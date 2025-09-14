@@ -7,18 +7,23 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext", //nodenext, commonjs
-    "moduleResolution": "nodenext", //nodenext, node
+    "module": "esnext", //nodenext, commonjs
+    "moduleResolution": "bundler", //nodenext, node
     // "ignoreDeprecations": "6.0",
     "target": "ES2020", //esnext
-    "outDir": "dist",
-    "rootDir": "src",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "lib": ["esnext"], //esnext
     "types": ["google-apps-script"],
+    "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
+    "allowUmdGlobalAccess": true,
+
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
     // "outFile": "./dist/bundle.js", // For single file output
 
     // "noImplicitAny": true,
@@ -30,10 +35,6 @@
     // and npm install -D @types/node
 
     // Other Outputs
-    "sourceMap": true,
-    "declaration": true,
-    "declarationMap": true,
-    "allowUmdGlobalAccess": true,
 
     // Stricter Typechecking Options
     "strict": false,

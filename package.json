@@ -16,7 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/google-apps-script": "^2.0.1"
+    "@types/google-apps-script": "^2.0.1",
+    "tslib": "^2.8.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",

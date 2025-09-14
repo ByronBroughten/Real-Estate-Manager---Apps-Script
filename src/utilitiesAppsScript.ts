@@ -76,6 +76,7 @@ const _spreadsheetUtils = {
 };
 
 const asU = {
+  test(): void {},
   trigger: _triggerUtils,
   standardize: _standardizeUtils,
   range: _rangeUtils,

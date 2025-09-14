@@ -1,8 +1,8 @@
-import { trigger } from "./addOnetimeCharge.ts";
-import { spreadsheets } from "./Constants.ts";
-import { asU } from "./utilitiesAppsScript.ts";
+import { RangeObj } from "./addOnetimeCharge.js";
+import { asU } from "./utilitiesAppsScript.js";
 
 function main() {
-  asU.batchUpdateRanges([], spreadsheets.realEstateManager.id);
-  trigger({ range: asU.range.getNamed("apiAddOnetimeChargeEnter") });
+  asU.test();
+  RangeObj.test();
 }
+main();

@@ -1,5 +1,5 @@
-import { spreadsheets } from "./Constants.ts";
-import { asU } from "./utilitiesAppsScript.ts";
+import { spreadsheets } from "./Constants.js";
+import { asU } from "./utilitiesAppsScript.js";
 
 export function trigger(e) {
   const addOnetimeChargeRange = asU.range.getNamed("apiAddOnetimeChargeEnter");
@@ -128,6 +128,9 @@ export class RangeObj {
     declaredHeaders = [],
   }: RangeObjInitProps) {
     return new RangeObj(rangeName, headerIdx, declaredHeaders);
+  }
+  static test(): void {
+    return;
   }
 }
 
