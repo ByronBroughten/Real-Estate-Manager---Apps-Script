@@ -1,10 +1,6 @@
 import { spreadsheets } from "./Constants";
 import { asU } from "./utilitiesAppsScript";
 
-function getSheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-}
-
 function trigger(e) {
   const addOnetimeChargeRange = asU.range.getNamed("apiAddOnetimeChargeEnter");
   if (e.range.getA1Notation() === addOnetimeChargeRange.getA1Notation()) {
