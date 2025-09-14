@@ -10,14 +10,16 @@
     "module": "nodenext", //nodenext, commonjs
     "moduleResolution": "nodenext", //nodenext, node
     // "ignoreDeprecations": "6.0",
-    "target": "ES2019", //esnext
+    "target": "ES2020", //esnext
     "outDir": "dist",
     "rootDir": "src",
-    "lib": ["es2019"], //esnext
+    "lib": ["esnext"], //esnext
     "types": ["google-apps-script"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    // "outFile": "./dist/bundle.js", // For single file output
 
     // "noImplicitAny": true,
-    // "esModuleInterop": true,
     // "typeRoots": ["./node_modules/@types"],
 
     // For nodejs:
