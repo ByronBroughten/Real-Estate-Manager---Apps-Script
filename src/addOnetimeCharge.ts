@@ -1,7 +1,7 @@
-import { spreadsheets } from "./Constants.js";
-import { asU } from "./utilitiesAppsScript.js";
+import { spreadsheets } from "./Constants.ts";
+import { asU } from "./utilitiesAppsScript.ts";
 
-function trigger(e) {
+export function trigger(e) {
   const addOnetimeChargeRange = asU.range.getNamed("apiAddOnetimeChargeEnter");
   if (e.range.getA1Notation() === addOnetimeChargeRange.getA1Notation()) {
     handleAddOnetimeCharge();

@@ -17,6 +17,8 @@
     "types": ["google-apps-script"],
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     // "outFile": "./dist/bundle.js", // For single file output
 
     // "noImplicitAny": true,
