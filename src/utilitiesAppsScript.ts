@@ -1,13 +1,7 @@
+import type { GenericRangeObj } from "./types.js";
 export type RangeData = {
   range: string;
   values: any[][];
-};
-
-type GenericRangeObj = {
-  [key: string]: {
-    rn: string;
-    vls: any[][];
-  };
 };
 
 const _standardizeUtils = {
@@ -28,7 +22,7 @@ const _rangeUtils = {
     if (namedRange) {
       return namedRange;
     } else {
-      throw new Error(`Named range for "${name}" not found.`);
+      throw new Error(`Named range for "${rangeName}" not found.`);
     }
   },
   makeGenericRangeObj: function (genToRangeNames): GenericRangeObj {
@@ -81,7 +75,7 @@ const _spreadsheetUtils = {
   },
 };
 
-export const asU = {
+const asU = {
   trigger: _triggerUtils,
   standardize: _standardizeUtils,
   range: _rangeUtils,
@@ -99,6 +93,8 @@ export const asU = {
     );
   },
 };
+
+export { asU };
 
 // function mailAppExample() {
 //   try {

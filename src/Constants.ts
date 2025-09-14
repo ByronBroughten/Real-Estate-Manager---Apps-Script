@@ -1,4 +1,4 @@
-export const spreadsheets = {
+const spreadsheets = {
   realEstateManager: {
     id: "1wzFBUFani9pOHAOla7nQObqDuTQU084HZotAPbQlcnQ",
     sheets: {
@@ -13,3 +13,5 @@ export const spreadsheets = {
     },
   },
 };
+
+export { spreadsheets };

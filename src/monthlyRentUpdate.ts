@@ -1,6 +1,7 @@
-import { spreadsheets } from "./Constants";
-import { asU, RangeData } from "./utilitiesAppsScript";
-import { utils } from "./utilitiesGeneral";
+import { spreadsheets } from "./Constants.js";
+import type { RangeData } from "./utilitiesAppsScript.js";
+import { asU } from "./utilitiesAppsScript.js";
+import { utils } from "./utilitiesGeneral.js";
 
 function testMonthlyRentUpdate() {
   const rangeData: RangeData[] = [];
