@@ -205,7 +205,7 @@ const chargeOnetimeSchema = {
 };
 
 // getDataRegion
-function handleAddOnetimeCharge() {
+export function handleAddOnetimeCharge() {
   const chargeOnetime: RangeObj = RangeObj.init({
     rangeName: "chargeOnetime",
     declaredHeaders: Object.keys(chargeOnetimeSchema),
