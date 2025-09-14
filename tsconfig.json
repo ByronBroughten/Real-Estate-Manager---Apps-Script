@@ -23,6 +23,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "noEmit": false,
+    "emitDeclarationOnly": false,
     "allowImportingTsExtensions": false,
     // "outFile": "./dist/bundle.js", // For single file output
 
