@@ -5,8 +5,13 @@ function enforceUnionValues<T extends UnionValuesBase>(t: T): T {
   return t;
 }
 
-const unionValues = enforceUnionValues({
+const dropdownOptions = enforceUnionValues({
   rentPortionNames: ["Household", "Subsidy program"],
+} as const);
+// These will be used to populate named ranges and validate data.
+
+const unionValues = enforceUnionValues({
+  ...dropdownOptions,
 } as const);
 type UnionValuesSimple = typeof unionValues;
 
