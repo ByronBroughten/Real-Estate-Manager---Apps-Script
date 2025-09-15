@@ -7,5 +7,6 @@ export default {
     format: "es",
     sourcemap: true,
   },
+  treeshake: false,
   plugins: [typescript({ tsconfig: "./tsconfig.json" })],
 };

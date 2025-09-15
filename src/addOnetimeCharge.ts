@@ -146,63 +146,13 @@ type HeadersToValues = {
 };
 
 const apiChargeOnetimeSchema = {
-  Date: {
-    type: "date",
-    resetValue: "=TODAY()",
-  },
-  "Household name": {
-    type: "string", //household.Name
-  },
-  "Currency amount": {
-    type: "number",
-  },
-  Description: {
-    type: "string",
-  },
-  Portion: {
-    type: "string", // nrHouseholdPortion
-    resetValue: "Household",
-  },
-  Notes: {
+  Placeholder: {
     type: "string",
   },
 };
 
 const chargeOnetimeSchema = {
-  Date: {
-    type: "date",
-  },
-  ID: {
-    // create
-    type: "string",
-  },
-  "Household ID": {
-    type: "string",
-  },
-  "Subsidy ID": {
-    // only needed if the portion is "subsidy"
-    // can be obtained by most recent subsidy on recurring charges
-    type: "string",
-  },
-  "Expense ID": {
-    // optional
-    type: "string",
-  },
-  "Household name": {
-    // household[Name]
-    type: "formula",
-    value: "=FILTER(household[Name], household[ID]=$ColletterRownum)",
-  },
-  Portion: {
-    type: "string",
-  },
-  Description: {
-    type: "string",
-  },
-  "Dollar amount": {
-    type: "number",
-  },
-  Notes: {
+  Placeholder: {
     type: "string",
   },
 };
@@ -242,10 +192,3 @@ export function handleAddOnetimeCharge() {
     spreadsheets.realEstateManager.id
   );
 }
-
-const sectionNames = [
-  "apiAddChargeOnetime",
-  "chargeOnetime",
-  "household",
-  "unit",
-] as const;
