@@ -1,33 +1,42 @@
-import type { SectionNameSimple } from "./sectionNames";
+import { enforceDict } from "./enforceSchema";
+import { sectionNames, type SectionNameSimple } from "./sectionNames";
 
 type SectionBase = {
-  headerIndex: number;
-  rangeName: string;
+  sectionName: SectionNameSimple;
+  sheetId: string;
+  idPrepend: string;
 };
 
-type SectionsBase = {
-  [S in SectionNameSimple]: Record<string, SectionBase>;
-};
+type SectionProp<
+  SN extends SectionNameSimple,
+  IP extends string,
+  SI extends string
+> = Record<
+  SN,
+  {
+    sectionName: SN;
+    idPrepend: IP;
+    sheetId: SI;
+  }
+>;
 
-const standardSectionProps = {
-  headerIndex: 1,
-} as const;
+function makeSectionProp<
+  SN extends SectionNameSimple,
+  IP extends string,
+  SI extends string
+>(sectionName: SN, idPrepend: IP, sheetId: SI): SectionProp<SN, IP, SI> {
+  return {
+    [sectionName]: { sectionName, idPrepend, sheetId },
+  } as SectionProp<SN, IP, SI>;
+}
 
-type StandardSectionProps = typeof standardSectionProps;
+const msp = makeSectionProp;
 
-function makeSectionBase<SN extends SectionNameSimple>(sectionName: SN) {}
-// I need the utility types from the other project.
-// Also which setions do I really need for immediate functionality I'm pursuing?
-
-export const sections = enforceSectionsBase({
-  unit: {},
-  household: {},
-  householdChargeOnetime: {},
-  addHouseholdChargeOnetime: {},
+export const sections = enforceDict(sectionNames, {} as SectionBase, {
+  ...msp("unit", "p", ""),
+  ...msp("household", "h", ""),
+  ...msp("householdChargeOnetime", "hco", ""),
+  ...msp("addHouseholdChargeOnetime", "ahco", ""),
 });
 
 export type Sections = typeof sections;
-
-function enforceSectionsBase<T extends SectionsBase>(t: T): T {
-  return t;
-}

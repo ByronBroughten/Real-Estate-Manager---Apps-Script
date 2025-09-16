@@ -1,3 +1,4 @@
+import type { UnionObj } from "../../utils/Obj/UnionObj";
 import type { SectionNameSimple } from "../sectionNames";
 
 export type IdBase = {
@@ -15,12 +16,15 @@ type Id<SN extends SectionNameSimple = SectionNameSimple> = {
 type VarbBase =
   | {
       type: "id";
-      idParams: {
+      params: {
         sectionName: string;
         relationship: "parent" | "self" | "child" | "none";
       };
     }
-  | {
-      type: "string" | "number" | "boolean" | "date";
-      idParams: null;
-    }; // get your utility types from the other project to make this a union of objects.
+  | UnionObj<"">;
+
+{
+  type: "string" | "number" | "boolean" | "date";
+  params: {
+  }
+} // get your utility types from the other project to make this a union of objects.

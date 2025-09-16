@@ -1,15 +1,11 @@
-function enforceSectionNamesBase<T extends readonly string[]>(t: T): T {
-  return t;
-}
+import { enforceNames, type EnforceName } from "./enforceSchema";
 
-export const sectionNames = enforceSectionNamesBase([
+export const sectionNames = enforceNames([
   "unit",
   "household",
   "householdChargeOnetime",
   "addHouseholdChargeOnetime",
 ] as const);
 
-type EnforceSectionNameSimple<Arr extends readonly string[]> = Arr[number];
-
-export type SectionNameSimple = EnforceSectionNameSimple<typeof sectionNames>;
+export type SectionNameSimple = EnforceName<typeof sectionNames>;
 export type SectionName<S extends SectionNameSimple = SectionNameSimple> = S;
