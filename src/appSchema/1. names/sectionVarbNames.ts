@@ -1,9 +1,9 @@
-import { enforceDict } from "./enforceSchema";
+import { makeSchemaDict } from "../makeSchema";
 import { sectionNames, type SectionNameSimple } from "./sectionNames";
 
 type VarbNamesBase = readonly ["ID", ...string[]];
 
-const sectionVarbNames = enforceDict(
+const sectionVarbNames = makeSchemaDict(
   sectionNames,
   ["ID"] as VarbNamesBase,
   {

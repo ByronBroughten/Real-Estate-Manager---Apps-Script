@@ -1,9 +1,9 @@
-import type { StrictExtract } from "../utils/Arr";
-import type { Merge } from "../utils/Obj/merge";
-import { type SectionNameSimple } from "./sectionNames";
-import type { VarbName } from "./sectionVarbNames";
-import type { ValueName } from "./valueNames";
-import type { IdValueParams } from "./values/id";
+import type { StrictExtract } from "../../utils/Arr";
+import type { Merge } from "../../utils/Obj/merge";
+import { type SectionNameSimple } from "../1. names/sectionNames";
+import type { VarbName } from "../1. names/sectionVarbNames";
+import type { ValueName } from "../1. names/valueNames";
+import type { IdValueParams } from "./valueAttributes/id";
 
 type ValueParamsBase = {} | IdValueParams;
 type ValueNameToParams = Merge<
@@ -40,13 +40,15 @@ function makeVarbs<SN extends SectionNameSimple, VBS extends Varbs<SN>>(
   return varbs;
 }
 
+// I gotta enforce a structure at every level I think.
+
 // type SectionVarbs<SN extends SectionNameSimple> = {
 //   [VN in VarbName<SN>]: Varb<
 // }
 
 // keep it simple or copy the last project.
 
-// const sectionVarbsNext = enforceDict(sectionNames, {} as VarbsBase, {
+// const sectionVarbsNext = makeSchemaDict(sectionNames, {} as VarbsBase, {
 //   unit: mvp("ID", "id", {
 //     sectionName: "unit",
 //     relationship: "self",

@@ -1,6 +1,6 @@
-import { enforceNames, type EnforceName } from "./enforceSchema";
+import { makeSchemaNames, type EnforceName } from "../makeSchema";
 
-export const valueNames = enforceNames([
+export const valueNames = makeSchemaNames([
   "id",
   "string",
   "number",
