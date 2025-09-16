@@ -1,122 +1,71 @@
-import type { SectionNameSimple } from "./sectionNames";
+import type { StrictExtract } from "../utils/Arr";
+import type { Merge } from "../utils/Obj/merge";
+import { type SectionNameSimple } from "./sectionNames";
+import type { VarbName } from "./sectionVarbNames";
+import type { ValueName } from "./valueNames";
+import type { IdValueParams } from "./values/id";
 
-type SectionVarbBase = {};
+type ValueParamsBase = {} | IdValueParams;
+type ValueNameToParams = Merge<
+  Record<ValueName, {}>,
+  Record<StrictExtract<ValueName, "id">, IdValueParams>
+>;
+type ValueParams<VN extends ValueName> = ValueNameToParams[VN];
 
-type SectionVarbsBase = {
-  [S in SectionNameSimple]: Record<string, SectionVarbBase>;
+type VarbBase = {
+  valueName: ValueName;
+  ValueParams: ValueParamsBase;
+};
+type Varb<
+  VLN extends ValueName = ValueName,
+  VLP extends ValueParams<VLN> = ValueParams<VLN>
+> = {
+  valueName: VLN;
+  valueParams: VLP;
 };
 
-const valueNames = ["ID", "string", "number", "boolean"] as const;
-
-const chargeOnetimeSchema = {
-  Date: {
-    type: "date",
-  },
-  ID: {
-    // create
-    type: "string",
-  },
-  "Household ID": {
-    type: "string",
-  },
-  "Subsidy ID": {
-    // only needed if the portion is "subsidy"
-    // can be obtained by most recent subsidy on recurring charges
-    type: "string",
-  },
-  "Expense ID": {
-    // optional
-    type: "string",
-  },
-  "Household name": {
-    // household[Name]
-    type: "formula",
-    value: "=FILTER(household[Name], household[ID]=$ColletterRownum)",
-  },
-  Portion: {
-    type: "string",
-  },
-  Description: {
-    type: "string",
-  },
-  "Dollar amount": {
-    type: "number",
-  },
-  Notes: {
-    type: "string",
-  },
-};
-
-export const sectionVarbs = enforceBase({
-  unit: {
-    ID: { type: "string" },
-  },
-  household: {
-    ID: { type: "string" },
-  },
-  householdChargeOnetime: {
-    Date: {
-      type: "date",
-    },
-    ID: {
-      // create
-      type: "string",
-    },
-    "Household ID": {
-      type: "string",
-    },
-    "Subsidy ID": {
-      // only needed if the portion is "subsidy"
-      // can be obtained by most recent subsidy on recurring charges
-      type: "string",
-    },
-    "Expense ID": {
-      // optional
-      type: "string",
-    },
-    "Household name": {
-      // household[Name]
-      type: "formula",
-      value: "=FILTER(household[Name], household[ID]=$ColletterRownum)",
-    },
-    Portion: {
-      type: "string",
-    },
-    Description: {
-      type: "string",
-    },
-    "Dollar amount": {
-      type: "number",
-    },
-    Notes: {
-      type: "string",
-    },
-  },
-  addHouseholdChargeOnetime: {
-    Date: {
-      type: "date",
-      resetValue: "=TODAY()",
-    },
-    "Household name": {
-      type: "string", //household.Name
-    },
-    "Currency amount": {
-      type: "number",
-    },
-    Description: {
-      type: "string",
-    },
-    Portion: {
-      type: "string", // nrHouseholdPortion
-      resetValue: "Household",
-    },
-    Notes: {
-      type: "string",
-    },
-  },
-  addHouseholdChargeRecurring: {},
-});
-
-function enforceBase<T extends SectionVarbsBase>(t: T): T {
-  return t;
+function makeVarb(valueName, valueParams) {
+  return { valueName, valueParams };
 }
+
+type VarbsBase = Record<VarbName, VarbBase>;
+type Varbs<SN extends SectionNameSimple, VB extends Varb = Varb> = Record<
+  VarbName<SN>,
+  VB
+>;
+
+function makeVarbs<SN extends SectionNameSimple, VBS extends Varbs<SN>>(
+  varbs: VBS
+) {
+  return varbs;
+}
+
+// type SectionVarbs<SN extends SectionNameSimple> = {
+//   [VN in VarbName<SN>]: Varb<
+// }
+
+// keep it simple or copy the last project.
+
+// const sectionVarbsNext = enforceDict(sectionNames, {} as VarbsBase, {
+//   unit: mvp("ID", "id", {
+//     sectionName: "unit",
+//     relationship: "self",
+//   }),
+//   household: mvp("ID", "id", {
+//     sectionName: "household",
+//     relationship: "self",
+//   }),
+//   householdChargeOnetime: {
+//     ...mvp("ID", "id", {
+//       sectionName: "householdChargeOnetime",
+//       relationship: "self",
+//     }), //here's where I need the ID parameters
+//     ...mvp("Date", "date", {}),
+//   },
+//   addHouseholdChargeOnetime: {
+//     ...mvp("ID", "id", {
+//       sectionName: "addHouseholdChargeOnetime",
+//       relationship: "self",
+//     }),
+//   },
+// });

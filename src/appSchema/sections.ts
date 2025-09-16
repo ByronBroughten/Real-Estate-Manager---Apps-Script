@@ -1,42 +1,30 @@
 import { enforceDict } from "./enforceSchema";
-import { sectionNames, type SectionNameSimple } from "./sectionNames";
+import { sectionNames } from "./sectionNames";
 
 type SectionBase = {
-  sectionName: SectionNameSimple;
   sheetId: string;
   idPrepend: string;
 };
 
-type SectionProp<
-  SN extends SectionNameSimple,
-  IP extends string,
-  SI extends string
-> = Record<
-  SN,
-  {
-    sectionName: SN;
-    idPrepend: IP;
-    sheetId: SI;
-  }
->;
+type Section<IP extends string, SI extends string> = {
+  idPrepend: IP;
+  sheetId: SI;
+};
 
-function makeSectionProp<
-  SN extends SectionNameSimple,
-  IP extends string,
-  SI extends string
->(sectionName: SN, idPrepend: IP, sheetId: SI): SectionProp<SN, IP, SI> {
-  return {
-    [sectionName]: { sectionName, idPrepend, sheetId },
-  } as SectionProp<SN, IP, SI>;
+function makeSection<IP extends string, SI extends string>(
+  idPrepend: IP,
+  sheetId: SI
+): Section<IP, SI> {
+  return { idPrepend, sheetId } as Section<IP, SI>;
 }
 
-const msp = makeSectionProp;
+const ms = makeSection;
 
 export const sections = enforceDict(sectionNames, {} as SectionBase, {
-  ...msp("unit", "p", ""),
-  ...msp("household", "h", ""),
-  ...msp("householdChargeOnetime", "hco", ""),
-  ...msp("addHouseholdChargeOnetime", "ahco", ""),
+  unit: ms("un", ""),
+  household: ms("h", ""),
+  householdChargeOnetime: ms("hco", ""),
+  addHouseholdChargeOnetime: ms("ahco", ""),
 });
 
 export type Sections = typeof sections;
