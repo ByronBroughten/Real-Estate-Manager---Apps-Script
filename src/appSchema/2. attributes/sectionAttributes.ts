@@ -22,9 +22,11 @@ const ma = makeAttributes;
 
 export const sections = makeSchemaDict(sectionNames, {} as SectionBase, {
   unit: ma("un", ""),
-  household: ma("h", ""),
-  householdChargeOnetime: ma("hco", ""),
-  addHouseholdChargeOnetime: ma("ahco", ""),
+  household: ma("hh", ""),
+  expense: ma("ex", ""),
+  subsidy: ma("sb", ""),
+  hhChargeOnetime: ma("hco", ""),
+  addHhChargeOnetime: ma("ahco", ""),
 });
 
 export type Sections = typeof sections;

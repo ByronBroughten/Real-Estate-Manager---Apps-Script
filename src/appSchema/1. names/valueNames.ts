@@ -1,12 +1,14 @@
-import { makeSchemaNames, type EnforceName } from "../makeSchema";
+import { makeSchemaNames, type MakeSchemaName } from "../makeSchema";
 
 export const valueNames = makeSchemaNames([
   "id",
+  "linkedIds",
   "string",
   "number",
   "boolean",
   "date",
+  "rentPortionName",
 ] as const);
 
-export type ValueNameSimple = EnforceName<typeof valueNames>;
+export type ValueNameSimple = MakeSchemaName<typeof valueNames>;
 export type ValueName<V extends ValueNameSimple = ValueNameSimple> = V;

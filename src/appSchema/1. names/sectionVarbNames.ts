@@ -1,34 +1,35 @@
 import { makeSchemaDict } from "../makeSchema";
 import { sectionNames, type SectionNameSimple } from "./sectionNames";
 
-type VarbNamesBase = readonly ["ID", ...string[]];
+type VarbNamesBase = readonly ["id", ...string[]];
 
 const sectionVarbNames = makeSchemaDict(
   sectionNames,
-  ["ID"] as VarbNamesBase,
+  ["id"] as VarbNamesBase,
   {
-    unit: ["ID"],
-    household: ["ID"],
-    householdChargeOnetime: [
-      "ID",
-      "Date",
-      "Household ID",
-      "Subsidy ID",
-      "Expense ID",
-      "Household name",
-      "Portion",
-      "Description",
-      "Dollar amount",
-      "Notes",
+    unit: ["id"],
+    household: ["id"],
+    expense: ["id"],
+    subsidy: ["id"],
+    hhChargeOnetime: [
+      "id",
+      "date",
+      "householdId",
+      "subsidyId",
+      "expenseId",
+      "portion",
+      "description",
+      "amount",
+      "notes",
     ],
-    addHouseholdChargeOnetime: [
-      "ID",
-      "Date",
-      "Household name",
-      "Currency amount",
-      "Description",
-      "Portion",
-      "Notes",
+    addHhChargeOnetime: [
+      "id",
+      "date",
+      "householdName",
+      "amount",
+      "description",
+      "portion",
+      "notes",
     ],
   } as const
 );

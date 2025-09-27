@@ -1,73 +1,114 @@
-import type { StrictExtract } from "../../utils/Arr";
 import type { Merge } from "../../utils/Obj/merge";
 import { type SectionNameSimple } from "../1. names/sectionNames";
 import type { VarbName } from "../1. names/sectionVarbNames";
 import type { ValueName } from "../1. names/valueNames";
-import type { IdValueParams } from "./valueAttributes/id";
+import { makeSchemaStructure, type MakeSchemaDict } from "../makeSchema";
+import type { LinkedIdParams } from "./valueAttributes/id";
+import type { UnionValueParamsDict } from "./valueAttributes/unionValues";
 
-type ValueParamsBase = {} | IdValueParams;
-type ValueNameToParams = Merge<
-  Record<ValueName, {}>,
-  Record<StrictExtract<ValueName, "id">, IdValueParams>
+type ValueParamsDict = MakeSchemaDict<
+  ValueName,
+  Merge<
+    {
+      linkedIds: LinkedIdParams;
+      id: {};
+      string: {};
+      number: {};
+      boolean: {};
+      date: {};
+    },
+    UnionValueParamsDict
+  >
 >;
-type ValueParams<VN extends ValueName> = ValueNameToParams[VN];
 
-type VarbBase = {
-  valueName: ValueName;
-  ValueParams: ValueParamsBase;
-};
+type ValueParams<VN extends ValueName> = ValueParamsDict[VN];
+
 type Varb<
-  VLN extends ValueName = ValueName,
-  VLP extends ValueParams<VLN> = ValueParams<VLN>
+  VN extends ValueName = ValueName,
+  S extends string = string,
+  VP extends ValueParams<VN> = ValueParams<VN>
 > = {
-  valueName: VLN;
-  valueParams: VLP;
+  valueName: VN;
+  valueParams: VP;
+  displayName: S;
 };
 
-function makeVarb(valueName, valueParams) {
-  return { valueName, valueParams };
+type SectionVarbsBase = {
+  [SN in SectionNameSimple]: {
+    [VN in VarbName<SN>]: Varb;
+  };
+};
+
+function makeVarb<
+  VN extends ValueName,
+  S extends string,
+  P extends ValueParams<VN>
+>(valueName: VN, displayName: S, valueParams: P): Varb<VN, S, P> {
+  return { valueName, displayName, valueParams };
 }
 
-type VarbsBase = Record<VarbName, VarbBase>;
-type Varbs<SN extends SectionNameSimple, VB extends Varb = Varb> = Record<
-  VarbName<SN>,
-  VB
->;
+const vS = {
+  id(): Varb<"id", "ID", {}> {
+    return makeVarb("id", "ID", {});
+  },
+  linkedIds<S extends string, P extends ValueParams<"linkedIds">>(
+    displayName: S,
+    idParams: P
+  ): Varb<"linkedIds", S, P> {
+    return makeVarb("linkedIds", displayName, idParams);
+  },
+  gen<VN extends Exclude<ValueName, "linkedIds">, S extends string>(
+    valueName: VN,
+    displayName: S
+  ): Varb<VN, S, {}> {
+    return makeVarb(valueName, displayName, {});
+  },
+  date() {
+    return this.gen("date", "Date");
+  },
+};
 
-function makeVarbs<SN extends SectionNameSimple, VBS extends Varbs<SN>>(
-  varbs: VBS
-) {
-  return varbs;
-}
+const vsS = {
+  idOnly(): { id: Varb<"id", "ID", {}> } {
+    return { id: vS.id() };
+  },
+};
 
-// I gotta enforce a structure at every level I think.
-
-// type SectionVarbs<SN extends SectionNameSimple> = {
-//   [VN in VarbName<SN>]: Varb<
-// }
-
-// keep it simple or copy the last project.
-
-// const sectionVarbsNext = makeSchemaDict(sectionNames, {} as VarbsBase, {
-//   unit: mvp("ID", "id", {
-//     sectionName: "unit",
-//     relationship: "self",
-//   }),
-//   household: mvp("ID", "id", {
-//     sectionName: "household",
-//     relationship: "self",
-//   }),
-//   householdChargeOnetime: {
-//     ...mvp("ID", "id", {
-//       sectionName: "householdChargeOnetime",
-//       relationship: "self",
-//     }), //here's where I need the ID parameters
-//     ...mvp("Date", "date", {}),
-//   },
-//   addHouseholdChargeOnetime: {
-//     ...mvp("ID", "id", {
-//       sectionName: "addHouseholdChargeOnetime",
-//       relationship: "self",
-//     }),
-//   },
-// });
+export const sectionVarbs = makeSchemaStructure({} as SectionVarbsBase, {
+  unit: vsS.idOnly(),
+  household: vsS.idOnly(),
+  expense: vsS.idOnly(),
+  subsidy: vsS.idOnly(),
+  hhChargeOnetime: {
+    id: vS.id(),
+    householdId: vS.linkedIds("Household ID", {
+      sectionName: "household",
+      relationship: "parent",
+    }),
+    expenseId: vS.linkedIds("Expense ID", {
+      sectionName: "expense",
+      relationship: "none",
+    }),
+    subsidyId: vS.linkedIds("Subsidy ID", {
+      sectionName: "subsidy",
+      relationship: "none",
+    }),
+    date: vS.date(),
+    amount: vS.gen("number", "Dollar amount"),
+    description: vS.gen("string", "Description"),
+    notes: vS.gen("string", "Notes"),
+    portion: vS.gen("rentPortionName", "Portion"),
+  },
+  addHhChargeOnetime: {
+    id: vS.id(),
+    date: vS.date(),
+    householdName: vS.linkedIds("Household ID", {
+      sectionName: "household",
+      relationship: "parent",
+    }),
+    portion: vS.gen("rentPortionName", "Portion"),
+    amount: vS.gen("number", "Dollar amount"),
+    description: vS.gen("string", "Description"),
+    notes: vS.gen("string", "Notes"),
+  },
+});

@@ -1,20 +1,27 @@
+import type { Merge } from "../../utils/Obj/merge";
 import { type ValueName } from "../1. names/valueNames";
 import { makeSchemaStructure, type MakeSchemaDict } from "../makeSchema";
+import type { UnionValues } from "./valueAttributes/unionValues";
+import { makeUnionValueSchemas } from "./valueAttributes/unionValues";
 
 type Values = MakeSchemaDict<
   ValueName,
-  {
-    id: string;
-    string: string;
-    number: number;
-    boolean: boolean;
-    date: Date;
-  }
+  Merge<
+    {
+      id: string;
+      linkedIds: string[];
+      string: string;
+      number: number;
+      boolean: boolean;
+      date: Date;
+    },
+    UnionValues
+  >
 >;
 
 export type Value<VN extends ValueName> = Values[VN];
 
-type ValueSchema<VN extends ValueName> = {
+export type ValueSchema<VN extends ValueName> = {
   makeDefault: () => Value<VN>;
 };
 
@@ -25,6 +32,9 @@ type ValueAttributesBase = {
 export const valueAttributes = makeSchemaStructure({} as ValueAttributesBase, {
   id: {
     makeDefault: () => "shouldNotHappen",
+  },
+  linkedIds: {
+    makeDefault: () => [],
   },
   string: {
     makeDefault: () => "",
@@ -38,4 +48,5 @@ export const valueAttributes = makeSchemaStructure({} as ValueAttributesBase, {
   date: {
     makeDefault: () => new Date(),
   },
+  ...makeUnionValueSchemas(),
 });

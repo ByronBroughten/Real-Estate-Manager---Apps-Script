@@ -2,9 +2,7 @@ export function makeSchemaNames<T extends readonly string[]>(t: T): T {
   return t;
 }
 
-export type EnforceName<Arr extends readonly string[]> = Arr[number];
-
-export type MakeSchemaDict<KS extends string, V extends Record<KS, any>> = V;
+export type MakeSchemaName<Arr extends readonly string[]> = Arr[number];
 
 export function makeSchemaDict<
   KS extends readonly string[],
@@ -13,6 +11,8 @@ export function makeSchemaDict<
 >(_keys: KS, _valueSchema: VS, dict: D): D {
   return dict;
 }
+
+export type MakeSchemaDict<KS extends string, V extends Record<KS, any>> = V;
 
 export function makeSchemaStructure<S extends any, T extends S>(
   _structure: S,
