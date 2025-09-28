@@ -4,7 +4,7 @@ export const sectionNames = makeSchemaNames([
   "unit",
   "household",
   "expense",
-  "subsidy",
+  "subsidyProgram",
   "hhChargeOnetime",
   "addHhChargeOnetime",
 ] as const);

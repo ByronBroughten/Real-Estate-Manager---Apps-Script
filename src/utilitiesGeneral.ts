@@ -17,17 +17,21 @@ const _dateUtils = {
 
     return normalizedInputDate <= today;
   },
-  makeID(length = 7) {
+};
+
+const _idUtils = {
+  make(prepend: string, length: number = 7) {
     const alphabet =
       "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
     let result = "";
     for (let i = 0; i < length; i++) {
       result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
     }
-    return result;
+    return `${prepend}-${result}`;
   },
 };
 
 export const utils = {
   date: _dateUtils,
+  id: _idUtils,
 };

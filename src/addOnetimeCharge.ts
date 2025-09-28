@@ -1,194 +1,215 @@
-import { spreadsheets } from "./Constants.js";
+import type { SectionName } from "./appSchema/1. names/sectionNames.js";
+import type {
+  SectionValues,
+  VarbName,
+  VarbValue,
+} from "./appSchema/2. attributes/sectionVarbAttributes.js";
+import {
+  SectionSchema,
+  SectionsSchema,
+} from "./appSchema/4. generated/sectionsSchema.js";
 import { asU } from "./utilitiesAppsScript.js";
+import { Obj } from "./utils/Obj.js";
 
-export function trigger(e) {
-  const addOnetimeChargeRange = asU.range.getNamed("apiAddOnetimeChargeEnter");
-  if (e.range.getA1Notation() === addOnetimeChargeRange.getA1Notation()) {
-    handleAddOnetimeCharge();
-    addOnetimeChargeRange.setValue(false);
-  }
+// export function trigger(e) {
+//   const addOnetimeChargeRange = asU.range.getNamed("apiAddOnetimeChargeEnter");
+//   if (e.range.getA1Notation() === addOnetimeChargeRange.getA1Notation()) {
+//     handleAddOnetimeCharge();
+//     addOnetimeChargeRange.setValue(false);
+//   }
+// }
+
+const headerRowIdx = 1;
+const topValueRowIdx = 2;
+
+type RowData = any[];
+type SheetData = RowData[];
+type ColInfo = { idx: number; wasUpdated: boolean };
+type ColTracker<SN extends SectionName> = Record<VarbName<SN>, ColInfo>;
+
+type SheetState<SN extends SectionName> = {
+  colTracker: ColTracker<SN>;
+  sheetData: SheetData;
+};
+
+type SpreadsheetState<SNS extends SectionName> = {
+  [SN in SNS]: SheetState<SN>;
+};
+
+export function addOnetimeCharge() {
+  // Here I must integrate the spreadsheet class with the Sheet and Row classes.
+  // Then I just have to add something for batchUpdateRanges that automatically creates
+  // all the range data and updates the spreadsheet accordingly.
+  // After that, I should be able to crank out the apis and automations.
+  // const sheetAddOnetime = Sheet.init("addHhChargeOnetime");
+  // const sheetOnetime = Sheet.init("hhChargeOnetime");
+  // const sheetUnit = Sheet.init("unit");
+  // const sheetHousehold = Sheet.init("household");
+  // const rowAddOnetime = sheetAddOnetime.topValueRow;
+  // // get all the values
+  // sheetAddOnetime.addRowAndValues({});
+  // // get the range data for sheetAddOnetime and sheetOnetime
+  // asU.batchUpdateRanges(
+  //   [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
+  //   spreadsheets.realEstateManager.id
+  // );
 }
 
-export class RangeObj {
-  private headerIdx: number;
-  private rangeName: string;
-  private rangeValues: any[][];
-  private headerIndices: { [key: string]: number };
-
-  constructor(rangeName: string, headerIdx: number, declaredHeaders: string[]) {
-    const range: GoogleAppsScript.Spreadsheet.Range =
-      asU.range.getNamed(rangeName);
-    this.headerIdx = headerIdx;
-    this.rangeName = rangeName;
-    this.rangeValues = range.getValues();
-    this.headerIndices = this.initHeaderIndices(declaredHeaders);
+export class Spreadsheet<SNS extends SectionName> {
+  sectionNames: readonly SNS[];
+  state: SpreadsheetState<SNS>;
+  constructor(sectionNames: readonly SNS[]) {
+    this.sectionNames = sectionNames;
   }
-
-  private initHeaderIndices(declaredHeaders: string[]): {
-    [key: string]: number;
-  } {
-    if (declaredHeaders.length === 0) {
-      declaredHeaders = this.allHeaders;
-    }
-    const headerIndex: { [key: string]: number } = {};
-    for (const header of declaredHeaders) {
-      const index = this.allHeaders.indexOf(header);
-      if (index === -1) {
+  static initState<SNS extends SectionName>(
+    sectionNames: SNS[]
+  ): SpreadsheetState<SNS> {
+    return sectionNames.reduce((state, sectionName) => {
+      state[sectionName] = this.initSheetState(sectionName);
+      return state;
+    }, {} as SpreadsheetState<SNS>);
+  }
+  private static initColTracker<SN extends SectionName>(
+    sectionName: SN,
+    headers: string[]
+  ): ColTracker<SN> {
+    const schema = new SectionsSchema();
+    const { varbNames } = schema.section(sectionName);
+    const colTracker: ColTracker<SN> = {} as ColTracker<SN>;
+    for (const varbName of varbNames) {
+      const { displayName } = schema.varb(sectionName, varbName);
+      const colIdx = headers.indexOf(displayName);
+      if (colIdx === -1) {
         throw new Error(
-          `Header "${header}" not found in range "${this.rangeName}".`
+          `Header ${displayName} not found in sheet for section ${sectionName}`
         );
       }
-      headerIndex[header] = index;
+      colTracker[varbName] = {
+        idx: colIdx,
+        wasUpdated: false,
+      };
     }
-    return headerIndex;
+    return colTracker;
   }
-  private get valueRows(): any[][] {
-    return this.rangeValues.slice(1);
-  }
-  private get allHeaders(): string[] {
-    return this.rangeValues[this.headerIdx];
-  }
-  get headers(): string[] {
-    return Object.keys(this.headerIndices);
-  }
-  get rangeData() {
-    return { range: this.rangeName, values: this.rangeValues };
-  }
-  topValue(header): any {
-    const index = this.indexOfHeader(header);
-    return this.topValues[index];
-  }
-  get topValues(): { [key: string]: any } {
-    const topValues: { [key: string]: any } = {};
-    for (const header of this.headers) {
-      topValues[header] = this.topValue(header);
-    }
-    return topValues;
-  }
-  private setValue(
-    header: string,
-    valueRowIndex: number,
-    value: any
-  ): RangeObj {
-    const colIndex = this.headerIdx[header];
-    this.setValueAtIndices(valueRowIndex, colIndex, value);
-    return this;
-  }
-  setTopValue(header: string, value: any): RangeObj {
-    this.setValue(header, 0, value);
-    return this;
-  }
-  private getValueAtIndices(rowIndex: number, colIndex: number): any {
-    return this.rangeValues[rowIndex][colIndex];
-  }
-  private setValueAtIndices(rowIndex, colIndex, value): RangeObj {
-    this.rangeValues[rowIndex][colIndex] = value;
-    return this;
-  }
-  setTopValueRow(headersToValues: HeadersToValues): RangeObj {
-    for (const [header, value] of Object.entries(headersToValues)) {
-      this.setTopValue(header, value);
-    }
-    return this;
-  }
-  private addEmptyRow(): RangeObj {
-    this.rangeValues.push(new Array(this.allHeaders.length).fill(""));
-    return this;
-  }
-  addValueRow(headersToValues: HeadersToValues): RangeObj {
-    this.addEmptyRow();
-    const newRowIndex = this.rangeValues.length - 1;
-    this.setValueRow(headersToValues, newRowIndex);
-    return this;
-  }
-  setValueRow(
-    headersToValues: HeadersToValues,
-    valueRowIndex: number
-  ): RangeObj {
-    for (const [header, value] of Object.entries(headersToValues)) {
-      this.setValue(header, valueRowIndex, value);
-    }
-    return this;
-  }
-  indexOfHeader(header): number {
-    return this.headerIndices[header];
-  }
-  valueColumn(header: string) {
-    const colIndex = this.indexOfHeader(header);
-    const column: any[] = [];
-    for (const row of this.valueRows) {
-      column.push(row[colIndex]);
-    }
-    return column;
-  }
-
-  static init({
-    rangeName,
-    headerIdx = 2,
-    declaredHeaders = [],
-  }: RangeObjInitProps) {
-    return new RangeObj(rangeName, headerIdx, declaredHeaders);
-  }
-  static test(): void {
-    return;
+  private static initSheetState<SN extends SectionName>(
+    sectionName: SN
+  ): SheetState<SN> {
+    const schema = new SectionsSchema();
+    const { sheetId } = schema.section(sectionName);
+    const sheetData = asU.range.getValuesBySheetId(sheetId);
+    const headers = sheetData[headerRowIdx];
+    const colTracker = this.initColTracker(sectionName, headers);
+    return {
+      colTracker,
+      sheetData,
+    };
   }
 }
 
-type RangeObjInitProps = {
-  rangeName: string;
-  headerIdx?: number;
-  valueIdx?: number;
-  declaredHeaders?: string[];
-};
+export class Sheet<SN extends SectionName> {
+  private sectionName: SN;
+  readonly state: SheetData;
+  readonly sectionsSchema: SectionsSchema;
+  readonly colTracker: ColTracker<SN>;
 
-type HeadersToValues = {
-  [key: string]: any;
-};
+  constructor(
+    sectionName: SN,
+    state: SheetData,
+    colTracker: ColTracker<SN>,
+    sectionsSchema: SectionsSchema
+  ) {
+    this.sectionName = sectionName;
+    this.state = state;
+    this.sectionsSchema = sectionsSchema;
+    this.colTracker = colTracker;
+  }
+  get sectionSchema(): SectionSchema<SN> {
+    return this.sectionsSchema.section(this.sectionName);
+  }
+  get headerRowIdx(): number {
+    return headerRowIdx;
+  }
+  get topValueRowIdx(): number {
+    return topValueRowIdx;
+  }
+  colIdx<VN extends VarbName<SN>>(varbName: VN): number {
+    return this.colTracker[varbName].idx;
+  }
+  colUpdated<VN extends VarbName<SN>>(varbName: VN): Sheet<SN> {
+    this.colTracker[varbName].wasUpdated = true;
+    return this;
+  }
+  row(rowIdx: number): Row<SN> {
+    return new Row(this, rowIdx);
+  }
+  get topValueRow() {
+    return this.row(this.topValueRowIdx);
+  }
+  get lastValueRow() {
+    return this.row(this.state.length - 1);
+  }
+  get valueRows(): Row<SN>[] {
+    const rows: Row<SN>[] = [];
+    for (let i = this.topValueRowIdx; i < this.state.length; i++) {
+      rows.push(this.row(i));
+    }
+    return rows;
+  }
+  topValue<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
+    return this.topValueRow.value(varbName);
+  }
+  private addEmptyRow(): Sheet<SN> {
+    const rowState: any[] = new Array(this.topValueRow.rowState.length).fill(
+      ""
+    );
+    this.state.push(rowState);
+    return this;
+  }
+  addRowDefault(): Sheet<SN> {
+    this.addEmptyRow();
+    const row = this.lastValueRow;
+    this.sectionSchema.varbNames.forEach((varbName) => {
+      const varbSchema = this.sectionSchema.varb(varbName);
+      row.setValue(varbName, varbSchema.makeDefaultValue());
+    });
+    return this;
+  }
+  addRowAndValues(values: Partial<SectionValues<SN>>): Sheet<SN> {
+    this.addRowDefault();
+    const row = this.lastValueRow;
+    row.setValues(values);
+    return this;
+  }
+}
 
-const apiChargeOnetimeSchema = {
-  Placeholder: {
-    type: "string",
-  },
-};
+class Row<SN extends SectionName> {
+  private sheet: Sheet<SN>;
+  private rowIdx: number;
 
-const chargeOnetimeSchema = {
-  Placeholder: {
-    type: "string",
-  },
-};
-
-// getDataRegion
-export function handleAddOnetimeCharge() {
-  const chargeOnetime: RangeObj = RangeObj.init({
-    rangeName: "chargeOnetime",
-    declaredHeaders: Object.keys(chargeOnetimeSchema),
-  });
-
-  const apiAddChargeOnetime: RangeObj = RangeObj.init({
-    rangeName: "apiAddChargeOnetime",
-    declaredHeaders: Object.keys(apiChargeOnetimeSchema),
-  });
-  // add something for resetting values based on schema
-
-  const unit: RangeObj = RangeObj.init({
-    rangeName: "unit",
-    declaredHeaders: ["ID", "Household ID"],
-  });
-
-  const household: RangeObj = RangeObj.init({
-    rangeName: "household",
-    declaredHeaders: ["ID", "Name"],
-  });
-
-  const topValues = apiAddChargeOnetime.topValues;
-
-  chargeOnetime.addValueRow({
-    // needs all headers
-    // should I validate it or just use typescript?
-  });
-
-  asU.batchUpdateRanges(
-    [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
-    spreadsheets.realEstateManager.id
-  );
+  constructor(sheet: Sheet<SN>, rowIdx: number) {
+    this.sheet = sheet;
+    this.rowIdx = rowIdx;
+  }
+  get rowState(): any[] {
+    return this.sheet.state[this.rowIdx];
+  }
+  value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
+    const colIdx = this.sheet.colIdx(varbName);
+    return this.rowState[colIdx] as VarbValue<SN, VN>;
+  }
+  setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
+    varbName: VN,
+    value: VL
+  ): Row<SN> {
+    const colIdx = this.sheet.colIdx(varbName);
+    this.rowState[colIdx] = value as any;
+    this.sheet.colUpdated(varbName);
+    return this;
+  }
+  setValues(sectionValues: Partial<SectionValues<SN>>): Row<SN> {
+    for (const [varbName, value] of Obj.entries(sectionValues)) {
+      this.setValue(varbName, value as VarbValue<SN, typeof varbName>);
+    }
+    return this;
+  }
 }

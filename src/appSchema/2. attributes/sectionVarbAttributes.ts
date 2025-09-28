@@ -1,27 +1,7 @@
-import type { Merge } from "../../utils/Obj/merge";
 import { type SectionNameSimple } from "../1. names/sectionNames";
-import type { VarbName } from "../1. names/sectionVarbNames";
 import type { ValueName } from "../1. names/valueNames";
-import { makeSchemaStructure, type MakeSchemaDict } from "../makeSchema";
-import type { LinkedIdParams } from "./valueAttributes/id";
-import type { UnionValueParamsDict } from "./valueAttributes/unionValues";
-
-type ValueParamsDict = MakeSchemaDict<
-  ValueName,
-  Merge<
-    {
-      linkedIds: LinkedIdParams;
-      id: {};
-      string: {};
-      number: {};
-      boolean: {};
-      date: {};
-    },
-    UnionValueParamsDict
-  >
->;
-
-type ValueParams<VN extends ValueName> = ValueParamsDict[VN];
+import { makeSchemaStructure } from "../makeSchema";
+import type { Value, ValueAttributes, ValueParams } from "./allValueAttributes";
 
 type Varb<
   VN extends ValueName = ValueName,
@@ -33,9 +13,11 @@ type Varb<
   displayName: S;
 };
 
+export type BaseVarbAttributes = Varb;
+
 type SectionVarbsBase = {
   [SN in SectionNameSimple]: {
-    [VN in VarbName<SN>]: Varb;
+    [VN in VarbName<SN>]: BaseVarbAttributes;
   };
 };
 
@@ -51,13 +33,13 @@ const vS = {
   id(): Varb<"id", "ID", {}> {
     return makeVarb("id", "ID", {});
   },
-  linkedIds<S extends string, P extends ValueParams<"linkedIds">>(
+  linkedId<S extends string, P extends ValueParams<"linkedId">>(
     displayName: S,
     idParams: P
-  ): Varb<"linkedIds", S, P> {
-    return makeVarb("linkedIds", displayName, idParams);
+  ): Varb<"linkedId", S, P> {
+    return makeVarb("linkedId", displayName, idParams);
   },
-  gen<VN extends Exclude<ValueName, "linkedIds">, S extends string>(
+  gen<VN extends Exclude<ValueName, "linkedId">, S extends string>(
     valueName: VN,
     displayName: S
   ): Varb<VN, S, {}> {
@@ -74,41 +56,71 @@ const vsS = {
   },
 };
 
-export const sectionVarbs = makeSchemaStructure({} as SectionVarbsBase, {
-  unit: vsS.idOnly(),
-  household: vsS.idOnly(),
-  expense: vsS.idOnly(),
-  subsidy: vsS.idOnly(),
-  hhChargeOnetime: {
-    id: vS.id(),
-    householdId: vS.linkedIds("Household ID", {
-      sectionName: "household",
-      relationship: "parent",
-    }),
-    expenseId: vS.linkedIds("Expense ID", {
-      sectionName: "expense",
-      relationship: "none",
-    }),
-    subsidyId: vS.linkedIds("Subsidy ID", {
-      sectionName: "subsidy",
-      relationship: "none",
-    }),
-    date: vS.date(),
-    amount: vS.gen("number", "Dollar amount"),
-    description: vS.gen("string", "Description"),
-    notes: vS.gen("string", "Notes"),
-    portion: vS.gen("rentPortionName", "Portion"),
-  },
-  addHhChargeOnetime: {
-    id: vS.id(),
-    date: vS.date(),
-    householdName: vS.linkedIds("Household ID", {
-      sectionName: "household",
-      relationship: "parent",
-    }),
-    portion: vS.gen("rentPortionName", "Portion"),
-    amount: vS.gen("number", "Dollar amount"),
-    description: vS.gen("string", "Description"),
-    notes: vS.gen("string", "Notes"),
-  },
-});
+export const allVarbAttributes = makeSchemaStructure(
+  {} as SectionVarbsBase,
+  {
+    unit: vsS.idOnly(),
+    household: vsS.idOnly(),
+    expense: vsS.idOnly(),
+    subsidyProgram: vsS.idOnly(),
+    hhChargeOnetime: {
+      id: vS.id(),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "delete",
+      }),
+      expenseId: vS.linkedId("Expense ID", {
+        sectionName: "expense",
+        onDelete: "setEmpty",
+      }),
+      date: vS.date(),
+      amount: vS.gen("number", "Dollar amount"),
+      description: vS.gen("string", "Description"),
+      notes: vS.gen("string", "Notes"),
+    },
+    addHhChargeOnetime: {
+      id: vS.id(),
+      date: vS.date(),
+      householdName: vS.gen("string", "Household name"),
+      expenseId: vS.linkedId("Expense ID", {
+        sectionName: "expense",
+        onDelete: "setEmpty",
+      }),
+      amount: vS.gen("number", "Dollar amount"),
+      description: vS.gen("string", "Description"),
+      notes: vS.gen("string", "Notes"),
+    },
+  } as const
+);
+
+export type AllVarbAttributes = typeof allVarbAttributes;
+
+export type VarbName<SN extends SectionNameSimple = SectionNameSimple> =
+  keyof AllVarbAttributes[SN];
+
+export type SectionVarbAttributes<SN extends SectionNameSimple> =
+  AllVarbAttributes[SN];
+
+export type VarbAttributes<
+  SN extends SectionNameSimple,
+  VN extends VarbName<SN>
+> = SectionVarbAttributes<SN>[VN];
+
+export type VarbValueName<
+  SN extends SectionNameSimple,
+  VN extends VarbName<SN>
+> = VarbAttributes<SN, VN>["valueName" & keyof VarbAttributes<SN, VN>];
+
+export type VarbValueAttributes<
+  SN extends SectionNameSimple,
+  VN extends VarbName<SN>
+> = ValueAttributes<VarbValueName<SN, VN> & ValueName>;
+
+export type VarbValue<
+  SN extends SectionNameSimple,
+  VN extends VarbName<SN>
+> = Value<VarbValueName<SN, VN> & ValueName>;
+
+export type SectionValues<SN extends SectionNameSimple> = {
+  [VN in VarbName<SN>]: VarbValue<SN, VN>;
+};

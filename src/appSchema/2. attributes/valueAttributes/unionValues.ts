@@ -1,5 +1,5 @@
 import { Obj } from "../../../utils/Obj";
-import type { ValueSchema } from "../valueAttributes";
+import type { ValueSchema } from "../allValueAttributes";
 
 type UnionValuesBase = {
   readonly [key: string]: readonly string[];

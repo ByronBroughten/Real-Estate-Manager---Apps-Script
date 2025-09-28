@@ -1,9 +1,9 @@
 import type { SectionNameSimple } from "../../1. names/sectionNames";
 
-const SectionRelationships = ["parent", "child", "none"] as const;
-export type SectionRelationship = (typeof SectionRelationships)[number];
+const onDelete = ["delete", "setEmpty"] as const;
+type OnDelete = (typeof onDelete)[number];
 
 export type LinkedIdParams = {
   sectionName: SectionNameSimple;
-  relationship: SectionRelationship;
+  onDelete: OnDelete;
 };

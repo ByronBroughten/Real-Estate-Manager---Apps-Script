@@ -1,14 +1,10 @@
-import { RangeObj } from "./addOnetimeCharge.js";
-import { sectionVarbs } from "./appSchema/2. attributes/sectionVarbAttributes.js";
+import { Spreadsheet } from "./addOnetimeCharge.js";
+import { sectionNames } from "./appSchema/1. names/sectionNames.js";
 import { asU } from "./utilitiesAppsScript.js";
 
 function main() {
-  const schema = sectionVarbs;
   asU.test();
-  RangeObj.test();
+  const ss = new Spreadsheet(sectionNames);
   console.log("All tests passed");
 }
 main();
-
-// Test ideas:
-// Make sure the variables aren't missing from any section

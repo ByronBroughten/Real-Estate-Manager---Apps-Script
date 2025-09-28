@@ -2,7 +2,7 @@ import { makeSchemaNames, type MakeSchemaName } from "../makeSchema";
 
 export const valueNames = makeSchemaNames([
   "id",
-  "linkedIds",
+  "linkedId",
   "string",
   "number",
   "boolean",

@@ -10,14 +10,12 @@ const sectionVarbNames = makeSchemaDict(
     unit: ["id"],
     household: ["id"],
     expense: ["id"],
-    subsidy: ["id"],
+    subsidyProgram: ["id"],
     hhChargeOnetime: [
       "id",
       "date",
       "householdId",
-      "subsidyId",
       "expenseId",
-      "portion",
       "description",
       "amount",
       "notes",
@@ -26,18 +24,18 @@ const sectionVarbNames = makeSchemaDict(
       "id",
       "date",
       "householdName",
+      "expenseId",
       "amount",
       "description",
-      "portion",
       "notes",
     ],
   } as const
 );
 
 type SectionVarbNames = typeof sectionVarbNames;
-type SectionVarbName = {
+type SectionToVarbName = {
   [SN in SectionNameSimple]: SectionVarbNames[SN][number];
 };
 
-export type VarbName<SN extends SectionNameSimple = SectionNameSimple> =
-  SectionVarbName[SN];
+export type VarbNameWide<SN extends SectionNameSimple = SectionNameSimple> =
+  SectionToVarbName[SN];
