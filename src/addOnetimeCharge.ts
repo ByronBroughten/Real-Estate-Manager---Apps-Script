@@ -8,7 +8,6 @@ import {
   SectionSchema,
   SectionsSchema,
 } from "./appSchema/4. generated/sectionsSchema.js";
-import { spreadsheets } from "./Constants.js";
 import { asU } from "./utilitiesAppsScript.js";
 import { Obj } from "./utils/Obj.js";
 
@@ -67,11 +66,10 @@ export class Spreadsheet<SNS extends SectionName = SectionName> {
   pushAllChanges() {
     // Ok. for every sheet that has been updated,
     // I need to get its range data:
-
-    asU.batchUpdateRanges(
-      [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
-      spreadsheets.realEstateManager.id
-    );
+    // asU.batchUpdateRanges(
+    //   [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
+    //   spreadsheets.realEstateManager.id
+    // );
   }
   getRangeData() {
     // for each sheet and each column that was updated

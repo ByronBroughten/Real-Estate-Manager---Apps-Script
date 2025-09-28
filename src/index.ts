@@ -4,7 +4,7 @@ import { asU } from "./utilitiesAppsScript.js";
 
 function main() {
   asU.test();
-  const ss = new Spreadsheet(sectionNames);
+  const ss = Spreadsheet.init(sectionNames);
   console.log("All tests passed");
 }
 main();
