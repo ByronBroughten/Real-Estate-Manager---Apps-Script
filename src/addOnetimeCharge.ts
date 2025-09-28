@@ -8,6 +8,7 @@ import {
   SectionSchema,
   SectionsSchema,
 } from "./appSchema/4. generated/sectionsSchema.js";
+import { spreadsheets } from "./Constants.js";
 import { asU } from "./utilitiesAppsScript.js";
 import { Obj } from "./utils/Obj.js";
 
@@ -20,16 +21,16 @@ import { Obj } from "./utils/Obj.js";
 // }
 
 const headerRowIdx = 1;
-const topValueRowIdx = 2;
+const topBodyRowIdx = 2;
 
 type RowData = any[];
-type SheetData = RowData[];
+type SheetValues = RowData[];
 type ColInfo = { idx: number; wasUpdated: boolean };
 type ColTracker<SN extends SectionName> = Record<VarbName<SN>, ColInfo>;
 
 type SheetState<SN extends SectionName> = {
   colTracker: ColTracker<SN>;
-  sheetData: SheetData;
+  values: SheetValues;
 };
 
 type SpreadsheetState<SNS extends SectionName> = {
@@ -37,7 +38,6 @@ type SpreadsheetState<SNS extends SectionName> = {
 };
 
 export function addOnetimeCharge() {
-  // Here I must integrate the spreadsheet class with the Sheet and Row classes.
   // Then I just have to add something for batchUpdateRanges that automatically creates
   // all the range data and updates the spreadsheet accordingly.
   // After that, I should be able to crank out the apis and automations.
@@ -45,29 +45,68 @@ export function addOnetimeCharge() {
   // const sheetOnetime = Sheet.init("hhChargeOnetime");
   // const sheetUnit = Sheet.init("unit");
   // const sheetHousehold = Sheet.init("household");
-  // const rowAddOnetime = sheetAddOnetime.topValueRow;
+  // const rowAddOnetime = sheetAddOnetime.topBodyRow;
   // // get all the values
   // sheetAddOnetime.addRowAndValues({});
   // // get the range data for sheetAddOnetime and sheetOnetime
-  // asU.batchUpdateRanges(
-  //   [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
-  //   spreadsheets.realEstateManager.id
-  // );
 }
 
-export class Spreadsheet<SNS extends SectionName> {
+export class Spreadsheet<SNS extends SectionName = SectionName> {
   sectionNames: readonly SNS[];
   state: SpreadsheetState<SNS>;
-  constructor(sectionNames: readonly SNS[]) {
+  sectionsSchema: SectionsSchema;
+  constructor(
+    sectionNames: readonly SNS[],
+    state: SpreadsheetState<SNS>,
+    sectionsSchema: SectionsSchema
+  ) {
     this.sectionNames = sectionNames;
+    this.state = state;
+    this.sectionsSchema = sectionsSchema;
   }
-  static initState<SNS extends SectionName>(
-    sectionNames: SNS[]
+  pushAllChanges() {
+    // Ok. for every sheet that has been updated,
+    // I need to get its range data:
+
+    asU.batchUpdateRanges(
+      [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
+      spreadsheets.realEstateManager.id
+    );
+  }
+  getRangeData() {
+    // for each sheet and each column that was updated
+    // I need the range (sheet name, column data range), and column values
+  }
+
+  static init<SNS extends SectionName>(
+    sectionNames: readonly SNS[]
+  ): Spreadsheet<SNS> {
+    return new Spreadsheet(
+      sectionNames,
+      this.initState(sectionNames),
+      new SectionsSchema()
+    );
+  }
+  private static initState<SNS extends SectionName>(
+    sectionNames: readonly SNS[]
   ): SpreadsheetState<SNS> {
     return sectionNames.reduce((state, sectionName) => {
       state[sectionName] = this.initSheetState(sectionName);
       return state;
     }, {} as SpreadsheetState<SNS>);
+  }
+  private static initSheetState<SN extends SectionName>(
+    sectionName: SN
+  ): SheetState<SN> {
+    const schema = new SectionsSchema();
+    const { sheetId } = schema.section(sectionName);
+    const values = asU.range.getValuesBySheetId(sheetId);
+    const headers = values[headerRowIdx];
+    const colTracker = this.initColTracker(sectionName, headers);
+    return {
+      colTracker,
+      values,
+    };
   }
   private static initColTracker<SN extends SectionName>(
     sectionName: SN,
@@ -91,46 +130,33 @@ export class Spreadsheet<SNS extends SectionName> {
     }
     return colTracker;
   }
-  private static initSheetState<SN extends SectionName>(
-    sectionName: SN
-  ): SheetState<SN> {
-    const schema = new SectionsSchema();
-    const { sheetId } = schema.section(sectionName);
-    const sheetData = asU.range.getValuesBySheetId(sheetId);
-    const headers = sheetData[headerRowIdx];
-    const colTracker = this.initColTracker(sectionName, headers);
-    return {
-      colTracker,
-      sheetData,
-    };
-  }
 }
 
 export class Sheet<SN extends SectionName> {
-  private sectionName: SN;
-  readonly state: SheetData;
-  readonly sectionsSchema: SectionsSchema;
-  readonly colTracker: ColTracker<SN>;
+  readonly sectionName: SN;
+  private spreadsheet: Spreadsheet<SN>;
 
-  constructor(
-    sectionName: SN,
-    state: SheetData,
-    colTracker: ColTracker<SN>,
-    sectionsSchema: SectionsSchema
-  ) {
+  constructor(sectionName: SN, spreadsheet: Spreadsheet<SN>) {
     this.sectionName = sectionName;
-    this.state = state;
-    this.sectionsSchema = sectionsSchema;
-    this.colTracker = colTracker;
+    this.spreadsheet = spreadsheet;
   }
   get sectionSchema(): SectionSchema<SN> {
-    return this.sectionsSchema.section(this.sectionName);
+    return this.spreadsheet.sectionsSchema.section(this.sectionName);
+  }
+  get sheetState(): SheetState<SN> {
+    return this.spreadsheet.state[this.sectionName];
+  }
+  get values(): SheetValues {
+    return this.sheetState.values;
+  }
+  get colTracker(): ColTracker<SN> {
+    return this.sheetState.colTracker;
   }
   get headerRowIdx(): number {
     return headerRowIdx;
   }
-  get topValueRowIdx(): number {
-    return topValueRowIdx;
+  get topBodyRowIdx(): number {
+    return topBodyRowIdx;
   }
   colIdx<VN extends VarbName<SN>>(varbName: VN): number {
     return this.colTracker[varbName].idx;
@@ -142,32 +168,30 @@ export class Sheet<SN extends SectionName> {
   row(rowIdx: number): Row<SN> {
     return new Row(this, rowIdx);
   }
-  get topValueRow() {
-    return this.row(this.topValueRowIdx);
+  get topBodyRow() {
+    return this.row(this.topBodyRowIdx);
   }
-  get lastValueRow() {
-    return this.row(this.state.length - 1);
+  get lastBodyRow() {
+    return this.row(this.values.length - 1);
   }
   get valueRows(): Row<SN>[] {
     const rows: Row<SN>[] = [];
-    for (let i = this.topValueRowIdx; i < this.state.length; i++) {
+    for (let i = this.topBodyRowIdx; i < this.values.length; i++) {
       rows.push(this.row(i));
     }
     return rows;
   }
-  topValue<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
-    return this.topValueRow.value(varbName);
+  topBodyValue<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
+    return this.topBodyRow.value(varbName);
   }
   private addEmptyRow(): Sheet<SN> {
-    const rowState: any[] = new Array(this.topValueRow.rowState.length).fill(
-      ""
-    );
-    this.state.push(rowState);
+    const rowState: any[] = new Array(this.topBodyRow.rowState.length).fill("");
+    this.values.push(rowState);
     return this;
   }
   addRowDefault(): Sheet<SN> {
     this.addEmptyRow();
-    const row = this.lastValueRow;
+    const row = this.lastBodyRow;
     this.sectionSchema.varbNames.forEach((varbName) => {
       const varbSchema = this.sectionSchema.varb(varbName);
       row.setValue(varbName, varbSchema.makeDefaultValue());
@@ -176,7 +200,7 @@ export class Sheet<SN extends SectionName> {
   }
   addRowAndValues(values: Partial<SectionValues<SN>>): Sheet<SN> {
     this.addRowDefault();
-    const row = this.lastValueRow;
+    const row = this.lastBodyRow;
     row.setValues(values);
     return this;
   }
@@ -184,14 +208,14 @@ export class Sheet<SN extends SectionName> {
 
 class Row<SN extends SectionName> {
   private sheet: Sheet<SN>;
-  private rowIdx: number;
+  readonly rowIdx: number;
 
   constructor(sheet: Sheet<SN>, rowIdx: number) {
     this.sheet = sheet;
     this.rowIdx = rowIdx;
   }
   get rowState(): any[] {
-    return this.sheet.state[this.rowIdx];
+    return this.sheet.values[this.rowIdx];
   }
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     const colIdx = this.sheet.colIdx(varbName);

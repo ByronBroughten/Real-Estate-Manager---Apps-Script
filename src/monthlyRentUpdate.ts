@@ -40,6 +40,8 @@ function testGetRecurringPriceUpdateRangeData() {
   return asU.batchUpdateRanges(rangeData, spreadsheets.realEstateManager.id);
 }
 
+function getRecurringPriceUpdateRangeDataNext() {}
+
 function getRecurringPriceUpdateRangeData(genToRangeNames: {
   [key: string]: string;
 }): RangeData[] {
