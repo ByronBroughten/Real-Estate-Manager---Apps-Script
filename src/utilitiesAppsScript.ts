@@ -21,11 +21,6 @@ const _standardizeUtils = {
 };
 
 const _rangeUtils = {
-  getValuesBySheetId(sheetId: number): any[][] {
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const sheet = ss.getSheetById(sheetId);
-    return sheet.getDataRange().getValues();
-  },
   getNamed: function (rangeName): GoogleAppsScript.Spreadsheet.Range {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 

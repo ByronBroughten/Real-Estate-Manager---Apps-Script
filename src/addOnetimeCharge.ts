@@ -8,7 +8,6 @@ import {
   SectionSchema,
   SectionsSchema,
 } from "./appSchema/4. generated/sectionsSchema.js";
-import { asU } from "./utilitiesAppsScript.js";
 import { Obj } from "./utils/Obj.js";
 
 // export function trigger(e) {
@@ -28,6 +27,7 @@ type ColInfo = { idx: number; wasUpdated: boolean };
 type ColTracker<SN extends SectionName> = Record<VarbName<SN>, ColInfo>;
 
 type SheetState<SN extends SectionName> = {
+  a1Range: string;
   colTracker: ColTracker<SN>;
   values: SheetValues;
 };
@@ -64,8 +64,10 @@ export class Spreadsheet<SNS extends SectionName = SectionName> {
     this.sectionsSchema = sectionsSchema;
   }
   pushAllChanges() {
+    // Needed experiment:
+    // When I update the range with fewer rows than it contains, will it remove rows?
+    // When I update the range with more rows than it contains, will  add rows?
     // Ok. for every sheet that has been updated,
-    // I need to get its range data:
     // asU.batchUpdateRanges(
     //   [chargeOnetime.rangeData, apiAddChargeOnetime.rangeData],
     //   spreadsheets.realEstateManager.id
@@ -79,31 +81,42 @@ export class Spreadsheet<SNS extends SectionName = SectionName> {
   static init<SNS extends SectionName>(
     sectionNames: readonly SNS[]
   ): Spreadsheet<SNS> {
+    const schema = new SectionsSchema();
     return new Spreadsheet(
       sectionNames,
-      this.initState(sectionNames),
-      new SectionsSchema()
+      this.initState(sectionNames, schema),
+      schema
     );
   }
   private static initState<SNS extends SectionName>(
-    sectionNames: readonly SNS[]
+    sectionNames: readonly SNS[],
+    sectionsSchema: SectionsSchema
   ): SpreadsheetState<SNS> {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
     return sectionNames.reduce((state, sectionName) => {
-      state[sectionName] = this.initSheetState(sectionName);
+      state[sectionName] = this.initSheetState(sectionName, ss, sectionsSchema);
       return state;
     }, {} as SpreadsheetState<SNS>);
   }
   private static initSheetState<SN extends SectionName>(
-    sectionName: SN
+    sectionName: SN,
+    ss: GoogleAppsScript.Spreadsheet.Spreadsheet,
+    sectionsSchema: SectionsSchema
   ): SheetState<SN> {
-    const schema = new SectionsSchema();
-    const { sheetId } = schema.section(sectionName);
-    const values = asU.range.getValuesBySheetId(sheetId);
+    const { sheetId } = sectionsSchema.section(sectionName);
+    const sheet = ss.getSheetById(sheetId);
+
+    const sheetName = sheet.getName();
+    const dataRange = sheet.getDataRange();
+
+    const a1Range = dataRange.getA1Notation();
+    const values = sheet.getDataRange().getValues();
     const headers = values[headerRowIdx];
-    const colTracker = this.initColTracker(sectionName, headers);
+
     return {
-      colTracker,
+      colTracker: this.initColTracker(sectionName, headers),
       values,
+      a1Range,
     };
   }
   private static initColTracker<SN extends SectionName>(
