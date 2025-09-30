@@ -1,4 +1,5 @@
 import { Obj } from "../../../utils/Obj";
+import { validationError } from "../../../utils/validation";
 import type { ValueSchema } from "../allValueAttributes";
 
 type UnionValuesBase = {
@@ -21,7 +22,7 @@ type UnionValueArrs = typeof unionValues;
 type UnionValueName = keyof UnionValueArrs;
 
 export type UnionValues = {
-  [K in UnionValueName]: UnionValueArrs[K][number];
+  [K in UnionValueName]: UnionValueArrs[K][number] | "";
 };
 
 export type UnionValue<N extends UnionValueName = UnionValueName> =
@@ -29,8 +30,20 @@ export type UnionValue<N extends UnionValueName = UnionValueName> =
 
 function makeDefaultUnionValue<N extends UnionValueName>(
   name: N
-): UnionValues[N] {
+): UnionValue<N> {
   return unionValues[name][0];
+}
+
+function validateUnionValue<N extends UnionValueName>(
+  value: unknown,
+  name: N
+): UnionValue<N> {
+  if (unionValues[name].includes(value as any)) {
+    return value as UnionValue<N>;
+  } else {
+    throw validationError(value, `'${name}' union value element.`);
+    // Hmmm... This can sometimes be "", though.
+  }
 }
 
 type UnionValueAttributesBase = {
@@ -43,6 +56,7 @@ export function makeUnionValueSchemas(): UnionValueAttributesBase {
   (Obj.keys(unionValues) as UnionValueName[]).forEach((name) => {
     result[name] = {
       makeDefault: () => makeDefaultUnionValue(name),
+      defaultValidate: (value: "unknown") => validateUnionValue(value, name),
     };
   });
   return result;

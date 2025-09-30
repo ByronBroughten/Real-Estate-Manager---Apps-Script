@@ -81,6 +81,12 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
   private get attributes(): VarbAttributes<SN, VN> {
     return this.allVarbAttributes[this.sectionName][this.varbName];
   }
+  validate(value: unknown): VarbValue<SN, VN> {
+    return (this.attributes as BaseVarbAttributes).validate(value) as VarbValue<
+      SN,
+      VN
+    >;
+  }
   get displayName(): string {
     return (this.attributes as BaseVarbAttributes).displayName;
   }

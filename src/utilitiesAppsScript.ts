@@ -21,6 +21,44 @@ const _standardizeUtils = {
 };
 
 const _rangeUtils = {
+  getA1({
+    sheetName,
+    startBase0,
+    endBase0,
+  }: {
+    sheetName: string;
+    startBase0: {
+      rowIdx: number;
+      colIdx: number;
+    };
+    endBase0: {
+      rowIdx: number;
+      colIdx: number;
+    };
+  }) {
+    return `'${sheetName}'!${this.indicesToA1(startBase0)}:${this.indicesToA1(
+      endBase0
+    )}`;
+  },
+  indicesToA1(base0: { rowIdx: number; colIdx: number }) {
+    return `${this.columnIndexToA1(base0.rowIdx)}${this.rowIndexToA1(
+      base0.colIdx
+    )}`;
+  },
+  rowIndexToA1(rowIndexBase0) {
+    return rowIndexBase0 + 1;
+  },
+  columnIndexToA1(colIndexBase0: number) {
+    let colString = "";
+    let tempIndex = colIndexBase0 + 1;
+
+    while (tempIndex > 0) {
+      const remainder = (tempIndex - 1) % 26;
+      colString = String.fromCharCode(65 + remainder) + colString;
+      tempIndex = Math.floor((tempIndex - 1) / 26);
+    }
+    return colString;
+  },
   getNamed: function (rangeName): GoogleAppsScript.Spreadsheet.Range {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
 
@@ -88,18 +126,6 @@ const asU = {
   standardize: _standardizeUtils,
   range: _rangeUtils,
   spreadsheet: _spreadsheetUtils,
-  batchUpdateRanges: function (
-    rangeDataArr: RangeData[],
-    spreadsheetId: string
-  ) {
-    Sheets.Spreadsheets?.Values?.batchUpdate(
-      {
-        valueInputOption: "USER_ENTERED",
-        data: rangeDataArr,
-      },
-      spreadsheetId
-    );
-  },
 };
 
 export { asU };

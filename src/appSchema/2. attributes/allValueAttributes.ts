@@ -1,4 +1,5 @@
 import type { Merge } from "../../utils/Obj/merge";
+import { valS } from "../../utils/validation";
 import { type ValueName } from "../1. names/valueNames";
 import { makeSchemaStructure, type MakeSchemaDict } from "../makeSchema";
 import type { LinkedIdParams } from "./valueAttributes/id";
@@ -15,18 +16,21 @@ type Values = MakeSchemaDict<
       id: string;
       linkedId: string;
       string: string;
-      number: number;
-      boolean: boolean;
-      date: Date;
+      number: number | "";
+      boolean: boolean | "";
+      date: string | Date;
     },
     UnionValues
   >
 >;
 
 export type Value<VN extends ValueName> = Values[VN];
+export type ValidateValue<VN extends ValueName> = (value: unknown) => Value<VN>;
+export type MakeDefaultValue<VN extends ValueName> = () => Value<VN>;
 
 export type ValueSchema<VN extends ValueName> = {
-  makeDefault: () => Value<VN>;
+  makeDefault: MakeDefaultValue<VN>;
+  defaultValidate: ValidateValue<VN>;
 };
 
 type ValueAttributesBase = {
@@ -38,21 +42,27 @@ export const allValueAttributes = makeSchemaStructure(
   {
     id: {
       makeDefault: () => "shouldNotHappen",
+      defaultValidate: valS.validate.stringNotEmpty,
     },
     linkedId: {
       makeDefault: () => "shouldNotHappen",
+      defaultValidate: valS.validate.string,
     },
     string: {
       makeDefault: () => "",
+      defaultValidate: valS.validate.string,
     },
     number: {
       makeDefault: () => 0,
+      defaultValidate: valS.validate.number,
     },
     boolean: {
       makeDefault: () => false,
+      defaultValidate: valS.validate.boolean,
     },
     date: {
       makeDefault: () => new Date(),
+      defaultValidate: valS.validate.date,
     },
     ...makeUnionValueSchemas(),
   } as const
