@@ -1,6 +1,11 @@
 import type { SectionName } from "../appSchema/1. names/sectionNames";
-import type { SectionValues } from "../appSchema/2. attributes/sectionVarbAttributes";
+import type {
+  SectionValues,
+  VarbName,
+  VarbValue,
+} from "../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
+import { Obj } from "../utils/Obj";
 import { SheetBase, type SheetProps } from "./Sheet";
 
 export type RowState<SN extends SectionName> = SectionValues<SN>;
@@ -24,12 +29,11 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get schema(): SectionSchema<SN> {
     return this.sectionSchema;
   }
-  get state(): CellValue[] {
-    return this.sheet.values[this.rowIdx];
+  get state(): RowState<SN> {
+    return this.rowState;
   }
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
-    const colIdx = this.sheet.colIdx(varbName);
-    return this.rowState[colIdx] as VarbValue<SN, VN>;
+    return this.rowState[varbName] as VarbValue<SN, VN>;
   }
   get values(): Omit<SectionValues<SN>, "id"> {
     return this.varbNames.reduce((values, varbName) => {
@@ -50,25 +54,14 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
 
   get varbNames(): VarbName<SN>[] {
-    return this.sheet.sectionSchema.varbNames;
-  }
-  private setValueByIdx(colIdx: number, value: CellValue) {
-    this.rowState[colIdx] = value as any;
-  }
-  clearValues(): Row<SN> {
-    throw new Error("this isn't ready yet");
-    this.rowState.forEach((_, idx) => {
-      this.setValueByIdx(idx, "");
-    });
-    return this;
+    return this.schema.varbNames;
   }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
     value: VL
   ): Row<SN> {
-    const colIdx = this.sheet.colIdx(varbName);
-    this.setValueByIdx(colIdx, value);
-    this.sheet.colUpdated(varbName);
+    // this needs work
+
     return this;
   }
   setValues(sectionValues: Partial<SectionValues<SN>>): Row<SN> {
