@@ -1,4 +1,4 @@
-import { Spreadsheet } from "./Spreadsheet.js";
+import { Spreadsheet } from "./StateHandlers/Spreadsheet.js";
 import { sectionNames } from "./appSchema/1. names/sectionNames.js";
 import { asU } from "./utilitiesAppsScript.js";
 

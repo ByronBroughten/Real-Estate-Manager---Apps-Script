@@ -24,8 +24,8 @@ import {
 } from "../2. attributes/sectionVarbAttributes";
 
 export class SectionsSchema {
-  private allSectionAttributes: AllSectionAttributes = allSectionAttributes;
-  private allVarbAttributes: AllVarbAttributes = allVarbAttributes;
+  readonly headerRowIdx = 1;
+  readonly topBodyRowIdx = 2;
   constructor() {}
   section<SN extends SectionName>(sectionName: SN): SectionSchema<SN> {
     return new SectionSchema(sectionName);

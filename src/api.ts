@@ -1,4 +1,4 @@
-import { Spreadsheet } from "./Spreadsheet";
+import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 
 // export function trigger(e) {
 //   const addOnetimeChargeRange = asU.range.getNamed("apiAddOnetimeChargeEnter");
@@ -25,5 +25,8 @@ export const api = {
 
     // In the state I can  track  section rows to append.
     // And I can track columns to update.
+  },
+  updateRentPortions() {
+    const ss = Spreadsheet.init();
   },
 };
