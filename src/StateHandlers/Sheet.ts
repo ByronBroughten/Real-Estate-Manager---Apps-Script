@@ -10,8 +10,10 @@ import { Obj } from "../utils/Obj";
 import { Row, type RowState } from "./Row";
 import { SpreadsheetBase, type SpreadsheetProps } from "./Spreadsheet";
 
-type Headers<SN extends SectionName> = { [VN in VarbName<SN>]: number };
-type Rows<SN extends SectionName> = {
+export type HeaderIndices<SN extends SectionName> = {
+  [VN in VarbName<SN>]: number;
+};
+export type Rows<SN extends SectionName> = {
   [id in string]: RowState<SN>;
 };
 
@@ -38,7 +40,7 @@ export type SheetState<SN extends SectionName> = {
   // Does rows include headers? No. I want their data to be consistent.
   bodyRows: Rows<SN>;
   bodyRowOrder: string[];
-  headerIndices: Headers<SN>;
+  headerIndices: HeaderIndices<SN>;
   headerOrder: VarbName<SN>[];
 
   changesToSave: ChangesToSave<SN>;
