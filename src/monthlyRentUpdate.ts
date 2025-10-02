@@ -1,4 +1,5 @@
 import { spreadsheets } from "./Constants.js";
+import { Spreadsheet } from "./StateHandlers/Spreadsheet.js";
 import { asU } from "./utilitiesAppsScript.js";
 import type { RangeData } from "./utilitiesAppsScript.ts";
 import { utils } from "./utilitiesGeneral.js";
@@ -40,7 +41,9 @@ function testGetRecurringPriceUpdateRangeData() {
   return asU.batchUpdateRanges(rangeData, spreadsheets.realEstateManager.id);
 }
 
-function getRecurringPriceUpdateRangeDataNext() {}
+function getRecurringPriceUpdateRangeDataNext() {
+  const ss = Spreadsheet.init();
+}
 
 function getRecurringPriceUpdateRangeData(genToRangeNames: {
   [key: string]: string;

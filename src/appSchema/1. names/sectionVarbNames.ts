@@ -8,7 +8,14 @@ const sectionVarbNames = makeSchemaDict(
   ["id"] as VarbNamesBase,
   {
     unit: ["id"],
-    household: ["id"],
+    test: ["id", "dateCurrent", "dateNext", "priceCurrent", "priceNext"],
+    household: [
+      "id",
+      "rentIncreaseDateLast",
+      "rentIncreaseDateNext",
+      "rentChargeMonthly",
+      "rentChargeMonthlyNext",
+    ],
     expense: ["id"],
     subsidyProgram: ["id"],
     hhChargeOnetime: [

@@ -8,7 +8,10 @@ import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 //   }
 // }
 
+export function test() {}
+
 export const api = {
+  monthlyRentUpdate() {},
   addHhOnetimeCharge() {
     const ss = Spreadsheet.init();
 
@@ -18,13 +21,7 @@ export const api = {
 
     const sOnetime = ss.sheet("hhChargeOnetime");
     sOnetime.addRowWithValues(values);
-    ss.pushAllChanges();
-    // Probably I'm just going to append the row.
-    // I can append multiple rows.
-    // I think I can do two types of operations: col and row (multi of each).
-
-    // In the state I can  track  section rows to append.
-    // And I can track columns to update.
+    ss.batchUpdateRanges();
   },
   updateRentPortions() {
     const ss = Spreadsheet.init();

@@ -76,7 +76,20 @@ export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
     unit: vsS.idOnly(),
-    household: vsS.idOnly(),
+    household: {
+      id: vS.id(),
+      rentIncreaseDateLast: vS.gen("date", "Last rent increase date"),
+      rentIncreaseDateNext: vS.gen("date", "Next rent increase date"),
+      rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
+      rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
+    },
+    test: {
+      id: vS.id(),
+      dateCurrent: vS.date(),
+      dateNext: vS.date(),
+      priceCurrent: vS.gen("number", "Price"),
+      priceNext: vS.gen("number", "Price"),
+    },
     expense: vsS.idOnly(),
     subsidyProgram: vsS.idOnly(),
     hhChargeOnetime: {

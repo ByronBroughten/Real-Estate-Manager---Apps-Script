@@ -4,17 +4,11 @@ import type {
   VarbName,
   VarbValue,
 } from "../appSchema/2. attributes/sectionVarbAttributes.js";
-import {
-  SectionSchema,
-  SectionsSchema,
-} from "../appSchema/4. generated/sectionsSchema.js";
-import { asU, type DataFilterRange, type RangeData } from "../utilitiesAppsScript.js";
-import { Arr } from "../utils/Arr.js";
+import { SectionsSchema } from "../appSchema/4. generated/sectionsSchema.js";
+import { type DataFilterRange } from "../utilitiesAppsScript.js";
 import { Obj } from "../utils/Obj.js";
 import type { HeaderIndices, Rows, SheetState } from "./Sheet.js";
-import {Sheet} from "./Sheet.js";
-
-
+import { Sheet } from "./Sheet.js";
 
 type SpreadsheetState = {
   [SN in SectionName]: SheetState<SN>;
@@ -50,7 +44,7 @@ export class SpreadsheetBase {
   }
 }
 
-type SheetProps = { isAddOnly?: boolean; };
+type SheetProps = { isAddOnly?: boolean };
 
 export class Spreadsheet extends SpreadsheetBase {
   static init(): Spreadsheet {
@@ -82,21 +76,45 @@ export class Spreadsheet extends SpreadsheetBase {
     const headerRowRange = sheet.getRange(this.headerRowIdx, 0, 1, lastColIdx);
     const headerValues = headerRowRange.getValues()[0];
     const headerIndices = this.getVarbNameIndices(sectionName, headerValues);
-    const headerOrder = [...schema.varbNames].sort((a, b) => headerIndices[a] - headerIndices[b]);
-    
+    const headerOrder = [...schema.varbNames].sort(
+      (a, b) => headerIndices[a] - headerIndices[b]
+    );
 
-    const bodyRowIdRange = sheet.getRange(this.topBodyRowIdx, 0, lastRowIdx - this.topBodyRowIdx + 1, 1);
+    const bodyRowIdRange = sheet.getRange(
+      this.topBodyRowIdx,
+      0,
+      lastRowIdx - this.topBodyRowIdx + 1,
+      1
+    );
     const bodyRowIdValues = bodyRowIdRange.getValues();
     const bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
-    
-    const bodyRows: Rows<SN> = {}
+
+    const bodyRows: Rows<SN> = {};
     if (!isAddOnly) {
-      const bodyRowRange = sheet.getRange(this.topBodyRowIdx, 0, lastRowIdx - this.topBodyRowIdx + 1, 1);
-      const bodyRowValues = bodyRowRange.getValues();
+      const columns = {} as { [VN in VarbName<SN>]: VarbValue<SN, VN>[] };
+      for (const varbName of schema.varbNames) {
+        const column = sheet.getRange(
+          this.topBodyRowIdx,
+          headerIndices[varbName],
+          lastRowIdx,
+          1
+        );
+        const columnValues = column.getValues();
+        columns[varbName] = columnValues.map((row) => row[0]);
+      }
+      for (let i = 0; i < bodyRowOrder.length; i++) {
+        const rowId = bodyRowOrder[i];
+        const rowValues = schema.varbNames.reduce((values, varbName) => {
+          const value = columns[varbName][i];
+          values[varbName] = value as SectionValues<SN>[typeof varbName];
+          return values;
+        }, {} as SectionValues<SN>);
+        bodyRows[rowId] = rowValues;
+      }
     }
-    
+
     return {
-      sheetName: sheet.getName(),      
+      sheetName: sheet.getName(),
       isAddSafe,
       isAddOnly,
       headerIndices,
@@ -116,7 +134,10 @@ export class Spreadsheet extends SpreadsheetBase {
   get sectionNames(): SectionName[] {
     return Obj.keys(this.state);
   }
-  sheet<SN extends SectionName>(sectionName: SN, props: SheetProps={ isAddOnly: false }): Sheet<SN> {
+  sheet<SN extends SectionName>(
+    sectionName: SN,
+    props: SheetProps = { isAddOnly: false }
+  ): Sheet<SN> {
     if (!this.sectionNames.includes(sectionName)) {
       this.state[sectionName] = this.initSheetState(
         sectionName,
@@ -125,7 +146,7 @@ export class Spreadsheet extends SpreadsheetBase {
     }
     return new Sheet({
       sectionName: sectionName,
-      ...this.spreadsheetProps
+      ...this.spreadsheetProps,
     });
   }
   appendRange(roughRange: string, rawRows: any[][]) {
@@ -142,10 +163,13 @@ export class Spreadsheet extends SpreadsheetBase {
   }
   batchUpdateRanges() {
     const rangeData = this.getRangeData();
-    Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter({
-      valueInputOption: "USER_ENTERED",
-      data: rangeData,
-    }, this.spreadsheetId);
+    Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
+      {
+        valueInputOption: "USER_ENTERED",
+        data: rangeData,
+      },
+      this.spreadsheetId
+    );
     // Sheets.Spreadsheets?.Values?.batchUpdate(
     //   {
     //     valueInputOption: "USER_ENTERED",
@@ -180,4 +204,4 @@ export class Spreadsheet extends SpreadsheetBase {
     }
     return indices;
   }
-
+}
