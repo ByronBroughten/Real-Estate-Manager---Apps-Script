@@ -8,17 +8,16 @@ import {
   SectionSchema,
   SectionsSchema,
 } from "../appSchema/4. generated/sectionsSchema.js";
-import { asU, type RangeData } from "../utilitiesAppsScript.js";
+import { asU, type DataFilterRange, type RangeData } from "../utilitiesAppsScript.js";
 import { Obj } from "../utils/Obj.js";
 import type { SheetState } from "./Sheet.js";
 import {Sheet} from "./Sheet.js";
 
+
+
 type SpreadsheetState = {
   [SN in SectionName]: SheetState<SN>;
 };
-
-export type CellValue = number | Date | string | boolean;
-
 
 export interface SpreadsheetProps {
   spreadsheetState: SpreadsheetState;
@@ -50,65 +49,9 @@ export class SpreadsheetBase {
   }
 }
 
+type SheetProps = { isAddOnly?: boolean; };
+
 export class Spreadsheet extends SpreadsheetBase {
-  get state(): SpreadsheetState {
-    return this.spreadsheetState;
-  }
-  pushAllChanges(): void {
-    const rangeData = this.getRangeData();
-    this.batchUpdateRanges(rangeData);
-  }
-  appendRange(roughRange: string, rawRows: any[][]) {
-    Sheets.Spreadsheets?.Values?.append(
-      {
-        values: rawRows,
-      },
-      this.gss.getId(),
-      roughRange,
-      {
-        valueInputOption: "USER_ENTERED",
-      }
-    );
-  }
-  private standardizedValue(value: CellValue): Exclude<CellValue, Date> {
-    if (value instanceof Date) {
-      value = asU.standardize.date(value);
-    }
-    return value;
-  }
-  private batchUpdateRanges(rangeDataArr: RangeData[]) {
-    Sheets.Spreadsheets?.Values?.batchUpdate(
-      {
-        valueInputOption: "USER_ENTERED",
-        data: rangeDataArr,
-      },
-      this.gss.getId()
-    );
-  }
-  getRangeData(): RangeData[] {
-    const rangeData: RangeData[] = [];
-    for (const sectionName of this.sectionNames) {
-      const sheet = this.sheet(sectionName);
-      rangeData.push(...sheet.getRangeData());
-    }
-    return rangeData;
-  }
-  get sectionNames(): SectionName[] {
-    return Obj.keys(this.state);
-  }
-
-  sheet<SN extends SectionName>(sectionName: SN): Sheet<SN> {
-    if (!this.sectionNames.includes(sectionName)) {
-      this.state[sectionName] = this.initSheetState(
-        sectionName
-      ) as SpreadsheetState[SN];
-    }
-    return new Sheet({
-      sectionName: sectionName,
-      ...this.spreadsheetProps
-    });
-  }
-
   static init(): Spreadsheet {
     return new Spreadsheet({
       spreadsheetState: {} as SpreadsheetState,
@@ -117,25 +60,102 @@ export class Spreadsheet extends SpreadsheetBase {
     });
   }
   private initSheetState<SN extends SectionName>(
-    sectionName: SN
+    sectionName: SN,
+    props: SheetProps
   ): SheetState<SN> {
-    const { sheetId } = this.sectionsSchema.section(sectionName);
-    const sheet = this.gss.getSheetById(sheetId);
-    const dataRange = sheet.getDataRange();
+    const schema = this.sectionsSchema.section(sectionName);
+    const sheet = this.gss.getSheetById(schema.sheetId);
 
     const sheetName = sheet.getName();
-    const a1Range = dataRange.getA1Notation();
-    const values = dataRange.getValues();
-    const headers = values[this.headerRowIdx];
 
+    const range = sheet.getDataRange();
+
+    // I don't know if these are base 1 or base 0. I must implement tests.
+    const lastColIdx = range.getLastColumn();
+    const lastRowIdx = range.getLastRow();
+
+    const headerRowRange = sheet.getRange(this.headerRowIdx, 0, 1, lastColIdx);
+    const headerValues = headerRowRange.getValues()[0];
+    // Use these to get varbName indices
+
+    const bodyRowIdRange = sheet.getRange(this.topBodyRowIdx, 0, lastRowIdx - this.topBodyRowIdx + 1, 1);
+    const bodyRowIdValues = bodyRowIdRange.getValues();
+    const bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
+
+    const isAddOnly = props.isAddOnly || false;
+    
+    // grab one column at a time.
+    const bodyRowRange = sheet.getRange(this.topBodyRowIdx, 0, lastRowIdx - this.topBodyRowIdx + 1, 1);
+    
     return {
-      sheetName,
+      sheetName: sheet.getName(),      
+      isAddSafe: schema.varbNames.length === lastColIdx,
+      isAddOnly,
+      bodyRows: {},//
+      bodyRowOrder: bodyRowOrder,
+      headerIndices: {},//
+      headerOrder: [], //
 
-      colTracker: this.initColTracker(sectionName, headers),
-      values,
-      a1Range,
+      changesToSave: {},
+      rangeData: [],
     };
   }
+  get state(): SpreadsheetState {
+    return this.spreadsheetState;
+  }
+  get spreadsheetId(): string {
+    return this.gss.getId();
+  }
+  get sectionNames(): SectionName[] {
+    return Obj.keys(this.state);
+  }
+  sheet<SN extends SectionName>(sectionName: SN, props: SheetProps={ isAddOnly: false }): Sheet<SN> {
+    if (!this.sectionNames.includes(sectionName)) {
+      this.state[sectionName] = this.initSheetState(
+        sectionName,
+        props
+      ) as SpreadsheetState[SN];
+    }
+    return new Sheet({
+      sectionName: sectionName,
+      ...this.spreadsheetProps
+    });
+  }
+  appendRange(roughRange: string, rawRows: any[][]) {
+    Sheets.Spreadsheets?.Values?.append(
+      {
+        values: rawRows,
+      },
+      this.spreadsheetId,
+      roughRange,
+      {
+        valueInputOption: "USER_ENTERED",
+      }
+    );
+  }
+  batchUpdateRanges() {
+    const rangeData = this.getRangeData();
+    Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter({
+      valueInputOption: "USER_ENTERED",
+      data: rangeData,
+    }, this.spreadsheetId);
+    // Sheets.Spreadsheets?.Values?.batchUpdate(
+    //   {
+    //     valueInputOption: "USER_ENTERED",
+    //     data: rangeDataArr,
+    //   },
+    //   this.spreadsheetId
+    // );
+  }
+  private getRangeData(): DataFilterRange[] {
+    const rangeData: DataFilterRange[] = [];
+    for (const sectionName of this.sectionNames) {
+      const sheet = this.sheet(sectionName);
+      rangeData.push(...sheet.collectRangeData());
+    }
+    return rangeData;
+  }
+  
   private initColTracker<SN extends SectionName>(
     sectionName: SN,
     headers: string[]

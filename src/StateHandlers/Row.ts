@@ -6,7 +6,7 @@ import type {
 } from "../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
 import { Obj } from "../utils/Obj";
-import { SheetBase, type SheetProps } from "./Sheet";
+import { Sheet, SheetBase, type ChangesToSave, type SheetProps } from "./Sheet";
 
 export type RowState<SN extends SectionName> = SectionValues<SN>;
 
@@ -21,7 +21,7 @@ export class RowBase<SN extends SectionName> extends SheetBase<SN> {
     this.id = id;
   }
   get rowState(): RowState<SN> {
-    return this.sheetState.rows[this.id];
+    return this.sheetState.bodyRows[this.id];
   }
 }
 
@@ -31,6 +31,11 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
   get state(): RowState<SN> {
     return this.rowState;
+  }
+  get absoluteIdx(): number {
+    const topBodyRowIdx = this.sheet.topBodyRowIdx;
+    const baseIdx = this.sheetState.bodyRowOrder.indexOf(this.id);
+    return baseIdx + topBodyRowIdx;
   }
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     return this.rowState[varbName] as VarbValue<SN, VN>;
@@ -56,12 +61,21 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get varbNames(): VarbName<SN>[] {
     return this.schema.varbNames;
   }
+  get changesToSave(): ChangesToSave<SN> {
+    return this.sheetState.changesToSave;
+  }
+  get sheet(): Sheet<SN> {
+    return new Sheet(this.sheetProps);
+  }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
     value: VL
   ): Row<SN> {
-    // this needs work
-
+    this.rowState[varbName] = value as RowState<SN>[VN];
+    this.sheet.addChangeToSave(this.id, {
+      action: "update",
+      varbNames: [varbName],
+    });
     return this;
   }
   setValues(sectionValues: Partial<SectionValues<SN>>): Row<SN> {

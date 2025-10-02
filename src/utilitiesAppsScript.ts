@@ -1,3 +1,23 @@
+export type CellValue = number | Date | string | boolean;
+export type DataFilterRange =
+  GoogleAppsScript.Sheets.Schema.DataFilterValueRange;
+export type DataFilter = GoogleAppsScript.Sheets.Schema.DataFilter;
+
+const _dataFilterExample: DataFilter = {
+  gridRange: {
+    sheetId: 0,
+    startColumnIndex: 0,
+    startRowIndex: 0,
+    endColumnIndex: 1,
+    endRowIndex: 1,
+  },
+};
+
+const _dataFilterRangeExample: DataFilterRange = {
+  dataFilter: _dataFilterExample,
+  values: [[""]],
+};
+
 export type RangeData = {
   range: string;
   values: any[][];
@@ -11,6 +31,13 @@ export type GenericRangeObj = {
 };
 
 const _standardizeUtils = {
+  value(value: CellValue): Exclude<CellValue, Date> {
+    if (value instanceof Date) {
+      return this.date(value);
+    } else {
+      return value;
+    }
+  },
   date: function (dateObj: Date): string {
     return Utilities.formatDate(
       dateObj,

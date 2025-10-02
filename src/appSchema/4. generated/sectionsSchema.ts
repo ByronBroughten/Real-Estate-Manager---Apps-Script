@@ -15,6 +15,7 @@ import {
   allVarbAttributes,
   type AllVarbAttributes,
   type BaseVarbAttributes,
+  type SectionValues,
   type SectionVarbAttributes,
   type VarbAttributes,
   type VarbName,
@@ -62,6 +63,14 @@ export class SectionSchema<SN extends SectionName> {
   }
   get varbNames(): VarbName<SN>[] {
     return Obj.keys(this.allVarbAttributes[this.sectionName]);
+  }
+  makeDefaultValues(): SectionValues<SN> {
+    return this.varbNames.reduce((values, varbName) => {
+      values[varbName] = this.varb(
+        varbName
+      ).makeDefaultValue() as SectionValues<SN>[typeof varbName];
+      return values;
+    }, {} as SectionValues<SN>);
   }
   varbDisplayNames(): string[] {
     return this.varbNames.map((vn) => this.varb(vn).displayName);
