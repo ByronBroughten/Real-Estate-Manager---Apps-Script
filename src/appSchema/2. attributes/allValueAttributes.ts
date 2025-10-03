@@ -18,7 +18,7 @@ type Values = MakeSchemaDict<
       string: string;
       number: number | "";
       boolean: boolean | "";
-      date: string | Date;
+      date: Date | "";
     },
     UnionValues
   >

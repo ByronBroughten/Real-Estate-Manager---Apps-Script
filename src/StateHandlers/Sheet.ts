@@ -78,6 +78,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   get schema(): SectionSchema<SN> {
     return this.sectionSchema;
   }
+  get orderedRows(): Row<SN>[] {
+    return this.state.bodyRowOrder.map((id) => this.row(id));
+  }
   get rows(): Rows<SN> {
     return this.state.bodyRows;
   }

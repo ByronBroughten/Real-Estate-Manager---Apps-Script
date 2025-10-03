@@ -1,6 +1,7 @@
 import { makeSchemaNames, type MakeSchemaName } from "../makeSchema";
 
 export const sectionNames = makeSchemaNames([
+  "test",
   "unit",
   "household",
   "expense",
