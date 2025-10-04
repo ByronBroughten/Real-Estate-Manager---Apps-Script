@@ -24,7 +24,7 @@ type Values = MakeSchemaDict<
   >
 >;
 
-export type Value<VN extends ValueName> = Values[VN];
+export type Value<VN extends ValueName = ValueName> = Values[VN];
 export type ValidateValue<VN extends ValueName> = (value: unknown) => Value<VN>;
 export type MakeDefaultValue<VN extends ValueName> = () => Value<VN>;
 

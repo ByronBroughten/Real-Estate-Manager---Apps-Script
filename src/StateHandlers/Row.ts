@@ -1,4 +1,6 @@
 import type { SectionName } from "../appSchema/1. names/sectionNames";
+import type { ValueName } from "../appSchema/1. names/valueNames";
+import type { Value } from "../appSchema/2. attributes/allValueAttributes";
 import type {
   SectionValues,
   VarbName,
@@ -76,6 +78,22 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       action: "update",
       varbNames: [varbName],
     });
+    return this;
+  }
+  setValueType<VN extends VarbName<SN>>(
+    varbName: VN,
+    valueName: ValueName,
+    value: Value
+  ): Row<SN> {
+    const schema = this.schema.varb(varbName);
+    if (schema.valueName !== valueName) {
+      throw new Error(
+        `Value name ${valueName} does not match varb value name ${schema.valueName}`
+      );
+    }
+
+    value = schema.validate(value);
+    this.setValue(varbName, value as VarbValue<SN, VN>);
     return this;
   }
   setValues(sectionValues: Partial<SectionValues<SN>>): Row<SN> {

@@ -82,6 +82,13 @@ export const allVarbAttributes = makeSchemaStructure(
       rentIncreaseDateNext: vS.gen("date", "Next rent increase date"),
       rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
       rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
+
+      subsidyPortionMonthly: vS.gen("number", "Subsidy rent portion monthly"),
+      subsidyPortionChangeDate: vS.gen("date", "Subsidy portion change date"),
+      subsidyPortionMonthlyNext: vS.gen(
+        "number",
+        "Next subsidy rent portion monthly"
+      ),
     },
     test: {
       id: vS.id(),
