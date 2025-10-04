@@ -1,10 +1,8 @@
-import { Spreadsheet } from "./StateHandlers/Spreadsheet.js";
-import { sectionNames } from "./appSchema/1. names/sectionNames.js";
-import { asU } from "./utilitiesAppsScript.js";
+import { TopOperator } from "./api.js";
 
-function main() {
-  asU.test();
-  const ss = Spreadsheet.init(sectionNames);
+function test() {
+  const top = TopOperator.init();
+  top.test();
   console.log("All tests passed");
 }
-main();
+test();

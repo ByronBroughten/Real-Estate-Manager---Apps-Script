@@ -8,24 +8,6 @@ import {
 import { utils } from "./utilitiesGeneral";
 import { Obj } from "./utils/Obj";
 
-const testRentRangeNames = {
-  dateCurrent: "testDate",
-  dateNext: "testDateNext",
-  priceCurrent: "testPaymentMonthly",
-  priceNext: "testPaymentMonthlyNext",
-};
-
-const testPhaRangeNames = {
-  dateNext: "testDateOfChange",
-  priceCurrent: "testSubPaymentMonthly",
-  priceNext: "testSubPaymentMonthlyNext",
-};
-
-function testTopOperator() {
-  const top = TopOperator.init();
-  top.test();
-}
-
 interface TopOperatorProps extends SpreadsheetProps {
   ss: Spreadsheet;
 }
