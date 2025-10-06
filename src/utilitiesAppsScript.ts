@@ -50,11 +50,11 @@ const _standardizeUtils = {
 const _rangeUtils = {
   getA1({
     sheetName,
-    startBase0,
+    startBase1,
     endBase0,
   }: {
     sheetName: string;
-    startBase0: {
+    startBase1: {
       rowIdx: number;
       colIdx: number;
     };
@@ -63,7 +63,7 @@ const _rangeUtils = {
       colIdx: number;
     };
   }) {
-    return `'${sheetName}'!${this.indicesToA1(startBase0)}:${this.indicesToA1(
+    return `'${sheetName}'!${this.indicesToA1(startBase1)}:${this.indicesToA1(
       endBase0
     )}`;
   },

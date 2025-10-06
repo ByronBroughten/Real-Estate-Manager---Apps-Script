@@ -67,8 +67,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       update: new Set(),
     };
   }
-  colIdx<VN extends VarbName<SN>>(varbName: VN): number {
-    return this.state.headerIndices[varbName];
+
+  colIdxBase1<VN extends VarbName<SN>>(varbName: VN): number {
+    return this.state.headerIndicesBase1[varbName];
   }
   row(id: string): Row<SN> {
     return new Row({
@@ -123,15 +124,15 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   private collectUpdateData<VN extends VarbName<SN>>(rowId, varbName: VN) {
     const row = this.row(rowId);
-    const { absoluteIdx } = row;
+    const { base1Idx } = row;
     return {
       dataFilter: {
         gridRange: {
           sheetId: this.schema.sheetId,
-          startRowIndex: absoluteIdx,
-          endRowIndex: absoluteIdx,
-          startColumnIndex: this.colIdx(varbName),
-          endColumnIndex: this.colIdx(varbName),
+          startRowIndex: base1Idx,
+          endRowIndex: base1Idx,
+          startColumnIndex: this.colIdxBase1(varbName),
+          endColumnIndex: this.colIdxBase1(varbName),
         },
       },
       values: [[row.value(varbName)]],
@@ -139,16 +140,16 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   private collectAddData(rowId): DataFilterRange {
     const row = this.row(rowId);
-    const { absoluteIdx } = row;
+    const { base1Idx } = row;
     const { headerOrder } = this.state;
     return {
       dataFilter: {
         gridRange: {
           sheetId: this.schema.sheetId,
-          startRowIndex: absoluteIdx,
-          endRowIndex: absoluteIdx,
-          startColumnIndex: this.colIdx(headerOrder[0]),
-          endColumnIndex: this.colIdx(headerOrder[headerOrder.length - 1]),
+          startRowIndex: base1Idx,
+          endRowIndex: base1Idx,
+          startColumnIndex: this.colIdxBase1(headerOrder[0]),
+          endColumnIndex: this.colIdxBase1(headerOrder[headerOrder.length - 1]),
         },
       },
       values: [headerOrder.map((varbName) => row.value(varbName))],

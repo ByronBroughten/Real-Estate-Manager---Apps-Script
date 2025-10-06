@@ -19,10 +19,10 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get state(): RowState<SN> {
     return this.rowState;
   }
-  get absoluteIdx(): number {
-    const topBodyRowIdx = this.sheet.topBodyRowIdx;
+  get base1Idx(): number {
+    const { topBodyRowIdxBase1 } = this.sheet;
     const baseIdx = this.sheetState.bodyRowOrder.indexOf(this.id);
-    return baseIdx + topBodyRowIdx;
+    return baseIdx + topBodyRowIdxBase1;
   }
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     return this.rowState[varbName] as VarbValue<SN, VN>;

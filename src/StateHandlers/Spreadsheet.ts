@@ -47,17 +47,25 @@ export class Spreadsheet extends SpreadsheetBase {
       );
     }
 
-    const headerRowRange = sheet.getRange(this.headerRowIdx, 0, 1, lastColIdx);
+    const headerRowRange = sheet.getRange(
+      this.headerRowIdxBase1,
+      1,
+      1,
+      lastColIdx
+    );
     const headerValues = headerRowRange.getValues()[0];
-    const headerIndices = this.getVarbNameIndices(sectionName, headerValues);
+    const headerIndices = this.getVarbNameIndicesBase1(
+      sectionName,
+      headerValues
+    );
     const headerOrder = [...schema.varbNames].sort(
       (a, b) => headerIndices[a] - headerIndices[b]
     );
 
     const bodyRowIdRange = sheet.getRange(
-      this.topBodyRowIdx,
-      0,
-      lastRowIdx - this.topBodyRowIdx + 1,
+      this.topBodyRowIdxBase1,
+      1,
+      lastRowIdx - this.topBodyRowIdxBase1 + 1,
       1
     );
     const bodyRowIdValues = bodyRowIdRange.getValues();
@@ -68,7 +76,7 @@ export class Spreadsheet extends SpreadsheetBase {
       const columns = {} as { [VN in VarbName<SN>]: VarbValue<SN, VN>[] };
       for (const varbName of schema.varbNames) {
         const column = sheet.getRange(
-          this.topBodyRowIdx,
+          this.topBodyRowIdxBase1,
           headerIndices[varbName],
           lastRowIdx,
           1
@@ -91,7 +99,7 @@ export class Spreadsheet extends SpreadsheetBase {
       sheetName: sheet.getName(),
       isAddSafe,
       isAddOnly,
-      headerIndices,
+      headerIndicesBase1: headerIndices,
       headerOrder,
       bodyRows,
       bodyRowOrder,
@@ -160,12 +168,12 @@ export class Spreadsheet extends SpreadsheetBase {
     }
     return rangeData;
   }
-  private getVarbNameIndices<SN extends SectionName>(
+  private getVarbNameIndicesBase1<SN extends SectionName>(
     sectionName: SN,
     headers: string[]
   ): HeaderIndices<SN> {
     const schema = this.sectionsSchema.section(sectionName);
-    const indices: HeaderIndices<SN> = {} as HeaderIndices<SN>;
+    const indicesBase1: HeaderIndices<SN> = {} as HeaderIndices<SN>;
     for (const varbName of schema.varbNames) {
       const { displayName } = schema.varb(varbName);
       const colIdx = headers.indexOf(displayName);
@@ -174,8 +182,8 @@ export class Spreadsheet extends SpreadsheetBase {
           `Header ${displayName} not found in sheet for section ${sectionName}`
         );
       }
-      indices[varbName] = colIdx;
+      indicesBase1[varbName] = colIdx + 1;
     }
-    return indices;
+    return indicesBase1;
   }
 }

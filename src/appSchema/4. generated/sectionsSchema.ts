@@ -25,8 +25,8 @@ import {
 } from "../2. attributes/sectionVarbAttributes";
 
 export class SectionsSchema {
-  readonly headerRowIdx = 1;
-  readonly topBodyRowIdx = 2;
+  readonly headerRowIdxBase1 = 2; // base 1
+  readonly topBodyRowIdxBase1 = 3; // base 1
   constructor() {}
   section<SN extends SectionName>(sectionName: SN): SectionSchema<SN> {
     return new SectionSchema(sectionName);

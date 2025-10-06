@@ -32,7 +32,7 @@ export type SheetState<SN extends SectionName> = {
   // Does rows include headers? No. I want their data to be consistent.
   bodyRows: Rows<SN>;
   bodyRowOrder: string[];
-  headerIndices: HeaderIndices<SN>;
+  headerIndicesBase1: HeaderIndices<SN>;
   headerOrder: VarbName<SN>[];
 
   changesToSave: ChangesToSave<SN>;

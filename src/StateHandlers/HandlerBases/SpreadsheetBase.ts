@@ -28,10 +28,10 @@ export class SpreadsheetBase {
       gss: this.gss,
     };
   }
-  get headerRowIdx(): number {
-    return this.sectionsSchema.headerRowIdx;
+  get headerRowIdxBase1(): number {
+    return this.sectionsSchema.headerRowIdxBase1;
   }
-  get topBodyRowIdx(): number {
-    return this.sectionsSchema.topBodyRowIdx;
+  get topBodyRowIdxBase1(): number {
+    return this.sectionsSchema.topBodyRowIdxBase1;
   }
 }
