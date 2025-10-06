@@ -129,6 +129,18 @@ const _rangeUtils = {
 };
 
 const _triggerUtils = {
+  deleteByFnName(...fnNames: string[]): void {
+    const triggers = ScriptApp.getProjectTriggers();
+    for (const trigger of triggers) {
+      const fnName = trigger.getHandlerFunction();
+      if (fnNames.includes(fnName)) {
+        {
+          ScriptApp.deleteTrigger(trigger);
+          console.log(`Deleted existing trigger for fnName ${fnName}.`);
+        }
+      }
+    }
+  },
   addFirstOfMonth: function (...functionNames: string[]) {
     for (const functionName of functionNames) {
       ScriptApp.newTrigger(functionName).timeBased().onMonthDay(1).create();
