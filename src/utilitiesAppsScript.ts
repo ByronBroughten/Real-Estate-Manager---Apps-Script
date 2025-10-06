@@ -141,6 +141,14 @@ const _triggerUtils = {
       }
     }
   },
+  addOnEdit(...fnNames: string[]): void {
+    for (const fnName of fnNames) {
+      ScriptApp.newTrigger(fnName)
+        .forSpreadsheet(SpreadsheetApp.getActive())
+        .onEdit()
+        .create();
+    }
+  },
   addFirstOfMonth: function (...functionNames: string[]) {
     for (const functionName of functionNames) {
       ScriptApp.newTrigger(functionName).timeBased().onMonthDay(1).create();
