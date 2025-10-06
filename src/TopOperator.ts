@@ -1,10 +1,10 @@
 import type { SectionName } from "./appSchema/1. names/sectionNames";
 import type { VarbName } from "./appSchema/2. attributes/sectionVarbAttributes";
 import {
-  Spreadsheet,
   SpreadsheetBase,
   type SpreadsheetProps,
-} from "./StateHandlers/Spreadsheet";
+} from "./StateHandlers/HandlerBases/SpreadsheetBase";
+import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
 import { Obj } from "./utils/Obj";
 
