@@ -7,42 +7,16 @@ import type {
 import { SectionsSchema } from "../appSchema/4. generated/sectionsSchema.js";
 import { type DataFilterRange } from "../utilitiesAppsScript.js";
 import { Obj } from "../utils/Obj.js";
-import type { HeaderIndices, Rows, SheetState } from "./Sheet.js";
+import type {
+  HeaderIndices,
+  Rows,
+  SheetState,
+} from "./HandlerBases/SheetBase.js";
+import {
+  SpreadsheetBase,
+  type SpreadsheetState,
+} from "./HandlerBases/SpreadsheetBase.js";
 import { Sheet } from "./Sheet.js";
-
-type SpreadsheetState = {
-  [SN in SectionName]: SheetState<SN>;
-};
-
-export interface SpreadsheetProps {
-  spreadsheetState: SpreadsheetState;
-  sectionsSchema: SectionsSchema;
-  gss: GoogleAppsScript.Spreadsheet.Spreadsheet;
-}
-
-export class SpreadsheetBase {
-  readonly spreadsheetState: SpreadsheetState;
-  readonly sectionsSchema: SectionsSchema;
-  readonly gss: GoogleAppsScript.Spreadsheet.Spreadsheet;
-  constructor(props: SpreadsheetProps) {
-    this.spreadsheetState = props.spreadsheetState;
-    this.sectionsSchema = props.sectionsSchema;
-    this.gss = props.gss;
-  }
-  get spreadsheetProps(): SpreadsheetProps {
-    return {
-      spreadsheetState: this.spreadsheetState,
-      sectionsSchema: this.sectionsSchema,
-      gss: this.gss,
-    };
-  }
-  get headerRowIdx(): number {
-    return this.sectionsSchema.headerRowIdx;
-  }
-  get topBodyRowIdx(): number {
-    return this.sectionsSchema.topBodyRowIdx;
-  }
-}
 
 type SheetProps = { isAddOnly?: boolean };
 

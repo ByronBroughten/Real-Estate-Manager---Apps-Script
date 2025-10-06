@@ -8,24 +8,9 @@ import type {
 } from "../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
 import { Obj } from "../utils/Obj";
-import { Sheet, SheetBase, type ChangesToSave, type SheetProps } from "./Sheet";
-
-export type RowState<SN extends SectionName> = SectionValues<SN>;
-
-interface RowProps<SN extends SectionName> extends SheetProps<SN> {
-  id: string;
-}
-
-export class RowBase<SN extends SectionName> extends SheetBase<SN> {
-  readonly id: string;
-  constructor({ id, ...props }: RowProps<SN>) {
-    super(props);
-    this.id = id;
-  }
-  get rowState(): RowState<SN> {
-    return this.sheetState.bodyRows[this.id];
-  }
-}
+import { RowBase, type RowState } from "./HandlerBases/RowBase";
+import type { ChangesToSave } from "./HandlerBases/SheetBase";
+import { Sheet } from "./Sheet";
 
 export class Row<SN extends SectionName> extends RowBase<SN> {
   get schema(): SectionSchema<SN> {

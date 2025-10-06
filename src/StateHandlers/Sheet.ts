@@ -7,69 +7,18 @@ import type {
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
 import { type DataFilterRange } from "../utilitiesAppsScript";
 import { Obj } from "../utils/Obj";
-import { Row, type RowState } from "./Row";
-import { SpreadsheetBase, type SpreadsheetProps } from "./Spreadsheet";
-
-export type HeaderIndices<SN extends SectionName> = {
-  [VN in VarbName<SN>]: number;
-};
-export type Rows<SN extends SectionName> = {
-  [id in string]: RowState<SN>;
-};
-
-type RowChangesToSave<SN extends SectionName> = {
-  add: boolean;
-  delete: boolean;
-  update: Set<VarbName<SN>>;
-};
+import {
+  SheetBase,
+  type ChangesToSave,
+  type RowChangesToSave,
+  type Rows,
+  type SheetState,
+} from "./HandlerBases/SheetBase";
+import { Row } from "./Row";
 
 type RowChangeProps<SN extends SectionName> =
   | { action: "add" | "delete" }
   | { action: "update"; varbNames: VarbName<SN>[] };
-
-export type ChangesToSave<SN extends SectionName> = {
-  [rowId: string]: RowChangesToSave<SN>;
-};
-
-export type SheetState<SN extends SectionName> = {
-  sheetName;
-
-  isAddSafe: boolean;
-  isAddOnly: boolean;
-
-  // Does rows include headers? No. I want their data to be consistent.
-  bodyRows: Rows<SN>;
-  bodyRowOrder: string[];
-  headerIndices: HeaderIndices<SN>;
-  headerOrder: VarbName<SN>[];
-
-  changesToSave: ChangesToSave<SN>;
-  rangeData: DataFilterRange[];
-};
-
-export interface SheetProps<SN extends SectionName> extends SpreadsheetProps {
-  sectionName: SN;
-}
-
-export class SheetBase<SN extends SectionName> extends SpreadsheetBase {
-  readonly sectionName: SN;
-  constructor({ sectionName, ...props }: SheetProps<SN>) {
-    super(props);
-    this.sectionName = sectionName;
-  }
-  get sheetState(): SheetState<SN> {
-    return this.spreadsheetState[this.sectionName];
-  }
-  get sheetProps(): SheetProps<SN> {
-    return {
-      sectionName: this.sectionName,
-      ...this.spreadsheetProps,
-    };
-  }
-  get sectionSchema(): SectionSchema<SN> {
-    return this.sectionsSchema.section(this.sectionName);
-  }
-}
 
 export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   get state(): SheetState<SN> {
