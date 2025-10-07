@@ -1,4 +1,7 @@
-import type { SectionName } from "./appSchema/1. names/sectionNames";
+import {
+  isApiSectionName,
+  type SectionName,
+} from "./appSchema/1. names/sectionNames";
 import type { VarbName } from "./appSchema/2. attributes/sectionVarbAttributes";
 import {
   SpreadsheetBase,
@@ -22,6 +25,17 @@ export class TopOperator extends SpreadsheetBase {
     const ss = Spreadsheet.init();
     return new TopOperator({ ...ss.spreadsheetProps, ss });
   }
+  isEnterValue(sheetId, colIdx: number, rowIdx: number) {
+    const { sectionName } = this.sectionsSchema.sectionBySheetId(
+      Number(sheetId)
+    );
+    if (isApiSectionName(sectionName)) {
+      const sheet = this.ss.sheet(sectionName);
+      const triggerColIdx = sheet.colIdxBase1("enter");
+      const triggerRowIdx = sheet.topBodyRowIdxBase1;
+      return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
+    } else return false;
+  }
 
   addHhOnetimeCharge() {
     const ss = this.ss;
@@ -30,6 +44,7 @@ export class TopOperator extends SpreadsheetBase {
     const values = rAddOnetime.validateValues();
     const sOnetime = ss.sheet("hhChargeOnetime");
     sOnetime.addRowWithValues(values);
+    rAddOnetime.resetToDefault();
     ss.batchUpdateRanges();
   }
   monthlyRentUpdate() {

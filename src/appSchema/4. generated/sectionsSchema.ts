@@ -27,9 +27,20 @@ import {
 export class SectionsSchema {
   readonly headerRowIdxBase1 = 2; // base 1
   readonly topBodyRowIdxBase1 = 3; // base 1
+  private allSectionAttributes: AllSectionAttributes = allSectionAttributes;
   constructor() {}
   section<SN extends SectionName>(sectionName: SN): SectionSchema<SN> {
     return new SectionSchema(sectionName);
+  }
+  sectionBySheetId(sheetId: number): SectionSchema<SectionName> {
+    for (const [sectionName, attributes] of Obj.entries(
+      this.allSectionAttributes
+    )) {
+      if (attributes.sheetId === sheetId) {
+        return this.section(sectionName);
+      }
+    }
+    throw new Error(`Section not found for sheetId ${sheetId}`);
   }
   varb<SN extends SectionName, VN extends VarbName<SN>>(
     sectionName: SN,

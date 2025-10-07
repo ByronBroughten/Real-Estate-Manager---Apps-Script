@@ -92,9 +92,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     }
 
     const rowId = this.schema.makeSectionId();
-    this.rows[rowId] = this.schema.makeDefaultValues();
+    this.rows[rowId] = {} as SectionValues<SN>;
+    this.row(rowId).resetToDefault();
     this.state.bodyRowOrder.push(rowId);
-    this.addChangeToSave(rowId, { action: "add" });
     return rowId;
   }
   addRowWithValues(values: Partial<SectionValues<SN>>): string {

@@ -54,6 +54,9 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get sheet(): Sheet<SN> {
     return new Sheet(this.sheetProps);
   }
+  resetToDefault() {
+    this.setValues(this.schema.makeDefaultValues());
+  }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
     value: VL

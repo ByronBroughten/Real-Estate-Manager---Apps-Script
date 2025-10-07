@@ -137,6 +137,7 @@ export const allVarbAttributes = makeSchemaStructure(
         valS.validate.stringNotEmpty
       ),
       notes: vS.gen("string", "Notes"),
+      enter: vS.gen("boolean", "Enter"),
     },
   } as const
 );

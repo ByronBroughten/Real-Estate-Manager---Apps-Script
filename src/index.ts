@@ -1,10 +1,31 @@
 import { TopOperator } from "./TopOperator.js";
+import { asU } from "./utilitiesAppsScript.js";
 
-function test(doTest: boolean = true) {
-  if (doTest) {
+function triggerFirstOfMonth() {
+  const top = TopOperator.init();
+  top.monthlyRentUpdate();
+}
+
+function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
+  if (e.value === "TRUE") {
+    const sheetId = e.source.getId();
+    const colId = e.range.getColumn();
+    const rowId = e.range.getRow();
     const top = TopOperator.init();
-    top.test();
-    console.log("All tests passed");
+    if (top.isEnterValue(sheetId, colId, rowId)) {
+      top.addHhOnetimeCharge();
+    }
   }
 }
-test(false);
+
+function resetTriggers(doResetTriggers: boolean = true) {
+  if (doResetTriggers) {
+    const top = TopOperator.init();
+    top.test();
+    asU.trigger.deleteAll();
+    asU.trigger.addFirstOfMonth("triggerFirstOfMonth");
+    asU.trigger.addOnEdit("triggerOnEdit");
+  }
+}
+
+resetTriggers(false);

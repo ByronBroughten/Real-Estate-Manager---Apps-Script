@@ -39,6 +39,7 @@ const sectionVarbNames = makeSchemaDict(
       "amount",
       "description",
       "notes",
+      "enter",
     ],
   } as const
 );

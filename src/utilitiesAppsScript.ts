@@ -129,35 +129,23 @@ const _rangeUtils = {
 };
 
 const _triggerUtils = {
-  deleteByFnName(...fnNames: string[]): void {
+  deleteAll(): void {
     const triggers = ScriptApp.getProjectTriggers();
     for (const trigger of triggers) {
-      const fnName = trigger.getHandlerFunction();
-      if (fnNames.includes(fnName)) {
-        {
-          ScriptApp.deleteTrigger(trigger);
-          console.log(`Deleted existing trigger for fnName ${fnName}.`);
-        }
-      }
+      ScriptApp.deleteTrigger(trigger);
     }
   },
-  addOnEdit(...fnNames: string[]): void {
-    for (const fnName of fnNames) {
-      ScriptApp.newTrigger(fnName)
-        .forSpreadsheet(SpreadsheetApp.getActive())
-        .onEdit()
-        .create();
-    }
+  addOnEdit(fnName: string): void {
+    ScriptApp.newTrigger(fnName)
+      .forSpreadsheet(SpreadsheetApp.getActive())
+      .onEdit()
+      .create();
   },
-  addFirstOfMonth: function (...functionNames: string[]) {
-    for (const functionName of functionNames) {
-      ScriptApp.newTrigger(functionName).timeBased().onMonthDay(1).create();
-    }
+  addFirstOfMonth: function (fnName: string) {
+    ScriptApp.newTrigger(fnName).timeBased().onMonthDay(1).create();
   },
-  addEveryMinute: function (...functionNames: string[]) {
-    for (const functionName of functionNames) {
-      ScriptApp.newTrigger(functionName).timeBased().everyMinutes(1).create();
-    }
+  addEveryMinute: function (fnName: string) {
+    ScriptApp.newTrigger(fnName).timeBased().everyMinutes(1).create();
   },
 };
 
@@ -195,24 +183,4 @@ export { asU };
 //       "An error occurred in your script: " + e.message
 //     );
 //   }
-// }
-
-// function getNamedRanges(rangeNames) {
-//   const namedRanges = {};
-//   for (const name of rangeNames) {
-//     namedRanges[name] = getNamedRange(name);
-//   }
-//   return namedRanges;
-// }
-
-// function getNamedRangeIds() {
-//   const spreadsheet = Sheets.Spreadsheets.get(spreadsheetId);
-// const sheet = spreadsheet.getSheetById(sheetId);
-// const namedRanges = sheet.getNamedRanges()
-// for (let i = 0; i < namedRanges.length; i++) {
-//   const namedRange = namedRanges[i];
-//   const namedRangeName = namedRange.getName();
-//   const namedRangeId = namedRange.getId();
-//   Logger.log(`Named Range Name: ${namedRangeName}, ID: ${namedRangeId}`);
-// }
 // }
