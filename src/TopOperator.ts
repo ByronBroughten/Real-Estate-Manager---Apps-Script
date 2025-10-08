@@ -25,10 +25,8 @@ export class TopOperator extends SpreadsheetBase {
     const ss = Spreadsheet.init();
     return new TopOperator({ ...ss.spreadsheetProps, ss });
   }
-  isEnterValue(sheetId, colIdx: number, rowIdx: number) {
-    const { sectionName } = this.sectionsSchema.sectionBySheetId(
-      Number(sheetId)
-    );
+  isEnterValue(sheetId: number, colIdx: number, rowIdx: number) {
+    const { sectionName } = this.sectionsSchema.sectionBySheetId(sheetId);
     if (isApiSectionName(sectionName)) {
       const sheet = this.ss.sheet(sectionName);
       const triggerColIdx = sheet.colIdxBase1("enter");

@@ -19,7 +19,7 @@ type Varb<
   valueParams: VP;
   displayName: S;
   validate: ValidateValue<VN>;
-};
+}; // I'd also like makeDefault to be here
 
 export type BaseVarbAttributes = Varb;
 

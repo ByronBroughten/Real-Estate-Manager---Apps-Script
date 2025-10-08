@@ -179,7 +179,7 @@ export class Spreadsheet extends SpreadsheetBase {
       const colIdx = headers.indexOf(displayName);
       if (colIdx === -1) {
         throw new Error(
-          `Header ${displayName} not found in sheet for section ${sectionName}`
+          `Header "${displayName}" not found in sheet for section ${sectionName}`
         );
       }
       indicesBase1[varbName] = colIdx + 1;
