@@ -8,6 +8,7 @@ export const valueNames = makeSchemaNames([
   "boolean",
   "date",
   "rentPortionName",
+  "hhNameFromId",
 ] as const);
 
 export type ValueNameSimple = MakeSchemaName<typeof valueNames>;

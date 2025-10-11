@@ -25,6 +25,7 @@ const sectionVarbNames = makeSchemaDict(
       "id",
       "date",
       "householdId",
+      "householdName",
       "expenseId",
       "description",
       "amount",

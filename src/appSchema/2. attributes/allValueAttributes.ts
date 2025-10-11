@@ -1,8 +1,13 @@
-import type { Merge } from "../../utils/Obj/merge";
+import type { Spread } from "../../utils/Obj/spread";
 import { valS } from "../../utils/validation";
 import { type ValueName } from "../1. names/valueNames";
 import { makeSchemaStructure, type MakeSchemaDict } from "../makeSchema";
 import type { LinkedIdParams } from "./valueAttributes/id";
+import {
+  makeLiteralValueSchemas,
+  type LiteralValueParamsDict,
+  type LiteralValues,
+} from "./valueAttributes/literalValues";
 import type {
   UnionValueParamsDict,
   UnionValues,
@@ -11,16 +16,19 @@ import { makeUnionValueSchemas } from "./valueAttributes/unionValues";
 
 type Values = MakeSchemaDict<
   ValueName,
-  Merge<
-    {
-      id: string;
-      linkedId: string;
-      string: string;
-      number: number | "";
-      boolean: boolean | "";
-      date: Date | "";
-    },
-    UnionValues
+  Spread<
+    [
+      {
+        id: string;
+        linkedId: string;
+        string: string;
+        number: number | "";
+        boolean: boolean | "";
+        date: Date | "";
+      },
+      UnionValues,
+      LiteralValues
+    ]
   >
 >;
 
@@ -65,6 +73,7 @@ export const allValueAttributes = makeSchemaStructure(
       defaultValidate: valS.validate.date,
     },
     ...makeUnionValueSchemas(),
+    ...makeLiteralValueSchemas(),
   } as const
 );
 
@@ -73,16 +82,19 @@ export type ValueAttributes<VN extends ValueName> = AllValueAttributes[VN];
 
 type ValueParamsDict = MakeSchemaDict<
   ValueName,
-  Merge<
-    {
-      linkedId: LinkedIdParams;
-      id: {};
-      string: {};
-      number: {};
-      boolean: {};
-      date: {};
-    },
-    UnionValueParamsDict
+  Spread<
+    [
+      {
+        linkedId: LinkedIdParams;
+        id: {};
+        string: {};
+        number: {};
+        boolean: {};
+        date: {};
+      },
+      UnionValueParamsDict,
+      LiteralValueParamsDict
+    ]
   >
 >;
 
