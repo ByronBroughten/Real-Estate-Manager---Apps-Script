@@ -111,7 +111,7 @@ export const allVarbAttributes = makeSchemaStructure(
         onDelete: "setEmpty",
       }),
       date: vS.date(),
-      amount: vS.gen("number", "Dollar amount"),
+      amount: vS.gen("number", "Amount"),
       description: vS.gen("string", "Description"),
       notes: vS.gen("string", "Notes"),
     },
@@ -131,7 +131,7 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "expense",
         onDelete: "setEmpty",
       }),
-      amount: vS.gen("number", "Dollar amount"),
+      amount: vS.gen("number", "Amount"),
       description: vS.gen(
         "string",
         "Description",
