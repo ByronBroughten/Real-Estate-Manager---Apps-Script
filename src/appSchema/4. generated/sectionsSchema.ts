@@ -1,5 +1,5 @@
 import { utils } from "../../utilitiesGeneral";
-import { Obj } from "../../utils/Obj";
+import { Obj, type StrictOmit } from "../../utils/Obj";
 import type { SectionName } from "../1. names/sectionNames";
 import type { ValueName } from "../1. names/valueNames";
 import {
@@ -75,11 +75,15 @@ export class SectionSchema<SN extends SectionName> {
   get varbNames(): VarbName<SN>[] {
     return Obj.keys(this.allVarbAttributes[this.sectionName]);
   }
-  makeDefaultValues(): SectionValues<SN> {
+  makeDefaultValues(): StrictOmit<SectionValues<SN>, "id"> {
     return this.varbNames.reduce((values, varbName) => {
-      values[varbName] = this.varb(
-        varbName
-      ).makeDefaultValue() as SectionValues<SN>[typeof varbName];
+      if (varbName === "id") {
+        return values;
+      } else {
+        values[varbName] = this.varb(
+          varbName
+        ).makeDefaultValue() as SectionValues<SN>[typeof varbName];
+      }
       return values;
     }, {} as SectionValues<SN>);
   }
@@ -122,6 +126,9 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
     ] as VarbValueAttributes<SN, VN>;
   }
   makeDefaultValue(): VarbValue<SN, VN> {
+    if (this.varbName === "id") {
+      throw new Error("Cannot make default value for id varb");
+    }
     return this.valueAttributes.makeDefault() as VarbValue<SN, VN>;
   }
 }
