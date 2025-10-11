@@ -87,7 +87,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   addRowDefault(): string {
     if (!this.state.isAddSafe) {
       throw new Error(
-        "Sheet is not add safe. Not enough varbNames for columns."
+        `Sheet "${this.sectionName}" is not add safe. Not enough varbNames for columns.`
       );
     }
 

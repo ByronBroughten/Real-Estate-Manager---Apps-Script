@@ -7,11 +7,8 @@ function triggerFirstOfMonth() {
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
-  console.log(e.value);
   if (e.value === "TRUE") {
     const sheetId = e.range.getSheet().getSheetId();
-    Logger.log("The spreadsheet ID is: " + sheetId);
-
     const colId = e.range.getColumn();
     const rowId = e.range.getRow();
     const top = TopOperator.init();
