@@ -33,8 +33,8 @@ const _validateS = {
       throw validationError(value, "string");
     }
   },
-  stringNotEmpty(value: unknown): string {
-    const str = this.string(value);
+  stringNotEmpty: (value: unknown): string => {
+    const str = _validateS.string(value);
     if (_isS.stringNotEmpty(str)) {
       return str;
     } else {
