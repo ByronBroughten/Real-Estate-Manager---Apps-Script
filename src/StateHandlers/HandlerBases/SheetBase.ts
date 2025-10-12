@@ -1,7 +1,10 @@
 import type { SectionName } from "../../appSchema/1. names/sectionNames";
 import type { VarbName } from "../../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../../appSchema/4. generated/sectionsSchema";
-import type { DataFilterRange } from "../../utilitiesAppsScript";
+import type {
+  BatchUpdateRequest,
+  DataFilterRange,
+} from "../../utilitiesAppsScript";
 import type { RowState } from "./RowBase";
 
 import { SpreadsheetBase, type SpreadsheetProps } from "./SpreadsheetBase";
@@ -37,6 +40,7 @@ export type SheetState<SN extends SectionName> = {
 
   changesToSave: ChangesToSave<SN>;
   rangeData: DataFilterRange[];
+  batchUpdateRequests: BatchUpdateRequest[];
 };
 
 export interface SheetProps<SN extends SectionName> extends SpreadsheetProps {

@@ -5,7 +5,10 @@ import type {
   VarbValue,
 } from "../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
-import { type DataFilterRange } from "../utilitiesAppsScript";
+import {
+  type BatchUpdateRequest,
+  type DataFilterRange,
+} from "../utilitiesAppsScript";
 import { Obj } from "../utils/Obj";
 import {
   SheetBase,
@@ -105,6 +108,27 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     row.setValues(values);
     return rowId;
   }
+  collectRequests(): BatchUpdateRequest[] {
+    const changes = this.changesToSave;
+    for (const [rowId, change] of Obj.entries(changes)) {
+      if (change.delete) {
+        throw new Error(
+          "Not implemented. Deleting rows are not yet supported."
+        );
+      } else if (change.add) {
+        throw new Error("Not implemented. Adding rows is not yet supported.");
+      } else {
+        for (const varbName of change.update) {
+          this.state.batchUpdateRequests.push(
+            this.collectUpdateRequest(rowId, varbName)
+          );
+        }
+      }
+    }
+    const batchUpdateRequests = [...this.state.batchUpdateRequests];
+    this.state.batchUpdateRequests = [];
+    return batchUpdateRequests;
+  }
   collectRangeData(): DataFilterRange[] {
     const changes = this.changesToSave;
     for (const [rowId, change] of Obj.entries(changes)) {
@@ -124,6 +148,47 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.state.rangeData = [];
     return rangeData;
   }
+  private collectUpdateRequest<VN extends VarbName<SN>>(
+    rowId,
+    varbName: VN
+  ): BatchUpdateRequest {
+    const row = this.row(rowId);
+    // inexplicably, GAS treats indices as zero-indexed for this purpose
+    const rowIdx = row.base1Idx - 1;
+    const colIdx = this.colIdxBase1(varbName) - 1;
+    return {
+      updateCells: {
+        fields: "userEnteredValue",
+        rows: [
+          {
+            values: [{ userEnteredValue: row.valueUserEntered(varbName) }],
+          },
+        ],
+        range: {
+          sheetId: this.schema.sheetId,
+          startRowIndex: rowIdx,
+          endRowIndex: rowIdx + 1,
+          startColumnIndex: colIdx,
+          endColumnIndex: colIdx + 1,
+        },
+      },
+      // appendCells: {
+      //   fields: "userEnteredValue",
+      //   rows: [
+      //     {
+      //       values: [
+      //         {
+      //           userEnteredValue: {
+      //             stringValue: value,
+      //           },
+      //         },
+      //       ],
+      //     },
+      //   ],
+      // },
+    };
+  }
+
   private collectUpdateData<VN extends VarbName<SN>>(
     rowId,
     varbName: VN

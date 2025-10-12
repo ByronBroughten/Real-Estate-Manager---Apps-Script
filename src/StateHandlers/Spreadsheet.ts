@@ -5,7 +5,10 @@ import type {
   VarbValue,
 } from "../appSchema/2. attributes/sectionVarbAttributes.js";
 import { SectionsSchema } from "../appSchema/4. generated/sectionsSchema.js";
-import { type DataFilterRange } from "../utilitiesAppsScript.js";
+import {
+  type BatchUpdateRequest,
+  type DataFilterRange,
+} from "../utilitiesAppsScript.js";
 import { Obj } from "../utils/Obj.js";
 import type {
   HeaderIndices,
@@ -115,6 +118,7 @@ export class Spreadsheet extends SpreadsheetBase {
       bodyRows,
       bodyRowOrder,
       changesToSave: {},
+      batchUpdateRequests: [],
       rangeData: [],
     };
   }
@@ -142,6 +146,7 @@ export class Spreadsheet extends SpreadsheetBase {
       ...this.spreadsheetProps,
     });
   }
+
   appendRange(roughRange: string, rawRows: any[][]) {
     Sheets.Spreadsheets?.Values?.append(
       {
@@ -155,21 +160,24 @@ export class Spreadsheet extends SpreadsheetBase {
     );
   }
   batchUpdateRanges() {
-    const rangeData = this.getRangeData();
-    Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
-      {
-        valueInputOption: "USER_ENTERED",
-        data: rangeData,
-      },
-      this.spreadsheetId
-    );
-    // Sheets.Spreadsheets?.Values?.batchUpdate(
+    const requests = this.getRequests();
+    Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
+    // const rangeData = this.getRangeData();
+    // Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
     //   {
     //     valueInputOption: "USER_ENTERED",
-    //     data: rangeDataArr,
+    //     data: rangeData,
     //   },
     //   this.spreadsheetId
     // );
+  }
+  private getRequests(): BatchUpdateRequest[] {
+    const requests: BatchUpdateRequest[] = [];
+    for (const sectionName of this.sectionNames) {
+      const sheet = this.sheet(sectionName);
+      requests.push(...sheet.collectRequests());
+    }
+    return requests;
   }
   private getRangeData(): DataFilterRange[] {
     const rangeData: DataFilterRange[] = [];

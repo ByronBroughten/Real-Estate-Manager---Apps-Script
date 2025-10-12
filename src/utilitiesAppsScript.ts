@@ -15,6 +15,13 @@ const _dataFilterExample: DataFilter = {
   },
 };
 
+export type BatchUpdateRequest = GoogleAppsScript.Sheets.Schema.Request;
+export type UpdateCellsRequest =
+  GoogleAppsScript.Sheets.Schema.UpdateCellsRequest;
+
+export type UserEnteredValue =
+  UpdateCellsRequest["rows"][number]["values"][number]["userEnteredValue"];
+
 const _dataFilterRangeExample: DataFilterRange = {
   dataFilter: _dataFilterExample,
   majorDimension: "ROWS",

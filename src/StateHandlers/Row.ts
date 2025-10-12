@@ -7,8 +7,13 @@ import type {
   VarbValue,
 } from "../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
-import { asU, type StandardizedValue } from "../utilitiesAppsScript";
+import {
+  asU,
+  type StandardizedValue,
+  type UserEnteredValue,
+} from "../utilitiesAppsScript";
 import { Obj } from "../utils/Obj";
+import { valS } from "../utils/validation";
 import { RowBase, type RowState } from "./HandlerBases/RowBase";
 import type { ChangesToSave } from "./HandlerBases/SheetBase";
 import { Sheet } from "./Sheet";
@@ -35,6 +40,23 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       VarbValue<SN, VN>
     >;
   }
+  valueUserEntered(varbName: VarbName<SN>): UserEnteredValue {
+    const value = this.value(varbName);
+    if (valS.is.string(value)) {
+      if (value[0] === "=") {
+        return { formulaValue: value };
+      } else {
+        return { stringValue: value };
+      }
+    } else if (valS.is.date(value)) {
+      return { stringValue: asU.standardize.date(value) };
+    } else if (valS.is.number(value)) {
+      return { numberValue: value };
+    } else if (valS.is.boolean(value)) {
+      return { boolValue: value };
+    }
+  }
+
   get values(): Omit<SectionValues<SN>, "id"> {
     return this.varbNames.reduce((values, varbName) => {
       if (varbName !== "id") {
