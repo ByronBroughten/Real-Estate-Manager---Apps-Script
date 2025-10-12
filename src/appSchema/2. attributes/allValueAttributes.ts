@@ -53,8 +53,7 @@ export const allValueAttributes = makeSchemaStructure(
       defaultValidate: valS.validate.stringNotEmpty,
     },
     linkedId: {
-      //or empty
-      makeDefault: () => "shouldNotHappen",
+      makeDefault: () => "",
       defaultValidate: valS.validate.string,
     },
     string: {

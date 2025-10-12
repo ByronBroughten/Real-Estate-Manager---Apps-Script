@@ -188,7 +188,6 @@ export class TopOperator extends SpreadsheetBase {
     for (const test of Obj.values(tests)) {
       const gTest = this.ss.gSheetBySectionName("test");
       gTest.deleteRows(this.ss.topBodyRowIdxBase1, 3);
-
       test.beforeFn();
       test.run();
       // check test.after

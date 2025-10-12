@@ -95,6 +95,9 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     return this;
   }
   setValues(sectionValues: Partial<SectionValues<SN>>): Row<SN> {
+    sectionValues = Obj.strictPick(sectionValues, this.varbNames) as Partial<
+      SectionValues<SN>
+    >;
     for (const [varbName, value] of Obj.entries(sectionValues)) {
       this.setValue(varbName, value as VarbValue<SN, typeof varbName>);
     }
