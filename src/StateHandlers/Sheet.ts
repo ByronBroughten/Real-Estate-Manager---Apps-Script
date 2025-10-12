@@ -96,10 +96,12 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
 
     const rowId = this.schema.makeSectionId();
     this.rows[rowId] = {} as SectionValues<SN>;
+    this.state.bodyRowOrder.push(rowId);
+    this.addChangeToSave(rowId, { action: "add" });
+
     const row = this.row(rowId);
     row.setValue("id", rowId);
     row.resetToDefault();
-    this.state.bodyRowOrder.push(rowId);
     return rowId;
   }
   addRowWithValues(values: Partial<SectionValues<SN>>): string {
@@ -115,14 +117,10 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         throw new Error(
           "Not implemented. Deleting rows are not yet supported."
         );
-      } else if (change.add) {
-        this.state.batchUpdateRequests.push(this.collectAppendRequest(rowId));
-        for (const varbName of this.row(rowId).varbNames) {
-          this.state.batchUpdateRequests.push(
-            this.collectUpdateRequest(rowId, varbName)
-          );
-        }
       } else {
+        if (change.add) {
+          this.state.batchUpdateRequests.push(this.collectAppendRequest(rowId));
+        }
         for (const varbName of change.update) {
           this.state.batchUpdateRequests.push(
             this.collectUpdateRequest(rowId, varbName)
