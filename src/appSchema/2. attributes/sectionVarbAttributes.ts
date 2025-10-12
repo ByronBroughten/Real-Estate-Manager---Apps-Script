@@ -177,6 +177,9 @@ export type VarbValue<
   VN extends VarbName<SN>
 > = Value<VarbValueName<SN, VN> & ValueName>;
 
-export type SectionValues<SN extends SectionNameSimple> = {
-  [VN in VarbName<SN>]: VarbValue<SN, VN>;
+export type SectionValues<
+  SN extends SectionNameSimple,
+  VNS extends VarbName<SN> = VarbName<SN>
+> = {
+  [VN in VNS]: VarbValue<SN, VN>;
 };

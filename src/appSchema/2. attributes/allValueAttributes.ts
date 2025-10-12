@@ -22,9 +22,9 @@ type Values = MakeSchemaDict<
         id: string;
         linkedId: string;
         string: string;
-        number: number | "";
+        date: Date | string;
+        number: number | string;
         boolean: boolean | "";
-        date: Date | "";
       },
       UnionValues,
       LiteralValues
@@ -72,7 +72,7 @@ export const allValueAttributes = makeSchemaStructure(
     date: {
       //or empty
       makeDefault: () => new Date(),
-      defaultValidate: valS.validate.dateOrEmpty,
+      defaultValidate: valS.validate.dateOrEmptyOrFormula,
     },
     ...makeUnionValueSchemas(),
     ...makeLiteralValueSchemas(),

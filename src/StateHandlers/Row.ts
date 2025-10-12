@@ -57,18 +57,21 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     }
   }
 
-  get values(): Omit<SectionValues<SN>, "id"> {
-    return this.varbNames.reduce((values, varbName) => {
-      if (varbName !== "id") {
-        values[varbName] = this.value(
-          varbName
-        ) as (typeof values)[typeof varbName];
-      }
+  values<VN extends VarbName<SN> = VarbName<SN>>(
+    varbNames?: VN[]
+  ): SectionValues<SN, VN> {
+    const keys = varbNames || (this.varbNames as VN[]);
+    return keys.reduce((values, varbName) => {
+      values[varbName] = this.value(
+        varbName
+      ) as (typeof values)[typeof varbName];
       return values;
-    }, {} as SectionValues<SN>);
+    }, {} as SectionValues<SN, VN>);
   }
-  validateValues(): Omit<SectionValues<SN>, "id"> {
-    const values = this.values;
+  validateValues<VN extends VarbName<SN> = VarbName<SN>>(
+    varbNames?: VN[]
+  ): SectionValues<SN, VN> {
+    const values = this.values(varbNames);
     for (const [varbName, value] of Obj.entries(values)) {
       this.schema.varb(varbName).validate(value);
     }

@@ -14,6 +14,9 @@ const _isS = {
   emptyString(value: unknown): value is "" {
     return value === "";
   },
+  formula(value: unknown): value is string {
+    return typeof value === "string" && value[0] === "=";
+  },
   number(value: unknown): value is number {
     return typeof value === "number";
   },
@@ -69,8 +72,8 @@ const _validateS = {
       throw validationError(value, "date");
     }
   },
-  dateOrEmpty: (value: unknown): Date | "" => {
-    if (_isS.date(value) || _isS.emptyString(value)) {
+  dateOrEmptyOrFormula: (value: unknown): Date | string => {
+    if (_isS.date(value) || _isS.emptyString(value) || _isS.formula(value)) {
       return value;
     } else {
       throw validationError(value, "date or empty string");

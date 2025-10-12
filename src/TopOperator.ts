@@ -12,6 +12,7 @@ import {
 } from "./StateHandlers/HandlerBases/SpreadsheetBase";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
+import { Arr } from "./utils/Arr";
 import { Obj } from "./utils/Obj";
 
 interface TopOperatorProps extends SpreadsheetProps {
@@ -42,10 +43,14 @@ export class TopOperator extends SpreadsheetBase {
     const ss = this.ss;
     const sAddOnetime = ss.sheet("addHhChargeOnetime");
     const rAddOnetime = sAddOnetime.topBodyRow;
-    const values = rAddOnetime.validateValues();
+    const values = rAddOnetime.validateValues(
+      Arr.excludeStrict(rAddOnetime.varbNames, ["id", "enter", "householdName"])
+    );
+
     const sOnetime = ss.sheet("hhChargeOnetime");
     sOnetime.addRowWithValues(values);
     rAddOnetime.resetToDefault();
+    rAddOnetime.setValue("date", "=TODAY()");
     ss.batchUpdateRanges();
   }
   monthlyRentUpdate() {
