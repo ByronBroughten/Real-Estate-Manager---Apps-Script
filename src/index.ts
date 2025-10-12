@@ -17,6 +17,11 @@ function triggerOnEditCustom(e: GoogleAppsScript.Events.SheetsOnEdit) {
   }
 }
 
+function addHhOnetimeCharge() {
+  const top = TopOperator.init();
+  top.addHhOnetimeCharge();
+}
+
 function resetTriggers(doResetTriggers: boolean = true) {
   if (doResetTriggers) {
     const top = TopOperator.init();
