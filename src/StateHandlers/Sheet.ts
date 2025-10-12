@@ -116,7 +116,12 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           "Not implemented. Deleting rows are not yet supported."
         );
       } else if (change.add) {
-        throw new Error("Not implemented. Adding rows is not yet supported.");
+        this.state.batchUpdateRequests.push(this.collectAppendRequest(rowId));
+        for (const varbName of this.row(rowId).varbNames) {
+          this.state.batchUpdateRequests.push(
+            this.collectUpdateRequest(rowId, varbName)
+          );
+        }
       } else {
         for (const varbName of change.update) {
           this.state.batchUpdateRequests.push(
@@ -129,24 +134,17 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.state.batchUpdateRequests = [];
     return batchUpdateRequests;
   }
-  collectRangeData(): DataFilterRange[] {
-    const changes = this.changesToSave;
-    for (const [rowId, change] of Obj.entries(changes)) {
-      if (change.delete) {
-        throw new Error(
-          "Not implemented. Deleting rows are not yet supported."
-        );
-      } else if (change.add) {
-        this.state.rangeData.push(this.collectAddData(rowId));
-      } else {
-        for (const varbName of change.update) {
-          this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
-        }
-      }
-    }
-    const rangeData = [...this.state.rangeData];
-    this.state.rangeData = [];
-    return rangeData;
+  private collectAppendRequest<VN extends VarbName<SN>>(
+    rowId
+  ): BatchUpdateRequest {
+    const row = this.row(rowId);
+    return {
+      appendDimension: {
+        sheetId: this.schema.sheetId,
+        dimension: "ROWS",
+        length: 1,
+      },
+    };
   }
   private collectUpdateRequest<VN extends VarbName<SN>>(
     rowId,
@@ -187,6 +185,25 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       //   ],
       // },
     };
+  }
+  collectRangeData(): DataFilterRange[] {
+    const changes = this.changesToSave;
+    for (const [rowId, change] of Obj.entries(changes)) {
+      if (change.delete) {
+        throw new Error(
+          "Not implemented. Deleting rows are not yet supported."
+        );
+      } else if (change.add) {
+        this.state.rangeData.push(this.collectAddData(rowId));
+      } else {
+        for (const varbName of change.update) {
+          this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
+        }
+      }
+    }
+    const rangeData = [...this.state.rangeData];
+    this.state.rangeData = [];
+    return rangeData;
   }
 
   private collectUpdateData<VN extends VarbName<SN>>(

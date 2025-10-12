@@ -46,7 +46,6 @@ export class TopOperator extends SpreadsheetBase {
     const values = rAddOnetime.validateValues(
       Arr.excludeStrict(rAddOnetime.varbNames, ["id", "enter", "householdName"])
     );
-
     const sOnetime = ss.sheet("hhChargeOnetime");
     sOnetime.addRowWithValues(values);
     rAddOnetime.resetToDefault();

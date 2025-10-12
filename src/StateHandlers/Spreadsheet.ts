@@ -160,16 +160,16 @@ export class Spreadsheet extends SpreadsheetBase {
     );
   }
   batchUpdateRanges() {
-    // const requests = this.getRequests();
-    // Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
-    const rangeData = this.getRangeData();
-    Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
-      {
-        valueInputOption: "USER_ENTERED",
-        data: rangeData,
-      },
-      this.spreadsheetId
-    );
+    const requests = this.getRequests();
+    Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
+    // const rangeData = this.getRangeData();
+    // Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
+    //   {
+    //     valueInputOption: "USER_ENTERED",
+    //     data: rangeData,
+    //   },
+    //   this.spreadsheetId
+    // );
   }
   private getRequests(): BatchUpdateRequest[] {
     const requests: BatchUpdateRequest[] = [];
