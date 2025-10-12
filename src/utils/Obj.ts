@@ -47,6 +47,14 @@ export const Obj = {
     if (value && typeof value === "object") return true;
     else return false;
   },
+  pick<O extends object, KS extends keyof O>(obj: O, keys: KS[]): Pick<O, KS> {
+    return keys.reduce((objNext, key) => {
+      if (key in obj) {
+        objNext[key] = obj[key];
+      }
+      return objNext;
+    }, {} as Pick<O, KS>);
+  },
   strictPick<O extends object, KS extends keyof O>(
     obj: O,
     keys: KS[]
