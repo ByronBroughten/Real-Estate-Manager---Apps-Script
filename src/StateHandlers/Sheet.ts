@@ -130,14 +130,15 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   ): DataFilterRange {
     const row = this.row(rowId);
     const { base1Idx } = row;
+    const colBase1Idx = this.colIdxBase1(varbName);
     return {
       dataFilter: {
         gridRange: {
           sheetId: this.schema.sheetId,
           startRowIndex: base1Idx,
-          endRowIndex: base1Idx,
-          startColumnIndex: this.colIdxBase1(varbName),
-          endColumnIndex: this.colIdxBase1(varbName),
+          endRowIndex: base1Idx + 1,
+          startColumnIndex: colBase1Idx,
+          endColumnIndex: colBase1Idx + 1,
         },
       },
       majorDimension: "ROWS",

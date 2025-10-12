@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "tsc": "tsc",
-    "build": "rollup --config",
+    "build": "rollup --config; clasp push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
