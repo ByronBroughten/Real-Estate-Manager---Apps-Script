@@ -68,17 +68,22 @@ export class Spreadsheet extends SpreadsheetBase {
       (a, b) => headerIndices[a] - headerIndices[b]
     );
 
-    const bodyRowIdRange = sheet.getRange(
-      this.topBodyRowIdxBase1,
-      1,
-      lastRowIdx - this.topBodyRowIdxBase1 + 1,
-      1
-    );
-    const bodyRowIdValues = bodyRowIdRange.getValues();
-    const bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
+    let bodyRowOrder = [];
+    const numRows = lastRowIdx - this.topBodyRowIdxBase1 + 1;
+    const areRows = numRows > 0;
+    if (areRows) {
+      const bodyRowIdRange = sheet.getRange(
+        this.topBodyRowIdxBase1,
+        1,
+        lastRowIdx - this.topBodyRowIdxBase1 + 1,
+        1
+      );
+      const bodyRowIdValues = bodyRowIdRange.getValues();
+      bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
+    }
 
     const bodyRows: Rows<SN> = {};
-    if (!isAddOnly) {
+    if (!isAddOnly && areRows) {
       const columns = {} as { [VN in VarbName<SN>]: VarbValue<SN, VN>[] };
       for (const varbName of schema.varbNames) {
         const column = sheet.getRange(
