@@ -2,7 +2,10 @@ import {
   isApiSectionName,
   type SectionName,
 } from "./appSchema/1. names/sectionNames";
-import type { VarbName } from "./appSchema/2. attributes/sectionVarbAttributes";
+import type {
+  SectionValues,
+  VarbName,
+} from "./appSchema/2. attributes/sectionVarbAttributes";
 import {
   SpreadsheetBase,
   type SpreadsheetProps,
@@ -140,23 +143,23 @@ export class TopOperator extends SpreadsheetBase {
       //   },
       // },
       oneTimePriceUpdate: {
-        beforeFn() {
+        beforeFn: () => {
           const allValues = {
             dateNext: [date, datePlusOne, dateMinusOne],
             priceCurrent: [1500, 1500, 1500],
             priceNext: [2000, 2000, 2000],
-          };
+          } as const;
           const test = this.ss.sheet("test");
           for (let i = 0; i < 3; i++) {
-            const values = Obj.keys(allValues).reduce((acc, key) => {
-              acc[key] = allValues[key][i];
-              return acc;
-            });
+            const values = Obj.keys(allValues).reduce((vals, varbName) => {
+              vals[varbName as any] = allValues[varbName][i];
+              return vals;
+            }, {} as SectionValues<"test">);
             test.addRowWithValues(values);
           }
           this.ss.batchUpdateRanges();
         },
-        afterFn() {
+        afterFn: () => {
           const allValues = {
             dateNext: ["", "", ""],
             priceCurrent: [2000, 1500, 2000],
