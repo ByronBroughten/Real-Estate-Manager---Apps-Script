@@ -28,6 +28,12 @@ export class Spreadsheet extends SpreadsheetBase {
       gss: SpreadsheetApp.getActiveSpreadsheet(),
     });
   }
+  gSheetBySectionName(
+    sectionName: SectionName
+  ): GoogleAppsScript.Spreadsheet.Sheet {
+    const schema = this.sectionsSchema.section(sectionName);
+    return this.gss.getSheetById(schema.sheetId);
+  }
   private initSheetState<SN extends SectionName>(
     sectionName: SN,
     props: SheetProps

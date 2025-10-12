@@ -70,8 +70,8 @@ export class TopOperator extends SpreadsheetBase {
     }
   ) {
     const ss = this.ss;
-    const test = ss.sheet(sectionName);
-    for (const row of test.orderedRows) {
+    const sheet = ss.sheet(sectionName);
+    for (const row of sheet.orderedRows) {
       const dateNext = row.value(names.dateNext);
       if (dateNext instanceof Date && utils.date.isTodayOrPassed(dateNext)) {
         row.setValueType(
@@ -92,8 +92,8 @@ export class TopOperator extends SpreadsheetBase {
     }
   ) {
     const ss = this.ss;
-    const test = ss.sheet(sectionName);
-    for (const row of test.orderedRows) {
+    const sheet = ss.sheet(sectionName);
+    for (const row of sheet.orderedRows) {
       const dateNext = row.value(names.dateNext);
       if (dateNext instanceof Date && utils.date.isTodayOrPassed(dateNext)) {
         row.setValueType(
@@ -107,45 +107,69 @@ export class TopOperator extends SpreadsheetBase {
     }
   }
   test() {
-    // I gotta define what the sheet state looks like before
-    // and after each test
+    const date = new Date();
+    const datePlusOne = new Date(date.getDate() + 1);
+    const dateMinusOne = new Date(date.getDate() - 1);
 
-    // update the ranges before
+    const datePlus30 = new Date(date.getDate() + 30);
+    const datePlus31 = new Date(date.getDate() + 31);
+    const datePlus29 = new Date(date.getDate() + 29);
+
     const tests = {
-      recurringPriceUpdate: {
-        before: {
-          // probably like ten values each, yeah?
-          dateCurrent: [],
-          dateNext: [],
-          priceCurrent: [],
-          priceNext: [],
-        },
-        after: {
-          dateCurrent: [],
-          dateNext: [],
-          priceCurrent: [],
-          priceNext: [],
-        },
-        run: () => {
-          this.recurringPriceUpdate("test", {
-            dateCurrent: "dateCurrent",
-            dateNext: "dateNext",
-            priceCurrent: "priceCurrent",
-            priceNext: "priceNext",
-          });
+      // recurringPriceUpdate: {
+      //   before: {
+      //     dateCurrent: [date, datePlusOne, dateMinusOne],
+      //     dateNext: [datePlus30, datePlus31, datePlus29],
+      //     priceCurrent: [1500, 1500, 1500],
+      //     priceNext: [2000, 2000, 2000],
+      //   },
+      //   after: {
+      //     dateCurrent: [],
+      //     dateNext: [],
+      //     priceCurrent: [2000, 1500, 2000],
+      //     priceNext: [2000, 2000, 2000],
+      //   },
+      //   run: () => {
+      //     this.recurringPriceUpdate("test", {
+      //       dateCurrent: "dateCurrent",
+      //       dateNext: "dateNext",
+      //       priceCurrent: "priceCurrent",
+      //       priceNext: "priceNext",
+      //     });
+      //     this.ss.batchUpdateRanges();
+      //   },
+      // },
+      oneTimePriceUpdate: {
+        beforeFn() {
+          const allValues = {
+            dateNext: [date, datePlusOne, dateMinusOne],
+            priceCurrent: [1500, 1500, 1500],
+            priceNext: [2000, 2000, 2000],
+          };
+          const test = this.ss.sheet("test");
+          for (let i = 0; i < 3; i++) {
+            const values = Obj.keys(allValues).reduce((acc, key) => {
+              acc[key] = allValues[key][i];
+              return acc;
+            });
+            test.addRowWithValues(values);
+          }
           this.ss.batchUpdateRanges();
         },
-      },
-      oneTimePriceUpdate: {
-        before: {
-          dateNext: [],
-          priceCurrent: [],
-          priceNext: [],
-        },
-        after: {
-          dateNext: [],
-          priceCurrent: [],
-          priceNext: [],
+        afterFn() {
+          const allValues = {
+            dateNext: ["", "", ""],
+            priceCurrent: [2000, 1500, 2000],
+            priceNext: ["", 2000, ""],
+          };
+          const test = this.ss.sheet("test");
+          for (let i = 0; i < 3; i++) {
+            const values = Obj.keys(allValues).reduce((acc, key) => {
+              acc[key] = allValues[key][i];
+              return acc;
+            });
+            // check values
+          }
         },
         run: () => {
           this.oneTimePriceUpdate("test", {
@@ -159,10 +183,12 @@ export class TopOperator extends SpreadsheetBase {
     };
 
     for (const test of Obj.values(tests)) {
-      // set test.before
+      const gTest = this.ss.gSheetBySectionName("test");
+      gTest.deleteRows(this.ss.topBodyRowIdxBase1, 3);
+
+      test.beforeFn();
       test.run();
       // check test.after
-      // reset test body rows to blank
     }
   }
 }
