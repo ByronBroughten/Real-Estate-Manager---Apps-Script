@@ -15,6 +15,7 @@ const _dataFilterExample: DataFilter = {
 
 const _dataFilterRangeExample: DataFilterRange = {
   dataFilter: _dataFilterExample,
+  majorDimension: "ROWS",
   values: [[""]],
 };
 

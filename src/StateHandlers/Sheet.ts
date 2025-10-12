@@ -93,7 +93,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
 
     const rowId = this.schema.makeSectionId();
     this.rows[rowId] = {} as SectionValues<SN>;
-    this.row(rowId).resetToDefault();
+    const row = this.row(rowId);
+    row.setValue("id", rowId);
+    row.resetToDefault();
     this.state.bodyRowOrder.push(rowId);
     return rowId;
   }
@@ -122,7 +124,10 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.state.rangeData = [];
     return rangeData;
   }
-  private collectUpdateData<VN extends VarbName<SN>>(rowId, varbName: VN) {
+  private collectUpdateData<VN extends VarbName<SN>>(
+    rowId,
+    varbName: VN
+  ): DataFilterRange {
     const row = this.row(rowId);
     const { base1Idx } = row;
     return {
@@ -135,6 +140,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           endColumnIndex: this.colIdxBase1(varbName),
         },
       },
+      majorDimension: "ROWS",
       values: [[row.value(varbName)]],
     };
   }
@@ -152,6 +158,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           endColumnIndex: this.colIdxBase1(headerOrder[headerOrder.length - 1]),
         },
       },
+      majorDimension: "ROWS",
       values: [headerOrder.map((varbName) => row.value(varbName))],
     };
   }
