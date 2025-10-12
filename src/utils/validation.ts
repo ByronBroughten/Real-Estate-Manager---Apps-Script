@@ -11,8 +11,8 @@ const _isS = {
   string(value: unknown): value is string {
     return typeof value === "string";
   },
-  stringNotEmpty(value: string): value is string {
-    return value !== "";
+  emptyString(value: unknown): value is "" {
+    return value === "";
   },
   number(value: unknown): value is number {
     return typeof value === "number";
@@ -26,7 +26,7 @@ const _isS = {
 };
 
 const _validateS = {
-  string(value: unknown): string {
+  string: (value: unknown): string => {
     if (_isS.string(value)) {
       return value;
     } else {
@@ -35,31 +35,45 @@ const _validateS = {
   },
   stringNotEmpty: (value: unknown): string => {
     const str = _validateS.string(value);
-    if (_isS.stringNotEmpty(str)) {
+    if (!_isS.emptyString(str)) {
       return str;
     } else {
       throw validationError(value, "not empty string");
     }
   },
-  number(value: unknown): number {
+  number: (value: unknown): number => {
     if (_isS.number(value)) {
       return value;
     } else {
       throw validationError(value, "number");
     }
   },
-  boolean(value: unknown): boolean {
+  numberOrEmpty: (value: unknown): number | "" => {
+    if (_isS.number(value) || _isS.emptyString(value)) {
+      return value;
+    } else {
+      throw validationError(value, "number or empty string");
+    }
+  },
+  boolean: (value: unknown): boolean => {
     if (_isS.boolean(value)) {
       return value;
     } else {
       throw validationError(value, "boolean");
     }
   },
-  date(value: unknown): Date {
+  date: (value: unknown): Date => {
     if (_isS.date(value)) {
       return value;
     } else {
       throw validationError(value, "date");
+    }
+  },
+  dateOrEmpty: (value: unknown): Date | "" => {
+    if (_isS.date(value) || _isS.emptyString(value)) {
+      return value;
+    } else {
+      throw validationError(value, "date or empty string");
     }
   },
 };

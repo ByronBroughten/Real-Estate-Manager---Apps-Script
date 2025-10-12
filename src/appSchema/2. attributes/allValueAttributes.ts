@@ -53,6 +53,7 @@ export const allValueAttributes = makeSchemaStructure(
       defaultValidate: valS.validate.stringNotEmpty,
     },
     linkedId: {
+      //or empty
       makeDefault: () => "shouldNotHappen",
       defaultValidate: valS.validate.string,
     },
@@ -61,16 +62,18 @@ export const allValueAttributes = makeSchemaStructure(
       defaultValidate: valS.validate.string,
     },
     number: {
+      //or empty
       makeDefault: () => 0,
-      defaultValidate: valS.validate.number,
+      defaultValidate: valS.validate.numberOrEmpty,
     },
     boolean: {
       makeDefault: () => false,
       defaultValidate: valS.validate.boolean,
     },
     date: {
+      //or empty
       makeDefault: () => new Date(),
-      defaultValidate: valS.validate.date,
+      defaultValidate: valS.validate.dateOrEmpty,
     },
     ...makeUnionValueSchemas(),
     ...makeLiteralValueSchemas(),
