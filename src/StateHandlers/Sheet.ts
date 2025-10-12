@@ -110,6 +110,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     row.setValues(values);
     return rowId;
   }
+  gSheet(): GoogleAppsScript.Spreadsheet.Sheet {
+    return this.gss.getSheetById(this.schema.sheetId);
+  }
   collectRequests(): BatchUpdateRequest[] {
     const changes = this.changesToSave;
     for (const [rowId, change] of Obj.entries(changes)) {
@@ -119,7 +122,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         );
       } else {
         if (change.add) {
-          this.state.batchUpdateRequests.push(this.collectAppendRequest(rowId));
+          this.gSheet().appendRow(["Loading..."]);
+          // this.state.batchUpdateRequests.push(this.collectAppendRequest(rowId));
         }
         for (const varbName of change.update) {
           this.state.batchUpdateRequests.push(
@@ -137,10 +141,20 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   ): BatchUpdateRequest {
     const row = this.row(rowId);
     return {
-      appendDimension: {
+      appendCells: {
         sheetId: this.schema.sheetId,
-        dimension: "ROWS",
-        length: 1,
+        fields: "*",
+        rows: [
+          {
+            values: [
+              {
+                userEnteredValue: {
+                  stringValue: "Loading...",
+                },
+              },
+            ],
+          },
+        ],
       },
     };
   }
@@ -168,20 +182,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           endColumnIndex: colIdx + 1,
         },
       },
-      // appendCells: {
-      //   fields: "userEnteredValue",
-      //   rows: [
-      //     {
-      //       values: [
-      //         {
-      //           userEnteredValue: {
-      //             stringValue: value,
-      //           },
-      //         },
-      //       ],
-      //     },
-      //   ],
-      // },
     };
   }
   collectRangeData(): DataFilterRange[] {
@@ -191,17 +191,18 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         throw new Error(
           "Not implemented. Deleting rows are not yet supported."
         );
-      } else if (change.add) {
-        this.state.rangeData.push(this.collectAddData(rowId));
       } else {
+        if (change.add) {
+          this.gSheet().appendRow(["Loading..."]);
+        }
         for (const varbName of change.update) {
           this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
         }
       }
+      const rangeData = [...this.state.rangeData];
+      this.state.rangeData = [];
+      return rangeData;
     }
-    const rangeData = [...this.state.rangeData];
-    this.state.rangeData = [];
-    return rangeData;
   }
 
   private collectUpdateData<VN extends VarbName<SN>>(
