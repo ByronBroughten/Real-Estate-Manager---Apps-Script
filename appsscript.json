@@ -6,9 +6,20 @@
         "userSymbol": "Sheets",
         "version": "v4",
         "serviceId": "sheets"
+      },
+      {
+        "userSymbol": "Gmail",
+        "version": "v1",
+        "serviceId": "gmail"
+      },
+      {
+        "userSymbol": "Docs",
+        "version": "v1",
+        "serviceId": "docs"
       }
     ]
   },
+  "oauthScopes": ["https://www.googleapis.com/auth/spreadsheets"],
   "executionApi": {
     "access": "ANYONE"
   },
