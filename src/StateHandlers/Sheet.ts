@@ -143,7 +143,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         },
       },
       majorDimension: "ROWS",
-      values: [[row.value(varbName)]],
+      values: [[row.valueStandardized(varbName)]],
     };
   }
   private collectAddData(rowId): DataFilterRange {
@@ -161,7 +161,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         },
       },
       majorDimension: "ROWS",
-      values: [headerOrder.map((varbName) => row.value(varbName))],
+      values: [headerOrder.map((varbName) => row.valueStandardized(varbName))],
     };
   }
 }

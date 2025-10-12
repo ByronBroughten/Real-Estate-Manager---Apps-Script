@@ -3,6 +3,8 @@ export type DataFilterRange =
   GoogleAppsScript.Sheets.Schema.DataFilterValueRange;
 export type DataFilter = GoogleAppsScript.Sheets.Schema.DataFilter;
 
+export type StandardizedValue<CV extends CellValue> = Exclude<CV, Date>;
+
 const _dataFilterExample: DataFilter = {
   gridRange: {
     sheetId: 0,
@@ -32,11 +34,11 @@ export type GenericRangeObj = {
 };
 
 const _standardizeUtils = {
-  value(value: CellValue): Exclude<CellValue, Date> {
+  value<CV extends CellValue>(value: CV): StandardizedValue<CV> {
     if (value instanceof Date) {
       return this.date(value);
     } else {
-      return value;
+      return value as StandardizedValue<CV>;
     }
   },
   date: function (dateObj: Date): string {

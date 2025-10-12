@@ -7,6 +7,7 @@ import type {
   VarbValue,
 } from "../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../appSchema/4. generated/sectionsSchema";
+import { asU, type StandardizedValue } from "../utilitiesAppsScript";
 import { Obj } from "../utils/Obj";
 import { RowBase, type RowState } from "./HandlerBases/RowBase";
 import type { ChangesToSave } from "./HandlerBases/SheetBase";
@@ -26,6 +27,13 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     return this.rowState[varbName] as VarbValue<SN, VN>;
+  }
+  valueStandardized<VN extends VarbName<SN>>(
+    varbName: VN
+  ): StandardizedValue<VarbValue<SN, VN>> {
+    return asU.standardize.value(this.value(varbName)) as StandardizedValue<
+      VarbValue<SN, VN>
+    >;
   }
   get values(): Omit<SectionValues<SN>, "id"> {
     return this.varbNames.reduce((values, varbName) => {
