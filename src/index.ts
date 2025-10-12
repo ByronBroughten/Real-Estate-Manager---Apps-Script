@@ -1,11 +1,12 @@
 import { TopOperator } from "./TopOperator.js";
+import { asU } from "./utilitiesAppsScript.js";
 
 function triggerFirstOfMonth() {
   const top = TopOperator.init();
   top.monthlyRentUpdate();
 }
 
-function triggerOnEditCustom(e: GoogleAppsScript.Events.SheetsOnEdit) {
+function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (e.value === "TRUE") {
     const sheetId = e.range.getSheet().getSheetId();
     const colId = e.range.getColumn();
@@ -26,9 +27,9 @@ function resetTriggers(doResetTriggers: boolean = true) {
   if (doResetTriggers) {
     const top = TopOperator.init();
     top.test();
-    // asU.trigger.deleteAll();
-    // asU.trigger.addFirstOfMonth("triggerFirstOfMonth");
-    // asU.trigger.addOnEdit("triggerOnEditCustom");
+    asU.trigger.deleteAll();
+    asU.trigger.addFirstOfMonth("triggerFirstOfMonth");
+    asU.trigger.addOnEdit("triggerOnEdit");
   }
 }
 
