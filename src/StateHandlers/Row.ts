@@ -1,6 +1,8 @@
-import type { SectionName } from "../appSchema/1. names/sectionNames";
-import type { ValueName } from "../appSchema/1. names/valueNames";
-import type { Value } from "../appSchema/2. attributes/allValueAttributes";
+import type {
+  Value,
+  ValueName,
+} from "../appSchema/2. attributes/allValueAttributes";
+import type { SectionName } from "../appSchema/2. attributes/sectionAttributes";
 import type {
   SectionValues,
   VarbName,

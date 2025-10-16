@@ -14,7 +14,7 @@ export function makeSchemaDict<
 
 export type MakeSchemaDict<KS extends string, V extends Record<KS, any>> = V;
 
-export function makeSchemaStructure<S extends any, T extends S>(
+export function makeSchemaStructure<S extends unknown, T extends S>(
   _structure: S,
   t: T
 ): T {

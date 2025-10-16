@@ -1,16 +1,18 @@
 import { utils } from "../../utilitiesGeneral";
 import { Obj, type StrictOmit } from "../../utils/Obj";
-import type { SectionName } from "../1. names/sectionNames";
-import type { ValueName } from "../1. names/valueNames";
+
 import {
   allValueAttributes,
   type AllValueAttributes,
+  type ValueName,
 } from "../2. attributes/allValueAttributes";
-import {
-  allSectionAttributes,
-  type AllSectionAttributes,
-  type SectionAttributes,
+import type {
+  AllSectionAttributes,
+  SectionAttributes,
+  SectionName,
 } from "../2. attributes/sectionAttributes";
+import { allSectionAttributes } from "../2. attributes/sectionAttributes";
+
 import {
   allVarbAttributes,
   type AllVarbAttributes,

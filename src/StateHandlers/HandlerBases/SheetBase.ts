@@ -1,4 +1,4 @@
-import type { SectionName } from "../../appSchema/1. names/sectionNames";
+import type { SectionName } from "../../appSchema/2. attributes/sectionAttributes";
 import type { VarbName } from "../../appSchema/2. attributes/sectionVarbAttributes";
 import type { SectionSchema } from "../../appSchema/4. generated/sectionsSchema";
 import type {

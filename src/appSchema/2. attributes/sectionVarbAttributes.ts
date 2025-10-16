@@ -1,14 +1,15 @@
 import { valS } from "../../utils/validation";
-import { type SectionNameSimple } from "../1. names/sectionNames";
-import type { ValueName } from "../1. names/valueNames";
+
 import { makeSchemaStructure } from "../makeSchema";
 import {
   allValueAttributes,
   type ValidateValue,
   type Value,
   type ValueAttributes,
+  type ValueName,
   type ValueParams,
 } from "./allValueAttributes";
+import { type SectionNameSimple } from "./sectionAttributes";
 
 type Varb<
   VN extends ValueName = ValueName,
@@ -24,11 +25,10 @@ type Varb<
 
 export type BaseVarbAttributes = Varb;
 
-type SectionVarbsBase = {
-  [SN in SectionNameSimple]: {
-    [VN in VarbName<SN>]: BaseVarbAttributes;
-  };
-};
+type SectionVarbsBase = Record<
+  SectionNameSimple,
+  Record<string, BaseVarbAttributes>
+>;
 
 function makeVarb<
   VN extends ValueName,

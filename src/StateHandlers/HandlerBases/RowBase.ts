@@ -1,4 +1,4 @@
-import type { SectionName } from "../../appSchema/1. names/sectionNames";
+import type { SectionName } from "../../appSchema/2. attributes/sectionAttributes";
 import type { SectionValues } from "../../appSchema/2. attributes/sectionVarbAttributes";
 import { SheetBase, type SheetProps } from "./SheetBase";
 

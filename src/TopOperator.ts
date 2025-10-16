@@ -1,7 +1,7 @@
 import {
   isApiSectionName,
   type SectionName,
-} from "./appSchema/1. names/sectionNames";
+} from "./appSchema/2. attributes/sectionAttributes";
 import type {
   SectionValues,
   VarbName,
@@ -38,6 +38,7 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
+  buildOutRecurringTransactions() {}
 
   addHhOnetimeCharge() {
     const ss = this.ss;

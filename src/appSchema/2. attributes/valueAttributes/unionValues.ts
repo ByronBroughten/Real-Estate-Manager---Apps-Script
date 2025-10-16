@@ -55,6 +55,8 @@ export function makeUnionValueSchemas(): UnionValueAttributesBase {
     {} as UnionValueAttributesBase;
   (Obj.keys(unionValues) as UnionValueName[]).forEach((name) => {
     result[name] = {
+      /// hmmm
+      type: unionValues[name][0] as UnionValue<typeof name>,
       makeDefault: () => makeDefaultUnionValue(name),
       defaultValidate: (value: "unknown") => validateUnionValue(value, name),
     };

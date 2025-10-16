@@ -1,4 +1,4 @@
-import type { SectionNameSimple } from "../../1. names/sectionNames";
+import type { SectionNameSimple } from "../sectionAttributes";
 
 const onDelete = ["delete", "setEmpty"] as const;
 type OnDelete = (typeof onDelete)[number];

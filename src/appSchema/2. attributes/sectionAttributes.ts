@@ -1,10 +1,13 @@
-import { sectionNames, type SectionNameSimple } from "../1. names/sectionNames";
-import { makeSchemaDict } from "../makeSchema";
+import { Arr } from "../../utils/Arr";
+import { Obj } from "../../utils/Obj";
+import { makeSchemaStructure, type MakeSchemaName } from "../makeSchema";
 
-type SectionBase = {
+type SectionAttributesBase = {
   idPrepend: string;
   sheetId: number;
 };
+
+type AllSectionAttributesBase = Record<string, SectionAttributesBase>;
 
 type Section<IP extends string, SI extends number> = {
   idPrepend: IP;
@@ -20,9 +23,8 @@ function makeAttributes<IP extends string, SI extends number>(
 
 const ma = makeAttributes;
 
-export const allSectionAttributes = makeSchemaDict(
-  sectionNames,
-  {} as SectionBase,
+export const allSectionAttributes = makeSchemaStructure(
+  {} as AllSectionAttributesBase,
   {
     test: ma("tst", 2089200354),
     unit: ma("un", 321313883),
@@ -34,7 +36,22 @@ export const allSectionAttributes = makeSchemaDict(
   } as const
 );
 
+export const sectionNames = Obj.keys(allSectionAttributes);
+export type SectionNameSimple = MakeSchemaName<typeof sectionNames>;
+
 export type AllSectionAttributes = typeof allSectionAttributes;
 
 export type SectionAttributes<SN extends SectionNameSimple> =
   AllSectionAttributes[SN];
+
+export type SectionName<S extends SectionNameSimple = SectionNameSimple> = S;
+
+export const apiSectionNames = Arr.extractStrict(sectionNames, [
+  "addHhChargeOnetime",
+] as const);
+
+export type ApiSectionName = (typeof apiSectionNames)[number];
+
+export function isApiSectionName(s: string): s is ApiSectionName {
+  return apiSectionNames.includes(s as ApiSectionName);
+}

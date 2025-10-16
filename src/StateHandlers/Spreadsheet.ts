@@ -1,4 +1,4 @@
-import type { SectionName } from "../appSchema/1. names/sectionNames.js";
+import type { SectionName } from "../appSchema/2. attributes/sectionAttributes.js";
 import type {
   SectionValues,
   VarbName,
