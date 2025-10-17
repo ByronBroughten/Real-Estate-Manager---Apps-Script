@@ -1,6 +1,7 @@
 import { valS } from "../../utils/validation";
 
 import { makeSchemaStructure } from "../makeSchema";
+import { type SectionNameSimple } from "./sectionAttributes";
 import {
   allValueAttributes,
   type ValidateValue,
@@ -8,8 +9,7 @@ import {
   type ValueAttributes,
   type ValueName,
   type ValueParams,
-} from "./allValueAttributes";
-import { type SectionNameSimple } from "./sectionAttributes";
+} from "./valueAttributes";
 
 type Varb<
   VN extends ValueName = ValueName,

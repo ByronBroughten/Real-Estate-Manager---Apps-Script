@@ -1,10 +1,10 @@
-import type { SectionName } from "../appSchema/2. attributes/sectionAttributes.js";
+import type { SectionName } from "../appSchema/1. attributes/sectionAttributes.js";
 import type {
   SectionValues,
   VarbName,
   VarbValue,
-} from "../appSchema/2. attributes/sectionVarbAttributes.js";
-import { SectionsSchema } from "../appSchema/4. generated/sectionsSchema.js";
+} from "../appSchema/1. attributes/varbAttributes.js";
+import { SectionsSchema } from "../appSchema/3. generated/sectionsSchema.js";
 import {
   type BatchUpdateRequest,
   type DataFilterRange,

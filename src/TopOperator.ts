@@ -1,11 +1,11 @@
 import {
   isApiSectionName,
   type SectionName,
-} from "./appSchema/2. attributes/sectionAttributes";
+} from "./appSchema/1. attributes/sectionAttributes";
 import type {
   SectionValues,
   VarbName,
-} from "./appSchema/2. attributes/sectionVarbAttributes";
+} from "./appSchema/1. attributes/varbAttributes";
 import {
   SpreadsheetBase,
   type SpreadsheetProps,

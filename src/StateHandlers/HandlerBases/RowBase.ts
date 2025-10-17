@@ -1,5 +1,5 @@
-import type { SectionName } from "../../appSchema/2. attributes/sectionAttributes";
-import type { SectionValues } from "../../appSchema/2. attributes/sectionVarbAttributes";
+import type { SectionName } from "../../appSchema/1. attributes/sectionAttributes";
+import type { SectionValues } from "../../appSchema/1. attributes/varbAttributes";
 import { SheetBase, type SheetProps } from "./SheetBase";
 
 export type RowState<SN extends SectionName> = SectionValues<SN>;

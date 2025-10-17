@@ -1,17 +1,17 @@
 import { utils } from "../../utilitiesGeneral";
 import { Obj, type StrictOmit } from "../../utils/Obj";
 
-import {
-  allValueAttributes,
-  type AllValueAttributes,
-  type ValueName,
-} from "../2. attributes/allValueAttributes";
 import type {
   AllSectionAttributes,
   SectionAttributes,
   SectionName,
-} from "../2. attributes/sectionAttributes";
-import { allSectionAttributes } from "../2. attributes/sectionAttributes";
+} from "../1. attributes/sectionAttributes";
+import { allSectionAttributes } from "../1. attributes/sectionAttributes";
+import {
+  allValueAttributes,
+  type AllValueAttributes,
+  type ValueName,
+} from "../1. attributes/valueAttributes";
 
 import {
   allVarbAttributes,
@@ -24,7 +24,7 @@ import {
   type VarbValue,
   type VarbValueAttributes,
   type VarbValueName,
-} from "../2. attributes/sectionVarbAttributes";
+} from "../1. attributes/varbAttributes";
 
 export class SectionsSchema {
   readonly headerRowIdxBase1 = 2; // base 1

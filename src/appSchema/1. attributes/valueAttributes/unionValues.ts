@@ -1,6 +1,6 @@
 import { Obj } from "../../../utils/Obj";
 import { validationError } from "../../../utils/validation";
-import type { ValueSchema } from "../allValueAttributes";
+import { va, type ValueSchema } from "../valueAttributes";
 
 type UnionValuesBase = {
   readonly [key: string]: readonly string[];
@@ -38,30 +38,26 @@ function validateUnionValue<N extends UnionValueName>(
   value: unknown,
   name: N
 ): UnionValue<N> {
-  if (unionValues[name].includes(value as any)) {
+  if (unionValues[name].includes(value as any) || value === "") {
     return value as UnionValue<N>;
   } else {
     throw validationError(value, `'${name}' union value element.`);
-    // Hmmm... This can sometimes be "", though.
   }
 }
 
 type UnionValueAttributesBase = {
-  [K in UnionValueName]: ValueSchema<K>;
+  [K in UnionValueName]: ValueSchema<UnionValue<K>>;
 };
 
 export function makeUnionValueSchemas(): UnionValueAttributesBase {
-  const result: { [K in UnionValueName]: ValueSchema<K> } =
-    {} as UnionValueAttributesBase;
-  (Obj.keys(unionValues) as UnionValueName[]).forEach((name) => {
-    result[name] = {
-      /// hmmm
-      type: unionValues[name][0] as UnionValue<typeof name>,
+  return Obj.keys(unionValues).reduce((attributes, name) => {
+    attributes[name] = va({
+      type: "" as UnionValue<typeof name>,
       makeDefault: () => makeDefaultUnionValue(name),
-      defaultValidate: (value: "unknown") => validateUnionValue(value, name),
-    };
-  });
-  return result;
+      defaultValidate: (value: unknown) => validateUnionValue(value, name),
+    });
+    return attributes;
+  }, {} as UnionValueAttributesBase);
 }
 
 export type UnionValueParamsDict = {

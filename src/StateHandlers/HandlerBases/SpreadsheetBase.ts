@@ -1,5 +1,5 @@
-import type { SectionName } from "../../appSchema/2. attributes/sectionAttributes";
-import type { SectionsSchema } from "../../appSchema/4. generated/sectionsSchema";
+import type { SectionName } from "../../appSchema/1. attributes/sectionAttributes";
+import type { SectionsSchema } from "../../appSchema/3. generated/sectionsSchema";
 import type { SheetState } from "./SheetBase";
 
 export type SpreadsheetState = {
