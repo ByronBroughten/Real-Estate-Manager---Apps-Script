@@ -76,6 +76,18 @@ const vsS = {
 export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
+    hhTransactionOngoing: {
+      id: vS.id(),
+      householdID: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "delete",
+      }),
+      unitId: vS.linkedId("Unit ID", {
+        sectionName: "unit",
+        onDelete: "delete",
+      }),
+      portion: vS.gen("rentPortionName", "Portion"),
+    },
     unit: vsS.idOnly(),
     household: {
       id: vS.id(),

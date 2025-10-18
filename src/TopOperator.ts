@@ -38,7 +38,9 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
-  buildOutRecurringTransactions() {}
+  buildOutRecurringTransactions() {
+    const ss = this.ss;
+  }
 
   addHhOnetimeCharge() {
     const ss = this.ss;
