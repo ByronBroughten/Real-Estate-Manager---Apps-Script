@@ -44,6 +44,7 @@ const _validateS = {
       throw validationError(value, "not empty string");
     }
   },
+
   number: (value: unknown): number => {
     if (_isS.number(value)) {
       return value;
@@ -70,6 +71,13 @@ const _validateS = {
       return value;
     } else {
       throw validationError(value, "date");
+    }
+  },
+  dateOrEmpty: (value: unknown): Date | "" => {
+    if (_isS.date(value) || _isS.emptyString(value)) {
+      return value;
+    } else {
+      throw validationError(value, "date or empty string");
     }
   },
   dateOrEmptyOrFormula: (value: unknown): Date | string => {

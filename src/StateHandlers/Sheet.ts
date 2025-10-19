@@ -80,7 +80,16 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       ...this.sheetProps,
     });
   }
-
+  rowsFiltered(values: Partial<SectionValues<SN>>): Row<SN>[] {
+    return this.orderedRows.filter((row) => {
+      for (const varbName in values) {
+        if (row.value(varbName) !== values[varbName]) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
   get topBodyRow() {
     return this.row(this.state.bodyRowOrder[0]);
   }

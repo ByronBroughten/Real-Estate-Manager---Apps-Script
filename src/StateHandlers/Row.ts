@@ -35,6 +35,14 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     return this.rowState[varbName] as VarbValue<SN, VN>;
   }
+  valueNumber<VN extends VarbName<SN>>(varbName: VN): number {
+    const value = this.value(varbName);
+    return valS.validate.number(value);
+  }
+  valueDate<VN extends VarbName<SN>>(varbName: VN): Date {
+    const value = this.value(varbName);
+    return valS.validate.date(value);
+  }
   valueStandardized<VN extends VarbName<SN>>(
     varbName: VN
   ): StandardizedValue<VarbValue<SN, VN>> {

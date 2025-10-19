@@ -76,56 +76,149 @@ const vsS = {
 export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
-    hhTransactionOngoing: {
+    subsidyContract: {
+      id: vS.id(),
+      rentPortionMonthly: vS.gen("number", "Rent portion monthly"),
+      rentPortionMonthlyNext: vS.gen("number", "Rent portion monthly next"),
+      rentPortionDate: vS.date(),
+      rentPortionDateNext: vS.gen(
+        "date",
+        "Rent portion date next",
+        valS.validate.dateOrEmpty
+      ),
+    },
+    unit: vsS.idOnly(),
+    hhPet: vsS.idOnly(),
+    otherPayer: vsS.idOnly(),
+    hhPayment: {
+      id: vS.id(),
+      date: vS.date(),
+      paidBy: vS.gen("payerCategory", "Paid by"),
+      amount: vS.gen("number", "Amount"),
+      amountAllocated: vS.gen("amountAllocated", "Amount"),
+      paymentVerified: vS.gen("yesOrNo", "Payment verified"),
+      paymentProcessed: vS.gen("paymentProcessed", "Payment processed"),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "keep",
+      }),
+      hhMembersFullName: vS.gen("hhMembersFullNamesFromId", "Household name"),
+      subsidyProgramId: vS.linkedId("Subsidy program ID", {
+        sectionName: "subsidyContract",
+        onDelete: "keep",
+      }),
+      subsidyProgramName: vS.gen(
+        "subsidyProgramNameFromId",
+        "Subsidy program name"
+      ),
+      otherPayerID: vS.linkedId("Other payer ID", {
+        sectionName: "otherPayer",
+        onDelete: "keep",
+      }),
+      otherPayerName: vS.gen("otherPayerNameFromId", "Other payer name"),
+      notes: vS.gen("string", "Notes"),
+    },
+    hhPaymentAllocation: {
+      id: vS.id(),
+      paymentId: vS.linkedId("Payment ID", {
+        sectionName: "hhPayment",
+        onDelete: "delete",
+      }),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "keep",
+      }),
+      hhMembersFullName: vS.gen("hhMembersFullNamesFromId", "Household name"),
+      unitId: vS.linkedId("Unit ID", {
+        sectionName: "unit",
+        onDelete: "keep",
+      }),
+      unitName: vS.gen("unitNameFromId", "Unit name"),
+      portion: vS.gen("rentPortionName", "Portion"),
+      description: vS.gen("descriptionPaymentAllocation", "Description"),
+      amount: vS.gen("number", "Amount"),
+      subsidyContractId: vS.linkedId("Subsidy contract ID", {
+        sectionName: "subsidyContract",
+        onDelete: "keep",
+      }),
+      subsidyContractName: vS.gen(
+        "subsidyContractNameFromIdOp",
+        "Subsidy contract name"
+      ),
+    },
+    hhChargeOngoing: {
       id: vS.id(),
       householdID: vS.linkedId("Household ID", {
         sectionName: "household",
         onDelete: "delete",
       }),
+      hhMembersFullName: vS.gen(
+        "hhMembersFullNamesFromId",
+        "Household members full name"
+      ),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
         onDelete: "delete",
       }),
+      unitName: vS.gen("unitNameFromId", "Unit name"),
       portion: vS.gen("rentPortionName", "Portion"),
-    },
-    unit: vsS.idOnly(),
-    household: {
-      id: vS.id(),
-      rentIncreaseDateLast: vS.gen("date", "Last rent increase date"),
-      rentIncreaseDateNext: vS.gen("date", "Next rent increase date"),
-      rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
-      rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
-
-      subsidyPortionMonthly: vS.gen("number", "Subsidy rent portion monthly"),
-      subsidyPortionChangeDate: vS.gen("date", "Subsidy portion change date"),
-      subsidyPortionMonthlyNext: vS.gen(
-        "number",
-        "Next subsidy rent portion monthly"
+      description: vS.gen("descriptionChargeOngoing", "Description"),
+      amount: vS.gen("number", "Amount"),
+      frequency: vS.gen("ongoingFrequency", "Frequency"),
+      startDate: vS.gen("date", "Start date", valS.validate.date),
+      endDate: vS.gen("date", "End date", valS.validate.dateOrEmpty),
+      subsidyContractId: vS.linkedId("Subsidy contract ID", {
+        sectionName: "subsidyContract",
+        onDelete: "delete",
+      }),
+      subsidyContractName: vS.gen(
+        "subsidyContractNameFromIdOp",
+        "Subsidy contract name"
       ),
+      petId: vS.linkedId("Pet ID", {
+        sectionName: "hhPet",
+        onDelete: "delete",
+      }),
+      petName: vS.gen("petNameFromIdOp", "Pet name"),
+      notes: vS.gen("string", "Notes"),
     },
-    test: {
+    hhCharge: {
       id: vS.id(),
-      dateCurrent: vS.gen("date", "Current price date"),
-      dateNext: vS.gen("date", "Next price date"),
-      priceCurrent: vS.gen("number", "Current price"),
-      priceNext: vS.gen("number", "Next price"),
-    },
-    expense: vsS.idOnly(),
-    subsidyProgram: vsS.idOnly(),
-    hhChargeOnetime: {
-      id: vS.id(),
+      date: vS.date(),
+      chargeOngoingID: vS.linkedId("Ongoing charge ID", {
+        sectionName: "hhChargeOngoing",
+        onDelete: "keep",
+      }),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
         onDelete: "delete",
       }),
-      householdName: vS.gen("hhNameFromId", "Household name"),
+      hhMembersFullName: vS.gen("hhMembersFullNamesFromId", "Household name"),
+      unitId: vS.linkedId("Unit ID", {
+        sectionName: "unit",
+        onDelete: "delete",
+      }),
+      unitName: vS.gen("unitNameFromId", "Unit name"),
+      portion: vS.gen("rentPortionName", "Portion"),
+      description: vS.gen("descriptionCharge", "Description"),
+      amount: vS.gen("number", "Amount"),
+      subsidyContractId: vS.linkedId("Subsidy contract ID", {
+        sectionName: "subsidyContract",
+        onDelete: "keep",
+      }),
+      subsidyContractName: vS.gen(
+        "subsidyContractNameFromIdOp",
+        "Subsidy contract name"
+      ),
+      petId: vS.linkedId("Pet ID", {
+        sectionName: "hhPet",
+        onDelete: "keep",
+      }),
+      petName: vS.gen("petNameFromIdOp", "Pet name"),
       expenseId: vS.linkedId("Expense ID", {
         sectionName: "expense",
-        onDelete: "setEmpty",
+        onDelete: "keep",
       }),
-      date: vS.date(),
-      amount: vS.gen("number", "Amount"),
-      description: vS.gen("string", "Description"),
       notes: vS.gen("string", "Notes"),
     },
     addHhChargeOnetime: {
@@ -153,6 +246,23 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
     },
+    household: {
+      id: vS.id(),
+      rentIncreaseDateLast: vS.gen("date", "Last rent increase date"),
+      rentIncreaseDateNext: vS.gen("date", "Next rent increase date"),
+      rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
+      rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
+      subsidyPortionMonthly: vS.gen("number", "Subsidy rent portion monthly"),
+    },
+    test: {
+      id: vS.id(),
+      dateCurrent: vS.gen("date", "Current price date"),
+      dateNext: vS.gen("date", "Next price date"),
+      priceCurrent: vS.gen("number", "Current price"),
+      priceNext: vS.gen("number", "Next price"),
+    },
+    expense: vsS.idOnly(),
+    subsidyProgram: vsS.idOnly(),
   } as const
 );
 

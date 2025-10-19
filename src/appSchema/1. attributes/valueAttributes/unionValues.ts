@@ -9,40 +9,47 @@ function enforceUnionValues<T extends UnionValuesBase>(t: T): T {
   return t;
 }
 
-const descriptionsTransactionOngoing = [
+const descriptionChargeOngoing = [
   "Rent charge (base)",
   "Rent charge (utilities)",
   "Rent charge (pet fee)",
   "Caretaker rent reduction",
 ] as const;
 
-const descriptionsChargeOnetime = [
+const descriptionChargeOnetime = [
   "Damage or service charge",
   "Deposit charge",
   "Deposit uncharge",
 ] as const;
 
-const descriptionsPaymentsOnetime = [
-  "Payment",
-  "Caretaker rent reduction",
-  "Deposit deduction",
+const descriptionPaymentAllocation = [
+  "Normal payment",
   "Deposit payment",
   "Deposit repayment",
 ] as const;
 
+const descriptionCharge = [
+  ...descriptionChargeOngoing,
+  ...descriptionChargeOnetime,
+] as const;
+
 const descriptionsTransactionsAll = [
   ...new Set([
-    ...descriptionsTransactionOngoing,
-    ...descriptionsChargeOnetime,
-    ...descriptionsPaymentsOnetime,
+    ...descriptionChargeOngoing,
+    ...descriptionChargeOnetime,
+    ...descriptionPaymentAllocation,
   ] as const),
 ];
 
 const dropdownOptions = enforceUnionValues({
+  yesOrNo: ["Yes", "No"],
   rentPortionName: ["Household", "Subsidy program"],
-  descriptionsTransactionOngoing,
-  descriptionsChargeOnetime,
-  descriptionsPaymentsOnetime,
+  ongoingFrequency: ["Monthly", "Yearly"],
+  payerCategory: ["Household", "Subsidy program", "Other payer"],
+  descriptionChargeOngoing,
+  descriptionChargeOnetime,
+  descriptionCharge,
+  descriptionPaymentAllocation,
   descriptionsTransactionsAll,
 } as const);
 // These will be used to populate named ranges and validate data.

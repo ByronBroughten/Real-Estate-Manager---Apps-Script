@@ -63,6 +63,11 @@ export const allValueAttributes = makeSchemaStructure(
       makeDefault: () => new Date(),
       defaultValidate: valS.validate.dateOrEmptyOrFormula,
     }),
+    // literal: va({
+    //   type: "" as CellValue,
+    //   makeDefault: () => "shouldNotHappen",
+    //   defaultValidate: valS.validate.
+    // }),
     ...makeUnionValueSchemas(),
     ...makeLiteralValueSchemas(),
   } as const

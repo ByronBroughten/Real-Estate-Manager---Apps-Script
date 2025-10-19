@@ -38,10 +38,50 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
-  buildOutRecurringTransactions() {
+  buildOutChargesFromRecurring() {
     const ss = this.ss;
-  }
+    const hhTransaction = ss.sheet("hhChargeOngoing");
+    const hhCharge = ss.sheet("hhCharge");
 
+    hhTransaction.orderedRows.forEach((transaction) => {
+      const startDate = transaction.valueDate("startDate");
+      const endDate = transaction.valueDate("endDate");
+      const dates = utils.date.startDatesOfMonths(startDate, endDate);
+
+      for (let i = 0; i < dates.length; i++) {
+        const date = dates[i];
+        const end =
+          i === dates.length - 1 ? endDate : utils.date.lastDateOfMonth(date);
+        const proratedAmount = utils.date.prorateMonthlyAmount(
+          transaction.valueNumber("amount"),
+          date,
+          end
+        );
+
+        hhCharge.addRowWithValues({
+          date,
+          amount: proratedAmount,
+          ...transaction.values([
+            "description",
+            "householdID",
+            "petId",
+            "subsidyContractId",
+            "unitId",
+          ]),
+        });
+      }
+    });
+  }
+  buildOutPaymentsFromCharges() {
+    const ss = this.ss;
+    const hhPaymentAllocation = ss.sheet("hhPaymentAllocation");
+    // I'm not sure how I want to do this.
+    // Are payment groups based on charges or recurring transactions/charges?
+    // I'd need to lump together subsidy contracts
+  }
+  addRecurringTransaction() {
+    // implement this for updating rent amounts
+  }
   addHhOnetimeCharge() {
     const ss = this.ss;
     const sAddOnetime = ss.sheet("addHhChargeOnetime");
@@ -49,7 +89,7 @@ export class TopOperator extends SpreadsheetBase {
     const values = rAddOnetime.validateValues(
       Arr.excludeStrict(rAddOnetime.varbNames, ["id", "enter", "householdName"])
     );
-    const sOnetime = ss.sheet("hhChargeOnetime");
+    const sOnetime = ss.sheet("hhCharge");
     sOnetime.addRowWithValues(values);
     rAddOnetime.resetToDefault();
     rAddOnetime.setValue("date", "=TODAY()");
@@ -62,10 +102,10 @@ export class TopOperator extends SpreadsheetBase {
       priceCurrent: "rentChargeMonthly",
       priceNext: "rentChargeMonthlyNext",
     });
-    this.oneTimePriceUpdate("household", {
-      dateNext: "subsidyPortionChangeDate",
-      priceCurrent: "subsidyPortionMonthly",
-      priceNext: "subsidyPortionMonthlyNext",
+    this.oneTimePriceUpdate("subsidyContract", {
+      dateNext: "rentPortionDateNext",
+      priceCurrent: "rentPortionMonthly",
+      priceNext: "rentPortionMonthlyNext",
     });
     this.ss.batchUpdateRanges();
   }

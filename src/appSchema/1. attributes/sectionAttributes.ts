@@ -27,13 +27,18 @@ export const allSectionAttributes = makeSchemaStructure(
   {} as AllSectionAttributesBase,
   {
     test: ma("tst", 2089200354),
-    hhChargeOnetime: ma("hhc", 825934775),
+    hhChargeOngoing: ma("hto", 194710324),
+    hhCharge: ma("hhc", 825934775),
     addHhChargeOnetime: ma("ahhc", 1202471195),
-    hhTransactionOngoing: ma("hto", 194710324),
+    hhPayment: ma("hhp", 1544131100),
+    hhPaymentAllocation: ma("hpa", 348639454),
     unit: ma("un", 321313883),
     household: ma("hh", 0),
     expense: ma("ex", 449009036),
     subsidyProgram: ma("sp", 332858329),
+    subsidyContract: ma("sc", 1155067179),
+    hhPet: ma("hp", 560379920),
+    otherPayer: ma("op", 471889863),
   } as const
 );
 
