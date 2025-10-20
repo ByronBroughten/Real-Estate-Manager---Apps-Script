@@ -154,7 +154,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       hhMembersFullName: vS.gen(
         "hhMembersFullNamesFromId",
-        "Household members full name"
+        "HH members full name"
       ),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
