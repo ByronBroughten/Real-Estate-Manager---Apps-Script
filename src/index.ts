@@ -6,6 +6,11 @@ function triggerFirstOfMonth() {
   top.monthlyRentUpdate();
 }
 
+function buildOutChargesFromRecurring() {
+  const top = TopOperator.init();
+  top.buildOutChargesFromRecurring();
+}
+
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (e.value === "TRUE") {
     const sheetId = e.range.getSheet().getSheetId();
