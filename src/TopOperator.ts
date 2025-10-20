@@ -76,6 +76,7 @@ export class TopOperator extends SpreadsheetBase {
         });
       }
     });
+    ss.batchUpdateRanges();
   }
   buildOutPaymentsFromCharges() {
     const ss = this.ss;
