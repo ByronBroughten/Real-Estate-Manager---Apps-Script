@@ -14,6 +14,7 @@ import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
 import { Arr } from "./utils/Arr";
 import { Obj } from "./utils/Obj";
+import { valS } from "./utils/validation";
 
 interface TopOperatorProps extends SpreadsheetProps {
   ss: Spreadsheet;
@@ -45,7 +46,11 @@ export class TopOperator extends SpreadsheetBase {
 
     hhTransaction.orderedRows.forEach((transaction) => {
       const startDate = transaction.valueDate("startDate");
-      const endDate = transaction.valueDate("endDate");
+      const endDateMaybe = transaction.value("endDate");
+      const endDate = endDateMaybe
+        ? valS.validate.date(endDateMaybe)
+        : utils.date.lastDateOfMonth(new Date());
+
       const dates = utils.date.firstDaysOfMonths(startDate, endDate);
 
       for (let i = 0; i < dates.length; i++) {

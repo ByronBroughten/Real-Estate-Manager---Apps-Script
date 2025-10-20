@@ -44,8 +44,15 @@ const _dateUtils = {
     );
 
     while (currentDate <= endDate) {
-      firstDays.push(new Date(currentDate)); // Push a copy to avoid reference issues
-      currentDate.setMonth(currentDate.getMonth() + 1); // Move to the first day of the next month
+      if (
+        currentDate.getMonth() === startDate.getMonth() &&
+        currentDate.getFullYear() === startDate.getFullYear()
+      ) {
+        continue;
+      }
+
+      firstDays.push(new Date(currentDate));
+      currentDate.setMonth(currentDate.getMonth() + 1);
     }
 
     return firstDays;
