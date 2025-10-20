@@ -46,7 +46,7 @@ export class TopOperator extends SpreadsheetBase {
     hhTransaction.orderedRows.forEach((transaction) => {
       const startDate = transaction.valueDate("startDate");
       const endDate = transaction.valueDate("endDate");
-      const dates = utils.date.startDatesOfMonths(startDate, endDate);
+      const dates = utils.date.firstDaysOfMonths(startDate, endDate);
 
       for (let i = 0; i < dates.length; i++) {
         const date = dates[i];

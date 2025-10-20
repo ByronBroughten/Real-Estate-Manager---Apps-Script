@@ -35,16 +35,20 @@ const _dateUtils = {
 
     return normalizedInputDate <= today;
   },
-  startDatesOfMonths(startDate: Date, endDate: Date) {
-    const startMonth = startDate.getMonth();
-    const endMonth = endDate.getMonth();
-    const startYear = startDate.getFullYear();
-    const months: Date[] = [new Date(startDate)];
-    for (let i = startMonth; i <= endMonth; i++) {
-      const month = new Date(startYear, i, 1);
-      months.push(month);
+  firstDaysOfMonths(startDate: Date, endDate: Date): Date[] {
+    const firstDays: Date[] = [startDate];
+    let currentDate = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth(),
+      1
+    );
+
+    while (currentDate <= endDate) {
+      firstDays.push(new Date(currentDate)); // Push a copy to avoid reference issues
+      currentDate.setMonth(currentDate.getMonth() + 1); // Move to the first day of the next month
     }
-    return months;
+
+    return firstDays;
   },
   lastDateOfMonth(date: Date): Date {
     const year = date.getFullYear();
