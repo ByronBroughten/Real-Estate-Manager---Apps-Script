@@ -45,13 +45,11 @@ const _dateUtils = {
 
     while (currentDate <= endDate) {
       if (
-        currentDate.getMonth() === startDate.getMonth() &&
-        currentDate.getFullYear() === startDate.getFullYear()
+        currentDate.getMonth() !== startDate.getMonth() &&
+        currentDate.getFullYear() !== startDate.getFullYear()
       ) {
-        continue;
+        firstDays.push(new Date(currentDate));
       }
-
-      firstDays.push(new Date(currentDate));
       currentDate.setMonth(currentDate.getMonth() + 1);
     }
 
