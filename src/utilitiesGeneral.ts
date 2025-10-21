@@ -50,7 +50,12 @@ const _dateUtils = {
       if (this.monthYear(currentDate) !== this.monthYear(startDate)) {
         firstDays.push(new Date(currentDate));
       }
-      currentDate.setMonth(currentDate.getMonth() + 1);
+
+      currentDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        1
+      );
     }
 
     return firstDays;
