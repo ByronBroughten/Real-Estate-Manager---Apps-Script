@@ -142,6 +142,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       }
     }
     const batchUpdateRequests = [...this.state.batchUpdateRequests];
+    this.state.changesToSave = {};
     this.state.batchUpdateRequests = [];
     return batchUpdateRequests;
   }
@@ -208,10 +209,10 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
         }
       }
-      const rangeData = [...this.state.rangeData];
-      this.state.rangeData = [];
-      return rangeData;
     }
+    const rangeData = [...this.state.rangeData];
+    this.state.rangeData = [];
+    return rangeData;
   }
 
   private collectUpdateData<VN extends VarbName<SN>>(
