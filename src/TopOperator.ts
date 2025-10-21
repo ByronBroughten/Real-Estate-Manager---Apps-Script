@@ -41,12 +41,12 @@ export class TopOperator extends SpreadsheetBase {
   }
   buildOutChargesFromRecurring() {
     const ss = this.ss;
-    const hhTransaction = ss.sheet("hhChargeOngoing");
+    const hhChargeOngoing = ss.sheet("hhChargeOngoing");
     const hhCharge = ss.sheet("hhCharge");
 
-    hhTransaction.orderedRows.forEach((transaction) => {
-      const startDate = transaction.valueDate("startDate");
-      const endDateMaybe = transaction.value("endDate");
+    hhChargeOngoing.orderedRows.forEach((chargeOngoing) => {
+      const startDate = chargeOngoing.valueDate("startDate");
+      const endDateMaybe = chargeOngoing.value("endDate");
       const endDate = endDateMaybe
         ? valS.validate.date(endDateMaybe)
         : utils.date.lastDateOfMonth(new Date());
@@ -58,7 +58,7 @@ export class TopOperator extends SpreadsheetBase {
         const end =
           i === dates.length - 1 ? endDate : utils.date.lastDateOfMonth(date);
         const proratedAmount = utils.date.prorateMonthlyAmount(
-          transaction.valueNumber("amount"),
+          chargeOngoing.valueNumber("amount"),
           date,
           end
         );
@@ -66,9 +66,9 @@ export class TopOperator extends SpreadsheetBase {
         hhCharge.addRowWithValues({
           date,
           amount: proratedAmount,
-          ...transaction.values([
+          ...chargeOngoing.values([
             "description",
-            "householdID",
+            "householdId",
             "petId",
             "subsidyContractId",
             "unitId",

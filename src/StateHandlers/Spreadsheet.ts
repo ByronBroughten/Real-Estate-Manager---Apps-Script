@@ -113,6 +113,7 @@ export class Spreadsheet extends SpreadsheetBase {
       sheetName: sheet.getName(),
       isAddSafe,
       isAddOnly,
+      rowAddCounter: 0,
       headerIndicesBase1: headerIndices,
       headerOrder,
       bodyRows,

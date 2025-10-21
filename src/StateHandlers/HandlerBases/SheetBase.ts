@@ -31,6 +31,7 @@ export type SheetState<SN extends SectionName> = {
 
   isAddSafe: boolean;
   isAddOnly: boolean;
+  rowAddCounter: number;
 
   // Does rows include headers? No. I want their data to be consistent.
   bodyRows: Rows<SN>;

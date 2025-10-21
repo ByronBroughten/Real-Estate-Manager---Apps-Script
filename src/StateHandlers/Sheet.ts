@@ -122,6 +122,50 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   gSheet(): GoogleAppsScript.Spreadsheet.Sheet {
     return this.gss.getSheetById(this.schema.sheetId);
   }
+  collectRangeData(): DataFilterRange[] {
+    const changes = this.changesToSave;
+    for (const [rowId, change] of Obj.entries(changes)) {
+      if (change.delete) {
+        throw new Error(
+          "Not implemented. Deleting rows are not yet supported."
+        );
+      } else {
+        if (change.add) {
+          this.state.rowAddCounter++;
+          this.gSheet().appendRow(["Loading..."]);
+        }
+        for (const varbName of change.update) {
+          this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
+        }
+      }
+    }
+    const rangeData = [...this.state.rangeData];
+    this.state.rangeData = [];
+    return rangeData;
+  }
+
+  private collectUpdateData<VN extends VarbName<SN>>(
+    rowId,
+    varbName: VN
+  ): DataFilterRange {
+    const row = this.row(rowId);
+    // inexplicably row.base1Idx is 0-indexed for this purpose
+    const rowIdx = row.base1Idx - 1;
+    const colIdx = this.colIdxBase1(varbName) - 1;
+    return {
+      dataFilter: {
+        gridRange: {
+          sheetId: this.schema.sheetId,
+          startRowIndex: rowIdx,
+          endRowIndex: rowIdx + 1,
+          startColumnIndex: colIdx,
+          endColumnIndex: colIdx + 1,
+        },
+      },
+      majorDimension: "ROWS",
+      values: [[row.valueStandardized(varbName)]],
+    };
+  }
   collectRequests(): BatchUpdateRequest[] {
     const changes = this.changesToSave;
     for (const [rowId, change] of Obj.entries(changes)) {
@@ -192,49 +236,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           endColumnIndex: colIdx + 1,
         },
       },
-    };
-  }
-  collectRangeData(): DataFilterRange[] {
-    const changes = this.changesToSave;
-    for (const [rowId, change] of Obj.entries(changes)) {
-      if (change.delete) {
-        throw new Error(
-          "Not implemented. Deleting rows are not yet supported."
-        );
-      } else {
-        if (change.add) {
-          this.gSheet().appendRow(["Loading..."]);
-        }
-        for (const varbName of change.update) {
-          this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
-        }
-      }
-    }
-    const rangeData = [...this.state.rangeData];
-    this.state.rangeData = [];
-    return rangeData;
-  }
-
-  private collectUpdateData<VN extends VarbName<SN>>(
-    rowId,
-    varbName: VN
-  ): DataFilterRange {
-    const row = this.row(rowId);
-    // inexplicably row.base1Idx is 0-indexed for this purpose
-    const rowIdx = row.base1Idx - 1;
-    const colIdx = this.colIdxBase1(varbName) - 1;
-    return {
-      dataFilter: {
-        gridRange: {
-          sheetId: this.schema.sheetId,
-          startRowIndex: rowIdx,
-          endRowIndex: rowIdx + 1,
-          startColumnIndex: colIdx,
-          endColumnIndex: colIdx + 1,
-        },
-      },
-      majorDimension: "ROWS",
-      values: [[row.valueStandardized(varbName)]],
     };
   }
   private collectAddData(rowId): DataFilterRange {

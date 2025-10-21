@@ -148,7 +148,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     hhChargeOngoing: {
       id: vS.id(),
-      householdID: vS.linkedId("Household ID", {
+      householdId: vS.linkedId("Household ID", {
         sectionName: "household",
         onDelete: "delete",
       }),
