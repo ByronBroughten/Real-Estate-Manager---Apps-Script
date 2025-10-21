@@ -35,6 +35,9 @@ const _dateUtils = {
 
     return normalizedInputDate <= today;
   },
+  monthYear(date: Date) {
+    return `${date.getMonth() + 1}/${date.getFullYear()}`;
+  },
   firstDaysOfMonths(startDate: Date, endDate: Date): Date[] {
     const firstDays: Date[] = [startDate];
     let currentDate = new Date(
@@ -44,10 +47,7 @@ const _dateUtils = {
     );
 
     while (currentDate <= endDate) {
-      if (
-        currentDate.getMonth() !== startDate.getMonth() &&
-        currentDate.getFullYear() !== startDate.getFullYear()
-      ) {
+      if (this.monthYear(currentDate) !== this.monthYear(startDate)) {
         firstDays.push(new Date(currentDate));
       }
       currentDate.setMonth(currentDate.getMonth() + 1);
