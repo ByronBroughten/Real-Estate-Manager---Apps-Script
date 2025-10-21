@@ -54,7 +54,8 @@ const _dateUtils = {
       currentDate = new Date(
         currentDate.getFullYear(),
         currentDate.getMonth() + 1,
-        1
+        1,
+        12
       );
     }
 

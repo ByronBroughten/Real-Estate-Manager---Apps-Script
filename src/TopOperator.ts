@@ -82,9 +82,8 @@ export class TopOperator extends SpreadsheetBase {
   buildOutPaymentsFromCharges() {
     const ss = this.ss;
     const hhPaymentAllocation = ss.sheet("hhPaymentAllocation");
-    // I'm not sure how I want to do this.
-    // Are payment groups based on charges or recurring transactions/charges?
-    // I'd need to lump together subsidy contracts
+    // There will be payment groups, so they'll have to be based on the ongoing charges
+    // I'm still not exactly sure how to define payment groups
   }
   addRecurringTransaction() {
     // implement this for updating rent amounts
