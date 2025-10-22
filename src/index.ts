@@ -6,9 +6,14 @@ function triggerFirstOfMonth() {
   top.monthlyRentUpdate();
 }
 
-function buildOutChargesFromRecurring() {
+function buildOutCharges() {
   const top = TopOperator.init();
-  top.buildOutChargesFromRecurring();
+  top.buildOutCharges();
+}
+
+function buildOutPayments() {
+  const top = TopOperator.init();
+  top.buildOutPayments();
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {

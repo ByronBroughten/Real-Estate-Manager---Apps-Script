@@ -10,6 +10,7 @@ import {
   SpreadsheetBase,
   type SpreadsheetProps,
 } from "./StateHandlers/HandlerBases/SpreadsheetBase";
+import type { Row } from "./StateHandlers/Row";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
 import { Arr } from "./utils/Arr";
@@ -18,6 +19,12 @@ import { valS } from "./utils/validation";
 
 interface TopOperatorProps extends SpreadsheetProps {
   ss: Spreadsheet;
+}
+
+interface BuildFromChargeOngoingProps {
+  date: Date;
+  proratedAmount: number;
+  chargeOngoing: Row<"hhChargeOngoing">;
 }
 
 export class TopOperator extends SpreadsheetBase {
@@ -39,12 +46,84 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
-  buildOutChargesFromRecurring() {
+  buildOutCharges() {
     const ss = this.ss;
-    const hhChargeOngoing = ss.sheet("hhChargeOngoing");
     const hhCharge = ss.sheet("hhCharge");
 
-    hhChargeOngoing.orderedRows.forEach((chargeOngoing) => {
+    this.buildFromChargesOngoing(({ date, proratedAmount, chargeOngoing }) => {
+      hhCharge.addRowWithValues({
+        date,
+        amount: proratedAmount,
+        chargeSourceId: chargeOngoing.value("id"),
+        ...chargeOngoing.values([
+          "description",
+          "householdId",
+          "petId",
+          "subsidyContractId",
+          "unitId",
+        ]),
+      });
+    });
+    ss.batchUpdateRanges();
+    // Sort by description > date > household name
+  }
+
+  buildOutPaymentGroups() {
+    // For payment groups, I basically just need to create something that functions as hhChargeOngoing
+    // Basically, just adding together all of the payment amounts in the group on a per-month basis.
+    // It gets complicated depending on whether something is at the beginning or end of the month.
+    // Like, if the subsidy contract starts on the 20th... that amount would be added to the next
+    // payment group.
+    // But if it starts on the 1st, it can perhaps stay in the payment group.
+    // This is getting complicated.
+    // Once these are defined effectively, though, I can pretty much just use the buildOutPayments logic.
+  }
+  buildOutPayments() {
+    const ss = this.ss;
+    const hhChargeOngoing = ss.sheet("hhChargeOngoing");
+    const noPaymentGroups = hhChargeOngoing.orderedRows.filter((row) => {
+      return row.value("paymentGroupId") === "";
+    });
+
+    const hhPayment = ss.sheet("hhPayment");
+    const hhPaymentAllocation = ss.sheet("hhPaymentAllocation");
+    const subsidyContract = ss.sheet("subsidyContract");
+
+    this.buildFromChargesOngoing(({ proratedAmount, chargeOngoing }) => {
+      const subsidyContractId = chargeOngoing.value("subsidyContractId");
+      const paymentId = hhPayment.addRowWithValues({
+        amount: proratedAmount,
+        date: "",
+        ...(subsidyContractId
+          ? {
+              paidBy: "Subsidy program",
+              subsidyProgramId: subsidyContract
+                .row(subsidyContractId)
+                .value("subsidyProgramId"),
+            }
+          : {
+              paidBy: "Household",
+            }),
+        ...chargeOngoing.values(["householdId", "subsidyContractId"]),
+      });
+
+      hhPaymentAllocation.addRowWithValues({
+        paymentId,
+        ...chargeOngoing.values(["householdId", "unitId", "subsidyContractId"]),
+        portion: chargeOngoing.value("portion"),
+        description: "Normal payment",
+        amount: proratedAmount,
+      });
+    }, noPaymentGroups);
+    ss.batchUpdateRanges();
+    // For the ones that are in payment groups, I need to do a more complex thing.
+  }
+  private buildFromChargesOngoing(
+    doUpdate: (props: BuildFromChargeOngoingProps) => void,
+    chargesOngoing: Row<"hhChargeOngoing">[] = this.ss.sheet("hhChargeOngoing")
+      .orderedRows
+  ) {
+    chargesOngoing.forEach((chargeOngoing) => {
       const startDate = chargeOngoing.valueDate("startDate");
       const endDateMaybe = chargeOngoing.value("endDate");
       const endDate = endDateMaybe
@@ -57,34 +136,22 @@ export class TopOperator extends SpreadsheetBase {
         const date = dates[i];
         const end =
           i === dates.length - 1 ? endDate : utils.date.lastDateOfMonth(date);
+
         const proratedAmount = utils.date.prorateMonthlyAmount(
           chargeOngoing.valueNumber("amount"),
           date,
           end
         );
 
-        hhCharge.addRowWithValues({
+        doUpdate({
           date,
-          amount: proratedAmount,
-          chargeSourceId: chargeOngoing.value("id"),
-          ...chargeOngoing.values([
-            "description",
-            "householdId",
-            "petId",
-            "subsidyContractId",
-            "unitId",
-          ]),
+          proratedAmount,
+          chargeOngoing,
         });
       }
     });
-    ss.batchUpdateRanges();
   }
-  buildOutPaymentsFromCharges() {
-    const ss = this.ss;
-    const hhPaymentAllocation = ss.sheet("hhPaymentAllocation");
-    // There will be payment groups, so they'll have to be based on the ongoing charges
-    // I'm still not exactly sure how to define payment groups
-  }
+
   addRecurringTransaction() {
     // implement this for updating rent amounts
   }

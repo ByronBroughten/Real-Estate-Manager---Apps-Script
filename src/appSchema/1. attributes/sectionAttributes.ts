@@ -32,6 +32,7 @@ export const allSectionAttributes = makeSchemaStructure(
     addHhChargeOnetime: ma("ahhc", 1202471195),
     hhPayment: ma("hhp", 1544131100),
     hhPaymentAllocation: ma("hpa", 348639454),
+    paymentGroup: ma("pg", 939656506),
     unit: ma("un", 321313883),
     household: ma("hh", 0),
     expense: ma("ex", 449009036),

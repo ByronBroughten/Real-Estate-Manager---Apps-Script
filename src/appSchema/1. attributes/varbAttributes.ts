@@ -78,6 +78,10 @@ export const allVarbAttributes = makeSchemaStructure(
   {
     subsidyContract: {
       id: vS.id(),
+      subsidyProgramId: vS.linkedId("Subsidy program ID", {
+        sectionName: "subsidyProgram",
+        onDelete: "keep",
+      }),
       rentPortionMonthly: vS.gen("number", "Rent portion monthly"),
       rentPortionMonthlyNext: vS.gen("number", "Rent portion monthly next"),
       rentPortionDate: vS.date(),
@@ -87,12 +91,13 @@ export const allVarbAttributes = makeSchemaStructure(
         valS.validate.dateOrEmpty
       ),
     },
+    paymentGroup: vsS.idOnly(),
     unit: vsS.idOnly(),
     hhPet: vsS.idOnly(),
     otherPayer: vsS.idOnly(),
     hhPayment: {
       id: vS.id(),
-      date: vS.date(),
+      date: vS.gen("date", "Date paid (verified)", valS.validate.dateOrEmpty),
       paidBy: vS.gen("payerCategory", "Paid by"),
       amount: vS.gen("number", "Amount"),
       amountAllocated: vS.gen("amountAllocated", "Amount"),
@@ -166,6 +171,10 @@ export const allVarbAttributes = makeSchemaStructure(
       amount: vS.gen("number", "Amount"),
       frequency: vS.gen("ongoingFrequency", "Frequency"),
       startDate: vS.gen("date", "Start date", valS.validate.date),
+      paymentGroupId: vS.linkedId("Payment group ID", {
+        sectionName: "paymentGroup",
+        onDelete: "keep",
+      }),
       endDate: vS.gen("date", "End date", valS.validate.dateOrEmpty),
       subsidyContractId: vS.linkedId("Subsidy contract ID", {
         sectionName: "subsidyContract",
