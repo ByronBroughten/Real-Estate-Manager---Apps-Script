@@ -108,7 +108,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       hhMembersFullName: vS.gen(
         "hhMembersFullNamesFromId",
-        "Household members full name"
+        "HH members full name"
       ),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
         sectionName: "subsidyContract",
