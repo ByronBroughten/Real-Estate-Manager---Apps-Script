@@ -4,13 +4,14 @@ import { va, type ValueSchema } from "../valueAttributes";
 
 const literalValues = {
   amountAllocated: `=IF(COUNTIF(hhPaymentAllocation[Payment ID], SAME_ROW("ID")), SUM(FILTER(hhPaymentAllocation[Amount], hhPaymentAllocation[Payment ID]=SAME_ROW("ID"))), 0)`,
-  paymentProcessed: `=IF(SAME_ROW("Amount")=SAME_ROW("Allocated amount"), IF(SAME_ROW("Date paid (verified)")<>"", "Yes", "No"), "No")`,
+  paymentDate: `=ROW_MATCH(hhPayment[Date], hhPayment[ID], "Payment ID")`,
+  paymentProcessed: `=IF(SAME_ROW("Amount")=SAME_ROW("Allocated amount"), IF(SAME_ROW("Date")<>"",  IF(SAME_ROW("Details verified")="Yes", "Yes", "No"), "No"), "No")`,
   hhNameFromId: `=ROW_MATCH(household[Name], household[ID],"Household ID")`,
-  hhMembersFullNamesFromId: `=ROW_MATCH(household[Members full name], household[ID], "Household ID")`,
-  otherPayerNameFromId: `=ROW_MATCH(otherPayer[Name], otherPayer[ID], "Other payer ID")`,
-  subsidyContractNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyContract[Name], subsidyContract[ID], "Subsidy contract ID")`,
-  subsidyProgramNameFromId: `=ROW_MATCH(subsidyProgram[Name], subsidyProgram[ID], "Subsidy program ID")`,
   unitNameFromId: `=ROW_MATCH(unit[Name], unit[ID], "Unit ID")`,
+  hhMembersFullNamesFromId: `=ROW_MATCH(household[Members full name], household[ID], "Household ID")`,
+  otherPayerNameFromIdOp: `=ROW_MATCH_OR_BLANK(otherPayer[Name], otherPayer[ID], "Other payer ID")`,
+  subsidyContractNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyContract[Name], subsidyContract[ID], "Subsidy contract ID")`,
+  subsidyProgramNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyProgram[Name], subsidyProgram[ID], "Subsidy program ID")`,
   petNameFromIdOp: `=ROW_MATCH_OR_BLANK(pet[Name], pet[ID], "Pet ID")`,
 };
 

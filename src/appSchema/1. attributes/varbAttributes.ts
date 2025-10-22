@@ -97,10 +97,11 @@ export const allVarbAttributes = makeSchemaStructure(
     otherPayer: vsS.idOnly(),
     hhPayment: {
       id: vS.id(),
-      date: vS.gen("date", "Date paid (verified)", valS.validate.dateOrEmpty),
+      date: vS.gen("date", "Date", valS.validate.dateOrEmpty),
       paidBy: vS.gen("payerCategory", "Paid by"),
       amount: vS.gen("number", "Amount"),
       amountAllocated: vS.gen("amountAllocated", "Amount"),
+      detailsVerified: vS.gen("yesOrNo", "Details verified"),
       paymentProcessed: vS.gen("paymentProcessed", "Processed"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
@@ -115,14 +116,14 @@ export const allVarbAttributes = makeSchemaStructure(
         onDelete: "keep",
       }),
       subsidyProgramName: vS.gen(
-        "subsidyProgramNameFromId",
+        "subsidyProgramNameFromIdOp",
         "Subsidy program name"
       ),
       otherPayerID: vS.linkedId("Other payer ID", {
         sectionName: "otherPayer",
         onDelete: "keep",
       }),
-      otherPayerName: vS.gen("otherPayerNameFromId", "Other payer name"),
+      otherPayerName: vS.gen("otherPayerNameFromIdOp", "Other payer name"),
       notes: vS.gen("string", "Notes"),
     },
     hhPaymentAllocation: {
@@ -139,6 +140,7 @@ export const allVarbAttributes = makeSchemaStructure(
         "hhMembersFullNamesFromId",
         "HH members full name"
       ),
+      paymentDate: vS.gen("paymentDate", "Payment date"),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
         onDelete: "keep",

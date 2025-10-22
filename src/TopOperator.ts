@@ -79,21 +79,22 @@ export class TopOperator extends SpreadsheetBase {
     // Once these are defined effectively, though, I can pretty much just use the buildOutPayments logic.
   }
   buildOutPayments() {
+    // That should be good.
+    // For building out payments initially, I think I will skip the payment group stuff.
+
     const ss = this.ss;
     const hhChargeOngoing = ss.sheet("hhChargeOngoing");
-    const noPaymentGroups = hhChargeOngoing.orderedRows.filter((row) => {
-      return row.value("paymentGroupId") === "";
-    });
+    const chargesOngoing = hhChargeOngoing.orderedRows;
 
     const hhPayment = ss.sheet("hhPayment");
     const hhPaymentAllocation = ss.sheet("hhPaymentAllocation");
     const subsidyContract = ss.sheet("subsidyContract");
 
-    this.buildFromChargesOngoing(({ proratedAmount, chargeOngoing }) => {
+    this.buildFromChargesOngoing(({ date, proratedAmount, chargeOngoing }) => {
       const subsidyContractId = chargeOngoing.value("subsidyContractId");
       const paymentId = hhPayment.addRowWithValues({
         amount: proratedAmount,
-        date: "",
+        date,
         ...(subsidyContractId
           ? {
               paidBy: "Subsidy program",
@@ -114,7 +115,7 @@ export class TopOperator extends SpreadsheetBase {
         description: "Normal payment",
         amount: proratedAmount,
       });
-    }, noPaymentGroups);
+    }, chargesOngoing);
     ss.batchUpdateRanges();
     // For the ones that are in payment groups, I need to do a more complex thing.
   }
