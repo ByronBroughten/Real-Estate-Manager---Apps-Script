@@ -83,7 +83,7 @@ export const allVarbAttributes = makeSchemaStructure(
         onDelete: "keep",
       }),
       rentPortionMonthly: vS.gen("number", "Rent portion monthly"),
-      rentPortionMonthlyNext: vS.gen("number", "Rent portion monthly next"),
+      rentPortionMonthlyNext: vS.gen("number", "Next rent portion monthly"),
       rentPortionDate: vS.date(),
       rentPortionDateNext: vS.gen(
         "date",
