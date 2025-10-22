@@ -155,6 +155,7 @@ export const allVarbAttributes = makeSchemaStructure(
         "subsidyContractNameFromIdOp",
         "Subsidy contract name"
       ),
+      notes: vS.gen("string", "Notes"),
     },
     hhChargeOngoing: {
       id: vS.id(),
