@@ -87,7 +87,7 @@ export const allVarbAttributes = makeSchemaStructure(
       rentPortionDate: vS.gen("date", "Rent portion date", valS.validate.date),
       rentPortionDateNext: vS.gen(
         "date",
-        "Rent portion date next",
+        "Next rent portion date",
         valS.validate.dateOrEmpty
       ),
     },
