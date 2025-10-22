@@ -101,7 +101,6 @@ export const allVarbAttributes = makeSchemaStructure(
       paidBy: vS.gen("payerCategory", "Paid by"),
       amount: vS.gen("number", "Amount"),
       amountAllocated: vS.gen("amountAllocated", "Amount"),
-      paymentVerified: vS.gen("yesOrNo", "Payment verified"),
       paymentProcessed: vS.gen("paymentProcessed", "Payment processed"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
