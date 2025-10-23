@@ -46,7 +46,17 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
-  buildOutCharges() {
+  compileLedger(householdId: string): void {
+    const ss = this.ss;
+    const hhCharge = ss.sheet("hhCharge");
+
+    const hhPayment = ss.sheet("hhPayment");
+    const allocation = ss.sheet("hhPaymentAllocation");
+    // Do I do payment allocation? Yeah.
+    // Actually, is that all I need?
+    // No. I actually need... both...?
+  }
+  buildOutCharges(): void {
     const ss = this.ss;
     const hhCharge = ss.sheet("hhCharge");
 
@@ -83,6 +93,12 @@ export class TopOperator extends SpreadsheetBase {
     // That should be good.
     // For building out payments initially, I think I will skip the payment group stuff.
 
+    // I might not need the payment group stuff, not for ongoing, anyways.
+    // For that I can just use a calculation involving how much the PHA currently owes me and how much
+    // it is charged for the month.
+    // Simple, actually.
+    // And I can bank on them paying at or around the 1st and at or around the 15th.
+
     const ss = this.ss;
     const hhChargeOngoing = ss.sheet("hhChargeOngoing");
     const chargesOngoing = hhChargeOngoing.orderedRows;
@@ -96,6 +112,7 @@ export class TopOperator extends SpreadsheetBase {
       const paymentId = hhPayment.addRowWithValues({
         amount: proratedAmount,
         date,
+        detailsVerified: "No",
         ...(subsidyContractId
           ? {
               paidBy: "Subsidy program",
