@@ -56,6 +56,7 @@ export class TopOperator extends SpreadsheetBase {
         amount: proratedAmount,
         chargeSourceId: chargeOngoing.value("id"),
         ...chargeOngoing.values([
+          "portion",
           "description",
           "householdId",
           "petId",
