@@ -161,6 +161,8 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "hhPayment",
         onDelete: "delete",
       }),
+      paymentDate: vS.gen("getPaymentDate", "Payment date"),
+      processed: vS.gen("getPaymentProcessed", "Processed"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
         onDelete: "keep",
@@ -169,7 +171,6 @@ export const allVarbAttributes = makeSchemaStructure(
         "hhMembersFullNamesFromId",
         "HH members full name"
       ),
-      paymentDate: vS.gen("paymentDate", "Payment date"),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
         onDelete: "keep",
