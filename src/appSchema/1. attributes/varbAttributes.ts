@@ -76,6 +76,35 @@ const vsS = {
 export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
+    buildHhLedger: {
+      id: vS.id(),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "setEmpty",
+      }),
+      householdName: vS.gen("hhNameFromId", "Household name"),
+      portion: vS.gen("rentPortionName", "Portion"),
+      subsidyContractId: vS.linkedId("Subsidy contract ID", {
+        sectionName: "subsidyContract",
+        onDelete: "setEmpty",
+      }),
+      subsidyContractName: vS.gen(
+        "subsidyContractNameFromIdOp",
+        "Subsidy contract name"
+      ),
+      enter: vS.gen("boolean", "Enter"),
+    },
+    hhLedger: {
+      id: vS.id(),
+      date: vS.date(),
+      unitName: vS.gen("string", "Unit name"),
+      description: vS.gen("descriptionsTransactionsAll", "Description"),
+      issuer: vS.gen("string", "Issuer"),
+      charge: vS.gen("number", "Charge"),
+      payment: vS.gen("number", "Payment"),
+      balance: vS.gen("number", "Balance"),
+      notes: vS.gen("string", "Notes"),
+    },
     subsidyContract: {
       id: vS.id(),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
@@ -100,7 +129,7 @@ export const allVarbAttributes = makeSchemaStructure(
       date: vS.gen("date", "Date", valS.validate.dateOrEmpty),
       paidBy: vS.gen("payerCategory", "Paid by"),
       amount: vS.gen("number", "Amount"),
-      amountAllocated: vS.gen("amountAllocated", "Amount"),
+      amountAllocated: vS.gen("amountAllocated", "Allocated amount"),
       detailsVerified: vS.gen("yesOrNo", "Details verified"),
       paymentProcessed: vS.gen("paymentProcessed", "Processed"),
       householdId: vS.linkedId("Household ID", {

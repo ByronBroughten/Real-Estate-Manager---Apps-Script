@@ -37,6 +37,9 @@ export class TopOperator extends SpreadsheetBase {
     const ss = Spreadsheet.init();
     return new TopOperator({ ...ss.spreadsheetProps, ss });
   }
+  addRecurringTransaction() {
+    // implement this for updating rent amounts
+  }
   isEnterValue(sheetId: number, colIdx: number, rowIdx: number) {
     const { sectionName } = this.sectionsSchema.sectionBySheetId(sheetId);
     if (isApiSectionName(sectionName)) {
@@ -46,15 +49,26 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
-  compileLedger(householdId: string): void {
+  compileLedger(): void {
     const ss = this.ss;
-    const hhCharge = ss.sheet("hhCharge");
+    const hhLedger = ss.sheet("hhLedger");
+    // deleteAllBodyRows()
 
-    const hhPayment = ss.sheet("hhPayment");
+    const { householdId, portion, subsidyContractId } = ss
+      .sheet("buildHhLedger")
+      .topBodyRow.values();
+
+    const hhCharge = ss.sheet("hhCharge");
+    const filteredCharges = hhCharge.orderedRows.filter((row) => {});
+    for (const row of filteredCharges) {
+    }
+
     const allocation = ss.sheet("hhPaymentAllocation");
-    // Do I do payment allocation? Yeah.
-    // Actually, is that all I need?
-    // No. I actually need... both...?
+    const filteredAllocations = allocation.orderedRows.filter((row) => {});
+    for (const row of filteredAllocations) {
+    }
+
+    // sort()
   }
   buildOutCharges(): void {
     const ss = this.ss;
@@ -78,27 +92,7 @@ export class TopOperator extends SpreadsheetBase {
     ss.batchUpdateRanges();
     // Sort by description > date > household name
   }
-
-  buildOutPaymentGroups() {
-    // For payment groups, I basically just need to create something that functions as hhChargeOngoing
-    // Basically, just adding together all of the payment amounts in the group on a per-month basis.
-    // It gets complicated depending on whether something is at the beginning or end of the month.
-    // Like, if the subsidy contract starts on the 20th... that amount would be added to the next
-    // payment group.
-    // But if it starts on the 1st, it can perhaps stay in the payment group.
-    // This is getting complicated.
-    // Once these are defined effectively, though, I can pretty much just use the buildOutPayments logic.
-  }
   buildOutPayments() {
-    // That should be good.
-    // For building out payments initially, I think I will skip the payment group stuff.
-
-    // I might not need the payment group stuff, not for ongoing, anyways.
-    // For that I can just use a calculation involving how much the PHA currently owes me and how much
-    // it is charged for the month.
-    // Simple, actually.
-    // And I can bank on them paying at or around the 1st and at or around the 15th.
-
     const ss = this.ss;
     const hhChargeOngoing = ss.sheet("hhChargeOngoing");
     const chargesOngoing = hhChargeOngoing.orderedRows;
@@ -135,7 +129,6 @@ export class TopOperator extends SpreadsheetBase {
       });
     }, chargesOngoing);
     ss.batchUpdateRanges();
-    // For the ones that are in payment groups, I need to do a more complex thing.
   }
   private buildFromChargesOngoing(
     doUpdate: (props: BuildFromChargeOngoingProps) => void,
@@ -169,10 +162,6 @@ export class TopOperator extends SpreadsheetBase {
         });
       }
     });
-  }
-
-  addRecurringTransaction() {
-    // implement this for updating rent amounts
   }
   addHhOnetimeCharge() {
     const ss = this.ss;

@@ -27,6 +27,8 @@ export const allSectionAttributes = makeSchemaStructure(
   {} as AllSectionAttributesBase,
   {
     test: ma("tst", 2089200354),
+    hhLedger: ma("hl", 731807482),
+    buildHhLedger: ma("bhl", 706564734),
     hhChargeOngoing: ma("hto", 194710324),
     hhCharge: ma("hhc", 825934775),
     addHhChargeOnetime: ma("ahhc", 1202471195),
