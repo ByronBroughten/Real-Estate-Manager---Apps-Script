@@ -11,6 +11,7 @@ import {
   type SpreadsheetProps,
 } from "./StateHandlers/HandlerBases/SpreadsheetBase";
 import type { Row } from "./StateHandlers/Row";
+import type { Sheet } from "./StateHandlers/Sheet";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
 import { Arr } from "./utils/Arr";
@@ -26,6 +27,8 @@ interface BuildFromChargeOngoingProps {
   proratedAmount: number;
   chargeOngoing: Row<"hhChargeOngoing">;
 }
+
+type LedgerInputSn = "hhCharge" | "hhPaymentAllocation";
 
 export class TopOperator extends SpreadsheetBase {
   readonly ss: Spreadsheet;
@@ -58,14 +61,54 @@ export class TopOperator extends SpreadsheetBase {
       .sheet("buildHhLedger")
       .topBodyRow.values();
 
-    const hhCharge = ss.sheet("hhCharge");
-    const filteredCharges = hhCharge.orderedRows.filter((row) => {});
-    for (const row of filteredCharges) {
+    function filter<SN extends LedgerInputSn>(row: Row<SN>): boolean {
+      const vals = row.values(["householdId", "portion", "subsidyContractId"]);
+      if (vals.householdId === householdId && vals.portion === portion) {
+        if (subsidyContractId) {
+          return vals.subsidyContractId === subsidyContractId;
+        } else return true;
+      } else return false;
     }
 
-    const allocation = ss.sheet("hhPaymentAllocation");
-    const filteredAllocations = allocation.orderedRows.filter((row) => {});
+    function filteredRows<SN extends LedgerInputSn>(
+      sheet: Sheet<SN>
+    ): Row<SN>[] {
+      return sheet.orderedRows.filter((row) => {
+        return filter(row);
+      });
+    }
+
+    const filteredCharges = filteredRows(ss.sheet("hhCharge"));
+    for (const row of filteredCharges) {
+      const { amount, ...rest } = row.values([
+        "date",
+        "amount",
+        "description",
+        "unitName",
+      ]);
+      hhLedger.addRowWithValues({
+        issuer: "Property management",
+        notes: "",
+        charge: amount,
+        ...rest,
+      });
+    }
+
+    const filteredAllocations = filteredRows(ss.sheet("hhPaymentAllocation"));
     for (const row of filteredAllocations) {
+      const { amount, payer, ...rest } = row.values([
+        "amount",
+        "payer",
+        "date",
+        "description",
+        "unitName",
+      ]);
+      hhLedger.addRowWithValues({
+        notes: "",
+        issuer: payer,
+        payment: amount,
+        ...rest,
+      });
     }
 
     // sort()
@@ -109,13 +152,13 @@ export class TopOperator extends SpreadsheetBase {
         detailsVerified: "No",
         ...(subsidyContractId
           ? {
-              paidBy: "Subsidy program",
+              payer: "Subsidy program",
               subsidyProgramId: subsidyContract
                 .row(subsidyContractId)
                 .value("subsidyProgramId"),
             }
           : {
-              paidBy: "Household",
+              payer: "Household",
             }),
         ...chargeOngoing.values(["householdId", "subsidyContractId"]),
       });

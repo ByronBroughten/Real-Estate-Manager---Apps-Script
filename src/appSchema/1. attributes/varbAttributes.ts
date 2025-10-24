@@ -102,7 +102,7 @@ export const allVarbAttributes = makeSchemaStructure(
       issuer: vS.gen("string", "Issuer"),
       charge: vS.gen("number", "Charge"),
       payment: vS.gen("number", "Payment"),
-      balance: vS.gen("number", "Balance"),
+      balance: vS.gen("ledgerBalance", "Balance"),
       notes: vS.gen("string", "Notes"),
     },
     subsidyContract: {
@@ -127,7 +127,8 @@ export const allVarbAttributes = makeSchemaStructure(
     hhPayment: {
       id: vS.id(),
       date: vS.gen("date", "Date", valS.validate.dateOrEmpty),
-      paidBy: vS.gen("payerCategory", "Paid by"),
+      payerCategory: vS.gen("payerCategory", "Payer category"),
+      payer: vS.gen("payer", "Payer"),
       amount: vS.gen("number", "Amount"),
       amountAllocated: vS.gen("amountAllocated", "Allocated amount"),
       detailsVerified: vS.gen("yesOrNo", "Details verified"),
@@ -161,7 +162,8 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "hhPayment",
         onDelete: "delete",
       }),
-      paymentDate: vS.gen("getPaymentDate", "Payment date"),
+      date: vS.gen("getPaymentDate", "Payment date"),
+      payer: vS.gen("getPayer", "Payer"),
       processed: vS.gen("getPaymentProcessed", "Processed"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
