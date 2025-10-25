@@ -9,6 +9,7 @@ import {
   type BatchUpdateRequest,
   type DataFilterRange,
 } from "../utilitiesAppsScript";
+import { utils } from "../utilitiesGeneral";
 import { Obj } from "../utils/Obj";
 import {
   SheetBase,
@@ -44,6 +45,29 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   get changesToSave(): ChangesToSave<SN> {
     return this.state.changesToSave;
+  }
+  sort(varbName: VarbName<SN>): void {
+    this.sortWithoutAddingChanges(varbName);
+    this.addAllVarbsAsChanges();
+  }
+  sortWithoutAddingChanges(varbName: VarbName<SN>): void {
+    this.state.bodyRowOrder.sort((a, b) => {
+      return utils.general.compareForSort(
+        this.row(a).value(varbName),
+        this.row(b).value(varbName)
+      );
+    });
+  }
+  addAllVarbsAsChanges(): void {
+    this.orderedRows.forEach((row) => row.addAllVarbsAsChanges());
+  }
+  DELETE_ALL_BODY_ROWS() {
+    this.gSheet().deleteRows(
+      this.topBodyRowIdxBase1,
+      this.state.bodyRowOrder.length
+    );
+    this.state.bodyRowOrder = [];
+    this.state.bodyRows = {};
   }
   addChangeToSave(id: string, rowChange: RowChangeProps<SN>) {
     if (!this.changesToSave[id]) {

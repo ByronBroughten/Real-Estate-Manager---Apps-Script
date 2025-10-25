@@ -55,7 +55,7 @@ export class TopOperator extends SpreadsheetBase {
   compileLedger(): void {
     const ss = this.ss;
     const hhLedger = ss.sheet("hhLedger");
-    // deleteAllBodyRows()
+    hhLedger.DELETE_ALL_BODY_ROWS();
 
     const { householdId, portion, subsidyContractId } = ss
       .sheet("buildHhLedger")
@@ -111,7 +111,8 @@ export class TopOperator extends SpreadsheetBase {
       });
     }
 
-    // sort()
+    hhLedger.sort("date");
+    this.ss.batchUpdateRanges();
   }
   buildOutCharges(): void {
     const ss = this.ss;
@@ -132,8 +133,10 @@ export class TopOperator extends SpreadsheetBase {
         ]),
       });
     });
+    hhCharge.sortWithoutAddingChanges("subsidyContractId");
+    hhCharge.sortWithoutAddingChanges("date");
+    hhCharge.sort("hhMembersFullName");
     ss.batchUpdateRanges();
-    // Sort by description > date > household name
   }
   buildOutPayments() {
     const ss = this.ss;
@@ -171,6 +174,9 @@ export class TopOperator extends SpreadsheetBase {
         amount: proratedAmount,
       });
     }, chargesOngoing);
+    hhPayment.sortWithoutAddingChanges("subsidyProgramId");
+    hhPayment.sortWithoutAddingChanges("date");
+    hhPayment.sort("hhMembersFullName");
     ss.batchUpdateRanges();
   }
   private buildFromChargesOngoing(

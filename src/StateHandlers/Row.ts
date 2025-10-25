@@ -102,6 +102,12 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       this.schema.makeDefaultValues() as Partial<SectionValues<SN>>
     );
   }
+  addAllVarbsAsChanges() {
+    this.sheet.addChangeToSave(this.id, {
+      action: "update",
+      varbNames: this.varbNames,
+    });
+  }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
     value: VL
