@@ -11,10 +11,10 @@ function buildOutCharges() {
   top.buildOutCharges();
 }
 
-function buildOutPayments() {
-  const top = TopOperator.init();
-  top.buildOutPayments();
-}
+// function buildOutPayments() {
+//   const top = TopOperator.init();
+//   top.buildOutPayments();
+// }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (e.value === "TRUE") {
