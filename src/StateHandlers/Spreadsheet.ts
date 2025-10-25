@@ -70,6 +70,7 @@ export class Spreadsheet extends SpreadsheetBase {
     const headerOrder = [...schema.varbNames].sort(
       (a, b) => headerIndices[a] - headerIndices[b]
     );
+    const idIndexBase1 = headerIndices.id;
 
     let bodyRowOrder = [];
     const numRows = lastRowIdx - this.topBodyRowIdxBase1 + 1;
@@ -77,12 +78,12 @@ export class Spreadsheet extends SpreadsheetBase {
     if (areRows) {
       const bodyRowIdRange = sheet.getRange(
         this.topBodyRowIdxBase1,
-        1,
+        idIndexBase1,
         lastRowIdx - this.topBodyRowIdxBase1 + 1,
         1
       );
       const bodyRowIdValues = bodyRowIdRange.getValues();
-      bodyRowOrder = bodyRowIdValues.map((row) => row[headerIndices.id - 1]);
+      bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
     }
 
     const bodyRows: Rows<SN> = {};
