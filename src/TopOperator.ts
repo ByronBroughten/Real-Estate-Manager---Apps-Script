@@ -64,18 +64,22 @@ export class TopOperator extends SpreadsheetBase {
     function filter<SN extends LedgerInputSn>(row: Row<SN>): boolean {
       const vals = row.values(["householdId", "portion", "subsidyContractId"]);
       if (vals.householdId === householdId && vals.portion === portion) {
-        if (subsidyContractId) {
+        if (portion === "Household" || !subsidyContractId) {
+          return true;
+        } else {
           return vals.subsidyContractId === subsidyContractId;
-        } else return true;
-      } else return false;
+        }
+      } else {
+        return false;
+      }
     }
 
     function filteredRows<SN extends LedgerInputSn>(
       sheet: Sheet<SN>
     ): Row<SN>[] {
-      return sheet.orderedRows.filter((row) => {
-        return filter(row);
-      });
+      const rows = sheet.orderedRows;
+      const filteredRows = rows.filter((row) => filter(row));
+      return filteredRows;
     }
 
     const filteredCharges = filteredRows(ss.sheet("hhCharge"));
