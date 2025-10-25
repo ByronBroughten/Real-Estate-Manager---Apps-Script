@@ -62,6 +62,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.orderedRows.forEach((row) => row.addAllVarbsAsChanges());
   }
   DELETE_ALL_BODY_ROWS() {
+    console.log(`${this.topBodyRowIdxBase1}`);
+    console.log(`${this.state.bodyRowOrder.length}`);
     this.gSheet().deleteRows(
       this.topBodyRowIdxBase1,
       this.state.bodyRowOrder.length
