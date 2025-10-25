@@ -11,6 +11,11 @@ function buildOutCharges() {
   top.buildOutCharges();
 }
 
+function buildHhLedger() {
+  const top = TopOperator.init();
+  top.buildHhLedger();
+}
+
 // function buildOutPayments() {
 //   const top = TopOperator.init();
 //   top.buildOutPayments();
