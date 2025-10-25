@@ -82,7 +82,7 @@ export class Spreadsheet extends SpreadsheetBase {
         1
       );
       const bodyRowIdValues = bodyRowIdRange.getValues();
-      bodyRowOrder = bodyRowIdValues.map((row) => row[headerIndices.id]);
+      bodyRowOrder = bodyRowIdValues.map((row) => row[headerIndices.id - 1]);
     }
 
     const bodyRows: Rows<SN> = {};
