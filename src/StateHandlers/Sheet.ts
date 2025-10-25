@@ -62,14 +62,14 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.orderedRows.forEach((row) => row.addAllVarbsAsChanges());
   }
   DELETE_ALL_BODY_ROWS() {
-    console.log(`${this.topBodyRowIdxBase1}`);
-    console.log(`${this.state.bodyRowOrder.length}`);
-    this.gSheet().deleteRows(
-      this.topBodyRowIdxBase1,
-      this.state.bodyRowOrder.length
-    );
-    this.state.bodyRowOrder = [];
-    this.state.bodyRows = {};
+    if (this.state.bodyRowOrder.length > 0) {
+      this.gSheet().deleteRows(
+        this.topBodyRowIdxBase1,
+        this.state.bodyRowOrder.length
+      );
+      this.state.bodyRowOrder = [];
+      this.state.bodyRows = {};
+    }
   }
   addChangeToSave(id: string, rowChange: RowChangeProps<SN>) {
     if (!this.changesToSave[id]) {
