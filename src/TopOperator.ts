@@ -52,7 +52,7 @@ export class TopOperator extends SpreadsheetBase {
       return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
     } else return false;
   }
-  compileLedger(): void {
+  buildHhLedger(): void {
     const ss = this.ss;
     const hhLedger = ss.sheet("hhLedger");
     hhLedger.DELETE_ALL_BODY_ROWS();

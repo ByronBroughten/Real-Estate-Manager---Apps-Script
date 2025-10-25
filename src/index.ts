@@ -23,7 +23,12 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
     const rowId = e.range.getRow();
     const top = TopOperator.init();
     if (top.isEnterValue(sheetId, colId, rowId)) {
-      top.addHhOnetimeCharge();
+      const { sectionName } = top.sectionsSchema.sectionBySheetId(sheetId);
+      if (sectionName === "addHhChargeOnetime") {
+        top.addHhOnetimeCharge();
+      } else if (sectionName === "buildHhLedger") {
+        top.buildHhLedger();
+      }
     }
   }
 }
