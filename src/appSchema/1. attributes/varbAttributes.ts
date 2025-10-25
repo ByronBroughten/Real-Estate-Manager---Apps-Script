@@ -97,7 +97,7 @@ export const allVarbAttributes = makeSchemaStructure(
     hhLedger: {
       id: vS.id(),
       date: vS.date(),
-      unitName: vS.gen("string", "Unit name"),
+      unitName: vS.gen("string", "Unit"),
       description: vS.gen("descriptionsTransactionsAll", "Description"),
       issuer: vS.gen("string", "Issuer"),
       charge: vS.gen("number", "Charge"),
