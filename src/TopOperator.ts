@@ -117,6 +117,7 @@ export class TopOperator extends SpreadsheetBase {
   buildOutCharges(): void {
     const ss = this.ss;
     const hhCharge = ss.sheet("hhCharge");
+    hhCharge.DELETE_ALL_BODY_ROWS();
 
     this.buildFromChargesOngoing(({ date, proratedAmount, chargeOngoing }) => {
       hhCharge.addRowWithValues({
