@@ -1,9 +1,11 @@
+import type { Merge } from "../../utils/Obj/merge";
 import { valS } from "../../utils/validation";
 
 import { makeSchemaStructure } from "../makeSchema";
 import { type SectionNameSimple } from "./sectionAttributes";
 import {
   allValueAttributes,
+  type MakeDefaultValue,
   type ValidateValue,
   type Value,
   type ValueAttributes,
@@ -21,7 +23,7 @@ type Varb<
   valueParams: VP;
   displayName: S;
   validate: ValidateValue<VN>;
-  // makeDefault: MakeDefaultValue<VN>
+  makeDefault: MakeDefaultValue<VN>;
 };
 
 export type BaseVarbAttributes = Varb;
@@ -31,37 +33,73 @@ type SectionVarbsBase = Record<
   Record<string, BaseVarbAttributes>
 >;
 
+type MakeVarbProps<
+  VN extends ValueName,
+  S extends string,
+  P extends ValueParams<VN>
+> = Merge<
+  {
+    valueName: VN;
+    displayName: S;
+    valueParams: P;
+  },
+  MakeVarbOptions<VN>
+>;
+
+type MakeVarbOptions<VN extends ValueName> = {
+  validate?: ValidateValue<VN>;
+  makeDefault?: MakeDefaultValue<VN>;
+};
+
 function makeVarb<
   VN extends ValueName,
   S extends string,
   P extends ValueParams<VN>
->(
-  valueName: VN,
-  displayName: S,
-  valueParams: P,
-  validate: ValidateValue<VN> = allValueAttributes[valueName]
-    .defaultValidate as ValidateValue<VN>
-): Varb<VN, S, P> {
-  return { valueName, displayName, valueParams, validate };
+>({
+  valueName,
+  makeDefault = allValueAttributes[valueName].makeDefault,
+  validate = allValueAttributes[valueName].defaultValidate,
+  ...rest
+}: MakeVarbProps<VN, S, P>): Varb<VN, S, P> {
+  return {
+    valueName,
+    makeDefault,
+    validate,
+    ...rest,
+  };
 }
 
 const vS = {
   id(): Varb<"id", "ID", {}> {
-    return makeVarb("id", "ID", {});
+    return makeVarb({
+      valueName: "id",
+      displayName: "ID",
+      valueParams: {},
+    });
   },
   linkedId<S extends string, P extends ValueParams<"linkedId">>(
     displayName: S,
     idParams: P,
-    validate?: ValidateValue<"linkedId">
+    options: MakeVarbOptions<"linkedId"> = {}
   ): Varb<"linkedId", S, P> {
-    return makeVarb("linkedId", displayName, idParams, validate);
+    return makeVarb({
+      valueName: "linkedId",
+      displayName,
+      valueParams: idParams,
+      ...options,
+    });
   },
   gen<VN extends Exclude<ValueName, "id" | "linkedId">, S extends string>(
     valueName: VN,
     displayName: S,
-    validate?: ValidateValue<VN>
+    options: MakeVarbOptions<VN> = {}
   ): Varb<VN, S, {}> {
-    return makeVarb(valueName, displayName, {}, validate);
+    return makeVarb({
+      valueName,
+      displayName,
+      valueParams: {},
+      ...options,
+    });
   },
   date(): Varb<"date", "Date"> {
     return this.gen("date", "Date");
@@ -114,12 +152,12 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       rentPortionMonthly: vS.gen("number", "Rent portion monthly"),
       rentPortionMonthlyNext: vS.gen("number", "Next rent portion monthly"),
-      rentPortionDate: vS.gen("date", "Rent portion date", valS.validate.date),
-      rentPortionDateNext: vS.gen(
-        "date",
-        "Next rent portion date",
-        valS.validate.dateOrEmpty
-      ),
+      rentPortionDate: vS.gen("date", "Rent portion date", {
+        validate: valS.validate.date,
+      }),
+      rentPortionDateNext: vS.gen("date", "Next rent portion date", {
+        validate: valS.validate.dateOrEmpty,
+      }),
     },
     paymentGroup: vsS.idOnly(),
     unit: vsS.idOnly(),
@@ -127,7 +165,9 @@ export const allVarbAttributes = makeSchemaStructure(
     otherPayer: vsS.idOnly(),
     hhPayment: {
       id: vS.id(),
-      date: vS.gen("date", "Date", valS.validate.dateOrEmpty),
+      date: vS.gen("date", "Date", {
+        validate: valS.validate.date,
+      }),
       payerCategory: vS.gen("payerCategory", "Payer category"),
       payer: vS.gen("payer", "Payer"),
       amount: vS.gen("number", "Amount"),
@@ -211,12 +251,16 @@ export const allVarbAttributes = makeSchemaStructure(
       description: vS.gen("descriptionChargeOngoing", "Description"),
       amount: vS.gen("number", "Amount"),
       frequency: vS.gen("ongoingFrequency", "Frequency"),
-      startDate: vS.gen("date", "Start date", valS.validate.date),
+      startDate: vS.gen("date", "Start date", {
+        validate: valS.validate.date,
+      }),
       paymentGroupId: vS.linkedId("Payment group ID", {
         sectionName: "paymentGroup",
         onDelete: "keep",
       }),
-      endDate: vS.gen("date", "End date", valS.validate.dateOrEmpty),
+      endDate: vS.gen("date", "End date", {
+        validate: valS.validate.dateOrEmpty,
+      }),
       subsidyContractId: vS.linkedId("Subsidy contract ID", {
         sectionName: "subsidyContract",
         onDelete: "delete",
@@ -284,17 +328,30 @@ export const allVarbAttributes = makeSchemaStructure(
           sectionName: "household",
           onDelete: "setEmpty",
         },
-        valS.validate.stringNotEmpty
+        {
+          makeDefault: allValueAttributes.hhIdFromName.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
       ),
       amount: vS.gen("number", "Amount"),
-      description: vS.gen("descriptionChargeOnetime", "Description", (value) =>
-        validateUnionValueNoEmpty(value, "descriptionChargeOnetime")
-      ),
-      unitName: vS.gen("string", "Unit name"),
-      unitId: vS.linkedId("Unit ID", {
-        sectionName: "unit",
-        onDelete: "setEmpty",
+      description: vS.gen("descriptionChargeOnetime", "Description", {
+        validate: (value) =>
+          validateUnionValueNoEmpty(value, "descriptionChargeOnetime"),
       }),
+      unitName: vS.gen("string", "Unit name", {
+        makeDefault: allValueAttributes.unitNameFromHouseholdId.makeDefault,
+      }),
+      unitId: vS.linkedId(
+        "Unit ID",
+        {
+          sectionName: "unit",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.unitIdFromName.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
       expenseId: vS.linkedId("Expense ID", {
         sectionName: "expense",
         onDelete: "setEmpty",

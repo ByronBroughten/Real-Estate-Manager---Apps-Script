@@ -24,7 +24,9 @@ const descriptionChargeOnetime = [
 
 const descriptionPaymentAllocation = [
   "Normal payment",
+  "Rent forgiven",
   "Deposit payment",
+  "Deposit deduction",
   "Deposit repayment",
 ] as const;
 

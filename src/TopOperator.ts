@@ -49,7 +49,8 @@ export class TopOperator extends SpreadsheetBase {
       const sheet = this.ss.sheet(sectionName);
       const triggerColIdx = sheet.colIdxBase1("enter");
       const triggerRowIdx = sheet.topBodyRowIdxBase1;
-      return colIdx === triggerColIdx && rowIdx === triggerRowIdx;
+      const triggered = colIdx === triggerColIdx && rowIdx === triggerRowIdx;
+      return triggered;
     } else return false;
   }
   buildHhLedger(): void {
@@ -224,6 +225,7 @@ export class TopOperator extends SpreadsheetBase {
     const values = rAddOnetime.validateValues(
       Arr.excludeStrict(rAddOnetime.varbNames, ["id", "enter", "householdName"])
     );
+
     const sOnetime = ss.sheet("hhCharge");
     sOnetime.addRowWithValues(values);
     rAddOnetime.resetToDefault();

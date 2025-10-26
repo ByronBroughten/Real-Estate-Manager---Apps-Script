@@ -131,6 +131,9 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
     if (this.varbName === "id") {
       throw new Error("Cannot make default value for id varb");
     }
-    return this.valueAttributes.makeDefault() as VarbValue<SN, VN>;
+    return (this.attributes as BaseVarbAttributes).makeDefault() as VarbValue<
+      SN,
+      VN
+    >;
   }
 }
