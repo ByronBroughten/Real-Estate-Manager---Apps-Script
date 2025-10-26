@@ -279,7 +279,7 @@ export const allVarbAttributes = makeSchemaStructure(
     hhCharge: {
       id: vS.id(),
       date: vS.date(),
-      chargeSourceId: vS.linkedId("Charge source ID", {
+      chargeSourceId: vS.linkedId("Ongoing charge ID", {
         sectionName: "hhChargeOngoing",
         onDelete: "keep",
       }),
