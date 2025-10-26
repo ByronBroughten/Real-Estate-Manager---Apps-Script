@@ -217,7 +217,7 @@ export class TopOperator extends SpreadsheetBase {
       }
     });
   }
-  addHhOnetimeCharge() {
+  addHhChargeOnetime() {
     const ss = this.ss;
     const sAddOnetime = ss.sheet("addHhChargeOnetime");
     const rAddOnetime = sAddOnetime.topBodyRow;

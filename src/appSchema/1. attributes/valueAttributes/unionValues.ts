@@ -85,6 +85,17 @@ function validateUnionValue<N extends UnionValueName>(
   }
 }
 
+export function validateUnionValueNoEmpty<N extends UnionValueName>(
+  value: unknown,
+  name: N
+): UnionValue<N> {
+  if ((unionValues[name] as unknown[]).includes(value)) {
+    return value as UnionValue<N>;
+  } else {
+    throw validationError(value, `'${name}' not-empty union value element.`);
+  }
+}
+
 type UnionValueAttributesBase = {
   [K in UnionValueName]: ValueSchema<UnionValue<K>>;
 };

@@ -30,7 +30,7 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
     if (top.isEnterValue(sheetId, colId, rowId)) {
       const { sectionName } = top.sectionsSchema.sectionBySheetId(sheetId);
       if (sectionName === "addHhChargeOnetime") {
-        top.addHhOnetimeCharge();
+        top.addHhChargeOnetime();
       } else if (sectionName === "buildHhLedger") {
         top.buildHhLedger();
       }
@@ -38,9 +38,9 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   }
 }
 
-function addHhOnetimeCharge() {
+function addHhChargeOnetime() {
   const top = TopOperator.init();
-  top.addHhOnetimeCharge();
+  top.addHhChargeOnetime();
 }
 
 function resetTriggers(doResetTriggers: boolean = true) {

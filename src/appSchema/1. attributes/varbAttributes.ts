@@ -10,6 +10,7 @@ import {
   type ValueName,
   type ValueParams,
 } from "./valueAttributes";
+import { validateUnionValueNoEmpty } from "./valueAttributes/unionValues";
 
 type Varb<
   VN extends ValueName = ValueName,
@@ -102,7 +103,7 @@ export const allVarbAttributes = makeSchemaStructure(
       issuer: vS.gen("string", "Issuer"),
       charge: vS.gen("number", "Charge"),
       payment: vS.gen("number", "Payment"),
-      balance: vS.gen("ledgerBalance", "Balance"),
+      balance: vS.gen("ledgerBalance", "Balance owed"),
       notes: vS.gen("string", "Notes"),
     },
     subsidyContract: {
@@ -285,16 +286,19 @@ export const allVarbAttributes = makeSchemaStructure(
         },
         valS.validate.stringNotEmpty
       ),
+      amount: vS.gen("number", "Amount"),
+      description: vS.gen("descriptionChargeOnetime", "Description", (value) =>
+        validateUnionValueNoEmpty(value, "descriptionChargeOnetime")
+      ),
+      unitName: vS.gen("string", "Unit name"),
+      unitId: vS.linkedId("Unit ID", {
+        sectionName: "unit",
+        onDelete: "setEmpty",
+      }),
       expenseId: vS.linkedId("Expense ID", {
         sectionName: "expense",
         onDelete: "setEmpty",
       }),
-      amount: vS.gen("number", "Amount"),
-      description: vS.gen(
-        "string",
-        "Description",
-        valS.validate.stringNotEmpty
-      ),
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
     },
