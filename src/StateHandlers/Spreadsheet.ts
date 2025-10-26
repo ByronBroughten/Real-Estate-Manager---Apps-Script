@@ -48,14 +48,6 @@ export class Spreadsheet extends SpreadsheetBase {
     const lastColIdx = range.getLastColumn();
     const lastRowIdx = range.getLastRow();
 
-    const isAddSafe = schema.varbNames.length === lastColIdx;
-    const isAddOnly = props.isAddOnly || false;
-    if (isAddOnly && !isAddSafe) {
-      throw new Error(
-        "Sheet is addOnly but not addSafe. Not enough varbNames for columns."
-      );
-    }
-
     const headerRowRange = sheet.getRange(
       this.headerRowIdxBase1,
       1,
@@ -63,6 +55,18 @@ export class Spreadsheet extends SpreadsheetBase {
       lastColIdx
     );
     const headerValues = headerRowRange.getValues()[0];
+    const trueHeaders = headerValues.filter((header) => {
+      return header[0] !== "_";
+    });
+
+    const isAddSafe = schema.varbNames.length === trueHeaders.length;
+    const isAddOnly = props.isAddOnly || false;
+    if (isAddOnly && !isAddSafe) {
+      throw new Error(
+        "Sheet is addOnly but not addSafe. Not enough varbNames for columns."
+      );
+    }
+
     const headerIndices = this.getVarbNameIndicesBase1(
       sectionName,
       headerValues

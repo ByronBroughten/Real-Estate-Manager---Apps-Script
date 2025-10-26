@@ -279,7 +279,11 @@ export const allVarbAttributes = makeSchemaStructure(
     hhCharge: {
       id: vS.id(),
       date: vS.date(),
-      chargeSourceId: vS.linkedId("Ongoing charge ID", {
+      hhMembersFullName: vS.gen(
+        "hhMembersFullNamesFromId",
+        "HH members full name"
+      ),
+      chargeOngoingId: vS.linkedId("Ongoing charge ID", {
         sectionName: "hhChargeOngoing",
         onDelete: "keep",
       }),
@@ -287,10 +291,6 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "household",
         onDelete: "delete",
       }),
-      hhMembersFullName: vS.gen(
-        "hhMembersFullNamesFromId",
-        "HH members full name"
-      ),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
         onDelete: "delete",

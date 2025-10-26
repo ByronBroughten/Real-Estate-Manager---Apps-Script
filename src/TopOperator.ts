@@ -128,7 +128,7 @@ export class TopOperator extends SpreadsheetBase {
       hhCharge.addRowWithValues({
         date,
         amount: proratedAmount,
-        chargeSourceId: chargeOngoing.value("id"),
+        chargeOngoingId: chargeOngoing.value("id"),
         ...chargeOngoing.values([
           "portion",
           "description",
