@@ -41,7 +41,7 @@ export class TopOperator extends SpreadsheetBase {
     return new TopOperator({ ...ss.spreadsheetProps, ss });
   }
   addRecurringTransaction() {
-    // implement this for updating rent amounts
+    // implement this for updating rent amount
   }
   isEnterValue(sheetId: number, colIdx: number, rowIdx: number) {
     const { sectionName } = this.sectionsSchema.sectionBySheetId(sheetId);
@@ -217,6 +217,25 @@ export class TopOperator extends SpreadsheetBase {
         });
       }
     });
+  }
+  addHhPaymentOnetime() {
+    const ss = this.ss;
+    const sAddOnetime = ss.sheet("addHhPaymentOnetime");
+    const rAddOnetime = sAddOnetime.topBodyRow;
+    const payerValues = rAddOnetime.validateValues(["date"]);
+
+    const sPayment = ss.sheet("hhPayment");
+    sPayment.addRowWithValues(values);
+
+    const sAllocation = ss.sheet("hhPaymentAllocation");
+    sAllocation.addRowWithValues({
+      paymentId: sPayment.topBodyRow.value("id"),
+      ...values,
+    });
+
+    rAddOnetime.resetToDefault();
+    rAddOnetime.setValue("date", "=TODAY()");
+    ss.batchUpdateRanges();
   }
   addHhChargeOnetime() {
     const ss = this.ss;

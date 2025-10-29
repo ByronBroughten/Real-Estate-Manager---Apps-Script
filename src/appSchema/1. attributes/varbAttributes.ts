@@ -168,6 +168,8 @@ export const allVarbAttributes = makeSchemaStructure(
       date: vS.gen("date", "Date", {
         validate: valS.validate.date,
       }),
+      householdAllocated: vS.gen("householdAllocated", "Household allocated"),
+      numAllocated: vS.gen("numAllocated", "Number allocated"),
       payerCategory: vS.gen("payerCategory", "Payer category"),
       payer: vS.gen("payer", "Payer"),
       amount: vS.gen("number", "Amount"),
@@ -231,6 +233,125 @@ export const allVarbAttributes = makeSchemaStructure(
         "Subsidy contract name"
       ),
       notes: vS.gen("string", "Notes"),
+    },
+    addHhPaymentOnetime: {
+      id: vS.id(),
+      date: vS.date(),
+      householdName: vS.gen("string", "Household name"),
+      householdId: vS.linkedId(
+        "Household ID",
+        {
+          sectionName: "household",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      payerCategory: vS.gen("payerCategory", "Payer category"),
+      payer: vS.gen("payer", "Payer"),
+      subsidyProgramName: vS.gen("string", "Subsidy program name"),
+      subsidyProgramId: vS.linkedId(
+        "Subsidy program ID",
+        {
+          sectionName: "subsidyProgram",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault:
+            allValueAttributes.subsidyProgramIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      otherPayerName: vS.gen("string", "Other payer name"),
+      otherPayerId: vS.linkedId(
+        "Other payer ID",
+        {
+          sectionName: "otherPayer",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.otherPayerIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      portion: vS.gen("rentPortionName", "Portion"),
+      description: vS.gen("descriptionPaymentAllocation", "Description"),
+      amount: vS.gen("number", "Amount"),
+      detailsVerified: vS.gen("yesOrNo", "Details verified", {
+        makeDefault: () => "No",
+      }),
+      unitName: vS.gen("string", "Unit name", {
+        makeDefault: allValueAttributes.unitNameFromHouseholdIdOp.makeDefault,
+      }),
+      unitId: vS.linkedId(
+        "Unit ID",
+        {
+          sectionName: "unit",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.unitIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      subsidyContractName: vS.gen("string", "Subsidy contract name"),
+      subsidyContractId: vS.linkedId(
+        "Subsidy contract ID",
+        {
+          sectionName: "subsidyContract",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault:
+            allValueAttributes.subsidyContractIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      notes: vS.gen("string", "Notes"),
+      enter: vS.gen("boolean", "Enter"),
+    },
+    addHhChargeOnetime: {
+      id: vS.id(),
+      date: vS.date(),
+      householdName: vS.gen("string", "Household name"),
+      householdId: vS.linkedId(
+        "Household ID",
+        {
+          sectionName: "household",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      amount: vS.gen("number", "Amount"),
+      description: vS.gen("descriptionChargeOnetime", "Description", {
+        validate: (value) =>
+          validateUnionValueNoEmpty(value, "descriptionChargeOnetime"),
+      }),
+      unitName: vS.gen("string", "Unit name", {
+        makeDefault: allValueAttributes.unitNameFromHouseholdIdOp.makeDefault,
+      }),
+      unitId: vS.linkedId(
+        "Unit ID",
+        {
+          sectionName: "unit",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.unitIdFromNameOp.makeDefault,
+          validate: valS.validate.stringNotEmpty,
+        }
+      ),
+      expenseId: vS.linkedId("Expense ID", {
+        sectionName: "expense",
+        onDelete: "setEmpty",
+      }),
+      notes: vS.gen("string", "Notes"),
+      enter: vS.gen("boolean", "Enter"),
     },
     hhChargeOngoing: {
       id: vS.id(),
@@ -317,47 +438,6 @@ export const allVarbAttributes = makeSchemaStructure(
         onDelete: "keep",
       }),
       notes: vS.gen("string", "Notes"),
-    },
-    addHhChargeOnetime: {
-      id: vS.id(),
-      date: vS.date(),
-      householdName: vS.gen("string", "Household name"),
-      householdId: vS.linkedId(
-        "Household ID",
-        {
-          sectionName: "household",
-          onDelete: "setEmpty",
-        },
-        {
-          makeDefault: allValueAttributes.hhIdFromName.makeDefault,
-          validate: valS.validate.stringNotEmpty,
-        }
-      ),
-      amount: vS.gen("number", "Amount"),
-      description: vS.gen("descriptionChargeOnetime", "Description", {
-        validate: (value) =>
-          validateUnionValueNoEmpty(value, "descriptionChargeOnetime"),
-      }),
-      unitName: vS.gen("string", "Unit name", {
-        makeDefault: allValueAttributes.unitNameFromHouseholdId.makeDefault,
-      }),
-      unitId: vS.linkedId(
-        "Unit ID",
-        {
-          sectionName: "unit",
-          onDelete: "setEmpty",
-        },
-        {
-          makeDefault: allValueAttributes.unitIdFromName.makeDefault,
-          validate: valS.validate.stringNotEmpty,
-        }
-      ),
-      expenseId: vS.linkedId("Expense ID", {
-        sectionName: "expense",
-        onDelete: "setEmpty",
-      }),
-      notes: vS.gen("string", "Notes"),
-      enter: vS.gen("boolean", "Enter"),
     },
     household: {
       id: vS.id(),
