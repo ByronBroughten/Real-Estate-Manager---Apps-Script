@@ -222,15 +222,59 @@ export class TopOperator extends SpreadsheetBase {
     const ss = this.ss;
     const sAddOnetime = ss.sheet("addHhPaymentOnetime");
     const rAddOnetime = sAddOnetime.topBodyRow;
-    const payerValues = rAddOnetime.validateValues(["date"]);
 
+    const allValues = rAddOnetime.validateValues();
+    const payerValues = Obj.strictPick(allValues, [
+      "date",
+      "payerCategory",
+      "detailsVerified",
+      "paymentHhId",
+      "subsidyProgramId",
+      "otherPayerId",
+    ]);
+
+    switch (payerValues.payerCategory) {
+      case "Household":
+        if (!payerValues.paymentHhId) {
+          throw new Error("Household ID is required");
+        }
+        break;
+      case "Subsidy program":
+        if (!payerValues.subsidyProgramId) {
+          throw new Error("Subsidy program ID is required");
+        }
+        break;
+      case "Other payer":
+        if (!payerValues.otherPayerId) {
+          throw new Error("Other payer ID is required");
+        }
+        break;
+      default: {
+        throw new Error("Payer category is required");
+      }
+    }
     const sPayment = ss.sheet("hhPayment");
-    sPayment.addRowWithValues(values);
+    sPayment.addRowWithValues(payerValues);
+
+    const allocateValues = Obj.strictPick(allValues, [
+      "householdId",
+      "portion",
+      "description",
+      "amount",
+      "unitId",
+      "subsidyContractId",
+    ]);
+
+    if (allocateValues.portion === "Subsidy program") {
+      if (!allocateValues.subsidyContractId) {
+        throw new Error("Subsidy contract ID is required");
+      }
+    }
 
     const sAllocation = ss.sheet("hhPaymentAllocation");
     sAllocation.addRowWithValues({
       paymentId: sPayment.topBodyRow.value("id"),
-      ...values,
+      ...allocateValues,
     });
 
     rAddOnetime.resetToDefault();
