@@ -12,6 +12,7 @@ const literalValues = {
   numAllocated: `=COUNTIF(hhPaymentAllocation[Payment ID], "="&SAME_ROW("ID"))`,
   householdAllocated: `=IFS(SAME_ROW("Num allocated")=0, "", SAME_ROW("Num allocated")>1, "multiple", SAME_ROW("Num allocated")=1, ROW_MATCH(hhPaymentAllocation[HH members full name], hhPaymentAllocation[Payment ID], "ID"))`,
   hhNameFromId: `=ROW_MATCH(household[Name], household[ID],"Household ID")`,
+  hhNameFromIdOp: `=ROW_MATCH_OR_BLANK(household[Name], household[ID],"Household ID")`,
   hhIdFromNameOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Household name")`,
   paymentHhIdFromNameOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Payment HH name")`,
   subsidyProgramIdFromNameOp: `=ROW_MATCH_OR_BLANK(subsidyProgram[ID], subsidyProgram[Name], "Subsidy program name")`,

@@ -242,7 +242,7 @@ export class TopOperator extends SpreadsheetBase {
     }, chargesOngoing);
     hhPayment.sortWithoutAddingChanges("subsidyProgramId");
     hhPayment.sortWithoutAddingChanges("date");
-    hhPayment.sort("hhMembersFullName");
+    hhPayment.sort("hhName");
     ss.batchUpdateRanges();
   }
   private buildFromChargesOngoing(

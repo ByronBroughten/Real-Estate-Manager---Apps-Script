@@ -189,10 +189,7 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "household",
         onDelete: "keep",
       }),
-      hhMembersFullName: vS.gen(
-        "hhMembersFullNamesFromId",
-        "HH members full name"
-      ),
+      hhName: vS.gen("hhNameFromIdOp", "Household name"),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
         sectionName: "subsidyContract",
         onDelete: "keep",
