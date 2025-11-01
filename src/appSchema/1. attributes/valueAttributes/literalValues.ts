@@ -5,7 +5,7 @@ import { va, type ValueSchema } from "../valueAttributes";
 const literalValues = {
   amountAllocated: `=IF(COUNTIF(hhPaymentAllocation[Payment ID], SAME_ROW("ID")), SUM(FILTER(hhPaymentAllocation[Amount], hhPaymentAllocation[Payment ID]=SAME_ROW("ID"))), 0)`,
   getPaymentDate: `=ROW_MATCH(hhPayment[Date], hhPayment[ID], "Payment ID")`,
-  getPaymentProcessed: `=ROW_MATCH(hhPayment[Payment processed], hhPayment[ID], "Payment ID")`,
+  getPaymentProcessed: `=ROW_MATCH(hhPayment[Processed], hhPayment[ID], "Payment ID")`,
   getPayer: `=ROW_MATCH(hhPayment[Payer], hhPayment[ID], "Payment ID")`,
   payer: `=IFS(SAME_ROW("Payer category")="Household", "Household", SAME_ROW("Payer category")="Subsidy program", SAME_ROW("Subsidy program name"), SAME_ROW("Payer category")="Other payer", SAME_ROW("Other payer name"))`,
   paymentProcessed: `=IF(SAME_ROW("Amount")=SAME_ROW("Allocated amount"), IF(SAME_ROW("Date")<>"",  IF(SAME_ROW("Details verified")="Yes", "Yes", "No"), "No"), "No")`,
