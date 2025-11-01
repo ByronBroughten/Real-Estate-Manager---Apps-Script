@@ -198,7 +198,7 @@ export const allVarbAttributes = makeSchemaStructure(
         "subsidyProgramNameFromIdOp",
         "Subsidy program name"
       ),
-      otherPayerID: vS.linkedId("Other payer ID", {
+      otherPayerId: vS.linkedId("Other payer ID", {
         sectionName: "otherPayer",
         onDelete: "keep",
       }),
