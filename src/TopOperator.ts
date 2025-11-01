@@ -1,5 +1,5 @@
 import {
-  isApiSectionName,
+  type GroupSectionName,
   type SectionName,
 } from "./appSchema/1. attributes/sectionAttributes";
 import type {
@@ -14,7 +14,6 @@ import type { Row } from "./StateHandlers/Row";
 import type { Sheet } from "./StateHandlers/Sheet";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
-import { Arr } from "./utils/Arr";
 import { Obj } from "./utils/Obj";
 import { valS } from "./utils/validation";
 
@@ -43,24 +42,85 @@ export class TopOperator extends SpreadsheetBase {
   addRecurringTransaction() {
     // implement this for updating rent amount
   }
-  isEnterValue(sheetId: number, colIdx: number, rowIdx: number) {
-    const { sectionName } = this.sectionsSchema.sectionBySheetId(sheetId);
-    if (isApiSectionName(sectionName)) {
-      const sheet = this.ss.sheet(sectionName);
-      const triggerColIdx = sheet.colIdxBase1("enter");
-      const triggerRowIdx = sheet.topBodyRowIdxBase1;
-      const triggered = colIdx === triggerColIdx && rowIdx === triggerRowIdx;
-      return triggered;
-    } else return false;
+  isApiEnterTriggered<SN extends GroupSectionName<"api">>(
+    sectionName: SN,
+    colIdx: number,
+    rowIdx: number
+  ) {
+    const sheet = this.ss.sheet(sectionName);
+    const triggerColIdx = sheet.colIdxBase1("enter");
+    const triggerRowIdx = sheet.topBodyRowIdxBase1;
+    const triggered = colIdx === triggerColIdx && rowIdx === triggerRowIdx;
+    return triggered;
   }
-  buildHhLedger(): void {
+  // APIs
+  addHhPaymentOnetime(values: SectionValues<"addHhPaymentOnetime">) {
+    const payerValues = Obj.strictPick(values, [
+      "date",
+      "payerCategory",
+      "detailsVerified",
+      "paymentHhId",
+      "subsidyProgramId",
+      "otherPayerId",
+    ]);
+
+    switch (payerValues.payerCategory) {
+      case "Household":
+        if (!payerValues.paymentHhId) {
+          throw new Error("Household ID is required");
+        }
+        break;
+      case "Subsidy program":
+        if (!payerValues.subsidyProgramId) {
+          throw new Error("Subsidy program ID is required");
+        }
+        break;
+      case "Other payer":
+        if (!payerValues.otherPayerId) {
+          throw new Error("Other payer ID is required");
+        }
+        break;
+      default: {
+        throw new Error("Payer category is required");
+      }
+    }
+    const sPayment = this.ss.sheet("hhPayment");
+    sPayment.addRowWithValues(payerValues);
+
+    const allocateValues = Obj.strictPick(values, [
+      "householdId",
+      "portion",
+      "description",
+      "amount",
+      "unitId",
+      "subsidyContractId",
+    ]);
+
+    if (allocateValues.portion === "Subsidy program") {
+      if (!allocateValues.subsidyContractId) {
+        throw new Error("Subsidy contract ID is required");
+      }
+    }
+
+    const sAllocation = this.ss.sheet("hhPaymentAllocation");
+    sAllocation.addRowWithValues({
+      paymentId: sPayment.topBodyRow.value("id"),
+      ...allocateValues,
+    });
+    this.ss.batchUpdateRanges();
+  }
+  addHhChargeOnetime(values: SectionValues<"addHhChargeOnetime">) {
+    const relevant = Obj.strictOmit(values, "id", "enter", "householdName");
+    const sOnetime = this.ss.sheet("hhCharge");
+    sOnetime.addRowWithValues(relevant);
+    this.ss.batchUpdateRanges();
+  }
+  buildHhLedger(values: SectionValues<"buildHhLedger">): void {
     const ss = this.ss;
     const hhLedger = ss.sheet("hhLedger");
     hhLedger.DELETE_ALL_BODY_ROWS();
 
-    const { householdId, portion, subsidyContractId } = ss
-      .sheet("buildHhLedger")
-      .topBodyRow.values();
+    const { householdId, portion, subsidyContractId } = values;
 
     function filter<SN extends LedgerInputSn>(row: Row<SN>): boolean {
       const vals = row.values(["householdId", "portion", "subsidyContractId"]);
@@ -217,83 +277,6 @@ export class TopOperator extends SpreadsheetBase {
         });
       }
     });
-  }
-  addHhPaymentOnetime() {
-    const ss = this.ss;
-    const sAddOnetime = ss.sheet("addHhPaymentOnetime");
-    const rAddOnetime = sAddOnetime.topBodyRow;
-
-    const allValues = rAddOnetime.validateValues();
-    const payerValues = Obj.strictPick(allValues, [
-      "date",
-      "payerCategory",
-      "detailsVerified",
-      "paymentHhId",
-      "subsidyProgramId",
-      "otherPayerId",
-    ]);
-
-    switch (payerValues.payerCategory) {
-      case "Household":
-        if (!payerValues.paymentHhId) {
-          throw new Error("Household ID is required");
-        }
-        break;
-      case "Subsidy program":
-        if (!payerValues.subsidyProgramId) {
-          throw new Error("Subsidy program ID is required");
-        }
-        break;
-      case "Other payer":
-        if (!payerValues.otherPayerId) {
-          throw new Error("Other payer ID is required");
-        }
-        break;
-      default: {
-        throw new Error("Payer category is required");
-      }
-    }
-    const sPayment = ss.sheet("hhPayment");
-    sPayment.addRowWithValues(payerValues);
-
-    const allocateValues = Obj.strictPick(allValues, [
-      "householdId",
-      "portion",
-      "description",
-      "amount",
-      "unitId",
-      "subsidyContractId",
-    ]);
-
-    if (allocateValues.portion === "Subsidy program") {
-      if (!allocateValues.subsidyContractId) {
-        throw new Error("Subsidy contract ID is required");
-      }
-    }
-
-    const sAllocation = ss.sheet("hhPaymentAllocation");
-    sAllocation.addRowWithValues({
-      paymentId: sPayment.topBodyRow.value("id"),
-      ...allocateValues,
-    });
-
-    rAddOnetime.resetToDefault();
-    rAddOnetime.setValue("date", "=TODAY()");
-    ss.batchUpdateRanges();
-  }
-  addHhChargeOnetime() {
-    const ss = this.ss;
-    const sAddOnetime = ss.sheet("addHhChargeOnetime");
-    const rAddOnetime = sAddOnetime.topBodyRow;
-    const values = rAddOnetime.validateValues(
-      Arr.excludeStrict(rAddOnetime.varbNames, ["id", "enter", "householdName"])
-    );
-
-    const sOnetime = ss.sheet("hhCharge");
-    sOnetime.addRowWithValues(values);
-    rAddOnetime.resetToDefault();
-    rAddOnetime.setValue("date", "=TODAY()");
-    ss.batchUpdateRanges();
   }
   monthlyRentUpdate() {
     this.recurringPriceUpdate("household", {

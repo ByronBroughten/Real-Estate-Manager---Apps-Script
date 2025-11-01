@@ -1,4 +1,9 @@
-import type { SectionName } from "../appSchema/1. attributes/sectionAttributes";
+import {
+  isInSnGroup,
+  type GroupSectionName,
+  type SectionName,
+  type SnGroupName,
+} from "../appSchema/1. attributes/sectionAttributes";
 import type {
   SectionValues,
   VarbName,
@@ -57,6 +62,21 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         this.row(b).value(varbName)
       );
     });
+  }
+  validateThis<GN extends SnGroupName>(
+    snGroupName: GN
+  ): Sheet<GroupSectionName<GN>> {
+    if (isInSnGroup(snGroupName, this.sectionName)) {
+      return this as unknown as Sheet<GroupSectionName<GN>>;
+    } else {
+      throw new Error(`Not a sheet of from group "${snGroupName}"`);
+    }
+  }
+  isApiEnterTriggered(e: { colIdx: number; rowIdx: number }) {
+    const api = this.validateThis("api");
+    const triggerColIdx = api.colIdxBase1("enter");
+    const triggerRowIdx = api.topBodyRowIdxBase1;
+    return e.colIdx === triggerColIdx && e.rowIdx === triggerRowIdx;
   }
   addAllVarbsAsChanges(): void {
     this.orderedRows.forEach((row) => row.addAllVarbsAsChanges());

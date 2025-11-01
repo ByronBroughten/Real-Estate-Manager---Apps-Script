@@ -56,12 +56,23 @@ export type SectionAttributes<SN extends SectionNameSimple> =
 
 export type SectionName<S extends SectionNameSimple = SectionNameSimple> = S;
 
-export const apiSectionNames = Arr.extractStrict(sectionNames, [
-  "addHhChargeOnetime",
-] as const);
+const sectionNameGroups = {
+  api: Arr.extractStrict(sectionNames, [
+    "addHhChargeOnetime",
+    "buildHhLedger",
+    "addHhPaymentOnetime",
+  ] as const),
+};
 
-export type ApiSectionName = (typeof apiSectionNames)[number];
+type SectionNameGroups = typeof sectionNameGroups;
+export type SnGroupName = keyof SectionNameGroups;
 
-export function isApiSectionName(s: string): s is ApiSectionName {
-  return apiSectionNames.includes(s as ApiSectionName);
+export type GroupSectionName<GN extends SnGroupName> =
+  SectionNameGroups[GN][number];
+
+export function isInSnGroup<GN extends SnGroupName>(
+  groupName: GN,
+  sn: string
+): sn is GroupSectionName<GN> {
+  return sectionNameGroups[groupName].includes(sn as GroupSectionName<GN>);
 }

@@ -68,6 +68,17 @@ export const Obj = {
       return objNext;
     }, {} as StrictPick<O, KS>);
   },
+  strictOmit<O extends object, KS extends keyof O>(
+    obj: O,
+    ...keysToOmit: KS[]
+  ): StrictOmit<O, KS> {
+    return Obj.keys(obj).reduce((objNext, key) => {
+      if (!keysToOmit.includes(key as KS)) {
+        (objNext as O)[key] = obj[key];
+      }
+      return objNext;
+    }, {} as StrictOmit<O, KS>);
+  },
   keys<O extends object>(obj: O): Keys<O> {
     return Object.keys(obj) as any;
   },

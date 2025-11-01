@@ -104,12 +104,21 @@ const vS = {
   date(): Varb<"date", "Date"> {
     return this.gen("date", "Date");
   },
+  dateDefaultToday(): Varb<"date", "Date"> {
+    return this.gen("date", "Date", {
+      makeDefault: defaults.todayFormula,
+    });
+  },
 };
 
 const vsS = {
   idOnly(): { id: Varb<"id", "ID", {}> } {
     return { id: vS.id() };
   },
+};
+
+const defaults = {
+  todayFormula: () => "=TODAY()",
 };
 
 export const allVarbAttributes = makeSchemaStructure(
@@ -236,7 +245,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     addHhPaymentOnetime: {
       id: vS.id(),
-      date: vS.date(),
+      date: vS.dateDefaultToday(),
       // Allocation
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
@@ -327,7 +336,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     addHhChargeOnetime: {
       id: vS.id(),
-      date: vS.date(),
+      date: vS.dateDefaultToday(),
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
         "Household ID",
