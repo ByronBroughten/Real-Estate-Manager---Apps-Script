@@ -291,7 +291,9 @@ export const allVarbAttributes = makeSchemaStructure(
       detailsVerified: vS.gen("yesOrNo", "Details verified", {
         makeDefault: () => "No",
       }),
-      paymentHhName: vS.gen("string", "Payment HH name"),
+      paymentHhName: vS.gen("string", "Payment HH name", {
+        makeDefault: () => `=SAME_ROW("Household name")`,
+      }),
       paymentHhId: vS.linkedId(
         "Payment HH ID",
         {
