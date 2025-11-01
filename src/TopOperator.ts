@@ -57,12 +57,15 @@ export class TopOperator extends SpreadsheetBase {
   addHhPaymentOnetime(values: SectionValues<"addHhPaymentOnetime">) {
     const payerValues = Obj.strictPick(values, [
       "date",
+      "amount",
       "payerCategory",
       "detailsVerified",
       "paymentHhId",
       "subsidyProgramId",
       "otherPayerId",
     ]);
+
+    // Also no amount is getting added to payment
 
     switch (payerValues.payerCategory) {
       case "Household":
@@ -85,7 +88,10 @@ export class TopOperator extends SpreadsheetBase {
       }
     }
     const sPayment = this.ss.sheet("hhPayment");
-    sPayment.addRowWithValues(payerValues);
+    const paymentId = sPayment.addRowWithValues({
+      ...payerValues,
+      ...(payerValues.paymentHhId && { householdId: payerValues.paymentHhId }),
+    });
 
     const allocateValues = Obj.strictPick(values, [
       "householdId",
@@ -104,8 +110,8 @@ export class TopOperator extends SpreadsheetBase {
 
     const sAllocation = this.ss.sheet("hhPaymentAllocation");
     sAllocation.addRowWithValues({
-      paymentId: sPayment.topBodyRow.value("id"),
       ...allocateValues,
+      paymentId,
     });
     this.ss.batchUpdateRanges();
   }
