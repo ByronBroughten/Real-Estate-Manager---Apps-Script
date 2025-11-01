@@ -178,7 +178,7 @@ export const allVarbAttributes = makeSchemaStructure(
         validate: valS.validate.date,
       }),
       householdAllocated: vS.gen("householdAllocated", "Household allocated"),
-      numAllocated: vS.gen("numAllocated", "Number allocated"),
+      numAllocated: vS.gen("numAllocated", "Num allocated"),
       payerCategory: vS.gen("payerCategory", "Payer category"),
       payer: vS.gen("payer", "Payer"),
       amount: vS.gen("number", "Amount"),
