@@ -244,7 +244,9 @@ export const allVarbAttributes = makeSchemaStructure(
       id: vS.id(),
       date: vS.dateDefaultToday(),
       // Allocation
-      householdName: vS.gen("string", "Household name"),
+      householdName: vS.gen("string", "Household name", {
+        makeDefault: allValueAttributes.hhNameFromIdOp.makeDefault,
+      }),
       householdId: vS.linkedId(
         "Household ID",
         {
