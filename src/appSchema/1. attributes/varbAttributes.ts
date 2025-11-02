@@ -160,7 +160,7 @@ export const allVarbAttributes = makeSchemaStructure(
       issuer: vS.gen("string", "Issuer"),
       charge: vS.gen("number", "Charge"),
       payment: vS.gen("number", "Payment"),
-      balance: vS.gen("ledgerBalance", "Balance owed"),
+      balance: vS.gen("ledgerBalance", "Amount owed"),
       notes: vS.gen("string", "Notes"),
     },
     subsidyContract: {
