@@ -168,6 +168,9 @@ export class TopOperator extends SpreadsheetBase {
       this.ss.sheet("hhPaymentAllocation")
     );
     for (const row of filteredAllocations) {
+      if (row.value("processed") === "No") {
+        continue;
+      }
       const { amount, payer, ...rest } = row.values([
         "amount",
         "payer",
