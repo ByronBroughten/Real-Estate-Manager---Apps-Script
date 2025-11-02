@@ -16,11 +16,6 @@ function triggerFirstOfMonth() {
 //   top.buildOutCharges();
 // }
 
-// function buildHhLedger() {
-//   const top = TopOperator.init();
-//   top.buildHhLedger();
-// }
-
 // function buildOutPayments() {
 //   const top = TopOperator.init();
 //   top.buildOutPayments();
@@ -51,8 +46,10 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
       const apiRow = sheet.topBodyRow;
       const values = apiRow.validateValues();
 
-      apiRow.resetToDefault();
-      top.ss.batchUpdateRanges();
+      if (sectionName !== "buildHhLedger") {
+        apiRow.resetToDefault();
+        top.ss.batchUpdateRanges();
+      }
 
       try {
         top[sectionName](values as SectionValues<typeof sectionName> as any);

@@ -122,8 +122,7 @@ export class TopOperator extends SpreadsheetBase {
     this.ss.batchUpdateRanges();
   }
   buildHhLedger(values: SectionValues<"buildHhLedger">): void {
-    const ss = this.ss;
-    const hhLedger = ss.sheet("hhLedger");
+    const hhLedger = this.ss.sheet("hhLedger");
     hhLedger.DELETE_ALL_BODY_ROWS();
 
     const { householdId, portion, subsidyContractId } = values;
@@ -149,7 +148,7 @@ export class TopOperator extends SpreadsheetBase {
       return filteredRows;
     }
 
-    const filteredCharges = filteredRows(ss.sheet("hhCharge"));
+    const filteredCharges = filteredRows(this.ss.sheet("hhCharge"));
     for (const row of filteredCharges) {
       const { amount, ...rest } = row.values([
         "date",
@@ -165,7 +164,9 @@ export class TopOperator extends SpreadsheetBase {
       });
     }
 
-    const filteredAllocations = filteredRows(ss.sheet("hhPaymentAllocation"));
+    const filteredAllocations = filteredRows(
+      this.ss.sheet("hhPaymentAllocation")
+    );
     for (const row of filteredAllocations) {
       const { amount, payer, ...rest } = row.values([
         "amount",
@@ -284,19 +285,86 @@ export class TopOperator extends SpreadsheetBase {
       }
     });
   }
+
   monthlyRentUpdate() {
-    this.recurringPriceUpdate("household", {
-      dateCurrent: "rentIncreaseDateLast",
-      dateNext: "rentIncreaseDateNext",
-      priceCurrent: "rentChargeMonthly",
-      priceNext: "rentChargeMonthlyNext",
-    });
-    this.oneTimePriceUpdate("subsidyContract", {
-      dateNext: "rentPortionDateNext",
-      priceCurrent: "rentPortionMonthly",
-      priceNext: "rentPortionMonthlyNext",
-    });
+    // Fix the priceNext that probably got messed up by the old recurring price update function
+    // See if you need the functions to work differently between subsidyContract and rent
+    // Add params
+    // Do some rough tests
+
+    this.updateChargesOngoing();
+    this.buildOutLatestCharges();
+    // this.recurringPriceUpdate("household", {
+    //   dateCurrent: "rentIncreaseDateLast",
+    //   dateNext: "rentIncreaseDateNext",
+    //   priceCurrent: "rentChargeMonthly",
+    //   priceNext: "rentChargeMonthlyNext",
+    // });
+    // this.oneTimePriceUpdate("subsidyContract", {
+    //   dateNext: "rentPortionDateNext",
+    //   priceCurrent: "rentPortionMonthly",
+    //   priceNext: "rentPortionMonthlyNext",
+    // });
     this.ss.batchUpdateRanges();
+  }
+  buildOutLatestCharges() {
+    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
+    const charge = this.ss.sheet("hhCharge");
+
+    const actives = ongoingCharge.rowsFiltered({ endDate: "" });
+    for (const active of actives) {
+      const values = active.validateValues([
+        "householdId",
+        "portion",
+        "amount",
+        "description",
+        "unitId",
+        "subsidyContractId",
+        "petId",
+        "notes",
+      ]);
+
+      charge.addRowWithValues({
+        chargeOngoingId: active.value("id"),
+        ...values,
+      });
+    }
+  }
+  updateChargesOngoing() {
+    const household = this.ss.sheet("household");
+    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
+    const params = {
+      description: "Rent charge (base)",
+      dateNextVN: "rentIncreaseDateNext",
+      chargeNextVN: "rentChargeMonthlyNext",
+      portion: "Household",
+    } as const;
+
+    for (const hh of household.orderedRows) {
+      const dateNext = hh.value(params.dateNextVN);
+      if (dateNext instanceof Date && utils.date.isTodayOrPassed(dateNext)) {
+        const dayBefore = new Date(dateNext.getTime());
+        dayBefore.setDate(dayBefore.getDate() - 1);
+        const ocToEnd = ongoingCharge.orderedRows.filter((row) => {
+          const description = row.value("description");
+          const endDate = row.value("endDate");
+          return description === params.description && endDate === "";
+        });
+
+        for (const row of ocToEnd) {
+          row.setValueType("endDate", "date", dayBefore);
+        }
+        ongoingCharge.addRowWithValues({
+          startDate: dateNext,
+          endDate: "",
+          description: params.description,
+          amount: hh.value(params.chargeNextVN),
+          householdId: hh.value("id"),
+          frequency: "Monthly",
+          portion: params.portion,
+        });
+      }
+    }
   }
 
   private recurringPriceUpdate<SN extends SectionName>(

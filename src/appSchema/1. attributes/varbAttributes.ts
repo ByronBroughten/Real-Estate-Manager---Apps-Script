@@ -126,11 +126,11 @@ export const allVarbAttributes = makeSchemaStructure(
   {
     buildHhLedger: {
       id: vS.id(),
+      householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
         onDelete: "setEmpty",
       }),
-      householdName: vS.gen("hhNameFromId", "Household name"),
       portion: vS.gen("rentPortionName", "Portion"),
       subsidyContractId: vS.linkedId("Subsidy contract ID", {
         sectionName: "subsidyContract",

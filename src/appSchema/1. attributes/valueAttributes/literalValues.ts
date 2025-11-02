@@ -10,7 +10,7 @@ const literalValues = {
   payer: `=IFS(SAME_ROW("Payer category")="Household", SAME_ROW("Household name"), SAME_ROW("Payer category")="Subsidy program", SAME_ROW("Subsidy program name"), SAME_ROW("Payer category")="Other payer", SAME_ROW("Other payer name"))`,
   paymentProcessed: `=IF(SAME_ROW("Amount")=SAME_ROW("Allocated amount"), IF(SAME_ROW("Date")<>"",  IF(SAME_ROW("Details verified")="Yes", "Yes", "No"), "No"), "No")`,
   numAllocated: `=COUNTIF(hhPaymentAllocation[Payment ID], "="&SAME_ROW("ID"))`,
-  householdAllocated: `=IFS(SAME_ROW("Num allocated")=0, "", SAME_ROW("Num allocated")>1, "multiple", SAME_ROW("Num allocated")=1, ROW_MATCH(hhPaymentAllocation[HH members full name], hhPaymentAllocation[Payment ID], "ID"))`,
+  householdAllocated: `=IFS(SAME_ROW("Num allocated")=0, "", SAME_ROW("Num allocated")>1, "Multiple", SAME_ROW("Num allocated")=1, ROW_MATCH(hhPaymentAllocation[HH members full name], hhPaymentAllocation[Payment ID], "ID"))`,
   hhNameFromId: `=ROW_MATCH(household[Name], household[ID],"Household ID")`,
   hhNameFromIdOp: `=ROW_MATCH_OR_BLANK(household[Name], household[ID],"Household ID")`,
   hhIdFromNameOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Household name")`,
