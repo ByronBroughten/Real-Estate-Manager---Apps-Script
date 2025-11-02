@@ -127,18 +127,28 @@ export const allVarbAttributes = makeSchemaStructure(
     buildHhLedger: {
       id: vS.id(),
       householdName: vS.gen("string", "Household name"),
-      householdId: vS.linkedId("Household ID", {
-        sectionName: "household",
-        onDelete: "setEmpty",
-      }),
+      householdId: vS.linkedId(
+        "Household ID",
+        {
+          sectionName: "household",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
+        }
+      ),
       portion: vS.gen("rentPortionName", "Portion"),
-      subsidyContractId: vS.linkedId("Subsidy contract ID", {
-        sectionName: "subsidyContract",
-        onDelete: "setEmpty",
-      }),
-      subsidyContractName: vS.gen(
-        "subsidyContractNameFromIdOp",
-        "Subsidy contract name"
+      subsidyContractName: vS.gen("string", "Subsidy contract name"),
+      subsidyContractId: vS.linkedId(
+        "Subsidy contract ID",
+        {
+          sectionName: "subsidyContract",
+          onDelete: "setEmpty",
+        },
+        {
+          makeDefault:
+            allValueAttributes.subsidyContractIdFromNameOp.makeDefault,
+        }
       ),
       enter: vS.gen("boolean", "Enter"),
     },
