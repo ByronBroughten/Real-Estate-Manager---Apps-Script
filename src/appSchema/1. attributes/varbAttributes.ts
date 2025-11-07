@@ -169,6 +169,24 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "subsidyProgram",
         onDelete: "keep",
       }),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "keep",
+      }),
+      unitId: vS.linkedId(
+        "Unit ID",
+        {
+          sectionName: "unit",
+          onDelete: "keep",
+        },
+        {
+          makeDefault: allValueAttributes.unitNameFromHouseholdIdOp.makeDefault,
+        }
+      ),
+      paymentGroupId: vS.linkedId("Payment group ID", {
+        sectionName: "paymentGroup",
+        onDelete: "keep",
+      }),
       rentPortionMonthly: vS.gen("number", "Rent portion monthly"),
       rentPortionMonthlyNext: vS.gen("number", "Next rent portion monthly"),
       rentPortionDate: vS.gen("date", "Rent portion date", {
@@ -178,7 +196,29 @@ export const allVarbAttributes = makeSchemaStructure(
         validate: valS.validate.dateOrEmpty,
       }),
     },
-    paymentGroup: vsS.idOnly(),
+    paymentGroup: {
+      id: vS.id(),
+      payerCategory: vS.gen("payerCategory", "Payer category"),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "keep",
+      }),
+      hhName: vS.gen("hhNameFromIdOp", "Household name"),
+      subsidyProgramId: vS.linkedId("Subsidy program ID", {
+        sectionName: "subsidyContract",
+        onDelete: "keep",
+      }),
+      subsidyProgramName: vS.gen(
+        "subsidyProgramNameFromIdOp",
+        "Subsidy program name"
+      ),
+      otherPayerId: vS.linkedId("Other payer ID", {
+        sectionName: "otherPayer",
+        onDelete: "keep",
+      }),
+      otherPayerName: vS.gen("otherPayerNameFromIdOp", "Other payer name"),
+      notes: vS.gen("string", "Notes"),
+    },
     unit: vsS.idOnly(),
     hhPet: vsS.idOnly(),
     otherPayer: vsS.idOnly(),
@@ -472,10 +512,21 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     household: {
       id: vS.id(),
+      unitId: vS.linkedId("Unit ID", {
+        sectionName: "unit",
+        onDelete: "setEmpty",
+      }),
+      utilityChargeMonthly: vS.gen("number", "Utility charge monthly"),
+      utilityChargeMonthlyNext: vS.gen("number", "Next utility charge monthly"),
       rentIncreaseDateLast: vS.gen("date", "Last rent increase date"),
       rentIncreaseDateNext: vS.gen("date", "Next rent increase date"),
       rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
       rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
+      utilityChargeNextOverride: vS.gen(
+        "number",
+        "Next utility charge override"
+      ),
+      rentChargeNextOverride: vS.gen("number", "Next rent charge override"),
       subsidyPortionMonthly: vS.gen("number", "Subsidy rent portion monthly"),
     },
     test: {

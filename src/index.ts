@@ -11,14 +11,14 @@ function triggerFirstOfMonth() {
   top.monthlyRentUpdate();
 }
 
-// function buildOutCharges() {
+// function buildOutAllCharges() {
 //   const top = TopOperator.init();
-//   top.buildOutCharges();
+//   top.buildOutAllCharges();
 // }
 
-// function buildOutPayments() {
+// function buildOutAllPayments() {
 //   const top = TopOperator.init();
-//   top.buildOutPayments();
+//   top.buildOutAllPayments();
 // }
 
 type GetValues<SN extends SectionName> = () => SectionValues<SN>;

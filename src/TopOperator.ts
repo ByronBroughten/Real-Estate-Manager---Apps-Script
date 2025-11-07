@@ -1,11 +1,6 @@
-import {
-  type GroupSectionName,
-  type SectionName,
-} from "./appSchema/1. attributes/sectionAttributes";
-import type {
-  SectionValues,
-  VarbName,
-} from "./appSchema/1. attributes/varbAttributes";
+import { type GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
+import type { Value } from "./appSchema/1. attributes/valueAttributes";
+import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
 import {
   SpreadsheetBase,
   type SpreadsheetProps,
@@ -189,7 +184,265 @@ export class TopOperator extends SpreadsheetBase {
     hhLedger.sort("date");
     this.ss.batchUpdateRanges();
   }
-  buildOutCharges(): void {
+  private buildFromChargesOngoing(
+    doUpdate: (props: BuildFromChargeOngoingProps) => void,
+    chargesOngoing: Row<"hhChargeOngoing">[] = this.ss.sheet("hhChargeOngoing")
+      .orderedRows
+  ) {
+    chargesOngoing.forEach((chargeOngoing) => {
+      const startDate = chargeOngoing.valueDate("startDate");
+      const endDateMaybe = chargeOngoing.value("endDate");
+      const endDate = endDateMaybe
+        ? valS.validate.date(endDateMaybe)
+        : utils.date.lastDateOfMonth(new Date());
+
+      const dates = utils.date.firstDaysOfMonths(startDate, endDate);
+
+      for (let i = 0; i < dates.length; i++) {
+        const date = dates[i];
+        const end =
+          i === dates.length - 1 ? endDate : utils.date.lastDateOfMonth(date);
+
+        const proratedAmount = utils.date.prorateMonthlyAmount(
+          chargeOngoing.valueNumber("amount"),
+          date,
+          end
+        );
+
+        doUpdate({
+          date,
+          proratedAmount,
+          chargeOngoing,
+        });
+      }
+    });
+  }
+  monthlyRentUpdate() {
+    this.updateSubsidyContractCharges();
+    this.ss.batchUpdateRanges();
+    // needed for accurate rent portion calculations
+
+    this.updateRentAndUtilityCharges();
+    this.ss.batchUpdateRanges();
+    // needed for accurately building out charges
+
+    this.buildOutChargesFirstOfMonth();
+    this.buildOutPaymentsFirstOfMonth();
+    this.ss.batchUpdateRanges();
+  }
+  updateSubsidyContractCharges() {
+    const subsidyContract = this.ss.sheet("subsidyContract");
+    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
+
+    subsidyContract.orderedRows.forEach((row) => {
+      const dateNext = row.value("rentPortionDateNext");
+      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
+        const dayBefore = utils.date.getDayBefore(dateNext);
+        const chargesToEnd = ongoingCharge.rowsFiltered({
+          portion: "Subsidy program",
+          description: "Rent charge (base)",
+          subsidyContractId: row.value("id"),
+          endDate: "",
+        });
+        chargesToEnd.forEach((charge) => {
+          charge.setValue("endDate", dayBefore);
+        });
+
+        ongoingCharge.addRowWithValues({
+          startDate: dateNext,
+          amount: row.value("rentPortionMonthlyNext"),
+          description: "Rent charge (base)",
+          endDate: "",
+          portion: "Subsidy program",
+          subsidyContractId: row.value("id"),
+          householdId: row.value("householdId"),
+          unitId: row.value("unitId"),
+          paymentGroupId: row.value("paymentGroupId"),
+        });
+        row.setValue("rentPortionDateNext", "");
+      }
+    });
+  }
+  updateRentAndUtilityCharges() {
+    const household = this.ss.sheet("household");
+    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
+
+    household.orderedRows.forEach((row) => {
+      const dateNext = row.value("rentIncreaseDateNext");
+      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
+        const dayBefore = utils.date.getDayBefore(dateNext);
+
+        const chargesToEnd = ongoingCharge.rowsFiltered({
+          portion: "Household",
+          description: "Rent charge (base)",
+          householdId: row.value("id"),
+          endDate: "",
+        });
+        chargesToEnd.forEach((charge) => {
+          charge.setValue("endDate", dayBefore);
+        });
+        const rentChargeNext = row.valueNumber("rentChargeMonthlyNext");
+        const subsidyPortion = row.valueNumber("subsidyPortionMonthly");
+        ongoingCharge.addRowWithValues({
+          startDate: dateNext,
+          amount: rentChargeNext - subsidyPortion,
+          description: "Rent charge (base)",
+          portion: "Household",
+          endDate: "",
+          householdId: row.value("id"),
+          unitId: row.value("unitId"),
+        });
+
+        const utilityChargeNext = row.valueNumber("utilityChargeMonthlyNext");
+        if (utilityChargeNext) {
+          const chargesToEnd = ongoingCharge.rowsFiltered({
+            portion: "Household",
+            description: "Rent charge (utilities)",
+            householdId: row.value("id"),
+            endDate: "",
+          });
+          chargesToEnd.forEach((charge) => {
+            charge.setValue("endDate", dayBefore);
+          });
+          ongoingCharge.addRowWithValues({
+            startDate: dateNext,
+            amount: utilityChargeNext,
+            description: "Rent charge (utilities)",
+            portion: "Household",
+            endDate: "",
+            householdId: row.value("id"),
+            unitId: row.value("unitId"),
+          });
+        }
+
+        row.setValues({
+          rentChargeMonthly: rentChargeNext,
+          rentIncreaseDateLast: dateNext,
+          rentChargeNextOverride: "",
+          ...(utilityChargeNext && {
+            utilityChargeMonthly: utilityChargeNext,
+            utilityChargeNextOverride: "",
+          }),
+        });
+      }
+    });
+  }
+  buildOutChargesFirstOfMonth(date: Date = new Date()) {
+    const firstOfMonth = utils.date.firstDayOfMonth(date);
+
+    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
+    const charge = this.ss.sheet("hhCharge");
+
+    ongoingCharge.orderedRows.forEach((row) => {
+      const endDateValue = row.value("endDate");
+      const endDate = utils.date.dateOrLastDateOfThisMonth(
+        endDateValue,
+        firstOfMonth
+      );
+      if (utils.date.isThisDateOrAfter(endDate, firstOfMonth)) {
+        const values = row.validateValues([
+          "householdId",
+          "portion",
+          "description",
+          "unitId",
+          "subsidyContractId",
+          "petId",
+          "notes",
+        ]);
+
+        const amount = row.valueNumber("amount");
+        const proratedAmount = utils.date.prorateMonthlyAmount(
+          amount,
+          firstOfMonth,
+          endDate
+        );
+
+        charge.addRowWithValues({
+          ...values,
+          amount: proratedAmount,
+          chargeOngoingId: row.value("id"),
+          date: firstOfMonth,
+        });
+      }
+    });
+  }
+  buildOutPaymentsFirstOfMonth(date: Date = new Date()) {
+    const firstOfMonth = utils.date.firstDayOfMonth(date);
+
+    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
+    const payment = this.ss.sheet("hhPayment");
+    const allocation = this.ss.sheet("hhPaymentAllocation");
+    const paymentGroup = this.ss.sheet("paymentGroup");
+    const subsidyContract = this.ss.sheet("subsidyContract");
+
+    const actives = ongoingCharge.orderedRows.filter((row) => {
+      const endDate = row.dateOrLastDayOfThisMonth("endDate", firstOfMonth);
+      return utils.date.isThisDateOrAfter(endDate, firstOfMonth);
+    });
+
+    const groupedCharges = this.getPaymentGroups(actives);
+    for (const gc of Obj.values(groupedCharges)) {
+      const { paymentGroupId, subsidyContractId, householdId, portion } =
+        gc[0].values([
+          "subsidyContractId",
+          "householdId",
+          "paymentGroupId",
+          "portion",
+        ]);
+
+      const paymentId = payment.addRowWithValues({
+        date: firstOfMonth,
+        detailsVerified: "No",
+        ...(paymentGroupId && {
+          paymentGroupId,
+          ...paymentGroup
+            .row(paymentGroupId)
+            .values([
+              "payerCategory",
+              "householdId",
+              "subsidyProgramId",
+              "otherPayerId",
+            ]),
+        }),
+        ...(!paymentGroupId && {
+          payerCategory: portion,
+          householdId,
+          ...(subsidyContractId && {
+            subsidyProgramId: subsidyContract
+              .row(subsidyContractId)
+              .value("subsidyProgramId"),
+          }),
+        }),
+      });
+
+      const p = payment.row(paymentId);
+      let paymentTotal = 0;
+      gc.forEach((row) => {
+        const amount = row.valueNumber("amount");
+        const endDate = row.dateOrLastDayOfThisMonth("endDate", firstOfMonth);
+        const prorated = utils.date.prorateMonthlyAmount(
+          amount,
+          firstOfMonth,
+          endDate
+        );
+        paymentTotal += prorated;
+
+        allocation.addRowWithValues({
+          amount: prorated,
+          paymentId,
+          description: "Normal payment",
+          ...row.values([
+            "portion",
+            "householdId",
+            "unitId",
+            "subsidyContractId",
+          ]),
+        });
+      });
+      p.setValue("amount", paymentTotal);
+    }
+  }
+  private buildOutAllCharges(): void {
     const ss = this.ss;
     const hhCharge = ss.sheet("hhCharge");
     hhCharge.DELETE_ALL_BODY_ROWS();
@@ -214,7 +467,7 @@ export class TopOperator extends SpreadsheetBase {
     hhCharge.sort("hhMembersFullName");
     ss.batchUpdateRanges();
   }
-  buildOutPayments() {
+  private buildOutAllPayments() {
     const ss = this.ss;
     const hhChargeOngoing = ss.sheet("hhChargeOngoing");
     const chargesOngoing = hhChargeOngoing.orderedRows;
@@ -255,167 +508,33 @@ export class TopOperator extends SpreadsheetBase {
     hhPayment.sort("hhName");
     ss.batchUpdateRanges();
   }
-  private buildFromChargesOngoing(
-    doUpdate: (props: BuildFromChargeOngoingProps) => void,
-    chargesOngoing: Row<"hhChargeOngoing">[] = this.ss.sheet("hhChargeOngoing")
-      .orderedRows
-  ) {
-    chargesOngoing.forEach((chargeOngoing) => {
-      const startDate = chargeOngoing.valueDate("startDate");
-      const endDateMaybe = chargeOngoing.value("endDate");
-      const endDate = endDateMaybe
-        ? valS.validate.date(endDateMaybe)
-        : utils.date.lastDateOfMonth(new Date());
+  private getPaymentGroups(
+    ongoingCharges: Row<"hhChargeOngoing">[]
+  ): Record<string, Row<"hhChargeOngoing">[]> {
+    return ongoingCharges.reduce((acc, row) => {
+      const { id, paymentGroupId } = row.values(["id", "paymentGroupId"]);
 
-      const dates = utils.date.firstDaysOfMonths(startDate, endDate);
-
-      for (let i = 0; i < dates.length; i++) {
-        const date = dates[i];
-        const end =
-          i === dates.length - 1 ? endDate : utils.date.lastDateOfMonth(date);
-
-        const proratedAmount = utils.date.prorateMonthlyAmount(
-          chargeOngoing.valueNumber("amount"),
-          date,
-          end
-        );
-
-        doUpdate({
-          date,
-          proratedAmount,
-          chargeOngoing,
-        });
-      }
-    });
-  }
-
-  monthlyRentUpdate() {
-    // Fix the priceNext that probably got messed up by the old recurring price update function
-    // See if you need the functions to work differently between subsidyContract and rent
-    // Add params
-    // Do some rough tests
-
-    this.updateChargesOngoing();
-    this.buildOutLatestCharges();
-    // this.recurringPriceUpdate("household", {
-    //   dateCurrent: "rentIncreaseDateLast",
-    //   dateNext: "rentIncreaseDateNext",
-    //   priceCurrent: "rentChargeMonthly",
-    //   priceNext: "rentChargeMonthlyNext",
-    // });
-    // this.oneTimePriceUpdate("subsidyContract", {
-    //   dateNext: "rentPortionDateNext",
-    //   priceCurrent: "rentPortionMonthly",
-    //   priceNext: "rentPortionMonthlyNext",
-    // });
-    this.ss.batchUpdateRanges();
-  }
-  buildOutLatestCharges() {
-    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
-    const charge = this.ss.sheet("hhCharge");
-
-    const actives = ongoingCharge.rowsFiltered({ endDate: "" });
-    for (const active of actives) {
-      const values = active.validateValues([
-        "householdId",
-        "portion",
-        "amount",
-        "description",
-        "unitId",
-        "subsidyContractId",
-        "petId",
-        "notes",
-      ]);
-
-      charge.addRowWithValues({
-        chargeOngoingId: active.value("id"),
-        ...values,
-      });
-    }
-  }
-  updateChargesOngoing() {
-    const household = this.ss.sheet("household");
-    const ongoingCharge = this.ss.sheet("hhChargeOngoing");
-    const params = {
-      description: "Rent charge (base)",
-      dateNextVN: "rentIncreaseDateNext",
-      chargeNextVN: "rentChargeMonthlyNext",
-      portion: "Household",
-    } as const;
-
-    for (const hh of household.orderedRows) {
-      const dateNext = hh.value(params.dateNextVN);
-      if (dateNext instanceof Date && utils.date.isTodayOrPassed(dateNext)) {
-        const dayBefore = new Date(dateNext.getTime());
-        dayBefore.setDate(dayBefore.getDate() - 1);
-        const ocToEnd = ongoingCharge.orderedRows.filter((row) => {
-          const description = row.value("description");
-          const endDate = row.value("endDate");
-          return description === params.description && endDate === "";
-        });
-
-        for (const row of ocToEnd) {
-          row.setValueType("endDate", "date", dayBefore);
+      if (paymentGroupId) {
+        if (!acc[paymentGroupId]) {
+          acc[paymentGroupId] = [];
         }
-        ongoingCharge.addRowWithValues({
-          startDate: dateNext,
-          endDate: "",
-          description: params.description,
-          amount: hh.value(params.chargeNextVN),
-          householdId: hh.value("id"),
-          frequency: "Monthly",
-          portion: params.portion,
-        });
+        acc[paymentGroupId].push(row);
+      } else {
+        if (!acc[id]) {
+          acc[id] = [];
+        }
+        acc[id].push(row);
       }
-    }
+      return acc;
+    }, {} as Record<string, Row<"hhChargeOngoing">[]>);
+  }
+  isNotEndedFromThisDate(
+    endDate: Value<"date">,
+    thisDate: Date = new Date()
+  ): boolean {
+    return !endDate || utils.date.isDateAndThisDateOrAfter(endDate, thisDate);
   }
 
-  private recurringPriceUpdate<SN extends SectionName>(
-    sectionName: SN,
-    names: {
-      priceCurrent: VarbName<SN>;
-      priceNext: VarbName<SN>;
-      dateCurrent: VarbName<SN>;
-      dateNext: VarbName<SN>;
-    }
-  ) {
-    const ss = this.ss;
-    const sheet = ss.sheet(sectionName);
-    for (const row of sheet.orderedRows) {
-      const dateNext = row.value(names.dateNext);
-      if (dateNext instanceof Date && utils.date.isTodayOrPassed(dateNext)) {
-        row.setValueType(
-          names.priceCurrent,
-          "number",
-          row.value(names.priceNext)
-        );
-        row.setValueType(names.dateCurrent, "date", dateNext);
-      }
-    }
-  }
-  private oneTimePriceUpdate<SN extends SectionName>(
-    sectionName: SN,
-    names: {
-      priceCurrent: VarbName<SN>;
-      priceNext: VarbName<SN>;
-      dateNext: VarbName<SN>;
-    }
-  ) {
-    const ss = this.ss;
-    const sheet = ss.sheet(sectionName);
-    for (const row of sheet.orderedRows) {
-      const dateNext = row.value(names.dateNext);
-      if (dateNext instanceof Date && utils.date.isTodayOrPassed(dateNext)) {
-        row.setValueType(
-          names.priceCurrent,
-          "number",
-          row.value(names.priceNext)
-        );
-        row.setValueType(names.priceNext, "number", "");
-        row.setValueType(names.dateNext, "date", "");
-      }
-    }
-  }
   test() {
     const date = new Date();
     const datePlusOne = new Date(date.getDate() + 1);
@@ -424,80 +543,5 @@ export class TopOperator extends SpreadsheetBase {
     const datePlus30 = new Date(date.getDate() + 30);
     const datePlus31 = new Date(date.getDate() + 31);
     const datePlus29 = new Date(date.getDate() + 29);
-
-    const tests = {
-      // recurringPriceUpdate: {
-      //   before: {
-      //     dateCurrent: [date, datePlusOne, dateMinusOne],
-      //     dateNext: [datePlus30, datePlus31, datePlus29],
-      //     priceCurrent: [1500, 1500, 1500],
-      //     priceNext: [2000, 2000, 2000],
-      //   },
-      //   after: {
-      //     dateCurrent: [],
-      //     dateNext: [],
-      //     priceCurrent: [2000, 1500, 2000],
-      //     priceNext: [2000, 2000, 2000],
-      //   },
-      //   run: () => {
-      //     this.recurringPriceUpdate("test", {
-      //       dateCurrent: "dateCurrent",
-      //       dateNext: "dateNext",
-      //       priceCurrent: "priceCurrent",
-      //       priceNext: "priceNext",
-      //     });
-      //     this.ss.batchUpdateRanges();
-      //   },
-      // },
-      oneTimePriceUpdate: {
-        beforeFn: () => {
-          const allValues = {
-            dateNext: [date, datePlusOne, dateMinusOne],
-            priceCurrent: [1500, 1500, 1500],
-            priceNext: [2000, 2000, 2000],
-          } as const;
-          const test = this.ss.sheet("test");
-          for (let i = 0; i < 3; i++) {
-            const values = Obj.keys(allValues).reduce((vals, varbName) => {
-              vals[varbName as any] = allValues[varbName][i];
-              return vals;
-            }, {} as SectionValues<"test">);
-            test.addRowWithValues(values);
-          }
-          this.ss.batchUpdateRanges();
-        },
-        afterFn: () => {
-          const allValues = {
-            dateNext: ["", "", ""],
-            priceCurrent: [2000, 1500, 2000],
-            priceNext: ["", 2000, ""],
-          };
-          const test = this.ss.sheet("test");
-          for (let i = 0; i < 3; i++) {
-            const values = Obj.keys(allValues).reduce((acc, key) => {
-              acc[key] = allValues[key][i];
-              return acc;
-            });
-            // check values
-          }
-        },
-        run: () => {
-          this.oneTimePriceUpdate("test", {
-            dateNext: "dateNext",
-            priceCurrent: "priceCurrent",
-            priceNext: "priceNext",
-          });
-          this.ss.batchUpdateRanges();
-        },
-      },
-    };
-
-    for (const test of Obj.values(tests)) {
-      const gTest = this.ss.gSheetBySectionName("test");
-      gTest.deleteRows(this.ss.topBodyRowIdxBase1, 3);
-      test.beforeFn();
-      test.run();
-      // check test.after
-    }
   }
 }

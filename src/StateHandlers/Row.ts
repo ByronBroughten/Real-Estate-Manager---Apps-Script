@@ -14,6 +14,7 @@ import {
   type StandardizedValue,
   type UserEnteredValue,
 } from "../utilitiesAppsScript";
+import { utils } from "../utilitiesGeneral";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { RowBase, type RowState } from "./HandlerBases/RowBase";
@@ -43,6 +44,18 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     const value = this.value(varbName);
     return valS.validate.date(value);
   }
+  valueDateOrEmpty<VN extends VarbName<SN>>(varbName: VN): Date | "" {
+    const value = this.value(varbName);
+    return valS.validate.dateOrEmpty(value);
+  }
+  dateOrLastDayOfThisMonth<VN extends VarbName<SN>>(
+    varbName: VN,
+    date: Date = new Date()
+  ): Date {
+    const endDateValue = this.valueDateOrEmpty(varbName);
+    return utils.date.dateOrLastDateOfThisMonth(endDateValue, date);
+  }
+
   valueStandardized<VN extends VarbName<SN>>(
     varbName: VN
   ): StandardizedValue<VarbValue<SN, VN>> {

@@ -1,3 +1,5 @@
+import { valS } from "./utils/validation";
+
 const _currencyUtils = {
   format(amount: number, locale: string = "en-US", currency: string = "USD") {
     if (isNaN(amount)) {
@@ -17,46 +19,61 @@ const _currencyUtils = {
 };
 
 const _dateUtils = {
-  isTodayOrAfter: function (inputDate: Date) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const normalizedInputDate = new Date(inputDate);
-    normalizedInputDate.setHours(0, 0, 0, 0);
-
-    return normalizedInputDate >= today;
+  getDayBefore(date: Date) {
+    const dayBefore = new Date(date.getTime());
+    dayBefore.setDate(dayBefore.getDate() - 1);
+    return dayBefore;
   },
-  isTodayOrPassed: function (inputDate: Date) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const normalizedInputDate = new Date(inputDate);
-    normalizedInputDate.setHours(0, 0, 0, 0);
-
-    return normalizedInputDate <= today;
+  isDateAndTodayOrPassed: function (inputDate: unknown): inputDate is Date {
+    return inputDate instanceof Date && this.isThisDateOrPassed(inputDate);
+  },
+  isDateAndThisDateOrAfter: function (
+    inputDate: unknown,
+    thisDate: Date = new Date()
+  ): inputDate is Date {
+    return (
+      inputDate instanceof Date && this.isThisDateOrAfter(inputDate, thisDate)
+    );
+  },
+  isThisDateOrPassed: function (
+    inputDate: Date,
+    thisDate: Date = new Date()
+  ): boolean {
+    const testDate = this.normalizedDate(thisDate);
+    const normalizedInput = this.normalizedDate(inputDate);
+    return normalizedInput <= testDate;
+  },
+  isThisDateOrAfter: function (
+    inputDate: Date,
+    thisDate: Date = new Date()
+  ): inputDate is Date {
+    const testDate = this.normalizedDate(thisDate);
+    const normalizedInput = this.normalizedDate(inputDate);
+    return normalizedInput >= testDate;
+  },
+  normalizedDate(date: Date) {
+    const normalizedDate = new Date(date);
+    normalizedDate.setHours(0, 0, 0, 0);
+    return normalizedDate;
   },
   monthYear(date: Date) {
     return `${date.getMonth() + 1}/${date.getFullYear()}`;
   },
+  firstDayOfMonth(date: Date = new Date()): Date {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  },
+  incrementMonth(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 1, 12);
+  },
   firstDaysOfMonths(startDate: Date, endDate: Date): Date[] {
     const firstDays: Date[] = [startDate];
-    let currentDate = new Date(
-      startDate.getFullYear(),
-      startDate.getMonth(),
-      1
-    );
+    let currentDate = this.firstDayOfMonth(startDate);
 
     while (currentDate <= endDate) {
       if (this.monthYear(currentDate) !== this.monthYear(startDate)) {
         firstDays.push(new Date(currentDate));
       }
-
-      currentDate = new Date(
-        currentDate.getFullYear(),
-        currentDate.getMonth() + 1,
-        1,
-        12
-      );
+      currentDate = this.incrementMonth(currentDate);
     }
 
     return firstDays;
@@ -65,6 +82,13 @@ const _dateUtils = {
     const year = date.getFullYear();
     const month = date.getMonth();
     return new Date(year, month + 1, 0);
+  },
+  dateOrLastDateOfThisMonth(value, thisDate: Date = new Date()): Date {
+    if (valS.is.date(value)) {
+      return value;
+    } else {
+      utils.date.lastDateOfMonth(thisDate);
+    }
   },
   prorateMonthlyAmount(
     monthlyAmount: number,
