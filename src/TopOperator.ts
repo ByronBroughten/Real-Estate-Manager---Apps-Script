@@ -259,7 +259,10 @@ export class TopOperator extends SpreadsheetBase {
           unitId: row.value("unitId"),
           paymentGroupId: row.value("paymentGroupId"),
         });
-        row.setValue("rentPortionDateNext", "");
+        row.setValues({
+          rentPortionDateNext: "",
+          rentPortionMonthlyNext: "",
+        });
       }
     });
   }
