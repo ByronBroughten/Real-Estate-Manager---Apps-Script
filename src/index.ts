@@ -29,13 +29,13 @@ type OnEdit<SN extends SectionName> = {
   useValues: UseValues<SN>;
 };
 
-function testSubsidyContractChanges() {
+function testSubsidyContractCharges() {
   const top = TopOperator.init();
   top.updateSubsidyContractCharges();
   top.ss.batchUpdateRanges();
 }
 
-function testRentAndUtilityChanges() {
+function testRentAndUtilityCharges() {
   const top = TopOperator.init();
   top.updateRentAndUtilityCharges();
   top.ss.batchUpdateRanges();
