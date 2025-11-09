@@ -518,8 +518,8 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       utilityChargeMonthly: vS.gen("number", "Utility charge monthly"),
       utilityChargeMonthlyNext: vS.gen("number", "Next utility charge monthly"),
-      rentIncreaseDateLast: vS.gen("date", "Last rent increase date"),
-      rentIncreaseDateNext: vS.gen("date", "Next rent increase date"),
+      rentIncreaseDateLast: vS.gen("date", "Last rent change date"),
+      rentIncreaseDateNext: vS.gen("date", "Next rent change date"),
       rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
       rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
       utilityChargeNextOverride: vS.gen(
