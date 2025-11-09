@@ -295,9 +295,13 @@ export class TopOperator extends SpreadsheetBase {
           householdId: row.value("id"),
           unitId: row.value("unitId"),
         });
+        row.setValues({
+          rentChargeMonthly: rentChargeNext,
+          rentChargeNextOverride: "",
+        });
 
-        const utilityChargeNext = row.valueNumber("utilityChargeMonthlyNext");
-        if (utilityChargeNext) {
+        const utilityChargeNext = row.value("utilityChargeMonthlyNext");
+        if (utilityChargeNext !== "") {
           const chargesToEnd = ongoingCharge.rowsFiltered({
             portion: "Household",
             description: "Rent charge (utilities)",
@@ -316,17 +320,13 @@ export class TopOperator extends SpreadsheetBase {
             householdId: row.value("id"),
             unitId: row.value("unitId"),
           });
+          row.setValues({
+            utilityChargeMonthlyNext: "",
+            utilityChargeNextOverride: "",
+          });
         }
 
-        row.setValues({
-          rentChargeMonthly: rentChargeNext,
-          rentIncreaseDateLast: dateNext,
-          rentChargeNextOverride: "",
-          ...(utilityChargeNext && {
-            utilityChargeMonthly: utilityChargeNext,
-            utilityChargeNextOverride: "",
-          }),
-        });
+        row.setValue("rentIncreaseDateLast", dateNext);
       }
     });
   }
