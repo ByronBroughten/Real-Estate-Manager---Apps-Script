@@ -29,6 +29,30 @@ type OnEdit<SN extends SectionName> = {
   useValues: UseValues<SN>;
 };
 
+function testSubsidyContractChanges() {
+  const top = TopOperator.init();
+  top.updateSubsidyContractCharges();
+  top.ss.batchUpdateRanges();
+}
+
+function testRentAndUtilityChanges() {
+  const top = TopOperator.init();
+  top.updateRentAndUtilityCharges();
+  top.ss.batchUpdateRanges();
+}
+
+function testBuildOutCharges() {
+  const top = TopOperator.init();
+  top.buildOutChargesFirstOfMonth();
+  top.ss.batchUpdateRanges();
+}
+
+function testBuildOutPayments() {
+  const top = TopOperator.init();
+  top.buildOutPaymentsFirstOfMonth();
+  top.ss.batchUpdateRanges();
+}
+
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (e.value === "TRUE") {
     const sheetId = e.range.getSheet().getSheetId();
