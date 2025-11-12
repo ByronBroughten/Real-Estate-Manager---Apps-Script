@@ -2,8 +2,13 @@ export type StrictExtract<T, K extends T> = Extract<T, K>;
 export type StrictExclude<T, K extends T> = Exclude<T, K>;
 
 export const Arr = {
+  oneOrThrow<V extends any>(arr: readonly V[]): V {
+    if (arr.length !== 1) {
+      throw new Error("There is more than one item in this array.");
+    } else return arr[0];
+  },
   firstOrThrow<V extends any>(arr: readonly V[]): V {
-    if (arr.length < 0) {
+    if (arr.length < 1) {
       throw new Error("This array is empty.");
     } else return arr[0];
   },

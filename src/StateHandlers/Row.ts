@@ -81,7 +81,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
 
   values<VN extends VarbName<SN> = VarbName<SN>>(
-    varbNames?: VN[]
+    varbNames?: readonly VN[]
   ): SectionValues<SN, VN> {
     const keys = varbNames || (this.varbNames as VN[]);
     return keys.reduce((values, varbName) => {

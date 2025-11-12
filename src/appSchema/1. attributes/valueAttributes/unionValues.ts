@@ -12,7 +12,7 @@ function enforceUnionValues<T extends UnionValuesBase>(t: T): T {
 const descriptionChargeOngoing = [
   "Rent charge (base)",
   "Rent charge (utilities)",
-  "Rent charge (pet fee)",
+  "Pet fee (recurring)",
   "Caretaker rent reduction",
 ] as const;
 

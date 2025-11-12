@@ -29,8 +29,8 @@ export const allSectionAttributes = makeSchemaStructure(
     test: ma("tst", 2089200354),
     hhLedger: ma("hl", 731807482),
     buildHhLedger: ma("bhl", 706564734),
-    hhChargeOngoing: ma("hto", 194710324),
     hhCharge: ma("hhc", 825934775),
+    hhLeaseChargeOngoing: ma("hlco", 445175805),
     addHhChargeOnetime: ma("ahhc", 1202471195),
     hhPayment: ma("hhp", 1544131100),
     hhPaymentAllocation: ma("hpa", 348639454),
@@ -41,6 +41,7 @@ export const allSectionAttributes = makeSchemaStructure(
     expense: ma("ex", 449009036),
     subsidyProgram: ma("sp", 332858329),
     subsidyContract: ma("sc", 1155067179),
+    scChargeOngoing: ma("scco", 194710324),
     hhPet: ma("hp", 560379920),
     otherPayer: ma("op", 471889863),
   } as const

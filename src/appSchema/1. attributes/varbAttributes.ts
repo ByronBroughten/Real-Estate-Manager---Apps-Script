@@ -424,7 +424,32 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
     },
-    hhChargeOngoing: {
+    hhLeaseChargeOngoing: {
+      id: vS.id(),
+      householdId: vS.linkedId("Household ID", {
+        sectionName: "household",
+        onDelete: "delete",
+      }),
+      householdName: vS.gen("hhNameFromId", "Household name"),
+      unitId: vS.linkedId("Unit ID", {
+        sectionName: "unit",
+        onDelete: "keep",
+      }),
+      unitName: vS.gen("unitNameFromId", "Unit name"),
+      startDate: vS.gen("date", "Start date", {
+        validate: valS.validate.date,
+      }),
+      endDate: vS.gen("date", "End date", {
+        validate: valS.validate.dateOrEmpty,
+      }),
+      rentChange: vS.gen("yesOrNo", "Rent change"),
+      rentChargeBaseMonthly: vS.gen("number", "Rent charge (base)"),
+      rentChargeUtilitiesMonthly: vS.gen("number", "Rent charge (utilities)"),
+      caretakerRentReduction: vS.gen("number", "Caretaker rent reduction"),
+      petFeeRecurring: vS.gen("number", "Pet fee (recurring)"),
+      notes: vS.gen("string", "Notes"),
+    },
+    scChargeOngoing: {
       id: vS.id(),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
@@ -436,36 +461,29 @@ export const allVarbAttributes = makeSchemaStructure(
       ),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
-        onDelete: "delete",
-      }),
-      unitName: vS.gen("unitNameFromId", "Unit name"),
-      portion: vS.gen("rentPortionName", "Portion"),
-      description: vS.gen("descriptionChargeOngoing", "Description"),
-      amount: vS.gen("number", "Amount"),
-      frequency: vS.gen("ongoingFrequency", "Frequency"),
-      startDate: vS.gen("date", "Start date", {
-        validate: valS.validate.date,
-      }),
-      paymentGroupId: vS.linkedId("Payment group ID", {
-        sectionName: "paymentGroup",
         onDelete: "keep",
       }),
-      endDate: vS.gen("date", "End date", {
-        validate: valS.validate.dateOrEmpty,
-      }),
+      unitName: vS.gen("unitNameFromId", "Unit name"),
+      description: vS.gen("descriptionChargeOngoing", "Description"),
+      amount: vS.gen("number", "Amount"),
       subsidyContractId: vS.linkedId("Subsidy contract ID", {
         sectionName: "subsidyContract",
         onDelete: "delete",
       }),
       subsidyContractName: vS.gen(
-        "subsidyContractNameFromIdOp",
+        "subsidyContractNameFromId",
         "Subsidy contract name"
       ),
-      petId: vS.linkedId("Pet ID", {
-        sectionName: "hhPet",
-        onDelete: "delete",
+      paymentGroupId: vS.linkedId("Payment group ID", {
+        sectionName: "paymentGroup",
+        onDelete: "keep",
       }),
-      petName: vS.gen("petNameFromIdOp", "Pet name"),
+      startDate: vS.gen("date", "Start date", {
+        validate: valS.validate.date,
+      }),
+      endDate: vS.gen("date", "End date", {
+        validate: valS.validate.dateOrEmpty,
+      }),
       notes: vS.gen("string", "Notes"),
     },
     hhCharge: {
@@ -475,10 +493,6 @@ export const allVarbAttributes = makeSchemaStructure(
         "hhMembersFullNamesFromId",
         "HH members full name"
       ),
-      chargeOngoingId: vS.linkedId("Ongoing charge ID", {
-        sectionName: "hhChargeOngoing",
-        onDelete: "keep",
-      }),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
         onDelete: "delete",
@@ -518,16 +532,18 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       utilityChargeMonthly: vS.gen("number", "Utility charge monthly"),
       utilityChargeMonthlyNext: vS.gen("number", "Next utility charge monthly"),
+
       rentIncreaseDateLast: vS.gen("date", "Last rent change date"),
       rentIncreaseDateNext: vS.gen("date", "Next rent change date"),
-      rentChargeMonthly: vS.gen("number", "Rent charge monthly"),
-      rentChargeMonthlyNext: vS.gen("number", "Next rent charge monthly"),
+      rentChargeMonthly: vS.gen("number", "Base rent charge monthly"),
+      rentChargeMonthlyNext: vS.gen("number", "Next base rent charge monthly"),
       utilityChargeNextOverride: vS.gen(
         "number",
         "Next utility charge override"
       ),
       rentChargeNextOverride: vS.gen("number", "Next rent charge override"),
       subsidyPortionMonthly: vS.gen("number", "Subsidy rent portion monthly"),
+      householdPortionMonthly: vS.gen("number", "HH base rent portion monthly"),
     },
     test: {
       id: vS.id(),

@@ -24,6 +24,7 @@ const literalValues = {
   ledgerBalance: `=SUM_COL_TO_ROW("Charge") - SUM_COL_TO_ROW("Payment")`,
   hhMembersFullNamesFromId: `=ROW_MATCH(household[Members full name], household[ID], "Household ID")`,
   otherPayerNameFromIdOp: `=ROW_MATCH_OR_BLANK(otherPayer[Name], otherPayer[ID], "Other payer ID")`,
+  subsidyContractNameFromId: `=ROW_MATCH(subsidyContract[Name], subsidyContract[ID], "Subsidy contract ID")`,
   subsidyContractNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyContract[Name], subsidyContract[ID], "Subsidy contract ID")`,
   subsidyProgramNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyProgram[Name], subsidyProgram[ID], "Subsidy program ID")`,
   petNameFromIdOp: `=ROW_MATCH_OR_BLANK(pet[Name], pet[ID], "Pet ID")`,
