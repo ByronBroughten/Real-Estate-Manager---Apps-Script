@@ -59,8 +59,6 @@ export class TopOperator extends SpreadsheetBase {
       "otherPayerId",
     ]);
 
-    // Also no amount is getting added to payment
-
     switch (payerValues.payerCategory) {
       case "Household":
         if (!payerValues.paymentHhId) {
