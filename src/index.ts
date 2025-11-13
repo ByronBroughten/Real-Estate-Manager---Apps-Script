@@ -29,27 +29,22 @@ type OnEdit<SN extends SectionName> = {
   useValues: UseValues<SN>;
 };
 
-function testSubsidyContractCharges() {
+function testUpdateLeaseOngoingCharges() {
   const top = TopOperator.init();
-  top.updateSubsidyContractCharges();
+  top.updateLeaseOngoingCharges();
   top.ss.batchUpdateRanges();
 }
 
-function testRentAndUtilityCharges() {
+function testUpdateSubsidyOngoingCharges() {
   const top = TopOperator.init();
-  top.updateRentAndUtilityCharges();
+  top.updateSubsidyOngoingCharges();
   top.ss.batchUpdateRanges();
 }
 
-function testBuildOutCharges() {
+function testBuildOutMonthlyChargesAndPayments() {
   const top = TopOperator.init();
-  top.buildOutChargesFirstOfMonth();
-  top.ss.batchUpdateRanges();
-}
-
-function testBuildOutPayments() {
-  const top = TopOperator.init();
-  top.buildOutPaymentsFirstOfMonth();
+  const cfp = top.buildOutChargesFirstOfMonth();
+  top.buildOutPaymentsFromCharges(cfp);
   top.ss.batchUpdateRanges();
 }
 
