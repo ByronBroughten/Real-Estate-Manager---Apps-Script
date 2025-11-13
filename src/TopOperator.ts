@@ -16,7 +16,7 @@ interface TopOperatorProps extends SpreadsheetProps {
 }
 
 type LedgerInputSn = "hhCharge" | "hhPaymentAllocation";
-type ChargesForPayments = {
+type ChargeIdsForPayments = {
   paymentGroups: {
     [paymentGroupId: string]: string[];
   };
@@ -301,6 +301,11 @@ export class TopOperator extends SpreadsheetBase {
     });
   }
   buildOutChargesFirstOfMonth(date: Date = new Date()) {
+    const cfp: ChargeIdsForPayments = {
+      paymentGroups: {},
+      singles: [],
+    };
+
     const firstOfMonth = utils.date.firstDayOfMonth(date);
     const lastOfMonth = utils.date.lastDateOfMonth(firstOfMonth);
 
@@ -326,11 +331,6 @@ export class TopOperator extends SpreadsheetBase {
       });
     }
 
-    const cfp: ChargesForPayments = {
-      paymentGroups: {},
-      singles: [],
-    };
-
     household.orderedRows.forEach((hh) => {
       const householdId = hh.value("id");
       const hhLeasesActiveThisMonth = getActives(householdId, hhLeaseOngoing);
@@ -341,8 +341,8 @@ export class TopOperator extends SpreadsheetBase {
         let householdPortion = 0;
 
         // TODO: Account for if a tenant switches units mid-month
-        // TODO: Divvy subsidy charges by subsidy contract
-        // TODO: Make separate charges for subsidy, pet, and others
+        // TODO: Divvy subsidy charges by subsidy contract if there are multiple.
+        // TODO: Make separate ongoing charges for pet fees
         const firstUnitId = hhLeasesActiveThisMonth[0].value("unitId");
 
         const chargeProps = {
@@ -416,7 +416,7 @@ export class TopOperator extends SpreadsheetBase {
     });
     return cfp;
   }
-  buildOutPaymentsFromCharges(cfp: ChargesForPayments) {
+  buildOutPaymentsFromCharges(cfp: ChargeIdsForPayments) {
     this.addPaymentsAndAllocate({
       chargeIds: cfp.singles,
     });
