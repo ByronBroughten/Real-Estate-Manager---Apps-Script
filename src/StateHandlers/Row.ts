@@ -48,12 +48,46 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     const value = this.value(varbName);
     return valS.validate.dateOrEmpty(value);
   }
-  dateOrLastDayOfThisMonth<VN extends VarbName<SN>>(
+  dateValueAfterOrGivenDate<VN extends VarbName<SN>>(
     varbName: VN,
     date: Date = new Date()
   ): Date {
-    const endDateValue = this.valueDateOrEmpty(varbName);
-    return utils.date.dateOrLastDateOfThisMonth(endDateValue, date);
+    const dateValue = this.valueDateOrEmpty(varbName);
+    if (!valS.is.date(dateValue)) {
+      return date;
+    }
+
+    if (utils.date.isDateSameOrAfter(dateValue, date)) {
+      return dateValue;
+    } else {
+      return date;
+    }
+  }
+  dateValueBeforeOrGivenDate<VN extends VarbName<SN>>(
+    varbName: VN,
+    date: Date = new Date()
+  ): Date {
+    const dateValue = this.valueDateOrEmpty(varbName);
+    if (!valS.is.date(dateValue)) {
+      return date;
+    }
+
+    if (utils.date.isDateSameOrBefore(dateValue, date)) {
+      return dateValue;
+    } else {
+      return date;
+    }
+  }
+  dateValueOrGivenDate<VN extends VarbName<SN>>(
+    varbName: VN,
+    date: Date = new Date()
+  ): Date {
+    const dateValue = this.valueDateOrEmpty(varbName);
+    if (valS.is.date(dateValue)) {
+      return dateValue;
+    } else {
+      return date;
+    }
   }
 
   valueStandardized<VN extends VarbName<SN>>(

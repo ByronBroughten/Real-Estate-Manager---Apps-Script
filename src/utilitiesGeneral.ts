@@ -32,7 +32,7 @@ const _dateUtils = {
     thisDate: Date = new Date()
   ): inputDate is Date {
     return (
-      inputDate instanceof Date && this.isThisDateOrAfter(inputDate, thisDate)
+      inputDate instanceof Date && this.isDateSameOrAfter(inputDate, thisDate)
     );
   },
   isThisDateOrPassed: function (
@@ -43,13 +43,21 @@ const _dateUtils = {
     const normalizedInput = this.normalizedDate(inputDate);
     return normalizedInput <= testDate;
   },
-  isThisDateOrAfter: function (
+  isDateSameOrAfter: function (
     inputDate: Date,
     thisDate: Date = new Date()
   ): inputDate is Date {
     const testDate = this.normalizedDate(thisDate);
     const normalizedInput = this.normalizedDate(inputDate);
     return normalizedInput >= testDate;
+  },
+  isDateSameOrBefore: function (
+    inputDate: Date,
+    thisDate: Date = new Date()
+  ): inputDate is Date {
+    const testDate = this.normalizedDate(thisDate);
+    const normalizedInput = this.normalizedDate(inputDate);
+    return normalizedInput <= testDate;
   },
   normalizedDate(date: Date) {
     const normalizedDate = new Date(date);
