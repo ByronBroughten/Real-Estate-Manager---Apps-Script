@@ -183,8 +183,8 @@ export class TopOperator extends SpreadsheetBase {
   }
 
   monthlyRentUpdate() {
-    this.updateHouseholdLeaseCharges();
-    this.updateSubsidyContractCharges();
+    this.updateLeaseOngoingCharges();
+    this.updateSubsidyOngoingCharges();
     this.ss.batchUpdateRanges();
     // needed for accurately building out charges
 
@@ -226,41 +226,7 @@ export class TopOperator extends SpreadsheetBase {
   //     }
   //   });
   // }
-  updateSubsidyContractCharges() {
-    const subsidyContract = this.ss.sheet("subsidyContract");
-    const ssChargeOngoing = this.ss.sheet("scChargeOngoing");
-
-    subsidyContract.orderedRows.forEach((row) => {
-      const dateNext = row.value("rentPortionDateNext");
-      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
-        const dayBefore = utils.date.getDayBefore(dateNext);
-        const chargesToEnd = ssChargeOngoing.rowsFiltered({
-          description: "Rent charge (base)",
-          subsidyContractId: row.value("id"),
-          endDate: "",
-        });
-        chargesToEnd.forEach((charge) => {
-          charge.setValue("endDate", dayBefore);
-        });
-
-        ssChargeOngoing.addRowWithValues({
-          startDate: dateNext,
-          amount: row.value("rentPortionMonthlyNext"),
-          description: "Rent charge (base)",
-          endDate: "",
-          subsidyContractId: row.value("id"),
-          householdId: row.value("householdId"),
-          unitId: row.value("unitId"),
-          paymentGroupId: row.value("paymentGroupId"),
-        });
-        row.setValues({
-          rentPortionDateNext: "",
-          rentPortionMonthlyNext: "",
-        });
-      }
-    });
-  }
-  updateHouseholdLeaseCharges() {
+  updateLeaseOngoingCharges() {
     const household = this.ss.sheet("household");
     const leaseChargeOngoing = this.ss.sheet("hhLeaseChargeOngoing");
 
@@ -296,6 +262,40 @@ export class TopOperator extends SpreadsheetBase {
         hh.setValues({
           rentChargeNextOverride: "",
           utilityChargeNextOverride: "",
+        });
+      }
+    });
+  }
+  updateSubsidyOngoingCharges() {
+    const subsidyContract = this.ss.sheet("subsidyContract");
+    const ssChargeOngoing = this.ss.sheet("scChargeOngoing");
+
+    subsidyContract.orderedRows.forEach((row) => {
+      const dateNext = row.value("rentPortionDateNext");
+      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
+        const dayBefore = utils.date.getDayBefore(dateNext);
+        const chargesToEnd = ssChargeOngoing.rowsFiltered({
+          description: "Rent charge (base)",
+          subsidyContractId: row.value("id"),
+          endDate: "",
+        });
+        chargesToEnd.forEach((charge) => {
+          charge.setValue("endDate", dayBefore);
+        });
+
+        ssChargeOngoing.addRowWithValues({
+          startDate: dateNext,
+          amount: row.value("rentPortionMonthlyNext"),
+          description: "Rent charge (base)",
+          endDate: "",
+          subsidyContractId: row.value("id"),
+          householdId: row.value("householdId"),
+          unitId: row.value("unitId"),
+          paymentGroupId: row.value("paymentGroupId"),
+        });
+        row.setValues({
+          rentPortionDateNext: "",
+          rentPortionMonthlyNext: "",
         });
       }
     });
