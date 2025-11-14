@@ -2,6 +2,9 @@ export type StrictExtract<T, K extends T> = Extract<T, K>;
 export type StrictExclude<T, K extends T> = Exclude<T, K>;
 
 export const Arr = {
+  hasDuplicates(arr: unknown[]): boolean {
+    return new Set(arr).size !== arr.length;
+  },
   compareForSort(a: unknown, b: unknown): number {
     if (typeof a === "number" && typeof b === "number") {
       return a - b;

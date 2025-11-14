@@ -9,6 +9,7 @@ import {
   type BatchUpdateRequest,
   type DataFilterRange,
 } from "../utilitiesAppsScript.js";
+import { Arr } from "../utils/Arr.js";
 import { Obj } from "../utils/Obj.js";
 import type {
   HeaderIndices,
@@ -87,6 +88,10 @@ export class Spreadsheet extends SpreadsheetBase {
         1
       );
       const bodyRowIdValues = bodyRowIdRange.getValues();
+      if (Arr.hasDuplicates(bodyRowIdValues)) {
+        throw new Error(`Sheet "${sectionName}" has duplicate row IDs.`);
+      }
+
       bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
     }
 
