@@ -14,7 +14,7 @@ import {
   type BatchUpdateRequest,
   type DataFilterRange,
 } from "../utilitiesAppsScript";
-import { utils } from "../utilitiesGeneral";
+import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import {
   SheetBase,
@@ -52,12 +52,12 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     return this.state.changesToSave;
   }
   sort(varbName: VarbName<SN>): void {
-    this.sortWithoutAddingChanges(varbName);
+    this.sortAscWithoutAddingChanges(varbName);
     this.addAllVarbsAsChanges();
   }
-  sortWithoutAddingChanges(varbName: VarbName<SN>): void {
+  sortAscWithoutAddingChanges(varbName: VarbName<SN>): void {
     this.state.bodyRowOrder.sort((a, b) => {
-      return utils.general.compareForSort(
+      return Arr.compareForSort(
         this.row(a).value(varbName),
         this.row(b).value(varbName)
       );

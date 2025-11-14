@@ -441,6 +441,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       endDate: vS.gen("date", "End date", {
         validate: valS.validate.dateOrEmpty,
+        makeDefault: () => "",
       }),
       rentChange: vS.gen("yesOrNo", "Rent change"),
       rentChargeBaseMonthly: vS.gen("number", "Rent charge (base)"),
@@ -483,6 +484,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       endDate: vS.gen("date", "End date", {
         validate: valS.validate.dateOrEmpty,
+        makeDefault: () => "",
       }),
       notes: vS.gen("string", "Notes"),
     },

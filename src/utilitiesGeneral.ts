@@ -130,22 +130,7 @@ const _idUtils = {
 };
 
 export const utils = {
-  general: {
-    compareForSort(a: unknown, b: unknown): number {
-      if (typeof a === "number" && typeof b === "number") {
-        return a - b;
-      }
-      if (typeof a === "string" && typeof b === "string") {
-        return a.localeCompare(b);
-      }
-      if (a instanceof Date && b instanceof Date) {
-        return a.getTime() - b.getTime();
-      }
-      const stringA = String(a);
-      const stringB = String(b);
-      return stringA.localeCompare(stringB);
-    },
-  },
+  general: {},
   date: _dateUtils,
   currency: _currencyUtils,
   id: _idUtils,

@@ -1,6 +1,9 @@
 import { type GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
 import { chargeVarbToDescriptor } from "./appSchema/1. attributes/valueAttributes/pairs";
-import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
+import type {
+  SectionValues,
+  VarbName,
+} from "./appSchema/1. attributes/varbAttributes";
 import {
   SpreadsheetBase,
   type SpreadsheetProps,
@@ -9,6 +12,7 @@ import type { Row } from "./StateHandlers/Row";
 import type { Sheet } from "./StateHandlers/Sheet";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { utils } from "./utilitiesGeneral";
+import { Arr } from "./utils/Arr";
 import { Obj } from "./utils/Obj";
 
 interface TopOperatorProps extends SpreadsheetProps {
@@ -237,11 +241,22 @@ export class TopOperator extends SpreadsheetBase {
         const rentChargeNext = hh.valueNumber("rentChargeMonthlyNext");
         const utilityChargeNext = hh.value("utilityChargeMonthlyNext");
 
+        const dayBefore = utils.date.getDayBefore(dateNext);
+        const chargesToEnd = leaseChargeOngoing
+          .rowsFiltered({
+            householdId: hh.value("id"),
+            endDate: "",
+          })
+          .sort((a, b) =>
+            Arr.compareForSort(b.value("startDate"), a.value("startDate"))
+          );
+
+        chargesToEnd.forEach((charge) => {
+          charge.setValue("endDate", dayBefore);
+        });
+
         const householdId = hh.value("id");
-        const lco = leaseChargeOngoing.rowsFiltered({
-          householdId,
-          endDate: "",
-        })[0];
+        const lco = chargesToEnd.length > 0 ? chargesToEnd[0] : null;
 
         leaseChargeOngoing.addRowWithValues({
           householdId,
@@ -249,11 +264,17 @@ export class TopOperator extends SpreadsheetBase {
           rentChange: "Yes",
           rentChargeBaseMonthly: rentChargeNext,
           startDate: dateNext,
-          ...lco.values([
-            "petFeeRecurring",
-            "caretakerRentReduction",
-            "rentChargeUtilitiesMonthly",
-          ]),
+          ...(!lco && {
+            petFeeRecurring: 0,
+            caretakerRentReduction: 0,
+            rentChargeUtilitiesMonthly: 0,
+          }),
+          ...(lco &&
+            lco.values([
+              "petFeeRecurring",
+              "caretakerRentReduction",
+              "rentChargeUtilitiesMonthly",
+            ])),
           ...(utilityChargeNext !== "" && {
             rentChargeUtilitiesMonthly: utilityChargeNext,
           }),
@@ -351,38 +372,33 @@ export class TopOperator extends SpreadsheetBase {
           householdId,
         } as const;
 
-        for (const lease of hhLeasesActiveThisMonth) {
-          const startDate = lease.dateValueAfterOrGivenDate(
+        function proratedPortion<
+          SN extends "hhLeaseChargeOngoing" | "scChargeOngoing",
+          VN extends VarbName<SN>
+        >(row: Row<SN>, varbName: VN) {
+          const startDate = row.dateValueAfterOrGivenDate(
             "startDate",
             firstOfMonth
           );
-          const endDate = lease.dateValueBeforeOrGivenDate(
+          const endDate = row.dateValueBeforeOrGivenDate(
             "endDate",
             lastOfMonth
           );
-          householdPortion += utils.date.prorateMonthlyAmount(
-            lease.valueNumber(varbName),
+          return utils.date.prorateMonthlyAmount(
+            row.valueNumber(varbName),
             startDate,
             endDate
           );
         }
 
+        for (const lease of hhLeasesActiveThisMonth) {
+          householdPortion += proratedPortion(lease, varbName);
+        }
+
         if (varbName === "rentChargeBaseMonthly") {
           let subsidyPortion = 0;
           for (const scContract of scChargesActiveThisMonth) {
-            const scStartDate = scContract.dateValueAfterOrGivenDate(
-              "startDate",
-              firstOfMonth
-            );
-            const scEndDate = scContract.dateValueBeforeOrGivenDate(
-              "endDate",
-              lastOfMonth
-            );
-            subsidyPortion += utils.date.prorateMonthlyAmount(
-              scContract.valueNumber("amount"),
-              scStartDate,
-              scEndDate
-            );
+            subsidyPortion += proratedPortion(scContract, "amount");
           }
           if (subsidyPortion) {
             householdPortion -= subsidyPortion;

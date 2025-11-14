@@ -2,6 +2,30 @@ export type StrictExtract<T, K extends T> = Extract<T, K>;
 export type StrictExclude<T, K extends T> = Exclude<T, K>;
 
 export const Arr = {
+  compareForSort(a: unknown, b: unknown): number {
+    if (typeof a === "number" && typeof b === "number") {
+      return a - b;
+    }
+    if (typeof a === "string" && typeof b === "string") {
+      return a.localeCompare(b);
+    }
+    if (a instanceof Date && b instanceof Date) {
+      return a.getTime() - b.getTime();
+    }
+    const stringA = String(a);
+    const stringB = String(b);
+    return stringA.localeCompare(stringB);
+  },
+  sortAscending(arr: unknown[]) {
+    return [...arr].sort((a, b) => {
+      return this.compareForSort(a, b);
+    });
+  },
+  sortDescending(arr: unknown[]) {
+    return [...arr].sort((a, b) => {
+      return this.compareForSort(b, a);
+    });
+  },
   oneOrThrow<V extends any>(arr: readonly V[]): V {
     if (arr.length !== 1) {
       throw new Error("There is more than one item in this array.");
