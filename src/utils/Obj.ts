@@ -30,6 +30,16 @@ export type PropKeyOfValue<
 > = keyof SubType<O, V>;
 
 export const Obj = {
+  pushByKey<
+    O extends Record<string, any[]>,
+    K extends keyof O,
+    V extends O[K][number]
+  >(obj: O, key: K, value: V) {
+    if (!obj[key]) {
+      obj[key] = [] as O[K];
+    }
+    obj[key].push(value);
+  },
   isEmpty(obj: any): boolean {
     return Object.keys(obj).length === 0;
   },

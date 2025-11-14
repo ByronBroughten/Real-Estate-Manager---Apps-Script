@@ -22,12 +22,19 @@ interface TopOperatorProps extends SpreadsheetProps {
 type PaymentIdToCharges = Record<string, Row<"hhCharge">[]>;
 
 type LedgerInputSn = "hhCharge" | "hhPaymentAllocation";
+
 type ChargeIdsForPayments = {
-  paymentGroups: {
+  paymentGroup: {
     [paymentGroupId: string]: string[];
   };
-  singles: string[];
+  subsidyContract: {
+    [subsidyContractId: string]: string[];
+  };
+  household: {
+    [householdId: string]: string[];
+  };
 };
+type PaymentGroupType = keyof ChargeIdsForPayments;
 
 export class TopOperator extends SpreadsheetBase {
   readonly ss: Spreadsheet;
@@ -325,8 +332,9 @@ export class TopOperator extends SpreadsheetBase {
   }
   buildOutChargesFirstOfMonth(date: Date = new Date()) {
     const cfp: ChargeIdsForPayments = {
-      paymentGroups: {},
-      singles: [],
+      paymentGroup: {},
+      subsidyContract: {},
+      household: {},
     };
 
     const firstOfMonth = utils.date.firstDayOfMonth(date);
@@ -397,6 +405,9 @@ export class TopOperator extends SpreadsheetBase {
           householdPortion += proratedPortion(lease, varbName);
         }
 
+        if (varbName === "caretakerRentReduction") {
+          householdPortion = -householdPortion;
+        }
         if (varbName === "rentChargeBaseMonthly") {
           let subsidyPortion = 0;
           for (const scContract of scChargesActiveThisMonth) {
@@ -405,56 +416,60 @@ export class TopOperator extends SpreadsheetBase {
           if (subsidyPortion) {
             const topScCharge = scChargesActiveThisMonth[0];
             householdPortion -= subsidyPortion;
-            const subsidyChargeId = charge.addRowWithValues({
+            const chargeId = charge.addRowWithValues({
               portion: "Subsidy program",
               description: "Rent charge (base)",
-              subsidyContractId: topScCharge.value("id"),
+              subsidyContractId: topScCharge.value("subsidyContractId"),
               amount: subsidyPortion,
               ...chargeProps,
             });
             const paymentGroupId =
               scChargesActiveThisMonth[0].value("paymentGroupId");
             if (paymentGroupId) {
-              if (!cfp.paymentGroups[paymentGroupId]) {
-                cfp.paymentGroups[paymentGroupId] = [];
-              }
-              cfp.paymentGroups[paymentGroupId].push(subsidyChargeId);
+              Obj.pushByKey(cfp.paymentGroup, paymentGroupId, chargeId);
             } else {
-              cfp.singles.push(subsidyChargeId);
+              for (const scContract of scChargesActiveThisMonth) {
+                Obj.pushByKey(
+                  cfp.subsidyContract,
+                  scContract.value("id"),
+                  chargeId
+                );
+              }
             }
           }
         }
-        if (householdPortion > 0) {
-          const householdChargeId = charge.addRowWithValues({
+
+        if (householdPortion !== 0) {
+          const chargId = charge.addRowWithValues({
             amount: householdPortion,
             portion: "Household",
             description: chargeVarbToDescriptor[varbName],
             ...chargeProps,
           });
-          cfp.singles.push(householdChargeId);
+          Obj.pushByKey(cfp.household, householdId, chargId);
         }
       }
     });
     return cfp;
   }
   buildOutPaymentsFromCharges(cfp: ChargeIdsForPayments) {
-    this.addPaymentsAndAllocate({
-      chargeIds: cfp.singles,
-    });
-
-    Obj.keys(cfp.paymentGroups).forEach((paymentGroupId) => {
+    for (const paymentGroupType of [
+      "household",
+      "subsidyContract",
+      "paymentGroup",
+    ] as const) {
       this.addPaymentsAndAllocate({
-        paymentGroupId: paymentGroupId as string,
-        chargeIds: cfp.paymentGroups[paymentGroupId],
+        paymentGroupType,
+        idToChargeIds: cfp[paymentGroupType],
       });
-    });
+    }
   }
   addPaymentsAndAllocate({
-    paymentGroupId,
-    chargeIds,
+    paymentGroupType,
+    idToChargeIds,
   }: {
-    paymentGroupId?: string;
-    chargeIds: string[];
+    paymentGroupType: PaymentGroupType;
+    idToChargeIds: { [id: string]: string[] };
   }) {
     const hhCharge = this.ss.sheet("hhCharge");
     const payment = this.ss.sheet("hhPayment");
@@ -462,58 +477,54 @@ export class TopOperator extends SpreadsheetBase {
     const subsidyContract = this.ss.sheet("subsidyContract");
 
     const paymentIdToCharges: PaymentIdToCharges = {};
-    function groupChargeWithPaymentId(
-      paymentId: string,
-      charge: Row<"hhCharge">
-    ) {
-      if (!paymentIdToCharges[paymentId]) {
-        paymentIdToCharges[paymentId] = [];
-      }
-      paymentIdToCharges[paymentId].push(charge);
-    }
-
-    const charges = chargeIds.map((chargeId) => hhCharge.row(chargeId));
-
-    if (!paymentGroupId) {
-      for (const charge of charges) {
-        const portion = charge.value("portion");
+    for (const [groupId, chargeIds] of Obj.entries(idToChargeIds)) {
+      const charges = chargeIds.map((chargeId) => hhCharge.row(chargeId));
+      function addPayment(values: Partial<SectionValues<"hhPayment">>) {
+        const topCharge = charges[0];
         const paymentId = payment.addRowWithValues({
           detailsVerified: "No",
-          ...charge.values(["date", "amount"]),
-          ...(portion === "Household" && {
+          amount: 0,
+          date: topCharge.value("date"),
+          ...values,
+        });
+
+        let amount = 0;
+        for (const charge of charges) {
+          amount += charge.valueNumber("amount");
+          Obj.pushByKey(paymentIdToCharges, paymentId, charge);
+        }
+        payment.row(paymentId).setValue("amount", amount);
+      }
+
+      const handlers: Record<PaymentGroupType, () => void> = {
+        household: () => {
+          addPayment({
             payerCategory: "Household",
-            householdId: charge.value("householdId"),
-          }),
-          ...(portion === "Subsidy program" && {
+            householdId: groupId,
+          });
+        },
+        subsidyContract: () => {
+          addPayment({
             payerCategory: "Subsidy program",
             subsidyProgramId: subsidyContract
-              .row(charge.valueStringNotEmpty("subsidyContractId"))
+              .row(groupId)
               .value("subsidyProgramId"),
-          }),
-        });
-        groupChargeWithPaymentId(paymentId, charge);
-      }
-    } else if (paymentGroupId) {
-      const pg = paymentGroup.row(paymentGroupId);
-      const topCharge = charges[0];
-      const paymentId = payment.addRowWithValues({
-        amount: 0,
-        detailsVerified: "No",
-        date: topCharge.value("date"),
-        ...pg.values([
-          "householdId",
-          "payerCategory",
-          "subsidyProgramId",
-          "otherPayerId",
-        ]),
-      });
+          });
+        },
+        paymentGroup: () => {
+          const pg = paymentGroup.row(groupId);
+          addPayment(
+            pg.values([
+              "householdId",
+              "payerCategory",
+              "subsidyProgramId",
+              "otherPayerId",
+            ])
+          );
+        },
+      };
 
-      let amount = 0;
-      for (const charge of charges) {
-        amount += charge.valueNumber("amount");
-        groupChargeWithPaymentId(paymentId, charge);
-      }
-      payment.row(paymentId).setValue("amount", amount);
+      handlers[paymentGroupType]();
     }
     this.addAllocations(paymentIdToCharges);
   }

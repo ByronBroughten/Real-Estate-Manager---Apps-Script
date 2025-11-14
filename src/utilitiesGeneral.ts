@@ -68,7 +68,7 @@ const _dateUtils = {
     return `${date.getMonth() + 1}/${date.getFullYear()}`;
   },
   firstDayOfMonth(date: Date = new Date()): Date {
-    return new Date(date.getFullYear(), date.getMonth(), 1);
+    return new Date(date.getFullYear(), date.getMonth(), 1, 12);
   },
   incrementMonth(date: Date) {
     return new Date(date.getFullYear(), date.getMonth() + 1, 1, 12);
@@ -89,7 +89,7 @@ const _dateUtils = {
   lastDateOfMonth(date: Date): Date {
     const year = date.getFullYear();
     const month = date.getMonth();
-    return new Date(year, month + 1, 0);
+    return new Date(year, month + 1, 0, 12);
   },
   dateOrLastDateOfThisMonth(value, thisDate: Date = new Date()): Date {
     if (valS.is.date(value)) {
