@@ -188,11 +188,11 @@ export const allVarbAttributes = makeSchemaStructure(
         onDelete: "keep",
       }),
       rentPortionMonthly: vS.gen("number", "Rent portion monthly"),
-      rentPortionMonthlyNext: vS.gen("number", "Next rent portion monthly"),
+      rentPortionMonthlyNext: vS.gen("number", "Next subsidy portion monthly"),
       rentPortionDate: vS.gen("date", "Rent portion date", {
         validate: valS.validate.date,
       }),
-      rentPortionDateNext: vS.gen("date", "Next rent portion date", {
+      rentPortionDateNext: vS.gen("date", "Next subsidy portion date", {
         validate: valS.validate.dateOrEmpty,
       }),
     },
