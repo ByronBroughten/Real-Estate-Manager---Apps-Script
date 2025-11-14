@@ -129,6 +129,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   rowsFiltered(values: Partial<SectionValues<SN>>): Row<SN>[] {
     return this.orderedRows.filter((row) => {
       for (const varbName in values) {
+        console.log(
+          `row: ${row.value(varbName)}  |  values: ${values[varbName]}`
+        );
         if (row.value(varbName) !== values[varbName]) {
           return false;
         }

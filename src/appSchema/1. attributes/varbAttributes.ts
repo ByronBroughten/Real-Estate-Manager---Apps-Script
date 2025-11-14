@@ -469,7 +469,7 @@ export const allVarbAttributes = makeSchemaStructure(
       amount: vS.gen("number", "Amount"),
       subsidyContractId: vS.linkedId("Subsidy contract ID", {
         sectionName: "subsidyContract",
-        onDelete: "delete",
+        onDelete: "keep",
       }),
       subsidyContractName: vS.gen(
         "subsidyContractNameFromId",
