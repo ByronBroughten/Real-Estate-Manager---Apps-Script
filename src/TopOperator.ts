@@ -242,14 +242,14 @@ export class TopOperator extends SpreadsheetBase {
         const utilityChargeNext = hh.value("utilityChargeMonthlyNext");
 
         const dayBefore = utils.date.getDayBefore(dateNext);
-        const chargesToEnd = leaseChargeOngoing
-          .rowsFiltered({
-            householdId: hh.value("id"),
-            endDate: "",
-          })
-          .sort((a, b) =>
-            Arr.compareForSort(b.value("startDate"), a.value("startDate"))
-          );
+        const chargesToEnd = leaseChargeOngoing.rowsFiltered({
+          householdId: hh.value("id"),
+          endDate: "",
+        });
+
+        chargesToEnd.sort((a, b) =>
+          Arr.compareForSort(b.value("startDate"), a.value("startDate"))
+        );
 
         chargesToEnd.forEach((charge) => {
           charge.setValue("endDate", dayBefore);
