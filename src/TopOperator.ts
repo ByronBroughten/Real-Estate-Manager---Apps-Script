@@ -205,40 +205,6 @@ export class TopOperator extends SpreadsheetBase {
     this.buildOutPaymentsFromCharges(cfp);
     this.ss.batchUpdateRanges();
   }
-  // private buildFromChargesOngoing(
-  //   doUpdate: (props: BuildFromChargeOngoingProps) => void,
-  //   chargesOngoing: Row<"hhChargeOngoing">[] = this.ss.sheet("hhChargeOngoing")
-  //     .orderedRows
-  // ) {
-
-  //   chargesOngoing.forEach((chargeOngoing) => {
-  //     const startDate = chargeOngoing.valueDate("startDate");
-  //     const endDateMaybe = chargeOngoing.value("endDate");
-  //     const endDate = endDateMaybe
-  //       ? valS.validate.date(endDateMaybe)
-  //       : utils.date.lastDateOfMonth(new Date());
-
-  //     const dates = utils.date.firstDaysOfMonths(startDate, endDate);
-
-  //     for (let i = 0; i < dates.length; i++) {
-  //       const date = dates[i];
-  //       const end =
-  //         i === dates.length - 1 ? endDate : utils.date.lastDateOfMonth(date);
-
-  //       const proratedAmount = utils.date.prorateMonthlyAmount(
-  //         chargeOngoing.valueNumber("amount"),
-  //         date,
-  //         end
-  //       );
-
-  //       doUpdate({
-  //         date,
-  //         proratedAmount,
-  //         chargeOngoing,
-  //       });
-  //     }
-  //   });
-  // }
   updateLeaseOngoingCharges() {
     const household = this.ss.sheet("household");
     const leaseChargeOngoing = this.ss.sheet("hhLeaseChargeOngoing");

@@ -1,7 +1,4 @@
-import {
-  isInSnGroup,
-  type SectionName,
-} from "./appSchema/1. attributes/sectionAttributes.js";
+import { isInSnGroup } from "./appSchema/1. attributes/sectionAttributes.js";
 import type { SectionValues } from "./appSchema/1. attributes/varbAttributes.js";
 import { TopOperator } from "./TopOperator.js";
 import { asU } from "./utilitiesAppsScript.js";
@@ -9,43 +6,6 @@ import { asU } from "./utilitiesAppsScript.js";
 function triggerFirstOfMonth() {
   const top = TopOperator.init();
   top.monthlyRentUpdate();
-}
-
-// function buildOutAllCharges() {
-//   const top = TopOperator.init();
-//   top.buildOutAllCharges();
-// }
-
-// function buildOutAllPayments() {
-//   const top = TopOperator.init();
-//   top.buildOutAllPayments();
-// }
-
-type GetValues<SN extends SectionName> = () => SectionValues<SN>;
-type UseValues<SN extends SectionName> = (values: SectionValues<SN>) => void;
-
-type OnEdit<SN extends SectionName> = {
-  getValues: GetValues<SN>;
-  useValues: UseValues<SN>;
-};
-
-function testUpdateLeaseOngoingCharges() {
-  const top = TopOperator.init();
-  top.updateLeaseOngoingCharges();
-  top.ss.batchUpdateRanges();
-}
-
-function testUpdateSubsidyOngoingCharges() {
-  const top = TopOperator.init();
-  top.updateSubsidyOngoingCharges();
-  top.ss.batchUpdateRanges();
-}
-
-function testBuildOutMonthlyChargesAndPayments() {
-  const top = TopOperator.init();
-  const cfp = top.buildOutChargesFirstOfMonth();
-  top.buildOutPaymentsFromCharges(cfp);
-  top.ss.batchUpdateRanges();
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
@@ -92,3 +52,22 @@ function resetTriggers(doResetTriggers: boolean = true) {
 }
 
 resetTriggers(false);
+
+function testUpdateLeaseOngoingCharges() {
+  const top = TopOperator.init();
+  top.updateLeaseOngoingCharges();
+  top.ss.batchUpdateRanges();
+}
+
+function testUpdateSubsidyOngoingCharges() {
+  const top = TopOperator.init();
+  top.updateSubsidyOngoingCharges();
+  top.ss.batchUpdateRanges();
+}
+
+function testBuildOutMonthlyChargesAndPayments() {
+  const top = TopOperator.init();
+  const cfp = top.buildOutChargesFirstOfMonth();
+  top.buildOutPaymentsFromCharges(cfp);
+  top.ss.batchUpdateRanges();
+}
