@@ -28,6 +28,7 @@ const descriptionPaymentAllocation = [
   "Deposit payment",
   "Deposit deduction",
   "Deposit repayment",
+  "Caretaker rent reduction",
 ] as const;
 
 const descriptionCharge = [
@@ -47,7 +48,12 @@ const dropdownOptions = enforceUnionValues({
   yesOrNo: ["Yes", "No"],
   rentPortionName: ["Household", "Subsidy program"],
   ongoingFrequency: ["Monthly", "Yearly"],
-  payerCategory: ["Household", "Subsidy program", "Other payer"],
+  payerCategory: [
+    "Household",
+    "Subsidy program",
+    "Other payer",
+    "Rent reduction",
+  ],
   descriptionChargeOngoing,
   descriptionChargeOnetime,
   descriptionCharge,

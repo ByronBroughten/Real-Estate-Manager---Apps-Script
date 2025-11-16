@@ -201,7 +201,7 @@ export class TopOperator extends SpreadsheetBase {
     this.ss.batchUpdateRanges();
     // needed for accurately building out charges
 
-    const cfp = this.buildOutChargesFirstOfMonth();
+    const cfp = this.buildOutChargesForMonth();
     this.buildOutPaymentsFromCharges(cfp);
     this.ss.batchUpdateRanges();
   }
@@ -296,15 +296,45 @@ export class TopOperator extends SpreadsheetBase {
       }
     });
   }
-  buildOutChargesFirstOfMonth(date: Date = new Date()) {
+  handleCaretakerRentReduction(
+    amount: number,
+    date: Date = new Date(),
+    householdId: string,
+    unitId
+  ) {
+    const payment = this.ss.sheet("hhPayment");
+    const allocation = this.ss.sheet("hhPaymentAllocation");
+    const expense = this.ss.sheet("expense");
+
+    const paymentId = payment.addRowWithValues({
+      date,
+      amount,
+      payerCategory: "Rent reduction",
+      detailsVerified: "No",
+    });
+
+    allocation.addRowWithValues({
+      amount,
+      householdId,
+      description: "Caretaker rent reduction",
+      paymentId,
+      portion: "Household",
+      unitId,
+    });
+
+    expense.addRowWithValues({
+      // TODO add expense
+    });
+  }
+  buildOutChargesForMonth(date: Date = new Date()) {
     const cfp: ChargeIdsForPayments = {
       paymentGroup: {},
       subsidyContract: {},
       household: {},
     };
 
-    const firstOfMonth = utils.date.firstDayOfMonth(date);
-    const lastOfMonth = utils.date.lastDateOfMonth(firstOfMonth);
+    const { firstOfMonth, lastOfMonth } =
+      utils.date.firstAndLastDayOfMonth(date);
 
     const household = this.ss.sheet("household");
     const scChargeOngoing = this.ss.sheet("scChargeOngoing");
@@ -372,7 +402,13 @@ export class TopOperator extends SpreadsheetBase {
         }
 
         if (varbName === "caretakerRentReduction") {
-          householdPortion = -householdPortion;
+          this.handleCaretakerRentReduction(
+            householdPortion,
+            firstOfMonth,
+            householdId,
+            firstUnitId
+          );
+          continue;
         }
         if (varbName === "rentChargeBaseMonthly") {
           let subsidyPortion = 0;

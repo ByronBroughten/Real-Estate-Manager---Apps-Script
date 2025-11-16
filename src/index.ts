@@ -67,7 +67,7 @@ function testUpdateSubsidyOngoingCharges() {
 
 function testBuildOutMonthlyChargesAndPayments() {
   const top = TopOperator.init();
-  const cfp = top.buildOutChargesFirstOfMonth();
+  const cfp = top.buildOutChargesForMonth();
   top.buildOutPaymentsFromCharges(cfp);
   top.ss.batchUpdateRanges();
 }

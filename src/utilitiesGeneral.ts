@@ -73,6 +73,15 @@ const _dateUtils = {
   incrementMonth(date: Date) {
     return new Date(date.getFullYear(), date.getMonth() + 1, 1, 12);
   },
+  firstAndLastDayOfMonth(date: Date = new Date()): {
+    firstOfMonth: Date;
+    lastOfMonth: Date;
+  } {
+    return {
+      firstOfMonth: this.firstDayOfMonth(date),
+      lastOfMonth: this.lastDateOfMonth(date),
+    };
+  },
   firstDaysOfMonths(startDate: Date, endDate: Date): Date[] {
     const firstDays: Date[] = [startDate];
     let currentDate = this.firstDayOfMonth(startDate);
