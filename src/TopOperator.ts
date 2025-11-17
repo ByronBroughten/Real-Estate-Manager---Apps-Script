@@ -165,6 +165,7 @@ export class TopOperator extends SpreadsheetBase {
         issuer: "Property management",
         notes: "",
         charge: amount,
+        payment: "",
         ...rest,
       });
     }
@@ -187,6 +188,7 @@ export class TopOperator extends SpreadsheetBase {
         notes: "",
         issuer: payer,
         payment: amount,
+        charge: "",
         ...rest,
       });
     }

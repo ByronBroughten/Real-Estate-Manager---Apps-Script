@@ -232,7 +232,7 @@ export const allVarbAttributes = makeSchemaStructure(
       payerCategory: vS.gen("payerCategory", "Payer category"),
       payer: vS.gen("payer", "Payer"),
       amount: vS.gen("number", "Amount"),
-      amountAllocated: vS.gen("amountAllocated", "Allocated amount"),
+      amountAllocated: vS.gen("amountAllocated", "Amount allocated"),
       detailsVerified: vS.gen("yesOrNo", "Details verified"),
       paymentProcessed: vS.gen("paymentProcessed", "Processed"),
       householdId: vS.linkedId("Household ID", {
@@ -339,7 +339,7 @@ export const allVarbAttributes = makeSchemaStructure(
         makeDefault: () => "No",
       }),
       paymentHhName: vS.gen("string", "Payment HH name", {
-        makeDefault: () => `=SAME_ROW("Household name")`,
+        makeDefault: () => `=SR("Household name")`,
       }),
       paymentHhId: vS.linkedId(
         "Payment HH ID",

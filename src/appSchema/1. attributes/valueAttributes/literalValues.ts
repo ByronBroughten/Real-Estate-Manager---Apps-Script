@@ -3,14 +3,14 @@ import { validationError } from "../../../utils/validation";
 import { va, type ValueSchema } from "../valueAttributes";
 
 const literalValues = {
-  amountAllocated: `=IF(COUNTIF(hhPaymentAllocation[Payment ID], SAME_ROW("ID")), SUM(FILTER(hhPaymentAllocation[Amount], hhPaymentAllocation[Payment ID]=SAME_ROW("ID"))), 0)`,
+  amountAllocated: `=IF(COUNTIF(hhPaymentAllocation[Payment ID], SR("ID")), SUM(FILTER(hhPaymentAllocation[Amount], hhPaymentAllocation[Payment ID]=SR("ID"))), 0)`,
   getPaymentDate: `=ROW_MATCH(hhPayment[Date], hhPayment[ID], "Payment ID")`,
   getPaymentProcessed: `=ROW_MATCH(hhPayment[Processed], hhPayment[ID], "Payment ID")`,
   getPayer: `=ROW_MATCH(hhPayment[Payer], hhPayment[ID], "Payment ID")`,
-  payer: `=IFS(SAME_ROW("Payer category")="Household", SAME_ROW("Household name"), SAME_ROW("Payer category")="Subsidy program", SAME_ROW("Subsidy program name"), SAME_ROW("Payer category")="Other payer", SAME_ROW("Other payer name"), SAME_ROW("Payer category")="Rent reduction", SAME_ROW("Rent reduction"))`,
-  paymentProcessed: `=IF(SAME_ROW("Amount")=SAME_ROW("Allocated amount"), IF(SAME_ROW("Date")<>"",  IF(SAME_ROW("Details verified")="Yes", "Yes", "No"), "No"), "No")`,
-  numAllocated: `=COUNTIF(hhPaymentAllocation[Payment ID], "="&SAME_ROW("ID"))`,
-  householdAllocated: `=IFS(SAME_ROW("Num allocated")=0, "", SAME_ROW("Num allocated")>1, "Multiple", SAME_ROW("Num allocated")=1, ROW_MATCH(hhPaymentAllocation[HH members full name], hhPaymentAllocation[Payment ID], "ID"))`,
+  payer: `=IFS(SR("Payer category")="Household", SR("Household name"), SR("Payer category")="Subsidy program", SR("Subsidy program name"), SR("Payer category")="Other payer", SR("Other payer name"), SR("Payer category")="Rent reduction", SR("Rent reduction"))`,
+  paymentProcessed: `=IF(SR("Amount")=SR("Amount allocated"), IF(SR("Date")<>"",  IF(SR("Details verified")="Yes", "Yes", "No"), "No"), "No")`,
+  numAllocated: `=COUNTIF(hhPaymentAllocation[Payment ID], "="&SR("ID"))`,
+  householdAllocated: `=IFS(SR("Num allocated")=0, "", SR("Num allocated")>1, "Multiple", SR("Num allocated")=1, ROW_MATCH(hhPaymentAllocation[HH members full name], hhPaymentAllocation[Payment ID], "ID"))`,
   hhNameFromId: `=ROW_MATCH(household[Name], household[ID],"Household ID")`,
   hhNameFromIdOp: `=ROW_MATCH_OR_BLANK(household[Name], household[ID],"Household ID")`,
   hhIdFromNameOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Household name")`,
