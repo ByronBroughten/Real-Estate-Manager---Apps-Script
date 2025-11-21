@@ -88,11 +88,10 @@ export class Spreadsheet extends SpreadsheetBase {
         1
       );
       const bodyRowIdValues = bodyRowIdRange.getValues();
-      if (Arr.hasDuplicates(bodyRowIdValues)) {
+      bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
+      if (Arr.hasDuplicates(bodyRowOrder)) {
         throw new Error(`Sheet "${sectionName}" has duplicate row IDs.`);
       }
-
-      bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
     }
 
     const bodyRows: Rows<SN> = {};
