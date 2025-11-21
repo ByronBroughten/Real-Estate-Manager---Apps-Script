@@ -131,41 +131,41 @@ export class TopOperator extends SpreadsheetBase {
     hhLedger.DELETE_ALL_BODY_ROWS();
 
     const { householdId, portion, subsidyContractId } = values;
-
-    function filter<SN extends LedgerInputSn>(row: Row<SN>): boolean {
-      const vals = row.values(["householdId", "portion", "subsidyContractId"]);
-      if (vals.householdId === householdId && vals.portion === portion) {
-        if (portion === "Household" || !subsidyContractId) {
-          return true;
-        } else {
-          return vals.subsidyContractId === subsidyContractId;
-        }
-      } else {
-        return false;
-      }
-    }
-
     function filteredRows<SN extends LedgerInputSn>(
       sheet: Sheet<SN>
     ): Row<SN>[] {
       const rows = sheet.orderedRows;
-      const filteredRows = rows.filter((row) => filter(row));
-      return filteredRows;
+      return rows.filter((row) => {
+        const vals = row.values([
+          "portion",
+          "householdId",
+          "subsidyContractId",
+        ]);
+        if (householdId === vals.householdId && portion === vals.portion) {
+          if (portion === "Subsidy program") {
+            return subsidyContractId === vals.subsidyContractId;
+          } else {
+            return true;
+          }
+        } else {
+          return false;
+        }
+      });
     }
 
     const filteredCharges = filteredRows(this.ss.sheet("hhCharge"));
     for (const row of filteredCharges) {
       const { amount, ...rest } = row.values([
-        "date",
         "amount",
+        "date",
         "description",
         "unitName",
       ]);
       hhLedger.addRowWithValues({
         issuer: "Property management",
-        notes: "",
         charge: amount,
         payment: "",
+        notes: "",
         ...rest,
       });
     }
@@ -185,10 +185,10 @@ export class TopOperator extends SpreadsheetBase {
         "unitName",
       ]);
       hhLedger.addRowWithValues({
-        notes: "",
         issuer: payer,
         payment: amount,
         charge: "",
+        notes: "",
         ...rest,
       });
     }
