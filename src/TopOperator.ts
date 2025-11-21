@@ -128,6 +128,8 @@ export class TopOperator extends SpreadsheetBase {
   }
   buildHhLedger(values: SectionValues<"buildHhLedger">): void {
     const hhLedger = this.ss.sheet("hhLedger");
+    const hhCharge = this.ss.sheet("hhCharge");
+    const hhPaymentAllocation = this.ss.sheet("hhPaymentAllocation");
     hhLedger.DELETE_ALL_BODY_ROWS();
 
     const { householdId, portion, subsidyContractId } = values;
@@ -153,7 +155,7 @@ export class TopOperator extends SpreadsheetBase {
       });
     }
 
-    const filteredCharges = filteredRows(this.ss.sheet("hhCharge"));
+    const filteredCharges = filteredRows(hhCharge);
     for (const row of filteredCharges) {
       const { amount, ...rest } = row.values([
         "amount",
@@ -170,9 +172,7 @@ export class TopOperator extends SpreadsheetBase {
       });
     }
 
-    const filteredAllocations = filteredRows(
-      this.ss.sheet("hhPaymentAllocation")
-    );
+    const filteredAllocations = filteredRows(hhPaymentAllocation);
     for (const row of filteredAllocations) {
       if (row.value("processed") === "No") {
         continue;
