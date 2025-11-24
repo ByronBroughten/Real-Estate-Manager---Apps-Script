@@ -67,8 +67,9 @@ export type SectionName<S extends SectionNameSimple = SectionNameSimple> = S;
 const sectionNameGroups = {
   api: Arr.extractStrict(sectionNames, [
     "addHhChargeOnetime",
-    "buildHhLedger",
     "addHhPaymentOnetime",
+    "buildHhLedger",
+    "addExpense",
   ] as const),
 };
 

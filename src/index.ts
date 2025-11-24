@@ -23,18 +23,16 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
 
     if (sheet.isApiEnterTriggered({ colIdx, rowIdx })) {
       const apiRow = sheet.topBodyRow;
-      const values = apiRow.validateValues();
+      const apiValues = apiRow.validateValues();
 
-      if (sectionName !== "buildHhLedger") {
-        apiRow.resetToDefault();
-        top.ss.batchUpdateRanges();
-      }
+      apiRow.resetToDefault();
+      top.ss.batchUpdateRanges();
 
       try {
-        top[sectionName](values as SectionValues<typeof sectionName> as any);
+        top[sectionName](apiValues as SectionValues<typeof sectionName> as any);
       } catch (e) {
         console.error(e);
-        apiRow.setValues(values);
+        apiRow.setValues(apiValues);
         top.ss.batchUpdateRanges();
       }
     }
