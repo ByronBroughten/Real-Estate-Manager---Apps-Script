@@ -59,6 +59,31 @@ const dropdownOptions = enforceUnionValues({
   descriptionCharge,
   descriptionPaymentAllocation,
   descriptionsTransactionsAll,
+  expenseCategory: [
+    "Repair",
+    "Supplies",
+    "Cleaning & maintenance",
+    "Depreciation expense or depletion",
+    "Utilities",
+    "Insurance",
+    "Taxes",
+    "Mortgage interest paid to banks",
+    "Legal & professional",
+    "Advertising",
+    "Auto and travel",
+    "Mgmt fees",
+    "Commissions",
+    "Other interest",
+    "Other",
+    "Principal",
+  ],
+  receiptFormat: ["Electronic", "Physical", "Cash ledger", "Text message"],
+  taxAdjust: [
+    "minus primary space",
+    "Primary residence",
+    "Half primary residence",
+    "Minus primary time space",
+  ],
 } as const);
 // These will be used to populate named ranges and validate data.
 

@@ -2,7 +2,7 @@ import type { Merge } from "../../utils/Obj/merge";
 import { valS } from "../../utils/validation";
 
 import { makeSchemaStructure } from "../makeSchema";
-import { type SectionNameSimple } from "./sectionAttributes";
+import { validateSnObj, type SectionNameSimple } from "./sectionAttributes";
 import {
   allValueAttributes,
   type MakeDefaultValue,
@@ -69,6 +69,20 @@ function makeVarb<
   };
 }
 
+const linkedIdDisplayNames = validateSnObj({
+  property: "Property ID",
+  unit: "Unit ID",
+  household: "Household ID",
+});
+
+type LinkedIdSn = keyof typeof linkedIdDisplayNames;
+
+type LinkedIdProps = {
+  displayName?: string;
+  default?: ValueName;
+  required?: boolean;
+};
+
 const vS = {
   id(): Varb<"id", "ID", {}> {
     return makeVarb({
@@ -89,6 +103,34 @@ const vS = {
       ...options,
     });
   },
+  linkedIdNext<SN extends LinkedIdSn>(
+    sectionName: SN,
+    props: LinkedIdProps = {}
+  ): Varb<"linkedId", string> {
+    const snToSd = validateSnObj({
+      property: "Property ID",
+      unit: "Unit ID",
+      household: "Household ID",
+    });
+
+    const valueParams = {
+      sectionName,
+      onDelete: "setEmpty",
+    } as ValueParams<"linkedId">;
+
+    return makeVarb({
+      valueName: "linkedId",
+      displayName: props.displayName ?? snToSd[sectionName],
+      valueParams,
+      ...(props.required && {
+        validate: valS.validate.stringNotEmpty,
+      }),
+      ...(props.default && {
+        makeDefault: allValueAttributes[props.default]
+          .makeDefault as () => string,
+      }),
+    });
+  },
   gen<VN extends Exclude<ValueName, "id" | "linkedId">, S extends string>(
     valueName: VN,
     displayName: S,
@@ -99,6 +141,11 @@ const vS = {
       displayName,
       valueParams: {},
       ...options,
+    });
+  },
+  stringNotEmpty<S extends string>(displayName: S): Varb<"string", S> {
+    return this.gen("string", displayName, {
+      validate: valS.validate.stringNotEmpty,
     });
   },
   date(): Varb<"date", "Date"> {
@@ -286,6 +333,55 @@ export const allVarbAttributes = makeSchemaStructure(
         "Subsidy contract name"
       ),
       notes: vS.gen("string", "Notes"),
+    },
+    expense: {
+      id: vS.id(),
+      date: vS.date(),
+      propertyName: vS.gen("propertyNameFromId", "Property name"),
+      propertyId: vS.linkedIdNext("property", { required: true }),
+      unitName: vS.gen("unitNameFromIdOp", "Unit name"),
+      unitId: vS.linkedIdNext("unit", { required: false }),
+      propertyYearName: vS.gen("propertyYearName", "Property year name"),
+      biller: vS.gen("string", "Biller"),
+      description: vS.gen("string", "Description"),
+      category: vS.gen("expenseCategory", "Expense category"),
+      receiptFormat: vS.gen("receiptFormat", "Receipt format", {
+        makeDefault: () => "Electronic",
+      }),
+      taxAdjust: vS.gen("taxAdjust", "Tax adjust"),
+      deductibleAmount: vS.gen("deductibleAmount", "Deductible amount"),
+      amount: vS.gen("number", "Amount"),
+      notes: vS.gen("string", "Notes"),
+    },
+    addExpense: {
+      id: vS.id(),
+      date: vS.dateDefaultToday(),
+      billerName: vS.gen("string", "Biller name"),
+      propertyName: vS.gen("string", "Property name"),
+      propertyId: vS.linkedIdNext("property", {
+        default: "propertyIdFromName",
+        required: true,
+      }),
+      unitId: vS.linkedIdNext("unit", {
+        default: "unitIdFromNameOp",
+        required: false,
+      }),
+      unitName: vS.gen("string", "Unit name"),
+      expenseCategory: vS.gen("expenseCategory", "Expense category"),
+      description: vS.gen("string", "Description"),
+      receiptFormat: vS.gen("receiptFormat", "Receipt format", {
+        makeDefault: () => "Electronic",
+      }),
+      amount: vS.gen("number", "Amount"),
+      deductableAmount: vS.gen("number", "Deductable amount"),
+      hhToChargeName: vS.gen("string", "Household to charge"),
+      householdId: vS.linkedIdNext("household", {
+        default: "hhIdFromToChargeOp",
+        required: false,
+      }),
+      hhChargeAmount: vS.gen("number", "Household charge amount"),
+      notes: vS.gen("string", "Notes"),
+      enter: vS.gen("boolean", "Enter"),
     },
     addHhPaymentOnetime: {
       id: vS.id(),
@@ -545,7 +641,6 @@ export const allVarbAttributes = makeSchemaStructure(
       priceCurrent: vS.gen("number", "Current price"),
       priceNext: vS.gen("number", "Next price"),
     },
-    expense: vsS.idOnly(),
     subsidyProgram: vsS.idOnly(),
   } as const
 );

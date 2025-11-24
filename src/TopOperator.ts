@@ -61,7 +61,27 @@ export class TopOperator extends SpreadsheetBase {
     return triggered;
   }
   // APIs
+  addExpense(values: SectionValues<"addExpense">) {
+    const expense = this.ss.sheet("expense");
+    const hhCharge = this.ss.sheet("hhCharge");
+
+    Obj.strictPick(values, [
+      "date",
+      "amount",
+      "category",
+      "detailsVerified",
+      "hhToChargeName",
+    ]);
+
+    expense.addRowWithValues({});
+
+    if (values.hhToChargeName) {
+      hhCharge.addRowWithValues({});
+    }
+  }
   addHhPaymentOnetime(values: SectionValues<"addHhPaymentOnetime">) {
+    const hhPayment = this.ss.sheet("hhPayment");
+    const hhAllocation = this.ss.sheet("hhPaymentAllocation");
     const payerValues = Obj.strictPick(values, [
       "date",
       "amount",
@@ -92,8 +112,8 @@ export class TopOperator extends SpreadsheetBase {
         throw new Error("Payer category is required");
       }
     }
-    const sPayment = this.ss.sheet("hhPayment");
-    const paymentId = sPayment.addRowWithValues({
+
+    const paymentId = hhPayment.addRowWithValues({
       ...payerValues,
       ...(payerValues.paymentHhId && { householdId: payerValues.paymentHhId }),
     });
@@ -113,8 +133,7 @@ export class TopOperator extends SpreadsheetBase {
       }
     }
 
-    const sAllocation = this.ss.sheet("hhPaymentAllocation");
-    sAllocation.addRowWithValues({
+    hhAllocation.addRowWithValues({
       ...allocateValues,
       paymentId,
     });

@@ -39,6 +39,7 @@ export const allSectionAttributes = makeSchemaStructure(
     unit: ma("un", 321313883),
     household: ma("hh", 0),
     expense: ma("ex", 449009036),
+    addExpense: ma("aex", 1964495656),
     subsidyProgram: ma("sp", 332858329),
     subsidyContract: ma("sc", 1155067179),
     scChargeOngoing: ma("scco", 194710324),
@@ -49,6 +50,12 @@ export const allSectionAttributes = makeSchemaStructure(
 
 export const sectionNames = Obj.keys(allSectionAttributes);
 export type SectionNameSimple = MakeSchemaName<typeof sectionNames>;
+
+export function validateSnObj<T extends Partial<Record<SectionName, unknown>>>(
+  t: T
+): T {
+  return t;
+}
 
 export type AllSectionAttributes = typeof allSectionAttributes;
 
