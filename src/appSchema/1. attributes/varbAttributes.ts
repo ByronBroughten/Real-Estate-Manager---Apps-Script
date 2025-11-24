@@ -373,7 +373,9 @@ export const allVarbAttributes = makeSchemaStructure(
         makeDefault: () => "Electronic",
       }),
       amount: vS.gen("number", "Amount"),
-      taxAdjust: vS.gen("taxAdjust", "Tax adjust"),
+      taxAdjust: vS.gen("taxAdjust", "Tax adjust", {
+        makeDefault: () => "",
+      }),
       hhToChargeName: vS.gen("string", "Household to charge"),
       householdId: vS.linkedIdNext("household", {
         default: "hhIdFromToChargeOp",
