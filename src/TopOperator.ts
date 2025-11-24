@@ -98,6 +98,7 @@ export class TopOperator extends SpreadsheetBase {
         ...hhChargeVals,
       });
     }
+    this.ss.batchUpdateRanges();
   }
   addHhPaymentOnetime(values: SectionValues<"addHhPaymentOnetime">) {
     const hhPayment = this.ss.sheet("hhPayment");
