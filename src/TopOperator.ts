@@ -65,18 +65,38 @@ export class TopOperator extends SpreadsheetBase {
     const expense = this.ss.sheet("expense");
     const hhCharge = this.ss.sheet("hhCharge");
 
-    Obj.strictPick(values, [
+    const expenseVals = Obj.strictPick(values, [
       "date",
       "amount",
-      "category",
-      "detailsVerified",
-      "hhToChargeName",
+      "billerName",
+      "description",
+      "expenseCategory",
+      "hhChargeLesserAmount",
+      "notes",
+      "propertyId",
+      "receiptFormat",
+      "taxAdjust",
+      "unitId",
     ]);
 
-    expense.addRowWithValues({});
+    const expenseId = expense.addRowWithValues(expenseVals);
 
     if (values.hhToChargeName) {
-      hhCharge.addRowWithValues({});
+      if (!values.householdId) {
+        throw new Error("Household ID is required");
+      }
+
+      const { amount, hhChargeLesserAmount, ...hhChargeVals } = Obj.strictPick(
+        values,
+        ["householdId", "date", "amount", "hhChargeLesserAmount", "unitId"]
+      );
+      hhCharge.addRowWithValues({
+        expenseId,
+        amount: hhChargeLesserAmount || amount,
+        description: "Damage or service charge",
+        portion: "Household",
+        ...hhChargeVals,
+      });
     }
   }
   addHhPaymentOnetime(values: SectionValues<"addHhPaymentOnetime">) {
