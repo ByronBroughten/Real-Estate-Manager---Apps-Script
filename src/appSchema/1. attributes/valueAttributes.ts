@@ -49,7 +49,7 @@ export const allValueAttributes = makeSchemaStructure(
     number: va({
       //or empty
       type: "" as number | string,
-      makeDefault: () => 0,
+      makeDefault: () => "",
       defaultValidate: valS.validate.numberOrEmpty,
     }),
     boolean: va({
