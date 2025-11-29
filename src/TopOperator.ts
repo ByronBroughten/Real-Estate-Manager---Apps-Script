@@ -93,7 +93,7 @@ export class TopOperator extends SpreadsheetBase {
       hhCharge.addRowWithValues({
         expenseId,
         amount: hhChargeLesserAmount || amount,
-        description: "Damage or service charge",
+        description: "Damage, waste, or service",
         portion: "Household",
         ...hhChargeVals,
       });

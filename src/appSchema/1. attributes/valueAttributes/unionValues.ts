@@ -17,7 +17,7 @@ const descriptionChargeOngoing = [
 ] as const;
 
 const descriptionChargeOnetime = [
-  "Damage or service charge",
+  "Damage, waste, or service",
   "Deposit charge",
   "Deposit uncharge",
 ] as const;
