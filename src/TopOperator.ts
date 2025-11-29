@@ -65,37 +65,46 @@ export class TopOperator extends SpreadsheetBase {
     const expense = this.ss.sheet("expense");
     const hhCharge = this.ss.sheet("hhCharge");
 
-    const expenseVals = Obj.strictPick(values, [
+    const { expenseNotes, ...expenseVals } = Obj.strictPick(values, [
       "date",
       "amount",
       "billerName",
       "description",
       "expenseCategory",
       "hhChargeLesserAmount",
-      "notes",
       "propertyId",
       "receiptFormat",
       "taxAdjust",
       "unitId",
+      "expenseNotes",
     ]);
 
-    const expenseId = expense.addRowWithValues(expenseVals);
+    const expenseId = expense.addRowWithValues({
+      ...expenseVals,
+      notes: expenseNotes,
+    });
 
     if (values.hhToChargeName) {
       if (!values.householdId) {
         throw new Error("Household ID is required");
       }
 
-      const { amount, hhChargeLesserAmount, ...hhChargeVals } = Obj.strictPick(
-        values,
-        ["householdId", "date", "amount", "hhChargeLesserAmount", "unitId"]
-      );
+      const { amount, hhChargeLesserAmount, hhChargeNotes, ...hhChargeVals } =
+        Obj.strictPick(values, [
+          "householdId",
+          "date",
+          "amount",
+          "hhChargeLesserAmount",
+          "unitId",
+          "hhChargeNotes",
+        ]);
       hhCharge.addRowWithValues({
         expenseId,
-        amount: hhChargeLesserAmount || amount,
+        amount: hhChargeLesserAmount === "" ? amount : hhChargeLesserAmount,
         description: "Damage, waste, or service",
         portion: "Household",
         ...hhChargeVals,
+        notes: hhChargeNotes,
       });
     }
     this.ss.batchUpdateRanges();

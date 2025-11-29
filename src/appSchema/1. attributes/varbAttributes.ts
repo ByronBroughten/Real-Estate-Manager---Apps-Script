@@ -382,7 +382,8 @@ export const allVarbAttributes = makeSchemaStructure(
         required: false,
       }),
       hhChargeLesserAmount: vS.gen("number", "Household charge lesser amount"),
-      notes: vS.gen("string", "Notes"),
+      expenseNotes: vS.gen("string", "Expense notes"),
+      hhChargeNotes: vS.gen("string", "HH notes"),
       enter: vS.gen("boolean", "Enter"),
     },
     addHhPaymentOnetime: {
