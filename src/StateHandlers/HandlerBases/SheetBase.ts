@@ -29,7 +29,7 @@ export type Rows<SN extends SectionName> = {
 export type SheetState<SN extends SectionName> = {
   sheetName;
 
-  isAddSafe: boolean;
+  unaccountedHeaders: string[];
   isAddOnly: boolean;
   rowAddCounter: number;
 

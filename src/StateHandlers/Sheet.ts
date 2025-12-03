@@ -51,6 +51,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   get changesToSave(): ChangesToSave<SN> {
     return this.state.changesToSave;
   }
+  get isAddSafe(): boolean {
+    return this.state.unaccountedHeaders.length === 0;
+  }
   sort(varbName: VarbName<SN>): void {
     this.sortAscWithoutAddingChanges(varbName);
     this.addAllVarbsAsChanges();
@@ -143,9 +146,13 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     return this.topBodyRow.value(varbName);
   }
   addRowDefault(): string {
-    if (!this.state.isAddSafe) {
+    if (!this.isAddSafe) {
       throw new Error(
-        `Sheet "${this.sectionName}" is not add safe. Not enough varbNames for columns.`
+        `Sheet "${
+          this.sectionName
+        }" is not add safe. There are no corresponding variables for the following column headers: ${this.state.unaccountedHeaders.join(
+          ", "
+        )}.`
       );
     }
 

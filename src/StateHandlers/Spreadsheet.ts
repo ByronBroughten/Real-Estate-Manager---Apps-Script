@@ -60,7 +60,11 @@ export class Spreadsheet extends SpreadsheetBase {
       return header[0] !== "_";
     });
 
-    const isAddSafe = schema.varbNames.length === trueHeaders.length;
+    const unaccountedHeaders = Arr.excludeStrict(
+      trueHeaders,
+      schema.varbDisplayNames()
+    );
+    const isAddSafe = unaccountedHeaders.length === 0;
     const isAddOnly = props.isAddOnly || false;
     if (isAddOnly && !isAddSafe) {
       throw new Error(
@@ -120,7 +124,7 @@ export class Spreadsheet extends SpreadsheetBase {
 
     return {
       sheetName: sheet.getName(),
-      isAddSafe,
+      unaccountedHeaders,
       isAddOnly,
       rowAddCounter: 0,
       headerIndicesBase1: headerIndices,
