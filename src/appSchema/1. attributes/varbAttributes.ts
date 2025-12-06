@@ -310,6 +310,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       date: vS.gen("getPaymentDate", "Payment date"),
       payer: vS.gen("getPayer", "Payer"),
+      filledOut: vS.gen("allocationFilledOut", "Filled out"),
       processed: vS.gen("getPaymentProcessed", "Processed"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",

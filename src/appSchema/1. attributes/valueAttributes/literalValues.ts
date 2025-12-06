@@ -5,6 +5,7 @@ import { va, type ValueSchema } from "../valueAttributes";
 const literalValues = {
   amountAllocated: `=IF(COUNTIF(hhPaymentAllocation[Payment ID], SR("ID")), SUM(FILTER(hhPaymentAllocation[Amount], hhPaymentAllocation[Payment ID]=SR("ID"))), 0)`,
   getPaymentDate: `=ROW_MATCH(hhPayment[Date], hhPayment[ID], "Payment ID")`,
+  allocationFilledOut: `=IF(AND(SR("ID")<>"",SR_IN("Household ID", household[ID]), SR_IN("Unit ID", unit[ID]), SR_IN("Portion", range[rentPortionName]), SR_IN("Description", range[descriptionPayment]), SR("Amount")<>""), "Yes", "No")`,
   getPaymentProcessed: `=ROW_MATCH(hhPayment[Processed], hhPayment[ID], "Payment ID")`,
   getPayer: `=ROW_MATCH(hhPayment[Payer], hhPayment[ID], "Payment ID")`,
   deductibleAmount: `=IFS(SR("Tax adjust")="", SR("Amount"), SR("Tax adjust")="Minus primary space", MINUS_PRIMARY_SPACE(SR("Amount"), SR("Property year name")), SR("Tax adjust")="Primary residence", 0, SR("Tax adjust")="Half primary residence", SR("Amount")/2, SR("Tax adjust")="Minus primary time space", MINUS_PRIMARY_TIME_SPACE(SR("Amount"), SR("Property year name")))`,
