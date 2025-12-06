@@ -178,6 +178,7 @@ export class TopOperator extends SpreadsheetBase {
   buildHhLedger(values: SectionValues<"buildHhLedger">): void {
     const hhLedger = this.ss.sheet("hhLedger");
     const hhCharge = this.ss.sheet("hhCharge");
+    const buildApi = this.ss.sheet("buildHhLedger");
     const hhPaymentAllocation = this.ss.sheet("hhPaymentAllocation");
     hhLedger.DELETE_ALL_BODY_ROWS();
 
@@ -243,6 +244,7 @@ export class TopOperator extends SpreadsheetBase {
     }
 
     hhLedger.sort("date");
+    buildApi.topBodyRow.setValue("dateLastRan", new Date());
     this.ss.batchUpdateRanges();
   }
 
