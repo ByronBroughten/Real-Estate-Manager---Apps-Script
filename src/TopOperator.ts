@@ -244,7 +244,10 @@ export class TopOperator extends SpreadsheetBase {
     }
 
     hhLedger.sort("date");
-    buildApi.topBodyRow.setValue("dateLastRan", new Date());
+    buildApi.topBodyRow.setValues({
+      dateLastRan: new Date(),
+      hhIdLastRan: values.householdId,
+    });
     this.ss.batchUpdateRanges();
   }
 

@@ -199,6 +199,7 @@ export const allVarbAttributes = makeSchemaStructure(
       ),
       enter: vS.gen("boolean", "Enter"),
       dateLastRan: vS.gen("date", "Date last ran"),
+      hhIdLastRan: vS.linkedIdNext("household", { required: false }),
     },
     hhLedger: {
       id: vS.id(),
