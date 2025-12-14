@@ -26,6 +26,7 @@ const literalValues = {
   unitNameFromId: `=ROW_MATCH(unit[Name], unit[ID], "Unit ID")`,
   unitNameFromIdOp: `=ROW_MATCH_OR_BLANK(unit[Name], unit[ID], "Unit ID")`,
   unitIdFromNameOp: `=ROW_MATCH_OR_BLANK(unit[ID], unit[Name], "Unit name")`,
+  unitIdFromHhLastRanOp: `=ROW_MATCH_OR_BLANK(household[Unit ID], household[ID], "Household ID last ran")`,
   propertyNameFromId: `=ROW_MATCH(property[Name], property[ID], "Property ID")`,
   propertyIdFromName: `=ROW_MATCH(property[ID], property[Name], "Property name")`,
   ledgerBalance: `=SUM_COL_TO_ROW("Charge") - SUM_COL_TO_ROW("Payment")`,

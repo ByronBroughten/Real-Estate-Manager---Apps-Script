@@ -36,6 +36,27 @@ type ChargeIdsForPayments = {
 };
 type PaymentGroupType = keyof ChargeIdsForPayments;
 
+type Dates = {
+  firstOfMonth: Date;
+  lastOfMonth: Date;
+};
+
+function proratedPortion<
+  SN extends "hhLeaseChargeOngoing" | "scChargeOngoing",
+  VN extends VarbName<SN>
+>(row: Row<SN>, varbName: VN, dates: Dates) {
+  const startDate = row.dateValueAfterOrGivenDate(
+    "startDate",
+    dates.firstOfMonth
+  );
+  const endDate = row.dateValueBeforeOrGivenDate("endDate", dates.lastOfMonth);
+  return utils.date.prorateMonthlyAmount(
+    row.valueNumber(varbName),
+    startDate,
+    endDate
+  );
+}
+
 export class TopOperator extends SpreadsheetBase {
   readonly ss: Spreadsheet;
   constructor({ ss, ...props }: TopOperatorProps) {
@@ -358,6 +379,10 @@ export class TopOperator extends SpreadsheetBase {
     householdId: string,
     unitId
   ) {
+    if (amount === 0) {
+      return;
+    }
+
     const payment = this.ss.sheet("hhPayment");
     const allocation = this.ss.sheet("hhPaymentAllocation");
     const expense = this.ss.sheet("expense");
@@ -434,27 +459,11 @@ export class TopOperator extends SpreadsheetBase {
           householdId,
         } as const;
 
-        function proratedPortion<
-          SN extends "hhLeaseChargeOngoing" | "scChargeOngoing",
-          VN extends VarbName<SN>
-        >(row: Row<SN>, varbName: VN) {
-          const startDate = row.dateValueAfterOrGivenDate(
-            "startDate",
-            firstOfMonth
-          );
-          const endDate = row.dateValueBeforeOrGivenDate(
-            "endDate",
-            lastOfMonth
-          );
-          return utils.date.prorateMonthlyAmount(
-            row.valueNumber(varbName),
-            startDate,
-            endDate
-          );
-        }
-
         for (const lease of hhLeasesActiveThisMonth) {
-          householdPortion += proratedPortion(lease, varbName);
+          householdPortion += proratedPortion(lease, varbName, {
+            firstOfMonth,
+            lastOfMonth,
+          });
         }
 
         if (varbName === "caretakerRentReduction") {
@@ -469,7 +478,10 @@ export class TopOperator extends SpreadsheetBase {
         if (varbName === "rentChargeBaseMonthly") {
           let subsidyPortion = 0;
           for (const scContract of scChargesActiveThisMonth) {
-            subsidyPortion += proratedPortion(scContract, "amount");
+            subsidyPortion += proratedPortion(scContract, "amount", {
+              firstOfMonth,
+              lastOfMonth,
+            });
           }
           if (subsidyPortion) {
             const topScCharge = scChargesActiveThisMonth[0];

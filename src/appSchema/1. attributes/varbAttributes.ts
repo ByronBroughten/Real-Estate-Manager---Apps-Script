@@ -203,6 +203,11 @@ export const allVarbAttributes = makeSchemaStructure(
         required: false,
         displayName: "Household ID last ran",
       }),
+      unitIdLastRan: vS.linkedIdNext("unit", {
+        required: false,
+        displayName: "Unit ID last ran",
+        default: "unitIdFromHhLastRanOp",
+      }),
     },
     hhLedger: {
       id: vS.id(),
