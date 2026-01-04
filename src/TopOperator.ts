@@ -63,6 +63,9 @@ export class TopOperator extends SpreadsheetBase {
     super(props);
     this.ss = ss;
   }
+  static test() {
+    return "test";
+  }
   static init() {
     const ss = Spreadsheet.init();
     return new TopOperator({ ...ss.spreadsheetProps, ss });
