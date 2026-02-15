@@ -158,7 +158,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       varbNames: this.varbNames,
     });
   }
-  delete() {
+  markForDelete() {
     this.sheet.addChangeToSave(this.id, {
       action: "delete",
     });

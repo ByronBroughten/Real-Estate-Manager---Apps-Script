@@ -481,7 +481,7 @@ export class TopOperator extends SpreadsheetBase {
     }));
 
     for (const charge of ongoingChargesOfMonth) {
-      charge.delete();
+      charge.markForDelete();
     
     }
 
