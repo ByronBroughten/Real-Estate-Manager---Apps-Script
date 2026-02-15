@@ -77,9 +77,22 @@ export class Spreadsheet extends SpreadsheetBase {
     );
   }
   batchUpdateRanges() {
-    this.batchUpdateByDataFilter();
+    this.batchUpdateByRequests();
+  }
+  batchUpdateByRequests() {
+    const requests = this.getRequests();
+    Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
+  }
+  private getRequests(): BatchUpdateRequest[] {
+    const requests: BatchUpdateRequest[] = [];
+    for (const sectionName of this.sectionNames) {
+      const sheet = this.sheet(sectionName);
+      requests.push(...sheet.collectRequests());
+    }
+    return requests;
   }
   batchUpdateByDataFilter() {
+    // NOTE: delete doesn't work with the data filter method
     const dataFilterRange = this.getDataFilterRange();
     Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
       {
@@ -93,20 +106,8 @@ export class Spreadsheet extends SpreadsheetBase {
     const dataFilterRange: DataFilterRange[] = [];
     for (const sectionName of this.sectionNames) {
       const sheet = this.sheet(sectionName);
-      dataFilterRange.push(...sheet.collectRangeData());
+      dataFilterRange.push(...sheet.collectDataFilters());
     }
     return dataFilterRange;
-  }
-  batchUpdateByRequests() {
-    const requests = this.getRequests();
-    Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
-  }
-  private getRequests(): BatchUpdateRequest[] {
-    const requests: BatchUpdateRequest[] = [];
-    for (const sectionName of this.sectionNames) {
-      const sheet = this.sheet(sectionName);
-      requests.push(...sheet.collectRequests());
-    }
-    return requests;
   }
 }

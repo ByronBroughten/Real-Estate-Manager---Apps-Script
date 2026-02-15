@@ -11,6 +11,8 @@ import type {
 import type { SectionSchema } from "../appSchema/3. generated/sectionsSchema";
 import {
   asU,
+  type BatchUpdateRequest,
+  type DataFilterRange,
   type StandardizedValue,
   type UserEnteredValue,
 } from "../utilitiesAppsScript";
@@ -156,6 +158,11 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       varbNames: this.varbNames,
     });
   }
+  delete() {
+    this.sheet.addChangeToSave(this.id, {
+      action: "delete",
+    });
+  }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
     value: VL
@@ -192,4 +199,98 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     }
     return this;
   }
+  collectDataFilter<VN extends VarbName<SN>>(varbName: VN): DataFilterRange {
+      // inexplicably, GAS treats indices as zero-indexed for this purpose
+      const rowIdx = this.base1Idx - 1;;
+      const colIdx = this.sheet.colIdxBase1(varbName) - 1;
+      return {
+        dataFilter: {
+          gridRange: {
+            sheetId: this.schema.sheetId,
+            startRowIndex: rowIdx,
+            endRowIndex: rowIdx + 1,
+            startColumnIndex: colIdx,
+            endColumnIndex: colIdx + 1,
+          },
+        },
+        majorDimension: "ROWS",
+        values: [[this.valueStandardized(varbName)]],
+      };
+    }
+  // private collectAddData(rowId): DataFilterRange {
+  //   const row = this.row(rowId);
+  //   const { base1Idx } = row;
+  //   const { headerOrder } = this.state;
+  //   return {
+  //     dataFilter: {
+  //       gridRange: {
+  //         sheetId: this.schema.sheetId,
+  //         startRowIndex: base1Idx,
+  //         endRowIndex: base1Idx,
+  //         startColumnIndex: this.colIdxBase1(headerOrder[0]),
+  //         endColumnIndex: this.colIdxBase1(headerOrder[headerOrder.length - 1]),
+  //       },
+  //     },
+  //     majorDimension: "ROWS",
+  //     values: [headerOrder.map((varbName) => row.valueStandardized(varbName))],
+  //   };
+  // }
+  makeDeleteRequest(): BatchUpdateRequest {
+    // inexplicably, GAS treats indices as zero-indexed for this purpose
+    const rowIdx = this.base1Idx - 1;
+    return {
+          deleteDimension: {
+            range: {
+              sheetId: this.schema.sheetId,
+              dimension: "ROWS",
+              startIndex: rowIdx,
+              endIndex: rowIdx + 1,
+            },
+          }
+        }
+  }
+  makeUpdateRequest<VN extends VarbName<SN>>(varbName: VN): BatchUpdateRequest {
+    // inexplicably, GAS treats indices as zero-indexed for this purpose
+    const rowIdx = this.base1Idx - 1;
+    const colIdx = this.sheet.colIdxBase1(varbName) - 1;
+    return {
+      updateCells: {
+        fields: "userEnteredValue",
+        rows: [
+          {
+            values: [{ userEnteredValue: this.valueUserEntered(varbName) }],
+          },
+        ],
+        range: {
+          sheetId: this.schema.sheetId,
+          startRowIndex: rowIdx,
+          endRowIndex: rowIdx + 1,
+          startColumnIndex: colIdx,
+          endColumnIndex: colIdx + 1,
+        },
+      },
+    };
+  }
+  //   private collectAppendRequest<VN extends VarbName<SN>>(
+  //   rowId
+  // ): BatchUpdateRequest {
+  //   const row = this.row(rowId);
+  //   return {
+  //     appendCells: {
+  //       sheetId: this.schema.sheetId,
+  //       fields: "*",
+  //       rows: [
+  //         {
+  //           values: [
+  //             {
+  //               userEnteredValue: {
+  //                 stringValue: "Loading...",
+  //               },
+  //             },
+  //           ],
+  //         },
+  //       ],
+  //     },
+  //   };
+  // }
 }

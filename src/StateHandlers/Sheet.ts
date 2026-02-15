@@ -325,7 +325,38 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   gSheet(): GoogleAppsScript.Spreadsheet.Sheet {
     return this.gss.getSheetById(this.schema.sheetId);
   }
-  collectRangeData(): DataFilterRange[] {
+  collectRequests(): BatchUpdateRequest[] {
+    const changes = this.changesToSave;
+    const batchUpdateRequests = [];
+    const batchDeleteRequests = [];
+    for (const [rowId, change] of Obj.entries(changes)) {
+      const row = this.row(rowId);
+      if (change.delete) {
+        batchDeleteRequests.push({
+          deleteDimension: {
+            range: {
+              sheetId: this.schema.sheetId,
+              dimension: "ROWS",
+              startIndex: row.base1Idx - 1,
+              endIndex: row.base1Idx,
+            },
+          }
+        })
+      } else {
+        if (change.add) {
+          this.gSheet().appendRow(["Loading..."]);
+          // batchUpdateRequests.push(this.collectAppendRequest(rowId));
+        }
+        for (const varbName of change.update) {
+          batchUpdateRequests.push(row.makeUpdateRequest(varbName));
+        }
+      }
+    }
+    this.state.changesToSave = {};
+    // Delete requests must be carried out after update requests, because row indices will change after deletions.
+    return [...batchUpdateRequests, ...batchDeleteRequests];
+  }
+  collectDataFilters(): DataFilterRange[] {
     const changes = this.changesToSave;
     const rangeData: DataFilterRange[] = [];
     for (const [rowId, change] of Obj.entries(changes)) {
@@ -338,123 +369,11 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           this.gSheet().appendRow(["Loading..."]);
         }
         for (const varbName of change.update) {
-          rangeData.push(this.collectUpdateData(rowId, varbName));
+          const row = this.row(rowId);
+          rangeData.push(row.collectDataFilter(varbName));
         }
       }
     }
     return rangeData;
-  }
-
-  private collectUpdateData<VN extends VarbName<SN>>(
-    rowId,
-    varbName: VN
-  ): DataFilterRange {
-    const row = this.row(rowId);
-    // inexplicably row.base1Idx is 0-indexed for this purpose
-    const rowIdx = row.base1Idx - 1;
-    const colIdx = this.colIdxBase1(varbName) - 1;
-    return {
-      dataFilter: {
-        gridRange: {
-          sheetId: this.schema.sheetId,
-          startRowIndex: rowIdx,
-          endRowIndex: rowIdx + 1,
-          startColumnIndex: colIdx,
-          endColumnIndex: colIdx + 1,
-        },
-      },
-      majorDimension: "ROWS",
-      values: [[row.valueStandardized(varbName)]],
-    };
-  }
-  collectRequests(): BatchUpdateRequest[] {
-    const changes = this.changesToSave;
-    const batchUpdateRequests = [];
-    for (const [rowId, change] of Obj.entries(changes)) {
-      if (change.delete) {
-        throw new Error(
-          "Not implemented. Deleting rows are not yet supported."
-        );
-      } else {
-        if (change.add) {
-          this.gSheet().appendRow(["Loading..."]);
-          // batchUpdateRequests.push(this.collectAppendRequest(rowId));
-        }
-        for (const varbName of change.update) {
-          batchUpdateRequests.push(
-            this.collectUpdateRequest(rowId, varbName)
-          );
-        }
-      }
-    }
-    this.state.changesToSave = {};
-    return batchUpdateRequests;
-  }
-  // private collectDeleteRequest(rowId): BatchUpdateRequest {}
-  private collectUpdateRequest<VN extends VarbName<SN>>(
-    rowId,
-    varbName: VN
-  ): BatchUpdateRequest {
-    const row = this.row(rowId);
-    // inexplicably, GAS treats indices as zero-indexed for this purpose
-    const rowIdx = row.base1Idx - 1;
-    const colIdx = this.colIdxBase1(varbName) - 1;
-    return {
-      updateCells: {
-        fields: "userEnteredValue",
-        rows: [
-          {
-            values: [{ userEnteredValue: row.valueUserEntered(varbName) }],
-          },
-        ],
-        range: {
-          sheetId: this.schema.sheetId,
-          startRowIndex: rowIdx,
-          endRowIndex: rowIdx + 1,
-          startColumnIndex: colIdx,
-          endColumnIndex: colIdx + 1,
-        },
-      },
-    };
-  }
-  private collectAppendRequest<VN extends VarbName<SN>>(
-    rowId
-  ): BatchUpdateRequest {
-    const row = this.row(rowId);
-    return {
-      appendCells: {
-        sheetId: this.schema.sheetId,
-        fields: "*",
-        rows: [
-          {
-            values: [
-              {
-                userEnteredValue: {
-                  stringValue: "Loading...",
-                },
-              },
-            ],
-          },
-        ],
-      },
-    };
-  }
-  private collectAddData(rowId): DataFilterRange {
-    const row = this.row(rowId);
-    const { base1Idx } = row;
-    const { headerOrder } = this.state;
-    return {
-      dataFilter: {
-        gridRange: {
-          sheetId: this.schema.sheetId,
-          startRowIndex: base1Idx,
-          endRowIndex: base1Idx,
-          startColumnIndex: this.colIdxBase1(headerOrder[0]),
-          endColumnIndex: this.colIdxBase1(headerOrder[headerOrder.length - 1]),
-        },
-      },
-      majorDimension: "ROWS",
-      values: [headerOrder.map((varbName) => row.valueStandardized(varbName))],
-    };
   }
 }
