@@ -20,9 +20,8 @@ import {
   SpreadsheetBase,
   type SpreadsheetState,
 } from "./HandlerBases/SpreadsheetBase.js";
-import { Sheet } from "./Sheet.js";
+import { Sheet, type SheetOptions } from "./Sheet.js";
 
-type SheetProps = { isAddOnly?: boolean };
 
 export class Spreadsheet extends SpreadsheetBase {
   static init(): Spreadsheet {
@@ -38,104 +37,7 @@ export class Spreadsheet extends SpreadsheetBase {
     const schema = this.sectionsSchema.section(sectionName);
     return this.gss.getSheetById(schema.sheetId);
   }
-  private initSheetState<SN extends SectionName>(
-    sectionName: SN,
-    props: SheetProps
-  ): SheetState<SN> {
-    const schema = this.sectionsSchema.section(sectionName);
-    const sheet = this.gss.getSheetById(schema.sheetId);
-
-    const range = sheet.getDataRange();
-    const lastColIdx = range.getLastColumn();
-    const lastRowIdx = range.getLastRow();
-
-    const headerRowRange = sheet.getRange(
-      this.headerRowIdxBase1,
-      1,
-      1,
-      lastColIdx
-    );
-    const headerValues = headerRowRange.getValues()[0];
-    const trueHeaders = headerValues.filter((header) => {
-      return header[0] !== "_";
-    });
-
-    const unaccountedHeaders = Arr.excludeStrict(
-      trueHeaders,
-      schema.varbDisplayNames()
-    );
-    const isAddSafe = unaccountedHeaders.length === 0;
-    const isAddOnly = props.isAddOnly || false;
-    if (isAddOnly && !isAddSafe) {
-      throw new Error(
-        "Sheet is addOnly but not addSafe. Not enough varbNames for columns."
-      );
-    }
-
-    const headerIndices = this.getVarbNameIndicesBase1(
-      sectionName,
-      headerValues
-    );
-    const headerOrder = [...schema.varbNames].sort(
-      (a, b) => headerIndices[a] - headerIndices[b]
-    );
-    const idIndexBase1 = headerIndices.id;
-
-    let bodyRowOrder = [];
-    const numRows = lastRowIdx - this.topBodyRowIdxBase1 + 1;
-    const areRows = numRows > 0;
-    if (areRows) {
-      const bodyRowIdRange = sheet.getRange(
-        this.topBodyRowIdxBase1,
-        idIndexBase1,
-        lastRowIdx - this.topBodyRowIdxBase1 + 1,
-        1
-      );
-      const bodyRowIdValues = bodyRowIdRange.getValues();
-      bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
-      if (Arr.hasDuplicates(bodyRowOrder)) {
-        throw new Error(`Sheet "${sectionName}" has duplicate row IDs.`);
-      }
-    }
-
-    const bodyRows: Rows<SN> = {};
-    if (!isAddOnly && areRows) {
-      const columns = {} as { [VN in VarbName<SN>]: VarbValue<SN, VN>[] };
-      for (const varbName of schema.varbNames) {
-        const column = sheet.getRange(
-          this.topBodyRowIdxBase1,
-          headerIndices[varbName],
-          lastRowIdx,
-          1
-        );
-        const columnValues = column.getValues();
-        columns[varbName] = columnValues.map((row) => row[0]);
-      }
-      for (let i = 0; i < bodyRowOrder.length; i++) {
-        const rowId = bodyRowOrder[i];
-        const rowValues = schema.varbNames.reduce((values, varbName) => {
-          const value = columns[varbName][i];
-          values[varbName] = value as SectionValues<SN>[typeof varbName];
-          return values;
-        }, {} as SectionValues<SN>);
-        bodyRows[rowId] = rowValues;
-      }
-    }
-
-    return {
-      sheetName: sheet.getName(),
-      unaccountedHeaders,
-      isAddOnly,
-      rowAddCounter: 0,
-      headerIndicesBase1: headerIndices,
-      headerOrder,
-      bodyRows,
-      bodyRowOrder,
-      changesToSave: {},
-      batchUpdateRequests: [],
-      rangeData: [],
-    };
-  }
+  
   get state(): SpreadsheetState {
     return this.spreadsheetState;
   }
@@ -147,20 +49,21 @@ export class Spreadsheet extends SpreadsheetBase {
   }
   sheet<SN extends SectionName>(
     sectionName: SN,
-    props: SheetProps = { isAddOnly: false }
+    options?: SheetOptions
   ): Sheet<SN> {
     if (!this.sectionNames.includes(sectionName)) {
-      this.state[sectionName] = this.initSheetState(
+      return Sheet.init(
         sectionName,
-        props
-      ) as SpreadsheetState[SN];
+        this.spreadsheetProps,
+        options
+      )
+    } else {
+      return new Sheet({
+        sectionName,
+        ...this.spreadsheetProps,
+      });
     }
-    return new Sheet({
-      sectionName: sectionName,
-      ...this.spreadsheetProps,
-    });
   }
-
   appendRange(roughRange: string, rawRows: any[][]) {
     Sheets.Spreadsheets?.Values?.append(
       {
@@ -174,16 +77,29 @@ export class Spreadsheet extends SpreadsheetBase {
     );
   }
   batchUpdateRanges() {
-    // const requests = this.getRequests();
-    // Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
-    const rangeData = this.getRangeData();
+    this.batchUpdateByDataFilter();
+  }
+  batchUpdateByDataFilter() {
+    const dataFilterRange = this.getDataFilterRange();
     Sheets.Spreadsheets?.Values?.batchUpdateByDataFilter(
       {
         valueInputOption: "USER_ENTERED",
-        data: rangeData,
+        data: dataFilterRange,
       },
       this.spreadsheetId
     );
+  }
+  private getDataFilterRange(): DataFilterRange[] {
+    const dataFilterRange: DataFilterRange[] = [];
+    for (const sectionName of this.sectionNames) {
+      const sheet = this.sheet(sectionName);
+      dataFilterRange.push(...sheet.collectRangeData());
+    }
+    return dataFilterRange;
+  }
+  batchUpdateByRequests() {
+    const requests = this.getRequests();
+    Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
   }
   private getRequests(): BatchUpdateRequest[] {
     const requests: BatchUpdateRequest[] = [];
@@ -192,31 +108,5 @@ export class Spreadsheet extends SpreadsheetBase {
       requests.push(...sheet.collectRequests());
     }
     return requests;
-  }
-  private getRangeData(): DataFilterRange[] {
-    const rangeData: DataFilterRange[] = [];
-    for (const sectionName of this.sectionNames) {
-      const sheet = this.sheet(sectionName);
-      rangeData.push(...sheet.collectRangeData());
-    }
-    return rangeData;
-  }
-  private getVarbNameIndicesBase1<SN extends SectionName>(
-    sectionName: SN,
-    headers: string[]
-  ): HeaderIndices<SN> {
-    const schema = this.sectionsSchema.section(sectionName);
-    const indicesBase1: HeaderIndices<SN> = {} as HeaderIndices<SN>;
-    for (const varbName of schema.varbNames) {
-      const { displayName } = schema.varb(varbName);
-      const colIdx = headers.indexOf(displayName);
-      if (colIdx === -1) {
-        throw new Error(
-          `Header "${displayName}" not found in sheet for section ${sectionName}`
-        );
-      }
-      indicesBase1[varbName] = colIdx + 1;
-    }
-    return indicesBase1;
   }
 }

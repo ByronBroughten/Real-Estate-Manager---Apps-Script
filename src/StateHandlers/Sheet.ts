@@ -19,17 +19,153 @@ import { Obj } from "../utils/Obj";
 import {
   SheetBase,
   type ChangesToSave,
+  type HeaderIndices,
   type RowChangesToSave,
   type Rows,
   type SheetState,
 } from "./HandlerBases/SheetBase";
+import type { SpreadsheetProps, SpreadsheetState } from "./HandlerBases/SpreadsheetBase";
 import { Row } from "./Row";
 
 type RowChangeProps<SN extends SectionName> =
   | { action: "add" | "delete" }
   | { action: "update"; varbNames: VarbName<SN>[] };
 
+export type SheetOptions = { isAddOnly?: boolean };
 export class Sheet<SN extends SectionName> extends SheetBase<SN> {
+  static init<SN extends SectionName>(
+    sectionName: SN,
+    spreadsheetProps: SpreadsheetProps,
+    options: SheetOptions = { isAddOnly: false }
+  ): Sheet<SN> {
+    const schema = spreadsheetProps.sectionsSchema.section(sectionName);
+    const gss = spreadsheetProps.gss;
+
+    spreadsheetProps.spreadsheetState[sectionName] = Sheet.initState(
+      sectionName,
+      schema,
+      gss.getSheetById(
+        schema.sheetId
+      ),
+      options
+    ) as SpreadsheetState[SN];
+
+    return new Sheet({
+      sectionName: sectionName,
+      ...spreadsheetProps,
+    });
+  }
+  static initState<SN extends SectionName>(
+    sectionName: SN,
+    schema: SectionSchema<SN>,
+    sheet: GoogleAppsScript.Spreadsheet.Sheet,
+    props: { isAddOnly?: boolean }
+  ): SheetState<SN> {
+    const { headerRowIdxBase1, topBodyRowIdxBase1 } = schema.sections;
+    
+    const range = sheet.getDataRange();
+    const lastColIdx = range.getLastColumn();
+    const lastRowIdx = range.getLastRow();
+
+    const headerRowRange = sheet.getRange(
+      headerRowIdxBase1,
+      1,
+      1,
+      lastColIdx
+    );
+    const headerValues = headerRowRange.getValues()[0];
+    const trueHeaders = headerValues.filter((header) => {
+      return header[0] !== "_";
+    });
+
+    const unaccountedHeaders = Arr.excludeStrict(
+      trueHeaders,
+      schema.varbDisplayNames()
+    );
+    const isAddSafe = unaccountedHeaders.length === 0;
+    const isAddOnly = props.isAddOnly || false;
+    if (isAddOnly && !isAddSafe) {
+      throw new Error(
+        "Sheet is addOnly but not addSafe. Not enough varbNames for columns."
+      );
+    }
+    const headerIndices = this.getVarbNameIndicesBase1(
+      schema,
+      headerValues
+    );
+    const headerOrder = [...schema.varbNames].sort(
+      (a, b) => headerIndices[a] - headerIndices[b]
+    );
+    const idIndexBase1 = headerIndices.id;
+
+    let bodyRowOrder = [];
+    const numRows = lastRowIdx - topBodyRowIdxBase1 + 1;
+    const areRows = numRows > 0;
+    if (areRows) {
+      const bodyRowIdRange = sheet.getRange(
+        topBodyRowIdxBase1,
+        idIndexBase1,
+        lastRowIdx - topBodyRowIdxBase1 + 1,
+        1
+      );
+      const bodyRowIdValues = bodyRowIdRange.getValues();
+      bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
+      if (Arr.hasDuplicates(bodyRowOrder)) {
+        throw new Error(`Sheet "${sectionName}" has duplicate row IDs.`);
+      }
+    }
+
+    const bodyRows: Rows<SN> = {};
+    if (!isAddOnly && areRows) {
+      const columns = {} as { [VN in VarbName<SN>]: VarbValue<SN, VN>[] };
+      for (const varbName of schema.varbNames) {
+        const column = sheet.getRange(
+          topBodyRowIdxBase1,
+          headerIndices[varbName],
+          lastRowIdx,
+          1
+        );
+        const columnValues = column.getValues();
+        columns[varbName] = columnValues.map((row) => row[0]);
+      }
+      for (let i = 0; i < bodyRowOrder.length; i++) {
+        const rowId = bodyRowOrder[i];
+        const rowValues = schema.varbNames.reduce((values, varbName) => {
+          const value = columns[varbName][i];
+          values[varbName] = value as SectionValues<SN>[typeof varbName];
+          return values;
+        }, {} as SectionValues<SN>);
+        bodyRows[rowId] = rowValues;
+      }
+    }
+    return {
+      sheetName: sheet.getName(),
+      unaccountedHeaders,
+      isAddOnly,
+      headerIndicesBase1: headerIndices,
+      headerOrder,
+      bodyRows,
+      bodyRowOrder,
+      changesToSave: {},
+    };
+  }
+  private static getVarbNameIndicesBase1<SN extends SectionName>(
+    schema: SectionSchema<SN>,
+    headers: string[]
+  ): HeaderIndices<SN> {
+    const indicesBase1: HeaderIndices<SN> = {} as HeaderIndices<SN>;
+    for (const varbName of schema.varbNames) {
+      const { displayName } = schema.varb(varbName);
+      const colIdx = headers.indexOf(displayName);
+      if (colIdx === -1) {
+        throw new Error(
+          `Header "${displayName}" not found in sheet for section ${schema.sectionName}`
+        );
+      }
+      indicesBase1[varbName] = colIdx + 1;
+    }
+    return indicesBase1;
+  }
   get state(): SheetState<SN> {
     return this.sheetState;
   }
@@ -75,11 +211,12 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       throw new Error(`Not a sheet of from group "${snGroupName}"`);
     }
   }
-  isApiEnterTriggered(e: { colIdx: number; rowIdx: number }) {
+  isApiEnterTriggered(e: { colIdxBase1: number; rowIdxBase1: number }) {
     const api = this.validateThis("api");
-    const triggerColIdx = api.colIdxBase1("enter");
-    const triggerRowIdx = api.topBodyRowIdxBase1;
-    return e.colIdx === triggerColIdx && e.rowIdx === triggerRowIdx;
+    const header = api.headerByColIdxBase1(e.colIdxBase1);
+    const isTopBodyRow = e.rowIdxBase1 === api.topBodyRowIdxBase1
+    const isEnter = header.slice(0, 5) === "Enter"
+    return isTopBodyRow && isEnter;
   }
   addAllVarbsAsChanges(): void {
     this.orderedRows.forEach((row) => row.addAllVarbsAsChanges());
@@ -94,11 +231,11 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       this.state.bodyRows = {};
     }
   }
-  addChangeToSave(id: string, rowChange: RowChangeProps<SN>) {
-    if (!this.changesToSave[id]) {
-      this.changesToSave[id] = this.createRowChanges();
+  addChangeToSave(rowId: string, rowChange: RowChangeProps<SN>) {
+    if (!this.changesToSave[rowId]) {
+      this.changesToSave[rowId] = this.createRowChanges();
     }
-    const changes = this.changesToSave[id];
+    const changes = this.changesToSave[rowId];
 
     if (rowChange.action === "update") {
       for (const varbName of rowChange.varbNames) {
@@ -107,7 +244,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     } else if (rowChange.action === "add") {
       changes.add = true;
     } else if (rowChange.action === "delete") {
-      changes.delete = false;
+      changes.delete = true;
     } else {
       throw new Error(`Unknown rowChange action: ${rowChange.action}`);
     }
@@ -119,7 +256,20 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       update: new Set(),
     };
   }
-
+  headerByColIdxBase1(colIdxBase1: number): string {
+    const varbName = this.varbNameByColIdxBase1(colIdxBase1);
+    const header = this.schema.varb(varbName).displayName;
+    return header;
+  }
+  varbNameByColIdxBase1(colIdxBase1: number): VarbName<SN> {
+    const varbName = this.state.headerOrder[colIdxBase1 - 1];
+    if (!varbName) {
+      throw new Error(
+        `No variable found at column index ${colIdxBase1} in sheet "${this.sectionName}"`
+      );
+    }
+    return varbName;
+  }
   colIdxBase1<VN extends VarbName<SN>>(varbName: VN): number {
     return this.state.headerIndicesBase1[varbName];
   }
@@ -177,6 +327,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   collectRangeData(): DataFilterRange[] {
     const changes = this.changesToSave;
+    const rangeData: DataFilterRange[] = [];
     for (const [rowId, change] of Obj.entries(changes)) {
       if (change.delete) {
         throw new Error(
@@ -184,16 +335,13 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         );
       } else {
         if (change.add) {
-          this.state.rowAddCounter++;
           this.gSheet().appendRow(["Loading..."]);
         }
         for (const varbName of change.update) {
-          this.state.rangeData.push(this.collectUpdateData(rowId, varbName));
+          rangeData.push(this.collectUpdateData(rowId, varbName));
         }
       }
     }
-    const rangeData = [...this.state.rangeData];
-    this.state.rangeData = [];
     return rangeData;
   }
 
@@ -221,6 +369,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   collectRequests(): BatchUpdateRequest[] {
     const changes = this.changesToSave;
+    const batchUpdateRequests = [];
     for (const [rowId, change] of Obj.entries(changes)) {
       if (change.delete) {
         throw new Error(
@@ -229,42 +378,19 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       } else {
         if (change.add) {
           this.gSheet().appendRow(["Loading..."]);
-          // this.state.batchUpdateRequests.push(this.collectAppendRequest(rowId));
+          // batchUpdateRequests.push(this.collectAppendRequest(rowId));
         }
         for (const varbName of change.update) {
-          this.state.batchUpdateRequests.push(
+          batchUpdateRequests.push(
             this.collectUpdateRequest(rowId, varbName)
           );
         }
       }
     }
-    const batchUpdateRequests = [...this.state.batchUpdateRequests];
     this.state.changesToSave = {};
-    this.state.batchUpdateRequests = [];
     return batchUpdateRequests;
   }
-  private collectAppendRequest<VN extends VarbName<SN>>(
-    rowId
-  ): BatchUpdateRequest {
-    const row = this.row(rowId);
-    return {
-      appendCells: {
-        sheetId: this.schema.sheetId,
-        fields: "*",
-        rows: [
-          {
-            values: [
-              {
-                userEnteredValue: {
-                  stringValue: "Loading...",
-                },
-              },
-            ],
-          },
-        ],
-      },
-    };
-  }
+  // private collectDeleteRequest(rowId): BatchUpdateRequest {}
   private collectUpdateRequest<VN extends VarbName<SN>>(
     rowId,
     varbName: VN
@@ -288,6 +414,28 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           startColumnIndex: colIdx,
           endColumnIndex: colIdx + 1,
         },
+      },
+    };
+  }
+  private collectAppendRequest<VN extends VarbName<SN>>(
+    rowId
+  ): BatchUpdateRequest {
+    const row = this.row(rowId);
+    return {
+      appendCells: {
+        sheetId: this.schema.sheetId,
+        fields: "*",
+        rows: [
+          {
+            values: [
+              {
+                userEnteredValue: {
+                  stringValue: "Loading...",
+                },
+              },
+            ],
+          },
+        ],
       },
     };
   }

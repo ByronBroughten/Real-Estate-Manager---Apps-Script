@@ -1,5 +1,6 @@
-import { type GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
+import { type GroupSectionName, type SectionName } from "./appSchema/1. attributes/sectionAttributes";
 import { chargeVarbToDescriptor } from "./appSchema/1. attributes/valueAttributes/pairs";
+import { isUnionValueNoEmpty } from "./appSchema/1. attributes/valueAttributes/unionValues";
 import type {
   SectionValues,
   VarbName,
@@ -70,19 +71,18 @@ export class TopOperator extends SpreadsheetBase {
     const ss = Spreadsheet.init();
     return new TopOperator({ ...ss.spreadsheetProps, ss });
   }
+
+  sheet<SN extends SectionName>(sectionName: SN): Sheet<SN> {
+    return this.ss.sheet(sectionName);
+  }
+
+
   addRecurringTransaction() {
     // implement this for updating rent amount
   }
-  isApiEnterTriggered<SN extends GroupSectionName<"api">>(
-    sectionName: SN,
-    colIdx: number,
-    rowIdx: number
-  ) {
-    const sheet = this.ss.sheet(sectionName);
-    const triggerColIdx = sheet.colIdxBase1("enter");
-    const triggerRowIdx = sheet.topBodyRowIdxBase1;
-    const triggered = colIdx === triggerColIdx && rowIdx === triggerRowIdx;
-    return triggered;
+  headerByIdx(idx: number){
+    this.ss.sectionsSchema
+
   }
   // APIs
   addExpense(values: SectionValues<"addExpense">) {
@@ -410,6 +410,92 @@ export class TopOperator extends SpreadsheetBase {
       // TODO add expense
     });
   }
+  // TODO: make a standalone function for building out charges for a particular household.
+  // Also, make it take a date range.
+  
+  deleteChargesInDateRange(householdId: string, startDate: Date, endDate: Date) {
+    const charge = this.ss.sheet("hhCharge");
+
+  }
+  updateAllMonthlyCharges(startDate: Date, endDate: Date) {
+    const household = this.ss.sheet("household");
+    household.orderedRows.forEach((hh) => {
+      this.updateHhMonthlyCharges(
+        hh.value("id"),
+        startDate,
+        endDate
+      );
+    });
+
+  }
+  private updateHhMonthlyCharges(householdId: string, startDate: Date, endDate: Date) {
+    const household = this.ss.sheet("household");
+    const scChargeOngoing = this.ss.sheet("scChargeOngoing");
+    const hhLeaseOngoing = this.ss.sheet("hhLeaseChargeOngoing");
+    const charge = this.ss.sheet("hhCharge");
+
+    this.deleteChargesInDateRange(householdId, startDate, endDate);
+
+
+    function getActives<SN extends "hhLeaseChargeOngoing" | "scChargeOngoing">(
+      sheet: Sheet<SN>
+    ): Row<SN>[] {
+      return sheet.orderedRows.filter((row) => {
+        return (
+          row.value("householdId") === householdId &&
+          utils.date.isDateSameOrBefore(row.valueDate("startDate"), endDate) &&
+          utils.date.isDateSameOrAfter(row.dateValueOrGivenDate("endDate", endDate), startDate)
+        );
+      });
+    }
+
+    const hhLeasesActiveThisMonth = getActives(hhLeaseOngoing);
+    const scChargesActiveThisMonth = getActives(scChargeOngoing);
+    const varbNames = Obj.keys(chargeVarbToDescriptor);
+
+    for (const varbName of varbNames) {
+      let householdPortion = 0;
+
+      // TODO: Account for if a tenant switches units mid-month
+      // TODO: Divvy subsidy charges by subsidy contract if there are multiple.
+      // TODO: Make separate ongoing charges for pet fees
+      const firstUnitId = hhLeasesActiveThisMonth[0].value("unitId");
+
+      const chargeProps = {
+        date: startDate, // Hmmm... the charges will all occur on this date, for now... But I want them to be monthly.
+        unitId: firstUnitId,
+        householdId,
+      } as const;
+    }
+  }
+  updateHhOneMonthCharges({householdId, month, year}: { householdId: string, month: number; year: number }) {
+    
+    const hhCharge = this.sheet("hhCharge");
+    const ongoingChargesOfMonth = hhCharge.orderedRows.filter((row => {
+      const date = row.valueDate("date");
+      return (
+        row.value("householdId") === householdId &&
+        utils.date.isInMonthAndYear(date, month, year) &&
+        isUnionValueNoEmpty(row.value("description"), "descriptionChargeOngoing")
+      );
+    }));
+
+    for (const charge of ongoingChargesOfMonth) {
+      charge.delete();
+    
+    }
+
+    
+
+    // 1. Delete all charges in the month that have an ongoing charge description.
+    // 2. Get all leases for the household that that are active in the month.
+    // - either start before the start date and end on or after the start date (or don't end)
+    // - or start on or after the start date and on or before the end date (regardless of end date)
+    // TODO: Throw an error if there is any overlap between lease dates.
+    // 3. Add prorated charges as needed for each lease that is active.
+  }
+
+
   buildOutChargesForMonth(date: Date = new Date()) {
     const cfp: ChargeIdsForPayments = {
       paymentGroup: {},
@@ -444,6 +530,7 @@ export class TopOperator extends SpreadsheetBase {
 
     household.orderedRows.forEach((hh) => {
       const householdId = hh.value("id");
+
       const hhLeasesActiveThisMonth = getActives(householdId, hhLeaseOngoing);
       const scChargesActiveThisMonth = getActives(householdId, scChargeOngoing);
 

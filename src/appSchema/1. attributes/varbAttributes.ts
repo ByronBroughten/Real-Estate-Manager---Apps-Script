@@ -171,6 +171,9 @@ const defaults = {
 export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
+    api: {
+      id: vS.id(),
+    },
     buildHhLedger: {
       id: vS.id(),
       householdName: vS.gen("string", "Household name"),
@@ -559,10 +562,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     scChargeOngoing: {
       id: vS.id(),
-      householdId: vS.linkedId("Household ID", {
-        sectionName: "household",
-        onDelete: "delete",
-      }),
+      householdId: vS.gen("hhIdFromScId", "Household ID"),
       householdName: vS.gen("hhNameFromId", "Household name"),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",

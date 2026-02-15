@@ -142,10 +142,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get varbNames(): VarbName<SN>[] {
     return this.schema.varbNames;
   }
-  get changesToSave(): ChangesToSave<SN> {
-    return this.sheetState.changesToSave;
-  }
-  get sheet(): Sheet<SN> {
+  get sheet(): Sheet<SN> {    
     return new Sheet(this.sheetProps);
   }
   resetToDefault() {

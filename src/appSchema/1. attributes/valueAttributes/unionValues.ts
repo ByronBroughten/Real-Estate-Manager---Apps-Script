@@ -118,11 +118,18 @@ function validateUnionValue<N extends UnionValueName>(
   }
 }
 
+export function isUnionValueNoEmpty<N extends UnionValueName>(
+  value: unknown,
+  name: N
+): value is UnionValue<N> {
+  return (unionValues[name] as unknown[]).includes(value);
+}
+
 export function validateUnionValueNoEmpty<N extends UnionValueName>(
   value: unknown,
   name: N
 ): UnionValue<N> {
-  if ((unionValues[name] as unknown[]).includes(value)) {
+  if (isUnionValueNoEmpty(value, name)) {
     return value as UnionValue<N>;
   } else {
     throw validationError(value, `'${name}' not-empty union value element.`);

@@ -27,6 +27,7 @@ export const allSectionAttributes = makeSchemaStructure(
   {} as AllSectionAttributesBase,
   {
     test: ma("tst", 2089200354),
+    api: ma("api", 290870631),
     hhLedger: ma("hl", 731807482),
     buildHhLedger: ma("bhl", 706564734),
     hhCharge: ma("hhc", 825934775),
@@ -70,6 +71,7 @@ const sectionNameGroups = {
     "addHhPaymentOnetime",
     "buildHhLedger",
     "addExpense",
+    "api"
   ] as const),
 };
 

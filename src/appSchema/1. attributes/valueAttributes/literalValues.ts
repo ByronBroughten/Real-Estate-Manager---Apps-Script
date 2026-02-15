@@ -16,6 +16,7 @@ const literalValues = {
   householdAllocated: `=IFS(SR("Num allocated")=0, "", SR("Num allocated")>1, "Multiple", SR("Num allocated")=1, ROW_MATCH(hhPaymentAllocation[HH members full name], hhPaymentAllocation[Payment ID], "ID"))`,
   hhNameFromId: `=ROW_MATCH(household[Name], household[ID],"Household ID")`,
   hhNameFromIdOp: `=ROW_MATCH_OR_BLANK(household[Name], household[ID],"Household ID")`,
+  hhIdFromScId: `=ROW_MATCH(subsidyContract[Household ID], subsidyContract[ID], "Subsidy contract ID")`,
   hhIdFromNameOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Household name")`,
   hhIdFromToChargeOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Household to charge")`,
   paymentHhIdFromNameOp: `=ROW_MATCH_OR_BLANK(household[ID], household[Name], "Payment HH name")`,

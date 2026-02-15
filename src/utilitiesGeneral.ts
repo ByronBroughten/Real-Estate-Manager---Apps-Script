@@ -24,6 +24,9 @@ const _dateUtils = {
     dayBefore.setDate(dayBefore.getDate() - 1);
     return dayBefore;
   },
+  isInMonthAndYear(date: Date, month: number, year: number): boolean {
+    return date.getMonth() === month && date.getFullYear() === year;
+  },
   isDateAndTodayOrPassed: function (inputDate: unknown): inputDate is Date {
     return inputDate instanceof Date && this.isThisDateOrPassed(inputDate);
   },

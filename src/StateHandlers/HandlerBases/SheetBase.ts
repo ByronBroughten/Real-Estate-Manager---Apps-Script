@@ -31,17 +31,13 @@ export type SheetState<SN extends SectionName> = {
 
   unaccountedHeaders: string[];
   isAddOnly: boolean;
-  rowAddCounter: number;
 
   // Does rows include headers? No. I want their data to be consistent.
-  bodyRows: Rows<SN>;
-  bodyRowOrder: string[];
   headerIndicesBase1: HeaderIndices<SN>;
   headerOrder: VarbName<SN>[];
-
+  bodyRows: Rows<SN>;
+  bodyRowOrder: string[];
   changesToSave: ChangesToSave<SN>;
-  rangeData: DataFilterRange[];
-  batchUpdateRequests: BatchUpdateRequest[];
 };
 
 export interface SheetProps<SN extends SectionName> extends SpreadsheetProps {

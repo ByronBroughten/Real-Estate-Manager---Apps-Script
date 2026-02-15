@@ -17,11 +17,11 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
       return;
     }
 
-    const colIdx = e.range.getColumn();
-    const rowIdx = e.range.getRow();
+    const colIdxBase1 = e.range.getColumn();
+    const rowIdxBase1 = e.range.getRow();
     const sheet = top.ss.sheet(sectionName);
 
-    if (sheet.isApiEnterTriggered({ colIdx, rowIdx })) {
+    if (sheet.isApiEnterTriggered({ colIdxBase1, rowIdxBase1 })) {
       const apiRow = sheet.topBodyRow;
       const apiValues = apiRow.validateValues();
 

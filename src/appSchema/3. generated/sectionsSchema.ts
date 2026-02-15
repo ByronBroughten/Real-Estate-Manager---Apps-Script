@@ -59,6 +59,9 @@ export class SectionSchema<SN extends SectionName> {
   constructor(sectionName: SN) {
     this.sectionName = sectionName;
   }
+  get sections(): SectionsSchema {
+    return new SectionsSchema();
+  }
   get attributes(): SectionAttributes<SN> {
     return this.allSectionAttributes[this.sectionName];
   }
