@@ -1,5 +1,8 @@
-import { type GroupSectionName, type SectionName } from "./appSchema/1. attributes/sectionAttributes";
-import { chargeVarbToDescriptor } from "./appSchema/1. attributes/valueAttributes/pairs";
+import { type SectionName } from "./appSchema/1. attributes/sectionAttributes";
+import {
+  chargeVarbToDescriptor,
+  leaseChargeVarbNames,
+} from "./appSchema/1. attributes/valueAttributes/pairs";
 import { isUnionValueNoEmpty } from "./appSchema/1. attributes/valueAttributes/unionValues";
 import type {
   SectionValues,
@@ -12,9 +15,9 @@ import {
 import type { Row } from "./StateHandlers/Row";
 import type { Sheet } from "./StateHandlers/Sheet";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
-import { utils } from "./utilitiesGeneral";
+import { utils, type MonthYear } from "./utilitiesGeneral";
 import { Arr } from "./utils/Arr";
-import { Obj } from "./utils/Obj";
+import { Obj, type StrictPick } from "./utils/Obj";
 
 interface TopOperatorProps extends SpreadsheetProps {
   ss: Spreadsheet;
@@ -42,21 +45,38 @@ type Dates = {
   lastOfMonth: Date;
 };
 
+interface HhIdMonthYear extends MonthYear {
+  householdId: string;
+}
+
 function proratedPortion<
   SN extends "hhLeaseChargeOngoing" | "scChargeOngoing",
-  VN extends VarbName<SN>
->(row: Row<SN>, varbName: VN, dates: Dates) {
+  VN extends VarbName<SN>,
+>(row: Row<SN>, varbName: VN, dates: Dates): number {
   const startDate = row.dateValueAfterOrGivenDate(
     "startDate",
-    dates.firstOfMonth
+    dates.firstOfMonth,
   );
   const endDate = row.dateValueBeforeOrGivenDate("endDate", dates.lastOfMonth);
-  return utils.date.prorateMonthlyAmount(
-    row.valueNumber(varbName),
+  return utils.dateNext.proratedMonthlyAmount({
+    amount: row.valueNumber(varbName),
     startDate,
-    endDate
-  );
+    endDate,
+    month: dates.firstOfMonth.getMonth() + 1,
+    year: dates.firstOfMonth.getFullYear(),
+  });
 }
+
+type SharedChargeLeaseValues = StrictPick<
+  SectionValues<"hhCharge">,
+  | "amount"
+  | "portion"
+  | "date"
+  | "description"
+  | "householdId"
+  | "unitId"
+  | "notes"
+>;
 
 export class TopOperator extends SpreadsheetBase {
   readonly ss: Spreadsheet;
@@ -76,13 +96,11 @@ export class TopOperator extends SpreadsheetBase {
     return this.ss.sheet(sectionName);
   }
 
-
   addRecurringTransaction() {
     // implement this for updating rent amount
   }
-  headerByIdx(idx: number){
-    this.ss.sectionsSchema
-
+  headerByIdx(idx: number) {
+    this.ss.sectionsSchema;
   }
   // APIs
   addExpense(values: SectionValues<"addExpense">) {
@@ -208,7 +226,7 @@ export class TopOperator extends SpreadsheetBase {
 
     const { householdId, portion, subsidyContractId } = values;
     function filteredRows<SN extends LedgerInputSn>(
-      sheet: Sheet<SN>
+      sheet: Sheet<SN>,
     ): Row<SN>[] {
       const rows = sheet.orderedRows;
       return rows.filter((row) => {
@@ -292,18 +310,18 @@ export class TopOperator extends SpreadsheetBase {
     household.orderedRows.forEach((hh) => {
       const dateNext = hh.value("rentIncreaseDateNext");
 
-      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
+      if (utils.dateNext.isDateAndTodayOrPassed(dateNext)) {
         const rentChargeNext = hh.valueNumber("rentChargeMonthlyNext");
         const utilityChargeNext = hh.value("utilityChargeMonthlyNext");
 
-        const dayBefore = utils.date.getDayBefore(dateNext);
+        const dayBefore = utils.dateNext.getDayBefore(dateNext);
         const chargesToEnd = leaseChargeOngoing.rowsFiltered({
           householdId: hh.value("id"),
           endDate: "",
         });
 
         chargesToEnd.sort((a, b) =>
-          Arr.compareForSort(b.value("startDate"), a.value("startDate"))
+          Arr.compareForSort(b.value("startDate"), a.value("startDate")),
         );
 
         chargesToEnd.forEach((charge) => {
@@ -348,8 +366,8 @@ export class TopOperator extends SpreadsheetBase {
 
     subsidyContract.orderedRows.forEach((row) => {
       const dateNext = row.value("rentPortionDateNext");
-      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
-        const dayBefore = utils.date.getDayBefore(dateNext);
+      if (utils.dateNext.isDateAndTodayOrPassed(dateNext)) {
+        const dayBefore = utils.dateNext.getDayBefore(dateNext);
         const chargesToEnd = ssChargeOngoing.rowsFiltered({
           description: "Rent charge (base)",
           subsidyContractId: row.value("id"),
@@ -376,16 +394,341 @@ export class TopOperator extends SpreadsheetBase {
       }
     });
   }
-  handleCaretakerRentReduction(
-    amount: number,
-    date: Date = new Date(),
-    householdId: string,
-    unitId
+  updateHhAllOngoingCharges(
+    householdIds: string[] = this.sheet("household").orderedRows.map((r) =>
+      r.value("id"),
+    ),
   ) {
-    if (amount === 0) {
-      return;
+    for (const householdId of householdIds) {
+      const { firstDate, lastDate } =
+        this.getFirstLastDateToUpdateCharges(householdId);
+      const startMonthYear = {
+        month: firstDate.getMonth() + 1,
+        year: firstDate.getFullYear(),
+      };
+
+      const endMonthYear = {
+        month: lastDate.getMonth() + 1,
+        year: lastDate.getFullYear(),
+      };
+
+      const monthYears = utils.dateNext.monthYearsOnAndBetween({
+        startMonthYear,
+        endMonthYear,
+      });
+
+      this.updateAllHhOngoingChargesInSpan({
+        householdIds: [householdId],
+        monthYears,
+      });
+    }
+  }
+  private getFirstLastDateToUpdateCharges(householdId: string): {
+    firstDate: Date;
+    lastDate: Date;
+  } {
+    const hhCharge = this.sheet("hhCharge");
+    const hhLease = this.sheet("hhLeaseChargeOngoing");
+
+    const hhCharges = hhCharge.rowsFiltered({ householdId });
+    const hhLeases = hhLease.rowsFiltered({ householdId });
+
+    let firstDate: Date = new Date();
+    let lastDate: Date = new Date();
+
+    if (hhCharges.length > 0) {
+      hhCharges.sort((a, b) =>
+        Arr.compareForSort(a.valueDate("date"), b.valueDate("date")),
+      );
+      firstDate = hhCharges[0].valueDate("date");
+      lastDate = Arr.lastOrThrow(hhCharges).valueDate("date");
     }
 
+    if (hhLeases.length > 0) {
+      hhLeases.sort((a, b) =>
+        Arr.compareForSort(a.valueDate("startDate"), b.valueDate("startDate")),
+      )[0];
+      const earliestStart = hhLeases[0].valueDate("startDate");
+      if (earliestStart < firstDate) {
+        firstDate = earliestStart;
+      }
+
+      const latestStart = Arr.lastOrThrow(hhLeases).valueDate("startDate");
+      if (latestStart > lastDate) {
+        lastDate = latestStart;
+      }
+
+      hhLeases.sort((a, b) =>
+        Arr.compareForSort(a.valueDate("endDate"), b.valueDate("endDate")),
+      );
+      const latestEnd = Arr.lastOrThrow(hhLeases).valueDate("endDate");
+      if (latestEnd > lastDate) {
+        lastDate = latestEnd;
+      }
+    }
+    return { firstDate, lastDate };
+  }
+  updateAllHhOngoingChargesInSpan({
+    householdIds,
+    monthYears,
+  }: {
+    householdIds: string[];
+    monthYears: MonthYear[];
+  }) {
+    householdIds.forEach((householdId) => {
+      monthYears.forEach(({ month, year }) => {
+        this.updateHhOneMonthCharges({
+          householdId,
+          month,
+          year,
+        });
+      });
+    });
+  }
+  private markChargesOfMonthForDelete({
+    householdId,
+    month,
+    year,
+  }: HhIdMonthYear) {
+    const ongoingChargesOfMonth = this.getOngoingChargesOfMonth({
+      householdId,
+      month,
+      year,
+    });
+    for (const charge of ongoingChargesOfMonth) {
+      charge.markForDelete();
+    }
+  }
+  private getOngoingChargesOfMonth({
+    householdId,
+    month,
+    year,
+  }: {
+    householdId: string;
+    month: number;
+    year: number;
+  }): Row<"hhCharge">[] {
+    const hhCharge = this.sheet("hhCharge");
+    return hhCharge.orderedRows.filter((row) => {
+      const date = row.valueDate("date");
+      return (
+        row.value("householdId") === householdId &&
+        utils.dateNext.isInMonthAndYear(date, month, year) &&
+        isUnionValueNoEmpty(
+          row.value("description"),
+          "descriptionChargeOngoing",
+        )
+      );
+    });
+  }
+  private getActiveLeasesAndContracts({
+    householdId,
+    month,
+    year,
+  }: HhIdMonthYear): {
+    activeHhLeases: Row<"hhLeaseChargeOngoing">[];
+    activeScCharges: Row<"scChargeOngoing">[];
+  } {
+    const hhLease = this.sheet("hhLeaseChargeOngoing");
+    const scChargeOngoing = this.sheet("scChargeOngoing");
+    const activeHhLeases = this.getActives({
+      sheet: hhLease,
+      householdId,
+      month,
+      year,
+    });
+    const activeScCharges = this.getActives({
+      sheet: scChargeOngoing,
+      householdId,
+      month,
+      year,
+    });
+    if (activeHhLeases.length > 1 || activeScCharges.length > 1) {
+      throw new Error(
+        "Multiple active leases or subsidy contracts for household in month. Cannot accurately update charges.",
+      );
+    }
+    return { activeHhLeases, activeScCharges };
+  }
+  private getActives<SN extends "hhLeaseChargeOngoing" | "scChargeOngoing">({
+    sheet,
+    householdId,
+    month,
+    year,
+  }: {
+    sheet: Sheet<SN>;
+    householdId: string;
+    month: number;
+    year: number;
+  }): Row<SN>[] {
+    const firstOfMonth = utils.dateNext.firstDayOfMonthNext({ month, year });
+    const lastOfMonth = utils.dateNext.lastDayOfMonthNext({ month, year });
+    return sheet.orderedRows.filter((row) => {
+      const startDate = row.valueDate("startDate");
+      const endDate = row.dateValueOrGivenDate("endDate", lastOfMonth);
+      if (startDate > endDate) {
+        throw new Error("Start date cannot be after end date.");
+      }
+      // The start date needs to be on or before the last day of the month
+      // The end date needs to be on or after the first day of the month
+      return (
+        row.value("householdId") === householdId &&
+        utils.dateNext.isDateSameOrBefore(startDate, lastOfMonth) &&
+        utils.dateNext.isDateSameOrAfter(endDate, firstOfMonth)
+      );
+    });
+  }
+  private updateHhOneMonthCharges({ householdId, month, year }: HhIdMonthYear) {
+    const hhCharge = this.sheet("hhCharge");
+
+    this.markChargesOfMonthForDelete({
+      householdId,
+      month,
+      year,
+    });
+
+    const { activeHhLeases, activeScCharges } =
+      this.getActiveLeasesAndContracts({
+        householdId,
+        month,
+        year,
+      });
+
+    const { firstOfMonth, lastOfMonth } =
+      utils.dateNext.firstAndLastOfMonthNext({ month, year });
+
+    for (const lease of activeHhLeases) {
+      const startDate = lease.valueDate("startDate");
+      const endDate = lease.dateValueOrGivenDate("endDate", lastOfMonth);
+
+      for (const varbName of leaseChargeVarbNames) {
+        const fullAmount = lease.valueNumber(varbName);
+        if (fullAmount === 0) {
+          continue; // skip lease charges of $0.
+        }
+
+        const { proratedAmount, isProrated } = utils.dateNext.prorateds({
+          amount: fullAmount,
+          startDate,
+          endDate,
+          month,
+          year,
+        });
+
+        const sharedValues: SharedChargeLeaseValues = {
+          amount: proratedAmount,
+          portion: "Household",
+          date: firstOfMonth,
+          description: chargeVarbToDescriptor[varbName],
+          householdId,
+          unitId: lease.value("unitId"),
+          notes: isProrated
+            ? `Prorated from ${startDate.toDateString()} to ${endDate.toDateString}`
+            : "",
+        };
+
+        switch (varbName) {
+          case "petFeeRecurring": {
+            hhCharge.addRowWithValues({
+              ...sharedValues,
+              petId: lease.value("petId"),
+            });
+          }
+          case "rentChargeUtilitiesMonthly": {
+            hhCharge.addRowWithValues(sharedValues);
+          }
+          case "rentChargeBaseMonthly": {
+            this.handleRentChargeBaseMonthly({
+              proratedRentTotal: proratedAmount,
+              sharedChargeValues: sharedValues,
+              month,
+              year,
+              activeHhLeases,
+              activeScCharges,
+            });
+          }
+          case "caretakerRentReduction": {
+            this.handleCaretakerRentReduction({
+              amount: proratedAmount,
+              date: firstOfMonth,
+              householdId,
+              unitId: lease.value("unitId"),
+            });
+          }
+          default: {
+            throw new Error(`Unhandled varb name: ${varbName}`);
+          }
+        }
+      }
+    }
+  }
+  private handleRentChargeBaseMonthly({
+    month,
+    year,
+    sharedChargeValues,
+    proratedRentTotal,
+    activeHhLeases,
+    activeScCharges,
+  }: {
+    proratedRentTotal: number;
+    sharedChargeValues: SharedChargeLeaseValues;
+    month: number;
+    year: number;
+    activeHhLeases: Row<"hhLeaseChargeOngoing">[];
+    activeScCharges: Row<"scChargeOngoing">[];
+  }) {
+    const hhCharge = this.sheet("hhCharge");
+
+    if (activeHhLeases.length > 0) {
+      throw new Error(
+        "This can only handle one active lease per month for now.",
+      );
+    }
+
+    const lastDayOfMonth = utils.dateNext.lastDayOfMonthNext({ month, year });
+
+    let proratedSubsidyTotal = 0;
+    for (const scContract of activeScCharges) {
+      const fullAmount = scContract.valueNumber("amount");
+      if (fullAmount === 0) {
+        continue;
+      }
+      const prorated = utils.dateNext.proratedMonthlyAmount({
+        amount: fullAmount,
+        startDate: scContract.valueDate("startDate"),
+        endDate: scContract.dateValueOrGivenDate("endDate", lastDayOfMonth),
+        month,
+        year,
+      });
+      proratedSubsidyTotal += prorated;
+      hhCharge.addRowWithValues({
+        ...sharedChargeValues,
+        amount: prorated,
+        portion: "Subsidy program",
+        description: "Rent charge (base)",
+        subsidyContractId: scContract.value("id"),
+        unitId: scContract.value("unitId"),
+      });
+    }
+    const tenantPortion = proratedRentTotal - proratedSubsidyTotal;
+    hhCharge.addRowWithValues({
+      ...sharedChargeValues,
+      amount: tenantPortion,
+      portion: "Household",
+      description: "Rent charge (base)",
+    });
+  }
+  private handleCaretakerRentReduction({
+    amount,
+    date,
+    householdId,
+    unitId,
+  }: {
+    amount: number;
+    date: Date;
+    householdId: string;
+    unitId: string;
+  }) {
     const payment = this.ss.sheet("hhPayment");
     const allocation = this.ss.sheet("hhPaymentAllocation");
     const expense = this.ss.sheet("expense");
@@ -410,93 +753,9 @@ export class TopOperator extends SpreadsheetBase {
       // TODO add expense
     });
   }
-  // TODO: make a standalone function for building out charges for a particular household.
-  // Also, make it take a date range.
-  
-  deleteChargesInDateRange(householdId: string, startDate: Date, endDate: Date) {
-    const charge = this.ss.sheet("hhCharge");
-
-  }
-  updateAllMonthlyCharges(startDate: Date, endDate: Date) {
-    const household = this.ss.sheet("household");
-    household.orderedRows.forEach((hh) => {
-      this.updateHhMonthlyCharges(
-        hh.value("id"),
-        startDate,
-        endDate
-      );
-    });
-
-  }
-  private updateHhMonthlyCharges(householdId: string, startDate: Date, endDate: Date) {
-    const household = this.ss.sheet("household");
-    const scChargeOngoing = this.ss.sheet("scChargeOngoing");
-    const hhLeaseOngoing = this.ss.sheet("hhLeaseChargeOngoing");
-    const charge = this.ss.sheet("hhCharge");
-
-    this.deleteChargesInDateRange(householdId, startDate, endDate);
-
-
-    function getActives<SN extends "hhLeaseChargeOngoing" | "scChargeOngoing">(
-      sheet: Sheet<SN>
-    ): Row<SN>[] {
-      return sheet.orderedRows.filter((row) => {
-        return (
-          row.value("householdId") === householdId &&
-          utils.date.isDateSameOrBefore(row.valueDate("startDate"), endDate) &&
-          utils.date.isDateSameOrAfter(row.dateValueOrGivenDate("endDate", endDate), startDate)
-        );
-      });
-    }
-
-    const hhLeasesActiveThisMonth = getActives(hhLeaseOngoing);
-    const scChargesActiveThisMonth = getActives(scChargeOngoing);
-    const varbNames = Obj.keys(chargeVarbToDescriptor);
-
-    for (const varbName of varbNames) {
-      let householdPortion = 0;
-
-      // TODO: Account for if a tenant switches units mid-month
-      // TODO: Divvy subsidy charges by subsidy contract if there are multiple.
-      // TODO: Make separate ongoing charges for pet fees
-      const firstUnitId = hhLeasesActiveThisMonth[0].value("unitId");
-
-      const chargeProps = {
-        date: startDate, // Hmmm... the charges will all occur on this date, for now... But I want them to be monthly.
-        unitId: firstUnitId,
-        householdId,
-      } as const;
-    }
-  }
-  updateHhOneMonthCharges({householdId, month, year}: { householdId: string, month: number; year: number }) {
-    
-    const hhCharge = this.sheet("hhCharge");
-    const ongoingChargesOfMonth = hhCharge.orderedRows.filter((row => {
-      const date = row.valueDate("date");
-      return (
-        row.value("householdId") === householdId &&
-        utils.date.isInMonthAndYear(date, month, year) &&
-        isUnionValueNoEmpty(row.value("description"), "descriptionChargeOngoing")
-      );
-    }));
-
-    for (const charge of ongoingChargesOfMonth) {
-      charge.markForDelete();
-    
-    }
-
-    
-
-    // 1. Delete all charges in the month that have an ongoing charge description.
-    // 2. Get all leases for the household that that are active in the month.
-    // - either start before the start date and end on or after the start date (or don't end)
-    // - or start on or after the start date and on or before the end date (regardless of end date)
-    // TODO: Throw an error if there is any overlap between lease dates.
-    // 3. Add prorated charges as needed for each lease that is active.
-  }
-
 
   buildOutChargesForMonth(date: Date = new Date()) {
+    //depreciated
     const cfp: ChargeIdsForPayments = {
       paymentGroup: {},
       subsidyContract: {},
@@ -504,7 +763,7 @@ export class TopOperator extends SpreadsheetBase {
     };
 
     const { firstOfMonth, lastOfMonth } =
-      utils.date.firstAndLastDayOfMonth(date);
+      utils.dateNext.firstAndLastDayOfMonth(date);
 
     const household = this.ss.sheet("household");
     const scChargeOngoing = this.ss.sheet("scChargeOngoing");
@@ -513,7 +772,7 @@ export class TopOperator extends SpreadsheetBase {
 
     function getActives<SN extends "hhLeaseChargeOngoing" | "scChargeOngoing">(
       householdId: string,
-      sheet: Sheet<SN>
+      sheet: Sheet<SN>,
     ): Row<SN>[] {
       return sheet.orderedRows.filter((row) => {
         const startDate = row.valueDate("startDate");
@@ -522,8 +781,8 @@ export class TopOperator extends SpreadsheetBase {
         // The end date needs to be on or after the first day of the month
         return (
           row.value("householdId") === householdId &&
-          utils.date.isDateSameOrBefore(startDate, lastOfMonth) &&
-          utils.date.isDateSameOrAfter(endDate, firstOfMonth)
+          utils.dateNext.isDateSameOrBefore(startDate, lastOfMonth) &&
+          utils.dateNext.isDateSameOrAfter(endDate, firstOfMonth)
         );
       });
     }
@@ -557,12 +816,14 @@ export class TopOperator extends SpreadsheetBase {
         }
 
         if (varbName === "caretakerRentReduction") {
-          this.handleCaretakerRentReduction(
-            householdPortion,
-            firstOfMonth,
-            householdId,
-            firstUnitId
-          );
+          if (householdPortion > 0) {
+            this.handleCaretakerRentReduction({
+              amount: householdPortion,
+              date: firstOfMonth,
+              householdId,
+              unitId: firstUnitId,
+            });
+          }
           continue;
         }
         if (varbName === "rentChargeBaseMonthly") {
@@ -592,7 +853,7 @@ export class TopOperator extends SpreadsheetBase {
                 Obj.pushByKey(
                   cfp.subsidyContract,
                   scContract.value("id"),
-                  chargeId
+                  chargeId,
                 );
               }
             }
@@ -679,7 +940,7 @@ export class TopOperator extends SpreadsheetBase {
               "payerCategory",
               "subsidyProgramId",
               "otherPayerId",
-            ])
+            ]),
           );
         },
       };

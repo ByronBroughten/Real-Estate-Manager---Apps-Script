@@ -17,7 +17,7 @@ import { validateUnionValueNoEmpty } from "./valueAttributes/unionValues";
 type Varb<
   VN extends ValueName = ValueName,
   S extends string = string,
-  VP extends ValueParams<VN> = ValueParams<VN>
+  VP extends ValueParams<VN> = ValueParams<VN>,
 > = {
   valueName: VN;
   valueParams: VP;
@@ -36,7 +36,7 @@ type SectionVarbsBase = Record<
 type MakeVarbProps<
   VN extends ValueName,
   S extends string,
-  P extends ValueParams<VN>
+  P extends ValueParams<VN>,
 > = Merge<
   {
     valueName: VN;
@@ -54,7 +54,7 @@ type MakeVarbOptions<VN extends ValueName> = {
 function makeVarb<
   VN extends ValueName,
   S extends string,
-  P extends ValueParams<VN>
+  P extends ValueParams<VN>,
 >({
   valueName,
   makeDefault = allValueAttributes[valueName].makeDefault,
@@ -73,6 +73,7 @@ const linkedIdDisplayNames = validateSnObj({
   property: "Property ID",
   unit: "Unit ID",
   household: "Household ID",
+  hhPet: "Pet ID",
 });
 
 type LinkedIdSn = keyof typeof linkedIdDisplayNames;
@@ -94,7 +95,7 @@ const vS = {
   linkedId<S extends string, P extends ValueParams<"linkedId">>(
     displayName: S,
     idParams: P,
-    options: MakeVarbOptions<"linkedId"> = {}
+    options: MakeVarbOptions<"linkedId"> = {},
   ): Varb<"linkedId", S, P> {
     return makeVarb({
       valueName: "linkedId",
@@ -105,14 +106,8 @@ const vS = {
   },
   linkedIdNext<SN extends LinkedIdSn>(
     sectionName: SN,
-    props: LinkedIdProps = {}
+    props: LinkedIdProps = {},
   ): Varb<"linkedId", string> {
-    const snToSd = validateSnObj({
-      property: "Property ID",
-      unit: "Unit ID",
-      household: "Household ID",
-    });
-
     const valueParams = {
       sectionName,
       onDelete: "setEmpty",
@@ -120,7 +115,7 @@ const vS = {
 
     return makeVarb({
       valueName: "linkedId",
-      displayName: props.displayName ?? snToSd[sectionName],
+      displayName: props.displayName ?? linkedIdDisplayNames[sectionName],
       valueParams,
       ...(props.required && {
         validate: valS.validate.stringNotEmpty,
@@ -134,7 +129,7 @@ const vS = {
   gen<VN extends Exclude<ValueName, "id" | "linkedId">, S extends string>(
     valueName: VN,
     displayName: S,
-    options: MakeVarbOptions<VN> = {}
+    options: MakeVarbOptions<VN> = {},
   ): Varb<VN, S, {}> {
     return makeVarb({
       valueName,
@@ -185,7 +180,7 @@ export const allVarbAttributes = makeSchemaStructure(
         },
         {
           makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
-        }
+        },
       ),
       portion: vS.gen("rentPortionName", "Portion"),
       subsidyContractName: vS.gen("string", "Subsidy contract name"),
@@ -198,7 +193,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault:
             allValueAttributes.subsidyContractIdFromNameOp.makeDefault,
-        }
+        },
       ),
       enter: vS.gen("boolean", "Enter"),
       dateLastRan: vS.gen("date", "Date last ran"),
@@ -241,7 +236,7 @@ export const allVarbAttributes = makeSchemaStructure(
         },
         {
           makeDefault: allValueAttributes.unitNameFromHouseholdIdOp.makeDefault,
-        }
+        },
       ),
       paymentGroupId: vS.linkedId("Payment group ID", {
         sectionName: "paymentGroup",
@@ -270,7 +265,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       subsidyProgramName: vS.gen(
         "subsidyProgramNameFromIdOp",
-        "Subsidy program name"
+        "Subsidy program name",
       ),
       otherPayerId: vS.linkedId("Other payer ID", {
         sectionName: "otherPayer",
@@ -306,7 +301,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       subsidyProgramName: vS.gen(
         "subsidyProgramNameFromIdOp",
-        "Subsidy program name"
+        "Subsidy program name",
       ),
       otherPayerId: vS.linkedId("Other payer ID", {
         sectionName: "otherPayer",
@@ -344,7 +339,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       subsidyContractName: vS.gen(
         "subsidyContractNameFromIdOp",
-        "Subsidy contract name"
+        "Subsidy contract name",
       ),
       notes: vS.gen("string", "Notes"),
     },
@@ -414,7 +409,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
           validate: valS.validate.stringNotEmpty,
-        }
+        },
       ),
       portion: vS.gen("rentPortionName", "Portion"),
       description: vS.gen("descriptionPaymentAllocation", "Description"),
@@ -431,7 +426,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault: allValueAttributes.unitIdFromNameOp.makeDefault,
           validate: valS.validate.stringNotEmpty,
-        }
+        },
       ),
       subsidyContractName: vS.gen("string", "Subsidy contract name"),
       subsidyContractId: vS.linkedId(
@@ -444,7 +439,7 @@ export const allVarbAttributes = makeSchemaStructure(
           makeDefault:
             allValueAttributes.subsidyContractIdFromNameOp.makeDefault,
           validate: valS.validate.string,
-        }
+        },
       ),
       // Payment
       payerCategory: vS.gen("payerCategory", "Payer category"),
@@ -463,7 +458,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault: allValueAttributes.paymentHhIdFromNameOp.makeDefault,
           validate: valS.validate.string,
-        }
+        },
       ),
       subsidyProgramName: vS.gen("string", "Subsidy program name"),
       subsidyProgramId: vS.linkedId(
@@ -476,7 +471,7 @@ export const allVarbAttributes = makeSchemaStructure(
           makeDefault:
             allValueAttributes.subsidyProgramIdFromNameOp.makeDefault,
           validate: valS.validate.string,
-        }
+        },
       ),
       otherPayerName: vS.gen("string", "Other payer name"),
       otherPayerId: vS.linkedId(
@@ -488,7 +483,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault: allValueAttributes.otherPayerIdFromNameOp.makeDefault,
           validate: valS.validate.string,
-        }
+        },
       ),
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
@@ -506,7 +501,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
           validate: valS.validate.stringNotEmpty,
-        }
+        },
       ),
       amount: vS.gen("number", "Amount"),
       description: vS.gen("descriptionChargeOnetime", "Description", {
@@ -525,7 +520,7 @@ export const allVarbAttributes = makeSchemaStructure(
         {
           makeDefault: allValueAttributes.unitIdFromNameOp.makeDefault,
           validate: valS.validate.stringNotEmpty,
-        }
+        },
       ),
       expenseId: vS.linkedId("Expense ID", {
         sectionName: "expense",
@@ -558,6 +553,8 @@ export const allVarbAttributes = makeSchemaStructure(
       rentChargeUtilitiesMonthly: vS.gen("number", "Rent charge (utilities)"),
       caretakerRentReduction: vS.gen("number", "Caretaker rent reduction"),
       petFeeRecurring: vS.gen("number", "Pet fee (recurring)"),
+      petId: vS.linkedIdNext("hhPet", { required: false }),
+      petName: vS.gen("petNameFromIdOp", "Pet name"),
       notes: vS.gen("string", "Notes"),
     },
     scChargeOngoing: {
@@ -577,7 +574,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       subsidyContractName: vS.gen(
         "subsidyContractNameFromId",
-        "Subsidy contract name"
+        "Subsidy contract name",
       ),
       paymentGroupId: vS.linkedId("Payment group ID", {
         sectionName: "paymentGroup",
@@ -614,7 +611,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       subsidyContractName: vS.gen(
         "subsidyContractNameFromIdOp",
-        "Subsidy contract name"
+        "Subsidy contract name",
       ),
       petId: vS.linkedId("Pet ID", {
         sectionName: "hhPet",
@@ -642,7 +639,7 @@ export const allVarbAttributes = makeSchemaStructure(
       rentChargeMonthlyNext: vS.gen("number", "Next base rent charge monthly"),
       utilityChargeNextOverride: vS.gen(
         "number",
-        "Next utility charge override"
+        "Next utility charge override",
       ),
       rentChargeNextOverride: vS.gen("number", "Next rent charge override"),
       subsidyPortionMonthly: vS.gen("number", "Subsidy rent portion monthly"),
@@ -656,7 +653,7 @@ export const allVarbAttributes = makeSchemaStructure(
       priceNext: vS.gen("number", "Next price"),
     },
     subsidyProgram: vsS.idOnly(),
-  } as const
+  } as const,
 );
 
 export type AllVarbAttributes = typeof allVarbAttributes;
@@ -669,32 +666,32 @@ export type SectionVarbAttributes<SN extends SectionNameSimple> =
 
 export type VarbAttributes<
   SN extends SectionNameSimple,
-  VN extends VarbName<SN>
+  VN extends VarbName<SN>,
 > = SectionVarbAttributes<SN>[VN];
 
 export type VarbValueName<
   SN extends SectionNameSimple,
-  VN extends VarbName<SN>
+  VN extends VarbName<SN>,
 > = VarbAttributes<SN, VN>["valueName" & keyof VarbAttributes<SN, VN>];
 
 export type VarbValueAttributes<
   SN extends SectionNameSimple,
-  VN extends VarbName<SN>
+  VN extends VarbName<SN>,
 > = ValueAttributes<VarbValueName<SN, VN> & ValueName>;
 
 export type ValidateVarb<
   SN extends SectionNameSimple,
-  VN extends VarbName<SN>
+  VN extends VarbName<SN>,
 > = ValidateValue<VarbValueName<SN, VN> & ValueName>;
 
 export type VarbValue<
   SN extends SectionNameSimple,
-  VN extends VarbName<SN>
+  VN extends VarbName<SN>,
 > = Value<VarbValueName<SN, VN> & ValueName>;
 
 export type SectionValues<
   SN extends SectionNameSimple,
-  VNS extends VarbName<SN> = VarbName<SN>
+  VNS extends VarbName<SN> = VarbName<SN>,
 > = {
   [VN in VNS]: VarbValue<SN, VN>;
 };
