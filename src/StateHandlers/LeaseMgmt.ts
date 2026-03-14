@@ -30,8 +30,7 @@ type LeaseAmountValues = Pick<
   LeaseAmountValueNames
 >;
 
-export class ContractMgmt extends OperatorBase {
-  // add subsidy contract
+export class LeaseMgmt extends OperatorBase {
   private leaseSheetProp: Sheet<"hhLeaseChargeOngoing"> | null = null;
   get leaseSheet() {
     if (!this.leaseSheetProp) {
@@ -49,10 +48,6 @@ export class ContractMgmt extends OperatorBase {
       caretakerRentReduction: 0,
       petFeeRecurring: 0,
     };
-  }
-  doPeriodicContractUpdates() {
-    this.doPeriodicLeaseUpdates();
-    this.doPeriodicSubsidyUpdates();
   }
   doPeriodicLeaseUpdates() {
     const household = this.sheet("household");
@@ -121,7 +116,6 @@ export class ContractMgmt extends OperatorBase {
       );
       return descending[0].values(leaseAmountValueNames);
     }
-
     return {};
   }
   private endActiveLeases(householdId: string, endDate: Date): void {
@@ -130,41 +124,7 @@ export class ContractMgmt extends OperatorBase {
       endDate: "",
     });
     householdLeases.forEach((lease) => {
-      lease.setValue("endDate", dateU.getDayBefore(endDate));
-    });
-  }
-  doPeriodicSubsidyUpdates() {
-    const subsidyContract = this.sheet("subsidyContract");
-    const ssChargeOngoing = this.sheet("scChargeOngoing");
-
-    subsidyContract.orderedRows.forEach((row) => {
-      const dateNext = row.value("rentPortionDateNext");
-      if (dateU.isDateAndTodayOrPassed(dateNext)) {
-        const dayBefore = dateU.getDayBefore(dateNext);
-        const chargesToEnd = ssChargeOngoing.rowsFiltered({
-          description: "Rent charge (base)",
-          subsidyContractId: row.value("id"),
-          endDate: "",
-        });
-        chargesToEnd.forEach((charge) => {
-          charge.setValue("endDate", dayBefore);
-        });
-
-        ssChargeOngoing.addRowWithValues({
-          startDate: dateNext,
-          amount: row.value("rentPortionMonthlyNext"),
-          description: "Rent charge (base)",
-          endDate: "",
-          subsidyContractId: row.value("id"),
-          householdId: row.value("householdId"),
-          unitId: row.value("unitId"),
-          paymentGroupId: row.value("paymentGroupId"),
-        });
-        row.setValues({
-          rentPortionDateNext: "",
-          rentPortionMonthlyNext: "",
-        });
-      }
+      lease.setValue("endDate", endDate);
     });
   }
 }

@@ -74,6 +74,8 @@ const linkedIdDisplayNames = validateSnObj({
   unit: "Unit ID",
   household: "Household ID",
   hhPet: "Pet ID",
+  subsidyAgreement: "Subsidy agreement ID",
+  paymentGroup: "Payment group ID",
 });
 
 type LinkedIdSn = keyof typeof linkedIdDisplayNames;
@@ -106,7 +108,9 @@ const vS = {
   },
   linkedIdNext<SN extends LinkedIdSn>(
     sectionName: SN,
-    props: LinkedIdProps = {},
+    props: LinkedIdProps = {
+      required: true,
+    },
   ): Varb<"linkedId", string> {
     const valueParams = {
       sectionName,
@@ -183,16 +187,16 @@ export const allVarbAttributes = makeSchemaStructure(
         },
       ),
       portion: vS.gen("rentPortionName", "Portion"),
-      subsidyContractName: vS.gen("string", "Subsidy contract name"),
-      subsidyContractId: vS.linkedId(
-        "Subsidy contract ID",
+      subsidyAgreementName: vS.gen("string", "Subsidy agreement name"),
+      subsidyAgreementId: vS.linkedId(
+        "Subsidy agreement ID",
         {
-          sectionName: "subsidyContract",
+          sectionName: "subsidyAgreement",
           onDelete: "setEmpty",
         },
         {
           makeDefault:
-            allValueAttributes.subsidyContractIdFromNameOp.makeDefault,
+            allValueAttributes.subsidyAgreementIdFromNameOp.makeDefault,
         },
       ),
       enter: vS.gen("boolean", "Enter"),
@@ -218,7 +222,7 @@ export const allVarbAttributes = makeSchemaStructure(
       balance: vS.gen("ledgerBalance", "Amount owed"),
       notes: vS.gen("string", "Notes"),
     },
-    subsidyContract: {
+    subsidyAgreement: {
       id: vS.id(),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
         sectionName: "subsidyProgram",
@@ -260,7 +264,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       hhName: vS.gen("hhNameFromIdOp", "Household name"),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
-        sectionName: "subsidyContract",
+        sectionName: "subsidyAgreement",
         onDelete: "keep",
       }),
       subsidyProgramName: vS.gen(
@@ -296,7 +300,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       hhName: vS.gen("hhNameFromIdOp", "Household name"),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
-        sectionName: "subsidyContract",
+        sectionName: "subsidyAgreement",
         onDelete: "keep",
       }),
       subsidyProgramName: vS.gen(
@@ -333,13 +337,13 @@ export const allVarbAttributes = makeSchemaStructure(
       portion: vS.gen("rentPortionName", "Portion"),
       description: vS.gen("descriptionPaymentAllocation", "Description"),
       amount: vS.gen("number", "Amount"),
-      subsidyContractId: vS.linkedId("Subsidy contract ID", {
-        sectionName: "subsidyContract",
+      subsidyAgreementId: vS.linkedId("Subsidy agreement ID", {
+        sectionName: "subsidyAgreement",
         onDelete: "keep",
       }),
-      subsidyContractName: vS.gen(
+      subsidyAgreementName: vS.gen(
         "subsidyContractNameFromIdOp",
-        "Subsidy contract name",
+        "Subsidy agreement name",
       ),
       notes: vS.gen("string", "Notes"),
     },
@@ -347,7 +351,7 @@ export const allVarbAttributes = makeSchemaStructure(
       id: vS.id(),
       date: vS.date(),
       propertyName: vS.gen("propertyNameFromId", "Property name"),
-      propertyId: vS.linkedIdNext("property", { required: true }),
+      propertyId: vS.linkedIdNext("property"),
       unitName: vS.gen("unitNameFromIdOp", "Unit name"),
       unitId: vS.linkedIdNext("unit", { required: false }),
       propertyYearName: vS.gen("propertyYearName", "Property year name"),
@@ -428,19 +432,11 @@ export const allVarbAttributes = makeSchemaStructure(
           validate: valS.validate.stringNotEmpty,
         },
       ),
-      subsidyContractName: vS.gen("string", "Subsidy contract name"),
-      subsidyContractId: vS.linkedId(
-        "Subsidy contract ID",
-        {
-          sectionName: "subsidyContract",
-          onDelete: "setEmpty",
-        },
-        {
-          makeDefault:
-            allValueAttributes.subsidyContractIdFromNameOp.makeDefault,
-          validate: valS.validate.string,
-        },
-      ),
+      subsidyAgreementName: vS.gen("string", "Subsidy agreement name"),
+      subsidyAgreementId: vS.linkedIdNext("subsidyAgreement", {
+        default: "subsidyAgreementIdFromNameOp",
+        required: true,
+      }),
       // Payment
       payerCategory: vS.gen("payerCategory", "Payer category"),
       detailsVerified: vS.gen("yesOrNo", "Details verified", {
@@ -548,7 +544,7 @@ export const allVarbAttributes = makeSchemaStructure(
       petFeeRecurring: vS.gen("number", "Pet fee (recurring)"),
       notes: vS.gen("string", "Notes"),
     },
-    scChargeOngoing: {
+    subsidyContract: {
       id: vS.id(),
       householdId: vS.gen("hhIdFromScId", "Household ID"),
       householdName: vS.gen("hhNameFromId", "Household name"),
@@ -557,19 +553,14 @@ export const allVarbAttributes = makeSchemaStructure(
         onDelete: "keep",
       }),
       unitName: vS.gen("unitNameFromId", "Unit name"),
-      description: vS.gen("descriptionChargeOngoing", "Description"),
-      amount: vS.gen("number", "Amount"),
-      subsidyContractId: vS.linkedId("Subsidy contract ID", {
-        sectionName: "subsidyContract",
-        onDelete: "keep",
-      }),
-      subsidyContractName: vS.gen(
+      rentChargeBaseMonthly: vS.gen("number", "Rent charge (base)"),
+      subsidyAgreementId: vS.linkedIdNext("subsidyAgreement"),
+      subsidyAgreementName: vS.gen(
         "subsidyContractNameFromId",
-        "Subsidy contract name",
+        "Subsidy agreement name",
       ),
-      paymentGroupId: vS.linkedId("Payment group ID", {
-        sectionName: "paymentGroup",
-        onDelete: "keep",
+      paymentGroupId: vS.linkedIdNext("paymentGroup", {
+        required: false,
       }),
       startDate: vS.gen("date", "Start date", {
         validate: valS.validate.date,
@@ -596,13 +587,13 @@ export const allVarbAttributes = makeSchemaStructure(
       portion: vS.gen("rentPortionName", "Portion"),
       description: vS.gen("descriptionCharge", "Description"),
       amount: vS.gen("number", "Amount"),
-      subsidyContractId: vS.linkedId("Subsidy contract ID", {
-        sectionName: "subsidyContract",
+      subsidyAgreementId: vS.linkedId("Subsidy agreement ID", {
+        sectionName: "subsidyAgreement",
         onDelete: "keep",
       }),
-      subsidyContractName: vS.gen(
+      subsidyAgreementName: vS.gen(
         "subsidyContractNameFromIdOp",
-        "Subsidy contract name",
+        "Subsidy agreement name",
       ),
       petId: vS.linkedId("Pet ID", {
         sectionName: "hhPet",

@@ -1,12 +1,13 @@
 import type { GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
 import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
 import { ChargeMgmt } from "./StateHandlers/ChargeMgmt";
-import { ContractMgmt } from "./StateHandlers/ContractMgmt";
 import { ExpenseMgmt } from "./StateHandlers/ExpenseMgmt";
 import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
+import { LeaseMgmt } from "./StateHandlers/LeaseMgmt";
 import { LedgerMgmt } from "./StateHandlers/LedgerMgmt";
 import { PaymentMgmt } from "./StateHandlers/PaymentMgmt";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
+import { SubsidyMgmt } from "./StateHandlers/SubsidyMgmt";
 
 type ApiFunctions = {
   readonly [SN in GroupSectionName<"api">]: (values: SectionValues<SN>) => void;
@@ -17,7 +18,8 @@ export class ApiOperator extends OperatorBase {
   readonly chargeMgmt = new ChargeMgmt(this.ss);
   readonly expenseMgmt = new ExpenseMgmt(this.ss);
   readonly paymentMgmt = new PaymentMgmt(this.ss);
-  readonly contractMgmt = new ContractMgmt(this.ss);
+  readonly leaseMgmt = new LeaseMgmt(this.ss);
+  readonly subsidyMgmt = new SubsidyMgmt(this.ss);
   readonly apiFunctions: ApiFunctions = {
     buildHhLedger: (values) => this.ledgerMgmt.buildHhLedger(values),
     addExpense: (values) => this.expenseMgmt.addExpense(values),
@@ -25,9 +27,13 @@ export class ApiOperator extends OperatorBase {
     addHhPaymentOnetime: (values) =>
       this.paymentMgmt.addHhPaymentOnetime(values),
   };
+  doPeriodicContractUpdates() {
+    this.leaseMgmt.doPeriodicLeaseUpdates();
+    this.subsidyMgmt.doPeriodicSubsidyUpdates();
+    this.batchUpdateRanges();
+  }
   monthlyRentUpdate() {
-    this.contractMgmt.doPeriodicContractUpdates();
-    this.batchUpdateRanges(); // needed for accurately building out charges.
+    this.doPeriodicContractUpdates();
 
     // const cfp = this.buildOutChargesForMonth();
     // this.buildOutPaymentsFromCharges(cfp);
@@ -46,7 +52,7 @@ export class ApiOperator extends OperatorBase {
   //   //depreciated
   //   const cfp: ChargeIdsForPayments = {
   //     paymentGroup: {},
-  //     subsidyContract: {},
+  //     subsidyAgreement: {},
   //     household: {},
   //   };
 
@@ -54,11 +60,11 @@ export class ApiOperator extends OperatorBase {
   //     utils.date.firstAndLastDayOfMonth(date);
 
   //   const household = this.ss.sheet("household");
-  //   const scChargeOngoing = this.ss.sheet("scChargeOngoing");
+  //   const subsidyContract = this.ss.sheet("subsidyContract");
   //   const hhLeaseOngoing = this.ss.sheet("hhLeaseChargeOngoing");
   //   const charge = this.ss.sheet("hhCharge");
 
-  //   function getActives<SN extends "hhLeaseChargeOngoing" | "scChargeOngoing">(
+  //   function getActives<SN extends "hhLeaseChargeOngoing" | "subsidyContract">(
   //     householdId: string,
   //     sheet: Sheet<SN>,
   //   ): Row<SN>[] {
@@ -79,7 +85,7 @@ export class ApiOperator extends OperatorBase {
   //     const householdId = hh.value("id");
 
   //     const hhLeasesActiveThisMonth = getActives(householdId, hhLeaseOngoing);
-  //     const scChargesActiveThisMonth = getActives(householdId, scChargeOngoing);
+  //     const scChargesActiveThisMonth = getActives(householdId, subsidyContract);
 
   //     const varbNames = Obj.keys(chargeVarbToDescriptor);
   //     for (const varbName of varbNames) {
@@ -128,7 +134,7 @@ export class ApiOperator extends OperatorBase {
   //           const chargeId = charge.addRowWithValues({
   //             portion: "Subsidy program",
   //             description: "Rent charge (base)",
-  //             subsidyContractId: topScCharge.value("subsidyContractId"),
+  //             subsidyAgreementId: topScCharge.value("subsidyAgreementId"),
   //             amount: subsidyPortion,
   //             ...chargeProps,
   //           });
@@ -139,7 +145,7 @@ export class ApiOperator extends OperatorBase {
   //           } else {
   //             for (const scContract of scChargesActiveThisMonth) {
   //               Obj.pushByKey(
-  //                 cfp.subsidyContract,
+  //                 cfp.subsidyAgreement,
   //                 scContract.value("id"),
   //                 chargeId,
   //               );
@@ -177,12 +183,12 @@ export class ApiOperator extends OperatorBase {
   //         "description",
   //         "householdId",
   //         "petId",
-  //         "subsidyContractId",
+  //         "subsidyAgreementId",
   //         "unitId",
   //       ]),
   //     });
   //   });
-  //   hhCharge.sortWithoutAddingChanges("subsidyContractId");
+  //   hhCharge.sortWithoutAddingChanges("subsidyAgreementId");
   //   hhCharge.sortWithoutAddingChanges("date");
   //   hhCharge.sort("hhMembersFullName");
   //   ss.batchUpdateRanges();
@@ -195,7 +201,7 @@ export class ApiOperator extends OperatorBase {
 // };
 
 // function proratedPortion<
-//   SN extends "hhLeaseChargeOngoing" | "scChargeOngoing",
+//   SN extends "hhLeaseChargeOngoing" | "subsidyContract",
 //   VN extends VarbName<SN>,
 // >(row: Row<SN>, varbName: VN, dates: Dates): number {
 //   const startDate = row.dateValueAfterOrGivenDate(

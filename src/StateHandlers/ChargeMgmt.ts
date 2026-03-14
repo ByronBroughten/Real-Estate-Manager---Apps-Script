@@ -165,10 +165,10 @@ export class ChargeMgmt extends OperatorBase {
     year,
   }: HhIdMonthYear): {
     activeHhLeases: Row<"hhLeaseChargeOngoing">[];
-    activeScCharges: Row<"scChargeOngoing">[];
+    activeScCharges: Row<"subsidyContract">[];
   } {
     const hhLease = this.sheet("hhLeaseChargeOngoing");
-    const scChargeOngoing = this.sheet("scChargeOngoing");
+    const subsidyContract = this.sheet("subsidyContract");
     const activeHhLeases = this.getActives({
       sheet: hhLease,
       householdId,
@@ -176,7 +176,7 @@ export class ChargeMgmt extends OperatorBase {
       year,
     });
     const activeScCharges = this.getActives({
-      sheet: scChargeOngoing,
+      sheet: subsidyContract,
       householdId,
       month,
       year,
@@ -188,7 +188,7 @@ export class ChargeMgmt extends OperatorBase {
     }
     return { activeHhLeases, activeScCharges };
   }
-  private getActives<SN extends "hhLeaseChargeOngoing" | "scChargeOngoing">({
+  private getActives<SN extends "hhLeaseChargeOngoing" | "subsidyContract">({
     sheet,
     householdId,
     month,
@@ -315,7 +315,7 @@ export class ChargeMgmt extends OperatorBase {
     month: number;
     year: number;
     activeHhLeases: Row<"hhLeaseChargeOngoing">[];
-    activeScCharges: Row<"scChargeOngoing">[];
+    activeScCharges: Row<"subsidyContract">[];
   }) {
     const hhCharge = this.sheet("hhCharge");
 
@@ -346,7 +346,7 @@ export class ChargeMgmt extends OperatorBase {
         amount: prorated,
         portion: "Subsidy program",
         description: "Rent charge (base)",
-        subsidyContractId: scContract.value("id"),
+        subsidyAgreementId: scContract.value("id"),
         unitId: scContract.value("unitId"),
       });
     }

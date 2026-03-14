@@ -12,7 +12,7 @@ type LedgerInputSn = GroupSectionName<"ledgerInputs">;
 
 interface IdsAndPortion {
   householdId: string;
-  subsidyContractId: string;
+  subsidyAgreementId: string;
   portion: VarbValue<LedgerInputSn, "portion">;
 }
 
@@ -24,15 +24,15 @@ interface RowsOfIdAndPortionProps<
 function rowsOfIdAndPortion<SN extends LedgerInputSn>({
   sheet,
   householdId,
-  subsidyContractId,
+  subsidyAgreementId,
   portion,
 }: RowsOfIdAndPortionProps<SN>): Row<SN>[] {
   const rows = sheet.orderedRows;
   return rows.filter((row) => {
-    const vals = row.values(["portion", "householdId", "subsidyContractId"]);
+    const vals = row.values(["portion", "householdId", "subsidyAgreementId"]);
     if (householdId === vals.householdId && portion === vals.portion) {
       if (portion === "Subsidy program") {
-        return subsidyContractId === vals.subsidyContractId;
+        return subsidyAgreementId === vals.subsidyAgreementId;
       } else {
         return true;
       }
@@ -50,7 +50,7 @@ export class LedgerMgmt extends OperatorBase {
 
     const idsAndPortion = Obj.strictPick(values, [
       "householdId",
-      "subsidyContractId",
+      "subsidyAgreementId",
       "portion",
     ]);
 

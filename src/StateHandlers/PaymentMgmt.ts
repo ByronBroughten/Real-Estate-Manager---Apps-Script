@@ -9,8 +9,8 @@ type ChargeIdsForPayments = {
   paymentGroup: {
     [paymentGroupId: string]: string[];
   };
-  subsidyContract: {
-    [subsidyContractId: string]: string[];
+  subsidyAgreement: {
+    [subsidyAgreementId: string]: string[];
   };
   household: {
     [householdId: string]: string[];
@@ -64,12 +64,12 @@ export class PaymentMgmt extends OperatorBase {
       "description",
       "amount",
       "unitId",
-      "subsidyContractId",
+      "subsidyAgreementId",
     ]);
 
     if (allocateValues.portion === "Subsidy program") {
-      if (!allocateValues.subsidyContractId) {
-        throw new Error("Subsidy contract ID is required");
+      if (!allocateValues.subsidyAgreementId) {
+        throw new Error("Subsidy agreement ID is required");
       }
     }
 
@@ -82,7 +82,7 @@ export class PaymentMgmt extends OperatorBase {
   buildOutPaymentsFromCharges(cfp: ChargeIdsForPayments) {
     for (const paymentGroupType of [
       "household",
-      "subsidyContract",
+      "subsidyAgreement",
       "paymentGroup",
     ] as const) {
       this.addPaymentsAndAllocate({
@@ -101,7 +101,7 @@ export class PaymentMgmt extends OperatorBase {
     const hhCharge = this.ss.sheet("hhCharge");
     const payment = this.ss.sheet("hhPayment");
     const paymentGroup = this.ss.sheet("paymentGroup");
-    const subsidyContract = this.ss.sheet("subsidyContract");
+    const subsidyAgreement = this.ss.sheet("subsidyAgreement");
 
     const paymentIdToCharges: PaymentIdToCharges = {};
     for (const [groupId, chargeIds] of Obj.entries(idToChargeIds)) {
@@ -130,10 +130,10 @@ export class PaymentMgmt extends OperatorBase {
             householdId: groupId,
           });
         },
-        subsidyContract: () => {
+        subsidyAgreement: () => {
           addPayment({
             payerCategory: "Subsidy program",
-            subsidyProgramId: subsidyContract
+            subsidyProgramId: subsidyAgreement
               .row(groupId)
               .value("subsidyProgramId"),
           });
@@ -167,7 +167,7 @@ export class PaymentMgmt extends OperatorBase {
             "portion",
             "householdId",
             "unitId",
-            "subsidyContractId",
+            "subsidyAgreementId",
           ]),
         });
       });
