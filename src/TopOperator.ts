@@ -26,7 +26,7 @@ export class ApiOperator extends OperatorBase {
       this.paymentMgmt.addHhPaymentOnetime(values),
   };
   monthlyRentUpdate() {
-    this.contractMgmt.updateOngoingContracts();
+    this.contractMgmt.doPeriodicContractUpdates();
     this.batchUpdateRanges(); // needed for accurately building out charges.
 
     // const cfp = this.buildOutChargesForMonth();

@@ -55,13 +55,13 @@ resetTriggers(false);
 
 function testUpdateLeaseOngoingCharges() {
   const top = ApiOperator.init();
-  top.contractMgmt.updateLeaseOngoingCharges();
+  top.contractMgmt.doPeriodicLeaseUpdates();
   top.ss.batchUpdateRanges();
 }
 
 function testUpdateSubsidyOngoingCharges() {
   const top = ApiOperator.init();
-  top.contractMgmt.updateSubsidyOngoingCharges();
+  top.contractMgmt.doPeriodicSubsidyUpdates();
   top.ss.batchUpdateRanges();
 }
 

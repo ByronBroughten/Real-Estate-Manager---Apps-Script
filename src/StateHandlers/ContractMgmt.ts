@@ -1,5 +1,5 @@
 import type { SectionValues } from "../appSchema/1. attributes/varbAttributes";
-import { utils } from "../utilitiesGeneral";
+import { dateU } from "../DateU";
 import { Arr } from "../utils/Arr";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
 import type { Sheet } from "./Sheet";
@@ -31,7 +31,6 @@ type LeaseAmountValues = Pick<
 >;
 
 export class ContractMgmt extends OperatorBase {
-  // add lease
   // add subsidy contract
   private leaseSheetProp: Sheet<"hhLeaseChargeOngoing"> | null = null;
   get leaseSheet() {
@@ -51,59 +50,27 @@ export class ContractMgmt extends OperatorBase {
       petFeeRecurring: 0,
     };
   }
-  updateOngoingContracts() {
-    this.updateLeaseOngoingCharges();
-    this.updateSubsidyOngoingCharges();
+  doPeriodicContractUpdates() {
+    this.doPeriodicLeaseUpdates();
+    this.doPeriodicSubsidyUpdates();
   }
-  updateLeaseOngoingCharges() {
+  doPeriodicLeaseUpdates() {
     const household = this.sheet("household");
-    const leaseChargeOngoing = this.ss.sheet("hhLeaseChargeOngoing");
-
     household.orderedRows.forEach((hh) => {
-      const dateNext = hh.value("rentIncreaseDateNext");
-
-      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
-        const rentChargeNext = hh.valueNumber("rentChargeMonthlyNext");
-        const utilityChargeNext = hh.value("utilityChargeMonthlyNext");
-
-        const dayBefore = utils.date.getDayBefore(dateNext);
-        const chargesToEnd = leaseChargeOngoing.rowsFiltered({
-          householdId: hh.value("id"),
-          endDate: "",
-        });
-
-        chargesToEnd.sort((a, b) =>
-          Arr.compareForSort(b.value("startDate"), a.value("startDate")),
-        );
-
-        chargesToEnd.forEach((charge) => {
-          charge.setValue("endDate", dayBefore);
-        });
-
+      const dateNext = hh.value("rentChangeDateNext");
+      if (dateU.isDateAndTodayOrPassed(dateNext)) {
         const householdId = hh.value("id");
-        const lco = chargesToEnd.length > 0 ? chargesToEnd[0] : null;
-
-        leaseChargeOngoing.addRowWithValues({
+        const rentChargeNext = hh.valueNumber("rentChargeMonthlyNext");
+        const utilityChargeNext = hh.valueNumber("utilityChargeMonthlyNext");
+        this.addLease({
           householdId,
           unitId: hh.value("unitId"),
-          rentChargeBaseMonthly: rentChargeNext,
           startDate: dateNext,
-          ...(!lco && {
-            petFeeRecurring: 0,
-            caretakerRentReduction: 0,
-            rentChargeUtilitiesMonthly: 0,
-          }),
-          ...(lco &&
-            lco.values([
-              "petFeeRecurring",
-              "caretakerRentReduction",
-              "rentChargeUtilitiesMonthly",
-            ])),
-          ...(utilityChargeNext !== "" && {
-            rentChargeUtilitiesMonthly: utilityChargeNext,
-          }),
+          fillBlankValuesWithPriorLease: "yes",
+          endPriorActiveLeases: "yes",
+          rentChargeBaseMonthly: rentChargeNext,
+          rentChargeUtilitiesMonthly: utilityChargeNext,
         });
-
         hh.setValues({
           rentChargeNextOverride: "",
           utilityChargeNextOverride: "",
@@ -114,8 +81,8 @@ export class ContractMgmt extends OperatorBase {
   addLease({
     householdId,
     startDate,
-    endPriorActiveLeases,
-    fillBlankValuesWithPriorLease,
+    endPriorActiveLeases = "yes",
+    fillBlankValuesWithPriorLease = "yes",
     ...rest
   }: AddLeaseProps) {
     let defaults: LeaseAmountValues = this.defaultLeaseValues;
@@ -126,7 +93,7 @@ export class ContractMgmt extends OperatorBase {
       };
     }
     if (endPriorActiveLeases === "yes") {
-      this.endActiveLeases(householdId, utils.date.getDayBefore(startDate));
+      this.endActiveLeases(householdId, dateU.getDayBefore(startDate));
     }
     this.leaseSheet.addRowWithValues({
       householdId,
@@ -163,17 +130,17 @@ export class ContractMgmt extends OperatorBase {
       endDate: "",
     });
     householdLeases.forEach((lease) => {
-      lease.setValue("endDate", utils.date.getDayBefore(endDate));
+      lease.setValue("endDate", dateU.getDayBefore(endDate));
     });
   }
-  updateSubsidyOngoingCharges() {
+  doPeriodicSubsidyUpdates() {
     const subsidyContract = this.sheet("subsidyContract");
     const ssChargeOngoing = this.sheet("scChargeOngoing");
 
     subsidyContract.orderedRows.forEach((row) => {
       const dateNext = row.value("rentPortionDateNext");
-      if (utils.date.isDateAndTodayOrPassed(dateNext)) {
-        const dayBefore = utils.date.getDayBefore(dateNext);
+      if (dateU.isDateAndTodayOrPassed(dateNext)) {
+        const dayBefore = dateU.getDayBefore(dateNext);
         const chargesToEnd = ssChargeOngoing.rowsFiltered({
           description: "Rent charge (base)",
           subsidyContractId: row.value("id"),
