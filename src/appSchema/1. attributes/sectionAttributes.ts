@@ -16,7 +16,7 @@ type Section<IP extends string, SI extends number> = {
 
 function makeAttributes<IP extends string, SI extends number>(
   idPrepend: IP,
-  sheetId: SI
+  sheetId: SI,
 ): Section<IP, SI> {
   return { idPrepend, sheetId } as Section<IP, SI>;
 }
@@ -46,14 +46,14 @@ export const allSectionAttributes = makeSchemaStructure(
     scChargeOngoing: ma("scco", 194710324),
     hhPet: ma("hp", 560379920),
     otherPayer: ma("op", 471889863),
-  } as const
+  } as const,
 );
 
 export const sectionNames = Obj.keys(allSectionAttributes);
 export type SectionNameSimple = MakeSchemaName<typeof sectionNames>;
 
 export function validateSnObj<T extends Partial<Record<SectionName, unknown>>>(
-  t: T
+  t: T,
 ): T {
   return t;
 }
@@ -71,9 +71,12 @@ const sectionNameGroups = {
     "addHhPaymentOnetime",
     "buildHhLedger",
     "addExpense",
-    "api"
   ] as const),
-};
+  ledgerInputs: Arr.extractStrict(sectionNames, [
+    "hhCharge",
+    "hhPaymentAllocation",
+  ] as const),
+} as const;
 
 type SectionNameGroups = typeof sectionNameGroups;
 export type SnGroupName = keyof SectionNameGroups;
@@ -83,7 +86,7 @@ export type GroupSectionName<GN extends SnGroupName> =
 
 export function isInSnGroup<GN extends SnGroupName>(
   groupName: GN,
-  sn: string
+  sn: string,
 ): sn is GroupSectionName<GN> {
-  return sectionNameGroups[groupName].includes(sn as GroupSectionName<GN>);
+  return (sectionNameGroups[groupName] as string[]).includes(sn);
 }

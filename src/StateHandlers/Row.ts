@@ -20,7 +20,6 @@ import { utils } from "../utilitiesGeneral";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { RowBase, type RowState } from "./HandlerBases/RowBase";
-import type { ChangesToSave } from "./HandlerBases/SheetBase";
 import { Sheet } from "./Sheet";
 
 export class Row<SN extends SectionName> extends RowBase<SN> {
@@ -56,7 +55,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
   dateValueAfterOrGivenDate<VN extends VarbName<SN>>(
     varbName: VN,
-    date: Date = new Date()
+    date: Date = new Date(),
   ): Date {
     const dateValue = this.valueDateOrEmpty(varbName);
     if (!valS.is.date(dateValue)) {
@@ -71,7 +70,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
   dateValueBeforeOrGivenDate<VN extends VarbName<SN>>(
     varbName: VN,
-    date: Date = new Date()
+    date: Date = new Date(),
   ): Date {
     const dateValue = this.valueDateOrEmpty(varbName);
     if (!valS.is.date(dateValue)) {
@@ -86,7 +85,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
   dateValueOrGivenDate<VN extends VarbName<SN>>(
     varbName: VN,
-    date: Date = new Date()
+    date: Date = new Date(),
   ): Date {
     const dateValue = this.valueDateOrEmpty(varbName);
     if (valS.is.date(dateValue)) {
@@ -97,7 +96,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
 
   valueStandardized<VN extends VarbName<SN>>(
-    varbName: VN
+    varbName: VN,
   ): StandardizedValue<VarbValue<SN, VN>> {
     return asU.standardize.value(this.value(varbName)) as StandardizedValue<
       VarbValue<SN, VN>
@@ -121,18 +120,21 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
 
   values<VN extends VarbName<SN> = VarbName<SN>>(
-    varbNames?: readonly VN[]
+    varbNames?: readonly VN[],
   ): SectionValues<SN, VN> {
     const keys = varbNames || (this.varbNames as VN[]);
-    return keys.reduce((values, varbName) => {
-      values[varbName] = this.value(
-        varbName
-      ) as (typeof values)[typeof varbName];
-      return values;
-    }, {} as SectionValues<SN, VN>);
+    return keys.reduce(
+      (values, varbName) => {
+        values[varbName] = this.value(
+          varbName,
+        ) as (typeof values)[typeof varbName];
+        return values;
+      },
+      {} as SectionValues<SN, VN>,
+    );
   }
   validateValues<VN extends VarbName<SN> = VarbName<SN>>(
-    varbNames?: VN[]
+    varbNames?: VN[],
   ): SectionValues<SN, VN> {
     const values = this.values(varbNames);
     for (const [varbName, value] of Obj.entries(values)) {
@@ -144,12 +146,12 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get varbNames(): VarbName<SN>[] {
     return this.schema.varbNames;
   }
-  get sheet(): Sheet<SN> {    
+  get sheet(): Sheet<SN> {
     return new Sheet(this.sheetProps);
   }
   resetToDefault() {
     this.setValues(
-      this.schema.makeDefaultValues() as Partial<SectionValues<SN>>
+      this.schema.makeDefaultValues() as Partial<SectionValues<SN>>,
     );
   }
   addAllVarbsAsChanges() {
@@ -165,7 +167,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
-    value: VL
+    value: VL,
   ): Row<SN> {
     this.rowState[varbName] = value as RowState<SN>[VN];
     this.sheet.addChangeToSave(this.id, {
@@ -177,12 +179,12 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   setValueType<VN extends VarbName<SN>>(
     varbName: VN,
     valueName: ValueName,
-    value: Value
+    value: Value,
   ): Row<SN> {
     const schema = this.schema.varb(varbName);
     if (schema.valueName !== valueName) {
       throw new Error(
-        `Value name ${valueName} does not match varb value name ${schema.valueName}`
+        `Value name ${valueName} does not match varb value name ${schema.valueName}`,
       );
     }
 
@@ -200,23 +202,23 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     return this;
   }
   collectDataFilter<VN extends VarbName<SN>>(varbName: VN): DataFilterRange {
-      // inexplicably, GAS treats indices as zero-indexed for this purpose
-      const rowIdx = this.base1Idx - 1;;
-      const colIdx = this.sheet.colIdxBase1(varbName) - 1;
-      return {
-        dataFilter: {
-          gridRange: {
-            sheetId: this.schema.sheetId,
-            startRowIndex: rowIdx,
-            endRowIndex: rowIdx + 1,
-            startColumnIndex: colIdx,
-            endColumnIndex: colIdx + 1,
-          },
+    // inexplicably, GAS treats indices as zero-indexed for this purpose
+    const rowIdx = this.base1Idx - 1;
+    const colIdx = this.sheet.colIdxBase1(varbName) - 1;
+    return {
+      dataFilter: {
+        gridRange: {
+          sheetId: this.schema.sheetId,
+          startRowIndex: rowIdx,
+          endRowIndex: rowIdx + 1,
+          startColumnIndex: colIdx,
+          endColumnIndex: colIdx + 1,
         },
-        majorDimension: "ROWS",
-        values: [[this.valueStandardized(varbName)]],
-      };
-    }
+      },
+      majorDimension: "ROWS",
+      values: [[this.valueStandardized(varbName)]],
+    };
+  }
   // private collectAddData(rowId): DataFilterRange {
   //   const row = this.row(rowId);
   //   const { base1Idx } = row;
@@ -239,15 +241,15 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     // inexplicably, GAS treats indices as zero-indexed for this purpose
     const rowIdx = this.base1Idx - 1;
     return {
-          deleteDimension: {
-            range: {
-              sheetId: this.schema.sheetId,
-              dimension: "ROWS",
-              startIndex: rowIdx,
-              endIndex: rowIdx + 1,
-            },
-          }
-        }
+      deleteDimension: {
+        range: {
+          sheetId: this.schema.sheetId,
+          dimension: "ROWS",
+          startIndex: rowIdx,
+          endIndex: rowIdx + 1,
+        },
+      },
+    };
   }
   makeUpdateRequest<VN extends VarbName<SN>>(varbName: VN): BatchUpdateRequest {
     // inexplicably, GAS treats indices as zero-indexed for this purpose

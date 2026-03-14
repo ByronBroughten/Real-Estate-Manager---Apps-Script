@@ -1,35 +1,37 @@
 import { isInSnGroup } from "./appSchema/1. attributes/sectionAttributes.js";
 import type { SectionValues } from "./appSchema/1. attributes/varbAttributes.js";
-import { TopOperator } from "./TopOperator.js";
+import { ApiOperator } from "./TopOperator.js";
 import { asU } from "./utilitiesAppsScript.js";
 
 function triggerFirstOfMonth() {
-  const top = TopOperator.init();
+  const top = ApiOperator.init();
   top.monthlyRentUpdate();
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (e.value === "TRUE") {
     const sheetId = e.range.getSheet().getSheetId();
-    const top = TopOperator.init();
-    const { sectionName } = top.sectionsSchema.sectionBySheetId(sheetId);
+    const top = ApiOperator.init();
+    const { sectionName } = top.ss.sectionsSchema.sectionBySheetId(sheetId);
     if (!isInSnGroup("api", sectionName)) {
       return;
     }
 
     const colIdxBase1 = e.range.getColumn();
     const rowIdxBase1 = e.range.getRow();
-    const sheet = top.ss.sheet(sectionName);
+    const sheet = top.sheet(sectionName);
 
     if (sheet.isApiEnterTriggered({ colIdxBase1, rowIdxBase1 })) {
       const apiRow = sheet.topBodyRow;
       const apiValues = apiRow.validateValues();
 
       apiRow.resetToDefault();
-      top.ss.batchUpdateRanges();
+      top.batchUpdateRanges();
 
       try {
-        top[sectionName](apiValues as SectionValues<typeof sectionName> as any);
+        top.apiFunctions[sectionName](
+          apiValues as SectionValues<typeof sectionName> as any,
+        );
       } catch (e) {
         console.error(e);
         apiRow.setValues(apiValues);
@@ -41,7 +43,7 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
 
 function resetTriggers(doResetTriggers: boolean = true) {
   if (doResetTriggers) {
-    const top = TopOperator.init();
+    const top = ApiOperator.init();
     top.test();
     asU.trigger.deleteAll();
     asU.trigger.addFirstOfMonth("triggerFirstOfMonth");
@@ -52,20 +54,20 @@ function resetTriggers(doResetTriggers: boolean = true) {
 resetTriggers(false);
 
 function testUpdateLeaseOngoingCharges() {
-  const top = TopOperator.init();
-  top.updateLeaseOngoingCharges();
+  const top = ApiOperator.init();
+  top.contractMgmt.updateLeaseOngoingCharges();
   top.ss.batchUpdateRanges();
 }
 
 function testUpdateSubsidyOngoingCharges() {
-  const top = TopOperator.init();
-  top.updateSubsidyOngoingCharges();
+  const top = ApiOperator.init();
+  top.contractMgmt.updateSubsidyOngoingCharges();
   top.ss.batchUpdateRanges();
 }
 
 function testBuildOutMonthlyChargesAndPayments() {
-  const top = TopOperator.init();
-  const cfp = top.buildOutChargesForMonth();
-  top.buildOutPaymentsFromCharges(cfp);
+  const top = ApiOperator.init();
+  // const cfp = top.buildOutChargesForMonth();
+  // top.buildOutPaymentsFromCharges(cfp);
   top.ss.batchUpdateRanges();
 }

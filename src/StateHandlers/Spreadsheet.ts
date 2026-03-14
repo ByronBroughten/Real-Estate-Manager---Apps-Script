@@ -1,27 +1,15 @@
 import type { SectionName } from "../appSchema/1. attributes/sectionAttributes.js";
-import type {
-  SectionValues,
-  VarbName,
-  VarbValue,
-} from "../appSchema/1. attributes/varbAttributes.js";
 import { SectionsSchema } from "../appSchema/3. generated/sectionsSchema.js";
 import {
   type BatchUpdateRequest,
   type DataFilterRange,
 } from "../utilitiesAppsScript.js";
-import { Arr } from "../utils/Arr.js";
 import { Obj } from "../utils/Obj.js";
-import type {
-  HeaderIndices,
-  Rows,
-  SheetState,
-} from "./HandlerBases/SheetBase.js";
 import {
   SpreadsheetBase,
   type SpreadsheetState,
 } from "./HandlerBases/SpreadsheetBase.js";
 import { Sheet, type SheetOptions } from "./Sheet.js";
-
 
 export class Spreadsheet extends SpreadsheetBase {
   static init(): Spreadsheet {
@@ -32,12 +20,12 @@ export class Spreadsheet extends SpreadsheetBase {
     });
   }
   gSheetBySectionName(
-    sectionName: SectionName
+    sectionName: SectionName,
   ): GoogleAppsScript.Spreadsheet.Sheet {
     const schema = this.sectionsSchema.section(sectionName);
     return this.gss.getSheetById(schema.sheetId);
   }
-  
+
   get state(): SpreadsheetState {
     return this.spreadsheetState;
   }
@@ -49,14 +37,10 @@ export class Spreadsheet extends SpreadsheetBase {
   }
   sheet<SN extends SectionName>(
     sectionName: SN,
-    options?: SheetOptions
+    options?: SheetOptions,
   ): Sheet<SN> {
     if (!this.sectionNames.includes(sectionName)) {
-      return Sheet.init(
-        sectionName,
-        this.spreadsheetProps,
-        options
-      )
+      return Sheet.init(sectionName, this.spreadsheetProps, options);
     } else {
       return new Sheet({
         sectionName,
@@ -73,7 +57,7 @@ export class Spreadsheet extends SpreadsheetBase {
       roughRange,
       {
         valueInputOption: "USER_ENTERED",
-      }
+      },
     );
   }
   batchUpdateRanges() {
@@ -99,7 +83,7 @@ export class Spreadsheet extends SpreadsheetBase {
         valueInputOption: "USER_ENTERED",
         data: dataFilterRange,
       },
-      this.spreadsheetId
+      this.spreadsheetId,
     );
   }
   private getDataFilterRange(): DataFilterRange[] {

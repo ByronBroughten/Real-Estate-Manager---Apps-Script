@@ -530,16 +530,10 @@ export const allVarbAttributes = makeSchemaStructure(
       enter: vS.gen("boolean", "Enter"),
     },
     hhLeaseChargeOngoing: {
-      id: vS.id(),
-      householdId: vS.linkedId("Household ID", {
-        sectionName: "household",
-        onDelete: "delete",
-      }),
       householdName: vS.gen("hhNameFromId", "Household name"),
-      unitId: vS.linkedId("Unit ID", {
-        sectionName: "unit",
-        onDelete: "keep",
-      }),
+      id: vS.id(),
+      householdId: vS.linkedIdNext("household", { required: true }),
+      unitId: vS.linkedIdNext("unit", { required: true }),
       unitName: vS.gen("unitNameFromId", "Unit name"),
       startDate: vS.gen("date", "Start date", {
         validate: valS.validate.date,
@@ -548,13 +542,10 @@ export const allVarbAttributes = makeSchemaStructure(
         validate: valS.validate.dateOrEmpty,
         makeDefault: () => "",
       }),
-      rentChange: vS.gen("yesOrNo", "Rent change"),
       rentChargeBaseMonthly: vS.gen("number", "Rent charge (base)"),
       rentChargeUtilitiesMonthly: vS.gen("number", "Rent charge (utilities)"),
       caretakerRentReduction: vS.gen("number", "Caretaker rent reduction"),
       petFeeRecurring: vS.gen("number", "Pet fee (recurring)"),
-      petId: vS.linkedIdNext("hhPet", { required: false }),
-      petName: vS.gen("petNameFromIdOp", "Pet name"),
       notes: vS.gen("string", "Notes"),
     },
     scChargeOngoing: {
