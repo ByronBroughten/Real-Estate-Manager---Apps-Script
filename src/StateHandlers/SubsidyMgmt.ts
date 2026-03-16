@@ -65,7 +65,7 @@ export class SubsidyMgmt extends OperatorBase {
       endDate: "",
     });
     activeContracts.forEach((contract) => {
-      contract.setValue("endDate", dateU.getDayBefore(endDate));
+      contract.setValue("endDate", endDate);
     });
   }
 }
