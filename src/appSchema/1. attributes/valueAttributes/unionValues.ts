@@ -1,6 +1,6 @@
 import { Obj } from "../../../utils/Obj";
 import { validationError } from "../../../utils/validation";
-import { va, type ValueSchema } from "../valueAttributes";
+import { va, type ValueSchema } from "./valueAttribute";
 
 type UnionValuesBase = {
   readonly [key: string]: readonly string[];
@@ -102,14 +102,14 @@ export type UnionValue<N extends UnionValueName = UnionValueName> =
   UnionValues[N];
 
 function makeDefaultUnionValue<UN extends UnionValueName>(
-  name: UN
+  name: UN,
 ): UnionValue<UN> {
   return unionValues[name][0] as UnionValue<UN>;
 }
 
 function validateUnionValue<N extends UnionValueName>(
   value: unknown,
-  name: N
+  name: N,
 ): UnionValue<N> {
   if ((unionValues[name] as unknown[]).includes(value) || value === "") {
     return value as UnionValue<N>;
@@ -120,14 +120,14 @@ function validateUnionValue<N extends UnionValueName>(
 
 export function isUnionValueNoEmpty<N extends UnionValueName>(
   value: unknown,
-  name: N
+  name: N,
 ): value is UnionValue<N> {
   return (unionValues[name] as unknown[]).includes(value);
 }
 
 export function validateUnionValueNoEmpty<N extends UnionValueName>(
   value: unknown,
-  name: N
+  name: N,
 ): UnionValue<N> {
   if (isUnionValueNoEmpty(value, name)) {
     return value as UnionValue<N>;

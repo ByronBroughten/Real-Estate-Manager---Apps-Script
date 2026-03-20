@@ -8,25 +8,9 @@ import {
 } from "./valueAttributes/literalValues";
 import type { UnionValueParamsDict } from "./valueAttributes/unionValues";
 import { makeUnionValueSchemas } from "./valueAttributes/unionValues";
-
-type MakeDefaultValueBase<V extends unknown> = () => V;
-type ValidateValueBase<V extends unknown> = (value: unknown) => V;
-
-export type ValueSchema<V extends unknown = unknown> = {
-  type: V;
-  makeDefault: MakeDefaultValueBase<V>;
-  defaultValidate: ValidateValueBase<V>;
-};
+import { va, type ValueSchema } from "./valueAttributes/valueAttribute";
 
 type ValueAttributesBase = Record<string, ValueSchema>;
-
-export function va<V extends unknown>(props: {
-  type: V;
-  makeDefault: MakeDefaultValueBase<V>;
-  defaultValidate: ValidateValueBase<V>;
-}) {
-  return props;
-}
 
 export const allValueAttributes = makeSchemaStructure(
   {} as ValueAttributesBase,
@@ -70,7 +54,7 @@ export const allValueAttributes = makeSchemaStructure(
     // }),
     ...makeUnionValueSchemas(),
     ...makeLiteralValueSchemas(),
-  } as const
+  } as const,
 );
 
 export type AllValueAttributes = typeof allValueAttributes;
@@ -94,7 +78,7 @@ type ValueParamsDict = MakeSchemaDict<
         date: {};
       },
       UnionValueParamsDict,
-      LiteralValueParamsDict
+      LiteralValueParamsDict,
     ]
   >
 >;

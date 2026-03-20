@@ -1,6 +1,6 @@
 import { Obj } from "../../../utils/Obj";
 import { validationError } from "../../../utils/validation";
-import { va, type ValueSchema } from "../valueAttributes";
+import { va, type ValueSchema } from "./valueAttribute";
 
 const literalValues = {
   amountAllocated: `=IF(COUNTIF(hhPaymentAllocation[Payment ID], SR("ID")), SUM(FILTER(hhPaymentAllocation[Amount], hhPaymentAllocation[Payment ID]=SR("ID"))), 0)`,
