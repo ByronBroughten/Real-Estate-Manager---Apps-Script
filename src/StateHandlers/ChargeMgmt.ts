@@ -4,7 +4,8 @@ import {
 } from "../appSchema/1. attributes/valueAttributes/pairs";
 import { isUnionValueNoEmpty } from "../appSchema/1. attributes/valueAttributes/unionValues";
 import type { SectionValues } from "../appSchema/1. attributes/varbAttributes";
-import { utils, type MonthYear } from "../utilitiesGeneral";
+import type { MonthYear } from "../DateU";
+import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
 import { Obj, type StrictPick } from "../utils/Obj";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
@@ -61,12 +62,29 @@ export class ChargeMgmt extends OperatorBase {
       });
     }
   }
+  updateAllHhOngoingChargesInSpan({
+    householdIds,
+    monthYears,
+  }: {
+    householdIds: string[];
+    monthYears: MonthYear[];
+  }) {
+    householdIds.forEach((householdId) => {
+      monthYears.forEach(({ month, year }) => {
+        this.updateHhOneMonthCharges({
+          householdId,
+          month,
+          year,
+        });
+      });
+    });
+  }
   private getFirstLastDateToUpdateCharges(householdId: string): {
     firstDate: Date;
     lastDate: Date;
   } {
     const hhCharge = this.sheet("hhCharge");
-    const hhLease = this.sheet("hhLeaseChargeOngoing");
+    const hhLease = this.sheet("hhLease");
 
     const hhCharges = hhCharge.rowsFiltered({ householdId });
     const hhLeases = hhLease.rowsFiltered({ householdId });
@@ -105,23 +123,6 @@ export class ChargeMgmt extends OperatorBase {
       }
     }
     return { firstDate, lastDate };
-  }
-  updateAllHhOngoingChargesInSpan({
-    householdIds,
-    monthYears,
-  }: {
-    householdIds: string[];
-    monthYears: MonthYear[];
-  }) {
-    householdIds.forEach((householdId) => {
-      monthYears.forEach(({ month, year }) => {
-        this.updateHhOneMonthCharges({
-          householdId,
-          month,
-          year,
-        });
-      });
-    });
   }
   private markChargesOfMonthForDelete({
     householdId,
@@ -164,10 +165,10 @@ export class ChargeMgmt extends OperatorBase {
     month,
     year,
   }: HhIdMonthYear): {
-    activeHhLeases: Row<"hhLeaseChargeOngoing">[];
+    activeHhLeases: Row<"hhLease">[];
     activeScCharges: Row<"subsidyContract">[];
   } {
-    const hhLease = this.sheet("hhLeaseChargeOngoing");
+    const hhLease = this.sheet("hhLease");
     const subsidyContract = this.sheet("subsidyContract");
     const activeHhLeases = this.getActives({
       sheet: hhLease,
@@ -188,7 +189,7 @@ export class ChargeMgmt extends OperatorBase {
     }
     return { activeHhLeases, activeScCharges };
   }
-  private getActives<SN extends "hhLeaseChargeOngoing" | "subsidyContract">({
+  private getActives<SN extends "hhLease" | "subsidyContract">({
     sheet,
     householdId,
     month,
@@ -266,13 +267,9 @@ export class ChargeMgmt extends OperatorBase {
             ? `Prorated from ${startDate.toDateString()} to ${endDate.toDateString}`
             : "",
         };
-
         switch (varbName) {
           case "petFeeRecurring": {
-            hhCharge.addRowWithValues({
-              ...sharedValues,
-              petId: lease.value("petId"),
-            });
+            hhCharge.addRowWithValues(sharedValues);
           }
           case "rentChargeUtilitiesMonthly": {
             hhCharge.addRowWithValues(sharedValues);
@@ -314,7 +311,7 @@ export class ChargeMgmt extends OperatorBase {
     sharedChargeValues: SharedChargeLeaseValues;
     month: number;
     year: number;
-    activeHhLeases: Row<"hhLeaseChargeOngoing">[];
+    activeHhLeases: Row<"hhLease">[];
     activeScCharges: Row<"subsidyContract">[];
   }) {
     const hhCharge = this.sheet("hhCharge");
@@ -329,7 +326,7 @@ export class ChargeMgmt extends OperatorBase {
 
     let proratedSubsidyTotal = 0;
     for (const scContract of activeScCharges) {
-      const fullAmount = scContract.valueNumber("amount");
+      const fullAmount = scContract.valueNumber("rentChargeBaseMonthly");
       if (fullAmount === 0) {
         continue;
       }

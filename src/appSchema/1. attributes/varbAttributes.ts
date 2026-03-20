@@ -525,7 +525,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
     },
-    hhLeaseChargeOngoing: {
+    hhLease: {
       householdName: vS.gen("hhNameFromId", "Household name"),
       id: vS.id(),
       householdId: vS.linkedIdNext("household", { required: true }),
@@ -595,11 +595,6 @@ export const allVarbAttributes = makeSchemaStructure(
         "subsidyContractNameFromIdOp",
         "Subsidy agreement name",
       ),
-      petId: vS.linkedId("Pet ID", {
-        sectionName: "hhPet",
-        onDelete: "keep",
-      }),
-      petName: vS.gen("petNameFromIdOp", "Pet name"),
       expenseId: vS.linkedId("Expense ID", {
         sectionName: "expense",
         onDelete: "keep",

@@ -31,7 +31,7 @@ export const allSectionAttributes = makeSchemaStructure(
     hhLedger: ma("hl", 731807482),
     buildHhLedger: ma("bhl", 706564734),
     hhCharge: ma("hhc", 825934775),
-    hhLeaseChargeOngoing: ma("hlco", 445175805),
+    hhLease: ma("hlco", 445175805),
     addHhChargeOnetime: ma("ahhc", 1202471195),
     hhPayment: ma("hhp", 1544131100),
     hhPaymentAllocation: ma("hpa", 348639454),

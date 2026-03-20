@@ -61,10 +61,10 @@ export class ApiOperator extends OperatorBase {
 
   //   const household = this.ss.sheet("household");
   //   const subsidyContract = this.ss.sheet("subsidyContract");
-  //   const hhLeaseOngoing = this.ss.sheet("hhLeaseChargeOngoing");
+  //   const hhLeaseOngoing = this.ss.sheet("hhLease");
   //   const charge = this.ss.sheet("hhCharge");
 
-  //   function getActives<SN extends "hhLeaseChargeOngoing" | "subsidyContract">(
+  //   function getActives<SN extends "hhLease" | "subsidyContract">(
   //     householdId: string,
   //     sheet: Sheet<SN>,
   //   ): Row<SN>[] {
@@ -201,7 +201,7 @@ export class ApiOperator extends OperatorBase {
 // };
 
 // function proratedPortion<
-//   SN extends "hhLeaseChargeOngoing" | "subsidyContract",
+//   SN extends "hhLease" | "subsidyContract",
 //   VN extends VarbName<SN>,
 // >(row: Row<SN>, varbName: VN, dates: Dates): number {
 //   const startDate = row.dateValueAfterOrGivenDate(

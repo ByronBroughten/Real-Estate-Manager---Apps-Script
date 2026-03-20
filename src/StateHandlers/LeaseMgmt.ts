@@ -25,21 +25,18 @@ const leaseAmountValueNames = [
 ] as const;
 type LeaseAmountValueNames = (typeof leaseAmountValueNames)[number];
 
-type LeaseAmountValues = Pick<
-  SectionValues<"hhLeaseChargeOngoing">,
-  LeaseAmountValueNames
->;
+type LeaseAmountValues = Pick<SectionValues<"hhLease">, LeaseAmountValueNames>;
 
 export class LeaseMgmt extends OperatorBase {
-  private leaseSheetProp: Sheet<"hhLeaseChargeOngoing"> | null = null;
+  private leaseSheetProp: Sheet<"hhLease"> | null = null;
   get leaseSheet() {
     if (!this.leaseSheetProp) {
-      this.leaseSheetProp = this.ss.sheet("hhLeaseChargeOngoing");
+      this.leaseSheetProp = this.ss.sheet("hhLease");
     }
     return this.leaseSheetProp;
   }
   get leaseSchema() {
-    return this.schema.section("hhLeaseChargeOngoing");
+    return this.schema.section("hhLease");
   }
   get defaultLeaseValues(): LeaseAmountValues {
     return {
