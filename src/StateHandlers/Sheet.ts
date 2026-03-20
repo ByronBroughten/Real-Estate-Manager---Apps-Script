@@ -24,7 +24,10 @@ import {
   type Rows,
   type SheetState,
 } from "./HandlerBases/SheetBase";
-import type { SpreadsheetProps, SpreadsheetState } from "./HandlerBases/SpreadsheetBase";
+import type {
+  SpreadsheetProps,
+  SpreadsheetState,
+} from "./HandlerBases/SpreadsheetBase";
 import { Row } from "./Row";
 
 type RowChangeProps<SN extends SectionName> =
@@ -36,7 +39,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   static init<SN extends SectionName>(
     sectionName: SN,
     spreadsheetProps: SpreadsheetProps,
-    options: SheetOptions = { isAddOnly: false }
+    options: SheetOptions = { isAddOnly: false },
   ): Sheet<SN> {
     const schema = spreadsheetProps.sectionsSchema.section(sectionName);
     const gss = spreadsheetProps.gss;
@@ -44,10 +47,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     spreadsheetProps.spreadsheetState[sectionName] = Sheet.initState(
       sectionName,
       schema,
-      gss.getSheetById(
-        schema.sheetId
-      ),
-      options
+      gss.getSheetById(schema.sheetId),
+      options,
     ) as SpreadsheetState[SN];
 
     return new Sheet({
@@ -59,20 +60,15 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     sectionName: SN,
     schema: SectionSchema<SN>,
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
-    props: { isAddOnly?: boolean }
+    props: { isAddOnly?: boolean },
   ): SheetState<SN> {
     const { headerRowIdxBase1, topBodyRowIdxBase1 } = schema.sections;
-    
+
     const range = sheet.getDataRange();
     const lastColIdx = range.getLastColumn();
     const lastRowIdx = range.getLastRow();
 
-    const headerRowRange = sheet.getRange(
-      headerRowIdxBase1,
-      1,
-      1,
-      lastColIdx
-    );
+    const headerRowRange = sheet.getRange(headerRowIdxBase1, 1, 1, lastColIdx);
     const headerValues = headerRowRange.getValues()[0];
     const trueHeaders = headerValues.filter((header) => {
       return header[0] !== "_";
@@ -80,22 +76,21 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
 
     const unaccountedHeaders = Arr.excludeStrict(
       trueHeaders,
-      schema.varbDisplayNames()
+      schema.varbDisplayNames(),
     );
     const isAddSafe = unaccountedHeaders.length === 0;
     const isAddOnly = props.isAddOnly || false;
     if (isAddOnly && !isAddSafe) {
       throw new Error(
-        "Sheet is addOnly but not addSafe. Not enough varbNames for columns."
+        "Sheet is addOnly but not addSafe. Not enough varbNames for columns.",
       );
     }
-    const headerIndices = this.getVarbNameIndicesBase1(
-      schema,
-      headerValues
-    );
-    const headerOrder = [...schema.varbNames].sort(
-      (a, b) => headerIndices[a] - headerIndices[b]
-    );
+    const headerIndices = this.getVarbNameIndicesBase1(schema, headerValues);
+    const indicesBase1ToHeader = Obj.invert(headerIndices);
+
+    // const headerOrder = [...schema.varbNames].sort(
+    //   (a, b) => headerIndices[a] - headerIndices[b]
+    // );
     const idIndexBase1 = headerIndices.id;
 
     let bodyRowOrder = [];
@@ -106,7 +101,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         topBodyRowIdxBase1,
         idIndexBase1,
         lastRowIdx - topBodyRowIdxBase1 + 1,
-        1
+        1,
       );
       const bodyRowIdValues = bodyRowIdRange.getValues();
       bodyRowOrder = bodyRowIdValues.map((row) => row[0]);
@@ -123,7 +118,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
           topBodyRowIdxBase1,
           headerIndices[varbName],
           lastRowIdx,
-          1
+          1,
         );
         const columnValues = column.getValues();
         columns[varbName] = columnValues.map((row) => row[0]);
@@ -143,7 +138,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       unaccountedHeaders,
       isAddOnly,
       headerIndicesBase1: headerIndices,
-      headerOrder,
       bodyRows,
       bodyRowOrder,
       changesToSave: {},
@@ -151,7 +145,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   private static getVarbNameIndicesBase1<SN extends SectionName>(
     schema: SectionSchema<SN>,
-    headers: string[]
+    headers: string[],
   ): HeaderIndices<SN> {
     const indicesBase1: HeaderIndices<SN> = {} as HeaderIndices<SN>;
     for (const varbName of schema.varbNames) {
@@ -159,7 +153,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       const colIdx = headers.indexOf(displayName);
       if (colIdx === -1) {
         throw new Error(
-          `Header "${displayName}" not found in sheet for section ${schema.sectionName}`
+          `Header "${displayName}" not found in sheet for section ${schema.sectionName}`,
         );
       }
       indicesBase1[varbName] = colIdx + 1;
@@ -198,12 +192,12 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.state.bodyRowOrder.sort((a, b) => {
       return Arr.compareForSort(
         this.row(a).value(varbName),
-        this.row(b).value(varbName)
+        this.row(b).value(varbName),
       );
     });
   }
   validateThis<GN extends SnGroupName>(
-    snGroupName: GN
+    snGroupName: GN,
   ): Sheet<GroupSectionName<GN>> {
     if (isInSnGroup(snGroupName, this.sectionName)) {
       return this as unknown as Sheet<GroupSectionName<GN>>;
@@ -214,8 +208,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   isApiEnterTriggered(e: { colIdxBase1: number; rowIdxBase1: number }) {
     const api = this.validateThis("api");
     const header = api.headerByColIdxBase1(e.colIdxBase1);
-    const isTopBodyRow = e.rowIdxBase1 === api.topBodyRowIdxBase1
-    const isEnter = header.slice(0, 5) === "Enter"
+    const isTopBodyRow = e.rowIdxBase1 === api.topBodyRowIdxBase1;
+    const isEnter = header.slice(0, 5) === "Enter";
     return isTopBodyRow && isEnter;
   }
   addAllVarbsAsChanges(): void {
@@ -225,7 +219,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     if (this.state.bodyRowOrder.length > 0) {
       this.gSheet().deleteRows(
         this.topBodyRowIdxBase1,
-        this.state.bodyRowOrder.length
+        this.state.bodyRowOrder.length,
       );
       this.state.bodyRowOrder = [];
       this.state.bodyRows = {};
@@ -262,10 +256,10 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     return header;
   }
   varbNameByColIdxBase1(colIdxBase1: number): VarbName<SN> {
-    const varbName = this.state.headerOrder[colIdxBase1 - 1];
+    const varbName = Obj.keyByValue(this.state.headerIndicesBase1, colIdxBase1);
     if (!varbName) {
       throw new Error(
-        `No variable found at column index ${colIdxBase1} in sheet "${this.sectionName}"`
+        `No variable found at column index ${colIdxBase1} in sheet "${this.sectionName}"`,
       );
     }
     return varbName;
@@ -301,8 +295,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
         `Sheet "${
           this.sectionName
         }" is not add safe. There are no corresponding variables for the following column headers: ${this.state.unaccountedHeaders.join(
-          ", "
-        )}.`
+          ", ",
+        )}.`,
       );
     }
 
@@ -340,8 +334,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
               startIndex: row.base1Idx - 1,
               endIndex: row.base1Idx,
             },
-          }
-        })
+          },
+        });
       } else {
         if (change.add) {
           this.gSheet().appendRow(["Loading..."]);
@@ -362,7 +356,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     for (const [rowId, change] of Obj.entries(changes)) {
       if (change.delete) {
         throw new Error(
-          "Not implemented. Deleting rows are not yet supported."
+          "Not implemented. Deleting rows are not yet supported.",
         );
       } else {
         if (change.add) {

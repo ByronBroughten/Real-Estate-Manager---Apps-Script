@@ -1,10 +1,6 @@
 import type { SectionName } from "../../appSchema/1. attributes/sectionAttributes";
 import type { VarbName } from "../../appSchema/1. attributes/varbAttributes";
 import type { SectionSchema } from "../../appSchema/3. generated/sectionsSchema";
-import type {
-  BatchUpdateRequest,
-  DataFilterRange,
-} from "../../utilitiesAppsScript";
 import type { RowState } from "./RowBase";
 
 import { SpreadsheetBase, type SpreadsheetProps } from "./SpreadsheetBase";
@@ -34,7 +30,6 @@ export type SheetState<SN extends SectionName> = {
 
   // Does rows include headers? No. I want their data to be consistent.
   headerIndicesBase1: HeaderIndices<SN>;
-  headerOrder: VarbName<SN>[];
   bodyRows: Rows<SN>;
   bodyRowOrder: string[];
   changesToSave: ChangesToSave<SN>;

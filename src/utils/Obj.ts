@@ -26,19 +26,29 @@ export type SubType<Base, Condition> = Pick<Base, AllowedKeys<Base, Condition>>;
 
 export type PropKeyOfValue<
   O extends object,
-  V extends O[keyof O]
+  V extends O[keyof O],
 > = keyof SubType<O, V>;
 
 export const Obj = {
   pushByKey<
     O extends Record<string, any[]>,
     K extends keyof O,
-    V extends O[K][number]
+    V extends O[K][number],
   >(obj: O, key: K, value: V) {
     if (!obj[key]) {
       obj[key] = [] as O[K];
     }
     obj[key].push(value);
+  },
+  keyByValue<O extends object, V extends O[keyof O]>(
+    obj: O,
+    value: V,
+  ): keyof O {
+    const key = this.keys(obj).find((key) => obj[key] === value);
+    if (!key) {
+      throw new Error("Value not found in object");
+    }
+    return key as keyof O;
   },
   isEmpty(obj: any): boolean {
     return Object.keys(obj).length === 0;
@@ -58,36 +68,45 @@ export const Obj = {
     else return false;
   },
   pick<O extends object, KS extends keyof O>(obj: O, keys: KS[]): Pick<O, KS> {
-    return keys.reduce((objNext, key) => {
-      if (key in obj) {
-        objNext[key] = obj[key];
-      }
-      return objNext;
-    }, {} as Pick<O, KS>);
+    return keys.reduce(
+      (objNext, key) => {
+        if (key in obj) {
+          objNext[key] = obj[key];
+        }
+        return objNext;
+      },
+      {} as Pick<O, KS>,
+    );
   },
   strictPick<O extends object, KS extends keyof O>(
     obj: O,
-    keys: KS[]
+    keys: KS[],
   ): StrictPick<O, KS> {
-    return keys.reduce((objNext, key) => {
-      if (key in obj) {
-        objNext[key] = obj[key];
-      } else {
-        throw new Error(`Key ${String(key)} not in object`);
-      }
-      return objNext;
-    }, {} as StrictPick<O, KS>);
+    return keys.reduce(
+      (objNext, key) => {
+        if (key in obj) {
+          objNext[key] = obj[key];
+        } else {
+          throw new Error(`Key ${String(key)} not in object`);
+        }
+        return objNext;
+      },
+      {} as StrictPick<O, KS>,
+    );
   },
   strictOmit<O extends object, KS extends keyof O>(
     obj: O,
     ...keysToOmit: KS[]
   ): StrictOmit<O, KS> {
-    return Obj.keys(obj).reduce((objNext, key) => {
-      if (!keysToOmit.includes(key as KS)) {
-        (objNext as O)[key] = obj[key];
-      }
-      return objNext;
-    }, {} as StrictOmit<O, KS>);
+    return Obj.keys(obj).reduce(
+      (objNext, key) => {
+        if (!keysToOmit.includes(key as KS)) {
+          (objNext as O)[key] = obj[key];
+        }
+        return objNext;
+      },
+      {} as StrictOmit<O, KS>,
+    );
   },
   keys<O extends object>(obj: O): Keys<O> {
     return Object.keys(obj) as any;
@@ -103,10 +122,20 @@ export const Obj = {
   },
   propKeysOfValue<O extends object, V extends O[keyof O]>(
     obj: O,
-    value: V
+    value: V,
   ): PropKeyOfValue<O, V>[] {
     const keys = this.keys(obj).filter((key) => obj[key] === value);
     return keys as PropKeyOfValue<O, V>[];
+  },
+  invert<O extends Record<string | number, string | number>>(
+    obj: O,
+  ): { [K in O[keyof O]]: keyof O } {
+    const objNext = {} as { [K in O[keyof O]]: keyof O };
+    for (const key in obj) {
+      const value = obj[key];
+      objNext[value] = key;
+    }
+    return objNext;
   },
   merge,
   spread,
