@@ -518,10 +518,6 @@ export const allVarbAttributes = makeSchemaStructure(
           validate: valS.validate.stringNotEmpty,
         },
       ),
-      expenseId: vS.linkedId("Expense ID", {
-        sectionName: "expense",
-        onDelete: "setEmpty",
-      }),
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
     },
@@ -595,10 +591,6 @@ export const allVarbAttributes = makeSchemaStructure(
         "subsidyContractNameFromIdOp",
         "Subsidy agreement name",
       ),
-      expenseId: vS.linkedId("Expense ID", {
-        sectionName: "expense",
-        onDelete: "keep",
-      }),
       notes: vS.gen("string", "Notes"),
     },
     household: {

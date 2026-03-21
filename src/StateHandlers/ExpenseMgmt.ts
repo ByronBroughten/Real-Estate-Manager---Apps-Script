@@ -20,7 +20,7 @@ export class ExpenseMgmt extends OperatorBase {
       "expenseNotes",
     ]);
 
-    const expenseId = expense.addRowWithValues({
+    expense.addRowWithValues({
       ...expenseVals,
       notes: expenseNotes,
     });
@@ -40,7 +40,6 @@ export class ExpenseMgmt extends OperatorBase {
           "hhChargeNotes",
         ]);
       hhCharge.addRowWithValues({
-        expenseId,
         amount: hhChargeLesserAmount === "" ? amount : hhChargeLesserAmount,
         description: "Damage, waste, or service",
         portion: "Household",
