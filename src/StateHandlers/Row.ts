@@ -35,6 +35,11 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     return baseIdx + topBodyRowIdxBase1;
   }
   value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
+    if (varbName === "id") {
+      throw new Error(
+        "For the id varb, use the id property of the row instead of the value method",
+      );
+    }
     return this.rowState[varbName] as VarbValue<SN, VN>;
   }
   valueStringNotEmpty<VN extends VarbName<SN>>(varbName: VN): string {

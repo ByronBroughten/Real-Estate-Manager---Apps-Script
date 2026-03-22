@@ -28,14 +28,14 @@ export class SubsidyMgmt extends OperatorBase {
   }
   doPeriodicSubsidyUpdates() {
     const subsidyAgreement = this.agreementSheet;
-    subsidyAgreement.orderedRows.forEach((row) => {
-      const dateNext = row.value("rentPortionDateNext");
+    subsidyAgreement.orderedRows.forEach((sa) => {
+      const dateNext = sa.value("rentPortionDateNext");
       if (dateU.isDateAndTodayOrPassed(dateNext)) {
         this.addSubsidyContract({
-          subsidyAgreementId: row.value("id"),
+          subsidyAgreementId: sa.id,
           startDate: dateNext,
-          rentChargeBaseMonthly: row.valueNumber("rentPortionMonthlyNext"),
-          unitId: row.value("unitId"),
+          rentChargeBaseMonthly: sa.valueNumber("rentPortionMonthlyNext"),
+          unitId: sa.value("unitId"),
           endPriorActiveContracts: "yes",
         });
       }

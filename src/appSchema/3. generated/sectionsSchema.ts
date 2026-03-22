@@ -36,7 +36,7 @@ export class SectionsSchema {
   }
   sectionBySheetId(sheetId: number): SectionSchema<SectionName> {
     for (const [sectionName, attributes] of Obj.entries(
-      this.allSectionAttributes
+      this.allSectionAttributes,
     )) {
       if (attributes.sheetId === sheetId) {
         return this.section(sectionName);
@@ -46,7 +46,7 @@ export class SectionsSchema {
   }
   varb<SN extends SectionName, VN extends VarbName<SN>>(
     sectionName: SN,
-    varbName: VN
+    varbName: VN,
   ): VarbSchema<SN, VN> {
     return new VarbSchema(sectionName, varbName);
   }
@@ -74,19 +74,28 @@ export class SectionSchema<SN extends SectionName> {
   get sheetId(): number {
     return this.attributes.sheetId;
   }
-  makeSectionId(): string {
-    return utils.id.make(this.attributes.idPrepend);
+  makeSectionIds(): {
+    fullId: string;
+    baseId: string;
+    fullIdFormula: string;
+  } {
+    const baseId = utils.id.makeBase();
+    return {
+      baseId,
+      fullId: `${this.attributes.idPrepend}-${baseId}`,
+      fullIdFormula: utils.id.makeFormula(this.attributes.idPrepend),
+    };
   }
   get varbNames(): VarbName<SN>[] {
     return Obj.keys(this.allVarbAttributes[this.sectionName]);
   }
   makeDefaultValues(): StrictOmit<SectionValues<SN>, "id"> {
     return this.varbNames.reduce((values, varbName) => {
-      if (varbName === "id") {
+      if (["id", "baseId"].includes(varbName as string)) {
         return values;
       } else {
         values[varbName] = this.varb(
-          varbName
+          varbName,
         ).makeDefaultValue() as SectionValues<SN>[typeof varbName];
       }
       return values;

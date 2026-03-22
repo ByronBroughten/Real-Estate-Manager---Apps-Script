@@ -300,13 +300,14 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       );
     }
 
-    const rowId = this.schema.makeSectionId();
+    const { baseId, fullId, fullIdFormula } = this.schema.makeSectionIds();
+    const rowId = fullId;
     this.rows[rowId] = {} as SectionValues<SN>;
     this.state.bodyRowOrder.push(rowId);
     this.addChangeToSave(rowId, { action: "add" });
-
     const row = this.row(rowId);
-    row.setValue("id", rowId);
+    row.setValue("id", fullIdFormula);
+    row.setValue("baseId", baseId);
     row.resetToDefault();
     return rowId;
   }

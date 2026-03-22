@@ -22,7 +22,7 @@ export class ApiOperator extends OperatorBase {
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);
   readonly apiFunctions: ApiFunctions = {
     buildHhLedger: (values) => this.ledgerMgmt.buildHhLedger(values),
-    addExpense: (values) => this.expenseMgmt.addExpense(values),
+    addExpenses: (values) => this.expenseMgmt.addExpenses(values),
     addHhChargeOnetime: (values) => this.chargeMgmt.addHhChargeOnetime(values),
     addHhPaymentOnetime: (values) =>
       this.paymentMgmt.addHhPaymentOnetime(values),
@@ -82,7 +82,7 @@ export class ApiOperator extends OperatorBase {
   //   }
 
   //   household.orderedRows.forEach((hh) => {
-  //     const householdId = hh.value("id");
+  //     const householdId = hh.id;
 
   //     const hhLeasesActiveThisMonth = getActives(householdId, hhLeaseOngoing);
   //     const scChargesActiveThisMonth = getActives(householdId, subsidyContract);
@@ -146,7 +146,7 @@ export class ApiOperator extends OperatorBase {
   //             for (const scContract of scChargesActiveThisMonth) {
   //               Obj.pushByKey(
   //                 cfp.subsidyAgreement,
-  //                 scContract.value("id"),
+  //                 scContract.id,
   //                 chargeId,
   //               );
   //             }
@@ -177,7 +177,7 @@ export class ApiOperator extends OperatorBase {
   //     hhCharge.addRowWithValues({
   //       date,
   //       amount: proratedAmount,
-  //       chargeOngoingId: chargeOngoing.value("id"),
+  //       chargeOngoingId: chargeOngoing.id,
   //       ...chargeOngoing.values([
   //         "portion",
   //         "description",

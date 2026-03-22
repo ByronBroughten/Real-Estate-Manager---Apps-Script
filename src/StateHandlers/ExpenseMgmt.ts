@@ -3,7 +3,7 @@ import { Obj } from "../utils/Obj";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
 
 export class ExpenseMgmt extends OperatorBase {
-  addExpense(values: SectionValues<"addExpense">) {
+  addExpenses(values: SectionValues<"addExpenses">) {
     const expense = this.ss.sheet("expense");
     const hhCharge = this.ss.sheet("hhCharge");
     const { expenseNotes, ...expenseVals } = Obj.strictPick(values, [

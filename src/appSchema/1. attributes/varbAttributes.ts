@@ -94,6 +94,13 @@ const vS = {
       valueParams: {},
     });
   },
+  baseId(): Varb<"baseId", "Base ID", {}> {
+    return makeVarb({
+      valueName: "baseId",
+      displayName: "Base ID",
+      valueParams: {},
+    });
+  },
   linkedId<S extends string, P extends ValueParams<"linkedId">>(
     displayName: S,
     idParams: P,
@@ -158,10 +165,16 @@ const vS = {
 };
 
 const vsS = {
-  idOnly(): { id: Varb<"id", "ID", {}> } {
-    return { id: vS.id() };
+  ids(): {
+    id: Varb<"id", "ID", {}>;
+    baseId: Varb<"baseId", "Base ID", {}>;
+  } {
+    return {
+      ...vsS.ids(),
+      baseId: vS.baseId(),
+    };
   },
-};
+} as const;
 
 const defaults = {
   todayFormula: () => "=TODAY()",
@@ -170,11 +183,9 @@ const defaults = {
 export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
-    api: {
-      id: vS.id(),
-    },
+    api: vsS.ids(),
     buildHhLedger: {
-      id: vS.id(),
+      ...vsS.ids(),
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
         "Household ID",
@@ -212,7 +223,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
     },
     hhLedger: {
-      id: vS.id(),
+      ...vsS.ids(),
       date: vS.date(),
       unitName: vS.gen("string", "Unit"),
       description: vS.gen("descriptionsTransactionsAll", "Description"),
@@ -223,7 +234,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     subsidyAgreement: {
-      id: vS.id(),
+      ...vsS.ids(),
       subsidyProgramId: vS.linkedId("Subsidy program ID", {
         sectionName: "subsidyProgram",
         onDelete: "keep",
@@ -256,7 +267,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
     },
     paymentGroup: {
-      id: vS.id(),
+      ...vsS.ids(),
       payerCategory: vS.gen("payerCategory", "Payer category"),
       householdId: vS.linkedId("Household ID", {
         sectionName: "household",
@@ -278,11 +289,11 @@ export const allVarbAttributes = makeSchemaStructure(
       otherPayerName: vS.gen("otherPayerNameFromIdOp", "Other payer name"),
       notes: vS.gen("string", "Notes"),
     },
-    unit: vsS.idOnly(),
-    hhPet: vsS.idOnly(),
-    otherPayer: vsS.idOnly(),
+    unit: vsS.ids(),
+    hhPet: vsS.ids(),
+    otherPayer: vsS.ids(),
     hhPayment: {
-      id: vS.id(),
+      ...vsS.ids(),
       date: vS.gen("date", "Date", {
         validate: valS.validate.date,
       }),
@@ -315,7 +326,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     hhPaymentAllocation: {
-      id: vS.id(),
+      ...vsS.ids(),
       paymentId: vS.linkedId("Payment ID", {
         sectionName: "hhPayment",
         onDelete: "delete",
@@ -348,7 +359,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     expense: {
-      id: vS.id(),
+      ...vsS.ids(),
       date: vS.date(),
       propertyName: vS.gen("propertyNameFromId", "Property name"),
       propertyId: vS.linkedIdNext("property"),
@@ -366,8 +377,8 @@ export const allVarbAttributes = makeSchemaStructure(
       amount: vS.gen("number", "Amount"),
       notes: vS.gen("string", "Notes"),
     },
-    addExpense: {
-      id: vS.id(),
+    addExpenses: {
+      ...vsS.ids(),
       date: vS.dateDefaultToday(),
       billerName: vS.gen("string", "Biller name"),
       propertyName: vS.gen("string", "Property name"),
@@ -400,7 +411,7 @@ export const allVarbAttributes = makeSchemaStructure(
       enter: vS.gen("boolean", "Enter"),
     },
     addHhPaymentOnetime: {
-      id: vS.id(),
+      ...vsS.ids(),
       date: vS.dateDefaultToday(),
       // Allocation
       householdName: vS.gen("string", "Household name"),
@@ -485,7 +496,7 @@ export const allVarbAttributes = makeSchemaStructure(
       enter: vS.gen("boolean", "Enter"),
     },
     addHhChargeOnetime: {
-      id: vS.id(),
+      ...vsS.ids(),
       date: vS.dateDefaultToday(),
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
@@ -523,7 +534,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     hhLease: {
       householdName: vS.gen("hhNameFromId", "Household name"),
-      id: vS.id(),
+      ...vsS.ids(),
       householdId: vS.linkedIdNext("household", { required: true }),
       unitId: vS.linkedIdNext("unit", { required: true }),
       unitName: vS.gen("unitNameFromId", "Unit name"),
@@ -541,7 +552,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     subsidyContract: {
-      id: vS.id(),
+      ...vsS.ids(),
       householdId: vS.gen("hhIdFromScId", "Household ID"),
       householdName: vS.gen("hhNameFromId", "Household name"),
       unitId: vS.linkedId("Unit ID", {
@@ -568,7 +579,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     hhCharge: {
-      id: vS.id(),
+      ...vsS.ids(),
       date: vS.date(),
       householdName: vS.gen("hhNameFromId", "Household name"),
       householdId: vS.linkedId("Household ID", {
@@ -594,7 +605,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     household: {
-      id: vS.id(),
+      ...vsS.ids(),
       unitId: vS.linkedId("Unit ID", {
         sectionName: "unit",
         onDelete: "setEmpty",
@@ -615,13 +626,13 @@ export const allVarbAttributes = makeSchemaStructure(
       householdPortionMonthly: vS.gen("number", "HH base rent portion monthly"),
     },
     test: {
-      id: vS.id(),
+      ...vsS.ids(),
       dateCurrent: vS.gen("date", "Current price date"),
       dateNext: vS.gen("date", "Next price date"),
       priceCurrent: vS.gen("number", "Current price"),
       priceNext: vS.gen("number", "Next price"),
     },
-    subsidyProgram: vsS.idOnly(),
+    subsidyProgram: vsS.ids(),
   } as const,
 );
 

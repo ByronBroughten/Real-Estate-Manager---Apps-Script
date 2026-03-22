@@ -19,14 +19,18 @@ const _currencyUtils = {
 };
 
 const _idUtils = {
-  make(prepend: string, length: number = 7) {
+  makeBase(): string {
+    const length = 7;
     const alphabet =
       "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
     let result = "";
     for (let i = 0; i < length; i++) {
       result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
     }
-    return `${prepend}-${result}`;
+    return result;
+  },
+  makeFormula(prepend: string): string {
+    return `=MAKE_ID(${prepend}, SR("Base ID"))`;
   },
 };
 

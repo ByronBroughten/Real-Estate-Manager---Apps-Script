@@ -34,8 +34,8 @@ export class ChargeMgmt extends OperatorBase {
     this.ss.batchUpdateRanges();
   }
   updateHhAllOngoingCharges(
-    householdIds: string[] = this.sheet("household").orderedRows.map((r) =>
-      r.value("id"),
+    householdIds: string[] = this.sheet("household").orderedRows.map(
+      (r) => r.id,
     ),
   ) {
     for (const householdId of householdIds) {
@@ -343,7 +343,7 @@ export class ChargeMgmt extends OperatorBase {
         amount: prorated,
         portion: "Subsidy program",
         description: "Rent charge (base)",
-        subsidyAgreementId: scContract.value("id"),
+        subsidyAgreementId: scContract.id,
         unitId: scContract.value("unitId"),
       });
     }

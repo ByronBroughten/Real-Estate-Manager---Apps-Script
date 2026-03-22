@@ -51,7 +51,7 @@ export class LeaseMgmt extends OperatorBase {
     household.orderedRows.forEach((hh) => {
       const dateNext = hh.value("rentChangeDateNext");
       if (dateU.isDateAndTodayOrPassed(dateNext)) {
-        const householdId = hh.value("id");
+        const householdId = hh.id;
         const rentChargeNext = hh.valueNumber("rentChargeMonthlyNext");
         const utilityChargeNext = hh.valueNumber("utilityChargeMonthlyNext");
         this.addLease({

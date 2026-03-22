@@ -1,3 +1,4 @@
+import { utils } from "../../utilitiesGeneral";
 import type { Spread } from "../../utils/Obj/spread";
 import { valS } from "../../utils/validation";
 import { makeSchemaStructure, type MakeSchemaDict } from "../makeSchema";
@@ -18,6 +19,11 @@ export const allValueAttributes = makeSchemaStructure(
     id: va({
       type: "" as string,
       makeDefault: () => "shouldNotHappen",
+      defaultValidate: valS.validate.string,
+    }),
+    baseId: va({
+      type: "" as string,
+      makeDefault: () => utils.id.makeBase(),
       defaultValidate: valS.validate.string,
     }),
     linkedId: va({
@@ -72,6 +78,7 @@ type ValueParamsDict = MakeSchemaDict<
       {
         linkedId: LinkedIdParams;
         id: {};
+        baseId: {};
         string: {};
         number: {};
         boolean: {};
