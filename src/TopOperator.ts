@@ -20,9 +20,13 @@ export class ApiOperator extends OperatorBase {
   readonly paymentMgmt = new PaymentMgmt(this.ss);
   readonly leaseMgmt = new LeaseMgmt(this.ss);
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);
+
   readonly apiFunctions: ApiFunctions = {
+    // if it's a single, it should be in the api sheet. Otherwise, it's in one of these.
+    // single
     buildHhLedger: (values) => this.ledgerMgmt.buildHhLedger(values),
-    addExpenses: (values) => this.expenseMgmt.addExpenses(values),
+    // multis
+    addExpenses: (_) => this.expenseMgmt.addExpenses(),
     addHhChargeOnetime: (values) => this.chargeMgmt.addHhChargeOnetime(values),
     addHhPaymentOnetime: (values) =>
       this.paymentMgmt.addHhPaymentOnetime(values),
