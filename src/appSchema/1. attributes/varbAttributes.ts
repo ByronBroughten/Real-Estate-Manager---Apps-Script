@@ -366,7 +366,7 @@ export const allVarbAttributes = makeSchemaStructure(
       propertyId: vS.linkedIdNext("property"),
       unitId: vS.linkedIdNext("unit", { required: false }),
       propertyYearName: vS.gen("propertyYearName", "Property year name"),
-      biller: vS.gen("string", "Biller"),
+      billerName: vS.gen("string", "Biller name"),
       description: vS.gen("string", "Description"),
       expenseCategory: vS.gen("expenseCategory", "Expense category"),
       receiptFormat: vS.gen("receiptFormat", "Receipt format", {
