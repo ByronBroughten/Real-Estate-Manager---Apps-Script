@@ -28,7 +28,14 @@ type SharedChargeLeaseValues = StrictPick<
 
 export class ChargeMgmt extends OperatorBase {
   addHhChargeOnetime(values: SectionValues<"addHhChargeOnetime">) {
-    const relevant = Obj.strictOmit(values, "id", "enter", "householdName");
+    const relevant = Obj.strictOmit(
+      values,
+      "id",
+      "baseId",
+      "enter",
+      "enterStatus",
+      "householdName",
+    );
     const sOnetime = this.ss.sheet("hhCharge");
     sOnetime.addRowWithValues(relevant);
     this.ss.batchUpdateRanges();

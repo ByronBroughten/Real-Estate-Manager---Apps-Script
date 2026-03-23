@@ -34,8 +34,11 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
     const baseIdx = this.sheetState.bodyRowOrder.indexOf(this.id);
     return baseIdx + topBodyRowIdxBase1;
   }
-  value<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
-    if (varbName === "id") {
+  value<VN extends VarbName<SN>>(
+    varbName: VN,
+    wantFormulaId?: "wantFormulaId",
+  ): VarbValue<SN, VN> {
+    if (!wantFormulaId && varbName === "id") {
       throw new Error(
         "For the id varb, use the id property of the row instead of the value method",
       );
@@ -132,6 +135,7 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       (values, varbName) => {
         values[varbName] = this.value(
           varbName,
+          "wantFormulaId",
         ) as (typeof values)[typeof varbName];
         return values;
       },
