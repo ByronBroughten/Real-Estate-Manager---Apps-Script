@@ -9,15 +9,14 @@ export class ExpenseMgmt extends OperatorBase {
     for (const row of addExpenses.orderedRows) {
       const { expenseNotes, ...expenseVals } = row.values([
         "date",
-        "amount",
-        "billerName",
-        "description",
-        "expenseCategory",
-        "hhChargeLesserAmount",
         "propertyId",
+        "unitId",
+        "billerName",
+        "expenseCategory",
+        "description",
+        "amount",
         "receiptFormat",
         "taxAdjust",
-        "unitId",
         "expenseNotes",
       ]);
       expense.addRowWithValues({
