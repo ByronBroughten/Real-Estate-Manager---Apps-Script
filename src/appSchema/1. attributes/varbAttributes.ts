@@ -87,9 +87,9 @@ type LinkedIdProps = {
 };
 
 const vS = {
-  id(): Varb<"id", "ID", {}> {
+  idFormula(): Varb<"idFormula", "ID", {}> {
     return makeVarb({
-      valueName: "id",
+      valueName: "idFormula",
       displayName: "ID",
       valueParams: {},
     });
@@ -166,11 +166,11 @@ const vS = {
 
 const vsS = {
   ids(): {
-    id: Varb<"id", "ID", {}>;
+    idFormula: Varb<"idFormula", "ID", {}>;
     baseId: Varb<"baseId", "Base ID", {}>;
   } {
     return {
-      id: vS.id(),
+      idFormula: vS.idFormula(),
       baseId: vS.baseId(),
     };
   },

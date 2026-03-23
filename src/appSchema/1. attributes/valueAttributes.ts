@@ -16,7 +16,7 @@ type ValueAttributesBase = Record<string, ValueSchema>;
 export const allValueAttributes = makeSchemaStructure(
   {} as ValueAttributesBase,
   {
-    id: va({
+    idFormula: va({
       type: "" as string,
       makeDefault: () => "shouldNotHappen",
       defaultValidate: valS.validate.string,
@@ -77,7 +77,7 @@ type ValueParamsDict = MakeSchemaDict<
     [
       {
         linkedId: LinkedIdParams;
-        id: {};
+        idFormula: {};
         baseId: {};
         string: {};
         number: {};

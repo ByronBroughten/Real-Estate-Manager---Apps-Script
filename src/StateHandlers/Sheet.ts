@@ -91,7 +91,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     // const headerOrder = [...schema.varbNames].sort(
     //   (a, b) => headerIndices[a] - headerIndices[b]
     // );
-    const idIndexBase1 = headerIndices.id;
+    const idIndexBase1 = headerIndices.idFormula;
 
     let bodyRowOrder = [];
     const numRows = lastRowIdx - topBodyRowIdxBase1 + 1;
@@ -306,7 +306,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.state.bodyRowOrder.push(rowId);
     this.addChangeToSave(rowId, { action: "add" });
     const row = this.row(rowId);
-    row.setValue("id", fullIdFormula);
+    row.setValue("idFormula", fullIdFormula);
     row.setValue("baseId", baseId);
     row.resetToDefault();
     return rowId;
