@@ -3,10 +3,15 @@ import { Obj, type StrictOmit } from "../../utils/Obj";
 
 import type {
   AllSectionAttributes,
+  GroupSectionName,
   SectionAttributes,
   SectionName,
+  SnGroupName,
 } from "../1. attributes/sectionAttributes";
-import { allSectionAttributes } from "../1. attributes/sectionAttributes";
+import {
+  allSectionAttributes,
+  isInSnGroup,
+} from "../1. attributes/sectionAttributes";
 import {
   allValueAttributes,
   type AllValueAttributes,
@@ -49,6 +54,12 @@ export class SectionsSchema {
     varbName: VN,
   ): VarbSchema<SN, VN> {
     return new VarbSchema(sectionName, varbName);
+  }
+  isInSnGroup<GN extends SnGroupName>(
+    groupName: GN,
+    sectionName: string,
+  ): sectionName is GroupSectionName<GN> {
+    return isInSnGroup(groupName, sectionName);
   }
 }
 

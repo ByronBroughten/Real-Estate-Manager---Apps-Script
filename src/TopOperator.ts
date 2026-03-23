@@ -1,4 +1,4 @@
-import type { GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
+import { type GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
 import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
 import { ChargeMgmt } from "./StateHandlers/ChargeMgmt";
 import { ExpenseMgmt } from "./StateHandlers/ExpenseMgmt";
@@ -6,6 +6,7 @@ import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
 import { LeaseMgmt } from "./StateHandlers/LeaseMgmt";
 import { LedgerMgmt } from "./StateHandlers/LedgerMgmt";
 import { PaymentMgmt } from "./StateHandlers/PaymentMgmt";
+import type { Sheet } from "./StateHandlers/Sheet";
 import { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { SubsidyMgmt } from "./StateHandlers/SubsidyMgmt";
 
@@ -46,6 +47,62 @@ export class ApiOperator extends OperatorBase {
 
   test() {
     return "test";
+  }
+  onTrueValueEntered(e: GoogleAppsScript.Events.SheetsOnEdit) {
+    const sheetId = e.range.getSheet().getSheetId();
+    const schema = this.schema;
+
+    const { sectionName } = schema.sectionBySheetId(sheetId);
+    if (!schema.isInSnGroup("api", sectionName)) {
+      return;
+    }
+
+    const sheet = this.sheet(sectionName);
+    const colIdxBase1 = e.range.getColumn();
+    const rowIdxBase1 = e.range.getRow();
+    if (!sheet.isApiEnterTriggered({ colIdxBase1, rowIdxBase1 })) {
+      return;
+    }
+
+    this.tryApiCall(sheet);
+  }
+  private tryApiCall(apiSheet: Sheet<GroupSectionName<"api">>) {
+    this.apiCallPrep(apiSheet);
+    try {
+      this.doApiCall(apiSheet);
+      this.resetApi(apiSheet);
+    } catch (e) {
+      this.handleApiCallError(apiSheet, e as Error);
+    }
+  }
+  private apiCallPrep(apiSheet: Sheet<GroupSectionName<"api">>) {
+    const apiTopRow = apiSheet.topBodyRow;
+    apiTopRow.setValue("enterStatus", "Processing...");
+    this.batchUpdateRanges();
+  }
+  private doApiCall(apiSheet: Sheet<GroupSectionName<"api">>) {
+    const apiTopRow = apiSheet.topBodyRow;
+    const { sectionName } = apiSheet;
+    const apiValues = apiTopRow.validateValues();
+    this.apiFunctions[sectionName](
+      apiValues as SectionValues<typeof sectionName> as any,
+    );
+  }
+  private resetApi(apiSheet: Sheet<GroupSectionName<"api">>) {
+    apiSheet.DELETE_ALL_BODY_ROWS();
+    apiSheet.addRowDefault();
+    this.batchUpdateRanges();
+  }
+  private handleApiCallError(
+    apiSheet: Sheet<GroupSectionName<"api">>,
+    error: Error,
+  ) {
+    console.error(error);
+    apiSheet.topBodyRow.setValue(
+      "enterStatus",
+      "Error: " + (error as Error).message,
+    );
+    this.ss.batchUpdateRanges();
   }
   static init(): ApiOperator {
     const ss = Spreadsheet.init();

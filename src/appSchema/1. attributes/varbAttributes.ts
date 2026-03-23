@@ -211,6 +211,7 @@ export const allVarbAttributes = makeSchemaStructure(
         },
       ),
       enter: vS.gen("boolean", "Enter"),
+      enterStatus: vS.gen("string", "Enter status"),
       dateLastRan: vS.gen("date", "Date last ran"),
       hhIdLastRan: vS.linkedIdNext("household", {
         required: false,
@@ -409,6 +410,7 @@ export const allVarbAttributes = makeSchemaStructure(
         required: false,
       }),
       enter: vS.gen("boolean", "Enter"),
+      enterStatus: vS.gen("string", "Enter status"),
     },
     addHhPaymentOnetime: {
       ...vsS.ids(),
@@ -494,6 +496,7 @@ export const allVarbAttributes = makeSchemaStructure(
       ),
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
+      enterStatus: vS.gen("string", "Enter status"),
     },
     addHhChargeOnetime: {
       ...vsS.ids(),
@@ -531,6 +534,7 @@ export const allVarbAttributes = makeSchemaStructure(
       ),
       notes: vS.gen("string", "Notes"),
       enter: vS.gen("boolean", "Enter"),
+      enterStatus: vS.gen("string", "Enter status"),
     },
     hhLease: {
       householdName: vS.gen("hhNameFromId", "Household name"),
