@@ -100,9 +100,9 @@ export class SectionSchema<SN extends SectionName> {
   get varbNames(): VarbName<SN>[] {
     return Obj.keys(this.allVarbAttributes[this.sectionName]);
   }
-  makeDefaultValues(): StrictOmit<SectionValues<SN>, "id"> {
+  makeDefaultValues(): StrictOmit<SectionValues<SN>, "idFormula" | "baseId"> {
     return this.varbNames.reduce((values, varbName) => {
-      if (["id", "baseId"].includes(varbName as string)) {
+      if (["idFormula", "baseId"].includes(varbName as string)) {
         return values;
       } else {
         values[varbName] = this.varb(
