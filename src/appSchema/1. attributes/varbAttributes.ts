@@ -170,7 +170,7 @@ const vsS = {
     baseId: Varb<"baseId", "Base ID", {}>;
   } {
     return {
-      ...vsS.ids(),
+      id: vS.id(),
       baseId: vS.baseId(),
     };
   },
