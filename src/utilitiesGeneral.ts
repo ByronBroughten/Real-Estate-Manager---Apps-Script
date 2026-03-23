@@ -30,7 +30,7 @@ const _idUtils = {
     return result;
   },
   makeFormula(prepend: string): string {
-    return `=MAKE_ID(${prepend}, SR("Base ID"))`;
+    return `=MAKE_ID("${prepend}", SR("Base ID"))`;
   },
 };
 
