@@ -83,6 +83,8 @@ const dropdownOptions = enforceUnionValues({
     "Cash ledger",
     "Text message",
     "Biller website",
+    "Email",
+    "Unknown",
   ],
   taxAdjust: [
     "Minus primary space",
