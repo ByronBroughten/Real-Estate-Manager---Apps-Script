@@ -84,6 +84,8 @@ const dropdownOptions = enforceUnionValues({
     "Text message",
     "Biller website",
     "Email",
+    "Cash App",
+    "Venmo",
     "Unknown",
   ],
   taxAdjust: [
