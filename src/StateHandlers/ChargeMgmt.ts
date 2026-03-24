@@ -30,7 +30,7 @@ export class ChargeMgmt extends OperatorBase {
   addHhChargeOnetime(values: SectionValues<"addHhChargeOnetime">) {
     const relevant = Obj.strictOmit(
       values,
-      "id",
+      "idFormula",
       "baseId",
       "enter",
       "enterStatus",
