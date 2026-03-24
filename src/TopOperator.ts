@@ -91,7 +91,7 @@ export class ApiOperator extends OperatorBase {
   private resetApi(apiSheet: Sheet<GroupSectionName<"api">>) {
     apiSheet.DELETE_ALL_BODY_ROWS();
     apiSheet.addRowDefault();
-    apiSheet.topBodyRow.setValue("baseId", "=ROW()");
+    apiSheet.topBodyRow.setValue("baseId", "=TEXT(ROW(), 0)");
     this.batchUpdateRanges();
   }
   private handleApiCallError(
