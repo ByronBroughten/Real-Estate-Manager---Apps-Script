@@ -77,7 +77,13 @@ const dropdownOptions = enforceUnionValues({
     "Other",
     "Principal",
   ],
-  receiptFormat: ["Electronic", "Physical", "Cash ledger", "Text message"],
+  receiptFormat: [
+    "Electronic",
+    "Physical",
+    "Cash ledger",
+    "Text message",
+    "Biller website",
+  ],
   taxAdjust: [
     "Minus primary space",
     "Primary residence",
