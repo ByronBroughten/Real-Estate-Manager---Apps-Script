@@ -151,8 +151,8 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
   get isEquationLiteral(): boolean {
     const valueAttributes =
       this.allValueAttributes[this.valueName as keyof AllValueAttributes];
-    const defaultValue = valueAttributes.makeDefault();
-    if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
+    const valueType = valueAttributes.type;
+    if (typeof valueType === "string" && valueType.startsWith("=")) {
       return true;
     } else {
       return false;

@@ -36,6 +36,9 @@ type RowChangeProps<SN extends SectionName> =
 
 export type SheetOptions = { isAddOnly?: boolean };
 export class Sheet<SN extends SectionName> extends SheetBase<SN> {
+  get secondBodyRowIdxBase1() {
+    return this.topBodyRowIdxBase1 + 1;
+  }
   static init<SN extends SectionName>(
     sectionName: SN,
     spreadsheetProps: SpreadsheetProps,
@@ -206,7 +209,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     }
   }
   isApiEnterTriggered(e: { colIdxBase1: number; rowIdxBase1: number }) {
-    const api = this.validateThis("api");
+    const api = this.validateThis("aggregateApi");
     const header = api.headerByColIdxBase1(e.colIdxBase1);
     const isTopBodyRow = e.rowIdxBase1 === api.topBodyRowIdxBase1;
     const isEnter = header.slice(0, 5) === "Enter";
@@ -223,6 +226,19 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       );
       this.state.bodyRowOrder = [];
       this.state.bodyRows = {};
+    }
+  }
+  DELETE_ALL_BODY_ROWS_BUT_TOP() {
+    if (this.state.bodyRowOrder.length > 1) {
+      this.gSheet().deleteRows(
+        this.topBodyRowIdxBase1 + 1,
+        this.state.bodyRowOrder.length - 1,
+      );
+      const topRowId = this.state.bodyRowOrder[0];
+      this.state.bodyRowOrder = [topRowId];
+      this.state.bodyRows = {
+        [topRowId]: this.state.bodyRows[topRowId],
+      } as Rows<SN>;
     }
   }
   addChangeToSave(rowId: string, rowChange: RowChangeProps<SN>) {
@@ -288,6 +304,9 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   get topBodyRow() {
     return this.row(this.state.bodyRowOrder[0]);
+  }
+  get secondBodyRow() {
+    return this.row(this.state.bodyRowOrder[1]);
   }
   topBodyRowValue<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     return this.topBodyRow.value(varbName);

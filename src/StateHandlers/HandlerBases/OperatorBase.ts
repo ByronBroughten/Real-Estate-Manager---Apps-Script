@@ -9,7 +9,7 @@ export class OperatorBase {
     this.ss = ss;
   }
   get schema(): SectionsSchema {
-    return this.ss.sectionsSchema;
+    return this.ss.schema;
   }
   sheet<SN extends SectionName>(sectionName: SN): Sheet<SN> {
     return this.ss.sheet(sectionName);

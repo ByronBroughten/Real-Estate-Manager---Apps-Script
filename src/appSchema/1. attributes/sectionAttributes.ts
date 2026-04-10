@@ -66,7 +66,7 @@ export type SectionAttributes<SN extends SectionNameSimple> =
 export type SectionName<S extends SectionNameSimple = SectionNameSimple> = S;
 
 const sectionNameGroups = {
-  api: Arr.extractStrict(sectionNames, [
+  aggregateApi: Arr.extractStrict(sectionNames, [
     "addHhChargeOnetime",
     "addHhPaymentOnetime",
     "buildHhLedger",

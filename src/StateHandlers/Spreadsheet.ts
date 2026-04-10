@@ -29,6 +29,9 @@ export class Spreadsheet extends SpreadsheetBase {
   get state(): SpreadsheetState {
     return this.spreadsheetState;
   }
+  get schema(): SectionsSchema {
+    return this.sectionsSchema;
+  }
   get spreadsheetId(): string {
     return this.gss.getId();
   }
