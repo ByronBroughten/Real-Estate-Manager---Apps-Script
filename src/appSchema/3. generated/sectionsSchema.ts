@@ -34,6 +34,9 @@ import {
 export class SectionsSchema {
   readonly headerRowIdxBase1 = 2; // base 1
   readonly topBodyRowIdxBase1 = 3; // base 1
+  get secondBodyRownIdxBase1() {
+    return this.topBodyRowIdxBase1 + 1;
+  }
   private allSectionAttributes: AllSectionAttributes = allSectionAttributes;
   constructor() {}
   section<SN extends SectionName>(sectionName: SN): SectionSchema<SN> {
@@ -144,6 +147,16 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
       SN,
       VN
     >;
+  }
+  get isEquationLiteral(): boolean {
+    const valueAttributes =
+      this.allValueAttributes[this.valueName as keyof AllValueAttributes];
+    const defaultValue = valueAttributes.makeDefault();
+    if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
+      return true;
+    } else {
+      return false;
+    }
   }
   get valueAttributes(): VarbValueAttributes<SN, VN> {
     return this.allValueAttributes[

@@ -160,11 +160,6 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       varbNames: this.varbNames,
     });
   }
-  markForDelete() {
-    this.sheet.addChangeToSave(this.id, {
-      action: "delete",
-    });
-  }
   setValue<VN extends VarbName<SN>, VL extends VarbValue<SN, VN>>(
     varbName: VN,
     value: VL,
@@ -175,6 +170,11 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
       varbNames: [varbName],
     });
     return this;
+  }
+  markForDelete() {
+    this.sheet.addChangeToSave(this.id, {
+      action: "delete",
+    });
   }
   setValueType<VN extends VarbName<SN>>(
     varbName: VN,

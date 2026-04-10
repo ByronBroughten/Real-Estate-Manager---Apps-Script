@@ -188,7 +188,7 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     this.sortAscWithoutAddingChanges(varbName);
     this.addAllVarbsAsChanges();
   }
-  sortAscWithoutAddingChanges(varbName: VarbName<SN>): void {
+  private sortAscWithoutAddingChanges(varbName: VarbName<SN>): void {
     this.state.bodyRowOrder.sort((a, b) => {
       return Arr.compareForSort(
         this.row(a).value(varbName),
@@ -233,7 +233,10 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
 
     if (rowChange.action === "update") {
       for (const varbName of rowChange.varbNames) {
-        changes.update.add(varbName);
+        const varbSchema = this.schema.varb(varbName);
+        if (!varbSchema.isEquationLiteral) {
+          changes.update.add(varbName);
+        }
       }
     } else if (rowChange.action === "add") {
       changes.add = true;
