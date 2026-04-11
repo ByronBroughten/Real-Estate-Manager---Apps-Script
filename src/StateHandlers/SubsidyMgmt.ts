@@ -1,5 +1,6 @@
 import { dateU } from "../DateU";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
+import type { Row } from "./Row";
 import type { Sheet } from "./Sheet";
 
 interface AddSubsidyContractProps {
@@ -31,16 +32,40 @@ export class SubsidyMgmt extends OperatorBase {
     subsidyAgreement.orderedRows.forEach((sa) => {
       const dateNext = sa.value("rentPortionDateNext");
       if (dateU.isDateAndTodayOrPassed(dateNext)) {
+        const contractLease = this.getActiveLeaseForContract(sa, dateNext);
         this.addSubsidyContract({
           subsidyAgreementId: sa.id,
           startDate: dateNext,
           rentChargeBaseMonthly: sa.valueNumber("rentPortionMonthlyNext"),
-          unitId: sa.value("unitId"),
+          unitId: contractLease.value("unitId"),
           endPriorActiveContracts: "yes",
         });
         sa.setValue("rentPortionDateNext", "");
       }
     });
+  }
+  private getActiveLeaseForContract(
+    sa: Row<"subsidyAgreement">,
+    dateNext: Date,
+  ): Row<"hhLease"> {
+    const leaseSheet = this.sheet("hhLease");
+    const hhLeases = leaseSheet.rowsFiltered({
+      householdId: sa.value("householdId"),
+    });
+    const activeLeases = hhLeases.filter((lease) => {
+      return lease.valueDate("startDate") <= dateNext;
+    });
+    const ascendingLeases = activeLeases.sort(
+      (a, b) =>
+        a.valueDate("startDate").getTime() - b.valueDate("startDate").getTime(),
+    );
+
+    if (ascendingLeases.length === 0) {
+      throw new Error(
+        `No active leases found for household ${sa.value("householdId")} when trying to update subsidy agreement ${sa.id}`,
+      );
+    }
+    return ascendingLeases[0];
   }
   addSubsidyContract({
     subsidyAgreementId,

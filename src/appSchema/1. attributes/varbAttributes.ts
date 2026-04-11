@@ -248,16 +248,6 @@ export const allVarbAttributes = makeSchemaStructure(
         sectionName: "household",
         onDelete: "keep",
       }),
-      unitId: vS.linkedId(
-        "Unit ID",
-        {
-          sectionName: "unit",
-          onDelete: "keep",
-        },
-        {
-          makeDefault: allValueAttributes.unitNameFromHouseholdIdOp.makeDefault,
-        },
-      ),
       paymentGroupId: vS.linkedId("Payment group ID", {
         sectionName: "paymentGroup",
         onDelete: "keep",
