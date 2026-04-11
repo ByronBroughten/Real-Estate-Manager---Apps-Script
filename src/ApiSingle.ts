@@ -157,5 +157,6 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
       "Error: " + (error as Error).message,
     );
     this.batchUpdateRanges();
+    throw error;
   }
 }
