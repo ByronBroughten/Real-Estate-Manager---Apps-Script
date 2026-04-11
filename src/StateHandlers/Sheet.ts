@@ -214,19 +214,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       this.state.bodyRows = {};
     }
   }
-  DELETE_ALL_BODY_ROWS_BUT_TOP() {
-    if (this.state.bodyRowOrder.length > 1) {
-      this.gSheet().deleteRows(
-        this.topBodyRowIdxBase1 + 1,
-        this.state.bodyRowOrder.length - 1,
-      );
-      const topRowId = this.state.bodyRowOrder[0];
-      this.state.bodyRowOrder = [topRowId];
-      this.state.bodyRows = {
-        [topRowId]: this.state.bodyRows[topRowId],
-      } as Rows<SN>;
-    }
-  }
   addChangeToSave(rowId: string, rowChange: RowChangeProps<SN>) {
     if (!this.changesToSave[rowId]) {
       this.changesToSave[rowId] = this.createRowChanges();

@@ -66,7 +66,7 @@ export class ApiAggregate<
     );
   }
   private resetApi() {
-    this.apiSheet.DELETE_ALL_BODY_ROWS_BUT_TOP();
+    this.apiSheet.DELETE_ALL_BODY_ROWS();
     this.apiSheet.addRowDefault();
     this.batchUpdateRanges();
   }
