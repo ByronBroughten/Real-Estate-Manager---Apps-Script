@@ -67,7 +67,8 @@ export type AllValueAttributes = typeof allValueAttributes;
 
 type ValueNameSimple = keyof AllValueAttributes;
 export type ValueName<V extends ValueNameSimple = ValueNameSimple> = V;
-export type ValueAttributes<VN extends ValueName> = AllValueAttributes[VN];
+export type ValueAttributes<VN extends ValueName = ValueName> =
+  AllValueAttributes[VN];
 export type Value<VN extends ValueName = ValueName> =
   ValueAttributes<VN>["type"];
 

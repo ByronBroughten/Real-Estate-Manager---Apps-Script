@@ -146,6 +146,11 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
   private get attributes(): VarbAttributes<SN, VN> {
     return this.allVarbAttributes[this.sectionName][this.varbName];
   }
+  get valueAttributes(): VarbValueAttributes<SN, VN> {
+    return this.allValueAttributes[
+      this.valueName as ValueName
+    ] as VarbValueAttributes<SN, VN>;
+  }
   validate(value: unknown): VarbValue<SN, VN> {
     return (this.attributes as BaseVarbAttributes).validate(value) as VarbValue<
       SN,
@@ -162,19 +167,13 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
     >;
   }
   get isEquationLiteral(): boolean {
-    const valueAttributes =
-      this.allValueAttributes[this.valueName as keyof AllValueAttributes];
+    const valueAttributes = this.valueAttributes;
     const defaultValue = valueAttributes.makeDefault();
     if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
       return true;
     } else {
       return false;
     }
-  }
-  get valueAttributes(): VarbValueAttributes<SN, VN> {
-    return this.allValueAttributes[
-      this.valueName as ValueName
-    ] as VarbValueAttributes<SN, VN>;
   }
   makeDefaultValue(): VarbValue<SN, VN> {
     if (this.varbName === "id") {
