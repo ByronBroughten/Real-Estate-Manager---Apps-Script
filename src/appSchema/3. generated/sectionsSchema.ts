@@ -144,7 +144,19 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
     this.varbName = varbName;
   }
   private get attributes(): VarbAttributes<SN, VN> {
-    return this.allVarbAttributes[this.sectionName][this.varbName];
+    const attributes = this.allVarbAttributes[this.sectionName][this.varbName];
+    if (!attributes) {
+      throw new Error(
+        `Varb "${this.varbName as string}" does not exist in section "${this.sectionName}"`,
+      );
+    }
+    return attributes;
+  }
+  get valueName(): VarbValueName<SN, VN> {
+    return (this.attributes as BaseVarbAttributes).valueName as VarbValueName<
+      SN,
+      VN
+    >;
   }
   get valueAttributes(): VarbValueAttributes<SN, VN> {
     return this.allValueAttributes[
@@ -159,12 +171,6 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
   }
   get displayName(): string {
     return (this.attributes as BaseVarbAttributes).displayName;
-  }
-  get valueName(): VarbValueName<SN, VN> {
-    return (this.attributes as BaseVarbAttributes).valueName as VarbValueName<
-      SN,
-      VN
-    >;
   }
   get isEquationLiteral(): boolean {
     const valueAttributes = this.valueAttributes;
