@@ -243,6 +243,11 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     if (rowChange.action === "update") {
       for (const varbName of rowChange.varbNames) {
         const varbSchema = this.schema.varb(varbName);
+        if (!varbSchema) {
+          throw new Error(
+            `Variable "${varbName as string}" does not exist in section "${this.sectionName}"`,
+          );
+        }
         if (!varbSchema.isEquationLiteral) {
           changes.update.add(varbName);
         }
