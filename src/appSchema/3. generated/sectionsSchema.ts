@@ -172,15 +172,6 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
   get displayName(): string {
     return (this.attributes as BaseVarbAttributes).displayName;
   }
-  get isEquationLiteral(): boolean {
-    const valueAttributes = this.valueAttributes;
-    const defaultValue = valueAttributes.makeDefault();
-    if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
-      return true;
-    } else {
-      return false;
-    }
-  }
   makeDefaultValue(): VarbValue<SN, VN> {
     if (this.varbName === "id") {
       throw new Error("Cannot make default value for id varb");
@@ -189,5 +180,13 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
       SN,
       VN
     >;
+  }
+  get isEquationLiteral(): boolean {
+    const defaultValue = this.makeDefaultValue();
+    if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
