@@ -89,11 +89,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       );
     }
     const headerIndices = this.getVarbNameIndicesBase1(schema, headerValues);
-    const indicesBase1ToHeader = Obj.invert(headerIndices);
-
-    // const headerOrder = [...schema.varbNames].sort(
-    //   (a, b) => headerIndices[a] - headerIndices[b]
-    // );
     const idIndexBase1 = headerIndices.idFormula;
 
     let bodyRowOrder = [];

@@ -11,6 +11,7 @@ import type {
 } from "../1. attributes/sectionAttributes";
 import {
   allSectionAttributes,
+  headerRowIdxBase1,
   isInSnGroup,
 } from "../1. attributes/sectionAttributes";
 import {
@@ -40,8 +41,8 @@ export type VarbNameMutable<SN extends SectionName> = Exclude<
 >;
 
 export class SectionsSchema {
-  readonly headerRowIdxBase1 = 2; // base 1
-  readonly topBodyRowIdxBase1 = 3; // base 1
+  readonly headerRowIdxBase1 = headerRowIdxBase1;
+  readonly topBodyRowIdxBase1 = 3;
   get secondBodyRownIdxBase1() {
     return this.topBodyRowIdxBase1 + 1;
   }

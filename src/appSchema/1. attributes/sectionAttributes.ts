@@ -12,13 +12,17 @@ type AllSectionAttributesBase = Record<string, SectionAttributesBase>;
 type Section<IP extends string, SI extends number> = {
   idPrepend: IP;
   sheetId: SI;
+  topBodyRowIdxBase1: number;
 };
 
+export const headerRowIdxBase1 = 2;
+const defaultTopBodyRowIdxBase1 = headerRowIdxBase1 + 1;
 function makeAttributes<IP extends string, SI extends number>(
   idPrepend: IP,
   sheetId: SI,
+  topBodyRowIdxBase1: number = defaultTopBodyRowIdxBase1,
 ): Section<IP, SI> {
-  return { idPrepend, sheetId } as Section<IP, SI>;
+  return { idPrepend, sheetId, topBodyRowIdxBase1 } as Section<IP, SI>;
 }
 
 const ma = makeAttributes;
@@ -27,20 +31,19 @@ export const allSectionAttributes = makeSchemaStructure(
   {} as AllSectionAttributesBase,
   {
     test: ma("tst", 2089200354),
-    api: ma("api", 290870631),
+    api: ma("api", 290870631, defaultTopBodyRowIdxBase1 + 1),
     hhLedger: ma("hl", 731807482),
-    buildHhLedger: ma("bhl", 706564734),
     hhCharge: ma("hhc", 825934775),
     hhLease: ma("hlco", 445175805),
-    addHhChargeOnetime: ma("ahhc", 1202471195),
+    addHhChargeOnetime: ma("ahhc", 1202471195, defaultTopBodyRowIdxBase1 + 1),
     hhPayment: ma("hhp", 1544131100),
     hhPaymentAllocation: ma("hpa", 348639454),
-    addHhPaymentOnetime: ma("ahhp", 1485718763),
+    addHhPaymentOnetime: ma("ahhp", 1485718763, defaultTopBodyRowIdxBase1 + 1),
     paymentGroup: ma("pg", 939656506),
     unit: ma("un", 321313883),
     household: ma("hh", 0),
     expense: ma("ex", 449009036),
-    addExpenses: ma("aex", 1964495656),
+    addExpenses: ma("aex", 1964495656, defaultTopBodyRowIdxBase1 + 1),
     subsidyProgram: ma("sp", 332858329),
     subsidyAgreement: ma("sa", 1155067179),
     subsidyContract: ma("sc", 194710324),

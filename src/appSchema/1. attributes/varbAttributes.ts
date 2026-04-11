@@ -210,45 +210,6 @@ export const allVarbAttributes = makeSchemaStructure(
       BHLenter: vS.gen("boolean", "BHL enter"),
       BHLenterStatus: vS.gen("string", "BHL enter status"),
     },
-    buildHhLedger: {
-      ...vsS.ids(),
-      householdName: vS.gen("string", "Household name"),
-      householdId: vS.linkedId(
-        "Household ID",
-        {
-          sectionName: "household",
-          onDelete: "setEmpty",
-        },
-        {
-          makeDefault: allValueAttributes.hhIdFromNameOp.makeDefault,
-        },
-      ),
-      portion: vS.gen("rentPortionName", "Portion"),
-      subsidyAgreementName: vS.gen("string", "Subsidy agreement name"),
-      subsidyAgreementId: vS.linkedId(
-        "Subsidy agreement ID",
-        {
-          sectionName: "subsidyAgreement",
-          onDelete: "setEmpty",
-        },
-        {
-          makeDefault:
-            allValueAttributes.subsidyAgreementIdFromNameOp.makeDefault,
-        },
-      ),
-      enter: vS.gen("boolean", "Enter"),
-      enterStatus: vS.gen("string", "Enter status"),
-      dateLastRan: vS.gen("date", "Date last ran"),
-      hhIdLastRan: vS.linkedIdNext("household", {
-        required: false,
-        displayName: "Household ID last ran",
-      }),
-      unitIdLastRan: vS.linkedIdNext("unit", {
-        required: false,
-        displayName: "Unit ID last ran",
-        default: "unitIdFromBHLhhLastRanOp",
-      }),
-    },
     hhLedger: {
       ...vsS.ids(),
       date: vS.date(),
