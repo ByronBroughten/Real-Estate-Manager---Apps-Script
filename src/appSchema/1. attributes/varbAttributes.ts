@@ -196,7 +196,7 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       BHLhouseholdName: vS.gen("string", "BHL household name"),
       BHLportion: vS.gen("rentPortionName", "BHL portion"),
-      BHLhouseholdId: vS.gen("hhIdFromNameOp", "BHL household ID from name"),
+      BHLhouseholdId: vS.gen("hhIdFromNameOp", "BHL household ID"),
       BHLsubsidyAgreementName: vS.gen("string", "BHL subsidy agreement name"),
       BHLsubsidyAgreementId: vS.gen(
         "subsidyAgreementIdFromNameOp",
