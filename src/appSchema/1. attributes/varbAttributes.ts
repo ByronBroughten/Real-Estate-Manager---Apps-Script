@@ -177,12 +177,12 @@ export const allVarbAttributes = makeSchemaStructure(
     api: {
       ...vsS.ids(),
       // Update Monthly Charges
-      UMCdateLastRan: vS.gen("date", "UMC date last ran"),
-      UMCstartMonthDate: vS.gen("date", "UMC start month date"),
-      UMChouseholdOrAll: vS.gen("string", "UMC household or all"),
-      UMChouseholdIdorAll: vS.gen("string", "UMC household ID or all"),
-      UMCenter: vS.gen("boolean", "UMC enter"),
-      UMCenterStatus: vS.gen("string", "UMC enter status"),
+      UPCdateLastRan: vS.gen("date", "UPC date last ran"),
+      UPCstartMonthDate: vS.gen("date", "UPC start month date"),
+      UPChouseholdOrAll: vS.gen("string", "UPC household or all"),
+      UPChouseholdIdorAll: vS.gen("string", "UPC household ID or all"),
+      UPCenter: vS.gen("boolean", "UPC enter"),
+      UPCenterStatus: vS.gen("string", "UPC enter status"),
       // Build Household Ledger
       BHLdateLastRan: vS.gen("date", "BHL date last ran"),
       BHLhhIdLastRan: vS.linkedIdNext("household", {

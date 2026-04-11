@@ -28,7 +28,7 @@ function validatePrefixToFnName<T extends ApiPrefixToFnNameBase>(obj: T): T {
 }
 const apiPrefixToFnName = validatePrefixToFnName({
   BHL: "buildHhLedger",
-  UMC: "updatePeriodicCharges",
+  UPC: "updatePeriodicCharges",
 } as const);
 
 type ApiPrefixToFnName = typeof apiPrefixToFnName;
