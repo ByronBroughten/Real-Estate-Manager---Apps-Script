@@ -28,7 +28,7 @@ export class TopOperator extends OperatorBase {
   test() {
     return "test";
   }
-  private standardizeEven(
+  private standardizeEvent(
     e: GoogleAppsScript.Events.SheetsOnEdit,
   ): StandardEvent {
     const colIdxBase1 = e.range.getColumn();
@@ -41,16 +41,16 @@ export class TopOperator extends OperatorBase {
     const schema = this.schema;
     const { sectionName } = schema.sectionBySheetId(sheetId);
 
-    if (schema.isInSnGroup("aggregateApi", sectionName)) {
+    if (sectionName === "api") {
+      const apiSingle = new ApiSingle(this.ss, this.standardizeEvent(e));
+      apiSingle.handleEvent();
+    } else if (schema.isInSnGroup("aggregateApi", sectionName)) {
       const apiAggregate = new ApiAggregate(
         this.ss,
         sectionName,
-        this.standardizeEven(e),
+        this.standardizeEvent(e),
       );
       apiAggregate.handleEvent();
-    } else if (sectionName === "api") {
-      const apiSingle = new ApiSingle(this.ss, this.standardizeEven(e));
-      apiSingle.handleEvent();
     } else {
       return;
     }

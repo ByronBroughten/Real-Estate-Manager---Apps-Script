@@ -8,15 +8,15 @@ function triggerFirstOfMonth() {
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (e.value === "TRUE") {
-    const api = TopOperator.init();
-    api.onTrueValueEntered(e);
+    const top = TopOperator.init();
+    top.onTrueValueEntered(e);
   }
 }
 
 function resetTriggers(doResetTriggers: boolean = true) {
   if (doResetTriggers) {
-    const api = TopOperator.init();
-    api.test();
+    const top = TopOperator.init();
+    top.test();
     asU.trigger.deleteAll();
     asU.trigger.addFirstOfMonth("triggerFirstOfMonth");
     asU.trigger.addOnEdit("triggerOnEdit");
@@ -26,20 +26,20 @@ function resetTriggers(doResetTriggers: boolean = true) {
 resetTriggers(false);
 
 function testUpdateLeaseOngoingCharges() {
-  const api = TopOperator.init();
-  api.leaseMgmt.doPeriodicLeaseUpdates();
-  api.ss.batchUpdateRanges();
+  const top = TopOperator.init();
+  top.leaseMgmt.doPeriodicLeaseUpdates();
+  top.ss.batchUpdateRanges();
 }
 
 function testUpdateSubsidyOngoingCharges() {
-  const api = TopOperator.init();
-  api.subsidyMgmt.doPeriodicSubsidyUpdates();
-  api.ss.batchUpdateRanges();
+  const top = TopOperator.init();
+  top.subsidyMgmt.doPeriodicSubsidyUpdates();
+  top.ss.batchUpdateRanges();
 }
 
 function testBuildOutMonthlyChargesAndPayments() {
-  const api = TopOperator.init();
-  // const cfp = api.buildOutChargesForMonth();
-  // api.buildOutPaymentsFromCharges(cfp);
-  api.ss.batchUpdateRanges();
+  const top = TopOperator.init();
+  // const cfp = top.buildOutChargesForMonth();
+  // top.buildOutPaymentsFromCharges(cfp);
+  top.ss.batchUpdateRanges();
 }
