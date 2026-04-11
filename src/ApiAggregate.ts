@@ -38,10 +38,9 @@ export class ApiAggregate<
   private isApiTriggered() {
     const api = this.apiSheet;
     const header = api.headerByColIdxBase1(this.event.colIdxBase1);
-    const isSecondBodyRow =
-      this.event.rowIdxBase1 === api.secondBodyRowIdxBase1;
+    const isTopBodyRow = this.event.rowIdxBase1 === api.topBodyRowIdxBase1;
     const isEnter = header === "Enter";
-    return isSecondBodyRow && isEnter;
+    return isTopBodyRow && isEnter;
   }
 
   private tryCallApi() {
@@ -54,8 +53,8 @@ export class ApiAggregate<
     }
   }
   private prepCallApi() {
-    const firstUnhiddenRow = this.apiSheet.secondBodyRow;
-    firstUnhiddenRow.setValue("enterStatus", "Processing...");
+    const topRow = this.apiSheet.topBodyRow;
+    topRow.setValue("enterStatus", "Processing...");
     this.batchUpdateRanges();
   }
   private callApi() {
@@ -73,10 +72,11 @@ export class ApiAggregate<
   }
   private handleApiCallError(error: Error) {
     console.error(error);
-    this.apiSheet.secondBodyRow.setValue(
+    this.apiSheet.topBodyRow.setValue(
       "enterStatus",
       "Error: " + (error as Error).message,
     );
     this.batchUpdateRanges();
+    throw error;
   }
 }

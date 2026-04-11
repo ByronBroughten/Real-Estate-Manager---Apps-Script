@@ -42,10 +42,6 @@ export type VarbNameMutable<SN extends SectionName> = Exclude<
 
 export class SectionsSchema {
   readonly headerRowIdxBase1 = headerRowIdxBase1;
-  readonly topBodyRowIdxBase1 = 3;
-  get secondBodyRownIdxBase1() {
-    return this.topBodyRowIdxBase1 + 1;
-  }
   private allSectionAttributes: AllSectionAttributes = allSectionAttributes;
   constructor() {}
   section<SN extends SectionName>(sectionName: SN): SectionSchema<SN> {
@@ -87,6 +83,9 @@ export class SectionSchema<SN extends SectionName> {
   }
   get attributes(): SectionAttributes<SN> {
     return this.allSectionAttributes[this.sectionName];
+  }
+  get topBodyRowIdxBase1(): number {
+    return this.attributes.topBodyRowIdxBase1;
   }
   get varbAttributes(): SectionVarbAttributes<SN> {
     return this.allVarbAttributes[this.sectionName];

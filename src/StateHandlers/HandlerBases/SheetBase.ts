@@ -57,4 +57,7 @@ export class SheetBase<SN extends SectionName> extends SpreadsheetBase {
   get sectionSchema(): SectionSchema<SN> {
     return this.sectionsSchema.section(this.sectionName);
   }
+  get topBodyRowIdxBase1(): number {
+    return this.sectionSchema.topBodyRowIdxBase1;
+  }
 }

@@ -31,7 +31,4 @@ export class SpreadsheetBase {
   get headerRowIdxBase1(): number {
     return this.sectionsSchema.headerRowIdxBase1;
   }
-  get topBodyRowIdxBase1(): number {
-    return this.sectionsSchema.topBodyRowIdxBase1;
-  }
 }

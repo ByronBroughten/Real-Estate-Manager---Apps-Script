@@ -36,9 +36,6 @@ type RowChangeProps<SN extends SectionName> =
 
 export type SheetOptions = { isAddOnly?: boolean };
 export class Sheet<SN extends SectionName> extends SheetBase<SN> {
-  get secondBodyRowIdxBase1() {
-    return this.topBodyRowIdxBase1 + 1;
-  }
   static init<SN extends SectionName>(
     sectionName: SN,
     spreadsheetProps: SpreadsheetProps,
@@ -65,7 +62,8 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     props: { isAddOnly?: boolean },
   ): SheetState<SN> {
-    const { headerRowIdxBase1, topBodyRowIdxBase1 } = schema.sections;
+    const { headerRowIdxBase1 } = schema.sections;
+    const { topBodyRowIdxBase1 } = schema.sections.section(sectionName);
 
     const range = sheet.getDataRange();
     const lastColIdx = range.getLastColumn();
@@ -292,9 +290,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
   }
   get topBodyRow() {
     return this.row(this.state.bodyRowOrder[0]);
-  }
-  get secondBodyRow() {
-    return this.row(this.state.bodyRowOrder[1]);
   }
   topBodyRowValue<VN extends VarbName<SN>>(varbName: VN): VarbValue<SN, VN> {
     return this.topBodyRow.value(varbName);
