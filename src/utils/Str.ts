@@ -25,7 +25,7 @@ export const Str = {
     str1: S1,
     str2: S2,
   ): CombineStrings<S1, S2> => {
-    return `${str1} ${str2}` as CombineStrings<S1, S2>;
+    return `${str1}${str2}` as CombineStrings<S1, S2>;
   },
   removeFirstN<T extends string, N extends number>(
     str: T,
