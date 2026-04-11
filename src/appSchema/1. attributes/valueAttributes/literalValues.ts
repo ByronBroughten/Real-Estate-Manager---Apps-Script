@@ -37,6 +37,7 @@ const literalValues = {
   subsidyContractNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyAgreement[Name], subsidyAgreement[ID], "Subsidy agreement ID")`,
   subsidyProgramNameFromIdOp: `=ROW_MATCH_OR_BLANK(subsidyProgram[Name], subsidyProgram[ID], "Subsidy program ID")`,
   petNameFromIdOp: `=ROW_MATCH_OR_BLANK(pet[Name], pet[ID], "Pet ID")`,
+  aggregateApiBaseId: `=TEXT(ROW(), 0)`,
 };
 
 export type LiteralValues = typeof literalValues;

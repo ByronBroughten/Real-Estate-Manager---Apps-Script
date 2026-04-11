@@ -160,6 +160,15 @@ const vS = {
 };
 
 const vsS = {
+  aggregateApiIds(): {
+    idFormula: Varb<"idFormula", "ID", {}>;
+    baseId: Varb<"aggregateApiBaseId", "Base ID", {}>;
+  } {
+    return {
+      idFormula: vS.idFormula(),
+      baseId: vS.gen("aggregateApiBaseId", "Base ID"),
+    };
+  },
   ids(): {
     idFormula: Varb<"idFormula", "ID", {}>;
     baseId: Varb<"baseId", "Base ID", {}>;
@@ -387,7 +396,7 @@ export const allVarbAttributes = makeSchemaStructure(
         default: "hhIdFromToChargeOp",
         required: false,
       }),
-      ...vsS.ids(),
+      ...vsS.aggregateApiIds(),
       propertyId: vS.linkedIdNext("property", {
         default: "propertyIdFromName",
         required: true,
@@ -400,7 +409,7 @@ export const allVarbAttributes = makeSchemaStructure(
       enterStatus: vS.gen("string", "Enter status"),
     },
     addHhPaymentOnetime: {
-      ...vsS.ids(),
+      ...vsS.aggregateApiIds(),
       date: vS.date(),
       // Allocation
       householdName: vS.gen("string", "Household name"),
@@ -486,7 +495,7 @@ export const allVarbAttributes = makeSchemaStructure(
       enterStatus: vS.gen("string", "Enter status"),
     },
     addHhChargeOnetime: {
-      ...vsS.ids(),
+      ...vsS.aggregateApiIds(),
       date: vS.date(),
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
