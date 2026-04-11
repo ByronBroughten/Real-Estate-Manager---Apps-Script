@@ -188,7 +188,7 @@ export const allVarbAttributes = makeSchemaStructure(
     api: {
       ...vsS.ids(),
       // Update leases and subsidy contracts
-      ULSdateLastRan: vS.date(),
+      ULSdateLastRan: vS.gen("date", "ULS date last ran"),
       ULSenter: vS.gen("boolean", "ULS enter"),
       ULSenterStatus: vS.gen("string", "ULS enter status"),
 
