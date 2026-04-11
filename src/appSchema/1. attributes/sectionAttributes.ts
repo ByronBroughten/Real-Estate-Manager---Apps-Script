@@ -31,7 +31,7 @@ export const allSectionAttributes = makeSchemaStructure(
   {} as AllSectionAttributesBase,
   {
     test: ma("tst", 2089200354),
-    api: ma("api", 290870631, defaultTopBodyRowIdxBase1 + 1),
+    api: ma("api", 290870631),
     hhLedger: ma("hl", 731807482),
     hhCharge: ma("hhc", 825934775),
     hhLease: ma("hlco", 445175805),
