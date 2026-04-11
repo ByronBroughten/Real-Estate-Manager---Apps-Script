@@ -196,12 +196,17 @@ export const allVarbAttributes = makeSchemaStructure(
       }),
       BHLhouseholdName: vS.gen("string", "BHL household name"),
       BHLportion: vS.gen("rentPortionName", "BHL portion"),
-      BHLhouseholdId: vS.gen("hhIdFromNameOp", "BHL household ID"),
+      BHLhouseholdId: vS.linkedIdNext("household", {
+        required: false,
+        displayName: "BHL household ID",
+        default: "hhIdFromNameOp",
+      }),
       BHLsubsidyAgreementName: vS.gen("string", "BHL subsidy agreement name"),
-      BHLsubsidyAgreementId: vS.gen(
-        "subsidyAgreementIdFromNameOp",
-        "BHL subsidy agreement ID",
-      ),
+      BHLsubsidyAgreementId: vS.linkedIdNext("subsidyAgreement", {
+        required: false,
+        displayName: "BHL subsidy agreement ID",
+        default: "subsidyAgreementIdFromNameOp",
+      }),
       BHLenter: vS.gen("boolean", "BHL enter"),
       BHLenterStatus: vS.gen("string", "BHL enter status"),
     },
