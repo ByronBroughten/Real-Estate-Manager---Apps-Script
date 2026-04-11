@@ -29,6 +29,7 @@ function validatePrefixToFnName<T extends ApiPrefixToFnNameBase>(obj: T): T {
 const apiPrefixToFnName = validatePrefixToFnName({
   BHL: "buildHhLedger",
   UPC: "updatePeriodicCharges",
+  ULS: "updateLeasesAndSubsidyContracts",
 } as const);
 
 type ApiPrefixToFnName = typeof apiPrefixToFnName;
@@ -59,7 +60,7 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
   private apiFnName: FN;
   readonly apiSheet: Sheet<"api">;
   readonly event: StandardEvent;
-  readonly leaseMgmt = new LeaseMgmt(this.ss);
+
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);
   get apiRow(): Row<"api"> {
     return this.apiSheet.topBodyRow;
@@ -76,6 +77,20 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
     return Obj.keyByValue(apiPrefixToFnName, this.apiFnName);
   }
   private apiFns: ApiFns = {
+    updateLeasesAndSubsidyContracts: (values) => {
+      const leaseMgmt = new LeaseMgmt(this.ss);
+      leaseMgmt.doPeriodicLeaseUpdates();
+
+      const subsidyMgmt = new SubsidyMgmt(this.ss);
+      subsidyMgmt.doPeriodicSubsidyUpdates();
+
+      this.standardCleanup();
+      this.apiRow.setValues({ ULSdateLastRan: new Date() });
+    },
+    updatePeriodicCharges: (values) => {
+      "TODO";
+      this.standardCleanup();
+    },
     buildHhLedger: (values) => {
       new LedgerMgmt(this.ss).buildHhLedger(values);
       this.standardCleanup();
@@ -83,10 +98,6 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
         BHLdateLastRan: new Date(),
         BHLhhIdLastRan: values.householdId,
       });
-    },
-    updatePeriodicCharges: (values) => {
-      "TODO";
-      this.standardCleanup();
     },
   };
 

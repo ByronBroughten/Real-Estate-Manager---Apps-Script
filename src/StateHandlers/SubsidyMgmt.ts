@@ -38,6 +38,7 @@ export class SubsidyMgmt extends OperatorBase {
           unitId: sa.value("unitId"),
           endPriorActiveContracts: "yes",
         });
+        sa.setValue("rentPortionDateNext", "");
       }
     });
   }

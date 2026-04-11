@@ -162,11 +162,13 @@ const vS = {
 const vsS = {
   aggregateApiIds(): {
     idFormula: Varb<"idFormula", "ID", {}>;
-    baseId: Varb<"aggregateApiBaseId", "Base ID", {}>;
+    baseId: Varb<"baseId", "Base ID", {}>;
   } {
     return {
       idFormula: vS.idFormula(),
-      baseId: vS.gen("aggregateApiBaseId", "Base ID"),
+      baseId: vS.gen("baseId", "Base ID", {
+        makeDefault: () => `=TEXT(ROW(), 0)`,
+      }),
     };
   },
   ids(): {
@@ -185,13 +187,19 @@ export const allVarbAttributes = makeSchemaStructure(
   {
     api: {
       ...vsS.ids(),
-      // Update Monthly Charges
+      // Update leases and subsidy contracts
+      ULSdateLastRan: vS.date(),
+      ULSenter: vS.gen("boolean", "ULS enter"),
+      ULSenterStatus: vS.gen("string", "ULS enter status"),
+
+      // Update monthly charges
       UPCdateLastRan: vS.gen("date", "UPC date last ran"),
       UPCstartMonthDate: vS.gen("date", "UPC start month date"),
       UPChouseholdOrAll: vS.gen("string", "UPC household or all"),
       UPChouseholdIdorAll: vS.gen("string", "UPC household ID or all"),
       UPCenter: vS.gen("boolean", "UPC enter"),
       UPCenterStatus: vS.gen("string", "UPC enter status"),
+
       // Build Household Ledger
       BHLdateLastRan: vS.gen("date", "BHL date last ran"),
       BHLhhIdLastRan: vS.linkedIdNext("household", {
