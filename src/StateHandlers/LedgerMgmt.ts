@@ -1,8 +1,6 @@
+import type { ApiFnValues } from "../ApiSingle";
 import type { GroupSectionName } from "../appSchema/1. attributes/sectionAttributes";
-import type {
-  SectionValues,
-  VarbValue,
-} from "../appSchema/1. attributes/varbAttributes";
+import type { VarbValue } from "../appSchema/1. attributes/varbAttributes";
 import { Obj } from "../utils/Obj";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
 import type { Row } from "./Row";
@@ -43,9 +41,8 @@ function rowsOfIdAndPortion<SN extends LedgerInputSn>({
 }
 
 export class LedgerMgmt extends OperatorBase {
-  buildHhLedger(values: SectionValues<"buildHhLedger">): void {
+  buildHhLedger(values: ApiFnValues<"buildHhLedger">): void {
     const hhLedger = this.sheet("hhLedger");
-    const buildApi = this.sheet("buildHhLedger");
     hhLedger.DELETE_ALL_BODY_ROWS();
 
     const idsAndPortion = Obj.strictPick(values, [
@@ -57,10 +54,6 @@ export class LedgerMgmt extends OperatorBase {
     this.addChargesToLedger(idsAndPortion);
     this.addAllocationsToLedger(idsAndPortion);
     hhLedger.sort("date");
-    buildApi.topBodyRow.setValues({
-      dateLastRan: new Date(),
-      hhIdLastRan: values.householdId,
-    });
     this.ss.batchUpdateRanges();
   }
   private addChargesToLedger(idsAndPortion: IdsAndPortion): void {

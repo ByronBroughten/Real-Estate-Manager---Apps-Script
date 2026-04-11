@@ -1,5 +1,6 @@
 import { utils } from "../../utilitiesGeneral";
-import { Obj, type StrictOmit } from "../../utils/Obj";
+import { Arr } from "../../utils/Arr";
+import { Obj } from "../../utils/Obj";
 
 import type {
   AllSectionAttributes,
@@ -30,6 +31,13 @@ import {
   type VarbValueAttributes,
   type VarbValueName,
 } from "../1. attributes/varbAttributes";
+
+const varbNameImmutable = ["idFormula", "baseId"] as const;
+type VarbNameImmutable = (typeof varbNameImmutable)[number];
+export type VarbNameMutable<SN extends SectionName> = Exclude<
+  VarbName<SN>,
+  VarbNameImmutable
+>;
 
 export class SectionsSchema {
   readonly headerRowIdxBase1 = 2; // base 1
@@ -103,17 +111,22 @@ export class SectionSchema<SN extends SectionName> {
   get varbNames(): VarbName<SN>[] {
     return Obj.keys(this.allVarbAttributes[this.sectionName]);
   }
-  makeDefaultValues(): StrictOmit<SectionValues<SN>, "idFormula" | "baseId"> {
-    return this.varbNames.reduce((values, varbName) => {
-      if (["idFormula", "baseId"].includes(varbName as string)) {
+  makeDefaultValues<VN extends VarbNameMutable<SN>>(
+    varbNames: VN[] = Arr.exclude(this.varbNames, varbNameImmutable) as VN[],
+  ): SectionValues<SN, VN> {
+    return varbNames.reduce(
+      (values, varbName) => {
+        if (varbNameImmutable.includes(varbName as VarbNameImmutable)) {
+          return values;
+        } else {
+          values[varbName] = this.varb(
+            varbName,
+          ).makeDefaultValue() as SectionValues<SN, VN>[typeof varbName];
+        }
         return values;
-      } else {
-        values[varbName] = this.varb(
-          varbName,
-        ).makeDefaultValue() as SectionValues<SN>[typeof varbName];
-      }
-      return values;
-    }, {} as SectionValues<SN>);
+      },
+      {} as SectionValues<SN, VN>,
+    );
   }
   varbDisplayNames(): string[] {
     return this.varbNames.map((vn) => this.varb(vn).displayName);
@@ -151,8 +164,8 @@ export class VarbSchema<SN extends SectionName, VN extends VarbName<SN>> {
   get isEquationLiteral(): boolean {
     const valueAttributes =
       this.allValueAttributes[this.valueName as keyof AllValueAttributes];
-    const valueType = valueAttributes.type;
-    if (typeof valueType === "string" && valueType.startsWith("=")) {
+    const defaultValue = valueAttributes.makeDefault();
+    if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
       return true;
     } else {
       return false;

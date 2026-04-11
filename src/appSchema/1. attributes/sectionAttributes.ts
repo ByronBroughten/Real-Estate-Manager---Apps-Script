@@ -69,7 +69,6 @@ const sectionNameGroups = {
   aggregateApi: Arr.extractStrict(sectionNames, [
     "addHhChargeOnetime",
     "addHhPaymentOnetime",
-    "buildHhLedger",
     "addExpenses",
   ] as const),
   ledgerInputs: Arr.extractStrict(sectionNames, [

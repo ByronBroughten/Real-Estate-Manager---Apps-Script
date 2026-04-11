@@ -8,7 +8,10 @@ import type {
   VarbName,
   VarbValue,
 } from "../appSchema/1. attributes/varbAttributes";
-import type { SectionSchema } from "../appSchema/3. generated/sectionsSchema";
+import type {
+  SectionSchema,
+  VarbNameMutable,
+} from "../appSchema/3. generated/sectionsSchema";
 import {
   asU,
   type BatchUpdateRequest,
@@ -149,9 +152,9 @@ export class Row<SN extends SectionName> extends RowBase<SN> {
   get sheet(): Sheet<SN> {
     return new Sheet(this.sheetProps);
   }
-  resetToDefault() {
+  resetToDefault(varbNames?: VarbNameMutable<SN>[]) {
     this.setValues(
-      this.schema.makeDefaultValues() as Partial<SectionValues<SN>>,
+      this.schema.makeDefaultValues(varbNames) as Partial<SectionValues<SN>>,
     );
   }
   addAllVarbsAsChanges() {

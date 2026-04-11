@@ -1,5 +1,6 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
+import { Str, type RemoveFirstN } from "./Str";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type DistributiveOmit<T, K extends keyof T> = T extends any
@@ -9,6 +10,13 @@ export type DistributiveOmit<T, K extends keyof T> = T extends any
 export type StrictPick<T, K extends keyof T> = Pick<T, K>;
 export type StrictPickPartial<T, K extends keyof T> = Partial<Pick<T, K>>;
 export type StrictOmitPartial<T, K extends keyof T> = Partial<Omit<T, K>>;
+export type PickStartsWith<T extends object, S extends string> = {
+  [K in keyof T as K extends `${S}${infer R}` ? K : never]: T[K];
+};
+
+export type InvertObj<O extends Record<string | number, string | number>> = {
+  [K in O[keyof O]]: keyof O;
+};
 
 type Keys<T> = [keyof T];
 type Values<T> = [T[keyof T]];
@@ -28,6 +36,10 @@ export type PropKeyOfValue<
   O extends object,
   V extends O[keyof O],
 > = keyof SubType<O, V>;
+
+export type RemoveFirstNFromKeys<T extends object, N extends number> = {
+  [K in keyof T & string as RemoveFirstN<K, N>]: T[K];
+};
 
 export const Obj = {
   pushByKey<
@@ -93,6 +105,35 @@ export const Obj = {
       },
       {} as StrictPick<O, KS>,
     );
+  },
+  pickStartsWith<T extends object, S extends string>(
+    obj: T,
+    prefix: S,
+  ): PickStartsWith<T, S> {
+    const result = {} as PickStartsWith<T, S>;
+    for (const key in obj) {
+      if (key.startsWith(prefix)) {
+        result[key as keyof PickStartsWith<T, S>] = obj[key] as PickStartsWith<
+          T,
+          S
+        >[keyof PickStartsWith<T, S>];
+      }
+    }
+    return result;
+  },
+  removeFirstNFromKeys<T extends object, N extends number>(
+    obj: T,
+    n: N,
+  ): RemoveFirstNFromKeys<T, N> {
+    const result = {} as RemoveFirstNFromKeys<T, N>;
+    for (const key in obj) {
+      const newKey = Str.removeFirstN(key, n) as keyof RemoveFirstNFromKeys<
+        T,
+        N
+      >;
+      result[newKey] = obj[key] as any;
+    }
+    return result;
   },
   strictOmit<O extends object, KS extends keyof O>(
     obj: O,

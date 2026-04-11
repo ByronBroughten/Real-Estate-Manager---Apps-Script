@@ -208,13 +208,6 @@ export class Sheet<SN extends SectionName> extends SheetBase<SN> {
       throw new Error(`Not a sheet of from group "${snGroupName}"`);
     }
   }
-  isApiEnterTriggered(e: { colIdxBase1: number; rowIdxBase1: number }) {
-    const api = this.validateThis("aggregateApi");
-    const header = api.headerByColIdxBase1(e.colIdxBase1);
-    const isTopBodyRow = e.rowIdxBase1 === api.topBodyRowIdxBase1;
-    const isEnter = header.slice(0, 5) === "Enter";
-    return isTopBodyRow && isEnter;
-  }
   addAllVarbsAsChanges(): void {
     this.orderedRows.forEach((row) => row.addAllVarbsAsChanges());
   }

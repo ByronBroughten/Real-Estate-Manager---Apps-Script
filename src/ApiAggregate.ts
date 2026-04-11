@@ -3,7 +3,6 @@ import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
 import { ChargeMgmt } from "./StateHandlers/ChargeMgmt";
 import { ExpenseMgmt } from "./StateHandlers/ExpenseMgmt";
 import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
-import { LedgerMgmt } from "./StateHandlers/LedgerMgmt";
 import { PaymentMgmt } from "./StateHandlers/PaymentMgmt";
 import type { Sheet } from "./StateHandlers/Sheet";
 import type { Spreadsheet } from "./StateHandlers/Spreadsheet";
@@ -25,20 +24,13 @@ export class ApiAggregate<
   }
   readonly apiSheet: Sheet<SN>;
   readonly event: StandardEvent;
-  readonly ledgerMgmt = new LedgerMgmt(this.ss);
-  readonly chargeMgmt = new ChargeMgmt(this.ss);
-  readonly expenseMgmt = new ExpenseMgmt(this.ss);
-  readonly paymentMgmt = new PaymentMgmt(this.ss);
-
   readonly aggregateApiFns: AggregateApiFns = {
-    // if it's a single, it should be in the api sheet. Otherwise, it's in one of these.
-    // single
-    buildHhLedger: (values) => this.ledgerMgmt.buildHhLedger(values),
     // multis
-    addExpenses: (_) => this.expenseMgmt.addExpenses(),
-    addHhChargeOnetime: (values) => this.chargeMgmt.addHhChargeOnetime(values),
+    addExpenses: (_) => new ExpenseMgmt(this.ss).addExpenses(),
+    addHhChargeOnetime: (values) =>
+      new ChargeMgmt(this.ss).addHhChargeOnetime(values),
     addHhPaymentOnetime: (values) =>
-      this.paymentMgmt.addHhPaymentOnetime(values),
+      new PaymentMgmt(this.ss).addHhPaymentOnetime(values),
   };
   handleEvent() {
     this.isApiTriggered() && this.tryCallApi();
@@ -85,6 +77,6 @@ export class ApiAggregate<
       "enterStatus",
       "Error: " + (error as Error).message,
     );
-    this.ss.batchUpdateRanges();
+    this.batchUpdateRanges();
   }
 }

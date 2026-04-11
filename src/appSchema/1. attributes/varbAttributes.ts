@@ -157,11 +157,6 @@ const vS = {
   date(): Varb<"date", "Date"> {
     return this.gen("date", "Date");
   },
-  dateDefaultToday(): Varb<"date", "Date"> {
-    return this.gen("date", "Date", {
-      makeDefault: defaults.todayFormula,
-    });
-  },
 };
 
 const vsS = {
@@ -176,14 +171,40 @@ const vsS = {
   },
 } as const;
 
-const defaults = {
-  todayFormula: () => "=TODAY()",
-};
-
 export const allVarbAttributes = makeSchemaStructure(
   {} as SectionVarbsBase,
   {
-    api: vsS.ids(),
+    api: {
+      ...vsS.ids(),
+      // Update Monthly Charges
+      UMCdateLastRan: vS.gen("date", "UMC date last ran"),
+      UMCstartMonthDate: vS.gen("date", "UMC start month date"),
+      UMChouseholdOrAll: vS.gen("string", "UMC household or all"),
+      UMChouseholdIdorAll: vS.gen("string", "UMC household ID or all"),
+      UMCenter: vS.gen("boolean", "UMC enter"),
+      UMCenterStatus: vS.gen("string", "UMC enter status"),
+      // Build Household Ledger
+      BHLdateLastRan: vS.gen("date", "BHL date last ran"),
+      BHLhhIdLastRan: vS.linkedIdNext("household", {
+        required: false,
+        displayName: "BHL household ID last ran",
+      }),
+      BHLunitIdLastRan: vS.linkedIdNext("unit", {
+        required: false,
+        displayName: "BHL unit ID last ran",
+        default: "unitIdFromBHLhhLastRanOp",
+      }),
+      BHLhouseholdName: vS.gen("string", "BHL household name"),
+      BHLportion: vS.gen("rentPortionName", "BHL portion"),
+      BHLhouseholdId: vS.gen("hhIdFromNameOp", "BHL household ID from name"),
+      BHLsubsidyAgreementName: vS.gen("string", "BHL subsidy agreement name"),
+      BHLsubsidyAgreementId: vS.gen(
+        "subsidyAgreementIdFromNameOp",
+        "BHL subsidy agreement ID",
+      ),
+      BHLenter: vS.gen("boolean", "BHL enter"),
+      BHLenterStatus: vS.gen("string", "BHL enter status"),
+    },
     buildHhLedger: {
       ...vsS.ids(),
       householdName: vS.gen("string", "Household name"),
@@ -220,7 +241,7 @@ export const allVarbAttributes = makeSchemaStructure(
       unitIdLastRan: vS.linkedIdNext("unit", {
         required: false,
         displayName: "Unit ID last ran",
-        default: "unitIdFromHhLastRanOp",
+        default: "unitIdFromBHLhhLastRanOp",
       }),
     },
     hhLedger: {
@@ -379,7 +400,7 @@ export const allVarbAttributes = makeSchemaStructure(
       notes: vS.gen("string", "Notes"),
     },
     addExpenses: {
-      date: vS.dateDefaultToday(),
+      date: vS.date(),
       propertyName: vS.gen("string", "Property name"),
       unitName: vS.gen("string", "Unit name"),
       billerName: vS.gen("string", "Biller name"),
@@ -414,7 +435,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     addHhPaymentOnetime: {
       ...vsS.ids(),
-      date: vS.dateDefaultToday(),
+      date: vS.date(),
       // Allocation
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
@@ -500,7 +521,7 @@ export const allVarbAttributes = makeSchemaStructure(
     },
     addHhChargeOnetime: {
       ...vsS.ids(),
-      date: vS.dateDefaultToday(),
+      date: vS.date(),
       householdName: vS.gen("string", "Household name"),
       householdId: vS.linkedId(
         "Household ID",
