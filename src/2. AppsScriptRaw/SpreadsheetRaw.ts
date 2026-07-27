@@ -1,4 +1,4 @@
-import { spreadsheetConfig } from "../../1. SpreadsheetSchema/0. sheetMetaData/1. spreadsheetConfig";
+import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
 import {
   SpreadsheetRawBase,
   type BatchUpdateRequest,

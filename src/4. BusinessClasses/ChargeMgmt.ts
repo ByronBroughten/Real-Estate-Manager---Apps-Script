@@ -1,5 +1,3 @@
-import { isValidationValueNoEmpty } from "../1. SpreadsheetSchema/0. sheetMetaData/3.1 validationLists";
-import type { TableValues } from "../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
 import type { MonthYear } from "../utils/Dat";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
@@ -7,6 +5,7 @@ import { Obj, type StrictPick } from "../utils/Obj";
 import type { Row } from "../3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
+import type { TableValues } from "../0. spreadsheetMetaData/5. columnAttributes";
 
 export const chargeVarbToDescriptor = {
   rentChargeBaseMonthly: "Rent charge (base)",

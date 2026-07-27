@@ -1,18 +1,17 @@
 import type { ApiFnValues } from "../ApiSingle";
 
-import type { GroupToTableName } from "../1. SpreadsheetSchema/0. sheetMetaData/4.1 tableNameGroups";
-import type { ColumnValue } from "../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
 import type { Row } from "../3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { Obj } from "../utils/Obj";
+import type { GroupToTableName } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 
 type LedgerInputSn = GroupToTableName<"ledgerInputs">;
 
 interface IdsAndPortion {
   householdId: string;
   subsidyAgreementId: string;
-  portion: ColumnValue<LedgerInputSn, "portion">;
+  portion: ColumnValueLedgerInputSn, "portion">;
 }
 
 interface RowsOfIdAndPortionProps<
