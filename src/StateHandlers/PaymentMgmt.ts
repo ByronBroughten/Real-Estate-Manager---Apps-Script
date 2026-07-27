@@ -1,9 +1,9 @@
-import type { SectionValues } from "../appSchema/1. attributes/varbAttributes";
+import type { TableValues } from "../appSchema/0. sheetMetaData/5. columnAttributes";
 import { Obj } from "../utils/Obj";
+import type { Row } from "./GenericHandlers/RowNamed";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
-import type { Row } from "./Row";
 
-type PaymentIdToCharges = Record<string, Row<"hhCharge">[]>;
+type PaymentIdToCharges = Record<string, Row<"occCharge">[]>;
 
 type ChargeIdsForPayments = {
   paymentGroup: {
@@ -19,9 +19,9 @@ type ChargeIdsForPayments = {
 type PaymentGroupType = keyof ChargeIdsForPayments;
 
 export class PaymentMgmt extends OperatorBase {
-  addHhPaymentOnetime(values: SectionValues<"addHhPaymentOnetime">) {
-    const hhPayment = this.ss.sheet("hhPayment");
-    const hhAllocation = this.ss.sheet("hhPaymentAllocation");
+  addOccPaymentOnetime(values: TableValues<"addOccPaymentOnetime">) {
+    const occPayment = this.ss.sheet("occPayment");
+    const occPayAllocation = this.ss.sheet("occPayAllocation");
     const payerValues = Obj.strictPick(values, [
       "date",
       "amount",
@@ -29,7 +29,7 @@ export class PaymentMgmt extends OperatorBase {
       "detailsVerified",
       "paymentHhId",
       "subsidyProgramId",
-      "otherPayerId",
+      "nonResidentPayerId",
     ]);
 
     switch (payerValues.payerCategory) {
@@ -44,7 +44,7 @@ export class PaymentMgmt extends OperatorBase {
         }
         break;
       case "Other payer":
-        if (!payerValues.otherPayerId) {
+        if (!payerValues.nonResidentPayerId) {
           throw new Error("Other payer ID is required");
         }
         break;
@@ -53,7 +53,7 @@ export class PaymentMgmt extends OperatorBase {
       }
     }
 
-    const paymentId = hhPayment.addRowWithValues({
+    const paymentId = occPayment.addRowWithValues({
       ...payerValues,
       ...(payerValues.paymentHhId && { householdId: payerValues.paymentHhId }),
     });
@@ -73,11 +73,11 @@ export class PaymentMgmt extends OperatorBase {
       }
     }
 
-    hhAllocation.addRowWithValues({
+    occPayAllocation.addRowWithValues({
       ...allocateValues,
       paymentId,
     });
-    this.ss.batchUpdateRanges();
+    this.ss.gatherRequestsAndBatchUpdate();
   }
   buildOutPaymentsFromCharges(cfp: ChargeIdsForPayments) {
     for (const paymentGroupType of [
@@ -98,15 +98,15 @@ export class PaymentMgmt extends OperatorBase {
     paymentGroupType: PaymentGroupType;
     idToChargeIds: { [id: string]: string[] };
   }) {
-    const hhCharge = this.ss.sheet("hhCharge");
-    const payment = this.ss.sheet("hhPayment");
+    const occCharge = this.ss.sheet("occCharge");
+    const payment = this.ss.sheet("occPayment");
     const paymentGroup = this.ss.sheet("paymentGroup");
     const subsidyAgreement = this.ss.sheet("subsidyAgreement");
 
     const paymentIdToCharges: PaymentIdToCharges = {};
     for (const [groupId, chargeIds] of Obj.entries(idToChargeIds)) {
-      const charges = chargeIds.map((chargeId) => hhCharge.row(chargeId));
-      function addPayment(values: Partial<SectionValues<"hhPayment">>) {
+      const charges = chargeIds.map((chargeId) => occCharge.row(chargeId));
+      function addPayment(values: Partial<TableValues<"occPayment">>) {
         const topCharge = charges[0];
         const paymentId = payment.addRowWithValues({
           detailsVerified: "No",
@@ -145,7 +145,7 @@ export class PaymentMgmt extends OperatorBase {
               "householdId",
               "payerCategory",
               "subsidyProgramId",
-              "otherPayerId",
+              "nonResidentPayerId",
             ]),
           );
         },
@@ -156,7 +156,7 @@ export class PaymentMgmt extends OperatorBase {
     this.addAllocations(paymentIdToCharges);
   }
   addAllocations(paymentIdToCharges: PaymentIdToCharges) {
-    const allocation = this.ss.sheet("hhPaymentAllocation");
+    const allocation = this.ss.sheet("occPayAllocation");
     for (const [paymentId, chargeRows] of Object.entries(paymentIdToCharges)) {
       chargeRows.forEach((charge) => {
         allocation.addRowWithValues({

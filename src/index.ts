@@ -1,3 +1,4 @@
+import { oneTimeSheetUpdates } from "./OnetimeSheetUpdates.js";
 import { TopOperator } from "./TopOperator.js";
 import { asU } from "./utilitiesAppsScript.js";
 
@@ -23,23 +24,24 @@ function resetTriggers(doResetTriggers: boolean = true) {
   }
 }
 
+oneTimeSheetUpdates.test();
 resetTriggers(false);
 
 function testUpdateLeaseOngoingCharges() {
   const top = TopOperator.init();
   top.leaseMgmt.doPeriodicLeaseUpdates();
-  top.ss.batchUpdateRanges();
+  top.ss.gatherRequestsAndBatchUpdate();
 }
 
 function testUpdateSubsidyOngoingCharges() {
   const top = TopOperator.init();
   top.subsidyMgmt.doPeriodicSubsidyUpdates();
-  top.ss.batchUpdateRanges();
+  top.ss.gatherRequestsAndBatchUpdate();
 }
 
 function testBuildOutMonthlyChargesAndPayments() {
   const top = TopOperator.init();
   // const cfp = top.buildOutChargesForMonth();
   // top.buildOutPaymentsFromCharges(cfp);
-  top.ss.batchUpdateRanges();
+  top.ss.gatherRequestsAndBatchUpdate();
 }

@@ -1,36 +1,36 @@
-import type { GroupSectionName } from "./appSchema/1. attributes/sectionAttributes";
-import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
+import type { GroupToTableName } from "./appSchema/0. sheetMetaData/4.1 tableNameGroups";
+import type { TableValues } from "./appSchema/0. sheetMetaData/5. columnAttributes";
 import { ChargeMgmt } from "./StateHandlers/ChargeMgmt";
 import { ExpenseMgmt } from "./StateHandlers/ExpenseMgmt";
+import type { SheetNamed } from "./StateHandlers/GenericHandlers/SheetNamed";
+import type { Spreadsheet } from "./StateHandlers/GenericHandlers/SpreadsheetNamed";
 import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
 import { PaymentMgmt } from "./StateHandlers/PaymentMgmt";
-import type { Sheet } from "./StateHandlers/Sheet";
-import type { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import type { StandardEvent } from "./TopOperator";
 
 type AggregateApiFns = {
-  readonly [SN in GroupSectionName<"aggregateApi">]: (
-    values: SectionValues<SN>,
+  readonly [TN in GroupToTableName<"aggregateApi">]: (
+    values: TableValues<TN>,
   ) => void;
 };
 
 export class ApiAggregate<
-  SN extends GroupSectionName<"aggregateApi">,
+  TN extends GroupToTableName<"aggregateApi">,
 > extends OperatorBase {
-  constructor(ss: Spreadsheet, sectionName: SN, event: StandardEvent) {
+  constructor(ss: Spreadsheet, tableName: TN, event: StandardEvent) {
     super(ss);
-    this.apiSheet = this.sheet(sectionName);
+    this.apiSheet = this.sheet(tableName);
     this.event = event;
   }
-  readonly apiSheet: Sheet<SN>;
+  readonly apiSheet: SheetNamed<TN>;
   readonly event: StandardEvent;
   readonly aggregateApiFns: AggregateApiFns = {
     // multis
-    addExpenses: (_) => new ExpenseMgmt(this.ss).addExpenses(),
-    addHhChargeOnetime: (values) =>
-      new ChargeMgmt(this.ss).addHhChargeOnetime(values),
-    addHhPaymentOnetime: (values) =>
-      new PaymentMgmt(this.ss).addHhPaymentOnetime(values),
+    addPropertyExpenses: (_) => new ExpenseMgmt(this.ss).addPropertyExpenses(),
+    addOccChargeOnetime: (values) =>
+      new ChargeMgmt(this.ss).addOccChargeOnetime(values),
+    addOccPaymentOnetime: (values) =>
+      new PaymentMgmt(this.ss).addOccPaymentOnetime(values),
   };
   handleEvent() {
     this.isApiTriggered() && this.tryCallApi();
@@ -55,20 +55,20 @@ export class ApiAggregate<
   private prepCallApi() {
     const topRow = this.apiSheet.topBodyRow;
     topRow.setValue("enterStatus", "Processing...");
-    this.batchUpdateRanges();
+    this.gatherRequestsAndBatchUpdate();
   }
   private callApi() {
     const apiTopRow = this.apiSheet.topBodyRow;
-    const { sectionName } = this.apiSheet;
+    const { tableName } = this.apiSheet;
     const apiValues = apiTopRow.validateValues();
-    this.aggregateApiFns[sectionName](
-      apiValues as SectionValues<typeof sectionName> as any,
+    this.aggregateApiFns[tableName](
+      apiValues as TableValues<typeof tableName> as any,
     );
   }
   private resetApi() {
     this.apiSheet.DELETE_ALL_BODY_ROWS();
     this.apiSheet.addRowDefault();
-    this.batchUpdateRanges();
+    this.gatherRequestsAndBatchUpdate();
   }
   private handleApiCallError(error: Error) {
     console.error(error);
@@ -76,7 +76,7 @@ export class ApiAggregate<
       "enterStatus",
       "Error: " + (error as Error).message,
     );
-    this.batchUpdateRanges();
+    this.gatherRequestsAndBatchUpdate();
     throw error;
   }
 }

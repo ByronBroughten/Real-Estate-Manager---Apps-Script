@@ -2,11 +2,11 @@ import { OperatorBase } from "./HandlerBases/OperatorBase";
 
 export class ExpenseMgmt extends OperatorBase {
   // I don't need the values, right?
-  addExpenses() {
-    const addExpenses = this.ss.sheet("addExpenses");
+  addPropertyExpenses() {
+    const addPropertyExpenses = this.ss.sheet("addPropertyExpenses");
     const expense = this.ss.sheet("expense");
 
-    for (const row of addExpenses.orderedRows) {
+    for (const row of addPropertyExpenses.orderedRows) {
       const { expenseNotes, ...expenseVals } = row.values([
         "date",
         "propertyId",
@@ -34,23 +34,23 @@ export class ExpenseMgmt extends OperatorBase {
     //     throw new Error("Household ID is required");
     //   }
 
-    //   const { amount, hhChargeLesserAmount, hhChargeNotes, ...hhChargeVals } =
+    //   const { amount, occChargeLesserAmount, occChargeNotes, ...occChargeVals } =
     //     Obj.strictPick(values, [
     //       "householdId",
     //       "date",
     //       "amount",
-    //       "hhChargeLesserAmount",
+    //       "occChargeLesserAmount",
     //       "unitId",
-    //       "hhChargeNotes",
+    //       "occChargeNotes",
     //     ]);
-    //   hhCharge.addRowWithValues({
-    //     amount: hhChargeLesserAmount === "" ? amount : hhChargeLesserAmount,
+    //   occCharge.addRowWithValues({
+    //     amount: occChargeLesserAmount === "" ? amount : occChargeLesserAmount,
     //     description: "Damage, waste, or service",
     //     portion: "Household",
-    //     ...hhChargeVals,
-    //     notes: hhChargeNotes,
+    //     ...occChargeVals,
+    //     notes: occChargeNotes,
     //   });
     // }
-    this.ss.batchUpdateRanges();
+    this.ss.gatherRequestsAndBatchUpdate();
   }
 }

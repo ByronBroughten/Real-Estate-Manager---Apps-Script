@@ -1,4 +1,4 @@
-export type ValueSchema<V extends unknown = unknown> = {
+export type ValueAttributesBase<V extends unknown = unknown> = {
   type: V;
   makeDefault: MakeDefaultValueBase<V>;
   defaultValidate: ValidateValueBase<V>;

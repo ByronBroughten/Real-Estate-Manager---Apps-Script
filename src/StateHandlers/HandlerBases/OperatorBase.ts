@@ -1,20 +1,20 @@
-import type { SectionName } from "../../appSchema/1. attributes/sectionAttributes";
-import type { SectionsSchema } from "../../appSchema/3. generated/sectionsSchema";
-import type { Sheet } from "../Sheet";
-import { Spreadsheet } from "../Spreadsheet";
+import type { TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes";
+import type { SpreadsheetSchema } from "../../appSchema/SpreadsheetSchema";
+import type { SheetNamed } from "../GenericHandlers/SheetNamed";
+import { Spreadsheet } from "../GenericHandlers/SpreadsheetNamed";
 
 export class OperatorBase {
   readonly ss: Spreadsheet;
   constructor(ss: Spreadsheet) {
     this.ss = ss;
   }
-  get schema(): SectionsSchema {
+  get schema(): SpreadsheetSchema {
     return this.ss.schema;
   }
-  sheet<SN extends SectionName>(sectionName: SN): Sheet<SN> {
-    return this.ss.sheet(sectionName);
+  sheet<TN extends TableName>(tableName: TN): SheetNamed<TN> {
+    return this.ss.sheet(tableName);
   }
-  batchUpdateRanges(): void {
-    return this.ss.batchUpdateRanges();
+  gatherRequestsAndBatchUpdate(): void {
+    return this.ss.gatherRequestsAndBatchUpdate();
   }
 }

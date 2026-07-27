@@ -1,8 +1,8 @@
-import type { SectionValues } from "../appSchema/1. attributes/varbAttributes";
+import type { TableValues } from "../appSchema/0. sheetMetaData/5. columnAttributes";
 import { dateU } from "../DateU";
 import { Arr } from "../utils/Arr";
+import type { SheetNamed } from "./GenericHandlers/SheetNamed";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
-import type { Sheet } from "./Sheet";
 
 interface AddLeaseProps {
   householdId: string;
@@ -25,18 +25,21 @@ const leaseAmountValueNames = [
 ] as const;
 type LeaseAmountValueNames = (typeof leaseAmountValueNames)[number];
 
-type LeaseAmountValues = Pick<SectionValues<"hhLease">, LeaseAmountValueNames>;
+type LeaseAmountValues = Pick<
+  TableValues<"occupancyTerms">,
+  LeaseAmountValueNames
+>;
 
 export class LeaseMgmt extends OperatorBase {
-  private leaseSheetProp: Sheet<"hhLease"> | null = null;
+  private leaseSheetProp: SheetNamed<"occupancyTerms"> | null = null;
   get leaseSheet() {
     if (!this.leaseSheetProp) {
-      this.leaseSheetProp = this.ss.sheet("hhLease");
+      this.leaseSheetProp = this.ss.sheet("occupancyTerms");
     }
     return this.leaseSheetProp;
   }
   get leaseSchema() {
-    return this.schema.section("hhLease");
+    return this.schema.table("occupancyTerms");
   }
   get defaultLeaseValues(): LeaseAmountValues {
     return {
@@ -56,7 +59,7 @@ export class LeaseMgmt extends OperatorBase {
         const utilityChargeNext = hh.valueNumber("utilityChargeMonthlyNext");
         this.addLease({
           householdId,
-          unitId: hh.value("unitId"),
+          occupancyId: hh.value("occupancyId"),
           startDate: dateNext,
           fillBlankValuesWithPriorLease: "yes",
           endPriorActiveLeases: "yes",

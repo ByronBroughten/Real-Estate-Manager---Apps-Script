@@ -779,8 +779,10 @@ declare namespace GoogleAppsScript {
                 etag?: string | undefined;
                 expirationDate?: string | undefined;
                 id?: string | undefined;
+                inheritedPermissionsDisabled?: boolean | undefined;
                 kind?: string | undefined;
                 name?: string | undefined;
+                pendingOwner?: boolean | undefined;
                 permissionDetails?: Drive.Schema.PermissionPermissionDetails[] | undefined;
                 photoLink?: string | undefined;
                 role?: "owner" | "organizer" | "fileOrganizer" | "writer" | "reader" | undefined;
@@ -788,6 +790,7 @@ declare namespace GoogleAppsScript {
                 teamDrivePermissionDetails?: Drive.Schema.PermissionTeamDrivePermissionDetails[] | undefined;
                 type?: string | undefined;
                 value?: string | undefined;
+                view?: string | undefined;
                 withLink?: boolean | undefined;
             }
             interface PermissionId {
@@ -928,21 +931,21 @@ declare namespace GoogleAppsScript {
         }
     }
     interface Drive_v2 {
-        About?: Drive.Collection.AboutCollection | undefined;
-        Apps?: Drive.Collection.AppsCollection | undefined;
-        Changes?: Drive.Collection.ChangesCollection | undefined;
-        Channels?: Drive.Collection.ChannelsCollection | undefined;
-        Children?: Drive.Collection.ChildrenCollection | undefined;
-        Comments?: Drive.Collection.CommentsCollection | undefined;
-        Drives?: Drive.Collection.DrivesCollection | undefined;
-        Files?: Drive.Collection.FilesCollection | undefined;
-        Parents?: Drive.Collection.ParentsCollection | undefined;
-        Permissions?: Drive.Collection.PermissionsCollection | undefined;
-        Properties?: Drive.Collection.PropertiesCollection | undefined;
-        Realtime?: Drive.Collection.RealtimeCollection | undefined;
-        Replies?: Drive.Collection.RepliesCollection | undefined;
-        Revisions?: Drive.Collection.RevisionsCollection | undefined;
-        Teamdrives?: Drive.Collection.TeamdrivesCollection | undefined;
+        About: Drive.Collection.AboutCollection;
+        Apps: Drive.Collection.AppsCollection;
+        Changes: Drive.Collection.ChangesCollection;
+        Channels: Drive.Collection.ChannelsCollection;
+        Children: Drive.Collection.ChildrenCollection;
+        Comments: Drive.Collection.CommentsCollection;
+        Drives: Drive.Collection.DrivesCollection;
+        Files: Drive.Collection.FilesCollection;
+        Parents: Drive.Collection.ParentsCollection;
+        Permissions: Drive.Collection.PermissionsCollection;
+        Properties: Drive.Collection.PropertiesCollection;
+        Realtime: Drive.Collection.RealtimeCollection;
+        Replies: Drive.Collection.RepliesCollection;
+        Revisions: Drive.Collection.RevisionsCollection;
+        Teamdrives: Drive.Collection.TeamdrivesCollection;
         // Create a new instance of Channel
         newChannel(): Drive.Schema.Channel;
         // Create a new instance of ChildReference
@@ -1004,4 +1007,7 @@ declare namespace GoogleAppsScript {
     }
 }
 
-declare var Drive_v2: GoogleAppsScript.Drive_v2;
+/**
+ * The `Drive_v2` advanced service must be enabled.
+ */
+declare var Drive_v2: GoogleAppsScript.Drive_v2 | undefined;

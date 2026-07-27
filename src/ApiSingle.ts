@@ -1,10 +1,10 @@
-import type { SectionValues } from "./appSchema/1. attributes/varbAttributes";
+import type { TableValues } from "./appSchema/0. sheetMetaData/5. columnAttributes";
+import type { Row } from "./StateHandlers/GenericHandlers/RowNamed";
+import type { SheetNamed } from "./StateHandlers/GenericHandlers/SheetNamed";
+import type { Spreadsheet } from "./StateHandlers/GenericHandlers/SpreadsheetNamed";
 import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
 import { LeaseMgmt } from "./StateHandlers/LeaseMgmt";
 import { LedgerMgmt } from "./StateHandlers/LedgerMgmt";
-import type { Row } from "./StateHandlers/Row";
-import type { Sheet } from "./StateHandlers/Sheet";
-import type { Spreadsheet } from "./StateHandlers/Spreadsheet";
 import { SubsidyMgmt } from "./StateHandlers/SubsidyMgmt";
 import type { StandardEvent } from "./TopOperator";
 import {
@@ -17,7 +17,7 @@ import {
 } from "./utils/Obj";
 import { Str, type CombineStrings, type TakeFirstN } from "./utils/Str";
 
-type AllApiValues = StrictOmit<SectionValues<"api">, "idFormula" | "baseId">;
+type AllApiValues = StrictOmit<TableValues<"api">, "baseId">;
 
 type ApiPrefixBase = TakeFirstN<keyof AllApiValues, 3>;
 type ApiPrefixToFnNameBase = {
@@ -58,7 +58,7 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
     this.apiSheet = this.sheet("api");
   }
   private apiFnName: FN;
-  readonly apiSheet: Sheet<"api">;
+  readonly apiSheet: SheetNamed<"api">;
   readonly event: StandardEvent;
 
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);
@@ -66,7 +66,7 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
     return this.apiSheet.topBodyRow;
   }
   get apiFnVarbNames(): (keyof ApiValuesWithPrefix<FN>)[] {
-    return this.apiSheet.varbNames.filter((vn) =>
+    return this.apiSheet.columnNames.filter((vn) =>
       vn.startsWith(this.apiPrefix),
     ) as (keyof ApiValuesWithPrefix<FN>)[];
   }
@@ -147,16 +147,16 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
     this.prepCallApi();
     try {
       this.callApi();
-      this.batchUpdateRanges();
+      this.gatherRequestsAndBatchUpdate();
     } catch (e) {
       this.handleApiCallError(e as Error);
     }
   }
   private prepCallApi() {
     const topRow = this.apiSheet.topBodyRow;
-    const varbName = this.apiVarbName("enterStatus");
-    topRow.setValue(varbName, "Processing...");
-    this.batchUpdateRanges();
+    const columnName = this.apiVarbName("enterStatus");
+    topRow.setValue(columnName, "Processing...");
+    this.gatherRequestsAndBatchUpdate();
   }
   private callApi() {
     this.apiFns[this.apiFnName](this.apiValues());
@@ -167,7 +167,7 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
       this.apiVarbName("enterStatus"),
       "Error: " + (error as Error).message,
     );
-    this.batchUpdateRanges();
+    this.gatherRequestsAndBatchUpdate();
     throw error;
   }
 }

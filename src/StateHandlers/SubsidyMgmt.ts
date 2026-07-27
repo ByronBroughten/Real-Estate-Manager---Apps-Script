@@ -1,7 +1,7 @@
 import { dateU } from "../DateU";
+import type { Row } from "./GenericHandlers/RowNamed";
+import type { SheetNamed } from "./GenericHandlers/SheetNamed";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
-import type { Row } from "./Row";
-import type { Sheet } from "./Sheet";
 
 interface AddSubsidyContractProps {
   subsidyAgreementId: string;
@@ -13,8 +13,8 @@ interface AddSubsidyContractProps {
 }
 
 export class SubsidyMgmt extends OperatorBase {
-  private agreementSheetProp: Sheet<"subsidyAgreement"> | null = null;
-  private contractSheetProp: Sheet<"subsidyContract"> | null = null;
+  private agreementSheetProp: SheetNamed<"subsidyAgreement"> | null = null;
+  private contractSheetProp: SheetNamed<"subsidyContract"> | null = null;
   private get agreementSheet() {
     if (!this.agreementSheetProp) {
       this.agreementSheetProp = this.ss.sheet("subsidyAgreement");
@@ -47,12 +47,12 @@ export class SubsidyMgmt extends OperatorBase {
   private getActiveLeaseForContract(
     sa: Row<"subsidyAgreement">,
     dateNext: Date,
-  ): Row<"hhLease"> {
-    const leaseSheet = this.sheet("hhLease");
-    const hhLeases = leaseSheet.rowsFiltered({
+  ): Row<"occupancyTerms"> {
+    const leaseSheet = this.sheet("occupancyTerms");
+    const occupancyTermss = leaseSheet.rowsFiltered({
       householdId: sa.value("householdId"),
     });
-    const activeLeases = hhLeases.filter((lease) => {
+    const activeLeases = occupancyTermss.filter((lease) => {
       return lease.valueDate("startDate") <= dateNext;
     });
     const ascendingLeases = activeLeases.sort(

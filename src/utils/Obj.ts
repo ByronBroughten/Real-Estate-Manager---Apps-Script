@@ -1,6 +1,6 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
-import { Str, type RemoveFirstN } from "./Str";
+import { Str, type CombineStringsWithFlat, type RemoveFirstN } from "./Str";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type DistributiveOmit<T, K extends keyof T> = T extends any
@@ -13,6 +13,39 @@ export type StrictOmitPartial<T, K extends keyof T> = Partial<Omit<T, K>>;
 export type PickStartsWith<T extends object, S extends string> = {
   [K in keyof T as K extends `${S}${infer R}` ? K : never]: T[K];
 };
+
+type UnionToIntersection<U> = (
+  U extends unknown ? (k: U) => void : never
+) extends (k: infer I) => void
+  ? I
+  : never;
+
+// Computes the flattened type: for each outer key, remap its inner keys to "outer.inner"
+type FlattenTwoLevels<T extends Record<string, Record<string, unknown>>> =
+  UnionToIntersection<
+    {
+      [K1 in keyof T]: {
+        [K2 in keyof T[K1] as CombineStringsWithFlat<
+          K1 & string,
+          K2 & string
+        >]: T[K1][K2];
+      };
+    }[keyof T]
+  >;
+
+function flattenTwoLevels<T extends Record<string, Record<string, unknown>>>(
+  obj: T,
+): FlattenTwoLevels<T> {
+  const result: Record<string, unknown> = {};
+  for (const outerKey in obj) {
+    const inner = obj[outerKey];
+    for (const innerKey in inner) {
+      result[`${outerKey}_${innerKey}`] = inner[innerKey];
+    }
+  }
+
+  return result as FlattenTwoLevels<T>;
+}
 
 export type InvertObj<O extends Record<string | number, string | number>> = {
   [K in O[keyof O]]: keyof O;
@@ -42,6 +75,7 @@ export type RemoveFirstNFromKeys<T extends object, N extends number> = {
 };
 
 export const Obj = {
+  flattenTwoLevels,
   pushByKey<
     O extends Record<string, any[]>,
     K extends keyof O,
@@ -113,10 +147,9 @@ export const Obj = {
     const result = {} as PickStartsWith<T, S>;
     for (const key in obj) {
       if (key.startsWith(prefix)) {
-        result[key as keyof PickStartsWith<T, S>] = obj[key] as PickStartsWith<
-          T,
-          S
-        >[keyof PickStartsWith<T, S>];
+        result[key as unknown as keyof PickStartsWith<T, S>] = obj[
+          key
+        ] as unknown as PickStartsWith<T, S>[keyof PickStartsWith<T, S>];
       }
     }
     return result;
@@ -127,10 +160,10 @@ export const Obj = {
   ): RemoveFirstNFromKeys<T, N> {
     const result = {} as RemoveFirstNFromKeys<T, N>;
     for (const key in obj) {
-      const newKey = Str.removeFirstN(key, n) as keyof RemoveFirstNFromKeys<
-        T,
-        N
-      >;
+      const newKey = Str.removeFirstN(
+        key,
+        n,
+      ) as unknown as keyof RemoveFirstNFromKeys<T, N>;
       result[newKey] = obj[key] as any;
     }
     return result;

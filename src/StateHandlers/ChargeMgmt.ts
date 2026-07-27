@@ -1,22 +1,27 @@
-import {
-  chargeVarbToDescriptor,
-  leaseChargeVarbNames,
-} from "../appSchema/1. attributes/valueAttributes/pairs";
-import { isUnionValueNoEmpty } from "../appSchema/1. attributes/valueAttributes/unionValues";
-import type { SectionValues } from "../appSchema/1. attributes/varbAttributes";
+import { isValidationValueNoEmpty } from "../appSchema/0. sheetMetaData/3.1 validationLists";
+import type { TableValues } from "../appSchema/0. sheetMetaData/5. columnAttributes";
 import type { MonthYear } from "../DateU";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
 import { Obj, type StrictPick } from "../utils/Obj";
+import type { Row } from "./GenericHandlers/RowNamed";
+import type { SheetNamed } from "./GenericHandlers/SheetNamed";
 import { OperatorBase } from "./HandlerBases/OperatorBase";
-import type { Row } from "./Row";
-import type { Sheet } from "./Sheet";
+
+export const chargeVarbToDescriptor = {
+  rentChargeBaseMonthly: "Rent charge (base)",
+  rentChargeUtilitiesMonthly: "Rent charge (utilities)",
+  petFeeRecurring: "Pet fee (recurring)",
+  caretakerRentReduction: "Caretaker rent reduction",
+} as const;
+
+export const leaseChargeVarbNames = Obj.keys(chargeVarbToDescriptor);
 
 interface HhIdMonthYear extends MonthYear {
   householdId: string;
 }
 type SharedChargeLeaseValues = StrictPick<
-  SectionValues<"hhCharge">,
+  TableValues<"occCharge">,
   | "amount"
   | "portion"
   | "date"
@@ -27,18 +32,17 @@ type SharedChargeLeaseValues = StrictPick<
 >;
 
 export class ChargeMgmt extends OperatorBase {
-  addHhChargeOnetime(values: SectionValues<"addHhChargeOnetime">) {
+  addOccChargeOnetime(values: TableValues<"addOccChargeOnetime">) {
     const relevant = Obj.strictOmit(
       values,
-      "idFormula",
       "baseId",
       "enter",
       "enterStatus",
       "householdName",
     );
-    const sOnetime = this.ss.sheet("hhCharge");
+    const sOnetime = this.ss.sheet("occCharge");
     sOnetime.addRowWithValues(relevant);
-    this.ss.batchUpdateRanges();
+    this.ss.gatherRequestsAndBatchUpdate();
   }
   updateHhAllOngoingCharges(
     householdIds: string[] = this.sheet("household").orderedRows.map(
@@ -90,41 +94,42 @@ export class ChargeMgmt extends OperatorBase {
     firstDate: Date;
     lastDate: Date;
   } {
-    const hhCharge = this.sheet("hhCharge");
-    const hhLease = this.sheet("hhLease");
+    const occCharge = this.sheet("occCharge");
+    const occupancyTerms = this.sheet("occupancyTerms");
 
-    const hhCharges = hhCharge.rowsFiltered({ householdId });
-    const hhLeases = hhLease.rowsFiltered({ householdId });
+    const occCharges = occCharge.rowsFiltered({ householdId });
+    const occupancyTermss = occupancyTerms.rowsFiltered({ householdId });
 
     let firstDate: Date = new Date();
     let lastDate: Date = new Date();
 
-    if (hhCharges.length > 0) {
-      hhCharges.sort((a, b) =>
+    if (occCharges.length > 0) {
+      occCharges.sort((a, b) =>
         Arr.compareForSort(a.valueDate("date"), b.valueDate("date")),
       );
-      firstDate = hhCharges[0].valueDate("date");
-      lastDate = Arr.lastOrThrow(hhCharges).valueDate("date");
+      firstDate = occCharges[0].valueDate("date");
+      lastDate = Arr.lastOrThrow(occCharges).valueDate("date");
     }
 
-    if (hhLeases.length > 0) {
-      hhLeases.sort((a, b) =>
+    if (occupancyTermss.length > 0) {
+      occupancyTermss.sort((a, b) =>
         Arr.compareForSort(a.valueDate("startDate"), b.valueDate("startDate")),
       )[0];
-      const earliestStart = hhLeases[0].valueDate("startDate");
+      const earliestStart = occupancyTermss[0].valueDate("startDate");
       if (earliestStart < firstDate) {
         firstDate = earliestStart;
       }
 
-      const latestStart = Arr.lastOrThrow(hhLeases).valueDate("startDate");
+      const latestStart =
+        Arr.lastOrThrow(occupancyTermss).valueDate("startDate");
       if (latestStart > lastDate) {
         lastDate = latestStart;
       }
 
-      hhLeases.sort((a, b) =>
+      occupancyTermss.sort((a, b) =>
         Arr.compareForSort(a.valueDate("endDate"), b.valueDate("endDate")),
       );
-      const latestEnd = Arr.lastOrThrow(hhLeases).valueDate("endDate");
+      const latestEnd = Arr.lastOrThrow(occupancyTermss).valueDate("endDate");
       if (latestEnd > lastDate) {
         lastDate = latestEnd;
       }
@@ -153,17 +158,13 @@ export class ChargeMgmt extends OperatorBase {
     householdId: string;
     month: number;
     year: number;
-  }): Row<"hhCharge">[] {
-    const hhCharge = this.sheet("hhCharge");
-    return hhCharge.orderedRows.filter((row) => {
+  }): Row<"occCharge">[] {
+    const occCharge = this.sheet("occCharge");
+    return occCharge.orderedRows.filter((row) => {
       const date = row.valueDate("date");
       return (
         row.value("householdId") === householdId &&
         utils.date.isInMonthAndYear(date, month, year) &&
-        isUnionValueNoEmpty(
-          row.value("description"),
-          "descriptionChargeOngoing",
-        )
       );
     });
   }
@@ -172,13 +173,13 @@ export class ChargeMgmt extends OperatorBase {
     month,
     year,
   }: HhIdMonthYear): {
-    activeHhLeases: Row<"hhLease">[];
+    activeoccupancyTermss: Row<"occupancyTerms">[];
     activeScCharges: Row<"subsidyContract">[];
   } {
-    const hhLease = this.sheet("hhLease");
+    const occupancyTerms = this.sheet("occupancyTerms");
     const subsidyContract = this.sheet("subsidyContract");
-    const activeHhLeases = this.getActives({
-      sheet: hhLease,
+    const activeoccupancyTermss = this.getActives({
+      sheet: occupancyTerms,
       householdId,
       month,
       year,
@@ -189,24 +190,24 @@ export class ChargeMgmt extends OperatorBase {
       month,
       year,
     });
-    if (activeHhLeases.length > 1 || activeScCharges.length > 1) {
+    if (activeoccupancyTermss.length > 1 || activeScCharges.length > 1) {
       throw new Error(
         "Multiple active leases or subsidy contracts for household in month. Cannot accurately update charges.",
       );
     }
-    return { activeHhLeases, activeScCharges };
+    return { activeoccupancyTermss, activeScCharges };
   }
-  private getActives<SN extends "hhLease" | "subsidyContract">({
+  private getActives<TN extends "occupancyTerms" | "subsidyContract">({
     sheet,
     householdId,
     month,
     year,
   }: {
-    sheet: Sheet<SN>;
+    sheet: SheetNamed<TN>;
     householdId: string;
     month: number;
     year: number;
-  }): Row<SN>[] {
+  }): Row<TN>[] {
     const firstOfMonth = utils.date.firstDayOfMonthNext({ month, year });
     const lastOfMonth = utils.date.lastDayOfMonthNext({ month, year });
     return sheet.orderedRows.filter((row) => {
@@ -225,7 +226,7 @@ export class ChargeMgmt extends OperatorBase {
     });
   }
   private updateHhOneMonthCharges({ householdId, month, year }: HhIdMonthYear) {
-    const hhCharge = this.sheet("hhCharge");
+    const occCharge = this.sheet("occCharge");
 
     this.markChargesOfMonthForDelete({
       householdId,
@@ -233,7 +234,7 @@ export class ChargeMgmt extends OperatorBase {
       year,
     });
 
-    const { activeHhLeases, activeScCharges } =
+    const { activeoccupancyTermss, activeScCharges } =
       this.getActiveLeasesAndContracts({
         householdId,
         month,
@@ -245,12 +246,12 @@ export class ChargeMgmt extends OperatorBase {
       year,
     });
 
-    for (const lease of activeHhLeases) {
+    for (const lease of activeoccupancyTermss) {
       const startDate = lease.valueDate("startDate");
       const endDate = lease.dateValueOrGivenDate("endDate", lastOfMonth);
 
-      for (const varbName of leaseChargeVarbNames) {
-        const fullAmount = lease.valueNumber(varbName);
+      for (const columnName of leaseChargeVarbNames) {
+        const fullAmount = lease.valueNumber(columnName);
         if (fullAmount === 0) {
           continue; // skip lease charges of $0.
         }
@@ -267,19 +268,19 @@ export class ChargeMgmt extends OperatorBase {
           amount: proratedAmount,
           portion: "Household",
           date: firstOfMonth,
-          description: chargeVarbToDescriptor[varbName],
+          description: chargeVarbToDescriptor[columnName],
           householdId,
           unitId: lease.value("unitId"),
           notes: isProrated
             ? `Prorated from ${startDate.toDateString()} to ${endDate.toDateString}`
             : "",
         };
-        switch (varbName) {
+        switch (columnName) {
           case "petFeeRecurring": {
-            hhCharge.addRowWithValues(sharedValues);
+            occCharge.addRowWithValues(sharedValues);
           }
           case "rentChargeUtilitiesMonthly": {
-            hhCharge.addRowWithValues(sharedValues);
+            occCharge.addRowWithValues(sharedValues);
           }
           case "rentChargeBaseMonthly": {
             this.handleRentChargeBaseMonthly({
@@ -287,7 +288,7 @@ export class ChargeMgmt extends OperatorBase {
               sharedChargeValues: sharedValues,
               month,
               year,
-              activeHhLeases,
+              activeoccupancyTermss,
               activeScCharges,
             });
           }
@@ -300,7 +301,7 @@ export class ChargeMgmt extends OperatorBase {
             });
           }
           default: {
-            throw new Error(`Unhandled varb name: ${varbName}`);
+            throw new Error(`Unhandled varb name: ${columnName}`);
           }
         }
       }
@@ -311,19 +312,19 @@ export class ChargeMgmt extends OperatorBase {
     year,
     sharedChargeValues,
     proratedRentTotal,
-    activeHhLeases,
+    activeoccupancyTermss,
     activeScCharges,
   }: {
     proratedRentTotal: number;
     sharedChargeValues: SharedChargeLeaseValues;
     month: number;
     year: number;
-    activeHhLeases: Row<"hhLease">[];
+    activeoccupancyTermss: Row<"occupancyTerms">[];
     activeScCharges: Row<"subsidyContract">[];
   }) {
-    const hhCharge = this.sheet("hhCharge");
+    const occCharge = this.sheet("occCharge");
 
-    if (activeHhLeases.length > 0) {
+    if (activeoccupancyTermss.length > 0) {
       throw new Error(
         "This can only handle one active lease per month for now.",
       );
@@ -345,7 +346,7 @@ export class ChargeMgmt extends OperatorBase {
         year,
       });
       proratedSubsidyTotal += prorated;
-      hhCharge.addRowWithValues({
+      occCharge.addRowWithValues({
         ...sharedChargeValues,
         amount: prorated,
         portion: "Subsidy program",
@@ -355,7 +356,7 @@ export class ChargeMgmt extends OperatorBase {
       });
     }
     const tenantPortion = proratedRentTotal - proratedSubsidyTotal;
-    hhCharge.addRowWithValues({
+    occCharge.addRowWithValues({
       ...sharedChargeValues,
       amount: tenantPortion,
       portion: "Household",
@@ -373,8 +374,8 @@ export class ChargeMgmt extends OperatorBase {
     householdId: string;
     unitId: string;
   }) {
-    const payment = this.ss.sheet("hhPayment");
-    const allocation = this.ss.sheet("hhPaymentAllocation");
+    const payment = this.ss.sheet("occPayment");
+    const allocation = this.ss.sheet("occPayAllocation");
     const expense = this.ss.sheet("expense");
 
     const paymentId = payment.addRowWithValues({
