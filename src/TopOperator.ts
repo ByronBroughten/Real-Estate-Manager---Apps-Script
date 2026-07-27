@@ -1,5 +1,5 @@
 import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
-import { Spreadsheet } from "./3. SpreadsheetNamed/SpreadsheetNamed";
+import { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
 import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
 import { ApiAggregate } from "./ApiAggregate";
@@ -56,7 +56,7 @@ export class TopOperator extends OperatorBase {
     }
   }
   static init(): TopOperator {
-    const ss = Spreadsheet.init();
+    const ss = SpreadsheetNamed.init();
     return new TopOperator(ss);
   }
 }

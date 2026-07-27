@@ -1,4 +1,4 @@
-import { dateU } from "./DateU";
+import { Dat } from "./utils/Dat";
 
 const _currencyUtils = {
   format(amount: number, locale: string = "en-US", currency: string = "USD") {
@@ -36,7 +36,7 @@ const _idUtils = {
 
 export const utils = {
   general: {},
-  date: dateU,
+  date: Dat,
   currency: _currencyUtils,
   id: _idUtils,
 };

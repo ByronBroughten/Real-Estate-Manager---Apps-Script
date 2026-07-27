@@ -1,7 +1,7 @@
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
 import type { Row } from "../3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
-import { dateU } from "../DateU";
+import { Dat } from "../utils/Dat";
 
 interface AddSubsidyContractProps {
   subsidyAgreementId: string;
@@ -31,7 +31,7 @@ export class SubsidyMgmt extends OperatorBase {
     const subsidyAgreement = this.agreementSheet;
     subsidyAgreement.orderedRows.forEach((sa) => {
       const dateNext = sa.value("rentPortionDateNext");
-      if (dateU.isDateAndTodayOrPassed(dateNext)) {
+      if (Dat.isDateAndTodayOrPassed(dateNext)) {
         const contractLease = this.getActiveLeaseForContract(sa, dateNext);
         this.addSubsidyContract({
           subsidyAgreementId: sa.id,
@@ -74,10 +74,7 @@ export class SubsidyMgmt extends OperatorBase {
     ...rest
   }: AddSubsidyContractProps) {
     if (endPriorActiveContracts === "yes") {
-      this.endActiveContracts(
-        subsidyAgreementId,
-        dateU.getDayBefore(startDate),
-      );
+      this.endActiveContracts(subsidyAgreementId, Dat.getDayBefore(startDate));
     }
     this.contractSheet.addRowWithValues({
       subsidyAgreementId,

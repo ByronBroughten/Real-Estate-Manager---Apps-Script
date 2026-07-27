@@ -1,8 +1,8 @@
-import type { TableValues } from "./1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
+import type { TableValues } from "./0. spreadsheetMetaData/5. columnAttributes";
 import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
 import type { Row } from "./3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "./3. SpreadsheetNamed/SheetNamed";
-import type { Spreadsheet } from "./3. SpreadsheetNamed/SpreadsheetNamed";
+import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
 import { LedgerMgmt } from "./4. BusinessClasses/LedgerMgmt";
 import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
@@ -52,7 +52,7 @@ type ApiFns = {
 };
 
 export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
-  constructor(ss: Spreadsheet, event: StandardEvent) {
+  constructor(ss: SpreadsheetNamed, event: StandardEvent) {
     super(ss);
     this.event = event;
     this.apiSheet = this.sheet("api");

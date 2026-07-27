@@ -164,7 +164,7 @@ class DateUtils {
   }
 }
 
-export const dateU = new DateUtils();
+export const Dat = new DateUtils();
 
 function _dateTest() {
   const date = new Date();

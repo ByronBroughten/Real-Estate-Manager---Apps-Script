@@ -1,6 +1,4 @@
-import { oneTimeSheetUpdates } from "./OnetimeSheetUpdates.js";
 import { TopOperator } from "./TopOperator.js";
-import { asU } from "./utilitiesAppsScript.js";
 
 function triggerFirstOfMonth() {
   const top = TopOperator.init();
@@ -13,19 +11,6 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
     top.onTrueValueEntered(e);
   }
 }
-
-function resetTriggers(doResetTriggers: boolean = true) {
-  if (doResetTriggers) {
-    const top = TopOperator.init();
-    top.test();
-    asU.trigger.deleteAll();
-    asU.trigger.addFirstOfMonth("triggerFirstOfMonth");
-    asU.trigger.addOnEdit("triggerOnEdit");
-  }
-}
-
-oneTimeSheetUpdates.test();
-resetTriggers(false);
 
 function testUpdateLeaseOngoingCharges() {
   const top = TopOperator.init();
