@@ -1,4 +1,4 @@
-import { RowRawBase } from "./RawHandlerBases/RowRawBase";
+import { RowRawBase } from "./ClassBases/RowRawBase";
 import { SheetRaw } from "./SheetRaw";
 
 export class RowRaw extends RowRawBase {

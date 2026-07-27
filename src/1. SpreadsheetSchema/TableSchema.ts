@@ -1,17 +1,17 @@
-import { utils } from "../utilitiesGeneral";
-import { Arr } from "../utils/Arr";
-import { spreadsheetConfig } from "./0. sheetMetaData/1. spreadsheetConfig";
+import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
 import {
   getTableAttribute,
   type TableAttributes,
   type TableName,
   type TableNameSimple,
-} from "./0. sheetMetaData/4.0 tableAttributes";
+} from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import {
   getTableColumnNames,
   type ColumnName,
   type TableValues,
-} from "./0. sheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/5. columnAttributes";
+import { utils } from "../utilitiesGeneral";
+import { Arr } from "../utils/Arr";
 import { ColumnSchema } from "./ColumnSchema";
 import { SpreadsheetSchema } from "./SpreadsheetSchema";
 

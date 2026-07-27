@@ -1,7 +1,7 @@
+import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
+import type { Row } from "../3. SpreadsheetNamed/RowNamed";
+import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { dateU } from "../DateU";
-import type { Row } from "./GenericHandlers/RowNamed";
-import type { SheetNamed } from "./GenericHandlers/SheetNamed";
-import { OperatorBase } from "./HandlerBases/OperatorBase";
 
 interface AddSubsidyContractProps {
   subsidyAgreementId: string;

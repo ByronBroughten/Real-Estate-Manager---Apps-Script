@@ -1,17 +1,17 @@
-import type { TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes.js";
-import { SpreadsheetSchema } from "../../appSchema/SpreadsheetSchema.js";
-import { Obj } from "../../utils/Obj.js";
+import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
+import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchema.js";
+import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase.js";
+import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
+import { Obj } from "../utils/Obj.js";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetState,
-} from "../HandlerBases/SpreadsheetNamedBase.js";
-import type { BatchUpdateRequest } from "../RawHandlers/RawHandlerBases/SpreadsheetRawBase.js";
-import { SpreadsheetRaw } from "../RawHandlers/SpreadsheetRaw.js";
+} from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed, type SheetOptions } from "./SheetNamed.js";
 
-export class Spreadsheet extends SpreadsheetNamedBase {
-  static init(): Spreadsheet {
-    return new Spreadsheet({
+export class SpreadsheetNamed extends SpreadsheetNamedBase {
+  static init(): SpreadsheetNamed {
+    return new SpreadsheetNamed({
       namedState: {
         spreadsheetTables: {} as SpreadsheetState,
         spreadsheetSchema: new SpreadsheetSchema(),

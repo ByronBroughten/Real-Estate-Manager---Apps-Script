@@ -1,11 +1,11 @@
-import type { GroupToTableName } from "./appSchema/0. sheetMetaData/4.1 tableNameGroups";
-import type { TableValues } from "./appSchema/0. sheetMetaData/5. columnAttributes";
-import { ChargeMgmt } from "./StateHandlers/ChargeMgmt";
-import { ExpenseMgmt } from "./StateHandlers/ExpenseMgmt";
-import type { SheetNamed } from "./StateHandlers/GenericHandlers/SheetNamed";
-import type { Spreadsheet } from "./StateHandlers/GenericHandlers/SpreadsheetNamed";
-import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
-import { PaymentMgmt } from "./StateHandlers/PaymentMgmt";
+import type { GroupToTableName } from "./0. spreadsheetMetaData/4.1 tableNameGroups";
+import type { TableValues } from "./0. spreadsheetMetaData/5. columnAttributes";
+import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
+import type { SheetNamed } from "./3. SpreadsheetNamed/SheetNamed";
+import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
+import { ChargeMgmt } from "./4. BusinessClasses/ChargeMgmt";
+import { ExpenseMgmt } from "./4. BusinessClasses/ExpenseMgmt";
+import { PaymentMgmt } from "./4. BusinessClasses/PaymentMgmt";
 import type { StandardEvent } from "./TopOperator";
 
 type AggregateApiFns = {
@@ -17,7 +17,7 @@ type AggregateApiFns = {
 export class ApiAggregate<
   TN extends GroupToTableName<"aggregateApi">,
 > extends OperatorBase {
-  constructor(ss: Spreadsheet, tableName: TN, event: StandardEvent) {
+  constructor(ss: SpreadsheetNamed, tableName: TN, event: StandardEvent) {
     super(ss);
     this.apiSheet = this.sheet(tableName);
     this.event = event;

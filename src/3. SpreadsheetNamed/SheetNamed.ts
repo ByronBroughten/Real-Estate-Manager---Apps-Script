@@ -1,18 +1,19 @@
-import { spreadsheetConfig } from "../../appSchema/0. sheetMetaData/1. spreadsheetConfig";
-import { type TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes";
-import {
-  isInTnGroup,
-  type GroupToTableName,
-  type TnGroupName,
-} from "../../appSchema/0. sheetMetaData/4.1 tableNameGroups";
+import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
+import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type {
+  GroupToTableName,
+  TnGroupName,
+} from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../../appSchema/0. sheetMetaData/5. columnAttributes";
-import type { TableSchema } from "../../appSchema/TableSchema";
-import { Arr } from "../../utils/Arr";
-import { Obj } from "../../utils/Obj";
+} from "../0. spreadsheetMetaData/5. columnAttributes";
+import type { TableSchema } from "../1. SpreadsheetSchema/TableSchema";
+import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
+import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
+import { Arr } from "../utils/Arr";
+import { Obj } from "../utils/Obj";
 import {
   SheetNamedBase,
   type ChangesToSave,
@@ -20,15 +21,13 @@ import {
   type RowChangesToSave,
   type Rows,
   type SheetState,
-} from "../HandlerBases/SheetNamedBase";
+} from "./ClassBases/SheetNamedBase";
 import type {
   SpreadsheetNamedProps,
   SpreadsheetState,
-} from "../HandlerBases/SpreadsheetNamedBase";
-import type { BatchUpdateRequest } from "../RawHandlers/RawHandlerBases/SpreadsheetRawBase";
-import type { SheetRaw } from "../RawHandlers/SheetRaw";
+} from "./ClassBases/SpreadsheetNamedBase";
 import { Row } from "./RowNamed";
-import { Spreadsheet } from "./SpreadsheetNamed";
+import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 type RowChangeProps<TN extends TableName> =
   | { action: "add" | "delete" }
@@ -36,8 +35,8 @@ type RowChangeProps<TN extends TableName> =
 
 export type SheetOptions = { isAddOnly?: boolean };
 export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
-  get spreadsheet(): Spreadsheet {
-    return new Spreadsheet(this.spreadsheetProps);
+  get spreadsheet(): SpreadsheetNamed {
+    return new SpreadsheetNamed(this.spreadsheetProps);
   }
   get raw(): SheetRaw {
     const schema = this.spreadsheetSchema.table(this.tableName);

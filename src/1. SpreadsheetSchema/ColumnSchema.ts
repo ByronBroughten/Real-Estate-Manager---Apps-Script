@@ -1,10 +1,9 @@
-import type { CombineStringsWithFlat } from "../utils/Str";
 import {
   getValueAttribute,
   type ValueAttributes,
   type ValueName,
-} from "./0. sheetMetaData/3.2 valueAttributes";
-import type { TableName } from "./0. sheetMetaData/4.0 tableAttributes";
+} from "../0. spreadsheetMetaData/3.2 valueAttributes";
+import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import {
   getColumnAttribute,
   type ColumnAttributes,
@@ -12,7 +11,8 @@ import {
   type ColumnName,
   type ColumnValue,
   type ColumnValueName,
-} from "./0. sheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/5. columnAttributes";
+import type { CombineStringsWithFlat } from "../utils/Str";
 
 export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
   readonly tableName: TN;

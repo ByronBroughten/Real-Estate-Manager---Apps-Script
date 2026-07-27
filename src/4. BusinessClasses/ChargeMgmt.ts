@@ -1,12 +1,12 @@
-import { isValidationValueNoEmpty } from "../appSchema/0. sheetMetaData/3.1 validationLists";
-import type { TableValues } from "../appSchema/0. sheetMetaData/5. columnAttributes";
+import { isValidationValueNoEmpty } from "../1. SpreadsheetSchema/0. sheetMetaData/3.1 validationLists";
+import type { TableValues } from "../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
 import type { MonthYear } from "../DateU";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
 import { Obj, type StrictPick } from "../utils/Obj";
-import type { Row } from "./GenericHandlers/RowNamed";
-import type { SheetNamed } from "./GenericHandlers/SheetNamed";
-import { OperatorBase } from "./HandlerBases/OperatorBase";
+import type { Row } from "../3. SpreadsheetNamed/RowNamed";
+import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
+import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
 
 export const chargeVarbToDescriptor = {
   rentChargeBaseMonthly: "Rent charge (base)",

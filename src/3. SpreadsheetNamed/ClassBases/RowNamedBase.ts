@@ -1,5 +1,5 @@
-import type { TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes";
-import type { TableValues } from "../../appSchema/0. sheetMetaData/5. columnAttributes";
+import type { TableName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { TableValues } from "../../0. spreadsheetMetaData/5. columnAttributes";
 import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
 
 export type RowState<TN extends TableName> = TableValues<TN>;

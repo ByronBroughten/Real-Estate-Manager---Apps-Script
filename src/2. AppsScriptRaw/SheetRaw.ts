@@ -1,4 +1,4 @@
-import { SheetRawBase } from "./RawHandlerBases/SheetRawBase";
+import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { RowRaw } from "./RowRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 

@@ -1,11 +1,11 @@
-import type { TableValues } from "./appSchema/0. sheetMetaData/5. columnAttributes";
-import type { Row } from "./StateHandlers/GenericHandlers/RowNamed";
-import type { SheetNamed } from "./StateHandlers/GenericHandlers/SheetNamed";
-import type { Spreadsheet } from "./StateHandlers/GenericHandlers/SpreadsheetNamed";
-import { OperatorBase } from "./StateHandlers/HandlerBases/OperatorBase";
-import { LeaseMgmt } from "./StateHandlers/LeaseMgmt";
-import { LedgerMgmt } from "./StateHandlers/LedgerMgmt";
-import { SubsidyMgmt } from "./StateHandlers/SubsidyMgmt";
+import type { TableValues } from "./1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
+import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
+import type { Row } from "./3. SpreadsheetNamed/RowNamed";
+import type { SheetNamed } from "./3. SpreadsheetNamed/SheetNamed";
+import type { Spreadsheet } from "./3. SpreadsheetNamed/SpreadsheetNamed";
+import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
+import { LedgerMgmt } from "./4. BusinessClasses/LedgerMgmt";
+import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
 import type { StandardEvent } from "./TopOperator";
 import {
   Obj,

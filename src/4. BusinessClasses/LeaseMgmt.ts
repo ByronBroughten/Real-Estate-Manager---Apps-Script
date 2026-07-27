@@ -1,8 +1,8 @@
-import type { TableValues } from "../appSchema/0. sheetMetaData/5. columnAttributes";
+import type { TableValues } from "../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
+import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
+import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { dateU } from "../DateU";
 import { Arr } from "../utils/Arr";
-import type { SheetNamed } from "./GenericHandlers/SheetNamed";
-import { OperatorBase } from "./HandlerBases/OperatorBase";
 
 interface AddLeaseProps {
   householdId: string;

@@ -1,8 +1,8 @@
-import { spreadsheetConfig } from "../../appSchema/0. sheetMetaData/1. spreadsheetConfig";
+import { spreadsheetConfig } from "../../1. SpreadsheetSchema/0. sheetMetaData/1. spreadsheetConfig";
 import {
   SpreadsheetRawBase,
   type BatchUpdateRequest,
-} from "./RawHandlerBases/SpreadsheetRawBase";
+} from "./ClassBases/SpreadsheetRawBase";
 import { SheetRaw } from "./SheetRaw";
 
 function getNativeTableNames() {

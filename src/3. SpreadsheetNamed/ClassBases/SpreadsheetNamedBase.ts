@@ -1,9 +1,9 @@
-import type { TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes";
-import type { SpreadsheetSchema } from "../../appSchema/SpreadsheetSchema";
+import type { TableName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SpreadsheetSchema } from "../../1. SpreadsheetSchema/SpreadsheetSchema";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
-} from "../RawHandlers/RawHandlerBases/SpreadsheetRawBase";
+} from "../../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
 import type { SheetState } from "./SheetNamedBase";
 
 export type SpreadsheetState = {

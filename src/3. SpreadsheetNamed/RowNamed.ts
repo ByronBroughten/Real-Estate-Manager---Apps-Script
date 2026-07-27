@@ -1,25 +1,28 @@
 import type {
   Value,
   ValueName,
-} from "../../appSchema/0. sheetMetaData/3.2 valueAttributes";
-import type { TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes";
+} from "../0. spreadsheetMetaData/3.2 valueAttributes";
+import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../../appSchema/0. sheetMetaData/5. columnAttributes";
-import type { TableSchema, VarbNameMutable } from "../../appSchema/TableSchema";
+} from "../0. spreadsheetMetaData/5. columnAttributes";
+import type {
+  TableSchema,
+  VarbNameMutable,
+} from "../1. SpreadsheetSchema/TableSchema";
+import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
+import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import {
   asU,
   type StandardizedValue,
   type UserEnteredValue,
-} from "../../utilitiesAppsScript";
-import { utils } from "../../utilitiesGeneral";
-import { Obj } from "../../utils/Obj";
-import { valS } from "../../utils/validation";
-import { RowBase, type RowState } from "../HandlerBases/RowNamedBase";
-import type { BatchUpdateRequest } from "../RawHandlers/RawHandlerBases/SpreadsheetRawBase";
-import { RowRaw } from "../RawHandlers/RowRaw";
+} from "../utilitiesAppsScript";
+import { utils } from "../utilitiesGeneral";
+import { Obj } from "../utils/Obj";
+import { valS } from "../utils/validation";
+import { RowBase, type RowState } from "./ClassBases/RowNamedBase";
 
 import { SheetNamed } from "./SheetNamed";
 

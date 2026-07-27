@@ -1,7 +1,7 @@
-import type { TableValues } from "../appSchema/0. sheetMetaData/5. columnAttributes";
+import type { TableValues } from "../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
+import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
+import type { Row } from "../3. SpreadsheetNamed/RowNamed";
 import { Obj } from "../utils/Obj";
-import type { Row } from "./GenericHandlers/RowNamed";
-import { OperatorBase } from "./HandlerBases/OperatorBase";
 
 type PaymentIdToCharges = Record<string, Row<"occCharge">[]>;
 

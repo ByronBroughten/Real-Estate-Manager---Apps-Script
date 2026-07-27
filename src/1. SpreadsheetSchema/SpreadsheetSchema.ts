@@ -1,14 +1,14 @@
 import {
   tableNames,
   type TableName,
-} from "./0. sheetMetaData/4.0 tableAttributes";
+} from "../0. spreadsheetMetaData/4.0 tableAttributes";
 
 import {
   isInTnGroup,
   type GroupToTableName,
   type TnGroupName,
-} from "./0. sheetMetaData/4.1 tableNameGroups";
-import { type ColumnName } from "./0. sheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/4.1 tableNameGroups";
+import { type ColumnName } from "../0. spreadsheetMetaData/5. columnAttributes";
 import { ColumnSchema } from "./ColumnSchema";
 import { TableSchema } from "./TableSchema";
 

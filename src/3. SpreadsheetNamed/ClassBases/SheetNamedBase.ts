@@ -1,6 +1,6 @@
-import type { TableName } from "../../appSchema/0. sheetMetaData/4.0 tableAttributes";
-import type { ColumnName } from "../../appSchema/0. sheetMetaData/5. columnAttributes";
-import type { TableSchema } from "../../appSchema/TableSchema";
+import type { TableName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { ColumnName } from "../../0. spreadsheetMetaData/5. columnAttributes";
+import type { TableSchema } from "../../1. SpreadsheetSchema/TableSchema";
 import type { RowState } from "./RowNamedBase";
 import {
   SpreadsheetNamedBase,
