@@ -60,4 +60,124 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
     return requests;
   }
+  appendTableAttributes() {
+    const metaTableSchema = this.schema.table("allTableAttributes" as const);
+    const spreadsheetId = this.gss.getId();
+
+    this.raw.initSheets();
+    const atrSheetRaw = this.raw.sheet(metaTableSchema.sheetGid);
+
+    // initSheets()
+    // If I had the title right away
+
+    // 2) Full cell data for just the "All Table Attributes" sheet.
+    const dataResponse = Sheets.Spreadsheets.get(spreadsheetId, {
+      ranges: [atrSheetRaw.title],
+      fields: "sheets(data(rowData(values(formattedValue))))",
+    });
+
+    const attrSheetData = (dataResponse.sheets || [])[0];
+    const rowData =
+      (attrSheetData &&
+        attrSheetData.data &&
+        attrSheetData.data[0] &&
+        attrSheetData.data[0].rowData) ||
+      [];
+
+    // Determine column positions from the header row (robust to column order).
+    const colIdIdx = this.schema.columnIdRowIdxBase0;
+    const colIdRow = rowData[colIdIdx];
+    const colIds = ((colIdRow && colIdRow.values) || []).map(
+      (v) => (v && v.formattedValue) || "",
+    );
+    const gidColIdx = colIds.indexOf(
+      metaTableSchema.column("sheetGid").columnId,
+    );
+    const nameColIdx = colIds.indexOf(
+      metaTableSchema.column("tableName").columnId,
+    );
+    const prefixColIdx = colIds.indexOf(
+      metaTableSchema.column("idPrefix").columnId,
+    );
+
+    if (gidColIdx === -1 || nameColIdx === -1 || prefixColIdx === -1) {
+      throw new Error(
+        `Could not locate expected headers on "${metaTableSchema.tableName}".`,
+      );
+    }
+
+    // Collect GIDs already described in the table's data rows.
+    const attrTable = attrTables[0];
+    const attrTableRange = attrTable.range;
+    const lastDataRowExclusive =
+      attrTableRange.endRowIndex !== undefined
+        ? attrTableRange.endRowIndex
+        : rowData.length;
+
+    const existingGIDs = new Set();
+    for (
+      let r = this.schema.topBodyRowIdxBase0;
+      r < lastDataRowExclusive;
+      r++
+    ) {
+      const row = rowData[r];
+      const cell = row && row.values && row.values[gidColIdx];
+      if (
+        cell &&
+        cell.formattedValue !== undefined &&
+        cell.formattedValue !== ""
+      ) {
+        existingGIDs.add(Number(cell.formattedValue));
+      }
+    }
+
+    // Find every table in the spreadsheet whose sheet GID isn't yet described.
+    const missing = [];
+    sheets.forEach((sheet) => {
+      const tables = sheet.tables || [];
+      if (tables.length === 0) return;
+      const sheetId = sheet.properties.sheetId;
+      if (existingGIDs.has(sheetId)) return;
+      // Per spec, exactly one table per sheet; describe it.
+      missing.push({ sheetId: sheetId, tableName: attrTable.name });
+    });
+
+    if (missing.length === 0) {
+      Logger.log(
+        `No missing tables found. "${metaTableSchema.tableName}" is already up to date.`,
+      );
+      return;
+    }
+
+    // Build AppendCellsRequest rows, placing values in the correct columns
+    // regardless of header order, leaving "ID prefix" blank.
+    const width = Math.max(gidColIdx, nameColIdx, prefixColIdx) + 1;
+    const rowsToAppend = missing.map((m) => {
+      const values = new Array(width).fill(null).map(() => ({}));
+      values[gidColIdx] = { userEnteredValue: { numberValue: m.sheetId } };
+      values[nameColIdx] = { userEnteredValue: { stringValue: m.tableName } };
+      // values[prefixColIdx] intentionally left as {} (blank) for manual entry.
+      return { values: values };
+    });
+
+    Sheets.Spreadsheets.batchUpdate(
+      {
+        requests: [
+          {
+            appendCells: {
+              sheetId: metaTableSchema.sheetGid,
+              tableId: attrTable.tableId,
+              rows: rowsToAppend,
+              fields: "userEnteredValue",
+            },
+          },
+        ],
+      },
+      spreadsheetId,
+    );
+
+    Logger.log(
+      `Appended ${missing.length} missing table row(s) to "${metaTableSchema.tableName}": ${missing.map((m) => m.sheetId + " (" + m.tableName + ")").join(", ")}`,
+    );
+  }
 }

@@ -1,4 +1,3 @@
-import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
 import {
   getTableAttribute,
   type TableAttributes,
@@ -22,7 +21,7 @@ export type VarbNameMutable<TN extends TableName> = Exclude<
   VarbNameImmutable
 >;
 
-export class TableSchema<TN extends TableNameSimple> {
+export class SheetSchema<TN extends TableNameSimple> {
   readonly tableName: TN;
   constructor(tableName: TN) {
     this.tableName = tableName;
@@ -37,9 +36,6 @@ export class TableSchema<TN extends TableNameSimple> {
   }
   get spreadsheet(): SpreadsheetSchema {
     return new SpreadsheetSchema();
-  }
-  get topBodyRowIdxBase1(): number {
-    return spreadsheetConfig.topBodyRowIdxBase1;
   }
   column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchema<TN, CN> {
     return new ColumnSchema(this.tableName, columnName);

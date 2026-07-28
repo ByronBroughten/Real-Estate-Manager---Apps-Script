@@ -1,6 +1,12 @@
 import {
-  tableNames,
+  getSpreadsheetConfigAttr,
+  spreadsheetConfig,
+  type SpreadsheetConfig,
+} from "../0. spreadsheetMetaData/1. spreadsheetConfig";
+import {
+  allTableNames,
   type TableName,
+  type TableNameSimple,
 } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 
 import {
@@ -10,18 +16,27 @@ import {
 } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 import { type ColumnName } from "../0. spreadsheetMetaData/5. columnAttributes";
 import { ColumnSchema } from "./ColumnSchema";
-import { TableSchema } from "./TableSchema";
+import { SheetSchema } from "./SheetSchema";
 
 export class SpreadsheetSchema {
-  constructor() {}
-  get tableNames() {
-    return tableNames;
+  configAttr<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
+    return getSpreadsheetConfigAttr(key);
   }
-  table<TN extends TableName>(tableName: TN): TableSchema<TN> {
-    return new TableSchema(tableName);
+  get columnIdRowIdxBase0(): number {
+    return spreadsheetConfig.columnIdRowIdxBase1 - 1;
   }
-  sectionBysheetGid(sheetGid: number): TableSchema<TableName> {
-    for (const tableName of this.tableNames) {
+  get topBodyRowIdxBase0(): number {
+    return spreadsheetConfig.topBodyRowIdxBase1 - 1;
+  }
+
+  get allTableNames() {
+    return allTableNames;
+  }
+  table<TN extends TableNameSimple>(tableName: TN): SheetSchema<TN> {
+    return new SheetSchema(tableName);
+  }
+  sectionBysheetGid(sheetGid: number): SheetSchema<TableName> {
+    for (const tableName of this.allTableNames) {
       if ((sheetGid = this.table(tableName).sheetGid)) {
         return this.table(tableName);
       }

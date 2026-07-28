@@ -9,9 +9,9 @@ import type {
   TableValues,
 } from "../0. spreadsheetMetaData/5. columnAttributes";
 import type {
-  TableSchema,
+  SheetSchema,
   VarbNameMutable,
-} from "../1. SpreadsheetSchema/TableSchema";
+} from "../1. SpreadsheetSchema/SheetSchema";
 import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import {
@@ -27,7 +27,7 @@ import { RowBase, type RowState } from "./ClassBases/RowNamedBase";
 import { SheetNamed } from "./SheetNamed";
 
 export class Row<TN extends TableName> extends RowBase<TN> {
-  get schema(): TableSchema<TN> {
+  get schema(): SheetSchema<TN> {
     return this.tableSchema;
   }
   get state(): RowState<TN> {

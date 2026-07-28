@@ -1,13 +1,13 @@
-import { Arr } from "../../utils/Arr";
-import { tableNames } from "./4.0 tableAttributes";
+import { Arr } from "../utils/Arr";
+import { allTableNames } from "./4.0 tableAttributes";
 
 const tableNameGroups = {
-  aggregateApi: Arr.extractStrict(tableNames, [
+  aggregateApi: Arr.extractStrict(allTableNames, [
     "addOccChargeOnetime",
     "addHhPaymentOnetime",
     "addExpenses",
   ] as const),
-  ledgerInputs: Arr.extractStrict(tableNames, [
+  ledgerInputs: Arr.extractStrict(allTableNames, [
     "occCharge",
     "occPayAllocation",
   ] as const),

@@ -9,7 +9,7 @@ import type {
   ColumnValue,
   TableValues,
 } from "../0. spreadsheetMetaData/5. columnAttributes";
-import type { TableSchema } from "../1. SpreadsheetSchema/TableSchema";
+import type { SheetSchema } from "../1. SpreadsheetSchema/SheetSchema";
 import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
 import { Arr } from "../utils/Arr";
@@ -66,7 +66,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   }
   static initState<TN extends TableName>(
     tableName: TN,
-    schema: TableSchema<TN>,
+    schema: SheetSchema<TN>,
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     props: { isAddOnly?: boolean },
   ): SheetState<TN> {
@@ -166,7 +166,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     return literalText;
   }
   private static getVarbNameIndicesBase1<TN extends TableName>(
-    schema: TableSchema<TN>,
+    schema: SheetSchema<TN>,
     headers: string[],
   ): HeaderIndices<TN> {
     const indicesBase1: HeaderIndices<TN> = {} as HeaderIndices<TN>;
@@ -185,7 +185,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   get state(): SheetState<TN> {
     return this.sheetState;
   }
-  get schema(): TableSchema<TN> {
+  get schema(): SheetSchema<TN> {
     return this.tableSchema;
   }
   colIdxBase1<CN extends ColumnName<TN>>(columnName: CN): number {

@@ -27,6 +27,9 @@ export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
       CN & string
     >;
   }
+  get columnId(): string {
+    return this.columnAttribute("columnId") as string;
+  }
   columnAttribute<K extends keyof ColumnAttributesBase>(
     key: K,
   ): ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>] {

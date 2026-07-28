@@ -1,4 +1,4 @@
-import { Obj } from "../../utils/Obj";
+import { Obj } from "../utils/Obj";
 import { makeSchemaStructure } from "./0.1 makeSchema";
 
 interface TableAttributesBase {
@@ -75,8 +75,8 @@ export type AllTableAttributes = typeof allTableAttributes;
 export type TableAttributes<TN extends TableNameSimple> =
   AllTableAttributes[TN];
 
-export const tableNames = Obj.keys(allTableAttributes);
-export type TableNameSimple = (typeof tableNames)[number];
+export const allTableNames = Obj.keys(allTableAttributes);
+export type TableNameSimple = (typeof allTableNames)[number];
 export type TableName<TN extends TableNameSimple = TableNameSimple> = TN;
 
 export function getTableAttribute<

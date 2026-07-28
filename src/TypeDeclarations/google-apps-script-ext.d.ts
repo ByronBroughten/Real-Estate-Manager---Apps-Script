@@ -25,6 +25,7 @@ declare namespace GoogleAppsScript {
 
       export interface AppendCellsRequest {
         sheetId?: number;
+        tableId?: string;
         rows?: RowData[];
         fields?: string;
       }

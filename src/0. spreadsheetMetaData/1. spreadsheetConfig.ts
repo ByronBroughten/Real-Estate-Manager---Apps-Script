@@ -6,3 +6,10 @@ export const spreadsheetConfig = {
   activePaymentStandardYear: 2026,
   domLateFeeCharged: 6,
 } as const;
+
+export type SpreadsheetConfig = typeof spreadsheetConfig;
+export function getSpreadsheetConfigAttr<K extends keyof SpreadsheetConfig>(
+  key: K,
+): SpreadsheetConfig[K] {
+  return spreadsheetConfig[key];
+}

@@ -1,8 +1,18 @@
 export type BatchUpdateRequest = GoogleAppsScript.Sheets.Schema.Request;
 
+export interface RawSheetState {
+  title: string;
+  tableName: string;
+  tableId: string;
+  endRowIdxBase0: number;
+}
+export interface RawSheetsState {
+  [sheetGid: string]: RawSheetState;
+}
 export interface RawState {
   gss: GoogleAppsScript.Spreadsheet.Spreadsheet;
   requests: BatchUpdateRequest[];
+  sheets: RawSheetsState;
 }
 
 export interface SpreadsheetRawProps {
@@ -17,6 +27,12 @@ export class SpreadsheetRawBase {
   get gss() {
     return this.rawState.gss;
   }
+  protected get sheetsState(): RawSheetsState {
+    return this.rawState.sheets;
+  }
+  get spreadsheetId() {
+    return this.gss.getId();
+  }
   get requests() {
     return this.rawState.requests;
   }
@@ -29,6 +45,7 @@ export class SpreadsheetRawBase {
     return {
       gss: SpreadsheetApp.getActiveSpreadsheet(),
       requests: [],
+      sheets: {},
     };
   }
 }

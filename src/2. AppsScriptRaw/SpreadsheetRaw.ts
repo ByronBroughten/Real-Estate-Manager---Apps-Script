@@ -2,21 +2,9 @@ import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfi
 import {
   SpreadsheetRawBase,
   type BatchUpdateRequest,
+  type RawSheetsState,
 } from "./ClassBases/SpreadsheetRawBase";
 import { SheetRaw } from "./SheetRaw";
-
-function getNativeTableNames() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const spreadsheetId = ss.getId();
-
-  // Call the Advanced Sheets API to get spreadsheet metadata
-  const metadata = Sheets.Spreadsheets.get(spreadsheetId);
-
-  // Iterate through all tabs in the file
-  metadata.sheets.forEach((sheet) => {
-    const sheetName = sheet.properties.title;
-  });
-}
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   get headerRowIdxBase1(): number {
@@ -24,6 +12,28 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   get spreadsheetId(): string {
     return this.gss.getId();
+  }
+
+  initSheets() {
+    const metaResponse = Sheets.Spreadsheets.get(this.spreadsheetId, {
+      fields: "sheets(properties(sheetId,title),tables(name,range, tableId))",
+    });
+
+    function error(whatNotFound: string): string {
+      throw new Error(`${whatNotFound} not found.`);
+    }
+
+    const rawSheets = metaResponse.sheets.reduce((sheets, sheet) => {
+      const sheetId = sheet?.properties?.sheetId || error("sheetId");
+      const title = sheet?.properties?.title || error("title");
+      const tableName = sheet?.tables?.[0]?.name || error("tableName");
+      const tableId = sheet?.tables?.[0]?.tableId || error("tableId");
+      const endRowIdxBase0 = sheet?.data?.[0]?.rowData.length - 1;
+      sheets[sheetId] = { title, tableName, tableId, endRowIdxBase0 };
+      return sheets;
+    }, {} as RawSheetsState);
+
+    this.rawState.sheets = rawSheets;
   }
   sheet(sheetGid: number): SheetRaw {
     return new SheetRaw({
