@@ -1,5 +1,14 @@
 declare namespace GoogleAppsScript {
   namespace Sheets {
+    namespace Collection {
+      interface SpreadsheetsCollection {
+        getByDataFilter(
+          resource: Schema.GetSpreadsheetByDataFilterRequest,
+          spreadsheetId: string,
+          optionalArgs?: { fields?: string },
+        ): Schema.Spreadsheet;
+      }
+    }
     namespace Schema {
       // -----------------------------------------------------------------
       // 1. Table Data Structures

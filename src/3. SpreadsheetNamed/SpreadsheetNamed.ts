@@ -1,6 +1,7 @@
 import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
+import type { ColumnName } from "../0. spreadsheetMetaData/5. columnAttributes.js";
 import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchema.js";
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase.js";
+
 import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
 import { Obj } from "../utils/Obj.js";
 import {
@@ -8,6 +9,13 @@ import {
   type SpreadsheetState,
 } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed, type SheetOptions } from "./SheetNamed.js";
+
+type RowCount = "noRows" | "oneRow" | "allRows";
+type ReqSheetsProps = {
+  [RC in RowCount]?: {
+    [TN in TableName]?: ColumnName<TN>[];
+  };
+};
 
 export class SpreadsheetNamed extends SpreadsheetNamedBase {
   static init(): SpreadsheetNamed {
@@ -59,6 +67,25 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       requests.push(...sheet.collectRequests());
     }
     return requests;
+  }
+  reqSheets() {
+    type RowCount = "noRows" | "oneRow" | "allRows";
+    type ReqSheetsProps = {
+      [RC in RowCount]?: {
+        [TN in TableName]?: ColumnName<TN>[];
+      };
+    };
+
+    function test<P extends ReqSheetsProps>(props: P): P {
+      return props;
+    }
+
+    test({
+      allRows: {
+        property: ["bedroomCount", "closingDate"],
+      },
+      noRows: {},
+    });
   }
   appendTableAttributes() {
     const metaTableSchema = this.schema.table("allTableAttributes" as const);

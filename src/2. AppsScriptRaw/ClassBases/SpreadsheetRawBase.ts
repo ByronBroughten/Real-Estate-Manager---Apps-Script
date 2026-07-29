@@ -2,6 +2,7 @@ import {
   configGet,
   type SpreadsheetConfig,
 } from "../../0. spreadsheetMetaData/1. spreadsheetConfig";
+import type { RawSheetsState, RawState } from "../Types/RawState";
 
 export interface SpreadsheetRawProps {
   rawState: RawState;
@@ -37,6 +38,7 @@ export class SpreadsheetRawBase {
       gss: SpreadsheetApp.getActiveSpreadsheet(),
       requests: [],
       sheets: new Map(),
+      newRowIdxCounterNegative: 0,
     };
   }
 }
