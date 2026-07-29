@@ -1,10 +1,12 @@
 import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
-import {
-  SpreadsheetRawBase,
-  type BatchUpdateRequest,
-  type RawSheetsState,
-} from "./ClassBases/SpreadsheetRawBase";
+import { valS } from "../utils/validation";
+import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import { SheetRaw } from "./SheetRaw";
+import type {
+  GetByDataFilterRequest,
+  GridRange,
+} from "./Types/AppsScriptTypes";
+import type { RawSheetsState } from "./Types/RawState";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   get headerRowIdxBase1(): number {
@@ -14,25 +16,52 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return this.gss.getId();
   }
 
+  getByDataFilter(request: GetByDataFilterRequest) {
+    Sheets.Spreadsheets.getByDataFilter(request, this.spreadsheetId, {
+      fields:
+        "sheets(properties(sheetId,title),tables(name,range,tableId),data(rowData(values(formattedValue))))",
+    });
+  }
+
+  getSheets(gridRanges: GridRange[]) {
+    Sheets.Spreadsheets.getByDataFilter(
+      {
+        dataFilters: gridRanges.map((gr) => ({
+          gridRange: gr,
+        })),
+      },
+      this.spreadsheetId,
+      {
+        fields:
+          "sheets(properties(sheetId,title),tables(name,range,tableId),data(rowData(values(formattedValue))))",
+      },
+    );
+  }
   initSheets() {
     const metaResponse = Sheets.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(name,range, tableId))",
     });
 
-    function error(whatNotFound: string): string {
-      throw new Error(`${whatNotFound} not found.`);
-    }
-
     const rawSheets = metaResponse.sheets.reduce((sheets, sheet) => {
-      const sheetId = sheet?.properties?.sheetId || error("sheetId");
-      const title = sheet?.properties?.title || error("title");
-      const tableName = sheet?.tables?.[0]?.name || error("tableName");
-      const tableId = sheet?.tables?.[0]?.tableId || error("tableId");
-      const endRowIdxBase0 = sheet?.data?.[0]?.rowData.length - 1;
-      sheets[sheetId] = { title, tableName, tableId, endRowIdxBase0 };
+      const sheetId = valS.assertDefined(
+        sheet?.properties?.sheetId,
+        "sheetId not found",
+      );
+      const title = valS.assertDefined(
+        sheet?.properties?.title,
+        "title not found",
+      );
+      const tableName = valS.assertDefined(
+        sheet?.tables?.[0]?.name,
+        "tableName not found",
+      );
+      const tableId = valS.assertDefined(
+        sheet?.tables?.[0]?.tableId,
+        "tableId not found",
+      );
+      sheets.set(sheetId, { title, tableName, tableId, rowData: new Map() });
       return sheets;
-    }, {} as RawSheetsState);
-
+    }, new Map() as RawSheetsState);
     this.rawState.sheets = rawSheets;
   }
   sheet(sheetGid: number): SheetRaw {

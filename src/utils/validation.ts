@@ -2,9 +2,16 @@ class ValidationError extends Error {}
 
 export function validationError(
   value: unknown,
-  notAWhat: string
+  notAWhat: string,
 ): ValidationError {
   return new ValidationError(`value "${value}" is not a ${notAWhat}`);
+}
+
+function assertDefined<T>(value: T | null | undefined, message: string): T {
+  if (value === null || value === undefined) {
+    throw new Error(message);
+  }
+  return value;
 }
 
 const _isS = {
@@ -92,6 +99,7 @@ const _validateS = {
 export const valS = {
   is: _isS,
   validate: _validateS,
+  assertDefined,
 
   // isString(value)
   // objToAny(value: any, e: Error): any {

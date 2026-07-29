@@ -1,21 +1,18 @@
-import { spreadsheetConfig } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
-import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import { spreadsheetConfig } from "../../1. SpreadsheetSchema/0. sheetMetaData/1. spreadsheetConfig";
+import { type TableName } from "../../1. SpreadsheetSchema/0. sheetMetaData/4.0 tableAttributes";
 import {
   isInTnGroup,
   type GroupToTableName,
   type TnGroupName,
-} from "../0. spreadsheetMetaData/4.1 tableNameGroups";
+} from "../../1. SpreadsheetSchema/0. sheetMetaData/4.1 tableNameGroups";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../0. spreadsheetMetaData/5. columnAttributes";
-import type { SheetSchema } from "../1. SpreadsheetSchema/SheetSchema";
-
-import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/RawState";
-import { Arr } from "../utils/Arr";
-import { Obj } from "../utils/Obj";
+} from "../../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
+import type { TableSchema } from "../../1. SpreadsheetSchema/SheetSchema";
+import type { BatchUpdateRequest } from "../../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
+import type { SheetRaw } from "../../2. AppsScriptRaw/SheetRaw";
 import {
   SheetNamedBase,
   type ChangesToSave,
@@ -23,13 +20,15 @@ import {
   type RowChangesToSave,
   type Rows,
   type SheetState,
-} from "./ClassBases/SheetNamedBase";
+} from "../../3. SpreadsheetNamed/ClassBases/SheetNamedBase";
 import type {
   SpreadsheetNamedProps,
   SpreadsheetState,
-} from "./ClassBases/SpreadsheetNamedBase";
+} from "../../3. SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { Arr } from "../../utils/Arr";
+import { Obj } from "../../utils/Obj";
 import { Row } from "./RowNamed";
-import { SpreadsheetNamed } from "./SpreadsheetNamed";
+import { Spreadsheet } from "./SpreadsheetNamed";
 
 type RowChangeProps<TN extends TableName> =
   | { action: "add" | "delete" }
@@ -37,8 +36,8 @@ type RowChangeProps<TN extends TableName> =
 
 export type SheetOptions = { isAddOnly?: boolean };
 export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
-  get spreadsheet(): SpreadsheetNamed {
-    return new SpreadsheetNamed(this.spreadsheetProps);
+  get spreadsheet(): Spreadsheet {
+    return new Spreadsheet(this.spreadsheetProps);
   }
   get raw(): SheetRaw {
     const schema = this.spreadsheetSchema.table(this.tableName);
@@ -68,7 +67,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   }
   static initState<TN extends TableName>(
     tableName: TN,
-    schema: SheetSchema<TN>,
+    schema: TableSchema<TN>,
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     props: { isAddOnly?: boolean },
   ): SheetState<TN> {
@@ -168,7 +167,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     return literalText;
   }
   private static getVarbNameIndicesBase1<TN extends TableName>(
-    schema: SheetSchema<TN>,
+    schema: TableSchema<TN>,
     headers: string[],
   ): HeaderIndices<TN> {
     const indicesBase1: HeaderIndices<TN> = {} as HeaderIndices<TN>;
@@ -187,7 +186,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   get state(): SheetState<TN> {
     return this.sheetState;
   }
-  get schema(): SheetSchema<TN> {
+  get schema(): TableSchema<TN> {
     return this.tableSchema;
   }
   colIdxBase1<CN extends ColumnName<TN>>(columnName: CN): number {

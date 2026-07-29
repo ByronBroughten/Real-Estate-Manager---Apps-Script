@@ -8,6 +8,28 @@ function buildSpreadsheetColumnMeta() {
   appendAllColumnAttributes();
   fixAllColumnAttributes();
 }
+function sortViaBatchUpdate() {
+  const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
+  const sheetId = SpreadsheetApp.getActive()
+    .getSheetByName("Data")
+    .getSheetId();
+
+  Sheets.Spreadsheets.batchUpdate(
+    {
+      requests: [
+        {
+          sortRange: {
+            range: { sheetId, startRowIndex: 1, startColumnIndex: 0 }, // skip header, unbounded end = rest of sheet
+            sortSpecs: [
+              { dimensionIndex: 2, sortOrder: "ASCENDING" }, // column C
+            ],
+          },
+        },
+      ],
+    },
+    spreadsheetId,
+  );
+}
 
 /**
  * Scans every sheet in the spreadsheet for native Google Sheets tables and

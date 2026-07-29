@@ -1,5 +1,5 @@
 import {
-  getSpreadsheetConfigAttr,
+  configGet,
   spreadsheetConfig,
   type SpreadsheetConfig,
 } from "../0. spreadsheetMetaData/1. spreadsheetConfig";
@@ -19,8 +19,8 @@ import { ColumnSchema } from "./ColumnSchema";
 import { SheetSchema } from "./SheetSchema";
 
 export class SpreadsheetSchema {
-  configAttr<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
-    return getSpreadsheetConfigAttr(key);
+  configGet<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
+    return configGet(key);
   }
   get columnIdRowIdxBase0(): number {
     return spreadsheetConfig.columnIdRowIdxBase1 - 1;

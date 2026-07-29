@@ -32,9 +32,6 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get tableId(): string {
     return this.sheetState.tableId;
   }
-  get endRowIdxBase0(): number {
-    return this.sheetState.endRowIdxBase0;
-  }
   get sheetState(): RawSheetState {
     return this.sheetState[this.gid];
   }

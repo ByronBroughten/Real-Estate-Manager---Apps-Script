@@ -1,34 +1,36 @@
 import type {
   Value,
   ValueName,
-} from "../0. spreadsheetMetaData/3.2 valueAttributes";
-import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+} from "../../1. SpreadsheetSchema/0. sheetMetaData/3.2 valueAttributes";
+import type { TableName } from "../../1. SpreadsheetSchema/0. sheetMetaData/4.0 tableAttributes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../0. spreadsheetMetaData/5. columnAttributes";
+} from "../../1. SpreadsheetSchema/0. sheetMetaData/5. columnAttributes";
 import type {
-  SheetSchema,
+  TableSchema,
   VarbNameMutable,
-} from "../1. SpreadsheetSchema/SheetSchema";
-
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
-import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
+} from "../../1. SpreadsheetSchema/SheetSchema";
+import type { BatchUpdateRequest } from "../../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
+import { RowRaw } from "../../2. AppsScriptRaw/RowRaw";
+import {
+  RowBase,
+  type RowState,
+} from "../../3. SpreadsheetNamed/ClassBases/RowNamedBase";
 import {
   asU,
   type StandardizedValue,
   type UserEnteredValue,
-} from "../utilitiesAppsScript";
-import { utils } from "../utilitiesGeneral";
-import { Obj } from "../utils/Obj";
-import { valS } from "../utils/validation";
-import { RowBase, type RowState } from "./ClassBases/RowNamedBase";
+} from "../../utilitiesAppsScript";
+import { utils } from "../../utilitiesGeneral";
+import { Obj } from "../../utils/Obj";
+import { valS } from "../../utils/validation";
 
 import { SheetNamed } from "./SheetNamed";
 
 export class Row<TN extends TableName> extends RowBase<TN> {
-  get schema(): SheetSchema<TN> {
+  get schema(): TableSchema<TN> {
     return this.tableSchema;
   }
   get state(): RowState<TN> {
@@ -42,7 +44,7 @@ export class Row<TN extends TableName> extends RowBase<TN> {
   get raw(): RowRaw {
     return new RowRaw({
       ...this.sheet.raw.sheetRawProps,
-      idxBase0: this.idxBase1 - 1,
+      idxBase1: this.idxBase1,
     });
   }
   value<CN extends ColumnName<TN>>(columnName: CN): ColumnValue<TN, CN> {
@@ -161,12 +163,12 @@ export class Row<TN extends TableName> extends RowBase<TN> {
   get sheet(): SheetNamed<TN> {
     return new SheetNamed(this.sheetProps);
   }
-  resetToDefault(columnNames?: VarbNameMutable<TN>[]): void {
+  resetToDefault(columnNames?: VarbNameMutable<TN>[]) {
     this.setValues(
       this.schema.makeDefaultValues(columnNames) as Partial<TableValues<TN>>,
     );
   }
-  addAllVarbsAsChanges(): void {
+  addAllVarbsAsChanges() {
     this.sheet.addChangeToSave(this.id, {
       action: "update",
       columnNames: this.columnNames,
