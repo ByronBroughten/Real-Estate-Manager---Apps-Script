@@ -11,7 +11,7 @@ import {
   type ColumnName,
   type ColumnValue,
   type ColumnValueName,
-} from "../0. spreadsheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import type { CombineStringsWithFlat } from "../utils/Str";
 
 export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
@@ -28,9 +28,12 @@ export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
     >;
   }
   get columnId(): string {
-    return this.columnAttribute("columnId") as string;
+    return this.colAttribute("columnId") as string;
   }
-  columnAttribute<K extends keyof ColumnAttributesBase>(
+  get idxBase0(): number {
+    return this.colAttribute("indexBase0") as number;
+  }
+  colAttribute<K extends keyof ColumnAttributesBase>(
     key: K,
   ): ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>] {
     return getColumnAttribute(
@@ -41,7 +44,7 @@ export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
   }
   get valueName(): ColumnAttributes<TN, CN>["valueName" &
     keyof ColumnAttributes<TN, CN>] {
-    return this.columnAttribute("valueName");
+    return this.colAttribute("valueName");
   }
   valueAttribute<
     K extends keyof ValueAttributes<ColumnValueName<TN, CN> & ValueName>,
@@ -52,7 +55,7 @@ export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
     );
   }
   validate(value: unknown): ColumnValue<TN, CN> {
-    const emptyAllowed = this.columnAttribute("emptyAllowed");
+    const emptyAllowed = this.colAttribute("emptyAllowed");
     return this.valueAttribute("defaultValidate")(value) as ColumnValue<TN, CN>;
   }
   makeDefaultValue(): ColumnValue<TN, CN> {

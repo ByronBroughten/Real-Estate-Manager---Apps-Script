@@ -13,6 +13,8 @@ export type SpreadsheetState = {
 export interface NamedState {
   spreadsheetTables: SpreadsheetState;
   spreadsheetSchema: SpreadsheetSchema;
+  colIdToIdx: Record<string, number>;
+  rowIdToIdx: Record<string, number>;
 }
 
 export interface SpreadsheetNamedProps extends SpreadsheetRawProps {

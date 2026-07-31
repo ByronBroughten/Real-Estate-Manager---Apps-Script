@@ -1,5 +1,5 @@
 import type { GroupToTableName } from "./0. spreadsheetMetaData/4.1 tableNameGroups";
-import type { TableValues } from "./0. spreadsheetMetaData/5. columnAttributes";
+import type { TableValues } from "./0. spreadsheetMetaData/5. allColumnAttributes";
 import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
 import type { SheetNamed } from "./3. SpreadsheetNamed/SheetNamed";
 import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";

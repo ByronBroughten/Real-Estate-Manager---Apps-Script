@@ -162,6 +162,12 @@ class DateUtils {
       isProrated: proratedProportion < 1,
     };
   }
+  serialDateToJSDate(serial): Date {
+    // Works for xcel and Google Sheets dates stored as numbers.
+    const epoch = new Date(Date.UTC(1899, 11, 30)); // Dec 30, 1899
+    const msPerDay = 24 * 60 * 60 * 1000;
+    return new Date(epoch.getTime() + serial * msPerDay);
+  }
 }
 
 export const Dat = new DateUtils();

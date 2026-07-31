@@ -9,7 +9,7 @@ import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../0. spreadsheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import type { SheetSchema } from "../1. SpreadsheetSchema/SheetSchema";
 
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";

@@ -8,7 +8,7 @@ import {
   getTableColumnNames,
   type ColumnName,
   type TableValues,
-} from "../0. spreadsheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
 import { ColumnSchema } from "./ColumnSchema";
@@ -72,7 +72,7 @@ export class SheetSchema<TN extends TableNameSimple> {
         } else {
           values[columnName] = this.column(
             columnName,
-          ).makeDefaultValue() as TableValues<TN, CN>[typeof columnName];
+          ).makeDefaultValue() as any;
         }
         return values;
       },

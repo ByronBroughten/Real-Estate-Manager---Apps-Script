@@ -1,5 +1,5 @@
 import type { TableName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
-import type { ColumnName } from "../../0. spreadsheetMetaData/5. columnAttributes";
+import type { ColumnName } from "../../0. spreadsheetMetaData/5. allColumnAttributes";
 import type { SheetSchema } from "../../1. SpreadsheetSchema/SheetSchema";
 import type { RowState } from "./RowNamedBase";
 import {
@@ -62,6 +62,6 @@ export class SheetNamedBase<TN extends TableName> extends SpreadsheetNamedBase {
     return this.spreadsheetSchema.table(this.tableName);
   }
   get topBodyRowIdxBase1(): number {
-    return this.tableSchema.topBodyRowIdxBase1;
+    return this.configGet("topBodyRowIdxBase1");
   }
 }

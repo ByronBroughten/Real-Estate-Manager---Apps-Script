@@ -7,14 +7,13 @@ import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../0. spreadsheetMetaData/5. columnAttributes";
+} from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import type {
   SheetSchema,
   VarbNameMutable,
 } from "../1. SpreadsheetSchema/SheetSchema";
-
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
+import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import {
   asU,
   type StandardizedValue,

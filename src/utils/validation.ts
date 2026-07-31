@@ -7,9 +7,12 @@ export function validationError(
   return new ValidationError(`value "${value}" is not a ${notAWhat}`);
 }
 
-function assertDefined<T>(value: T | null | undefined, message: string): T {
+function assertDefined<T>(
+  value: T | null | undefined,
+  whatNotFound: string,
+): T {
   if (value === null || value === undefined) {
-    throw new Error(message);
+    throw new Error(`${whatNotFound} not found.`);
   }
   return value;
 }

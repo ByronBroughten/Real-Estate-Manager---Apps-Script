@@ -1,4 +1,9 @@
 export type GoogleSpreadsheet = GoogleAppsScript.Sheets.Schema.Spreadsheet;
+export type GoogleSheet = GoogleAppsScript.Sheets.Schema.Sheet;
+
+export type GoogleSheetData = GoogleAppsScript.Sheets.Schema.Sheet["data"];
+
+export type BatchUpdateRequest = GoogleAppsScript.Sheets.Schema.Request;
 
 export type DataFilter =
   GoogleAppsScript.Sheets.Schema.GetSpreadsheetByDataFilterRequest["dataFilters"][number];

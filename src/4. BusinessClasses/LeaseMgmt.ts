@@ -1,4 +1,4 @@
-import type { TableValues } from "../0. spreadsheetMetaData/5. columnAttributes";
+import type { TableValues } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { Arr } from "../utils/Arr";

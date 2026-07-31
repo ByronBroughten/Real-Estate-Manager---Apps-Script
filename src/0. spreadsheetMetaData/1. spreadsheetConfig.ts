@@ -5,6 +5,7 @@ export const spreadsheetConfig = {
   headerRowIdxBase0: 2,
   topBodyRowIdxBase0: 3,
   columnIdRowIdxBase0: 1,
+  topFetchRowIdxBase0: 1,
   idDelimiter: "-",
   activePaymentStandardYear: 2026,
   domLateFeeCharged: 6,

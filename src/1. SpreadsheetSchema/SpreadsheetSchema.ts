@@ -14,7 +14,7 @@ import {
   type GroupToTableName,
   type TnGroupName,
 } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
-import { type ColumnName } from "../0. spreadsheetMetaData/5. columnAttributes";
+import { type ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { ColumnSchema } from "./ColumnSchema";
 import { SheetSchema } from "./SheetSchema";
 
@@ -35,7 +35,7 @@ export class SpreadsheetSchema {
   table<TN extends TableNameSimple>(tableName: TN): SheetSchema<TN> {
     return new SheetSchema(tableName);
   }
-  sectionBysheetGid(sheetGid: number): SheetSchema<TableName> {
+  sheetByGid(sheetGid: number): SheetSchema<TableName> {
     for (const tableName of this.allTableNames) {
       if ((sheetGid = this.table(tableName).sheetGid)) {
         return this.table(tableName);

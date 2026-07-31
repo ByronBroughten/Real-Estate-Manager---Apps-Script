@@ -1,8 +1,9 @@
 import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
-import type { ColumnName } from "../0. spreadsheetMetaData/5. columnAttributes.js";
+import type { ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes.js";
 import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchema.js";
 
 import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
+import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes.js";
 import { Obj } from "../utils/Obj.js";
 import {
   SpreadsheetNamedBase,
@@ -11,9 +12,9 @@ import {
 import { SheetNamed, type SheetOptions } from "./SheetNamed.js";
 
 type RowCount = "noRows" | "oneRow" | "allRows";
-type ReqSheetsProps = {
+type ReqSheetsProps<TN extends TableName> = {
   [RC in RowCount]?: {
-    [TN in TableName]?: ColumnName<TN>[];
+    [T in TN]?: ColumnName<T>[];
   };
 };
 
@@ -23,6 +24,8 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       namedState: {
         spreadsheetTables: {} as SpreadsheetState,
         spreadsheetSchema: new SpreadsheetSchema(),
+        colIdToIdx: {},
+        rowIdToIdx: {},
       },
       rawState: SpreadsheetRaw.initRawState(),
     });
@@ -68,24 +71,18 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
     return requests;
   }
-  reqSheets() {
-    type RowCount = "noRows" | "oneRow" | "allRows";
-    type ReqSheetsProps = {
-      [RC in RowCount]?: {
-        [TN in TableName]?: ColumnName<TN>[];
-      };
-    };
+  reqSheets<T extends TableName>(props: ReqSheetsProps<T>): SheetNamed<T> {
+    this.raw.reqSheets();
 
-    function test<P extends ReqSheetsProps>(props: P): P {
-      return props;
-    }
-
-    test({
+    const la = test({
       allRows: {
         property: ["bedroomCount", "closingDate"],
+        capex: ["lifespanMonths"],
       },
-      noRows: {},
-    });
+      noRows: {
+        allColumnAttributes: ["columnName"],
+      },
+    })[0];
   }
   appendTableAttributes() {
     const metaTableSchema = this.schema.table("allTableAttributes" as const);

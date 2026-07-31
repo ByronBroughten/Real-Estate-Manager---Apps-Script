@@ -12,7 +12,7 @@ export class RowRaw extends RowRawBase {
           sheetId: this.sheet.gid,
           dimension: "ROWS",
           startIndex: this.idxBase0,
-          endIndex: this.idxBase1,
+          endIndex: this.idxBase0 + 1,
         },
       },
     };

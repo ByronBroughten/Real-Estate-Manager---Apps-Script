@@ -1,3 +1,5 @@
+import type { RawState } from "../../2. AppsScriptRaw/Types/RawState";
+
 export interface SpreadsheetRawProps {
   rawState: RawState;
 }
@@ -22,6 +24,7 @@ export class SpreadsheetRawBase {
     return {
       gss: SpreadsheetApp.getActiveSpreadsheet(),
       requests: [],
+      sheets: new Map(),
     };
   }
 }
