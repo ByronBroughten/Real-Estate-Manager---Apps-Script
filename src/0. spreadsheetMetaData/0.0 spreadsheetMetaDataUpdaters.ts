@@ -516,7 +516,7 @@ function pruneAllColumnAttributes() {
     throw new Error(
       'Could not locate the "' +
         META_SHEET_TITLE +
-        '" sheet (gid ' +
+        '" sheet (sheetGid ' +
         META_SHEET_GID +
         ").",
     );

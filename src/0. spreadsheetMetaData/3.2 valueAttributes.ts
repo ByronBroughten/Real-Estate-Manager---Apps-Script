@@ -1,8 +1,13 @@
-import { utils } from "../../utilitiesGeneral";
-import { valS } from "../../utils/validation";
+import { utils } from "../utilitiesGeneral";
+import { Dat } from "../utils/Dat";
+import { valS } from "../utils/validation";
 import { makeSchemaStructure } from "./0.1 makeSchema";
 import type { ValueNameSimple } from "./2. valueNames";
-import { va, type ValueAttributesBase } from "./3.0 valueAttribute";
+import {
+  extractCellValue,
+  va,
+  type ValueAttributesBase,
+} from "./3.0 valueAttribute";
 import { makeValidationValueSchemas } from "./3.1 validationLists";
 
 type AllValueAttributesBase = Record<ValueNameSimple, ValueAttributesBase>;
@@ -13,26 +18,34 @@ const allValueAttributes = makeSchemaStructure(
       type: "" as string,
       makeDefault: () => utils.id.makeBase(),
       defaultValidate: valS.validate.string,
+      extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
     }),
     string: va({
       type: "" as string,
       makeDefault: () => "",
       defaultValidate: valS.validate.string,
+      extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
     }),
     number: va({
       type: "" as number | string,
       makeDefault: () => "",
       defaultValidate: valS.validate.numberOrEmpty,
+      extractCellValue: (colCell) => extractCellValue(colCell, "numberValue"),
     }),
     boolean: va({
       type: "" as boolean | string,
       makeDefault: () => false,
       defaultValidate: valS.validate.boolean,
+      extractCellValue: (colCell) => extractCellValue(colCell, "boolValue"),
     }),
     date: va({
       type: "" as Date | string,
       makeDefault: () => new Date(),
       defaultValidate: valS.validate.dateOrEmptyOrFormula,
+      extractCellValue: (colCell) =>
+        extractCellValue(colCell, "numberValue", (value) =>
+          Dat.serialDateToJSDate(value),
+        ),
     }),
     ...makeValidationValueSchemas(),
   } as const,

@@ -14,7 +14,10 @@ import {
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import type { CombineStringsWithFlat } from "../utils/Str";
 
-export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
+export class ColumnSchema<
+  TN extends TableName = TableName,
+  CN extends ColumnName<TN> = ColumnName<TN>,
+> {
   readonly tableName: TN;
   readonly columnName: CN;
   constructor(tableName: TN, columnName: CN) {
@@ -61,7 +64,7 @@ export class ColumnSchema<TN extends TableName, CN extends ColumnName<TN>> {
   makeDefaultValue(): ColumnValue<TN, CN> {
     return this.valueAttribute("makeDefault")() as ColumnValue<TN, CN>;
   }
-  get isEquationLiteral(): boolean {
+  get isFormula(): boolean {
     const defaultValue = this.makeDefaultValue();
     if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
       return true;

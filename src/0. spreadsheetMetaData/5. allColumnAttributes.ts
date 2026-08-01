@@ -1,4 +1,4 @@
-import { Obj } from "../utils/Obj";
+import { Obj, type KeyedMap } from "../utils/Obj";
 import type { CombineStringsWithFlat } from "../utils/Str";
 import { makeSchemaStructure } from "./0.1 makeSchema";
 import {
@@ -7,7 +7,11 @@ import {
   type ValueAttributes,
   type ValueName,
 } from "./3.2 valueAttributes";
-import { type TableNameSimple } from "./4.0 tableAttributes";
+import {
+  allTableNames,
+  getTableAttribute,
+  type TableNameSimple,
+} from "./4.0 tableAttributes";
 
 export interface ColumnAttributesBase<VN extends ValueName = ValueName> {
   columnId: string;
@@ -3613,4 +3617,42 @@ export function getColumnAttribute<
   K extends keyof ColumnAttributes<TN, CN>,
 >(tableName: TN, columnName: CN, key: K): ColumnAttributes<TN, CN>[K] {
   return allColumnAttributes[tableName][columnName][key];
+}
+
+export type RawIdxColumnAttributes = KeyedMap<
+  Record<string, ColumnAttributesBase>,
+  "indexBase0",
+  "columnName"
+>;
+export type ColAttributesRaw =
+  RawIdxColumnAttributes extends Map<any, infer V> ? V : never;
+type AllColumnAttrsGidIdx = Map<number, RawIdxColumnAttributes>;
+function makeAllColumnAttrsGidIdx(): AllColumnAttrsGidIdx {
+  return allTableNames.reduce((attrs, tableName) => {
+    const sheetGid = getTableAttribute(tableName, "sheetGid");
+    attrs.set(
+      sheetGid,
+      Obj.toKeyedMap(
+        allColumnAttributes[tableName],
+        "indexBase0",
+        "columnName",
+      ),
+    );
+    return attrs;
+  }, new Map() as AllColumnAttrsGidIdx);
+}
+
+const allColumnAttrsGidIdx = makeAllColumnAttrsGidIdx();
+export function getColumnAttributeRaw<K extends keyof ColAttributesRaw>(
+  sheetId: number,
+  columnIdx: number,
+  key: K,
+): ColAttributesRaw[K] {
+  const columnAttrs = allColumnAttrsGidIdx.get(sheetId)?.get(columnIdx);
+  if (!columnAttrs) {
+    throw new Error(
+      `No column attributes for sheetId=${sheetId}, columnIdx=${columnIdx}`,
+    );
+  }
+  return columnAttrs[key];
 }

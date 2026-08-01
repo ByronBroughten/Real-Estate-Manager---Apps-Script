@@ -14,10 +14,11 @@ export interface RawSheetState {
   tableName: string;
   tableId: string;
   rowIndexesAreValid: boolean;
-  rowData: RawRowData;
+  rowStates: RawRowStates;
 }
 
-export type RawRowData = Map<RowIdx, Map<ColIdx, CellValue>>;
+export type RawRowStates = Map<RowIdx, RawRowState>;
+export type RawRowState = Map<ColIdx, CellValue>;
 type SheetId = number;
 type RowIdx = number;
 type ColIdx = number;

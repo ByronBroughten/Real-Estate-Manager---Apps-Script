@@ -39,7 +39,7 @@ export class LeaseMgmt extends OperatorBase {
     return this.leaseSheetProp;
   }
   get leaseSchema() {
-    return this.schema.table("occupancyTerms");
+    return this.schema.sheet("occupancyTerms");
   }
   get defaultLeaseValues(): LeaseAmountValues {
     return {

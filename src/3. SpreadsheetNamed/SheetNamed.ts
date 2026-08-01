@@ -41,7 +41,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     return new SpreadsheetNamed(this.spreadsheetProps);
   }
   get raw(): SheetRaw {
-    const schema = this.spreadsheetSchema.table(this.tableName);
+    const schema = this.spreadsheetSchema.spreadsheetConfig(this.tableName);
     return this.spreadsheet.raw.sheet(schema.sheetGid);
   }
   static init<TN extends TableName>(
@@ -52,7 +52,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     const { spreadsheetSchema, spreadsheetTables } =
       spreadsheetProps.namedState;
     const { gss } = spreadsheetProps.rawState;
-    const schema = spreadsheetSchema.table(tableName);
+    const schema = spreadsheetSchema.sheet(tableName);
 
     spreadsheetTables[tableName] = SheetNamed.initState(
       tableName,
@@ -72,7 +72,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     sheet: GoogleAppsScript.Spreadsheet.Sheet,
     props: { isAddOnly?: boolean },
   ): SheetState<TN> {
-    const { topBodyRowIdxBase1 } = schema.spreadsheet.table(tableName);
+    const { topBodyRowIdxBase1 } = schema.spreadsheet.sheet(tableName);
 
     const range = sheet.getDataRange();
     const lastColIdx = range.getLastColumn();
@@ -267,7 +267,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     if (rowChange.action === "update") {
       for (const columnName of rowChange.columnNames) {
         const varbSchema = this.schema.column(columnName);
-        if (!varbSchema.isEquationLiteral) {
+        if (!varbSchema.isFormula) {
           changes.update.add(columnName);
         }
       }
@@ -332,7 +332,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
       );
     }
 
-    const { baseId, fullId } = this.schema.makeSectionIds();
+    const { baseId, fullId } = this.schema.makeRowId();
     const rowId = fullId;
     this.rows[rowId] = {} as TableValues<TN>;
     this.state.bodyRowOrder.push(rowId);

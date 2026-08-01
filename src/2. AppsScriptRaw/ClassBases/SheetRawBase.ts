@@ -1,43 +1,32 @@
+import type { RawSheetState } from "../Types/RawState";
 import {
   SpreadsheetRawBase,
-  type RawSheetState,
   type SpreadsheetRawProps,
 } from "./SpreadsheetRawBase";
 
 export interface SheetRawProps extends SpreadsheetRawProps {
-  gid: number;
+  sheetGid: number;
 }
 
 export class SheetRawNotFoundError extends Error {
-  constructor(gid: number) {
-    super(`Sheet with gid "${gid}" not found.`);
+  constructor(sheetGid: number) {
+    super(`Sheet with sheetGid "${sheetGid}" not found.`);
   }
 }
 
 export class SheetRawBase extends SpreadsheetRawBase {
-  readonly gid: number;
-  constructor({ gid, ...rest }: SheetRawProps) {
+  readonly sheetGid: number;
+  constructor({ sheetGid, ...rest }: SheetRawProps) {
     super(rest);
-    this.gid = gid;
-    if (!this.sheetState[this.gid]) {
-      throw new SheetRawNotFoundError(this.gid);
-    }
+    this.sheetGid = sheetGid;
   }
-  get title(): string {
-    return this.sheetState.title;
-  }
-  get tableName(): string {
-    return this.sheetState.tableName;
-  }
-  get tableId(): string {
-    return this.sheetState.tableId;
-  }
+
   get sheetState(): RawSheetState {
-    return this.sheetState[this.gid];
+    return this.sheetState[this.sheetGid];
   }
   get sheetRawProps(): SheetRawProps {
     return {
-      gid: this.gid,
+      sheetGid: this.sheetGid,
       rawState: this.rawState,
     };
   }

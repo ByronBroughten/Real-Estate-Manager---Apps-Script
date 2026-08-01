@@ -1,9 +1,4 @@
 import {
-  configGet,
-  spreadsheetConfig,
-  type SpreadsheetConfig,
-} from "../0. spreadsheetMetaData/1. spreadsheetConfig";
-import {
   allTableNames,
   type TableName,
   type TableNameSimple,
@@ -15,39 +10,38 @@ import {
   type TnGroupName,
 } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 import { type ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes";
+import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
+import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
 import { ColumnSchema } from "./ColumnSchema";
 import { SheetSchema } from "./SheetSchema";
 
-export class SpreadsheetSchema {
-  configGet<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
-    return configGet(key);
+export class SpreadsheetSchema extends SchemaBase {
+  get raw(): SpreadsheetSchemaRaw {
+    return new SpreadsheetSchemaRaw();
   }
-  get columnIdRowIdxBase0(): number {
-    return spreadsheetConfig.columnIdRowIdxBase1 - 1;
-  }
-  get topBodyRowIdxBase0(): number {
-    return spreadsheetConfig.topBodyRowIdxBase1 - 1;
-  }
-
-  get allTableNames() {
-    return allTableNames;
-  }
-  table<TN extends TableNameSimple>(tableName: TN): SheetSchema<TN> {
+  sheet<TN extends TableNameSimple>(tableName: TN): SheetSchema<TN> {
     return new SheetSchema(tableName);
   }
-  sheetByGid(sheetGid: number): SheetSchema<TableName> {
-    for (const tableName of this.allTableNames) {
-      if ((sheetGid = this.table(tableName).sheetGid)) {
-        return this.table(tableName);
-      }
-    }
-    throw new Error(`Section not found for sheetGid ${sheetGid}`);
-  }
-  varb<TN extends TableName, CN extends ColumnName<TN>>(
+  column<TN extends TableName, CN extends ColumnName<TN>>(
     tableName: TN,
     columnName: CN,
   ): ColumnSchema<TN, CN> {
     return new ColumnSchema(tableName, columnName);
+  }
+  validateConfig() {
+    if (this.colIdIdxAsFetched < 0) {
+      throw new Error(
+        "Column index is not fetched; column cannot be verified.",
+      );
+    }
+    if (this.topBodyRowIdxAsFetched < 0) {
+      throw new Error(
+        "Top row of table data is not fetched; data will be incomplete.",
+      );
+    }
+  }
+  get allTableNames() {
+    return allTableNames;
   }
   isInTnGroup<GN extends TnGroupName>(
     groupName: GN,

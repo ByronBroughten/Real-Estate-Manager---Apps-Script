@@ -1,4 +1,4 @@
-import { Obj } from "../utils/Obj";
+import { Obj, type KeyedMap } from "../utils/Obj";
 import { makeSchemaStructure } from "./0.1 makeSchema";
 
 interface TableAttributesBase {
@@ -6,14 +6,14 @@ interface TableAttributesBase {
   idPrefix: string;
 }
 
-function makeTableAttributes<T extends TableAttributesBase>(
+function makeTableAttributes(
   sheetGid: number,
   idPrefix: string,
-): T {
+): TableAttributesBase {
   return {
     sheetGid,
     idPrefix,
-  } as T;
+  };
 }
 const mta = makeTableAttributes;
 type AllTableAttributesBase = Record<string, TableAttributesBase>;
@@ -84,4 +84,24 @@ export function getTableAttribute<
   K extends keyof TableAttributes<TN>,
 >(tableName: TN, key: K): TableAttributes<TN>[K] {
   return allTableAttributes[tableName][key];
+}
+
+type AllTableAttributesByGid = KeyedMap<
+  AllTableAttributes,
+  "sheetGid",
+  "tableName"
+>;
+export const tableAttributesByGid = Obj.toKeyedMap(
+  allTableAttributes,
+  "sheetGid",
+  "tableName",
+);
+
+export type TableAttributesRaw =
+  AllTableAttributesByGid extends Map<any, infer V> ? V : never;
+export function getTableAttributeByGid<K extends keyof TableAttributesRaw>(
+  sheetGid,
+  key: K,
+): TableAttributesRaw[K] {
+  return tableAttributesByGid[sheetGid][key];
 }

@@ -13,8 +13,5 @@ export type GetByDataFilterRequest =
 
 export type GridRange = GoogleAppsScript.Sheets.Schema.GridRange;
 
-const test: GridRange = {
-  sheetId: 0,
-  startRowIndex: 0,
-  endRowIndex: 0,
-};
+export type GoogleColCell = GoogleAppsScript.Sheets.Schema.RowData;
+export type GoogleEffectiveValue = GoogleAppsScript.Sheets.Schema.ExtendedValue;

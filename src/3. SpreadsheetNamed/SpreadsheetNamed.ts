@@ -2,7 +2,10 @@ import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js
 import type { ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes.js";
 import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchema.js";
 
-import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
+import {
+  SpreadsheetRaw,
+  type RowsSheetsReqPropsRaw,
+} from "../2. AppsScriptRaw/SpreadsheetRaw.js";
 import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes.js";
 import { Obj } from "../utils/Obj.js";
 import {
@@ -12,10 +15,14 @@ import {
 import { SheetNamed, type SheetOptions } from "./SheetNamed.js";
 
 type RowCount = "noRows" | "oneRow" | "allRows";
-type ReqSheetsProps<TN extends TableName> = {
+type RowsSheetsReqProps<TN extends TableName> = {
   [RC in RowCount]?: {
     [T in TN]?: ColumnName<T>[];
   };
+};
+
+type NamedSheets<TN extends TableName> = {
+  [T in TN]: SheetNamed<T>;
 };
 
 export class SpreadsheetNamed extends SpreadsheetNamedBase {
@@ -29,10 +36,6 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       },
       rawState: SpreadsheetRaw.initRawState(),
     });
-  }
-  private batchGet(tableNames: TableName[]) {
-    // This defines which sheets you will need.
-    // If you want to get fancy, you can make it define which columns you'll need
   }
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
@@ -71,137 +74,48 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
     return requests;
   }
-  reqSheets<T extends TableName>(props: ReqSheetsProps<T>): SheetNamed<T> {
-    this.raw.reqSheets();
-
-    const la = test({
-      allRows: {
-        property: ["bedroomCount", "closingDate"],
-        capex: ["lifespanMonths"],
-      },
-      noRows: {
-        allColumnAttributes: ["columnName"],
-      },
-    })[0];
+  reqSheets<T extends TableName>(props: RowsSheetsReqProps<T>): NamedSheets<T> {
+    const rawProps = this._reqSheetsPropsToRaw(props);
+    this.raw.initSheets(rawProps);
+    const tableNames = this._tableNamesFromReqProps(props);
+    return tableNames.reduce((acc, tableName) => {
+      acc[tableName] = this.sheet(tableName);
+      return acc;
+    }, {} as NamedSheets<T>);
   }
-  appendTableAttributes() {
-    const metaTableSchema = this.schema.table("allTableAttributes" as const);
-    const spreadsheetId = this.gss.getId();
-
-    this.raw.initSheets();
-    const atrSheetRaw = this.raw.sheet(metaTableSchema.sheetGid);
-
-    // initSheets()
-    // If I had the title right away
-
-    // 2) Full cell data for just the "All Table Attributes" sheet.
-    const dataResponse = Sheets.Spreadsheets.get(spreadsheetId, {
-      ranges: [atrSheetRaw.title],
-      fields: "sheets(data(rowData(values(formattedValue))))",
-    });
-
-    const attrSheetData = (dataResponse.sheets || [])[0];
-    const rowData =
-      (attrSheetData &&
-        attrSheetData.data &&
-        attrSheetData.data[0] &&
-        attrSheetData.data[0].rowData) ||
-      [];
-
-    // Determine column positions from the header row (robust to column order).
-    const colIdIdx = this.schema.columnIdRowIdxBase0;
-    const colIdRow = rowData[colIdIdx];
-    const colIds = ((colIdRow && colIdRow.values) || []).map(
-      (v) => (v && v.formattedValue) || "",
-    );
-    const gidColIdx = colIds.indexOf(
-      metaTableSchema.column("sheetGid").columnId,
-    );
-    const nameColIdx = colIds.indexOf(
-      metaTableSchema.column("tableName").columnId,
-    );
-    const prefixColIdx = colIds.indexOf(
-      metaTableSchema.column("idPrefix").columnId,
-    );
-
-    if (gidColIdx === -1 || nameColIdx === -1 || prefixColIdx === -1) {
-      throw new Error(
-        `Could not locate expected headers on "${metaTableSchema.tableName}".`,
-      );
-    }
-
-    // Collect GIDs already described in the table's data rows.
-    const attrTable = attrTables[0];
-    const attrTableRange = attrTable.range;
-    const lastDataRowExclusive =
-      attrTableRange.endRowIndex !== undefined
-        ? attrTableRange.endRowIndex
-        : rowData.length;
-
-    const existingGIDs = new Set();
-    for (
-      let r = this.schema.topBodyRowIdxBase0;
-      r < lastDataRowExclusive;
-      r++
-    ) {
-      const row = rowData[r];
-      const cell = row && row.values && row.values[gidColIdx];
-      if (
-        cell &&
-        cell.formattedValue !== undefined &&
-        cell.formattedValue !== ""
-      ) {
-        existingGIDs.add(Number(cell.formattedValue));
+  private _reqSheetsPropsToRaw(
+    props: RowsSheetsReqProps<TableName>,
+  ): RowsSheetsReqPropsRaw {
+    const rawProps: RowsSheetsReqPropsRaw = new Map();
+    for (const rowCount of Obj.keys(props)) {
+      const sheets = props[rowCount];
+      if (!sheets) continue;
+      const rowCountRaw =
+        rowCount === "noRows" ? 0 : rowCount === "oneRow" ? 1 : "all";
+      for (const tableName of Obj.keys(sheets)) {
+        const colNames = sheets[tableName];
+        if (!colNames) continue;
+        const sheetGid = this.schema.sheet(tableName).sheetGid;
+        const colIdxes = colNames.map(
+          (colName) => this.schema.column(tableName, colName).idxBase0,
+        );
+        rawProps.set(rowCountRaw, new Map([[sheetGid, colIdxes]]));
       }
     }
-
-    // Find every table in the spreadsheet whose sheet GID isn't yet described.
-    const missing = [];
-    sheets.forEach((sheet) => {
-      const tables = sheet.tables || [];
-      if (tables.length === 0) return;
-      const sheetId = sheet.properties.sheetId;
-      if (existingGIDs.has(sheetId)) return;
-      // Per spec, exactly one table per sheet; describe it.
-      missing.push({ sheetId: sheetId, tableName: attrTable.name });
-    });
-
-    if (missing.length === 0) {
-      Logger.log(
-        `No missing tables found. "${metaTableSchema.tableName}" is already up to date.`,
-      );
-      return;
-    }
-
-    // Build AppendCellsRequest rows, placing values in the correct columns
-    // regardless of header order, leaving "ID prefix" blank.
-    const width = Math.max(gidColIdx, nameColIdx, prefixColIdx) + 1;
-    const rowsToAppend = missing.map((m) => {
-      const values = new Array(width).fill(null).map(() => ({}));
-      values[gidColIdx] = { userEnteredValue: { numberValue: m.sheetId } };
-      values[nameColIdx] = { userEnteredValue: { stringValue: m.tableName } };
-      // values[prefixColIdx] intentionally left as {} (blank) for manual entry.
-      return { values: values };
-    });
-
-    Sheets.Spreadsheets.batchUpdate(
-      {
-        requests: [
-          {
-            appendCells: {
-              sheetId: metaTableSchema.sheetGid,
-              tableId: attrTable.tableId,
-              rows: rowsToAppend,
-              fields: "userEnteredValue",
-            },
-          },
-        ],
-      },
-      spreadsheetId,
-    );
-
-    Logger.log(
-      `Appended ${missing.length} missing table row(s) to "${metaTableSchema.tableName}": ${missing.map((m) => m.sheetId + " (" + m.tableName + ")").join(", ")}`,
-    );
+    return rawProps;
+  }
+  private _tableNamesFromReqProps<T extends TableName>(
+    props: RowsSheetsReqProps<T>,
+  ): T[] {
+    return Obj.keys(props).reduce((acc, rowCount) => {
+      const sheets = props[rowCount];
+      if (!sheets) return acc;
+      for (const tableName of Obj.keys(sheets)) {
+        if (!acc.includes(tableName)) {
+          acc.push(tableName);
+        }
+      }
+      return acc;
+    }, [] as T[]);
   }
 }

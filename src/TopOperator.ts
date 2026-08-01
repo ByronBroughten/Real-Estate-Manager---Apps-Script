@@ -39,7 +39,7 @@ export class TopOperator extends OperatorBase {
   onTrueValueEntered(e: GoogleAppsScript.Events.SheetsOnEdit): void {
     const sheetGid = e.range.getSheet().getSheetId();
     const schema = this.schema;
-    const { tableName } = schema.sheetByGid(sheetGid);
+    const { tableName } = schema.raw.sheet(sheetGid);
 
     if (tableName === "api") {
       const apiSingle = new ApiSingle(this.ss, this.standardizeEvent(e));

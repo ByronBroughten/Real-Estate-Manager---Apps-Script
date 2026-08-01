@@ -59,9 +59,9 @@ export class SheetNamedBase<TN extends TableName> extends SpreadsheetNamedBase {
     };
   }
   get tableSchema(): SheetSchema<TN> {
-    return this.spreadsheetSchema.table(this.tableName);
+    return this.spreadsheetSchema.sheet(this.tableName);
   }
   get topBodyRowIdxBase1(): number {
-    return this.configGet("topBodyRowIdxBase1");
+    return this.config("topBodyRowIdxBase1");
   }
 }

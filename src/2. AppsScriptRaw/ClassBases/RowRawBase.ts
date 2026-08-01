@@ -1,3 +1,4 @@
+import type { RawRowState } from "../Types/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
 export interface RowRawProps extends SheetRawProps {
@@ -5,18 +6,18 @@ export interface RowRawProps extends SheetRawProps {
 }
 
 export class RowRawBase extends SheetRawBase {
-  readonly idxBase1;
+  readonly idxBase0;
   constructor({ idxBase0, ...rest }: RowRawProps) {
     super(rest);
-    this.idxBase1 = idxBase0;
+    this.idxBase0 = idxBase0;
   }
-  get idxBase0() {
-    return this.idxBase1 - 1;
+  get rowState(): RawRowState {
+    return this.sheetState.rowStates.get(this.idxBase0);
   }
   get rowRawProps(): RowRawProps {
     return {
       ...this.sheetRawProps,
-      idxBase0: this.idxBase1,
+      idxBase0: this.idxBase0,
     };
   }
 }

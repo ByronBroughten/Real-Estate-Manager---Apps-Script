@@ -1,7 +1,11 @@
-import { Obj } from "../../utils/Obj";
-import { validationError } from "../../utils/validation";
+import { Obj } from "../utils/Obj";
+import { validationError } from "../utils/validation";
 import { makeSchemaStructure } from "./0.1 makeSchema";
-import { va, type ValueAttributesBase } from "./3.0 valueAttribute";
+import {
+  extractCellValue,
+  va,
+  type ValueAttributesBase,
+} from "./3.0 valueAttribute";
 
 type ValidationValuesBase = {
   readonly [key: string]: readonly string[];
@@ -187,6 +191,7 @@ export function makeValidationValueSchemas(): ValidationValueAttributesBase {
         makeDefault: () => makeDefaultValidationValue(name),
         defaultValidate: (value: unknown) =>
           validateValidationValue(value, name),
+        extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
       });
     return attributes;
   }, {} as ValidationValueAttributesBase);

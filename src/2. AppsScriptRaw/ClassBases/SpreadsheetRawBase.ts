@@ -1,7 +1,3 @@
-import {
-  configGet,
-  type SpreadsheetConfig,
-} from "../../0. spreadsheetMetaData/1. spreadsheetConfig";
 import type { RawSheetsState, RawState } from "../Types/RawState";
 
 export interface SpreadsheetRawProps {
@@ -12,9 +8,6 @@ export class SpreadsheetRawBase {
   protected rawState: RawState;
   constructor(props: SpreadsheetRawProps) {
     this.rawState = props.rawState;
-  }
-  configGet<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
-    return configGet(key);
   }
   get gss() {
     return this.rawState.gss;
@@ -38,7 +31,6 @@ export class SpreadsheetRawBase {
       gss: SpreadsheetApp.getActiveSpreadsheet(),
       requests: [],
       sheets: new Map(),
-      newRowIdxCounterNegative: 0,
     };
   }
 }

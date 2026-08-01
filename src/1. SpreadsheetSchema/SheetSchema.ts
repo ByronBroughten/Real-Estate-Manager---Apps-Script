@@ -40,7 +40,7 @@ export class SheetSchema<TN extends TableNameSimple> {
   column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchema<TN, CN> {
     return new ColumnSchema(this.tableName, columnName);
   }
-  makeSectionIds(): {
+  makeRowId(): {
     fullId: string;
     baseId: string;
   } {

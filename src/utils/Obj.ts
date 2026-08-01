@@ -74,7 +74,34 @@ export type RemoveFirstNFromKeys<T extends object, N extends number> = {
   [K in keyof T & string as RemoveFirstN<K, N>]: T[K];
 };
 
+export type KeyedMap<
+  T extends Record<PropertyKey, object>, // was Record<PropertyKey, unknown>
+  F extends keyof T[keyof T],
+  N extends PropertyKey = "name",
+> = Map<
+  T[keyof T][F],
+  { [K in keyof T]: Omit<T[K], F> & { [P in N]: K } }[keyof T]
+>;
+
+function toKeyedMap<
+  const T extends Record<PropertyKey, object>, // was Record<PropertyKey, unknown>
+  F extends keyof T[keyof T],
+  N extends PropertyKey = "name",
+>(obj: T, idField: F, nameField: N = "name" as N): KeyedMap<T, F, N> {
+  const map = new Map() as KeyedMap<T, F, N>;
+
+  for (const outerKey of Object.keys(obj) as (keyof T)[]) {
+    const { [idField]: id, ...rest } = obj[outerKey] as Record<
+      PropertyKey,
+      unknown
+    >;
+    map.set(id as any, { [nameField]: outerKey, ...rest } as any);
+  }
+
+  return map;
+}
 export const Obj = {
+  toKeyedMap,
   flattenTwoLevels,
   pushByKey<
     O extends Record<string, any[]>,
