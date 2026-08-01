@@ -1,233 +1,38 @@
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
+import type { StrictPickPartial } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { RowRaw } from "./RowRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import type {
-  DataFilter,
   GoogleColCell,
+  GoogleGridRange,
   GoogleSheet,
   GoogleSheetData,
-  GridRange,
 } from "./Types/AppsScriptTypes";
 
+export type RowCount = number | "allFromStart";
+export type ColumnCount = number | "allFromStart";
+
+type GetGridRangeProps = {
+  startRowIndex: number;
+  rowCount: RowCount;
+  startColumnIndex: number;
+  columnCount: ColumnCount;
+};
+
 interface MakeGetRequestProps {
-  startRowIdxBase0: number;
-  howManyRows: number;
-  columnIdxsBase0: number;
-  howManyColumns: number;
+  rowCount: RowCount;
+  startRowIndex?: number;
+  startColumnIndex?: number;
+  columnCount?: ColumnCount;
 }
 
 interface MakeGetRequestsProps {
-  startRowIdxBase0: number;
-  howManyRows: number;
-  columnIdxsBase0: number[];
+  startRowIndex: number;
+  rowCount: RowCount;
+  startColumnIndexes: number[];
 }
-
-const test = {
-  sheets: [
-    {
-      tables: [
-        {
-          tableId: "691006646",
-          name: "allTableAttributes",
-        },
-      ],
-      data: [
-        {
-          startColumn: 1,
-          rowData: [
-            {
-              values: [
-                {
-                  formattedValue: "col-_NrBHfg",
-                  effectiveValue: {
-                    stringValue: "col-_NrBHfg",
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    stringValue: "Base ID",
-                  },
-                  formattedValue: "Base ID",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      tables: [
-        {
-          name: "test",
-          tableId: "1321948538",
-        },
-      ],
-      data: [
-        {
-          startColumn: 2,
-          rowData: [
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    stringValue: "Number",
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 4,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 11,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 12,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 13,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 11,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 12,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 13,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          startColumn: 4,
-          rowData: [
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    stringValue: "Date",
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-            {
-              values: [
-                {
-                  formattedValue: "7/30/2026",
-                  effectiveValue: {
-                    numberValue: 46233,
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
 
 export class SheetRaw extends SheetRawBase {
   get spreadsheet(): SpreadsheetRaw {
@@ -242,7 +47,7 @@ export class SheetRaw extends SheetRawBase {
       ...this.sheetRawProps,
     });
   }
-  get emptyGridRange(): GridRange {
+  get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
   }
   initSheetState(sheet: GoogleSheet): void {
@@ -259,11 +64,14 @@ export class SheetRaw extends SheetRawBase {
   }
   private _initSheetRowStates(sheetData: GoogleSheetData | undefined): void {
     // I kind of want to store row data as zero-indexed.
+
     const colsData = valS.assertDefined(sheetData, "sheetData");
     const { colIdRowIdx, topBodyRowIdx } = this.schema;
     colsData.forEach((colData) => {
+      // what about when I do all columns?
       const colIdx = colData.startColumn;
-      colData.rowData.forEach((colCell, rowIdx) => {
+      colData.rowData.forEach((colCell, rowIdxBase) => {
+        const rowIdx = rowIdxBase + colData.startRow;
         if (rowIdx === colIdRowIdx) {
           this.verifyColumnId(colIdx, colCell);
         } else if (rowIdx >= topBodyRowIdx) {
@@ -282,34 +90,79 @@ export class SheetRaw extends SheetRawBase {
       );
     }
   }
-  makeGetRequest({
-    startRowIdxBase0,
-    howManyRows,
-    columnIdxsBase0,
-    howManyColumns,
-  }: MakeGetRequestProps): DataFilter {
-    return {
-      gridRange: {
-        sheetId: this.sheetGid,
-        startRowIndex: startRowIdxBase0,
-        endRowIndex: startRowIdxBase0 + howManyRows,
-        startColumnIndex: columnIdxsBase0,
-        endColumnIndex: columnIdxsBase0 + howManyColumns,
-      },
-    };
+  gatherGetRequest({
+    rowCount,
+    columnCount = 1,
+    startRowIndex = 0,
+    startColumnIndex = 0,
+  }: MakeGetRequestProps): void {
+    this.rawState.getterGridRanges.push({
+      sheetId: this.sheetGid,
+      ...this.getGridRangeIndexes({
+        rowCount,
+        columnCount,
+        startRowIndex,
+        startColumnIndex,
+      }),
+    });
   }
-  makeGetRequests({
-    startRowIdxBase0,
-    howManyRows,
-    columnIdxsBase0,
-  }: MakeGetRequestsProps): DataFilter[] {
-    return columnIdxsBase0.map((columnIdxBase0) =>
-      this.makeGetRequest({
-        startRowIdxBase0,
-        howManyRows,
-        columnIdxsBase0: columnIdxBase0,
-        howManyColumns: 1,
+  gatherGetRequests({
+    rowCount,
+    startRowIndex = 0,
+    startColumnIndexes,
+  }: MakeGetRequestsProps): void {
+    startColumnIndexes.map((startColumnIndex) =>
+      this.gatherGetRequest({
+        rowCount,
+        startRowIndex,
+        startColumnIndex,
+        columnCount: 1,
       }),
     );
+  }
+  getGridRangeIndexes({
+    // The purpose of this is to ensure that all meta data is obtained even when no data rows are requested.
+    // All meta data and no data rows: columnStartIndex = columnEndIndex without a row end index
+    // Lacking table meta data but get the rest: rowStartIndex = rowEndIndex, or columnStartIndex = columnEndIndex with row indices
+    startRowIndex,
+    rowCount,
+    startColumnIndex,
+    columnCount,
+  }: GetGridRangeProps): StrictPickPartial<
+    GoogleGridRange,
+    "startRowIndex" | "endRowIndex" | "startColumnIndex" | "endColumnIndex"
+  > {
+    if (rowCount === "allFromStart") {
+      if (columnCount === "allFromStart") {
+        return { startRowIndex, startColumnIndex };
+      } else {
+        return {
+          startRowIndex,
+          startColumnIndex,
+          endColumnIndex: startColumnIndex + columnCount,
+        };
+      }
+    } else if (rowCount === 0) {
+      return {
+        startRowIndex,
+        startColumnIndex,
+        endColumnIndex: startColumnIndex,
+      };
+    } else {
+      if (columnCount === "allFromStart") {
+        return {
+          startRowIndex,
+          endRowIndex: startRowIndex + rowCount,
+          startColumnIndex,
+        };
+      } else {
+        return {
+          startRowIndex,
+          endRowIndex: startRowIndex + rowCount,
+          startColumnIndex,
+          endColumnIndex: startColumnIndex + columnCount,
+        };
+      }
+    }
   }
 }

@@ -24,7 +24,7 @@ declare namespace GoogleAppsScript {
       export interface Table {
         tableId?: string;
         name?: string;
-        range?: GridRange;
+        range?: GoogleGridRange;
         columnProperties?: TableColumnProperties[];
       }
 

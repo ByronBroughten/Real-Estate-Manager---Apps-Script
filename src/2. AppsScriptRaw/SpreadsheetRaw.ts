@@ -1,15 +1,12 @@
 import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
-import { SheetRaw } from "./SheetRaw";
+import { SheetRaw, type RowCount } from "./SheetRaw";
 import type {
-  BatchUpdateRequest,
-  GetByDataFilterRequest,
   GoogleSpreadsheet,
-  GridRange,
+  GoogleUpdateRequests,
 } from "./Types/AppsScriptTypes";
 
-type RowCount = number | "all";
 type SheetId = number;
 type ColumnIdx = number;
 type SheetsReqProps = Map<SheetId, ColumnIdx[]>;
@@ -30,58 +27,42 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   initSheets(props: RowsSheetsReqPropsRaw) {
     this.schema.validateConfig();
-    const gridRanges = this._makeGridRanges(props);
-    const data = this._getByDataFilter({
-      dataFilters: gridRanges.map((gr) => ({
+    this._gatherGridRanges(props);
+    const data = this.getByDataFilter();
+    this._addDataToState(data);
+    this.rawState.getterGridRanges = [];
+  }
+  getByDataFilter(): GoogleSpreadsheet {
+    return Sheets.Spreadsheets.getByDataFilter(
+      this._makeGetterResource(),
+      this.spreadsheetId,
+      {
+        fields:
+          "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,startRow,rowData(values(formattedValue))))",
+      },
+    );
+  }
+  private _makeGetterResource() {
+    return {
+      dataFilters: this.rawState.getterGridRanges.map((gr) => ({
         gridRange: gr,
       })),
-    });
-    this._addDataToState(data);
+      includeGridData: true,
+    };
   }
-  private _getByDataFilter(request: GetByDataFilterRequest): GoogleSpreadsheet {
-    return Sheets.Spreadsheets.getByDataFilter(request, this.spreadsheetId, {
-      fields:
-        "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,rowData(values(formattedValue))))",
-    });
-  }
-  private _makeGridRanges(props: RowsSheetsReqPropsRaw): GridRange[] {
-    return props.keys().reduce((gridRange, rowCount) => {
-      const sheets = props[rowCount] as SheetsReqProps;
-      sheets.keys().forEach((sheetId) => {
-        const colIdxes = sheets.get(sheetId);
-        colIdxes.forEach((colIdx) => {
-          gridRange.push(
-            this._makeGridRange({
-              rowCount,
-              sheetId,
-              colIdx,
-            }),
-          );
+
+  private _gatherGridRanges(props: RowsSheetsReqPropsRaw) {
+    props.keys().forEach((rowCount) => {
+      const propSheet = props[rowCount] as SheetsReqProps;
+      propSheet.keys().forEach((sheetId) => {
+        const colIdxes = propSheet.get(sheetId);
+        this.sheet(sheetId).gatherGetRequests({
+          startRowIndex: this.schema.config("topFetchRowIdx"),
+          rowCount,
+          startColumnIndexes: colIdxes || [],
         });
       });
-      return gridRange;
-    }, [] as GridRange[]);
-  }
-  private _makeGridRange({
-    rowCount,
-    sheetId,
-    colIdx,
-  }: {
-    rowCount: RowCount;
-    sheetId: number;
-    colIdx: number;
-  }): GridRange {
-    return {
-      sheetId: sheetId,
-      startColumnIndex: colIdx,
-      endColumnIndex: colIdx + 1,
-      startRowIndex: this.schema.colIdRowIdx,
-      ...(rowCount === "all"
-        ? {}
-        : {
-            endRowIndex: this.schema.topBodyRowIdx + rowCount,
-          }),
-    };
+    });
   }
   private _addDataToState(gss: GoogleSpreadsheet) {
     gss.sheets.forEach((gSheet) => {
@@ -104,7 +85,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       },
     );
   }
-  batchUpdateByRequests(requests: BatchUpdateRequest[]) {
+  batchUpdateByRequests(requests: GoogleUpdateRequests[]) {
     // if (rowsDeletedOrSorted) {
     //   // mark sheet rowIndexesAreValid as false
     // }

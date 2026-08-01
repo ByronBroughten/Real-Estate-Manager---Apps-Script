@@ -1,7 +1,4 @@
-import {
-  allTableNames,
-  type TableName,
-} from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import { allSheetGids } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
@@ -14,7 +11,7 @@ export class SpreadsheetSchemaRaw extends SchemaBase {
   column(sheetGid: number, columnIdx: number): ColumnSchemaRaw {
     return new ColumnSchemaRaw(sheetGid, columnIdx);
   }
-  get allTableNames(): TableName[] {
-    return allTableNames;
+  get allSheetGids(): number[] {
+    return allSheetGids;
   }
 }

@@ -18,8 +18,8 @@ export class SpreadsheetRawBase {
   get spreadsheetId() {
     return this.gss.getId();
   }
-  get requests() {
-    return this.rawState.requests;
+  get updateRequests() {
+    return this.rawState.updateRequests;
   }
   get spreadsheetRawProps(): SpreadsheetRawProps {
     return {
@@ -29,7 +29,8 @@ export class SpreadsheetRawBase {
   static initRawState(): RawState {
     return {
       gss: SpreadsheetApp.getActiveSpreadsheet(),
-      requests: [],
+      updateRequests: [],
+      getterGridRanges: [],
       sheets: new Map(),
     };
   }

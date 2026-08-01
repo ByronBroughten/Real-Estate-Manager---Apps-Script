@@ -1,4 +1,7 @@
-import type { ValueAttributesBase } from "../0. spreadsheetMetaData/3.0 valueAttribute";
+import {
+  extractCellValue,
+  type ValueAttributesBase,
+} from "../0. spreadsheetMetaData/3.0 valueAttribute";
 import {
   getValueAttribute,
   type Value,
@@ -41,6 +44,9 @@ export class ColumnSchemaRaw extends SchemaBase {
   }
   makeDefaultValue(): Value {
     return this.valueAttributes("makeDefault")();
+  }
+  extractCellString(colCell: GoogleColCell): string {
+    return extractCellValue(colCell, "stringValue");
   }
   extractCellValue(colCell: GoogleColCell): CellValue {
     return this.valueAttributes("extractCellValue")(colCell);

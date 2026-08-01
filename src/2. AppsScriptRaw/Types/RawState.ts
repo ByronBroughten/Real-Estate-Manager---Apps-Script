@@ -1,9 +1,10 @@
 import type { CellValue } from "../../utilitiesAppsScript";
-import type { BatchUpdateRequest } from "./AppsScriptTypes";
+import type { GoogleGridRange, GoogleUpdateRequests } from "./AppsScriptTypes";
 
 export interface RawState {
   gss: GoogleAppsScript.Spreadsheet.Spreadsheet;
-  requests: BatchUpdateRequest[];
+  updateRequests: GoogleUpdateRequests[];
+  getterGridRanges: GoogleGridRange[];
   sheets: RawSheetsState;
 }
 

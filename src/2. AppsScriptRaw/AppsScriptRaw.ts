@@ -1,7 +1,7 @@
 export class AppScriptRaw {
   static get trigger() {
     return {
-      deleteAll(): void {
+      deleteAllTriggers(): void {
         const triggers = ScriptApp.getProjectTriggers();
         for (const trigger of triggers) {
           ScriptApp.deleteTrigger(trigger);

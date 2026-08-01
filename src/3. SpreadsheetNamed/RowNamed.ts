@@ -13,7 +13,7 @@ import type {
   VarbNameMutable,
 } from "../1. SpreadsheetSchema/SheetSchema";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
+import type { GoogleUpdateRequests } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import {
   asU,
   type StandardizedValue,
@@ -214,7 +214,7 @@ export class Row<TN extends TableName> extends RowBase<TN> {
   }
   makeUpdateRequest<CN extends ColumnName<TN>>(
     columnName: CN,
-  ): BatchUpdateRequest {
+  ): GoogleUpdateRequests {
     // inexplicably, GAS treats indices as zero-indexed for this purpose
     const rowIdx = this.idxBase1 - 1;
     const colIdx = this.sheet.colIdxBase1(columnName) - 1;

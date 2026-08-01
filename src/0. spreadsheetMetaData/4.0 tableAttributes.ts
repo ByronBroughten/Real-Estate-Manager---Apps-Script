@@ -97,6 +97,8 @@ export const tableAttributesByGid = Obj.toKeyedMap(
   "tableName",
 );
 
+export const allSheetGids = [...tableAttributesByGid.keys()];
+
 export type TableAttributesRaw =
   AllTableAttributesByGid extends Map<any, infer V> ? V : never;
 export function getTableAttributeByGid<K extends keyof TableAttributesRaw>(

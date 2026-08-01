@@ -13,7 +13,6 @@ import type {
 import type { SheetSchema } from "../1. SpreadsheetSchema/SheetSchema";
 
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/RawState";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import {
@@ -348,7 +347,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     row.setValues(values);
     return rowId;
   }
-  collectRequests(): BatchUpdateRequest[] {
+  collectRequests(): GoogleUpdateRequests[] {
     const changes = this.changesToSave;
     const batchUpdateRequests = [];
     const batchDeleteRequests = [];

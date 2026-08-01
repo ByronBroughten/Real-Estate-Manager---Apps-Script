@@ -6,7 +6,7 @@ import {
   SpreadsheetRaw,
   type RowsSheetsReqPropsRaw,
 } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
-import type { BatchUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes.js";
+import type { GoogleUpdateRequests } from "../2. AppsScriptRaw/Types/AppsScriptTypes.js";
 import { Obj } from "../utils/Obj.js";
 import {
   SpreadsheetNamedBase,
@@ -15,11 +15,19 @@ import {
 import { SheetNamed, type SheetOptions } from "./SheetNamed.js";
 
 type RowCount = "noRows" | "oneRow" | "allRows";
-type RowsSheetsReqProps<TN extends TableName> = {
+type RowsSheetsDataReqProps<TN extends TableName> = {
   [RC in RowCount]?: {
     [T in TN]?: ColumnName<T>[];
   };
 };
+
+type RowsSheetsReqPropsNext<TN extends TableName> = {
+  rowCount: RowCount;
+  startRowIndex?: number;
+  sheets: {
+    [T in TN]?: "allColumns" | ColumnName<T>[];
+  };
+}[];
 
 type NamedSheets<TN extends TableName> = {
   [T in TN]: SheetNamed<T>;
@@ -66,15 +74,31 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   gatherRequestsAndBatchUpdate() {
     this.raw.batchUpdateByRequests(this.gatherRequests());
   }
-  private gatherRequests(): BatchUpdateRequest[] {
-    const requests: BatchUpdateRequest[] = [];
+  private gatherRequests(): GoogleUpdateRequests[] {
+    const requests: GoogleUpdateRequests[] = [];
     for (const tableName of this.tableNames) {
       const sheet = this.sheet(tableName);
       requests.push(...sheet.collectRequests());
     }
     return requests;
   }
-  reqSheets<T extends TableName>(props: RowsSheetsReqProps<T>): NamedSheets<T> {
+
+  // So... there's initSheets and there's initDataSheets.
+  // initDataSheets needs to have a rowCount, etc.
+  initSheets<T extends TableName>(
+    props: RowsSheetsDataReqProps<T>,
+  ): NamedSheets<T> {
+    const rawProps = this._reqSheetsPropsToRaw(props);
+    this.raw.initSheets(rawProps);
+    const tableNames = this._tableNamesFromReqProps(props);
+    return tableNames.reduce((acc, tableName) => {
+      acc[tableName] = this.sheet(tableName);
+      return acc;
+    }, {} as NamedSheets<T>);
+  }
+  initDataSheets<T extends TableName>(
+    props: RowsSheetsDataReqProps<T>,
+  ): NamedSheets<T> {
     const rawProps = this._reqSheetsPropsToRaw(props);
     this.raw.initSheets(rawProps);
     const tableNames = this._tableNamesFromReqProps(props);
@@ -84,14 +108,14 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }, {} as NamedSheets<T>);
   }
   private _reqSheetsPropsToRaw(
-    props: RowsSheetsReqProps<TableName>,
+    props: RowsSheetsDataReqProps<TableName>,
   ): RowsSheetsReqPropsRaw {
     const rawProps: RowsSheetsReqPropsRaw = new Map();
     for (const rowCount of Obj.keys(props)) {
       const sheets = props[rowCount];
       if (!sheets) continue;
       const rowCountRaw =
-        rowCount === "noRows" ? 0 : rowCount === "oneRow" ? 1 : "all";
+        rowCount === "noRows" ? 0 : rowCount === "oneRow" ? 1 : "allFromStart";
       for (const tableName of Obj.keys(sheets)) {
         const colNames = sheets[tableName];
         if (!colNames) continue;
@@ -105,7 +129,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return rawProps;
   }
   private _tableNamesFromReqProps<T extends TableName>(
-    props: RowsSheetsReqProps<T>,
+    props: RowsSheetsDataReqProps<T>,
   ): T[] {
     return Obj.keys(props).reduce((acc, rowCount) => {
       const sheets = props[rowCount];
@@ -117,5 +141,17 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }
       return acc;
     }, [] as T[]);
+  }
+  ensureColumnIds() {
+    const rawSs = this.raw;
+
+    rawSs.schema.allSheetGids.forEach((sheetGid) => {
+      rawSs.sheet(sheetGid).gatherGetRequest({
+        startRowIndex: rawSs.schema.colIdRowIdx,
+        rowCount: 1,
+        startColumnIndex: 0,
+        howManyColumns: rawSs.schema.columnCount,
+      });
+    });
   }
 }
