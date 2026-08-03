@@ -1,9 +1,9 @@
 import type { TableValues } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { Row } from "../3. SpreadsheetNamed/RowNamed";
+import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
 import { Obj } from "../utils/Obj";
 
-type PaymentIdToCharges = Record<string, Row<"occCharge">[]>;
+type PaymentIdToCharges = Record<string, RowNamed<"occCharge">[]>;
 
 type ChargeIdsForPayments = {
   paymentGroup: {
@@ -53,7 +53,7 @@ export class PaymentMgmt extends OperatorBase {
       }
     }
 
-    const paymentId = occPayment.addRowWithValues({
+    const paymentId = occPayment.appendRowWithVals({
       ...payerValues,
       ...(payerValues.paymentHhId && { householdId: payerValues.paymentHhId }),
     });
@@ -73,7 +73,7 @@ export class PaymentMgmt extends OperatorBase {
       }
     }
 
-    occPayAllocation.addRowWithValues({
+    occPayAllocation.appendRowWithVals({
       ...allocateValues,
       paymentId,
     });
@@ -108,7 +108,7 @@ export class PaymentMgmt extends OperatorBase {
       const charges = chargeIds.map((chargeId) => occCharge.row(chargeId));
       function addPayment(values: Partial<TableValues<"occPayment">>) {
         const topCharge = charges[0];
-        const paymentId = payment.addRowWithValues({
+        const paymentId = payment.appendRowWithVals({
           detailsVerified: "No",
           amount: 0,
           date: topCharge.value("date"),
@@ -159,7 +159,7 @@ export class PaymentMgmt extends OperatorBase {
     const allocation = this.ss.sheet("occPayAllocation");
     for (const [paymentId, chargeRows] of Object.entries(paymentIdToCharges)) {
       chargeRows.forEach((charge) => {
-        allocation.addRowWithValues({
+        allocation.appendRowWithVals({
           paymentId,
           description: "Normal payment",
           ...charge.values([

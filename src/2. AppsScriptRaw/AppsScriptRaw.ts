@@ -1,4 +1,7 @@
 export class AppScriptRaw {
+  static projectProperties(key: string): string | null {
+    return PropertiesService.getScriptProperties().getProperty(key);
+  }
   static get trigger() {
     return {
       deleteAllTriggers(): void {

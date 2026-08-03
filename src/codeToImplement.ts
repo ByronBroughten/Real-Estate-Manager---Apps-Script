@@ -1,3 +1,5 @@
+import { allTableNames } from "./0. spreadsheetMetaData/4.0 tableAttributes";
+
 const allColumnAttributesGid = 2034522667;
 function ensureColumns() {
   ensureColumnIds();
@@ -29,7 +31,7 @@ function ensureColumns() {
  */
 function ensureColumnIds() {
   const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
-  const sheetIds = Object.keys(tableNames).map(Number);
+  const sheetIds = Object.keys(allTableNames).map(Number);
 
   // ---------------------------------------------------------------------
   // 1) READ — pull only rows 2 (IDs) and 3 (headers) from every sheet in

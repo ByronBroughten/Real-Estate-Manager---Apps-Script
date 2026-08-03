@@ -5,7 +5,7 @@ import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { RowRaw } from "./RowRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import type {
-  GoogleColCell,
+  GoogleCellValue,
   GoogleGridRange,
   GoogleSheet,
   GoogleSheetData,
@@ -47,6 +47,23 @@ export class SheetRaw extends SheetRawBase {
       ...this.sheetRawProps,
     });
   }
+  get topBodyRow(): RowRaw {
+    return this.row(this.schema.topBodyRowIdx);
+  }
+  get allRows(): RowRaw[] {
+    return Array.from(this.sheetState.rowStates.keys()).map((idxBase0) =>
+      this.row(idxBase0),
+    );
+  }
+  get dataRows(): RowRaw[] {
+    return this.allRows.filter(
+      (row) => row.idxBase0 >= this.schema.topBodyRowIdx,
+    );
+  }
+  activeColumnIdxs(): number[] {
+    const colIdRow = this.row(this.schema.colIdRowIdx);
+    return colIdRow.activeColIdxs;
+  }
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
   }
@@ -57,36 +74,55 @@ export class SheetRaw extends SheetRawBase {
       title: valS.assertDefined(properties.title, "sheet title "),
       tableName: valS.assertDefined(table.name, "tableName"),
       tableId: valS.assertDefined(table.tableId, "tableId"),
-      rowStates: new Map(),
       rowIndexesAreValid: true,
+      rowStates: new Map(),
     });
-    this._initSheetRowStates(sheet.data);
+    if (sheet.data) {
+      this._initSheetRowStates(sheet.data);
+    }
   }
-  private _initSheetRowStates(sheetData: GoogleSheetData | undefined): void {
-    // I kind of want to store row data as zero-indexed.
-
+  private _initSheetRowStates(sheetData: GoogleSheetData): void {
     const colsData = valS.assertDefined(sheetData, "sheetData");
-    const { colIdRowIdx, topBodyRowIdx } = this.schema;
     colsData.forEach((colData) => {
-      // what about when I do all columns?
-      const colIdx = colData.startColumn;
+      const colIdxBase = valS.assertDefined(
+        colData.startColumn,
+        "colData.startColumn",
+      );
+      const columns = colData.columnMetadata || [];
       colData.rowData.forEach((colCell, rowIdxBase) => {
-        const rowIdx = rowIdxBase + colData.startRow;
-        if (rowIdx === colIdRowIdx) {
-          this.verifyColumnId(colIdx, colCell);
-        } else if (rowIdx >= topBodyRowIdx) {
-          this.row(rowIdx).initState(colIdx, colCell);
-        }
+        columns.forEach((_, colIdxOffset) => {
+          const colIdx = colIdxBase + colIdxOffset;
+          const rowIdx = rowIdxBase + colData.startRow;
+          const cellData = colCell?.values?.[colIdxOffset] as
+            | GoogleCellValue
+            | undefined;
+          this.row(rowIdx).initState(colIdx, cellData);
+        });
       });
     });
   }
-  verifyColumnId(colIdx: number, colCell: GoogleColCell): void {
-    const colSchema = this.schema.column(colIdx);
-    const value = colSchema.extractCellValue(colCell);
-    const columnId = colSchema.attribute("columnId");
-    if (value !== columnId) {
+  verifyColumnIds() {
+    // How should I handle when a raw row's state is missing?
+    const row = this.row(this.schema.colIdRowIdx);
+    const activeColIdxs = row.activeColIdxs;
+    if (!activeColIdxs.length) {
       throw new Error(
-        `value is "${value}" but expected "${columnId}". Are all the column ids and indexes up to date?`,
+        `Column ID row state not found for sheet ${this.sheetGid}. Cannot verify column IDs.`,
+      );
+    }
+    activeColIdxs.forEach((colIdx) => {
+      this._verifyColumnId(colIdx);
+    });
+  }
+  private _verifyColumnId(colIdx: number): void {
+    const colSchema = this.schema.column(colIdx);
+    const colIdInSchema = colSchema.attribute("columnId");
+
+    const colIdRow = this.row(this.schema.colIdRowIdx);
+    const colIdValue = colIdRow.value(colIdx);
+    if (colIdValue !== colIdInSchema) {
+      throw new Error(
+        `colIdValue is "${colIdValue}" but expected "${colIdInSchema}". Are all the column ids and indexes up to date?`,
       );
     }
   }
@@ -121,9 +157,7 @@ export class SheetRaw extends SheetRawBase {
     );
   }
   getGridRangeIndexes({
-    // The purpose of this is to ensure that all meta data is obtained even when no data rows are requested.
-    // All meta data and no data rows: columnStartIndex = columnEndIndex without a row end index
-    // Lacking table meta data but get the rest: rowStartIndex = rowEndIndex, or columnStartIndex = columnEndIndex with row indices
+    // This is to ensure that all meta data is obtained even when no data rows are requested.
     startRowIndex,
     rowCount,
     startColumnIndex,
@@ -164,5 +198,19 @@ export class SheetRaw extends SheetRawBase {
         };
       }
     }
+  }
+  get lastRowIdx(): number {
+    return Math.max(...this.sheetState.rowStates.keys());
+  }
+  appendRowDefault(): RowRaw {
+    const idx = this.lastRowIdx + 1;
+    this.sheetState.rowStates[this.lastRowIdx + 1] = new Map();
+    return this.row(idx)
+      .resetToDefault()
+      ._addChangeToSave({ action: "append" });
+  }
+  appendRow() {
+    this.appendRowDefault();
+    // logic about props to give the row
   }
 }

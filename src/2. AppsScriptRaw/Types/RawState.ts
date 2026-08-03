@@ -2,9 +2,9 @@ import type { CellValue } from "../../utilitiesAppsScript";
 import type { GoogleGridRange, GoogleUpdateRequests } from "./AppsScriptTypes";
 
 export interface RawState {
-  gss: GoogleAppsScript.Spreadsheet.Spreadsheet;
-  updateRequests: GoogleUpdateRequests[];
+  changesToSave: ChangesToSave;
   getterGridRanges: GoogleGridRange[];
+  updateRequests: GoogleUpdateRequests[];
   sheets: RawSheetsState;
 }
 
@@ -23,3 +23,24 @@ export type RawRowState = Map<ColIdx, CellValue>;
 type SheetId = number;
 type RowIdx = number;
 type ColIdx = number;
+type SheetRowId = string;
+
+export type ChangesToSave = Map<SheetRowId, RowChangesToSave>;
+export type RowChangesToSave = {
+  append: boolean;
+  delete: null | GoogleAppsScript.Sheets.Schema.Request;
+  update: Set<ColIdx>;
+};
+
+export type RowChangeUpdateProps = { action: "update"; colIdxes: number[] };
+export type RowChangeProps =
+  | { action: "append" | "delete" }
+  | RowChangeUpdateProps;
+
+export type RowCount = number | "allFromStart";
+export type InitSheetsPropsRaw = {
+  startRowIndex: number;
+  rowCount: RowCount;
+  sheets: Map<SheetId, "allColumns" | ColIdx[]>;
+};
+export type InitSheetsPropsColumnsRaw = "allColumns" | ColIdx[];

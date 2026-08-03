@@ -379,7 +379,7 @@ function ensureColumnIds() {
 
     if (colEnd === undefined || colEnd === null) return;
 
-    // Row 2 is index 1 (row 1 = index 0, row 2 = index 1, row 3 header = index 2).
+    // RowNamed 2 is index 1 (row 1 = index 0, row 2 = index 1, row 3 header = index 2).
     const rowDataArr =
       (sheet.data && sheet.data[0] && sheet.data[0].rowData) || [];
     const row2 = rowDataArr[1];

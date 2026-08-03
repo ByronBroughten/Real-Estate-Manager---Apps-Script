@@ -12,17 +12,27 @@ import {
   type ColumnValue,
   type ColumnValueName,
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
+import { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
+import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { CombineStringsWithFlat } from "../utils/Str";
+import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
-export class ColumnSchema<
+export class ColumnSchemaNamed<
   TN extends TableName = TableName,
   CN extends ColumnName<TN> = ColumnName<TN>,
-> {
+> extends SchemaBase {
   readonly tableName: TN;
   readonly columnName: CN;
   constructor(tableName: TN, columnName: CN) {
+    super();
     this.tableName = tableName;
     this.columnName = columnName;
+  }
+  get sheetSchema(): SheetSchemaNamed<TN> {
+    return new SheetSchemaNamed(this.tableName);
+  }
+  get raw(): ColumnSchemaRaw {
+    return new ColumnSchemaRaw(this.sheetSchema.sheetGid, this.columnIdx);
   }
   get columnFullname(): CombineStringsWithFlat<TN, CN & string> {
     return `${this.tableName}_${this.columnName as string}` as CombineStringsWithFlat<
@@ -30,11 +40,14 @@ export class ColumnSchema<
       CN & string
     >;
   }
+  get columnIdx(): number {
+    return this.colAttribute("indexBase0");
+  }
   get columnId(): string {
-    return this.colAttribute("columnId") as string;
+    return this.colAttribute("columnId");
   }
   get idxBase0(): number {
-    return this.colAttribute("indexBase0") as number;
+    return this.colAttribute("indexBase0");
   }
   colAttribute<K extends keyof ColumnAttributesBase>(
     key: K,
@@ -45,8 +58,7 @@ export class ColumnSchema<
       key as unknown as keyof ColumnAttributes<TN, CN>,
     ) as ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>];
   }
-  get valueName(): ColumnAttributes<TN, CN>["valueName" &
-    keyof ColumnAttributes<TN, CN>] {
+  get valueName(): ColumnValueName<TN, CN> {
     return this.colAttribute("valueName");
   }
   valueAttribute<

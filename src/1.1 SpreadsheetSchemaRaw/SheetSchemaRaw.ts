@@ -3,7 +3,10 @@ import {
   type TableAttributesRaw,
   type TableName,
 } from "../0. spreadsheetMetaData/4.0 tableAttributes";
-import { type ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes";
+import {
+  getSheetColumnIdxes,
+  type ColumnName,
+} from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { utils } from "../utilitiesGeneral";
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
@@ -28,6 +31,9 @@ export class SheetSchemaRaw extends SchemaBase {
   }
   column(columnIdx: number): ColumnSchemaRaw {
     return new ColumnSchemaRaw(this.sheetGid, columnIdx);
+  }
+  get allColumnIdxes(): MapIterator<number> {
+    return getSheetColumnIdxes(this.sheetGid);
   }
   get tableName(): TableName {
     return this.attribute("tableName");

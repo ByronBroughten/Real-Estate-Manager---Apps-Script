@@ -1,6 +1,6 @@
 import type { TableValues } from "./0. spreadsheetMetaData/5. allColumnAttributes";
 import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { Row } from "./3. SpreadsheetNamed/RowNamed";
+import type { RowNamed } from "./3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "./3. SpreadsheetNamed/SheetNamed";
 import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
@@ -62,7 +62,7 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
   readonly event: StandardEvent;
 
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);
-  get apiRow(): Row<"api"> {
+  get apiRow(): RowNamed<"api"> {
     return this.apiSheet.topBodyRow;
   }
   get apiFnVarbNames(): (keyof ApiValuesWithPrefix<FN>)[] {

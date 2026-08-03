@@ -8,10 +8,8 @@ import type {
   ColumnValue,
   TableValues,
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
-import type {
-  SheetSchema,
-  VarbNameMutable,
-} from "../1. SpreadsheetSchema/SheetSchema";
+import type { ColumnSchemaNamed } from "../1. SpreadsheetSchema/ColumnSchemaNamed";
+import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import type { GoogleUpdateRequests } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import {
@@ -22,26 +20,29 @@ import {
 import { utils } from "../utilitiesGeneral";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
-import { RowBase, type RowState } from "./ClassBases/RowNamedBase";
+import { RowNamedBase, type RowState } from "./ClassBases/RowNamedBase";
 
 import { SheetNamed } from "./SheetNamed";
 
-export class Row<TN extends TableName> extends RowBase<TN> {
-  get schema(): SheetSchema<TN> {
-    return this.tableSchema;
-  }
+export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
   get state(): RowState<TN> {
     return this.rowState;
   }
-  get idxBase1(): number {
-    const { topBodyRowIdxBase1 } = this.sheet;
-    const baseIdx = this.sheetState.bodyRowOrder.indexOf(this.id);
-    return baseIdx + topBodyRowIdxBase1;
+  get sheetSchema(): SheetSchemaNamed<TN> {
+    return this.sheet.schema;
+  }
+  columnSchema<CN extends ColumnName<TN>>(
+    columnName: CN,
+  ): ColumnSchemaNamed<TN, CN> {
+    return this.sheetSchema.column(columnName);
+  }
+  get idxBase0(): number {
+    return this.raw.idxBase0;
   }
   get raw(): RowRaw {
     return new RowRaw({
       ...this.sheet.raw.sheetRawProps,
-      idxBase0: this.idxBase1 - 1,
+      idxBase0: this.idxBase0,
     });
   }
   value<CN extends ColumnName<TN>>(columnName: CN): ColumnValue<TN, CN> {
@@ -133,7 +134,7 @@ export class Row<TN extends TableName> extends RowBase<TN> {
   values<CN extends ColumnName<TN> = ColumnName<TN>>(
     columnNames?: readonly CN[],
   ): TableValues<TN, CN> {
-    const keys = columnNames || (this.columnNames as CN[]);
+    const keys = columnNames || (this.activeColumnNames as CN[]);
     return keys.reduce(
       (values, columnName) => {
         values[columnName] = this.value(
@@ -153,45 +154,31 @@ export class Row<TN extends TableName> extends RowBase<TN> {
     }
     return values;
   }
-
-  get columnNames(): ColumnName<TN>[] {
-    return this.schema.columnNames;
+  get activeColumnNames(): ColumnName<TN>[] {
+    return this.sheet.activeColumnNames;
   }
   get sheet(): SheetNamed<TN> {
     return new SheetNamed(this.sheetProps);
   }
-  resetToDefault(columnNames?: VarbNameMutable<TN>[]): void {
-    this.setValues(
-      this.schema.makeDefaultValues(columnNames) as Partial<TableValues<TN>>,
-    );
-  }
-  addAllVarbsAsChanges(): void {
-    this.sheet.addChangeToSave(this.id, {
-      action: "update",
-      columnNames: this.columnNames,
-    });
+  columnIdx(columnName: ColumnName<TN>): number {
+    return this.columnSchema(columnName).idxBase0;
   }
   setValue<CN extends ColumnName<TN>, VL extends ColumnValue<TN, CN>>(
     columnName: CN,
     value: VL,
-  ): Row<TN> {
-    this.rowState[columnName] = value as RowState<TN>[CN];
-    this.sheet.addChangeToSave(this.id, {
-      action: "update",
-      columnNames: [columnName],
-    });
+  ): RowNamed<TN> {
+    this.raw.setState(this.columnIdx(columnName), value);
     return this;
   }
-  markForDelete() {
-    this.sheet.addChangeToSave(this.id, {
-      action: "delete",
-    });
+  delete(): void {
+    this.raw.delete();
+    this;
   }
   setValueType<CN extends ColumnName<TN>>(
     columnName: CN,
     valueName: ValueName,
     value: Value,
-  ): Row<TN> {
+  ): RowNamed<TN> {
     const schema = this.schema.column(columnName);
     if (schema.valueName !== valueName) {
       throw new Error(
@@ -203,8 +190,8 @@ export class Row<TN extends TableName> extends RowBase<TN> {
     this.setValue(columnName, value as ColumnValue<TN, CN>);
     return this;
   }
-  setValues(sectionValues: Partial<TableValues<TN>>): Row<TN> {
-    sectionValues = Obj.pick(sectionValues, this.columnNames) as Partial<
+  setValues(sectionValues: Partial<TableValues<TN>>): RowNamed<TN> {
+    sectionValues = Obj.pick(sectionValues, this.activeColumnNames) as Partial<
       TableValues<TN>
     >;
     for (const [columnName, value] of Obj.entries(sectionValues)) {

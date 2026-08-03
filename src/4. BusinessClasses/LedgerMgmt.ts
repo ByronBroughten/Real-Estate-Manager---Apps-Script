@@ -1,10 +1,10 @@
 import type { ApiFnValues } from "../ApiSingle";
 
+import type { GroupToTableName } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { Row } from "../3. SpreadsheetNamed/RowNamed";
+import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { Obj } from "../utils/Obj";
-import type { GroupToTableName } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 
 type LedgerInputSn = GroupToTableName<"ledgerInputs">;
 
@@ -24,8 +24,8 @@ function rowsOfIdAndPortion<TN extends LedgerInputSn>({
   householdId,
   subsidyAgreementId,
   portion,
-}: RowsOfIdAndPortionProps<TN>): Row<TN>[] {
-  const rows = sheet.orderedRows;
+}: RowsOfIdAndPortionProps<TN>): RowNamed<TN>[] {
+  const rows = sheet.dataRows;
   return rows.filter((row) => {
     const vals = row.values(["portion", "householdId", "subsidyAgreementId"]);
     if (householdId === vals.householdId && portion === vals.portion) {
@@ -43,7 +43,7 @@ function rowsOfIdAndPortion<TN extends LedgerInputSn>({
 export class LedgerMgmt extends OperatorBase {
   buildHhLedger(values: ApiFnValues<"buildHhLedger">): void {
     const hhLedger = this.sheet("occupancyLedger");
-    hhLedger.DELETE_ALL_BODY_ROWS();
+    hhLedger.RESET_TOP_ROW_DELETE_REST();
 
     const idsAndPortion = Obj.strictPick(values, [
       "householdId",
@@ -53,8 +53,8 @@ export class LedgerMgmt extends OperatorBase {
 
     this.addChargesToLedger(idsAndPortion);
     this.addAllocationsToLedger(idsAndPortion);
-    hhLedger.sort("date");
     this.ss.gatherRequestsAndBatchUpdate();
+    // sort from the sheet itself
   }
   private addChargesToLedger(idsAndPortion: IdsAndPortion): void {
     const hhLedger = this.sheet("occupancyLedger");
@@ -72,7 +72,7 @@ export class LedgerMgmt extends OperatorBase {
         "description",
         "unitName",
       ]);
-      hhLedger.addRowWithValues({
+      hhLedger.appendRowWithVals({
         issuer: "Property management",
         charge: amount,
         payment: "",
@@ -101,7 +101,7 @@ export class LedgerMgmt extends OperatorBase {
         "description",
         "unitName",
       ]);
-      hhLedger.addRowWithValues({
+      hhLedger.appendRowWithVals({
         issuer: payer,
         payment: amount,
         charge: "",

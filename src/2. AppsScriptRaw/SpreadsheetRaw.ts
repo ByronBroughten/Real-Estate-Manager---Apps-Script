@@ -1,23 +1,20 @@
 import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
-import { SheetRaw, type RowCount } from "./SheetRaw";
+import type { RowRaw } from "./RowRaw";
+import { SheetRaw } from "./SheetRaw";
 import type {
   GoogleSpreadsheet,
   GoogleUpdateRequests,
 } from "./Types/AppsScriptTypes";
-
-type SheetId = number;
-type ColumnIdx = number;
-type SheetsReqProps = Map<SheetId, ColumnIdx[]>;
-export type RowsSheetsReqPropsRaw = Map<RowCount, SheetsReqProps>;
+import type { InitSheetsPropsRaw } from "./Types/RawState";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   get schema() {
     return new SpreadsheetSchemaRaw();
   }
-  get spreadsheetId(): string {
-    return this.gss.getId();
+  get activeSheetGids(): MapIterator<number> {
+    return this.rawState.sheets.keys();
   }
   sheet(sheetGid: number): SheetRaw {
     return new SheetRaw({
@@ -25,20 +22,29 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       sheetGid: sheetGid,
     });
   }
-  initSheets(props: RowsSheetsReqPropsRaw) {
-    this.schema.validateConfig();
+  initSheets(props: InitSheetsPropsRaw[]): void {
     this._gatherGridRanges(props);
-    const data = this.getByDataFilter();
+    const data = this._getByDataFilter();
     this._addDataToState(data);
     this.rawState.getterGridRanges = [];
   }
-  getByDataFilter(): GoogleSpreadsheet {
+  loadSheetPropertiesGetGids(): number[] {
+    const data = Sheets.Spreadsheets.get(this.spreadsheetId, {
+      includeGridData: true,
+      fields: "sheets(properties(sheetId,title),tables(name,tableId))",
+    });
+    this._addDataToState(data);
+    return data.sheets.map((s) =>
+      valS.assertDefined(s.properties.sheetId, "sheetId"),
+    );
+  }
+  private _getByDataFilter(): GoogleSpreadsheet {
     return Sheets.Spreadsheets.getByDataFilter(
       this._makeGetterResource(),
       this.spreadsheetId,
       {
         fields:
-          "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,startRow,rowData(values(formattedValue))))",
+          "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,startRow,columnMetadata(hiddenByUser),rowData(values(formattedValue))))",
       },
     );
   }
@@ -51,17 +57,24 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     };
   }
 
-  private _gatherGridRanges(props: RowsSheetsReqPropsRaw) {
-    props.keys().forEach((rowCount) => {
-      const propSheet = props[rowCount] as SheetsReqProps;
-      propSheet.keys().forEach((sheetId) => {
-        const colIdxes = propSheet.get(sheetId);
+  private _gatherGridRanges(props: InitSheetsPropsRaw[]) {
+    props.forEach((prop) => {
+      const startRowIndex = prop.startRowIndex;
+      const rowCount = prop.rowCount;
+      for (const sheetId of prop.sheets.keys()) {
+        const propColIdx = prop.sheets[sheetId];
+        let columnIdxes: number[] = [];
+        if (propColIdx === "allColumns") {
+          columnIdxes.push(...this.schema.sheet(sheetId).allColumnIdxes);
+        } else {
+          columnIdxes.push(...propColIdx);
+        }
         this.sheet(sheetId).gatherGetRequests({
-          startRowIndex: this.schema.config("topFetchRowIdx"),
+          startRowIndex,
           rowCount,
-          startColumnIndexes: colIdxes || [],
+          startColumnIndexes: columnIdxes,
         });
-      });
+      }
     });
   }
   private _addDataToState(gss: GoogleSpreadsheet) {
@@ -71,24 +84,66 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       sheet.initSheetState(gSheet);
     });
   }
-  deleteRowUnderConstruction() {}
-  appendRange(roughRange: string, rawRows: any[][]) {
-    // depreciated
-    Sheets.Spreadsheets?.Values?.append(
-      {
-        values: rawRows,
-      },
-      this.spreadsheetId,
-      roughRange,
-      {
-        valueInputOption: "USER_ENTERED",
-      },
+  rowBySheetRowId(sheetRowId: string): RowRaw {
+    const [sheetGidStr, rowIdxStr] = sheetRowId.split(
+      this.schema.config("idDelimiterNext"),
     );
+    const sheetGid = parseInt(sheetGidStr);
+    const rowIdx = parseInt(rowIdxStr);
+    return this.sheet(sheetGid).row(rowIdx);
   }
-  batchUpdateByRequests(requests: GoogleUpdateRequests[]) {
-    // if (rowsDeletedOrSorted) {
-    //   // mark sheet rowIndexesAreValid as false
-    // }
-    Sheets.Spreadsheets.batchUpdate({ requests }, this.spreadsheetId);
+  batchUpdateGSheets() {
+    this._gatherUpdateRequests();
+    Sheets.Spreadsheets.batchUpdate(
+      { requests: this.rawState.updateRequests },
+      this.spreadsheetId,
+    );
+    this.rawState.updateRequests = [];
   }
+  private _gatherUpdateRequests() {
+    const changes = this.allChangesToSave;
+    const requests = {
+      append: [] as GoogleUpdateRequests[],
+      update: [] as GoogleUpdateRequests[],
+      delete: [] as GoogleUpdateRequests[],
+    } as const;
+
+    for (const [sheetRowId, change] of changes.entries()) {
+      if (change.append && change.delete) {
+        continue;
+      } else if (change.delete) {
+        requests.delete.push(change.delete);
+      } else {
+        const row = this.rowBySheetRowId(sheetRowId);
+        if (change.append) {
+          requests.append.push(row.raw.appendRequest);
+        }
+        for (const columnName of change.update) {
+          requests.update.push(row.updateRequest(columnName));
+        }
+        // I must test if appending and upating in the same batch works how I want it to.
+        // Otherwise, I might have to execute two separate requests.
+      }
+    }
+    // Delete requests must be carried last because row indices will change after deletions.
+    this.updateRequests.push(
+      ...requests.append,
+      ...requests.update,
+      ...requests.delete,
+    );
+    this.rawState.changesToSave = new Map();
+  }
+  // appendRange(roughRange: string, rawRows: any[][]) {
+  //   // depreciated
+  //   Sheets.Spreadsheets?.Values?.append(
+  //     {
+  //       values: rawRows,
+  //     },
+  //     this.spreadsheetId,
+  //     roughRange,
+  //     {
+  //       valueInputOption: "USER_ENTERED",
+  //     },
+  //   );
+  // }
 }

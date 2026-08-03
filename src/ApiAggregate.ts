@@ -66,8 +66,8 @@ export class ApiAggregate<
     );
   }
   private resetApi() {
-    this.apiSheet.DELETE_ALL_BODY_ROWS();
-    this.apiSheet.addRowDefault();
+    this.apiSheet.RESET_TOP_ROW_DELETE_REST();
+    this.apiSheet.appendRowDefault();
     this.gatherRequestsAndBatchUpdate();
   }
   private handleApiCallError(error: Error) {

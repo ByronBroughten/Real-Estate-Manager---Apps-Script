@@ -1,6 +1,6 @@
 import type { TableValues } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { Row } from "../3. SpreadsheetNamed/RowNamed";
+import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
@@ -40,11 +40,11 @@ export class ChargeMgmt extends OperatorBase {
       "householdName",
     );
     const sOnetime = this.ss.sheet("occCharge");
-    sOnetime.addRowWithValues(relevant);
+    sOnetime.appendRowWithVals(relevant);
     this.ss.gatherRequestsAndBatchUpdate();
   }
   updateHhAllOngoingCharges(
-    householdIds: string[] = this.sheet("household").orderedRows.map(
+    householdIds: string[] = this.sheet("household").dataRows.map(
       (r) => r.id,
     ),
   ) {
@@ -157,9 +157,9 @@ export class ChargeMgmt extends OperatorBase {
     householdId: string;
     month: number;
     year: number;
-  }): Row<"occCharge">[] {
+  }): RowNamed<"occCharge">[] {
     const occCharge = this.sheet("occCharge");
-    return occCharge.orderedRows.filter((row) => {
+    return occCharge.dataRows.filter((row) => {
       const date = row.valueDate("date");
       return (
         row.value("householdId") === householdId &&
@@ -172,8 +172,8 @@ export class ChargeMgmt extends OperatorBase {
     month,
     year,
   }: HhIdMonthYear): {
-    activeoccupancyTermss: Row<"occupancyTerms">[];
-    activeScCharges: Row<"subsidyContract">[];
+    activeoccupancyTermss: RowNamed<"occupancyTerms">[];
+    activeScCharges: RowNamed<"subsidyContract">[];
   } {
     const occupancyTerms = this.sheet("occupancyTerms");
     const subsidyContract = this.sheet("subsidyContract");
@@ -206,10 +206,10 @@ export class ChargeMgmt extends OperatorBase {
     householdId: string;
     month: number;
     year: number;
-  }): Row<TN>[] {
+  }): RowNamed<TN>[] {
     const firstOfMonth = utils.date.firstDayOfMonthNext({ month, year });
     const lastOfMonth = utils.date.lastDayOfMonthNext({ month, year });
-    return sheet.orderedRows.filter((row) => {
+    return sheet.dataRows.filter((row) => {
       const startDate = row.valueDate("startDate");
       const endDate = row.dateValueOrGivenDate("endDate", lastOfMonth);
       if (startDate > endDate) {
@@ -276,10 +276,10 @@ export class ChargeMgmt extends OperatorBase {
         };
         switch (columnName) {
           case "petFeeRecurring": {
-            occCharge.addRowWithValues(sharedValues);
+            occCharge.appendRowWithVals(sharedValues);
           }
           case "rentChargeUtilitiesMonthly": {
-            occCharge.addRowWithValues(sharedValues);
+            occCharge.appendRowWithVals(sharedValues);
           }
           case "rentChargeBaseMonthly": {
             this.handleRentChargeBaseMonthly({
@@ -318,8 +318,8 @@ export class ChargeMgmt extends OperatorBase {
     sharedChargeValues: SharedChargeLeaseValues;
     month: number;
     year: number;
-    activeoccupancyTermss: Row<"occupancyTerms">[];
-    activeScCharges: Row<"subsidyContract">[];
+    activeoccupancyTermss: RowNamed<"occupancyTerms">[];
+    activeScCharges: RowNamed<"subsidyContract">[];
   }) {
     const occCharge = this.sheet("occCharge");
 
@@ -345,7 +345,7 @@ export class ChargeMgmt extends OperatorBase {
         year,
       });
       proratedSubsidyTotal += prorated;
-      occCharge.addRowWithValues({
+      occCharge.appendRowWithVals({
         ...sharedChargeValues,
         amount: prorated,
         portion: "Subsidy program",
@@ -355,7 +355,7 @@ export class ChargeMgmt extends OperatorBase {
       });
     }
     const tenantPortion = proratedRentTotal - proratedSubsidyTotal;
-    occCharge.addRowWithValues({
+    occCharge.appendRowWithVals({
       ...sharedChargeValues,
       amount: tenantPortion,
       portion: "Household",
@@ -377,14 +377,14 @@ export class ChargeMgmt extends OperatorBase {
     const allocation = this.ss.sheet("occPayAllocation");
     const expense = this.ss.sheet("expense");
 
-    const paymentId = payment.addRowWithValues({
+    const paymentId = payment.appendRowWithVals({
       date,
       amount,
       payerCategory: "Rent reduction",
       detailsVerified: "No",
     });
 
-    allocation.addRowWithValues({
+    allocation.appendRowWithVals({
       amount,
       householdId,
       description: "Caretaker rent reduction",
@@ -393,7 +393,7 @@ export class ChargeMgmt extends OperatorBase {
       unitId,
     });
 
-    expense.addRowWithValues({
+    expense.appendRowWithVals({
       // TODO add expense
     });
   }

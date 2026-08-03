@@ -13,13 +13,17 @@ import {
   type TableNameSimple,
 } from "./4.0 tableAttributes";
 
-export interface ColumnAttributesBase<VN extends ValueName = ValueName> {
+interface ColumnAttributesLiteral {
   columnId: string;
   indexBase0: number;
   header: string;
-  valueName: VN;
   isFormula: boolean;
   emptyAllowed: boolean;
+}
+export interface ColumnAttributesBase<
+  VN extends ValueName = ValueName,
+> extends ColumnAttributesLiteral {
+  valueName: VN;
   customDefaultValue: Value<VN> | null;
 }
 function makeColumnAttributes<VN extends ValueName>(
@@ -3565,15 +3569,16 @@ export type ColumnName<TN extends TableNameSimple = TableNameSimple> =
 export type TableColumnAttributes<TN extends TableNameSimple> =
   AllColumnAttributes[TN];
 
-export type ColumnAttributes<
-  TN extends TableNameSimple,
-  CN extends ColumnName<TN>,
-> = TableColumnAttributes<TN>[CN];
-
 export type ColumnValueName<
   TN extends TableNameSimple,
   CN extends ColumnName<TN>,
-> = ColumnAttributes<TN, CN>["valueName" & keyof ColumnAttributes<TN, CN>];
+> = AllColumnAttributes[TN][CN]["valueName" &
+  keyof AllColumnAttributes[TN][CN]];
+
+export type ColumnAttributes<
+  TN extends TableNameSimple,
+  CN extends ColumnName<TN>,
+> = ColumnAttributesBase<ColumnValueName<TN, CN> & ValueName>;
 
 export type ColumnValueAttributes<
   TN extends TableNameSimple,
@@ -3597,26 +3602,21 @@ export type TableValues<
   [CN in VNS]: ColumnValue<TN, CN>;
 };
 
-export function getTableColumnNames<TN extends TableNameSimple>(
+export function getSheetColumnNames<TN extends TableNameSimple>(
   tableName: TN,
 ): ColumnName<TN>[] {
   return Obj.keys(allColumnAttributes[tableName]);
 }
 
-const allColumnAttributesFlat = Obj.flattenTwoLevels(allColumnAttributes);
-type AllColumnAttributesFlat = typeof allColumnAttributesFlat;
-type ColumnNameFullSimple = keyof AllColumnAttributesFlat;
-type ColumnNameFull<
-  TN extends TableNameSimple,
-  CN extends ColumnName<TN>,
-> = CombineStringsWithFlat<TN, CN & string>;
-
+// columnAttributes isn't actually very unique. The only unique
 export function getColumnAttribute<
   TN extends TableNameSimple,
   CN extends ColumnName<TN>,
   K extends keyof ColumnAttributes<TN, CN>,
 >(tableName: TN, columnName: CN, key: K): ColumnAttributes<TN, CN>[K] {
-  return allColumnAttributes[tableName][columnName][key];
+  return (
+    allColumnAttributes[tableName][columnName] as ColumnAttributes<TN, CN>
+  )[key];
 }
 
 export type RawIdxColumnAttributes = KeyedMap<
@@ -3643,6 +3643,7 @@ function makeAllColumnAttrsGidIdx(): AllColumnAttrsGidIdx {
 }
 
 const allColumnAttrsGidIdx = makeAllColumnAttrsGidIdx();
+
 export function getColumnAttributeRaw<K extends keyof ColAttributesRaw>(
   sheetId: number,
   columnIdx: number,
@@ -3656,3 +3657,14 @@ export function getColumnAttributeRaw<K extends keyof ColAttributesRaw>(
   }
   return columnAttrs[key];
 }
+export function getSheetColumnIdxes(sheetGid: number): MapIterator<number> {
+  return allColumnAttrsGidIdx.get(sheetGid).keys();
+}
+
+const allColumnAttributesFlat = Obj.flattenTwoLevels(allColumnAttributes);
+type AllColumnAttributesFlat = typeof allColumnAttributesFlat;
+type ColumnNameFullSimple = keyof AllColumnAttributesFlat;
+type ColumnNameFull<
+  TN extends TableNameSimple,
+  CN extends ColumnName<TN>,
+> = CombineStringsWithFlat<TN, CN & string>;

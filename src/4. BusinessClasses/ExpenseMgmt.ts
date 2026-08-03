@@ -6,7 +6,7 @@ export class ExpenseMgmt extends OperatorBase {
     const addPropertyExpenses = this.ss.sheet("addPropertyExpenses");
     const expense = this.ss.sheet("expense");
 
-    for (const row of addPropertyExpenses.orderedRows) {
+    for (const row of addPropertyExpenses.dataRows) {
       const { expenseNotes, ...expenseVals } = row.values([
         "date",
         "propertyId",
@@ -19,7 +19,7 @@ export class ExpenseMgmt extends OperatorBase {
         "taxAdjust",
         "expenseNotes",
       ]);
-      expense.addRowWithValues({
+      expense.appendRowWithVals({
         ...expenseVals,
         notes: expenseNotes,
       });
@@ -43,7 +43,7 @@ export class ExpenseMgmt extends OperatorBase {
     //       "unitId",
     //       "occChargeNotes",
     //     ]);
-    //   occCharge.addRowWithValues({
+    //   occCharge.appendRowWithVals({
     //     amount: occChargeLesserAmount === "" ? amount : occChargeLesserAmount,
     //     description: "Damage, waste, or service",
     //     portion: "Household",

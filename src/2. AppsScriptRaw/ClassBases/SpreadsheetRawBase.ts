@@ -1,3 +1,4 @@
+import { AppScriptRaw } from "../AppsScriptRaw";
 import type { RawSheetsState, RawState } from "../Types/RawState";
 
 export interface SpreadsheetRawProps {
@@ -9,14 +10,23 @@ export class SpreadsheetRawBase {
   constructor(props: SpreadsheetRawProps) {
     this.rawState = props.rawState;
   }
-  get gss() {
-    return this.rawState.gss;
-  }
   protected get sheetsState(): RawSheetsState {
     return this.rawState.sheets;
   }
-  get spreadsheetId() {
-    return this.gss.getId();
+  get spreadsheetId(): string {
+    const ssId = AppScriptRaw.projectProperties("realEstateSpreadsheetId");
+    if (!ssId) {
+      throw new Error(
+        "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
+      );
+    }
+    return ssId;
+  }
+  get getterGridRanges() {
+    return this.rawState.changesToSave;
+  }
+  get allChangesToSave() {
+    return this.rawState.changesToSave;
   }
   get updateRequests() {
     return this.rawState.updateRequests;
@@ -28,9 +38,9 @@ export class SpreadsheetRawBase {
   }
   static initRawState(): RawState {
     return {
-      gss: SpreadsheetApp.getActiveSpreadsheet(),
-      updateRequests: [],
       getterGridRanges: [],
+      changesToSave: new Map(),
+      updateRequests: [],
       sheets: new Map(),
     };
   }

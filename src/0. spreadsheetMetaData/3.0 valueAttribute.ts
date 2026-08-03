@@ -1,5 +1,5 @@
 import type {
-  GoogleColCell,
+  GoogleCellValue,
   GoogleEffectiveValue,
 } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import { valS } from "../utils/validation";
@@ -15,14 +15,14 @@ export function extractCellValue<
   K extends keyof GoogleEffectiveValue,
   T extends unknown = undefined,
 >(
-  colCell: GoogleColCell,
+  cellValue: GoogleCellValue | undefined,
   key: K,
   transformer?: (value: GoogleEffectiveValue[K]) => T,
 ): T extends undefined ? GoogleEffectiveValue[K] | "" : T | "" {
-  if (!colCell.values) {
+  if (cellValue === undefined) {
     return "" as T extends undefined ? GoogleEffectiveValue[K] | "" : T;
   }
-  const value = valS.assertDefined(colCell.values[0].effectiveValue[key], key);
+  const value = valS.assertDefined(cellValue.effectiveValue[key], key);
   if (transformer) {
     return transformer(value) as T extends undefined
       ? GoogleEffectiveValue[K] | ""
@@ -32,7 +32,7 @@ export function extractCellValue<
   }
 }
 
-type ExtractCellValue<V extends unknown> = (gsColumnCell: GoogleColCell) => V;
+type ExtractCellValue<V extends unknown> = (gsCellValue: GoogleCellValue) => V;
 type MakeDefaultValueBase<V extends unknown> = () => V;
 type ValidateValueBase<V extends unknown> = (value: unknown) => V;
 

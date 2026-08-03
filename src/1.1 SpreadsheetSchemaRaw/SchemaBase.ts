@@ -16,22 +16,7 @@ export class SchemaBase {
   get topBodyRowIdx(): number {
     return this.config("topBodyRowIdx");
   }
-  get colIdIdxAsFetched() {
-    return this.colIdRowIdx - this.topFetchRowIdx;
-  }
-  get topBodyRowIdxAsFetched() {
-    return this.topBodyRowIdx - this.topFetchRowIdx;
-  }
-  validateConfig() {
-    if (this.colIdIdxAsFetched < 0) {
-      throw new Error(
-        "Column index is not fetched; column cannot be verified.",
-      );
-    }
-    if (this.topBodyRowIdxAsFetched < 0) {
-      throw new Error(
-        "Top row of table data is not fetched; data will be incomplete.",
-      );
-    }
+  get idDelimiter(): string {
+    return this.config("idDelimiter");
   }
 }

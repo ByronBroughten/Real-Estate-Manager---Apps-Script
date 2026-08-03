@@ -5,13 +5,15 @@ import {
   type TableNameSimple,
 } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import {
-  getTableColumnNames,
+  getSheetColumnNames,
   type ColumnName,
   type TableValues,
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
+import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
+import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
-import { ColumnSchema } from "./ColumnSchema";
+import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import { SpreadsheetSchema } from "./SpreadsheetSchema";
 
 const varbNameImmutable = ["baseId"] as const;
@@ -21,10 +23,17 @@ export type VarbNameMutable<TN extends TableName> = Exclude<
   VarbNameImmutable
 >;
 
-export class SheetSchema<TN extends TableNameSimple> {
+export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
   readonly tableName: TN;
   constructor(tableName: TN) {
+    super();
     this.tableName = tableName;
+  }
+  get raw(): SheetSchemaRaw {
+    return new SheetSchemaRaw(this.attribute("sheetGid"));
+  }
+  columnNameByIdx(colIdx: number): ColumnName<TN> {
+    return this.raw.column(colIdx).attribute("columnName") as ColumnName<TN>;
   }
   private attribute<K extends keyof TableAttributes<TN>>(
     key: K,
@@ -37,8 +46,8 @@ export class SheetSchema<TN extends TableNameSimple> {
   get spreadsheet(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
-  column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchema<TN, CN> {
-    return new ColumnSchema(this.tableName, columnName);
+  column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
+    return new ColumnSchemaNamed(this.tableName, columnName);
   }
   makeRowId(): {
     fullId: string;
@@ -57,7 +66,7 @@ export class SheetSchema<TN extends TableNameSimple> {
     };
   }
   get columnNames(): ColumnName<TN>[] {
-    return getTableColumnNames(this.tableName);
+    return getSheetColumnNames(this.tableName);
   }
   makeDefaultValues<CN extends VarbNameMutable<TN>>(
     columnNames: CN[] = Arr.exclude(

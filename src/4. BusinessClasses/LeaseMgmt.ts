@@ -51,7 +51,7 @@ export class LeaseMgmt extends OperatorBase {
   }
   doPeriodicLeaseUpdates() {
     const household = this.sheet("household");
-    household.orderedRows.forEach((hh) => {
+    household.dataRows.forEach((hh) => {
       const dateNext = hh.value("rentChangeDateNext");
       if (Dat.isDateAndTodayOrPassed(dateNext)) {
         const householdId = hh.id;
@@ -90,7 +90,7 @@ export class LeaseMgmt extends OperatorBase {
     if (endPriorActiveLeases === "yes") {
       this.endActiveLeases(householdId, Dat.getDayBefore(startDate));
     }
-    this.leaseSheet.addRowWithValues({
+    this.leaseSheet.appendRowWithVals({
       householdId,
       startDate,
       ...defaults,
