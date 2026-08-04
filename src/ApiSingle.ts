@@ -6,7 +6,6 @@ import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
 import { LedgerMgmt } from "./4. BusinessClasses/LedgerMgmt";
 import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
-import type { SheetEventStandard } from "./TopOperator";
 import {
   Obj,
   type InvertObj,

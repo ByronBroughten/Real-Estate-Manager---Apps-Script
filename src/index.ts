@@ -1,3 +1,4 @@
+import { Api } from "./Api.js";
 import { TopOperator } from "./TopOperator.js";
 
 function triggerFirstOfMonth() {
@@ -6,10 +7,8 @@ function triggerFirstOfMonth() {
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
-  if (e.value === "TRUE") {
-    const top = TopOperator.init();
-    top.onTrueValueEntered(e);
-  }
+  const api = new Api();
+  api.handleSheetOnEditEvent(e);
 }
 
 function testUpdateLeaseOngoingCharges() {

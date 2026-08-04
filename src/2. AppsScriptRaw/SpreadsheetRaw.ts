@@ -7,9 +7,14 @@ import type {
   GoogleSpreadsheet,
   GoogleUpdateRequests,
 } from "./Types/AppsScriptTypes";
-import type { InitSheetsPropsRaw } from "./Types/RawState";
+import type { InitSheetsPropsRaw, SheetEventStandard } from "./Types/RawState";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
+  static init(): SpreadsheetRaw {
+    return new SpreadsheetRaw({
+      rawState: SpreadsheetRaw.initRawState(),
+    });
+  }
   get schema() {
     return new SpreadsheetSchemaRaw();
   }
@@ -88,6 +93,18 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
   }
+  standardizeSheetEditEvent({
+    range,
+    value,
+  }: GoogleAppsScript.Events.SheetsOnEdit): SheetEventStandard {
+    return {
+      colIdxBase0: range.getColumn() - 1,
+      rowIdxBase0: range.getRow() - 1,
+      sheetId: range.getSheet().getSheetId(),
+      value,
+    };
+  }
+
   batchUpdateGSheets() {
     this._gatherUpdateRequests();
     Sheets.Spreadsheets.batchUpdate(

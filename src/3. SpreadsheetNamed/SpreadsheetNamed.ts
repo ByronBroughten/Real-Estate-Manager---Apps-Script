@@ -97,8 +97,13 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
         new Map() as Map<number, "allColumns">,
       ),
     });
+    let sheetsUpdated = 0;
     this.schema.allTableNames.forEach((sheetGid) => {
       this.sheet(sheetGid).addMissingColumnIds();
+      sheetsUpdated++;
     });
+    Logger.log(
+      `ensureColumnIds: added missing column ID(s) in ${sheetsUpdated} sheets.`,
+    );
   }
 }

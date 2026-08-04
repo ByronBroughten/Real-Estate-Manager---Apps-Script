@@ -1,5 +1,4 @@
 import { Obj } from "../utils/Obj";
-
 function buildSpreadsheetColumnMeta() {
   appendTableAttributes();
   fixTableNames();

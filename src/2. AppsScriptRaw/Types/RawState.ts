@@ -46,3 +46,10 @@ export type InitSheetsPropsRaw = {
   sheets: Map<SheetId, "allColumns" | ColIdx[]>;
 };
 export type InitSheetsPropsColumnsRaw = "allColumns" | ColIdx[];
+
+export type SheetEventStandard = {
+  colIdxBase0: number;
+  rowIdxBase0: number;
+  sheetId: number;
+  value: GoogleAppsScript.Events.SheetsOnEdit["value"];
+};
