@@ -67,6 +67,15 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
       return Arr.compareForSort(a.value(columnName), b.value(columnName));
     });
   }
+  DELETE_ALL_DATA_ROWS(): SheetNamed<TN> {
+    if (this.raw.dataRowCount < 1) {
+      return this;
+    }
+    this.dataRows.forEach((row) => {
+      delete this.state[row.id];
+    });
+    this.raw.DELETE_ROWS(this.schema.topBodyRowIdx);
+  }
   RESET_TOP_DATA_ROW_DELETE_REST() {
     if (this.raw.dataRowCount > 0) {
       this.raw.topBodyRow.resetToDefault();
@@ -82,7 +91,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
       }
       delete this.state[row.id];
     });
-    this.raw.deleteRows(this.schema.topBodyRowIdx + 1);
+    this.raw.DELETE_ROWS(this.schema.topBodyRowIdx + 1);
   }
   rowsFiltered(values: Partial<TableValues<TN>>): RowNamed<TN>[] {
     return this.dataRows.filter((row) => {

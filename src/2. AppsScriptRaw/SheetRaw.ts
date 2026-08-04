@@ -207,6 +207,8 @@ export class SheetRaw extends SheetRawBase {
     return Math.max(...this.sheetState.rowStates.keys());
   }
   appendRowDefault(): RowRaw {
+    // How should I handle appending rows when there is just one row.
+
     const idx = this.lastRowIdx + 1;
     this.sheetState.rowStates[this.lastRowIdx + 1] = new Map();
     return this.row(idx)
@@ -220,7 +222,7 @@ export class SheetRaw extends SheetRawBase {
     }
     return row;
   }
-  deleteRows(
+  DELETE_ROWS(
     startRowIdx: number,
     numRows: number = this.rowCount - startRowIdx,
   ): SheetRaw {
