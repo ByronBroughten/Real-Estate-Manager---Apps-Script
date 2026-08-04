@@ -12,11 +12,6 @@ import type { ColumnSchemaNamed } from "../1. SpreadsheetSchema/ColumnSchemaName
 import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import type { GoogleUpdateRequests } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
-import {
-  asU,
-  type StandardizedValue,
-  type UserEnteredValue,
-} from "../utilitiesAppsScript";
 import { utils } from "../utilitiesGeneral";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
@@ -106,31 +101,6 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
       return date;
     }
   }
-
-  valueStandardized<CN extends ColumnName<TN>>(
-    columnName: CN,
-  ): StandardizedValue<ColumnValue<TN, CN>> {
-    return asU.standardize.value(this.value(columnName)) as StandardizedValue<
-      ColumnValue<TN, CN>
-    >;
-  }
-  valueUserEntered(columnName: ColumnName<TN>): UserEnteredValue {
-    const value = this.value(columnName);
-    if (valS.is.string(value)) {
-      if (value[0] === "=") {
-        return { formulaValue: value };
-      } else {
-        return { stringValue: value };
-      }
-    } else if (valS.is.date(value)) {
-      return { stringValue: asU.standardize.date(value) };
-    } else if (valS.is.number(value)) {
-      return { numberValue: value };
-    } else if (valS.is.boolean(value)) {
-      return { boolValue: value };
-    }
-  }
-
   values<CN extends ColumnName<TN> = ColumnName<TN>>(
     columnNames?: readonly CN[],
   ): TableValues<TN, CN> {

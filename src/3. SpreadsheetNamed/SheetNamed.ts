@@ -8,7 +8,6 @@ import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed"
 import type { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
 import { Arr } from "../utils/Arr";
-import { Obj } from "../utils/Obj";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SheetRowToRowIdx } from "./ClassBases/SpreadsheetNamedBase";
 import { RowNamed } from "./RowNamed";
@@ -19,7 +18,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     return new SpreadsheetNamed(this.spreadsheetProps);
   }
   get schema(): SheetSchemaNamed<TN> {
-    return this.spreadsheetSchema.sheet(this.tableName);
+    return this.spreadsheetSchema.sheet(this.sheetName);
   }
   get raw(): SheetRaw {
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
@@ -68,42 +67,22 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
       return Arr.compareForSort(a.value(columnName), b.value(columnName));
     });
   }
-  RESET_TOP_ROW_DELETE_REST() {
+  RESET_TOP_DATA_ROW_DELETE_REST() {
     if (this.raw.dataRowCount > 0) {
       this.raw.topBodyRow.resetToDefault();
-      this.raw.deleteRows(
-        this.schema.topBodyRowIdx + 1, // start row
-        // num rows
-      );
-
-      // Get all the row ids that will be deleted
-      // Remove their entries from the named state
+    }
+    if (this.raw.dataRowCount > 1) {
+      this.DELETE_DATA_ROWS_AFTER_TOP();
     }
   }
-
-  private createRowChanges<TN extends TableName>(): RowChangesToSave<TN> {
-    return {
-      add: false,
-      delete: false,
-      update: new Set(),
-    };
-  }
-  headerByColIdxBase1(colIdxBase1: number): string {
-    const columnName = this.varbNameByColIdxBase1(colIdxBase1);
-    const header = this.schema.column(columnName).displayName;
-    return header;
-  }
-  varbNameByColIdxBase1(colIdxBase1: number): ColumnName<TN> {
-    const columnName = Obj.keyByValue(
-      this.state.headerIndicesBase1,
-      colIdxBase1,
-    );
-    if (!columnName) {
-      throw new Error(
-        `No variable found at column index ${colIdxBase1} in sheet "${this.tableName}"`,
-      );
-    }
-    return columnName;
+  private DELETE_DATA_ROWS_AFTER_TOP() {
+    this.dataRows.forEach((row, idx) => {
+      if (idx === 0) {
+        return; // skip the top row
+      }
+      delete this.state[row.id];
+    });
+    this.raw.deleteRows(this.schema.topBodyRowIdx + 1);
   }
   rowsFiltered(values: Partial<TableValues<TN>>): RowNamed<TN>[] {
     return this.dataRows.filter((row) => {
@@ -116,7 +95,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     });
   }
   state(): SheetRowToRowIdx {
-    return this.namedState[this.tableName];
+    return this.namedState[this.sheetName];
   }
   appendRowDefault(): RowNamed<TN> {
     const { baseId, fullId } = this.schema.makeRowId();
@@ -129,10 +108,20 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     const row = this.appendRowDefault();
     return row.setValues(values);
   }
+  addMissingColumnIds(): SheetNamed<TN> {
+    const colIdRow = this.raw.row(this.schema.colIdRowIdx);
+    this.raw.schema.allColumnIdxes.forEach((colIdx) => {
+      const colIdValue = colIdRow.value(colIdx);
+      if (!colIdValue) {
+        colIdRow.setValue(colIdx, this.schema.makeColumnId());
+      }
+    });
+    return this;
+  }
   // validateThis<GN extends TnGroupName>(
   //   snGroupName: GN,
   // ): SheetNamed<GroupToTableName<GN>> {
-  //   if (isInTnGroup(snGroupName, this.tableName)) {
+  //   if (isInTnGroup(snGroupName, this.sheetName)) {
   //     return this as unknown as SheetNamed<GroupToTableName<GN>>;
   //   } else {
   //     throw new Error(`Not a sheet of from group "${snGroupName}"`);

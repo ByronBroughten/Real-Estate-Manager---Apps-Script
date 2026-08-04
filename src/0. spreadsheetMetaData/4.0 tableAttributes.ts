@@ -82,19 +82,19 @@ export type TableName<TN extends TableNameSimple = TableNameSimple> = TN;
 export function getTableAttribute<
   TN extends TableNameSimple,
   K extends keyof TableAttributes<TN>,
->(tableName: TN, key: K): TableAttributes<TN>[K] {
-  return allTableAttributes[tableName][key];
+>(sheetName: TN, key: K): TableAttributes<TN>[K] {
+  return allTableAttributes[sheetName][key];
 }
 
 type AllTableAttributesByGid = KeyedMap<
   AllTableAttributes,
   "sheetGid",
-  "tableName"
+  "sheetName"
 >;
 export const tableAttributesByGid = Obj.toKeyedMap(
   allTableAttributes,
   "sheetGid",
-  "tableName",
+  "sheetName",
 );
 
 export const allSheetGids = [...tableAttributesByGid.keys()];

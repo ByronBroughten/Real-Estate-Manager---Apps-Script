@@ -19,22 +19,22 @@ export class SpreadsheetSchema extends SchemaBase {
   get raw(): SpreadsheetSchemaRaw {
     return new SpreadsheetSchemaRaw();
   }
-  sheet<TN extends TableNameSimple>(tableName: TN): SheetSchemaNamed<TN> {
-    return new SheetSchemaNamed(tableName);
+  sheet<TN extends TableNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
+    return new SheetSchemaNamed(sheetName);
   }
   column<TN extends TableName, CN extends ColumnName<TN>>(
-    tableName: TN,
+    sheetName: TN,
     columnName: CN,
   ): ColumnSchemaNamed<TN, CN> {
-    return new ColumnSchemaNamed(tableName, columnName);
+    return new ColumnSchemaNamed(sheetName, columnName);
   }
   get allTableNames() {
     return allTableNames;
   }
   isInTnGroup<GN extends TnGroupName>(
     groupName: GN,
-    tableName: string,
-  ): tableName is GroupToTableName<GN> {
-    return isInTnGroup(groupName, tableName);
+    sheetName: string,
+  ): sheetName is GroupToTableName<GN> {
+    return isInTnGroup(groupName, sheetName);
   }
 }

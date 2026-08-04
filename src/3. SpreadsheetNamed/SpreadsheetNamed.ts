@@ -38,9 +38,9 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get gatheredTableNames(): TableName[] {
     return Obj.keys(this.namedState);
   }
-  sheet<TN extends TableName>(tableName: TN): SheetNamed<TN> {
+  sheet<TN extends TableName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
-      tableName,
+      sheetName,
       ...this.spreadsheetProps,
     });
   }
@@ -48,11 +48,10 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     ...props: InitSheetsPropsNamed<T>[]
   ): NamedSheets<T> {
     const rawProps = this._reqSheetsPropsToRaw(props);
-    this.raw.initSheets(rawProps);
+    this.raw.initSheets(...rawProps);
     const tableNames = this._tableNamesFromReqProps(props);
-
-    return [...tableNames].reduce((acc, tableName) => {
-      acc[tableName] = this.sheet(tableName);
+    return [...tableNames].reduce((acc, sheetName) => {
+      acc[sheetName] = this.sheet(sheetName);
       return acc;
     }, {} as NamedSheets<T>);
   }
@@ -66,14 +65,14 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
         rowCount,
         sheets: new Map(),
       };
-      for (const tableName of Obj.keys(sheets)) {
+      for (const sheetName of Obj.keys(sheets)) {
         let columnsRaw: InitSheetsPropsColumnsRaw = "allColumns";
-        if (sheets[tableName] !== "allColumns") {
-          columnsRaw = sheets[tableName].map(
-            (colName) => this.schema.column(tableName, colName).idxBase0,
+        if (sheets[sheetName] !== "allColumns") {
+          columnsRaw = sheets[sheetName].map(
+            (colName) => this.schema.column(sheetName, colName).idxBase0,
           );
         }
-        rawProps.sheets.set(this.schema.sheet(tableName).sheetGid, columnsRaw);
+        rawProps.sheets.set(this.schema.sheet(sheetName).sheetGid, columnsRaw);
       }
       rawPropsArr.push(rawProps);
     });
@@ -87,18 +86,19 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }, new Set() as Set<T>);
   }
   addMissingColumnIds() {
-    const sheets = this.initSheets({
+    // This assumes that the schemas are up to date.
+    this.raw.initSheets({
       startRowIndex: this.schema.colIdRowIdx,
       rowCount: 1,
-      sheets: this.schema.allTableNames.reduce(
-        (acc, tableName) => {
-          acc[tableName] = "allColumns";
-          return acc;
+      sheets: this.raw.schema.allSheetGids.reduce(
+        (acc, sheetGid) => {
+          return acc.set(sheetGid, "allColumns");
         },
-        {} as { [T in TableName]: "allColumns" },
+        new Map() as Map<number, "allColumns">,
       ),
     });
-    // Obj.values(sheets).forEach((sheet) => sheet.raw.addMissingColumnIds());
-    // Get the columnId row, check for blanks, update as needed.
+    this.schema.allTableNames.forEach((sheetGid) => {
+      this.sheet(sheetGid).addMissingColumnIds();
+    });
   }
 }

@@ -43,7 +43,7 @@ function rowsOfIdAndPortion<TN extends LedgerInputSn>({
 export class LedgerMgmt extends OperatorBase {
   buildHhLedger(values: ApiFnValues<"buildHhLedger">): void {
     const hhLedger = this.sheet("occupancyLedger");
-    hhLedger.RESET_TOP_ROW_DELETE_REST();
+    hhLedger.RESET_TOP_DATA_ROW_DELETE_REST();
 
     const idsAndPortion = Obj.strictPick(values, [
       "householdId",

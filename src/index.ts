@@ -15,18 +15,18 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
 function testUpdateLeaseOngoingCharges() {
   const top = TopOperator.init();
   top.leaseMgmt.doPeriodicLeaseUpdates();
-  top.ss.gatherRequestsAndBatchUpdate();
+  top.ss.raw.batchUpdateGSheets();
 }
 
 function testUpdateSubsidyOngoingCharges() {
   const top = TopOperator.init();
   top.subsidyMgmt.doPeriodicSubsidyUpdates();
-  top.ss.gatherRequestsAndBatchUpdate();
+  top.ss.raw.batchUpdateGSheets();
 }
 
 function testBuildOutMonthlyChargesAndPayments() {
   const top = TopOperator.init();
   // const cfp = top.buildOutChargesForMonth();
   // top.buildOutPaymentsFromCharges(cfp);
-  top.ss.gatherRequestsAndBatchUpdate();
+  top.ss.raw.batchUpdateGSheets();
 }

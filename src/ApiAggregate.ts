@@ -6,7 +6,7 @@ import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { ChargeMgmt } from "./4. BusinessClasses/ChargeMgmt";
 import { ExpenseMgmt } from "./4. BusinessClasses/ExpenseMgmt";
 import { PaymentMgmt } from "./4. BusinessClasses/PaymentMgmt";
-import type { StandardEvent } from "./TopOperator";
+import type { SheetEventStandard } from "./TopOperator";
 
 type AggregateApiFns = {
   readonly [TN in GroupToTableName<"aggregateApi">]: (
@@ -17,19 +17,19 @@ type AggregateApiFns = {
 export class ApiAggregate<
   TN extends GroupToTableName<"aggregateApi">,
 > extends OperatorBase {
-  constructor(ss: SpreadsheetNamed, tableName: TN, event: StandardEvent) {
+  constructor(ss: SpreadsheetNamed, sheetName: TN, event: SheetEventStandard) {
     super(ss);
-    this.apiSheet = this.sheet(tableName);
+    this.apiSheet = this.sheet(sheetName);
     this.event = event;
   }
   readonly apiSheet: SheetNamed<TN>;
-  readonly event: StandardEvent;
+  readonly event: SheetEventStandard;
   readonly aggregateApiFns: AggregateApiFns = {
     // multis
-    addPropertyExpenses: (_) => new ExpenseMgmt(this.ss).addPropertyExpenses(),
+    addExpenses: (_) => new ExpenseMgmt(this.ss).addPropertyExpenses(),
     addOccChargeOnetime: (values) =>
       new ChargeMgmt(this.ss).addOccChargeOnetime(values),
-    addOccPaymentOnetime: (values) =>
+    addHhPaymentOnetime: (values) =>
       new PaymentMgmt(this.ss).addOccPaymentOnetime(values),
   };
   handleEvent() {
@@ -37,8 +37,8 @@ export class ApiAggregate<
   }
   private isApiTriggered() {
     const api = this.apiSheet;
-    const header = api.headerByColIdxBase1(this.event.colIdxBase1);
-    const isTopBodyRow = this.event.rowIdxBase1 === api.topBodyRowIdxBase1;
+    const header = api.raw.headerRow.value(this.event.colIdxBase0) as string;
+    const isTopBodyRow = this.event.rowIdxBase0 === api.schema.topBodyRowIdx;
     const isEnter = header === "Enter";
     return isTopBodyRow && isEnter;
   }
@@ -59,14 +59,14 @@ export class ApiAggregate<
   }
   private callApi() {
     const apiTopRow = this.apiSheet.topBodyRow;
-    const { tableName } = this.apiSheet;
+    const { sheetName } = this.apiSheet;
     const apiValues = apiTopRow.validateValues();
-    this.aggregateApiFns[tableName](
-      apiValues as TableValues<typeof tableName> as any,
+    this.aggregateApiFns[sheetName](
+      apiValues as TableValues<typeof sheetName> as any,
     );
   }
   private resetApi() {
-    this.apiSheet.RESET_TOP_ROW_DELETE_REST();
+    this.apiSheet.RESET_TOP_DATA_ROW_DELETE_REST();
     this.apiSheet.appendRowDefault();
     this.gatherRequestsAndBatchUpdate();
   }

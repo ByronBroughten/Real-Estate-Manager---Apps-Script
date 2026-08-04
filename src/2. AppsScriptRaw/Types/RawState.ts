@@ -1,4 +1,3 @@
-import type { CellValue } from "../../utilitiesAppsScript";
 import type { GoogleGridRange, GoogleUpdateRequests } from "./AppsScriptTypes";
 
 export interface RawState {
@@ -12,12 +11,13 @@ export type RawSheetsState = Map<SheetId, RawSheetState>;
 
 export interface RawSheetState {
   title: string;
-  tableName: string;
+  sheetName: string;
   tableId: string;
   rowIndexesAreValid: boolean;
   rowStates: RawRowStates;
 }
 
+export type CellValue = number | Date | string | boolean;
 export type RawRowStates = Map<RowIdx, RawRowState>;
 export type RawRowState = Map<ColIdx, CellValue>;
 type SheetId = number;

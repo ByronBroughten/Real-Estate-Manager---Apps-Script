@@ -11,8 +11,8 @@ export class OperatorBase {
   get schema(): SpreadsheetSchema {
     return this.ss.schema;
   }
-  sheet<TN extends TableName>(tableName: TN): SheetNamed<TN> {
-    return this.ss.sheet(tableName);
+  sheet<TN extends TableName>(sheetName: TN): SheetNamed<TN> {
+    return this.ss.sheet(sheetName);
   }
   gatherRequestsAndBatchUpdate(): void {
     return this.ss.gatherRequestsAndBatchUpdate();

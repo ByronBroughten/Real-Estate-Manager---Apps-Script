@@ -6,7 +6,7 @@ import type { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
 import { LedgerMgmt } from "./4. BusinessClasses/LedgerMgmt";
 import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
-import type { StandardEvent } from "./TopOperator";
+import type { SheetEventStandard } from "./TopOperator";
 import {
   Obj,
   type InvertObj,
@@ -52,14 +52,14 @@ type ApiFns = {
 };
 
 export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
-  constructor(ss: SpreadsheetNamed, event: StandardEvent) {
+  constructor(ss: SpreadsheetNamed, event: SheetEventStandard) {
     super(ss);
     this.event = event;
     this.apiSheet = this.sheet("api");
   }
   private apiFnName: FN;
   readonly apiSheet: SheetNamed<"api">;
-  readonly event: StandardEvent;
+  readonly event: SheetEventStandard;
 
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);
   get apiRow(): RowNamed<"api"> {
@@ -130,9 +130,9 @@ export class ApiSingle<FN extends ApiFnName> extends OperatorBase {
   }
   private isValidApiTriggered() {
     const api = this.apiSheet;
-    const header = api.headerByColIdxBase1(this.event.colIdxBase1);
+    const header = api.raw.headerRow.value(this.event.colIdxBase0) as string;
 
-    const isTopBodyRow = this.event.rowIdxBase1 === api.topBodyRowIdxBase1;
+    const isTopBodyRow = this.event.rowIdxBase0 === api.schema.topBodyRowIdx;
     const isEnter = header.slice(-5) === "enter";
     const prefix = header.slice(0, 3);
     const isValidPrefix = prefix in apiPrefixToFnName;

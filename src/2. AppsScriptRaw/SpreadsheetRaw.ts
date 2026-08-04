@@ -22,8 +22,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       sheetGid: sheetGid,
     });
   }
-  initSheets(props: InitSheetsPropsRaw[]): void {
-    this._gatherGridRanges(props);
+  initSheets(...propArr: InitSheetsPropsRaw[]): void {
+    this._gatherGridRanges(propArr);
     const data = this._getByDataFilter();
     this._addDataToState(data);
     this.rawState.getterGridRanges = [];
@@ -44,7 +44,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.spreadsheetId,
       {
         fields:
-          "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,startRow,columnMetadata(hiddenByUser),rowData(values(formattedValue))))",
+          "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,startRow,columnMetadata(hiddenByUser),rowData(values(effectiveValue))))",
       },
     );
   }
@@ -116,7 +116,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       } else {
         const row = this.rowBySheetRowId(sheetRowId);
         if (change.append) {
-          requests.append.push(row.raw.appendRequest);
+          requests.append.push(row.appendRequest);
         }
         for (const columnName of change.update) {
           requests.update.push(row.updateRequest(columnName));
@@ -133,6 +133,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     );
     this.rawState.changesToSave = new Map();
   }
+
   // appendRange(roughRange: string, rawRows: any[][]) {
   //   // depreciated
   //   Sheets.Spreadsheets?.Values?.append(

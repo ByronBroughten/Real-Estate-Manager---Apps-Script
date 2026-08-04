@@ -12,8 +12,11 @@ import {
   getColumnAttributeRaw,
   type ColAttributesRaw,
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
-import type { GoogleCellValue } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
-import type { CellValue } from "../utilitiesAppsScript";
+import type {
+  GoogleCellValue,
+  UserEnteredValue,
+} from "../2. AppsScriptRaw/Types/AppsScriptTypes";
+import type { CellValue } from "../2. AppsScriptRaw/Types/RawState";
 import { SchemaBase } from "./SchemaBase";
 
 export class ColumnSchemaRaw extends SchemaBase {
@@ -50,6 +53,9 @@ export class ColumnSchemaRaw extends SchemaBase {
   }
   extractCellString(cellValue: GoogleCellValue | undefined): string {
     return extractCellValue(cellValue, "stringValue");
+  }
+  makeUserEnteredValue(value: Value): UserEnteredValue {
+    return this.valueAttributes("makeUserEnteredValue")(value as any);
   }
   extractCellValue(cellValue: GoogleCellValue | undefined): CellValue {
     return this.valueAttributes("extractCellValue")(cellValue);

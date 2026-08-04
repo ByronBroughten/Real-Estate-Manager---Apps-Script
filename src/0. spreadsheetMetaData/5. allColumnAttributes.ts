@@ -203,7 +203,7 @@ const allColumnAttributes = makeSchemaStructure(
     },
     allColumnAttributes: {
       id: mcs("col-K9DptS1", "string", "ID", 0, false),
-      tableName: mcs("col-U6y6xUt", "string", "Table name", 1, false),
+      sheetName: mcs("col-U6y6xUt", "string", "Table name", 1, false),
       columnIndexBase0: mcs(
         "col-83ENHF2",
         "number",
@@ -234,7 +234,7 @@ const allColumnAttributes = makeSchemaStructure(
       id: mcs("col-90lQMkS", "string", "ID", 0, true),
       baseId: mcs("col-_NrBHfg", "baseId", "Base ID", 1, false),
       sheetGid: mcs("col-fqCrMdm", "number", "Sheet GID", 2, false),
-      tableName: mcs("col-ssYwA1T", "string", "Table name", 3, false),
+      sheetName: mcs("col-ssYwA1T", "string", "Table name", 3, false),
       idPrefix: mcs("col-iqW3fCT", "string", "ID prefix", 4, false),
     },
     api: {
@@ -3603,9 +3603,9 @@ export type TableValues<
 };
 
 export function getSheetColumnNames<TN extends TableNameSimple>(
-  tableName: TN,
+  sheetName: TN,
 ): ColumnName<TN>[] {
-  return Obj.keys(allColumnAttributes[tableName]);
+  return Obj.keys(allColumnAttributes[sheetName]);
 }
 
 // columnAttributes isn't actually very unique. The only unique
@@ -3613,9 +3613,9 @@ export function getColumnAttribute<
   TN extends TableNameSimple,
   CN extends ColumnName<TN>,
   K extends keyof ColumnAttributes<TN, CN>,
->(tableName: TN, columnName: CN, key: K): ColumnAttributes<TN, CN>[K] {
+>(sheetName: TN, columnName: CN, key: K): ColumnAttributes<TN, CN>[K] {
   return (
-    allColumnAttributes[tableName][columnName] as ColumnAttributes<TN, CN>
+    allColumnAttributes[sheetName][columnName] as ColumnAttributes<TN, CN>
   )[key];
 }
 
@@ -3628,12 +3628,12 @@ export type ColAttributesRaw =
   RawIdxColumnAttributes extends Map<any, infer V> ? V : never;
 type AllColumnAttrsGidIdx = Map<number, RawIdxColumnAttributes>;
 function makeAllColumnAttrsGidIdx(): AllColumnAttrsGidIdx {
-  return allTableNames.reduce((attrs, tableName) => {
-    const sheetGid = getTableAttribute(tableName, "sheetGid");
+  return allTableNames.reduce((attrs, sheetName) => {
+    const sheetGid = getTableAttribute(sheetName, "sheetGid");
     attrs.set(
       sheetGid,
       Obj.toKeyedMap(
-        allColumnAttributes[tableName],
+        allColumnAttributes[sheetName],
         "indexBase0",
         "columnName",
       ),

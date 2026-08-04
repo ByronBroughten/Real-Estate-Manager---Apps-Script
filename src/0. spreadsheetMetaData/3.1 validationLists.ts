@@ -192,6 +192,7 @@ export function makeValidationValueSchemas(): ValidationValueAttributesBase {
         defaultValidate: (value: unknown) =>
           validateValidationValue(value, name),
         extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
+        makeUserEnteredValue: (value) => ({ stringValue: value }),
       });
     return attributes;
   }, {} as ValidationValueAttributesBase);

@@ -1,5 +1,9 @@
 import { allTableNames } from "./0. spreadsheetMetaData/4.0 tableAttributes";
 
+// Ideas:
+// Put tableId in the schema because it's stable.
+// Make sheetName based on the sheet's actual name
+
 const allColumnAttributesGid = 2034522667;
 function ensureColumns() {
   ensureColumnIds();

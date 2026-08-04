@@ -19,24 +19,34 @@ const allValueAttributes = makeSchemaStructure(
       makeDefault: () => utils.id.makeBase(),
       defaultValidate: valS.validate.string,
       extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
+      makeUserEnteredValue: (value) => ({ stringValue: value }),
     }),
     string: va({
       type: "" as string,
       makeDefault: () => "",
       defaultValidate: valS.validate.string,
       extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
+      makeUserEnteredValue: (value) => ({ stringValue: value }),
     }),
     number: va({
       type: "" as number | string,
-      makeDefault: () => "",
+      makeDefault: () => "" as const,
       defaultValidate: valS.validate.numberOrEmpty,
       extractCellValue: (colCell) => extractCellValue(colCell, "numberValue"),
+      makeUserEnteredValue: (value) =>
+        typeof value === "string"
+          ? { stringValue: value }
+          : { numberValue: value },
     }),
     boolean: va({
       type: "" as boolean | string,
       makeDefault: () => false,
       defaultValidate: valS.validate.boolean,
       extractCellValue: (colCell) => extractCellValue(colCell, "boolValue"),
+      makeUserEnteredValue: (value) =>
+        typeof value === "string"
+          ? { stringValue: value }
+          : { boolValue: value },
     }),
     date: va({
       type: "" as Date | string,
@@ -44,8 +54,12 @@ const allValueAttributes = makeSchemaStructure(
       defaultValidate: valS.validate.dateOrEmptyOrFormula,
       extractCellValue: (colCell) =>
         extractCellValue(colCell, "numberValue", (value) =>
-          Dat.serialDateToJSDate(value),
+          Dat.serialToDate(value),
         ),
+      makeUserEnteredValue: (value) =>
+        typeof value === "string"
+          ? { stringValue: value }
+          : { numberValue: Dat.dateToSerial(value) },
     }),
     ...makeValidationValueSchemas(),
   } as const,

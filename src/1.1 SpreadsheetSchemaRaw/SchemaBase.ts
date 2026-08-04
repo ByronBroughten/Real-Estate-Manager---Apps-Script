@@ -16,6 +16,9 @@ export class SchemaBase {
   get topBodyRowIdx(): number {
     return this.config("topBodyRowIdx");
   }
+  get headerRowIdx(): number {
+    return this.config("headerRowIdx");
+  }
   get idDelimiter(): string {
     return this.config("idDelimiter");
   }

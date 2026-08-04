@@ -35,14 +35,14 @@ export class SheetSchemaRaw extends SchemaBase {
   get allColumnIdxes(): MapIterator<number> {
     return getSheetColumnIdxes(this.sheetGid);
   }
-  get tableName(): TableName {
-    return this.attribute("tableName");
+  get sheetName(): TableName {
+    return this.attribute("sheetName");
   }
   makeRowId(): string {
     const idPrefix = this.attribute("idPrefix");
     if (!idPrefix) {
       throw new Error(
-        `Attempted to make id for table ${this.tableName} without an idPrefix`,
+        `Attempted to make id for table ${this.sheetName} without an idPrefix`,
       );
     }
     const baseId = utils.id.makeBase();

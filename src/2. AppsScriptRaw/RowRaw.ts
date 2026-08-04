@@ -1,9 +1,9 @@
 import type { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
-import type { CellValue } from "../utilitiesAppsScript";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import { SheetRaw } from "./SheetRaw";
 import type { GoogleCellValue } from "./Types/AppsScriptTypes";
 import type {
+  CellValue,
   RowChangeProps,
   RowChangesToSave,
   RowChangeUpdateProps,
@@ -70,6 +70,9 @@ export class RowRaw extends RowRawBase {
   delete() {
     this.rowState.delete(this.idxBase0);
     this._addChangeToSave({ action: "delete" });
+    this.sheetState.rowIndexesAreValid = false;
+    //TO DO to make rowIndexesAreValid still equal true, I would need to maintain an index for appending rows such that their index wouldn't depend on those currently in the sheet.
+    // For now, this suffices.
   }
 
   get sheetRowId(): string {
@@ -104,6 +107,41 @@ export class RowRaw extends RowRawBase {
     };
     actions[props.action](props);
     return this;
+  }
+  get appendRequest(): GoogleAppsScript.Sheets.Schema.Request {
+    return {
+      appendCells: {
+        sheetId: this.sheetGid,
+        tableId: `${this.sheetState.tableId}`,
+        rows: [{}],
+        fields: "userEnteredValue",
+      },
+    };
+  }
+
+  updateRequest(colIdx: number): GoogleAppsScript.Sheets.Schema.Request {
+    return {
+      updateCells: {
+        range: {
+          sheetId: this.sheetGid,
+          startRowIndex: this.idxBase0,
+          endRowIndex: this.idxBase0 + 1,
+          startColumnIndex: colIdx,
+          endColumnIndex: colIdx + 1,
+        },
+        rows: [{ values: [this._userEnteredValue(colIdx)] }],
+        fields: "userEnteredValue",
+      },
+    };
+  }
+  private _userEnteredValue(
+    colIdx: number,
+  ): GoogleAppsScript.Sheets.Schema.CellData {
+    return {
+      userEnteredValue: this.columnSchema(colIdx).makeUserEnteredValue(
+        this.value(colIdx),
+      ),
+    };
   }
   get deleteRequest(): GoogleAppsScript.Sheets.Schema.Request {
     return {

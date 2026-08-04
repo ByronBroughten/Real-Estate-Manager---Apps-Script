@@ -5,9 +5,9 @@ import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
 import { ApiAggregate } from "./ApiAggregate";
 import { ApiSingle } from "./ApiSingle";
 
-export type StandardEvent = {
-  colIdxBase1: number;
-  rowIdxBase1: number;
+export type SheetEventStandard = {
+  colIdxBase0: number;
+  rowIdxBase0: number;
 };
 
 export class TopOperator extends OperatorBase {
@@ -23,31 +23,30 @@ export class TopOperator extends OperatorBase {
     this.doPeriodicContractUpdates();
     // const cfp = this.buildOutChargesForMonth();
     // this.buildOutPaymentsFromCharges(cfp);
-    this.ss.gatherRequestsAndBatchUpdate();
+    this.ss.raw.batchUpdateGSheets();
   }
   test() {
     return "test";
   }
   private standardizeEvent(
     e: GoogleAppsScript.Events.SheetsOnEdit,
-  ): StandardEvent {
-    const colIdxBase1 = e.range.getColumn();
-    const rowIdxBase1 = e.range.getRow();
-    return { colIdxBase1, rowIdxBase1 };
+  ): SheetEventStandard {
+    const colIdxBase0 = e.range.getColumn() - 1;
+    const rowIdxBase0 = e.range.getRow() - 1;
+    return { colIdxBase0, rowIdxBase0 };
   }
 
   onTrueValueEntered(e: GoogleAppsScript.Events.SheetsOnEdit): void {
     const sheetGid = e.range.getSheet().getSheetId();
     const schema = this.schema;
-    const { tableName } = schema.raw.sheet(sheetGid);
-
-    if (tableName === "api") {
+    const { sheetName } = schema.raw.sheet(sheetGid);
+    if (sheetName === "api") {
       const apiSingle = new ApiSingle(this.ss, this.standardizeEvent(e));
       apiSingle.handleEvent();
-    } else if (schema.isInTnGroup("aggregateApi", tableName)) {
+    } else if (schema.isInTnGroup("aggregateApi", sheetName)) {
       const apiAggregate = new ApiAggregate(
         this.ss,
-        tableName,
+        sheetName,
         this.standardizeEvent(e),
       );
       apiAggregate.handleEvent();

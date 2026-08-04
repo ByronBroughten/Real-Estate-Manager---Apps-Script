@@ -3,7 +3,12 @@ export interface MonthYear {
   year: number;
 }
 
+// ---------------------------------------------------------------------
+// DATE-ONLY (no time-of-day) — use these today
+// ---------------------------------------------------------------------
 class DateUtils {
+  readonly SHEETS_EPOCH_UTC_MS: number = Date.UTC(1899, 11, 30); // Dec 30, 1899, 00:00 UTC
+  readonly MS_PER_DAY: number = 86_400_000;
   getDayBefore(date: Date): Date {
     const dayBefore = new Date(date.getTime());
     dayBefore.setDate(dayBefore.getDate() - 1);
@@ -162,11 +167,31 @@ class DateUtils {
       isProrated: proratedProportion < 1,
     };
   }
-  serialDateToJSDate(serial): Date {
-    // Works for xcel and Google Sheets dates stored as numbers.
-    const epoch = new Date(Date.UTC(1899, 11, 30)); // Dec 30, 1899
-    const msPerDay = 24 * 60 * 60 * 1000;
-    return new Date(epoch.getTime() + serial * msPerDay);
+  /** Sheets serial (whole number) -> JS Date, anchored at UTC midnight. */
+  serialToDate(serial: number): Date {
+    return new Date(
+      this.SHEETS_EPOCH_UTC_MS + Math.round(serial) * this.MS_PER_DAY,
+    );
+  }
+  /** JS Date -> Sheets serial (whole number of days). */
+  dateToSerial(date: Date): number {
+    return Math.round(
+      (date.getTime() - this.SHEETS_EPOCH_UTC_MS) / this.MS_PER_DAY,
+    );
+  }
+
+  /** Add (or subtract, with a negative) whole days. */
+  addDays(date: Date, days: number): Date {
+    const d = new Date(date);
+    d.setUTCDate(d.getUTCDate() + days);
+    return d;
+  }
+
+  /** Add (or subtract) whole months. JS normalizes overflow, e.g. Jan 31 + 1mo -> Mar 3. */
+  addMonths(date: Date, months: number): Date {
+    const d = new Date(date);
+    d.setUTCMonth(d.getUTCMonth() + months);
+    return d;
   }
 }
 

@@ -8,21 +8,21 @@ import {
 export interface SheetNamedProps<
   TN extends TableName,
 > extends SpreadsheetNamedProps {
-  tableName: TN;
+  sheetName: TN;
 }
 
 export class SheetNamedBase<TN extends TableName> extends SpreadsheetNamedBase {
-  readonly tableName: TN;
-  constructor({ tableName, ...props }: SheetNamedProps<TN>) {
+  readonly sheetName: TN;
+  constructor({ sheetName, ...props }: SheetNamedProps<TN>) {
     super(props);
-    this.tableName = tableName;
+    this.sheetName = sheetName;
   }
   get sheetState(): SheetRowToRowIdx {
-    return this.namedState[this.tableName];
+    return this.namedState[this.sheetName];
   }
   get sheetProps(): SheetNamedProps<TN> {
     return {
-      tableName: this.tableName,
+      sheetName: this.sheetName,
       ...this.spreadsheetProps,
     };
   }

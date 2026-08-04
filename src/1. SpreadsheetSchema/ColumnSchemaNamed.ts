@@ -21,21 +21,21 @@ export class ColumnSchemaNamed<
   TN extends TableName = TableName,
   CN extends ColumnName<TN> = ColumnName<TN>,
 > extends SchemaBase {
-  readonly tableName: TN;
+  readonly sheetName: TN;
   readonly columnName: CN;
-  constructor(tableName: TN, columnName: CN) {
+  constructor(sheetName: TN, columnName: CN) {
     super();
-    this.tableName = tableName;
+    this.sheetName = sheetName;
     this.columnName = columnName;
   }
   get sheetSchema(): SheetSchemaNamed<TN> {
-    return new SheetSchemaNamed(this.tableName);
+    return new SheetSchemaNamed(this.sheetName);
   }
   get raw(): ColumnSchemaRaw {
     return new ColumnSchemaRaw(this.sheetSchema.sheetGid, this.columnIdx);
   }
   get columnFullname(): CombineStringsWithFlat<TN, CN & string> {
-    return `${this.tableName}_${this.columnName as string}` as CombineStringsWithFlat<
+    return `${this.sheetName}_${this.columnName as string}` as CombineStringsWithFlat<
       TN,
       CN & string
     >;
@@ -53,7 +53,7 @@ export class ColumnSchemaNamed<
     key: K,
   ): ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>] {
     return getColumnAttribute(
-      this.tableName,
+      this.sheetName,
       this.columnName,
       key as unknown as keyof ColumnAttributes<TN, CN>,
     ) as ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>];

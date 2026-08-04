@@ -1,3 +1,4 @@
+import type { Value } from "../0. spreadsheetMetaData/3.2 valueAttributes";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
 import type { StrictPickPartial } from "../utils/Obj";
 import { valS } from "../utils/validation";
@@ -50,6 +51,9 @@ export class SheetRaw extends SheetRawBase {
   get topBodyRow(): RowRaw {
     return this.row(this.schema.topBodyRowIdx);
   }
+  get headerRow(): RowRaw {
+    return this.row(this.schema.headerRowIdx);
+  }
   get allRows(): RowRaw[] {
     return Array.from(this.sheetState.rowStates.keys()).map((idxBase0) =>
       this.row(idxBase0),
@@ -72,7 +76,7 @@ export class SheetRaw extends SheetRawBase {
     const table = sheet.tables[0];
     this.sheetsState.set(this.sheetGid, {
       title: valS.assertDefined(properties.title, "sheet title "),
-      tableName: valS.assertDefined(table.name, "tableName"),
+      sheetName: valS.assertDefined(table.name, "sheetName"),
       tableId: valS.assertDefined(table.tableId, "tableId"),
       rowIndexesAreValid: true,
       rowStates: new Map(),
@@ -209,8 +213,26 @@ export class SheetRaw extends SheetRawBase {
       .resetToDefault()
       ._addChangeToSave({ action: "append" });
   }
-  appendRow() {
-    this.appendRowDefault();
-    // logic about props to give the row
+  appendRow(colValues: Map<number, Value>): RowRaw {
+    const row = this.appendRowDefault();
+    for (const [colIdx, value] of colValues.entries()) {
+      row.setValue(colIdx, value);
+    }
+    return row;
+  }
+  deleteRows(
+    startRowIdx: number,
+    numRows: number = this.rowCount - startRowIdx,
+  ): SheetRaw {
+    this.sheetState.rowStates
+      .entries()
+      .filter(
+        ([rowIdx]) => rowIdx >= startRowIdx && rowIdx < startRowIdx + numRows,
+      )
+      .forEach(([rowIdx]) => {
+        const row = this.row(rowIdx);
+        row.delete();
+      });
+    return this;
   }
 }
