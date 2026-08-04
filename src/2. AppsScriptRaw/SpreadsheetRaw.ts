@@ -85,11 +85,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
   }
   rowBySheetRowId(sheetRowId: string): RowRaw {
-    const [sheetGidStr, rowIdxStr] = sheetRowId.split(
-      this.schema.config("idDelimiterNext"),
-    );
-    const sheetGid = parseInt(sheetGidStr);
-    const rowIdx = parseInt(rowIdxStr);
+    const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
   }
   batchUpdateGSheets() {
@@ -98,6 +94,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       { requests: this.rawState.updateRequests },
       this.spreadsheetId,
     );
+    this.rawState.sheetsInvalidateIdxesOnUpdate.forEach((sheetGid) => {
+      this.sheet(sheetGid).invalidateRowIndexes();
+    });
+    this.rawState.sheetsInvalidateIdxesOnUpdate.clear();
     this.rawState.updateRequests = [];
   }
   private _gatherUpdateRequests() {
@@ -113,6 +113,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         continue;
       } else if (change.delete) {
         requests.delete.push(change.delete);
+        const { sheetGid } = this.schema.idsFromSheetRowId(sheetRowId);
+        this.rawState.sheetsInvalidateIdxesOnUpdate.add(sheetGid);
       } else {
         const row = this.rowBySheetRowId(sheetRowId);
         if (change.append) {
@@ -121,11 +123,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         for (const columnName of change.update) {
           requests.update.push(row.updateRequest(columnName));
         }
-        // I must test if appending and upating in the same batch works how I want it to.
-        // Otherwise, I might have to execute two separate requests.
       }
     }
-    // Delete requests must be carried last because row indices will change after deletions.
     this.updateRequests.push(
       ...requests.append,
       ...requests.update,

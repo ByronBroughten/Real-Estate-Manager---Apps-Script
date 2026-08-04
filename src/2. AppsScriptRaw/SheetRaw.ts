@@ -79,10 +79,12 @@ export class SheetRaw extends SheetRawBase {
       sheetName: valS.assertDefined(table.name, "sheetName"),
       tableId: valS.assertDefined(table.tableId, "tableId"),
       rowIndexesAreValid: true,
+      nextAppendedRowIdx: 0,
       rowStates: new Map(),
     });
     if (sheet.data) {
       this._initSheetRowStates(sheet.data);
+      this.sheetState.nextAppendedRowIdx = this.lastRowIdx + 1;
     }
   }
   private _initSheetRowStates(sheetData: GoogleSheetData): void {
@@ -206,11 +208,16 @@ export class SheetRaw extends SheetRawBase {
   get lastRowIdx(): number {
     return Math.max(...this.sheetState.rowStates.keys());
   }
+  invalidateRowIndexes(): void {
+    this.sheetState.rowIndexesAreValid = false;
+  }
+  validateRowIndexes(): void {
+    this.sheetState.rowIndexesAreValid = true;
+  }
   appendRowDefault(): RowRaw {
-    // How should I handle appending rows when there is just one row.
-
-    const idx = this.lastRowIdx + 1;
-    this.sheetState.rowStates[this.lastRowIdx + 1] = new Map();
+    const idx = this.nextAppendedRowIdx;
+    this.sheetState.rowStates[idx] = new Map();
+    this.sheetState.nextAppendedRowIdx = idx + 1;
     return this.row(idx)
       .resetToDefault()
       ._addChangeToSave({ action: "append" });

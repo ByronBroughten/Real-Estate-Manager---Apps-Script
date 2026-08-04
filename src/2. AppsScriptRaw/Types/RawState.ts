@@ -5,6 +5,7 @@ export interface RawState {
   getterGridRanges: GoogleGridRange[];
   updateRequests: GoogleUpdateRequests[];
   sheets: RawSheetsState;
+  sheetsInvalidateIdxesOnUpdate: Set<SheetId>;
 }
 
 export type RawSheetsState = Map<SheetId, RawSheetState>;
@@ -13,6 +14,7 @@ export interface RawSheetState {
   title: string;
   sheetName: string;
   tableId: string;
+  nextAppendedRowIdx: number;
   rowIndexesAreValid: boolean;
   rowStates: RawRowStates;
 }

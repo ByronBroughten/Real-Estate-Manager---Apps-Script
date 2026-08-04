@@ -70,9 +70,6 @@ export class RowRaw extends RowRawBase {
   delete() {
     this.rowState.delete(this.idxBase0);
     this._addChangeToSave({ action: "delete" });
-    this.sheetState.rowIndexesAreValid = false;
-    //TO DO to make rowIndexesAreValid still equal true, I would need to maintain an index for appending rows such that their index wouldn't depend on those currently in the sheet.
-    // For now, this suffices.
   }
 
   get sheetRowId(): string {

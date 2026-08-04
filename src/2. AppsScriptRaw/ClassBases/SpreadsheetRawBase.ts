@@ -42,6 +42,7 @@ export class SpreadsheetRawBase {
       changesToSave: new Map(),
       updateRequests: [],
       sheets: new Map(),
+      sheetsInvalidateIdxesOnUpdate: new Set(),
     };
   }
 }

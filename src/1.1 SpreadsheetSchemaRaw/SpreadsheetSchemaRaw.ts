@@ -11,6 +11,25 @@ export class SpreadsheetSchemaRaw extends SchemaBase {
   column(sheetGid: number, columnIdx: number): ColumnSchemaRaw {
     return new ColumnSchemaRaw(sheetGid, columnIdx);
   }
+  idsFromSheetRowId(sheetRowId: string): { sheetGid: number; rowIdx: number } {
+    const [sheetGidStr, rowIdxStr] = sheetRowId.split(
+      this.config("idDelimiterNext"),
+    );
+    if (!sheetGidStr || !rowIdxStr) {
+      throw new Error(
+        `Invalid sheetRowId: ${sheetRowId}. Must be in the format "sheetGid${this.config("idDelimiterNext")}rowIdx"`,
+      );
+    }
+    const sheetGid = parseInt(sheetGidStr);
+    const rowIdx = parseInt(rowIdxStr);
+    if (isNaN(sheetGid) || isNaN(rowIdx)) {
+      throw new Error(
+        `Invalid sheetRowId: ${sheetRowId}. Must be in numeric values with a delimiter.`,
+      );
+    }
+    return { sheetGid, rowIdx };
+  }
+
   get allSheetGids(): number[] {
     return allSheetGids;
   }
