@@ -22,7 +22,7 @@ export class SpreadsheetNamedBase extends SpreadsheetRawBase {
   get spreadsheetSchema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
-  get spreadsheetProps(): SpreadsheetNamedProps {
+  get spreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
       rawState: this.rawState,
       namedState: this.namedState,

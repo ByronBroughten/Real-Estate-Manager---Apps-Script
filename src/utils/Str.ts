@@ -43,4 +43,22 @@ export const Str = {
   ): TakeFirstN<T, N> {
     return str.split("").slice(0, n).join("") as TakeFirstN<T, N>;
   },
+  sentenceToCamelCase(sentence) {
+    /**
+     * Converts a header sentence (e.g. "Column ID") into a camelCase key
+     * (e.g. "columnId"), used to robustly match row-3 headers regardless of
+     * minor spacing/punctuation/capitalization differences.
+     */
+    return sentence
+      .toLowerCase()
+      .trim()
+      .replace(/['’]/g, "") // remove straight & curly apostrophes
+      .split(/[^a-zA-Z0-9]+/)
+      .filter(Boolean)
+      .map((word, index) => {
+        if (index === 0) return word;
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join("");
+  },
 };

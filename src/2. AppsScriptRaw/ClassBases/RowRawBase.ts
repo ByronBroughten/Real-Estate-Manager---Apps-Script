@@ -10,6 +10,9 @@ export class RowRawBase extends SheetRawBase {
   constructor({ idxBase0, ...rest }: RowRawProps) {
     super(rest);
     this.idxBase0 = idxBase0;
+    if (!this.sheetState.rowStates.has(idxBase0)) {
+      this.sheetState.rowStates.set(idxBase0, new Map());
+    }
   }
   get rowState(): RawRowState {
     return this.sheetState.rowStates.get(this.idxBase0);

@@ -7,7 +7,6 @@ import {
   getSheetColumnIdxes,
   type ColumnName,
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
-import { utils } from "../utilitiesGeneral";
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
 
@@ -37,15 +36,5 @@ export class SheetSchemaRaw extends SchemaBase {
   }
   get sheetName(): TableName {
     return this.attribute("sheetName");
-  }
-  makeRowId(): string {
-    const idPrefix = this.attribute("idPrefix");
-    if (!idPrefix) {
-      throw new Error(
-        `Attempted to make id for table ${this.sheetName} without an idPrefix`,
-      );
-    }
-    const baseId = utils.id.makeBase();
-    return `${idPrefix}${this.config("idDelimiter")}${baseId}`;
   }
 }

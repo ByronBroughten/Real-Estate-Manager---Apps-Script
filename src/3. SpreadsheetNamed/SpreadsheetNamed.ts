@@ -41,7 +41,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   sheet<TN extends TableName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
       sheetName,
-      ...this.spreadsheetProps,
+      ...this.spreadsheetNamedProps,
     });
   }
   initSheets<T extends TableName>(

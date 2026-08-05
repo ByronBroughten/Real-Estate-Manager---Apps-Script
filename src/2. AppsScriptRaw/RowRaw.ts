@@ -26,6 +26,11 @@ export class RowRaw extends RowRawBase {
     });
   }
   value(colIdx: number): CellValue {
+    if (!this.rowState.has(colIdx)) {
+      throw new Error(
+        `Row ${this.idxBase0} does not have a value set for column index ${colIdx}.`,
+      );
+    }
     return this.rowState.get(colIdx);
   }
   ensureStateExists() {
@@ -71,19 +76,19 @@ export class RowRaw extends RowRawBase {
     this.rowState.delete(this.idxBase0);
     this._addChangeToSave({ action: "delete" });
   }
-
   get sheetRowId(): string {
-    return `${this.sheetGid}${this.sheetSchema.idDelimiter}${this.idxBase0}`;
+    return this.sheetSchema.makeId(this.sheetGid, this.idxBase0);
   }
   get changesToSave(): RowChangesToSave {
     this._ensureChnagesToSaveExists();
-    return this.allChangesToSave.get(this.sheetRowId);
+    return this.allChangesToSave.get(this.sheetRowId) as RowChangesToSave;
   }
   private _ensureChnagesToSaveExists(): void {
     const sheetChangesToSave = this.rawState.changesToSave;
     const sheetRowId = this.sheetRowId;
     if (!sheetChangesToSave.has(sheetRowId)) {
       sheetChangesToSave.set(sheetRowId, {
+        level: "row",
         append: false,
         delete: null,
         update: new Set(),

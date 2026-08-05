@@ -1,9 +1,14 @@
-import type { GoogleGridRange, GoogleUpdateRequests } from "./AppsScriptTypes";
+import type { GoogleGridRange, GoogleUpdateRequest } from "./AppsScriptTypes";
 
 export interface RawState {
   changesToSave: ChangesToSave;
   getterGridRanges: GoogleGridRange[];
-  updateRequests: GoogleUpdateRequests[];
+  updateRequests: {
+    append: GoogleUpdateRequest[];
+    update: GoogleUpdateRequest[];
+    delete: GoogleUpdateRequest[];
+    sort: GoogleUpdateRequest[];
+  };
   sheets: RawSheetsState;
   sheetsInvalidateIdxesOnUpdate: Set<SheetId>;
 }
@@ -27,12 +32,30 @@ type RowIdx = number;
 type ColIdx = number;
 type SheetRowId = string;
 
-export type ChangesToSave = Map<SheetRowId, RowChangesToSave>;
+export type SortParameters = {
+  colIdxToSortBy: number;
+  sortOrder: "ASCENDING" | "DESCENDING";
+};
+
+export type ChangesToSave = Map<
+  SheetId | SheetRowId,
+  RowChangesToSave | SheetChangesToSave
+>;
 export type RowChangesToSave = {
+  level: "row";
   append: boolean;
   delete: null | GoogleAppsScript.Sheets.Schema.Request;
   update: Set<ColIdx>;
 };
+export type SheetChangesToSave = {
+  level: "sheet";
+  sort: null | SortParameters;
+};
+
+export interface SheetChangeSortProps extends SortParameters {
+  action: "sort";
+}
+export type SheetChangeProps = SheetChangeSortProps;
 
 export type RowChangeUpdateProps = { action: "update"; colIdxes: number[] };
 export type RowChangeProps =
@@ -46,10 +69,3 @@ export type InitSheetsPropsRaw = {
   sheets: Map<SheetId, "allColumns" | ColIdx[]>;
 };
 export type InitSheetsPropsColumnsRaw = "allColumns" | ColIdx[];
-
-export type SheetEventStandard = {
-  colIdxBase0: number;
-  rowIdxBase0: number;
-  sheetId: number;
-  value: GoogleAppsScript.Events.SheetsOnEdit["value"];
-};

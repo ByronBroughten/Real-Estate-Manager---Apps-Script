@@ -11,7 +11,6 @@ import {
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
-import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import { SpreadsheetSchema } from "./SpreadsheetSchema";
@@ -49,27 +48,20 @@ export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
   column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  makeId(idPrefix: string): string {
-    return `${idPrefix}${this.config("idDelimiter")}${utils.id.makeBase()}`;
-  }
   makeColumnId(): string {
-    return `col${this.config("idDelimiter")}${utils.id.makeBase()}`;
+    return this.makeId("c", this._makeSheetDimensionId());
   }
-  makeRowId(): {
-    fullId: string;
-    baseId: string;
-  } {
+  makeRowId(): string {
+    return this.makeId("r", this._makeSheetDimensionId());
+  }
+  private _makeSheetDimensionId(): string {
     const idPrefix = this.attribute("idPrefix");
     if (!idPrefix) {
       throw new Error(
         `Attempted to make id for table ${this.sheetName} without an idPrefix`,
       );
     }
-    const baseId = utils.id.makeBase();
-    return {
-      baseId,
-      fullId: `${idPrefix}-${baseId}`,
-    };
+    return this.makeUniqueId(idPrefix);
   }
   get columnNames(): ColumnName<TN>[] {
     return getSheetColumnNames(this.sheetName);

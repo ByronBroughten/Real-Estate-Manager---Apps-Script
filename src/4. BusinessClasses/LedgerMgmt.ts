@@ -1,4 +1,3 @@
-import type { ApiFnValues } from "../ApiSingle";
 
 import type { GroupToTableName } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
@@ -41,7 +40,7 @@ function rowsOfIdAndPortion<TN extends LedgerInputSn>({
 }
 
 export class LedgerMgmt extends OperatorBase {
-  buildHhLedger(values: ApiFnValues<"buildHhLedger">): void {
+  buildHhLedger(): void {
     const hhLedger = this.sheet("occupancyLedger");
     hhLedger.RESET_TOP_DATA_ROW_DELETE_REST();
 

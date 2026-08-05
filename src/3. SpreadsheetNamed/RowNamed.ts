@@ -11,7 +11,7 @@ import type {
 import type { ColumnSchemaNamed } from "../1. SpreadsheetSchema/ColumnSchemaNamed";
 import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
-import type { GoogleUpdateRequests } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
+import type { GoogleUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import { utils } from "../utilitiesGeneral";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
@@ -171,7 +171,7 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
   }
   makeUpdateRequest<CN extends ColumnName<TN>>(
     columnName: CN,
-  ): GoogleUpdateRequests {
+  ): GoogleUpdateRequest {
     // inexplicably, GAS treats indices as zero-indexed for this purpose
     const rowIdx = this.idxBase1 - 1;
     const colIdx = this.sheet.colIdxBase1(columnName) - 1;

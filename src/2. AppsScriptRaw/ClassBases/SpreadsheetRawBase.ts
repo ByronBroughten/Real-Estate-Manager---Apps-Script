@@ -28,19 +28,24 @@ export class SpreadsheetRawBase {
   get allChangesToSave() {
     return this.rawState.changesToSave;
   }
-  get updateRequests() {
-    return this.rawState.updateRequests;
-  }
   get spreadsheetRawProps(): SpreadsheetRawProps {
     return {
       rawState: this.rawState,
+    };
+  }
+  static initSortedUpdateRequests(): RawState["updateRequests"] {
+    return {
+      append: [],
+      update: [],
+      delete: [],
+      sort: [],
     };
   }
   static initRawState(): RawState {
     return {
       getterGridRanges: [],
       changesToSave: new Map(),
-      updateRequests: [],
+      updateRequests: this.initSortedUpdateRequests(),
       sheets: new Map(),
       sheetsInvalidateIdxesOnUpdate: new Set(),
     };

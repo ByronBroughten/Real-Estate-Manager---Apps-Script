@@ -1,19 +1,98 @@
 import { SpreadsheetRaw } from "./2. AppsScriptRaw/SpreadsheetRaw";
+import { SpreadsheetNamedBase } from "./3. SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
+import { ChargeMgmt } from "./4. BusinessClasses/ChargeMgmt";
+import { ExpenseMgmt } from "./4. BusinessClasses/ExpenseMgmt";
+import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
+import { LedgerMgmt } from "./4. BusinessClasses/LedgerMgmt";
+import { PaymentMgmt } from "./4. BusinessClasses/PaymentMgmt";
+import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
 
-export class Api {
-  get ss(): SpreadsheetRaw {
-    return SpreadsheetRaw.init();
+export type SheetEventStandard = {
+  colIdxBase0: number;
+  rowIdxBase0: number;
+  sheetId: number;
+  value: GoogleAppsScript.Events.SheetsOnEdit["value"];
+};
+
+export class Api extends SpreadsheetNamedBase {
+  get ssr(): SpreadsheetRaw {
+    return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
+  get ssn(): SpreadsheetNamed {
+    return new SpreadsheetNamed(this.spreadsheetNamedProps);
+  }
+  readonly endpoints = {
+    addExpenses: () => new ExpenseMgmt(this.ssn).addPropertyExpenses(),
+    addOccChargeOnetime: () => new ChargeMgmt(this.ssn).addOccChargeOnetime(),
+    addHhPaymentOnetime: () => new PaymentMgmt(this.ssn).addOccPaymentOnetime(),
+    updateLeasesAndSubsidyContracts: () => {
+      // This will be contained in one function, not here;
+      const leaseMgmt = new LeaseMgmt(this.ssn);
+      leaseMgmt.doPeriodicLeaseUpdates();
+      const subsidyMgmt = new SubsidyMgmt(this.ssn);
+      subsidyMgmt.doPeriodicSubsidyUpdates();
+    },
+    updatePeriodicCharges: () => {
+      "TODO";
+    },
+    buildHhLedger: () => {
+      new LedgerMgmt(this.ssn).buildHhLedger();
+    },
+  };
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
+    const ssr = this.ssr;
     if (e.value !== "TRUE") {
       return;
     }
-    const standardizedEvent = this.ss.standardizeSheetEditEvent(e);
-    // - Find out if it's an edit column
-    // - Find out if it's in an aggregate api (sheet name)
-    // - Find out if it's in the one-row API (sheet name + column name)
-    // - Find out if it's in a separate column-wide one-row API (column name)
+    const rowIdx = e.range.getRow() - 1;
+    if (rowIdx !== ssr.schema.actionRowIdx) {
+      return;
+    }
+    const sheetGid = e.range.getSheet().getSheetId();
+    const colIdx = e.range.getColumn() - 1;
+    // isApiColumn
 
-    top.onTrueValueEntered(e);
+    const eSheet = ssr.sheet(sheetGid);
+    const eRow = eSheet.row(rowIdx);
+    const eTopBodyRow = eSheet.row(ssr.schema.topBodyRowIdx);
+    const e2ndBodyRow = eSheet.row(ssr.schema.topBodyRowIdx + 1);
+
+    eTopBodyRow.setValue(colIdx, "Processing...");
+    e2ndBodyRow.setValue(colIdx, "");
+    ssr.batchUpdateGSheets();
+
+    const endpointName = this._endpointNameOrNull(sheetGid, colIdx);
+
+    try {
+      // TO DO: implement endpoints by valid endpoint names
+      this.endpoints.addExpenses();
+    } catch (error) {
+      console.error(error);
+      e2ndBodyRow.setValue(colIdx, "Error: " + (error as Error).message);
+    } finally {
+      eRow.setValue(colIdx, "FALSE");
+      eTopBodyRow.setValue(
+        colIdx,
+        `Last ran on ${new Date().toLocaleString()}`,
+      );
+      // TO DO: set "last ran" for each row;
+      // TO DO: set the "select" column to FALSE for each row;
+
+      ssr.batchUpdateGSheets();
+    }
+  }
+  private _endpointNameOrNull(sheetGid: number, colIdx: number): string | null {
+    const sheetSchema = this.ssr.schema.sheet(sheetGid);
+    const sheetName = sheetSchema.sheetName;
+    const { columnName } = sheetSchema.column(colIdx);
+    const keyEndPhrase = "statusAndRun";
+    const isStatusAndRunColumn =
+      columnName.slice(-keyEndPhrase.length) === keyEndPhrase;
+    if (isStatusAndRunColumn) {
+      return sheetSchema.makeId(sheetName, columnName);
+    } else {
+      return null;
+    }
   }
 }

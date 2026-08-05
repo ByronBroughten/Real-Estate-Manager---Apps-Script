@@ -3,11 +3,12 @@ import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type { RowRaw } from "./RowRaw";
 import { SheetRaw } from "./SheetRaw";
+import type { GoogleSpreadsheet } from "./Types/AppsScriptTypes";
 import type {
-  GoogleSpreadsheet,
-  GoogleUpdateRequests,
-} from "./Types/AppsScriptTypes";
-import type { InitSheetsPropsRaw, SheetEventStandard } from "./Types/RawState";
+  InitSheetsPropsRaw,
+  RowChangesToSave,
+  SheetChangesToSave,
+} from "./Types/RawState";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
@@ -26,6 +27,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       rawState: this.rawState,
       sheetGid: sheetGid,
     });
+  }
+  rowBySheetRowId(sheetRowId: string): RowRaw {
+    const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
+    return this.sheet(sheetGid).row(rowIdx);
   }
   initSheets(...propArr: InitSheetsPropsRaw[]): void {
     this._gatherGridRanges(propArr);
@@ -61,7 +66,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       includeGridData: true,
     };
   }
-
   private _gatherGridRanges(props: InitSheetsPropsRaw[]) {
     props.forEach((prop) => {
       const startRowIndex = prop.startRowIndex;
@@ -89,78 +93,70 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       sheet.initSheetState(gSheet);
     });
   }
-  rowBySheetRowId(sheetRowId: string): RowRaw {
-    const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
-    return this.sheet(sheetGid).row(rowIdx);
-  }
-  standardizeSheetEditEvent({
-    range,
-    value,
-  }: GoogleAppsScript.Events.SheetsOnEdit): SheetEventStandard {
-    return {
-      colIdxBase0: range.getColumn() - 1,
-      rowIdxBase0: range.getRow() - 1,
-      sheetId: range.getSheet().getSheetId(),
-      value,
-    };
-  }
-
   batchUpdateGSheets() {
     this._gatherUpdateRequests();
+    this._sendUpdateRequests();
+    this._handleInvalidatedRowIndexes();
+  }
+  private _gatherUpdateRequests() {
+    const changes = this.allChangesToSave;
+    for (const [sheetRowId, change] of changes.entries()) {
+      if (change.level === "sheet" && typeof sheetRowId === "number") {
+        this._gatherSheetRequests(sheetRowId, change);
+      } else if (change.level === "row" && typeof sheetRowId === "string") {
+        this._gatherRowRequests(sheetRowId, change);
+      } else {
+        throw new Error(
+          `Invalid change level "${change.level}" with sheetRowId  "${sheetRowId}".`,
+        );
+      }
+    }
+    this.rawState.changesToSave = new Map();
+  }
+  private _gatherRowRequests(sheetRowId: string, change: RowChangesToSave) {
+    const requests = this.rawState.updateRequests;
+    if (change.append && change.delete) {
+      return;
+    } else if (change.delete) {
+      requests.delete.push(change.delete);
+      const { sheetGid } = this.schema.idsFromSheetRowId(sheetRowId);
+      this.rawState.sheetsInvalidateIdxesOnUpdate.add(sheetGid);
+    } else {
+      const row = this.rowBySheetRowId(sheetRowId);
+      if (change.append) {
+        requests.append.push(row.appendRequest);
+      }
+      for (const columnName of change.update) {
+        requests.update.push(row.updateRequest(columnName));
+      }
+    }
+  }
+  private _gatherSheetRequests(sheetRowId: number, change: SheetChangesToSave) {
+    const requests = this.rawState.updateRequests;
+    if (change.sort) {
+      const sheet = this.sheet(sheetRowId);
+      requests.sort.push(sheet.sortRequest(change.sort));
+    }
+  }
+  private _sendUpdateRequests() {
+    const surs = this.rawState.updateRequests;
     Sheets.Spreadsheets.batchUpdate(
-      { requests: this.rawState.updateRequests },
+      {
+        requests: [
+          ...surs.append,
+          ...surs.update,
+          ...surs.delete,
+          ...surs.sort,
+        ],
+      },
       this.spreadsheetId,
     );
+    this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+  }
+  private _handleInvalidatedRowIndexes() {
     this.rawState.sheetsInvalidateIdxesOnUpdate.forEach((sheetGid) => {
       this.sheet(sheetGid).invalidateRowIndexes();
     });
     this.rawState.sheetsInvalidateIdxesOnUpdate.clear();
-    this.rawState.updateRequests = [];
   }
-  private _gatherUpdateRequests() {
-    const changes = this.allChangesToSave;
-    const requests = {
-      append: [] as GoogleUpdateRequests[],
-      update: [] as GoogleUpdateRequests[],
-      delete: [] as GoogleUpdateRequests[],
-    } as const;
-
-    for (const [sheetRowId, change] of changes.entries()) {
-      if (change.append && change.delete) {
-        continue;
-      } else if (change.delete) {
-        requests.delete.push(change.delete);
-        const { sheetGid } = this.schema.idsFromSheetRowId(sheetRowId);
-        this.rawState.sheetsInvalidateIdxesOnUpdate.add(sheetGid);
-      } else {
-        const row = this.rowBySheetRowId(sheetRowId);
-        if (change.append) {
-          requests.append.push(row.appendRequest);
-        }
-        for (const columnName of change.update) {
-          requests.update.push(row.updateRequest(columnName));
-        }
-      }
-    }
-    this.updateRequests.push(
-      ...requests.append,
-      ...requests.update,
-      ...requests.delete,
-    );
-    this.rawState.changesToSave = new Map();
-  }
-
-  // appendRange(roughRange: string, rawRows: any[][]) {
-  //   // depreciated
-  //   Sheets.Spreadsheets?.Values?.append(
-  //     {
-  //       values: rawRows,
-  //     },
-  //     this.spreadsheetId,
-  //     roughRange,
-  //     {
-  //       valueInputOption: "USER_ENTERED",
-  //     },
-  //   );
-  // }
 }

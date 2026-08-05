@@ -3,7 +3,7 @@ export type GoogleSheet = GoogleAppsScript.Sheets.Schema.Sheet;
 
 export type GoogleSheetData = GoogleAppsScript.Sheets.Schema.Sheet["data"];
 
-export type GoogleUpdateRequests = GoogleAppsScript.Sheets.Schema.Request;
+export type GoogleUpdateRequest = GoogleAppsScript.Sheets.Schema.Request;
 
 export type DataFilter =
   GoogleAppsScript.Sheets.Schema.GetSpreadsheetByDataFilterRequest["dataFilters"][number];

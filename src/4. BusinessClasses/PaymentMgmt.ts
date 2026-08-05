@@ -19,7 +19,7 @@ type ChargeIdsForPayments = {
 type PaymentGroupType = keyof ChargeIdsForPayments;
 
 export class PaymentMgmt extends OperatorBase {
-  addOccPaymentOnetime(values: TableValues<"addOccPaymentOnetime">) {
+  addOccPaymentOnetime() {
     const occPayment = this.ss.sheet("occPayment");
     const occPayAllocation = this.ss.sheet("occPayAllocation");
     const payerValues = Obj.strictPick(values, [

@@ -31,7 +31,7 @@ type SharedChargeLeaseValues = StrictPick<
 >;
 
 export class ChargeMgmt extends OperatorBase {
-  addOccChargeOnetime(values: TableValues<"addOccChargeOnetime">) {
+  addOccChargeOnetime() {
     const relevant = Obj.strictOmit(
       values,
       "baseId",

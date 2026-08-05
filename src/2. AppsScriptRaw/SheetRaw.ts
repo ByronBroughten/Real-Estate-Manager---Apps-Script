@@ -10,7 +10,13 @@ import type {
   GoogleGridRange,
   GoogleSheet,
   GoogleSheetData,
+  GoogleUpdateRequest,
 } from "./Types/AppsScriptTypes";
+import type {
+  SheetChangeProps,
+  SheetChangesToSave,
+  SortParameters,
+} from "./Types/RawState";
 
 export type RowCount = number | "allFromStart";
 export type ColumnCount = number | "allFromStart";
@@ -243,5 +249,53 @@ export class SheetRaw extends SheetRawBase {
         row.delete();
       });
     return this;
+  }
+  get changesToSave(): SheetChangesToSave {
+    this._ensureChnagesToSaveExists();
+    return this.allChangesToSave.get(this.sheetGid) as SheetChangesToSave;
+  }
+  private _ensureChnagesToSaveExists(): void {
+    const sheetChangesToSave = this.rawState.changesToSave;
+    const sheetGid = this.sheetGid;
+    if (!sheetChangesToSave.has(sheetGid)) {
+      sheetChangesToSave.set(sheetGid, {
+        level: "sheet",
+        sort: null,
+      });
+    }
+  }
+  requestSortGSheet({ colIdxToSortBy, sortOrder }: SortParameters): void {
+    this._addChangeToSave({
+      action: "sort",
+      colIdxToSortBy,
+      sortOrder,
+    });
+  }
+  _addChangeToSave(props: SheetChangeProps): SheetRaw {
+    const changes = this.changesToSave;
+    const actions = {
+      sort: (props: SheetChangeProps) =>
+        (changes.sort = {
+          colIdxToSortBy: props.colIdxToSortBy,
+          sortOrder: props.sortOrder,
+        }),
+    };
+    actions[props.action](props);
+    return this;
+  }
+  sortRequest({
+    colIdxToSortBy,
+    sortOrder,
+  }: SortParameters): GoogleUpdateRequest {
+    return {
+      sortRange: {
+        range: {
+          sheetId: this.sheetGid,
+          startRowIndex: this.schema.topBodyRowIdx,
+          startColumnIndex: 0,
+        }, // skip header, unbounded end = rest of sheet
+        sortSpecs: [{ dimensionIndex: colIdxToSortBy, sortOrder }],
+      },
+    };
   }
 }

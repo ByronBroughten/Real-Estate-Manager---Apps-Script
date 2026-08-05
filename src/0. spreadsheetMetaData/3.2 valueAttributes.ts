@@ -1,4 +1,3 @@
-import { utils } from "../utilitiesGeneral";
 import { Dat } from "../utils/Dat";
 import { valS } from "../utils/validation";
 import { makeSchemaStructure } from "./0.1 makeSchema";
@@ -16,7 +15,7 @@ const allValueAttributes = makeSchemaStructure(
   {
     baseId: va({
       type: "" as string,
-      makeDefault: () => utils.id.makeBase(),
+      makeDefault: () => "don't use",
       defaultValidate: valS.validate.string,
       extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
       makeUserEnteredValue: (value) => ({ stringValue: value }),

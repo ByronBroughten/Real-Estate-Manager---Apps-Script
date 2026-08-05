@@ -15,7 +15,7 @@ import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   get spreadsheet(): SpreadsheetNamed {
-    return new SpreadsheetNamed(this.spreadsheetProps);
+    return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   get schema(): SheetSchemaNamed<TN> {
     return this.spreadsheetSchema.sheet(this.sheetName);
@@ -107,8 +107,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     return this.namedState[this.sheetName];
   }
   appendRowDefault(): RowNamed<TN> {
-    const { baseId, fullId } = this.schema.makeRowId();
-    const rowId = fullId;
+    const rowId = this.schema.makeRowId();
     const rowIdx = this.raw.appendRowDefault().idxBase0;
     this.state[rowId] = rowIdx;
     return this.row(rowId);
