@@ -174,7 +174,7 @@ export const Arr = {
   },
   excludeStrict<A extends any, B extends A>(
     a: readonly A[],
-    b: readonly B[],
+    ...b: readonly B[]
   ): Exclude<A, B>[] {
     return a.filter((str) => !b.includes(str as any)) as Exclude<A, B>[];
   },
@@ -182,7 +182,7 @@ export const Arr = {
     a: readonly A[],
     ...b: readonly B[]
   ): Extract<A, B>[] {
-    return a.filter((str) => b.includes(str as any)) as Extract<A, B>[];
+    return a.filter((str) => b.includes(str as B)) as Extract<A, B>[];
   },
   extractOrder<A extends any, B extends A>(
     // is this useful?

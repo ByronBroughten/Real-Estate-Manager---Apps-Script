@@ -1,5 +1,5 @@
 import {
-  allTableNames,
+  allsheetNames,
   type SheetName,
   type TableNameSimple,
 } from "../0. spreadsheetMetaData/4.0 tableAttributes";
@@ -33,8 +33,17 @@ export class SpreadsheetSchema extends SchemaBase {
   ): ColumnSchemaNamed<TN, CN> {
     return new ColumnSchemaNamed(sheetName, columnName);
   }
-  get allTableNames() {
-    return allTableNames;
+  get allsheetNames() {
+    return allsheetNames;
+  }
+  specifyAllSheetsAndColumns(): Record<SheetName, "allColumns"> {
+    return this.allsheetNames.reduce(
+      (acc, sheetName) => {
+        acc[sheetName] = "allColumns";
+        return acc;
+      },
+      {} as Record<SheetName, "allColumns">,
+    );
   }
   rawRowSpecifierByName(rowName: RowSpecifierBySchemaName): RowSpecifierRaw {
     const mrs = makeRowSpecifierRaw;
@@ -47,6 +56,7 @@ export class SpreadsheetSchema extends SchemaBase {
       topDatum: mrs(this.topDataRowIdx, 1),
       actions: mrs(this.actionRowIdx, 1),
       columnIds: mrs(this.colIdRowIdx, 1),
+      headers: mrs(this.headerRowIdx, 1),
     };
     return rowNameToRawSpecifier[rowName];
   }

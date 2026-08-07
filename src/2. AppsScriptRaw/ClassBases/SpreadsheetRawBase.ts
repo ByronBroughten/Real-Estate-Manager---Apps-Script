@@ -1,5 +1,11 @@
 import { AppScriptRaw } from "../AppsScriptRaw";
-import type { RawSheetsState, RawState } from "../Types/RawState";
+import type { GoogleGridRange } from "../Types/AppsScriptTypes";
+import {
+  initUpdateRequests,
+  type ChangesToSave,
+  type RawSheetsState,
+  type RawState,
+} from "../Types/RawState";
 
 export interface SpreadsheetRawProps {
   rawState: RawState;
@@ -22,11 +28,14 @@ export class SpreadsheetRawBase {
     }
     return ssId;
   }
-  get getterGridRanges() {
+  get getterGridRanges(): GoogleGridRange[] {
+    return this.rawState.getterGridRanges;
+  }
+  get allChangesToSave(): ChangesToSave {
     return this.rawState.changesToSave;
   }
-  get allChangesToSave() {
-    return this.rawState.changesToSave;
+  get updateRequests(): RawState["updateRequests"] {
+    return this.rawState.updateRequests;
   }
   get spreadsheetRawProps(): SpreadsheetRawProps {
     return {
@@ -34,12 +43,7 @@ export class SpreadsheetRawBase {
     };
   }
   static initSortedUpdateRequests(): RawState["updateRequests"] {
-    return {
-      append: [],
-      update: [],
-      delete: [],
-      sort: [],
-    };
+    return initUpdateRequests();
   }
   static initRawState(): RawState {
     return {
@@ -47,7 +51,6 @@ export class SpreadsheetRawBase {
       changesToSave: new Map(),
       updateRequests: this.initSortedUpdateRequests(),
       sheets: new Map(),
-      sheetsInvalidateIdxesOnUpdate: new Set(),
     };
   }
 }

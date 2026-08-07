@@ -29,6 +29,40 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
       id,
     });
   }
+  get topDataRow(): RowNamed<TN> {
+    return this.rawToNamedRow(this.raw.topDataRow);
+  }
+  get activeRows(): RowNamed<TN>[] {
+    return this.raw.activeRows.map((rawRow) => {
+      return this.rawToNamedRow(rawRow);
+    });
+  }
+  get dataRows(): RowNamed<TN>[] {
+    return this.activeRows.filter(
+      (row) => row.idxBase0 >= this.schema.topDataRowIdx,
+    );
+  }
+  get headerRow(): RowNamed<TN> {
+    return this.rawToNamedRow(this.raw.headerRow);
+  }
+  get colIdRow(): RowNamed<TN> {
+    return this.rawToNamedRow(this.raw.colIdRow);
+  }
+  get actionRow(): RowNamed<TN> {
+    return this.rawToNamedRow(this.raw.actionRow);
+  }
+  removeRowsExcept(...rowIdsToKeep: string[]): SheetNamed<TN> {
+    const rowsToKeep = rowIdsToKeep.map((rowId) => this.row(rowId));
+    this.raw.removeRowsExcept(...rowsToKeep.map((row) => row.idxBase0));
+    this.namedState.sheetRowIdsToIndexes[this.sheetName] = rowsToKeep.reduce(
+      (acc, row) => {
+        acc[row.id] = row.idxBase0;
+        return acc;
+      },
+      {} as RowIdsToIndexes,
+    );
+    return this;
+  }
   get activeColumnNames(): ColumnName<TN>[] {
     return this.raw
       .activeColumnIdxs()
@@ -40,19 +74,6 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   rawToNamedRow(rowRaw: RowRaw): RowNamed<TN> {
     const id = rowRaw.value(this.idValueIdx) as string;
     return this.row(id);
-  }
-  get topDataRow(): RowNamed<TN> {
-    return this.rawToNamedRow(this.raw.topDataRow);
-  }
-  get allRows(): RowNamed<TN>[] {
-    return this.raw.allRows.map((rawRow) => {
-      return this.rawToNamedRow(rawRow);
-    });
-  }
-  get dataRows(): RowNamed<TN>[] {
-    return this.allRows.filter(
-      (row) => row.idxBase0 >= this.schema.topDataRowIdx,
-    );
   }
   topDataRowValue<CN extends ColumnName<TN>>(
     columnName: CN,
@@ -74,7 +95,7 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
     this.dataRows.forEach((row) => {
       delete this.state[row.id];
     });
-    this.raw.DELETE_ROWS(this.schema.topDataRowIdx);
+    this.raw.DELETE_ACTIVE_ROWS(this.schema.topDataRowIdx);
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
     if (this.raw.dataRowCount > 0) {
@@ -91,7 +112,7 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
       }
       delete this.state[row.id];
     });
-    this.raw.DELETE_ROWS(this.schema.topDataRowIdx + 1);
+    this.raw.DELETE_ACTIVE_ROWS(this.schema.topDataRowIdx + 1);
   }
   rowsFiltered(values: Partial<TableValues<TN>>): RowNamed<TN>[] {
     return this.dataRows.filter((row) => {

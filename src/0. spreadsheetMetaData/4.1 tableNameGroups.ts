@@ -1,15 +1,15 @@
 import { Arr } from "../utils/Arr";
-import { allTableNames } from "./4.0 tableAttributes";
+import { allsheetNames } from "./4.0 tableAttributes";
 
 const tableNameGroups = {
   aggregateApi: Arr.extractStrict(
-    allTableNames,
+    allsheetNames,
     "addOccChargeOnetime",
     "addHhPaymentOnetime",
     "addExpenses",
   ),
   ledgerInputs: Arr.extractStrict(
-    allTableNames,
+    allsheetNames,
     "occCharge",
     "occPayAllocation",
   ),

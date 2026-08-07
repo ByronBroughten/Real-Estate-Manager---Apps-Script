@@ -6,6 +6,7 @@ export const spreadsheetConfig = {
   topDataRowIdxBase0: 4,
   activePaymentStandardYear: 2026,
   domLateFeeCharged: 6,
+  idHeader: "ID",
 } as const;
 
 export type SpreadsheetConfig = typeof spreadsheetConfig;

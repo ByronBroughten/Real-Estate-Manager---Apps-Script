@@ -1,6 +1,6 @@
 import type { Value } from "../0. spreadsheetMetaData/3.2 valueAttributes";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
-import type { StrictPickPartial } from "../utils/Obj";
+import { type StrictPickPartial } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
@@ -11,12 +11,12 @@ import type {
   GoogleGridRange,
   GoogleSheet,
   GoogleSheetData,
-  GoogleUpdateRequest,
 } from "./Types/AppsScriptTypes";
 import type {
   ColumnCount,
   RowCountRaw,
   SheetChangeProps,
+  SheetChangePropsObj,
   SheetChangesToSave,
   SortParameters,
 } from "./Types/RawState";
@@ -72,13 +72,13 @@ export class SheetRaw extends SheetRawBase {
   get colIdRow(): RowRaw {
     return this.row(this.schema.colIdRowIdx);
   }
-  get allRows(): RowRaw[] {
+  get activeRows(): RowRaw[] {
     return Array.from(this.sheetState.rowStates.keys()).map((idxBase0) =>
       this.row(idxBase0),
     );
   }
   get dataRows(): RowRaw[] {
-    return this.allRows.filter(
+    return this.activeRows.filter(
       (row) => row.idxBase0 >= this.schema.topDataRowIdx,
     );
   }
@@ -92,7 +92,14 @@ export class SheetRaw extends SheetRawBase {
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
   }
-  initSheetState(sheet: GoogleSheet): void {
+  integrateSheetState(sheet: GoogleSheet): void {
+    this._initSheetState(sheet);
+    if (sheet.data) {
+      this._integrateSheetRowStates(sheet.data);
+      this.sheetState.nextAppendedRowIdx = this.lastRowIdx + 1;
+    }
+  }
+  private _initSheetState(sheet: GoogleSheet): void {
     const properties = sheet.properties;
     const table = sheet.tables[0];
     this.sheetsState.set(this.sheetGid, {
@@ -100,15 +107,12 @@ export class SheetRaw extends SheetRawBase {
       sheetName: valS.assertDefined(table.name, "sheetName"),
       tableId: valS.assertDefined(table.tableId, "tableId"),
       rowIndexesAreValid: true,
+      lastNotStaleColumnIdx: null,
       nextAppendedRowIdx: 0,
       rowStates: new Map(),
     });
-    if (sheet.data) {
-      this._initSheetRowStates(sheet.data);
-      this.sheetState.nextAppendedRowIdx = this.lastRowIdx + 1;
-    }
   }
-  private _initSheetRowStates(sheetData: GoogleSheetData): void {
+  private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
     const colsData = valS.assertDefined(sheetData, "sheetData");
     colsData.forEach((colData) => {
       const colIdxBase = valS.assertDefined(
@@ -123,7 +127,7 @@ export class SheetRaw extends SheetRawBase {
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
-          this.row(rowIdx).initState(colIdx, cellData);
+          this.row(rowIdx).integrateState(colIdx, cellData);
         });
       });
     });
@@ -250,7 +254,7 @@ export class SheetRaw extends SheetRawBase {
     }
     return row;
   }
-  DELETE_ROWS(
+  DELETE_ACTIVE_ROWS(
     startRowIdx: number,
     numRows: number = this.rowCount - startRowIdx,
   ): SheetRaw {
@@ -265,6 +269,14 @@ export class SheetRaw extends SheetRawBase {
       });
     return this;
   }
+  removeRowsExcept(...rowIdxesToKeep: number[]): void {
+    const allRowIdxs = Array.from(this.sheetState.rowStates.keys());
+    allRowIdxs.forEach((rowIdx) => {
+      if (!rowIdxesToKeep.includes(rowIdx)) {
+        this.row(rowIdx).remove();
+      }
+    });
+  }
   get changesToSave(): SheetChangesToSave {
     this._ensureChnagesToSaveExists();
     return this.allChangesToSave.get(this.sheetGid) as SheetChangesToSave;
@@ -276,6 +288,7 @@ export class SheetRaw extends SheetRawBase {
       sheetChangesToSave.set(sheetGid, {
         level: "sheet",
         sort: null,
+        insertColumn: null,
       });
     }
   }
@@ -288,21 +301,56 @@ export class SheetRaw extends SheetRawBase {
   }
   _addChangeToSave(props: SheetChangeProps): SheetRaw {
     const changes = this.changesToSave;
-    const actions = {
-      sort: (props: SheetChangeProps) =>
+    const actions: {
+      [K in keyof SheetChangePropsObj]: (props: SheetChangePropsObj[K]) => any;
+    } = {
+      sort: (props) =>
         (changes.sort = {
           colIdxToSortBy: props.colIdxToSortBy,
           sortOrder: props.sortOrder,
         }),
+      insertColumn: (props) => (changes.insertColumn = props.startColumnIndex),
     };
-    actions[props.action](props);
+    switch (props.action) {
+      case "sort":
+        actions.sort(props);
+        break;
+      case "insertColumn":
+        actions.insertColumn(props);
+        break;
+      default:
+        throw new Error(
+          `Invalid action: ${(props as SheetChangeProps).action}. Must be one of "sort" or "insertColumn".`,
+        );
+    }
     return this;
   }
-  sortRequest({
-    colIdxToSortBy,
-    sortOrder,
-  }: SortParameters): GoogleUpdateRequest {
-    return {
+  insertColumnAt(startColumnIndex: number = 0): void {
+    this._addChangeToSave({
+      action: "insertColumn",
+      startColumnIndex,
+    });
+  }
+  gatherInsertColumnRequest(startColumnIndex: number): void {
+    this.updateRequests.insertColumn.push({
+      insertDimension: {
+        range: {
+          sheetId: this.sheetGid,
+          dimension: "COLUMNS",
+          startIndex: startColumnIndex,
+          endIndex: startColumnIndex + 1,
+        },
+        inheritFromBefore: false, // Let the formatting and column header colors be natural.
+      },
+    });
+    if (this.sheetState.lastNotStaleColumnIdx !== null) {
+      if (this.sheetState.lastNotStaleColumnIdx > startColumnIndex) {
+        this.sheetState.lastNotStaleColumnIdx = startColumnIndex;
+      }
+    }
+  }
+  gatherSortRequest({ colIdxToSortBy, sortOrder }: SortParameters): void {
+    this.updateRequests.sort.push({
       sortRange: {
         range: {
           sheetId: this.sheetGid,
@@ -311,14 +359,6 @@ export class SheetRaw extends SheetRawBase {
         }, // skip header, unbounded end = rest of sheet
         sortSpecs: [{ dimensionIndex: colIdxToSortBy, sortOrder }],
       },
-    };
-  }
-  reduceActiveRows(...rowIdxesToKeep: number[]): void {
-    const allRowIdxs = Array.from(this.sheetState.rowStates.keys());
-    allRowIdxs.forEach((rowIdx) => {
-      if (!rowIdxesToKeep.includes(rowIdx)) {
-        this.row(rowIdx).remove();
-      }
     });
   }
 }

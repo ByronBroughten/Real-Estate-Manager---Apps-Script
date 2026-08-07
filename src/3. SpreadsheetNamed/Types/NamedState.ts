@@ -11,9 +11,32 @@ export type SpreadsheetNamedState = {
   sheetRowIdsToIndexes: SheetRowIdsToIndexes;
 };
 
+type FetchRowsNamedSpecifiers<SN extends SheetName = SheetName> = {
+  all: {
+    rowSpecifier: RowSpecifier;
+    sheetColumnMode: "all";
+  };
+  allColumns: {
+    rowSpecifier: RowSpecifier;
+    sheetColumnMode: "allColumns";
+    sheetNames: SN | SN[];
+  };
+  specific: {
+    rowSpecifier: RowSpecifier;
+    sheetColumnMode: "specific";
+    sheetColumnNames: {
+      [S in SN]?: ColumnSpecifierNamed<SN>;
+    };
+  };
+};
+
+type ColumnMode = keyof FetchRowsNamedSpecifiers;
+export type FetchRowsNamedPropsNext<SN extends SheetName = SheetName> =
+  FetchRowsNamedSpecifiers<SN>[ColumnMode];
+
 export type FetchRowsNamedProps<TN extends SheetName = SheetName> = {
   rowSpecifier: RowSpecifier;
-  sheets: {
+  sheetColumns: {
     [T in TN]?: ColumnSpecifierNamed<TN>;
   };
 };
@@ -29,6 +52,7 @@ export const rowSpecifierNames = [
   "topDatum",
   "actions",
   "columnIds",
+  "headers",
 ] as const;
 export type RowSpecifierName = (typeof rowSpecifierNames)[number];
 export function isRowName(value: unknown): value is RowSpecifierName {
@@ -38,9 +62,9 @@ export function isRowName(value: unknown): value is RowSpecifierName {
   );
 }
 
-const rowSpecifierBySchemaNames = Arr.extractStrict(
+const rowSpecifierBySchemaNames = Arr.excludeStrict(
   rowSpecifierNames,
-  "activeRows",
+  "activeRows" as "activeRows",
 );
 export function isRowSpecifierBySchemaName(
   value: unknown,
@@ -52,6 +76,7 @@ export function isRowSpecifierBySchemaName(
 }
 
 export type ColumnSpecifierNamed<TN extends SheetName> =
+  | ColumnName<TN>
   | ColumnName<TN>[]
   | "allColumns";
 

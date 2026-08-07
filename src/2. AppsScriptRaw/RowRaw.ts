@@ -1,7 +1,10 @@
 import type { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import { SheetRaw } from "./SheetRaw";
-import type { GoogleCellValue } from "./Types/AppsScriptTypes";
+import type {
+  GoogleCellValue,
+  GoogleUpdateRequest,
+} from "./Types/AppsScriptTypes";
 import type {
   CellValue,
   RowChangeProps,
@@ -36,13 +39,16 @@ export class RowRaw extends RowRawBase {
     }
     return this.rowState.get(colIdx);
   }
+  get activeValueArr(): CellValue[] {
+    return [...this.rowState.values()];
+  }
   ensureStateExists() {
     const rowStates = this.sheetState.rowStates;
     if (!rowStates.has(this.idxBase0)) {
       rowStates.set(this.idxBase0, new Map());
     }
   }
-  initState(colIdx: number, cellValue: GoogleCellValue | undefined): void {
+  integrateState(colIdx: number, cellValue: GoogleCellValue | undefined): void {
     this.ensureStateExists();
     const value = this.extractValue(colIdx, cellValue);
     this.rowState.set(colIdx, value);
@@ -73,15 +79,27 @@ export class RowRaw extends RowRawBase {
     return this;
   }
   setValue(colIdx: number, value: CellValue): RowRaw {
+    this._validateNotFormulaColumn(colIdx);
+    this._validateColumnIndexNotStale(colIdx);
+    this.rowState.set(colIdx, value);
+    this._addChangeToSave({ action: "update", colIdxes: [colIdx] });
+    return this;
+  }
+  private _validateNotFormulaColumn(colIdx) {
     const columnSchema = this.columnSchema(colIdx);
     if (columnSchema.isFormula) {
       throw new Error(
         `Cannot set state for column ${columnSchema.columnName} because it is a formula column.`,
       );
     }
-    this.rowState.set(colIdx, value);
-    this._addChangeToSave({ action: "update", colIdxes: [colIdx] });
-    return this;
+  }
+  private _validateColumnIndexNotStale(colIdx) {
+    const { lastNotStaleColumnIdx } = this.sheetState;
+    if (lastNotStaleColumnIdx !== null && colIdx > lastNotStaleColumnIdx) {
+      throw new Error(
+        `Cannot reset to default for column index ${colIdx} because it is greater than the last valid column index ${lastNotStaleColumnIdx}.`,
+      );
+    }
   }
   delete() {
     this.remove();
@@ -124,19 +142,19 @@ export class RowRaw extends RowRawBase {
     actions[props.action](props);
     return this;
   }
-  get appendRequest(): GoogleAppsScript.Sheets.Schema.Request {
-    return {
+  gatherAppendRequest(): void {
+    this.updateRequests.append.push({
       appendCells: {
         sheetId: this.sheetGid,
         tableId: `${this.sheetState.tableId}`,
         rows: [{}],
         fields: "userEnteredValue",
       },
-    };
+    });
   }
 
-  updateRequest(colIdx: number): GoogleAppsScript.Sheets.Schema.Request {
-    return {
+  gatherUpdateRequest(colIdx: number): void {
+    this.updateRequests.update.push({
       updateCells: {
         range: {
           sheetId: this.sheetGid,
@@ -148,7 +166,7 @@ export class RowRaw extends RowRawBase {
         rows: [{ values: [this._userEnteredValue(colIdx)] }],
         fields: "userEnteredValue",
       },
-    };
+    });
   }
   private _userEnteredValue(
     colIdx: number,
@@ -159,7 +177,7 @@ export class RowRaw extends RowRawBase {
       ),
     };
   }
-  get deleteRequest(): GoogleAppsScript.Sheets.Schema.Request {
+  get deleteRequest(): GoogleUpdateRequest {
     return {
       deleteDimension: {
         range: {

@@ -1,4 +1,5 @@
 import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
+import type { ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes.js";
 import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchemaNamed.js";
 import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
 import type { FetchRowsRawProps } from "../2. AppsScriptRaw/Types/RawState.js";
@@ -56,16 +57,19 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     propsArr.forEach((props) => this._reqSheetsPropsToRaw(props));
     return this;
   }
-  private _reqSheetsPropsToRaw({ rowSpecifier, sheets }: FetchRowsNamedProps) {
+  private _reqSheetsPropsToRaw({
+    rowSpecifier,
+    sheetColumns,
+  }: FetchRowsNamedProps) {
     const arrSpecifier =
       typeof rowSpecifier === "string" ? [rowSpecifier] : rowSpecifier;
     arrSpecifier.forEach((specifier) => {
-      this._rowSpecifierNameToRaw(specifier, sheets);
+      this._rowSpecifierNameToRaw(specifier, sheetColumns);
     });
   }
   private _rowSpecifierNameToRaw(
     rowSpecifier: RowSpecifierName,
-    sheetColumns: FetchRowsNamedProps["sheets"],
+    sheetColumns: FetchRowsNamedProps["sheetColumns"],
   ): void {
     const rawSheets = this._namedToRawSheetColumnSpecifiers(sheetColumns);
     const schema = this.schema;
@@ -91,13 +95,13 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
   }
   private _namedToRawSheetColumnSpecifiers(
-    sheets: FetchRowsNamedProps["sheets"],
+    sheetColumns: FetchRowsNamedProps["sheetColumns"],
   ): FetchRowsRawProps["sheetColumns"] {
-    return Obj.keys(sheets).reduce(
+    return Obj.keys(sheetColumns).reduce(
       (acc, sheetName) => {
         const sheetGid = this.schema.sheet(sheetName).sheetGid;
         const columnSpecifier = this._columnSpecifierToIndexes(
-          sheets[sheetName],
+          sheetColumns[sheetName],
           sheetName,
         );
         acc.set(sheetGid, columnSpecifier);
@@ -113,38 +117,58 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     const schema = this.schema.sheet(sheetName);
     if (columnSpecifier === "allColumns") {
       return [...schema.raw.allColumnIdxes];
+    } else if (typeof columnSpecifier === "string") {
+      return [schema.column(columnSpecifier).idxBase0];
     } else {
-      return (["id", ...columnSpecifier] as const).map(
+      return (["id", ...(columnSpecifier as ColumnName[])] as const).map(
         (colName) => this.schema.column(sheetName, colName).idxBase0,
       );
     }
   }
-
   private _tableNamesFromReqProps<T extends SheetName>(
     propsArr: FetchRowsNamedProps<T>[],
   ): Set<T> {
     return propsArr.reduce((sheetNames, props) => {
-      return sheetNames.add(...Obj.keys(props.sheets));
+      return sheetNames.add(...Obj.keys(props.sheetColumns));
     }, new Set() as Set<T>);
   }
   addMissingColumnIds() {
-    const sheets = this.fetchRows({
+    this.fetchRows({
       rowSpecifier: "columnIds",
-      sheets: this.schema.allTableNames.reduce(
-        (acc, sheetName) => {
-          acc[sheetName] = "allColumns";
-          return acc;
-        },
-        {} as Record<SheetName, "allColumns">,
-      ),
+      sheetColumns: this.schema.specifyAllSheetsAndColumns(),
     });
     let sheetsUpdated = 0;
-    Obj.values(sheets).forEach((sheet) => {
+    this.activeSheets().forEach((sheet) => {
       sheet.addMissingColumnIds();
       sheetsUpdated++;
     });
     Logger.log(
       `ensureColumnIds: added missing column ID(s) in ${sheetsUpdated} sheets.`,
     );
+  }
+  activeSheets(): SheetNamed<SheetName>[] {
+    return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
+  }
+  ensureIdColumnOnAllTables() {
+    this.fetchRows({
+      rowSpecifier: "headers",
+      sheetColumns: this.schema.specifyAllSheetsAndColumns(),
+    });
+
+    const sheetsWithoutIdColumn = this.activeSheets().filter((sheet) => {
+      return sheet.headerRow.raw.activeValueArr.includes("ID") === false;
+    });
+
+    let fixedCount = 0;
+    for (const sheet of sheetsWithoutIdColumn) {
+      sheet.raw.insertColumnAt(0);
+      sheet.raw.headerRow.setValue(0, "ID");
+      for (const row of sheet.raw.activeRows) {
+        const newId = sheet.schema.makeRowId();
+        row.setValue(0, newId);
+      }
+      fixedCount++;
+    }
+    Logger.log(`Added an "ID" header column to ${fixedCount} table(s).`);
   }
 }

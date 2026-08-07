@@ -8,7 +8,7 @@ import {
   type ValueName,
 } from "./3.2 valueAttributes";
 import {
-  allTableNames,
+  allsheetNames,
   getTableAttribute,
   type TableNameSimple,
 } from "./4.0 tableAttributes";
@@ -3628,7 +3628,7 @@ export type ColAttributesRaw =
   RawIdxColumnAttributes extends Map<any, infer V> ? V : never;
 type AllColumnAttrsGidIdx = Map<number, RawIdxColumnAttributes>;
 function makeAllColumnAttrsGidIdx(): AllColumnAttrsGidIdx {
-  return allTableNames.reduce((attrs, sheetName) => {
+  return allsheetNames.reduce((attrs, sheetName) => {
     const sheetGid = getTableAttribute(sheetName, "sheetGid");
     attrs.set(
       sheetGid,

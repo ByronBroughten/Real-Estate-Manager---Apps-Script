@@ -15,6 +15,15 @@ export type SheetEventStandard = {
   value: GoogleAppsScript.Events.SheetsOnEdit["value"];
 };
 
+// Each business service will:
+// - inherit SpreadsheetNamedBase
+// - I'll handle endpoints one at a time. We'll see if we need this class or not.
+// - Endpoint would have endpointName; SelectorEndpoint would have that and selectorName.
+//   - Both names would be sheetName:columnName
+
+// Ok, so which endpoint should I implement? I should make a list.
+// Probably the straight-api ones first.
+
 export class Api extends SpreadsheetNamedBase {
   get ssr(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);

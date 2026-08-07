@@ -102,13 +102,12 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     gss.sheets.forEach((gSheet) => {
       const sheetGid = valS.assertDefined(gSheet.properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
-      sheet.initSheetState(gSheet);
+      sheet.integrateSheetState(gSheet);
     });
   }
   batchUpdateGSheets() {
     this._gatherUpdateRequests();
     this._sendUpdateRequests();
-    this._handleInvalidatedRowIndexes();
   }
   private _gatherUpdateRequests() {
     const changes = this.allChangesToSave;
@@ -126,28 +125,28 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this.rawState.changesToSave = new Map();
   }
   private _gatherRowRequests(sheetRowId: string, change: RowChangesToSave) {
-    const requests = this.rawState.updateRequests;
     if (change.append && change.delete) {
       return;
     } else if (change.delete) {
-      requests.delete.push(change.delete);
+      this.updateRequests.delete.push(change.delete);
       const { sheetGid } = this.schema.idsFromSheetRowId(sheetRowId);
-      this.rawState.sheetsInvalidateIdxesOnUpdate.add(sheetGid);
+      this.sheet(sheetGid).invalidateRowIndexes();
     } else {
       const row = this.rowBySheetRowId(sheetRowId);
       if (change.append) {
-        requests.append.push(row.appendRequest);
+        row.gatherAppendRequest();
       }
       for (const columnName of change.update) {
-        requests.update.push(row.updateRequest(columnName));
+        row.gatherUpdateRequest(columnName);
       }
     }
   }
   private _gatherSheetRequests(sheetRowId: number, change: SheetChangesToSave) {
-    const requests = this.rawState.updateRequests;
-    if (change.sort) {
-      const sheet = this.sheet(sheetRowId);
-      requests.sort.push(sheet.sortRequest(change.sort));
+    if (change.insertColumn !== null) {
+      this.sheet(sheetRowId).gatherInsertColumnRequest(change.insertColumn);
+    }
+    if (change.sort !== null) {
+      this.sheet(sheetRowId).gatherSortRequest(change.sort);
     }
   }
   private _sendUpdateRequests() {
@@ -156,6 +155,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       {
         requests: [
           ...surs.append,
+          ...surs.insertColumn,
           ...surs.update,
           ...surs.delete,
           ...surs.sort,
@@ -164,11 +164,5 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.spreadsheetId,
     );
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
-  }
-  private _handleInvalidatedRowIndexes() {
-    this.rawState.sheetsInvalidateIdxesOnUpdate.forEach((sheetGid) => {
-      this.sheet(sheetGid).invalidateRowIndexes();
-    });
-    this.rawState.sheetsInvalidateIdxesOnUpdate.clear();
   }
 }
