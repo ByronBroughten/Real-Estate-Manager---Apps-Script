@@ -77,7 +77,7 @@ export type TableAttributes<TN extends TableNameSimple> =
 
 export const allTableNames = Obj.keys(allTableAttributes);
 export type TableNameSimple = (typeof allTableNames)[number];
-export type TableName<TN extends TableNameSimple = TableNameSimple> = TN;
+export type SheetName<TN extends TableNameSimple = TableNameSimple> = TN;
 
 export function getTableAttribute<
   TN extends TableNameSimple,

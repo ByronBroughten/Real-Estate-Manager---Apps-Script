@@ -16,6 +16,9 @@ export class RowRaw extends RowRawBase {
   columnSchema(colIdx): ColumnSchemaRaw {
     return this.sheetSchema.column(colIdx);
   }
+  get isDataRow(): boolean {
+    return this.idxBase0 >= this.sheetSchema.topDataRowIdx;
+  }
   get activeColIdxs(): number[] {
     return Array.from(this.rowState.keys());
   }
@@ -46,14 +49,22 @@ export class RowRaw extends RowRawBase {
   }
   extractValue(colIdx, cellValue: GoogleCellValue | undefined): CellValue {
     const columnSchema = this.columnSchema(colIdx);
-    if (this.idxBase0 < this.sheetSchema.topBodyRowIdx) {
+    if (this.idxBase0 < this.sheetSchema.topDataRowIdx) {
       // This handles column ID and header rows.
       return columnSchema.extractCellString(cellValue);
     } else {
       return columnSchema.extractCellValue(cellValue);
     }
   }
-  resetToDefault(colIdxes: number[] = this.activeColIdxsNotFormula): RowRaw {
+  resetToDefault(...colIdxes: number[]): RowRaw {
+    if (!this.isDataRow) {
+      throw new Error(
+        `Cannot reset to default for row ${this.idxBase0} because it is not a data row.`,
+      );
+    }
+    if (colIdxes.length === 0) {
+      colIdxes = this.activeColIdxsNotFormula;
+    }
     colIdxes.forEach((colIdx) => {
       const columnSchema = this.columnSchema(colIdx);
       const defaultValue = columnSchema.makeDefaultValue();
@@ -73,8 +84,11 @@ export class RowRaw extends RowRawBase {
     return this;
   }
   delete() {
-    this.rowState.delete(this.idxBase0);
+    this.remove();
     this._addChangeToSave({ action: "delete" });
+  }
+  remove() {
+    this.rowState.delete(this.idxBase0);
   }
   get sheetRowId(): string {
     return this.sheetSchema.makeId(this.sheetGid, this.idxBase0);

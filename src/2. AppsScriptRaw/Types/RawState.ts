@@ -62,10 +62,27 @@ export type RowChangeProps =
   | { action: "append" | "delete" }
   | RowChangeUpdateProps;
 
-export type RowCount = number | "allFromStart";
-export type InitSheetsPropsRaw = {
+export interface FetchRowsRawProps extends RowSpecifierRaw {
+  sheetColumns: SheetColumnMap;
+}
+type SheetColumnMap = Map<SheetId, ColIdx[]>;
+
+export interface RowSpecifierRaw {
   startRowIndex: number;
-  rowCount: RowCount;
-  sheets: Map<SheetId, "allColumns" | ColIdx[]>;
-};
-export type InitSheetsPropsColumnsRaw = "allColumns" | ColIdx[];
+  rowCount: RowCountRaw;
+}
+export function makeRowSpecifierRaw(
+  startRowIndex: number,
+  rowCount: RowCountRaw,
+): RowSpecifierRaw {
+  return { startRowIndex, rowCount };
+}
+
+export type ColumnSpecifierRaw = ColIdx[] | "allColumns";
+export type ColumnCount = number | "allFromStart";
+export type RowCountRaw = number | "allFromStart";
+
+// export type InitSpecificRowsPropsRaw = {
+//   rowIdexes: number[];
+//   sheets: SheetColumnMap;
+// };

@@ -1,4 +1,4 @@
-import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import type {
   ColumnName,
   ColumnValue,
@@ -9,11 +9,11 @@ import type { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
 import { Arr } from "../utils/Arr";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
-import type { SheetRowToRowIdx } from "./ClassBases/SpreadsheetNamedBase";
 import { RowNamed } from "./RowNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
+import type { RowIdsToIndexes } from "./Types/NamedState";
 
-export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
+export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   get spreadsheet(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
@@ -25,7 +25,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   }
   row(id: string): RowNamed<TN> {
     return new RowNamed({
-      ...this.sheetProps,
+      ...this.sheetNamedProps,
       id,
     });
   }
@@ -41,8 +41,8 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     const id = rowRaw.value(this.idValueIdx) as string;
     return this.row(id);
   }
-  get topBodyRow(): RowNamed<TN> {
-    return this.rawToNamedRow(this.raw.topBodyRow);
+  get topDataRow(): RowNamed<TN> {
+    return this.rawToNamedRow(this.raw.topDataRow);
   }
   get allRows(): RowNamed<TN>[] {
     return this.raw.allRows.map((rawRow) => {
@@ -51,13 +51,13 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
   }
   get dataRows(): RowNamed<TN>[] {
     return this.allRows.filter(
-      (row) => row.idxBase0 >= this.schema.topBodyRowIdx,
+      (row) => row.idxBase0 >= this.schema.topDataRowIdx,
     );
   }
-  topBodyRowValue<CN extends ColumnName<TN>>(
+  topDataRowValue<CN extends ColumnName<TN>>(
     columnName: CN,
   ): ColumnValue<TN, CN> {
-    return this.topBodyRow.value(columnName);
+    return this.topDataRow.value(columnName);
   }
   sortRowsbyColumnName(
     rows: RowNamed<TN>[],
@@ -74,11 +74,11 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
     this.dataRows.forEach((row) => {
       delete this.state[row.id];
     });
-    this.raw.DELETE_ROWS(this.schema.topBodyRowIdx);
+    this.raw.DELETE_ROWS(this.schema.topDataRowIdx);
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
     if (this.raw.dataRowCount > 0) {
-      this.raw.topBodyRow.resetToDefault();
+      this.raw.topDataRow.resetToDefault();
     }
     if (this.raw.dataRowCount > 1) {
       this.DELETE_DATA_ROWS_AFTER_TOP();
@@ -91,7 +91,7 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
       }
       delete this.state[row.id];
     });
-    this.raw.DELETE_ROWS(this.schema.topBodyRowIdx + 1);
+    this.raw.DELETE_ROWS(this.schema.topDataRowIdx + 1);
   }
   rowsFiltered(values: Partial<TableValues<TN>>): RowNamed<TN>[] {
     return this.dataRows.filter((row) => {
@@ -103,8 +103,8 @@ export class SheetNamed<TN extends TableName> extends SheetNamedBase<TN> {
       return true;
     });
   }
-  state(): SheetRowToRowIdx {
-    return this.namedState[this.sheetName];
+  state(): RowIdsToIndexes {
+    return this.namedState.sheetRowIdsToIndexes[this.sheetName];
   }
   appendRowDefault(): RowNamed<TN> {
     const rowId = this.schema.makeRowId();

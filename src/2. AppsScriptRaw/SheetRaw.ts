@@ -3,6 +3,7 @@ import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
 import type { StrictPickPartial } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
+import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import type {
@@ -13,31 +14,30 @@ import type {
   GoogleUpdateRequest,
 } from "./Types/AppsScriptTypes";
 import type {
+  ColumnCount,
+  RowCountRaw,
   SheetChangeProps,
   SheetChangesToSave,
   SortParameters,
 } from "./Types/RawState";
 
-export type RowCount = number | "allFromStart";
-export type ColumnCount = number | "allFromStart";
-
 type GetGridRangeProps = {
   startRowIndex: number;
-  rowCount: RowCount;
+  rowCount: RowCountRaw;
   startColumnIndex: number;
   columnCount: ColumnCount;
 };
 
 interface MakeGetRequestProps {
-  rowCount: RowCount;
+  rowCount: RowCountRaw;
   startRowIndex?: number;
   startColumnIndex?: number;
   columnCount?: ColumnCount;
 }
 
 interface MakeGetRequestsProps {
+  rowCount: RowCountRaw;
   startRowIndex: number;
-  rowCount: RowCount;
   startColumnIndexes: number[];
 }
 
@@ -48,17 +48,29 @@ export class SheetRaw extends SheetRawBase {
   get schema(): SheetSchemaRaw {
     return new SheetSchemaRaw(this.sheetGid);
   }
-  row(idxBase0: number): RowRaw {
+  row(rowIdx: number): RowRaw {
     return new RowRaw({
-      idxBase0,
+      idxBase0: rowIdx,
       ...this.sheetRawProps,
     });
   }
-  get topBodyRow(): RowRaw {
-    return this.row(this.schema.topBodyRowIdx);
+  column(columnIdx: number): ColumnRaw {
+    return new ColumnRaw({
+      columnIdx,
+      ...this.sheetRawProps,
+    });
+  }
+  get topDataRow(): RowRaw {
+    return this.row(this.schema.topDataRowIdx);
   }
   get headerRow(): RowRaw {
     return this.row(this.schema.headerRowIdx);
+  }
+  get actionRow(): RowRaw {
+    return this.row(this.schema.actionRowIdx);
+  }
+  get colIdRow(): RowRaw {
+    return this.row(this.schema.colIdRowIdx);
   }
   get allRows(): RowRaw[] {
     return Array.from(this.sheetState.rowStates.keys()).map((idxBase0) =>
@@ -67,12 +79,15 @@ export class SheetRaw extends SheetRawBase {
   }
   get dataRows(): RowRaw[] {
     return this.allRows.filter(
-      (row) => row.idxBase0 >= this.schema.topBodyRowIdx,
+      (row) => row.idxBase0 >= this.schema.topDataRowIdx,
     );
   }
   activeColumnIdxs(): number[] {
     const colIdRow = this.row(this.schema.colIdRowIdx);
     return colIdRow.activeColIdxs;
+  }
+  get activeRowIndexes(): number[] {
+    return Array.from(this.sheetState.rowStates.keys());
   }
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
@@ -155,14 +170,14 @@ export class SheetRaw extends SheetRawBase {
     });
   }
   gatherGetRequests({
-    rowCount,
     startRowIndex = 0,
+    rowCount,
     startColumnIndexes,
   }: MakeGetRequestsProps): void {
     startColumnIndexes.map((startColumnIndex) =>
       this.gatherGetRequest({
-        rowCount,
         startRowIndex,
+        rowCount,
         startColumnIndex,
         columnCount: 1,
       }),
@@ -291,11 +306,19 @@ export class SheetRaw extends SheetRawBase {
       sortRange: {
         range: {
           sheetId: this.sheetGid,
-          startRowIndex: this.schema.topBodyRowIdx,
+          startRowIndex: this.schema.topDataRowIdx,
           startColumnIndex: 0,
         }, // skip header, unbounded end = rest of sheet
         sortSpecs: [{ dimensionIndex: colIdxToSortBy, sortOrder }],
       },
     };
+  }
+  reduceActiveRows(...rowIdxesToKeep: number[]): void {
+    const allRowIdxs = Array.from(this.sheetState.rowStates.keys());
+    allRowIdxs.forEach((rowIdx) => {
+      if (!rowIdxesToKeep.includes(rowIdx)) {
+        this.row(rowIdx).remove();
+      }
+    });
   }
 }

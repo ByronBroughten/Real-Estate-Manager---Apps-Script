@@ -11,6 +11,7 @@ function buildSpreadsheetColumnMeta() {
   syncAllColumnAttributes();
 }
 
+// Try claude code for reimplementing these one at a time.
 function sentenceToCamelCase(sentence) {
   return sentence
     .toLowerCase()
@@ -36,7 +37,7 @@ function makeRowId(idPrefix) {
   return result;
 }
 
-const tableNames = {
+const sheetNames = {
   "210603630": "allTableAttributes",
   "1967106628": "config",
   "2119236084": "validationList",
@@ -845,7 +846,7 @@ function appendColumnRows(spreadsheetId) {
   // "All Column Attributes" the filter is left open-ended (no
   // endRowIndex) so it also returns row 3 (headers) and rows 4+ (its
   // existing data) in the same call.
-  const dataFilters = Object.keys(tableNames).map(function (gidStr) {
+  const dataFilters = Object.keys(sheetNames).map(function (gidStr) {
     const sheetId = Number(gidStr);
     const gridRange: {
       sheetId: number;
@@ -927,9 +928,9 @@ function appendColumnRows(spreadsheetId) {
 
   // ---- 4. Find every column, across every sheet, missing from that set. ----
   const missingRows = [];
-  Object.keys(tableNames).forEach(function (gidStr) {
+  Object.keys(sheetNames).forEach(function (gidStr) {
     const sheetId = Number(gidStr);
-    const tableName = tableNames[gidStr];
+    const tableName = sheetNames[gidStr];
     getRow2Values(sheetId).forEach(function (cell) {
       const columnId = cellText(cell);
       if (!columnId) return; // blank/trailing cell, not a real column
@@ -996,7 +997,7 @@ function syncAllColumnAttributes() {
   // row — used to detect "is formula" and to infer data type).
   // For "All Column Attributes" specifically: row 2 through the last row,
   // since its rows from row 4 onward are the records we need to validate.
-  const dataFilters = Object.keys(tableNames).map(function (gid) {
+  const dataFilters = Object.keys(sheetNames).map(function (gid) {
     const sheetId = Number(gid);
     const gridRange: {
       sheetId: number;
@@ -1026,7 +1027,7 @@ function syncAllColumnAttributes() {
 
   response.sheets.forEach(function (sheet) {
     const sheetId = sheet.properties.sheetId;
-    const tableName = tableNames[String(sheetId)];
+    const tableName = sheetNames[String(sheetId)];
     const grid = sheet.data && sheet.data[0];
     const rowData = (grid && grid.rowData) || [];
     const row2 = (rowData[0] && rowData[0].values) || []; // column IDs

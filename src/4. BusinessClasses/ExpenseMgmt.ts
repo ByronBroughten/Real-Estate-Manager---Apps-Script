@@ -7,7 +7,7 @@ export class ExpenseMgmt extends OperatorBase {
     const expense = this.ss.sheet("expense");
 
     for (const row of addPropertyExpenses.dataRows) {
-      const { expenseNotes, ...expenseVals } = row.values([
+      const { expenseNotes, ...expenseVals } = row.values(
         "date",
         "propertyId",
         "unitId",
@@ -18,7 +18,7 @@ export class ExpenseMgmt extends OperatorBase {
         "receiptFormat",
         "taxAdjust",
         "expenseNotes",
-      ]);
+      );
       expense.appendRowWithVals({
         ...expenseVals,
         notes: expenseNotes,

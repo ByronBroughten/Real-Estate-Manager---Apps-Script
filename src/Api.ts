@@ -55,8 +55,8 @@ export class Api extends SpreadsheetNamedBase {
 
     const eSheet = ssr.sheet(sheetGid);
     const eRow = eSheet.row(rowIdx);
-    const eTopBodyRow = eSheet.row(ssr.schema.topBodyRowIdx);
-    const e2ndBodyRow = eSheet.row(ssr.schema.topBodyRowIdx + 1);
+    const eTopBodyRow = eSheet.row(ssr.schema.topDataRowIdx);
+    const e2ndBodyRow = eSheet.row(ssr.schema.topDataRowIdx + 1);
 
     eTopBodyRow.setValue(colIdx, "Processing...");
     e2ndBodyRow.setValue(colIdx, "");

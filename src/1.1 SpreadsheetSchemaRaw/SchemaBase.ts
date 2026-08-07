@@ -10,8 +10,8 @@ export class SchemaBase {
   get colIdRowIdx(): number {
     return this.config("columnIdRowIdxBase0");
   }
-  get topBodyRowIdx(): number {
-    return this.config("topBodyRowIdxBase0");
+  get topDataRowIdx(): number {
+    return this.config("topDataRowIdxBase0");
   }
   get headerRowIdx(): number {
     return this.config("headerRowIdxBase0");

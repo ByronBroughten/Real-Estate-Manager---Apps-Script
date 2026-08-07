@@ -3,7 +3,7 @@ export const spreadsheetConfig = {
   columnIdRowIdxBase0: 0,
   actionRowIdxBase0: 2,
   headerRowIdxBase0: 3,
-  topBodyRowIdxBase0: 4,
+  topDataRowIdxBase0: 4,
   activePaymentStandardYear: 2026,
   domLateFeeCharged: 6,
 } as const;

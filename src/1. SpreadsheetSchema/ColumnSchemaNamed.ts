@@ -3,7 +3,7 @@ import {
   type ValueAttributes,
   type ValueName,
 } from "../0. spreadsheetMetaData/3.2 valueAttributes";
-import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import {
   getColumnAttribute,
   type ColumnAttributes,
@@ -18,7 +18,7 @@ import type { CombineStringsWithFlat } from "../utils/Str";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class ColumnSchemaNamed<
-  TN extends TableName = TableName,
+  TN extends SheetName = SheetName,
   CN extends ColumnName<TN> = ColumnName<TN>,
 > extends SchemaBase {
   readonly sheetName: TN;

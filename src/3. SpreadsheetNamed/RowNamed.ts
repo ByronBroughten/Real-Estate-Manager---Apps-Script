@@ -2,7 +2,7 @@ import type {
   Value,
   ValueName,
 } from "../0. spreadsheetMetaData/3.2 valueAttributes";
-import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import type {
   ColumnName,
   ColumnValue,
@@ -11,15 +11,14 @@ import type {
 import type { ColumnSchemaNamed } from "../1. SpreadsheetSchema/ColumnSchemaNamed";
 import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
-import type { GoogleUpdateRequest } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
-import { utils } from "../utilitiesGeneral";
+import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { RowNamedBase, type RowState } from "./ClassBases/RowNamedBase";
 
 import { SheetNamed } from "./SheetNamed";
 
-export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
+export class RowNamed<TN extends SheetName> extends RowNamedBase<TN> {
   get state(): RowState<TN> {
     return this.rowState;
   }
@@ -69,7 +68,7 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
       return date;
     }
 
-    if (utils.date.isDateSameOrAfter(dateValue, date)) {
+    if (Dat.isDateSameOrAfter(dateValue, date)) {
       return dateValue;
     } else {
       return date;
@@ -84,7 +83,7 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
       return date;
     }
 
-    if (utils.date.isDateSameOrBefore(dateValue, date)) {
+    if (Dat.isDateSameOrBefore(dateValue, date)) {
       return dateValue;
     } else {
       return date;
@@ -102,25 +101,26 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
     }
   }
   values<CN extends ColumnName<TN> = ColumnName<TN>>(
-    columnNames?: readonly CN[],
+    ...columnNames: readonly CN[]
   ): TableValues<TN, CN> {
-    const keys = columnNames || (this.activeColumnNames as CN[]);
+    const keys =
+      columnNames.length > 0 ? columnNames : (this.activeColumnNames as CN[]);
     return keys.reduce(
       (values, columnName) => {
-        values[columnName] = this.value(
+        (values[columnName] as TableValues<TN, CN>[CN]) = this.value(
           columnName,
-        ) as (typeof values)[typeof columnName];
+        ) as TableValues<TN, CN>[CN];
         return values;
       },
       {} as TableValues<TN, CN>,
     );
   }
   validateValues<CN extends ColumnName<TN> = ColumnName<TN>>(
-    columnNames?: CN[],
+    ...columnNames: CN[]
   ): TableValues<TN, CN> {
-    const values = this.values(columnNames);
+    const values = this.values(...columnNames);
     for (const [columnName, value] of Obj.entries(values)) {
-      this.schema.column(columnName).validate(value);
+      this.columnSchema(columnName).validate(value);
     }
     return values;
   }
@@ -128,7 +128,7 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
     return this.sheet.activeColumnNames;
   }
   get sheet(): SheetNamed<TN> {
-    return new SheetNamed(this.sheetProps);
+    return new SheetNamed(this.sheetNamedProps);
   }
   columnIdx(columnName: ColumnName<TN>): number {
     return this.columnSchema(columnName).idxBase0;
@@ -137,7 +137,7 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
     columnName: CN,
     value: VL,
   ): RowNamed<TN> {
-    this.raw.setState(this.columnIdx(columnName), value);
+    this.raw.setValue(this.columnIdx(columnName), value);
     return this;
   }
   delete(): void {
@@ -149,7 +149,7 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
     valueName: ValueName,
     value: Value,
   ): RowNamed<TN> {
-    const schema = this.schema.column(columnName);
+    const schema = this.columnSchema(columnName);
     if (schema.valueName !== valueName) {
       throw new Error(
         `Value name ${valueName} does not match varb value name ${schema.valueName}`,
@@ -168,29 +168,5 @@ export class RowNamed<TN extends TableName> extends RowNamedBase<TN> {
       this.setValue(columnName, value as ColumnValue<TN, typeof columnName>);
     }
     return this;
-  }
-  makeUpdateRequest<CN extends ColumnName<TN>>(
-    columnName: CN,
-  ): GoogleUpdateRequest {
-    // inexplicably, GAS treats indices as zero-indexed for this purpose
-    const rowIdx = this.idxBase1 - 1;
-    const colIdx = this.sheet.colIdxBase1(columnName) - 1;
-    return {
-      updateCells: {
-        fields: "userEnteredValue",
-        rows: [
-          {
-            values: [{ userEnteredValue: this.valueUserEntered(columnName) }],
-          },
-        ],
-        range: {
-          sheetId: this.schema.sheetGid,
-          startRowIndex: rowIdx,
-          endRowIndex: rowIdx + 1,
-          startColumnIndex: colIdx,
-          endColumnIndex: colIdx + 1,
-        },
-      },
-    };
   }
 }

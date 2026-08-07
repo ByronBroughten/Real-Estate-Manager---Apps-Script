@@ -3,6 +3,7 @@ import { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
 import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
 import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
 
+// rename this "endpoints"?
 export class TopOperator extends OperatorBase {
   readonly leaseMgmt = new LeaseMgmt(this.ss);
   readonly subsidyMgmt = new SubsidyMgmt(this.ss);

@@ -26,7 +26,7 @@ function rowsOfIdAndPortion<TN extends LedgerInputSn>({
 }: RowsOfIdAndPortionProps<TN>): RowNamed<TN>[] {
   const rows = sheet.dataRows;
   return rows.filter((row) => {
-    const vals = row.values(["portion", "householdId", "subsidyAgreementId"]);
+    const vals = row.values("portion", "householdId", "subsidyAgreementId");
     if (householdId === vals.householdId && portion === vals.portion) {
       if (portion === "Subsidy program") {
         return subsidyAgreementId === vals.subsidyAgreementId;
@@ -65,12 +65,12 @@ export class LedgerMgmt extends OperatorBase {
     });
 
     for (const row of filteredCharges) {
-      const { amount, ...rest } = row.values([
+      const { amount, ...rest } = row.values(
         "amount",
         "date",
         "description",
         "unitName",
-      ]);
+      );
       hhLedger.appendRowWithVals({
         issuer: "Property management",
         charge: amount,
@@ -93,13 +93,13 @@ export class LedgerMgmt extends OperatorBase {
       if (row.value("processed") === "No") {
         continue;
       }
-      const { amount, payer, ...rest } = row.values([
+      const { amount, payer, ...rest } = row.values(
         "amount",
         "payer",
         "date",
         "description",
         "unitName",
-      ]);
+      );
       hhLedger.appendRowWithVals({
         issuer: payer,
         payment: amount,

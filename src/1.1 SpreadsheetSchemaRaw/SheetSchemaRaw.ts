@@ -1,7 +1,7 @@
 import {
   getTableAttributeByGid,
+  type SheetName,
   type TableAttributesRaw,
-  type TableName,
 } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import {
   getSheetColumnIdxes,
@@ -12,7 +12,7 @@ import { SchemaBase } from "./SchemaBase";
 
 const varbNameImmutable = ["baseId"] as const;
 type VarbNameImmutable = (typeof varbNameImmutable)[number];
-export type VarbNameMutable<TN extends TableName> = Exclude<
+export type VarbNameMutable<TN extends SheetName> = Exclude<
   ColumnName<TN>,
   VarbNameImmutable
 >;
@@ -34,7 +34,7 @@ export class SheetSchemaRaw extends SchemaBase {
   get allColumnIdxes(): MapIterator<number> {
     return getSheetColumnIdxes(this.sheetGid);
   }
-  get sheetName(): TableName {
+  get sheetName(): SheetName {
     return this.attribute("sheetName");
   }
 }

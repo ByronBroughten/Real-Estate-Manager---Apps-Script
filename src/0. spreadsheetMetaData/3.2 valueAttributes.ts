@@ -28,7 +28,7 @@ const allValueAttributes = makeSchemaStructure(
       makeUserEnteredValue: (value) => ({ stringValue: value }),
     }),
     number: va({
-      type: "" as number | string,
+      type: "" as number | "",
       makeDefault: () => "" as const,
       defaultValidate: valS.validate.numberOrEmpty,
       extractCellValue: (colCell) => extractCellValue(colCell, "numberValue"),
@@ -38,7 +38,7 @@ const allValueAttributes = makeSchemaStructure(
           : { numberValue: value },
     }),
     boolean: va({
-      type: "" as boolean | string,
+      type: false as boolean | "",
       makeDefault: () => false,
       defaultValidate: valS.validate.boolean,
       extractCellValue: (colCell) => extractCellValue(colCell, "boolValue"),
@@ -48,7 +48,7 @@ const allValueAttributes = makeSchemaStructure(
           : { boolValue: value },
     }),
     date: va({
-      type: "" as Date | string,
+      type: "" as Date | "",
       makeDefault: () => new Date(),
       defaultValidate: valS.validate.dateOrEmptyOrFormula,
       extractCellValue: (colCell) =>

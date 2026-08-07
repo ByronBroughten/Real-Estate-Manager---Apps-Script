@@ -5,7 +5,7 @@ import type { RowRaw } from "./RowRaw";
 import { SheetRaw } from "./SheetRaw";
 import type { GoogleSpreadsheet } from "./Types/AppsScriptTypes";
 import type {
-  InitSheetsPropsRaw,
+  FetchRowsRawProps,
   RowChangesToSave,
   SheetChangesToSave,
 } from "./Types/RawState";
@@ -32,8 +32,29 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
   }
-  initSheets(...propArr: InitSheetsPropsRaw[]): void {
+  fetchRows(...propArr: FetchRowsRawProps[]): void {
     this._gatherGridRanges(propArr);
+    this._doGetByDataFilter();
+  }
+  // fetchRowsSpecific(props: InitSpecificRowsPropsRaw): void {
+  //   this._gatherSpecificRowGridRanges(props);
+  //   this._doGetByDataFilter();
+  // }
+  // private _gatherSpecificRowGridRanges({
+  //   rowIdexes,
+  //   sheets,
+  // }: InitSpecificRowsPropsRaw): void {
+  //   rowIdexes.forEach((rowIdx) => {
+  //     for (const sheetId of sheets.keys()) {
+  //       this.sheet(sheetId).gatherGetRequests({
+  //         startRowIndex: rowIdx,
+  //         rowCount: 1,
+  //         columnSpecifier: sheets[sheetId],
+  //       });
+  //     }
+  //   });
+  // }
+  private _doGetByDataFilter(): void {
     const data = this._getByDataFilter();
     this._addDataToState(data);
     this.rawState.getterGridRanges = [];
@@ -66,22 +87,13 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       includeGridData: true,
     };
   }
-  private _gatherGridRanges(props: InitSheetsPropsRaw[]) {
-    props.forEach((prop) => {
-      const startRowIndex = prop.startRowIndex;
-      const rowCount = prop.rowCount;
-      for (const sheetId of prop.sheets.keys()) {
-        const propColIdx = prop.sheets[sheetId];
-        let columnIdxes: number[] = [];
-        if (propColIdx === "allColumns") {
-          columnIdxes.push(...this.schema.sheet(sheetId).allColumnIdxes);
-        } else {
-          columnIdxes.push(...propColIdx);
-        }
+  private _gatherGridRanges(props: FetchRowsRawProps[]): void {
+    props.forEach(({ startRowIndex, rowCount, sheetColumns }) => {
+      for (const sheetId of sheetColumns.keys()) {
         this.sheet(sheetId).gatherGetRequests({
           startRowIndex,
           rowCount,
-          startColumnIndexes: columnIdxes,
+          startColumnIndexes: sheetColumns[sheetId],
         });
       }
     });

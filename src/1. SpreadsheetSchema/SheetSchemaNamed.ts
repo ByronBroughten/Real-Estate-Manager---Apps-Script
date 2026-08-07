@@ -1,7 +1,7 @@
 import {
   getTableAttribute,
+  type SheetName,
   type TableAttributes,
-  type TableName,
   type TableNameSimple,
 } from "../0. spreadsheetMetaData/4.0 tableAttributes";
 import {
@@ -13,11 +13,11 @@ import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
 import { Arr } from "../utils/Arr";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
-import { SpreadsheetSchema } from "./SpreadsheetSchema";
+import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed";
 
 const varbNameImmutable = ["baseId"] as const;
 type VarbNameImmutable = (typeof varbNameImmutable)[number];
-export type VarbNameMutable<TN extends TableName> = Exclude<
+export type VarbNameMutable<TN extends SheetName> = Exclude<
   ColumnName<TN>,
   VarbNameImmutable
 >;

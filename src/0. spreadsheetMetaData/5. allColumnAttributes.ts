@@ -459,7 +459,7 @@ const allColumnAttributes = makeSchemaStructure(
         1,
         false,
       ),
-      topBodyRowIdxBase1: mcs(
+      topDataRowIdxBase1: mcs(
         "col-DZ4VSLw",
         "number",
         "Top body row idx base 1",

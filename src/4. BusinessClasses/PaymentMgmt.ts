@@ -141,12 +141,12 @@ export class PaymentMgmt extends OperatorBase {
         paymentGroup: () => {
           const pg = paymentGroup.row(groupId);
           addPayment(
-            pg.values([
+            pg.values(
               "householdId",
               "payerCategory",
               "subsidyProgramId",
               "nonResidentPayerId",
-            ]),
+            ),
           );
         },
       };
@@ -162,13 +162,13 @@ export class PaymentMgmt extends OperatorBase {
         allocation.appendRowWithVals({
           paymentId,
           description: "Normal payment",
-          ...charge.values([
+          ...charge.values(
             "amount",
             "portion",
             "householdId",
             "unitId",
             "subsidyAgreementId",
-          ]),
+          ),
         });
       });
     }

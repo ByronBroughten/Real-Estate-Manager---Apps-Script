@@ -37,12 +37,12 @@ export class SheetRawBase extends SpreadsheetRawBase {
     return this.sheetState.rowStates.size;
   }
   get dataRowCount(): number {
-    return this.rowCount - this.sheetSchema.topBodyRowIdx;
+    return this.rowCount - this.sheetSchema.topDataRowIdx;
   }
   get sheetRawProps(): SheetRawProps {
     return {
       sheetGid: this.sheetGid,
-      rawState: this.rawState,
+      ...this.spreadsheetRawProps,
     };
   }
 }

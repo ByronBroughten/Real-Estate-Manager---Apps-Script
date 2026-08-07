@@ -1,5 +1,5 @@
-import type { TableName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
-import type { SpreadsheetSchema } from "../../1. SpreadsheetSchema/SpreadsheetSchema";
+import type { SheetName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SpreadsheetSchema } from "../../1. SpreadsheetSchema/SpreadsheetSchemaNamed";
 import type { SheetNamed } from "../SheetNamed";
 import type { SpreadsheetNamed } from "../SpreadsheetNamed";
 
@@ -11,10 +11,10 @@ export class OperatorBase {
   get schema(): SpreadsheetSchema {
     return this.ss.schema;
   }
-  sheet<TN extends TableName>(sheetName: TN): SheetNamed<TN> {
+  sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return this.ss.sheet(sheetName);
   }
   gatherRequestsAndBatchUpdate(): void {
-    return this.ss.gatherRequestsAndBatchUpdate();
+    return this.ss.raw.batchUpdateGSheets();
   }
 }

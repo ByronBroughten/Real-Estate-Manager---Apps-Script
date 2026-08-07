@@ -108,7 +108,7 @@ export const Arr = {
         }
         return arrOfArrs;
       },
-      [[]] as T[][]
+      [[]] as T[][],
     );
   },
   indicesOf(arr: any[], value: any): number[] {
@@ -134,7 +134,7 @@ export const Arr = {
   findAndRmFirst<T>(
     arr: T[],
     fn: (value: T) => boolean,
-    mustFind: boolean = false
+    mustFind: boolean = false,
   ): T[] {
     const nextArr = [...arr];
     const idx = arr.findIndex(fn);
@@ -168,32 +168,32 @@ export const Arr = {
   },
   exclude<A extends any, B extends any>(
     a: readonly A[],
-    b: readonly B[]
+    b: readonly B[],
   ): Exclude<A, B>[] {
     return a.filter((str) => !b.includes(str as any)) as Exclude<A, B>[];
   },
   excludeStrict<A extends any, B extends A>(
     a: readonly A[],
-    b: readonly B[]
+    b: readonly B[],
   ): Exclude<A, B>[] {
     return a.filter((str) => !b.includes(str as any)) as Exclude<A, B>[];
   },
   extractStrict<A extends any, B extends A>(
     a: readonly A[],
-    b: readonly B[]
+    ...b: readonly B[]
   ): Extract<A, B>[] {
     return a.filter((str) => b.includes(str as any)) as Extract<A, B>[];
   },
   extractOrder<A extends any, B extends A>(
     // is this useful?
     a: readonly A[],
-    b: readonly B[]
+    b: readonly B[],
   ): Extract<A, B>[] {
     return b.filter((str) => a.includes(str as any)) as Extract<A, B>[];
   },
   extract<A extends any, B extends any>(
     a: readonly A[],
-    b: readonly B[]
+    b: readonly B[],
   ): Extract<A, B>[] {
     return a.filter((str) => b.includes(str as any)) as Extract<A, B>[];
   },
@@ -208,14 +208,14 @@ export const Arr = {
     const highestIdx = arr.length - 1;
     if (idx > highestIdx) {
       throw new ValueNotFoundError(
-        `The passed array does not have a value at passed idx ${idx}`
+        `The passed array does not have a value at passed idx ${idx}`,
       );
     }
     return true;
   },
   combineWithoutIdenticals<A extends any, B extends any>(
     a: A[],
-    b: B[]
+    b: B[],
   ): (A | B)[] {
     return [...new Set([...a, ...b])];
   },

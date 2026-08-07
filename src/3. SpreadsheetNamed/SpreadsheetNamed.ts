@@ -1,27 +1,17 @@
-import type { TableName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
-import type { ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes.js";
-import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchema.js";
-import type { RowCount } from "../2. AppsScriptRaw/SheetRaw.js";
-
+import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
+import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchemaNamed.js";
 import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
-import type {
-  InitSheetsPropsColumnsRaw,
-  InitSheetsPropsRaw,
-} from "../2. AppsScriptRaw/Types/RawState.js";
+import type { FetchRowsRawProps } from "../2. AppsScriptRaw/Types/RawState.js";
 import { Obj } from "../utils/Obj.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
-
-type InitSheetsPropsNamed<TN extends TableName> = {
-  startRowIndex: number;
-  rowCount: RowCount;
-  sheets: {
-    [T in TN]?: "allColumns" | ColumnName<T>[];
-  };
-};
-type NamedSheets<TN extends TableName> = {
-  [T in TN]: SheetNamed<T>;
-};
+import {
+  isRowSpecifierBySchemaName,
+  type ColumnSpecifierNamed,
+  type FetchRowsNamedProps,
+  type NamedSheets,
+  type RowSpecifierName,
+} from "./Types/NamedState.js";
 
 export class SpreadsheetNamed extends SpreadsheetNamedBase {
   static init(): SpreadsheetNamed {
@@ -35,71 +25,122 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get schema(): SpreadsheetSchema {
     return this.spreadsheetSchema;
   }
-  get gatheredTableNames(): TableName[] {
-    return Obj.keys(this.namedState);
+  get activeSheetNames(): SheetName[] {
+    return Obj.keys(this.namedState.sheetRowIdsToIndexes);
   }
-  sheet<TN extends TableName>(sheetName: TN): SheetNamed<TN> {
+  sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
       sheetName,
       ...this.spreadsheetNamedProps,
     });
   }
-  initSheets<T extends TableName>(
-    ...props: InitSheetsPropsNamed<T>[]
-  ): NamedSheets<T> {
-    const rawProps = this._reqSheetsPropsToRaw(props);
-    this.raw.initSheets(...rawProps);
-    const tableNames = this._tableNamesFromReqProps(props);
-    return [...tableNames].reduce((acc, sheetName) => {
+  sheets<TN extends SheetName>(...sheetNames: TN[]): NamedSheets<TN> {
+    return sheetNames.reduce((acc, sheetName) => {
       acc[sheetName] = this.sheet(sheetName);
       return acc;
-    }, {} as NamedSheets<T>);
+    }, {} as NamedSheets<TN>);
   }
-  private _reqSheetsPropsToRaw(
-    propsArr: InitSheetsPropsNamed<TableName>[],
-  ): InitSheetsPropsRaw[] {
-    const rawPropsArr: InitSheetsPropsRaw[] = [];
-    propsArr.forEach(({ startRowIndex, rowCount, sheets }) => {
-      const rawProps: InitSheetsPropsRaw = {
-        startRowIndex,
-        rowCount,
-        sheets: new Map(),
-      };
-      for (const sheetName of Obj.keys(sheets)) {
-        let columnsRaw: InitSheetsPropsColumnsRaw = "allColumns";
-        if (sheets[sheetName] !== "allColumns") {
-          columnsRaw = sheets[sheetName].map(
-            (colName) => this.schema.column(sheetName, colName).idxBase0,
-          );
-        }
-        rawProps.sheets.set(this.schema.sheet(sheetName).sheetGid, columnsRaw);
-      }
-      rawPropsArr.push(rawProps);
+  fetchRows<T extends SheetName>(
+    ...props: FetchRowsNamedProps<T>[]
+  ): NamedSheets<T> {
+    this._reqSheetsPropsArrToRaw(props);
+    this.raw.fetchRows(...this.fetchRowsRawProps);
+    this.namedState.fetchRowsRawProps = [];
+
+    const sheetNames = this._tableNamesFromReqProps(props);
+    return this.sheets(...sheetNames);
+  }
+  private _reqSheetsPropsArrToRaw(
+    propsArr: FetchRowsNamedProps<SheetName>[],
+  ): SpreadsheetNamed {
+    propsArr.forEach((props) => this._reqSheetsPropsToRaw(props));
+    return this;
+  }
+  private _reqSheetsPropsToRaw({ rowSpecifier, sheets }: FetchRowsNamedProps) {
+    const arrSpecifier =
+      typeof rowSpecifier === "string" ? [rowSpecifier] : rowSpecifier;
+    arrSpecifier.forEach((specifier) => {
+      this._rowSpecifierNameToRaw(specifier, sheets);
     });
-    return rawPropsArr;
   }
-  private _tableNamesFromReqProps<T extends TableName>(
-    propsArr: InitSheetsPropsNamed<T>[],
+  private _rowSpecifierNameToRaw(
+    rowSpecifier: RowSpecifierName,
+    sheetColumns: FetchRowsNamedProps["sheets"],
+  ): void {
+    const rawSheets = this._namedToRawSheetColumnSpecifiers(sheetColumns);
+    const schema = this.schema;
+    if (rowSpecifier === "activeRows") {
+      for (const sheetId of rawSheets.keys()) {
+        this.raw.sheet(sheetId).activeRowIndexes.forEach((rowIdx) => {
+          this.fetchRowsRawProps.push({
+            startRowIndex: rowIdx,
+            rowCount: 1,
+            sheetColumns: new Map([[sheetId, rawSheets.get(sheetId)]]),
+          });
+        });
+      }
+    } else if (isRowSpecifierBySchemaName(rowSpecifier)) {
+      this.fetchRowsRawProps.push({
+        ...schema.rawRowSpecifierByName(rowSpecifier),
+        sheetColumns: rawSheets,
+      });
+    } else {
+      throw new Error(
+        `Invalid rowSpecifier: ${rowSpecifier}. Must be a valid RowSpecifierName.`,
+      );
+    }
+  }
+  private _namedToRawSheetColumnSpecifiers(
+    sheets: FetchRowsNamedProps["sheets"],
+  ): FetchRowsRawProps["sheetColumns"] {
+    return Obj.keys(sheets).reduce(
+      (acc, sheetName) => {
+        const sheetGid = this.schema.sheet(sheetName).sheetGid;
+        const columnSpecifier = this._columnSpecifierToIndexes(
+          sheets[sheetName],
+          sheetName,
+        );
+        acc.set(sheetGid, columnSpecifier);
+        return acc;
+      },
+      new Map() as FetchRowsRawProps["sheetColumns"],
+    );
+  }
+  private _columnSpecifierToIndexes<TN extends SheetName>(
+    columnSpecifier: ColumnSpecifierNamed<TN>,
+    sheetName: TN,
+  ): number[] {
+    const schema = this.schema.sheet(sheetName);
+    if (columnSpecifier === "allColumns") {
+      return [...schema.raw.allColumnIdxes];
+    } else {
+      return (["id", ...columnSpecifier] as const).map(
+        (colName) => this.schema.column(sheetName, colName).idxBase0,
+      );
+    }
+  }
+
+  private _tableNamesFromReqProps<T extends SheetName>(
+    propsArr: FetchRowsNamedProps<T>[],
   ): Set<T> {
-    return propsArr.reduce((tableNames, props) => {
-      return tableNames.add(...Obj.keys(props.sheets));
+    return propsArr.reduce((sheetNames, props) => {
+      return sheetNames.add(...Obj.keys(props.sheets));
     }, new Set() as Set<T>);
   }
   addMissingColumnIds() {
-    // This assumes that the schemas are up to date.
-    this.raw.initSheets({
-      startRowIndex: this.schema.colIdRowIdx,
-      rowCount: 1,
-      sheets: this.raw.schema.allSheetGids.reduce(
-        (acc, sheetGid) => {
-          return acc.set(sheetGid, "allColumns");
+    const sheets = this.fetchRows({
+      rowSpecifier: "columnIds",
+      sheets: this.schema.allTableNames.reduce(
+        (acc, sheetName) => {
+          acc[sheetName] = "allColumns";
+          return acc;
         },
-        new Map() as Map<number, "allColumns">,
+        {} as Record<SheetName, "allColumns">,
       ),
     });
     let sheetsUpdated = 0;
-    this.schema.allTableNames.forEach((sheetGid) => {
-      this.sheet(sheetGid).addMissingColumnIds();
+    Obj.values(sheets).forEach((sheet) => {
+      sheet.addMissingColumnIds();
       sheetsUpdated++;
     });
     Logger.log(

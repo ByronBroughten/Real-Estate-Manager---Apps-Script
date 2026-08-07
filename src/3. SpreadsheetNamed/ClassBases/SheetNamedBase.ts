@@ -1,29 +1,29 @@
-import type { TableName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { RowIdsToIndexes } from "../Types/NamedState";
 import {
   SpreadsheetNamedBase,
-  type SheetRowToRowIdx,
   type SpreadsheetNamedProps,
 } from "./SpreadsheetNamedBase";
 
 export interface SheetNamedProps<
-  TN extends TableName,
+  TN extends SheetName,
 > extends SpreadsheetNamedProps {
   sheetName: TN;
 }
 
-export class SheetNamedBase<TN extends TableName> extends SpreadsheetNamedBase {
+export class SheetNamedBase<TN extends SheetName> extends SpreadsheetNamedBase {
   readonly sheetName: TN;
   constructor({ sheetName, ...props }: SheetNamedProps<TN>) {
     super(props);
     this.sheetName = sheetName;
   }
-  get sheetState(): SheetRowToRowIdx {
-    return this.namedState[this.sheetName];
+  get sheetState(): RowIdsToIndexes {
+    return this.namedState.sheetRowIdsToIndexes[this.sheetName];
   }
-  get sheetProps(): SheetNamedProps<TN> {
+  get sheetNamedProps(): SheetNamedProps<TN> {
     return {
       sheetName: this.sheetName,
-      ...this.spreadsheetProps,
+      ...this.spreadsheetNamedProps,
     };
   }
 }
