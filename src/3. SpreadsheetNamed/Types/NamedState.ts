@@ -1,17 +1,22 @@
 import type { SheetName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
 import type { ColumnName } from "../../0. spreadsheetMetaData/5. allColumnAttributes";
-import type { FetchRowsRawProps } from "../../2. AppsScriptRaw/Types/RawState";
+import type { GridRangeProps } from "../../2. AppsScriptRaw/Types/RawState";
 import { Arr } from "../../utils/Arr";
+import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";
 
 export type RowIdsToIndexes = Record<string, number>;
 export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
 export type SpreadsheetNamedState = {
-  fetchRowsRawProps: FetchRowsRawProps[];
+  gridRangeFetchProps: GridRangeProps[];
   sheetRowIdsToIndexes: SheetRowIdsToIndexes;
 };
 
-type FetchRowsNamedSpecifiers<SN extends SheetName = SheetName> = {
+type SheetColumnNames<SN extends SheetName> = {
+  [S in SN]?: ColumnSpecifierNamed<SN>;
+};
+
+export type FetchSpecifierObjNamed<SN extends SheetName = SheetName> = {
   all: {
     rowSpecifier: RowSpecifier;
     sheetColumnMode: "all";
@@ -24,21 +29,32 @@ type FetchRowsNamedSpecifiers<SN extends SheetName = SheetName> = {
   specific: {
     rowSpecifier: RowSpecifier;
     sheetColumnMode: "specific";
-    sheetColumnNames: {
-      [S in SN]?: ColumnSpecifierNamed<SN>;
-    };
+    sheetColumnNames: SheetColumnNames<SN>;
   };
 };
 
-type ColumnMode = keyof FetchRowsNamedSpecifiers;
-export type FetchRowsNamedPropsNext<SN extends SheetName = SheetName> =
-  FetchRowsNamedSpecifiers<SN>[ColumnMode];
+type FetchColumnsSpecifierObjNamed<SN extends SheetName = SheetName> = {
+  [S in keyof FetchSpecifierObjNamed<SN>]: StrictOmit<
+    FetchSpecifierObjNamed<SN>[S],
+    "rowSpecifier"
+  >;
+};
 
-export type FetchRowsNamedProps<TN extends SheetName = SheetName> = {
+export type FetchColumnSpecifierNamed<SN extends SheetName> =
+  FetchColumnsSpecifierObjNamed<SN>[ColumnMode];
+
+type ColumnMode = keyof FetchSpecifierObjNamed;
+
+export type FetchPropsNamed<SN extends SheetName> =
+  FetchSpecifierObjNamed<SN>[ColumnMode];
+
+export type SheetColumnNamesStandard<SN extends SheetName> = {
+  [S in SN]?: ColumnName<SN>[];
+};
+
+export type FetchPropsStandardNamed<SN extends SheetName = SheetName> = {
   rowSpecifier: RowSpecifier;
-  sheetColumns: {
-    [T in TN]?: ColumnSpecifierNamed<TN>;
-  };
+  sheetColumnNames: SheetColumnNamesStandard<SN>;
 };
 
 type RowSpecifier = RowSpecifierName | RowSpecifierName[];

@@ -39,6 +39,10 @@ export class RowNamed<TN extends SheetName> extends RowNamedBase<TN> {
       idxBase0: this.idxBase0,
     });
   }
+  cellIsActive<CN extends ColumnName<TN>>(columnName: CN): boolean {
+    const colIdx = this.columnIdx(columnName);
+    return this.raw.cellIsActive(colIdx);
+  }
   value<CN extends ColumnName<TN>>(columnName: CN): ColumnValue<TN, CN> {
     return this.rowState[columnName] as ColumnValue<TN, CN>;
   }

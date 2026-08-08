@@ -18,6 +18,7 @@ import type {
 } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import type { CellValue } from "../2. AppsScriptRaw/Types/RawState";
 import { SchemaBase } from "./SchemaBase";
+import { SheetSchemaRaw } from "./SheetSchemaRaw";
 
 export class ColumnSchemaRaw extends SchemaBase {
   readonly sheetId: number;
@@ -29,6 +30,9 @@ export class ColumnSchemaRaw extends SchemaBase {
   }
   attribute<K extends keyof ColAttributesRaw>(key: K): ColAttributesRaw[K] {
     return getColumnAttributeRaw(this.sheetId, this.columnIdx, key);
+  }
+  get sheet(): SheetSchemaRaw {
+    return new SheetSchemaRaw(this.sheetId);
   }
   get columnId(): string {
     return this.attribute("columnId") as string;
@@ -48,8 +52,12 @@ export class ColumnSchemaRaw extends SchemaBase {
   ): ValueAttributes[K] {
     return getValueAttribute(this.valueName, key);
   }
-  makeDefaultValue(): Value {
-    return this.valueAttributes("makeDefault")();
+  makeDefaultDataValue(): Value {
+    if (this.columnName === "id") {
+      return this.sheet.makeRowId();
+    } else {
+      return this.valueAttributes("makeDefault")();
+    }
   }
   extractCellString(cellValue: GoogleCellValue | undefined): string {
     return extractCellValue(cellValue, "stringValue");

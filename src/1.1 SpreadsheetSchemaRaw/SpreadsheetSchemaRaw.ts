@@ -1,4 +1,5 @@
 import { allSheetGids } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { RowRange } from "../2. AppsScriptRaw/Types/RawState";
 
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
@@ -10,6 +11,12 @@ export class SpreadsheetSchemaRaw extends SchemaBase {
   }
   column(sheetGid: number, columnIdx: number): ColumnSchemaRaw {
     return new ColumnSchemaRaw(sheetGid, columnIdx);
+  }
+  oneRowSpecifier(startRowIndex: number): RowRange {
+    return {
+      startRowIndex,
+      endRowIndex: startRowIndex + 1,
+    };
   }
   makeSheetIdxId(sheetGid: number, idx: number): string {
     return this.makeId(sheetGid, idx);
@@ -24,6 +31,15 @@ export class SpreadsheetSchemaRaw extends SchemaBase {
   idsFromSheetRowId(sheetRowId: string): { sheetGid: number; rowIdx: number } {
     const { idx, ...rest } = this._idsFromSheetIdxId(sheetRowId);
     return { ...rest, rowIdx: idx };
+  }
+  specifyAllSheetsAndColumns(): Map<number, number[]> {
+    return this.allSheetGids.reduce(
+      (acc, sheetGid) => {
+        acc[sheetGid] = [...this.sheet(sheetGid).allColumnIdxes];
+        return acc;
+      },
+      new Map() as Map<number, number[]>,
+    );
   }
   private _idsFromSheetIdxId(sheetRowId: string): {
     sheetGid: number;

@@ -73,11 +73,11 @@ export class ColumnSchemaNamed<
     const emptyAllowed = this.colAttribute("emptyAllowed");
     return this.valueAttribute("defaultValidate")(value) as ColumnValue<TN, CN>;
   }
-  makeDefaultValue(): ColumnValue<TN, CN> {
+  makeDefaultDataValue(): ColumnValue<TN, CN> {
     return this.valueAttribute("makeDefault")() as ColumnValue<TN, CN>;
   }
   get isFormula(): boolean {
-    const defaultValue = this.makeDefaultValue();
+    const defaultValue = this.makeDefaultDataValue();
     if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
       return true;
     } else {

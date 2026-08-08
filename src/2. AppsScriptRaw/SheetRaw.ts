@@ -1,6 +1,6 @@
 import type { Value } from "../0. spreadsheetMetaData/3.2 valueAttributes";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
-import { type StrictPickPartial } from "../utils/Obj";
+import { Obj, type StrictPickPartial } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
@@ -14,6 +14,7 @@ import type {
 } from "./Types/AppsScriptTypes";
 import type {
   ColumnCount,
+  GridRangeProps,
   RowCountRaw,
   SheetChangeProps,
   SheetChangePropsObj,
@@ -36,8 +37,8 @@ interface MakeGetRequestProps {
 }
 
 interface MakeGetRequestsProps {
-  rowCount: RowCountRaw;
   startRowIndex: number;
+  endRowIndex?: number;
   startColumnIndexes: number[];
 }
 
@@ -82,9 +83,8 @@ export class SheetRaw extends SheetRawBase {
       (row) => row.idxBase0 >= this.schema.topDataRowIdx,
     );
   }
-  activeColumnIdxs(): number[] {
-    const colIdRow = this.row(this.schema.colIdRowIdx);
-    return colIdRow.activeColIdxs;
+  get activeColumnIdxs(): number[] {
+    return this.activeRows[0].activeColIdxs;
   }
   get activeRowIndexes(): number[] {
     return Array.from(this.sheetState.rowStates.keys());
@@ -96,19 +96,29 @@ export class SheetRaw extends SheetRawBase {
     this._initSheetState(sheet);
     if (sheet.data) {
       this._integrateSheetRowStates(sheet.data);
-      this.sheetState.nextAppendedRowIdx = this.lastRowIdx + 1;
     }
   }
   private _initSheetState(sheet: GoogleSheet): void {
     const properties = sheet.properties;
     const table = sheet.tables[0];
+    const tableRange = Obj.validatePick(
+      table.range,
+      "number",
+      "startRowIndex",
+      "endRowIndex",
+      "startColumnIndex",
+      "endColumnIndex",
+    );
+
     this.sheetsState.set(this.sheetGid, {
       title: valS.assertDefined(properties.title, "sheet title "),
       sheetName: valS.assertDefined(table.name, "sheetName"),
-      tableId: valS.assertDefined(table.tableId, "tableId"),
+      activeTable: {
+        tableId: valS.assertDefined(table.tableId, "tableId"),
+        ...tableRange,
+      },
       rowIndexesAreValid: true,
       lastNotStaleColumnIdx: null,
-      nextAppendedRowIdx: 0,
       rowStates: new Map(),
     });
   }
@@ -132,9 +142,35 @@ export class SheetRaw extends SheetRawBase {
       });
     });
   }
+  addMissingColumnIds(): void {
+    const colIdRow = this.row(this.schema.colIdRowIdx);
+    this.activeColumnIdxs.forEach((colIdx) => {
+      const colIdValue = colIdRow.value(colIdx);
+      if (!colIdValue) {
+        colIdRow.setValue(colIdx, this.schema.makeColumnId());
+      }
+    });
+  }
+  wholeRowGridRange(rowIndex: number): GridRangeProps {
+    return {
+      sheetId: this.sheetGid,
+      ...this.spreadsheet.schema.oneRowSpecifier(rowIndex),
+      startColumnIndex: 0,
+      endColumnIndex: this.activeTable.endColumnIndex,
+    };
+  }
+  gatherGetRequests(props: GridRangeProps[]): void {
+    props.forEach((props) => {
+      this.rawState.getterGridRanges.push({
+        sheetId: this.sheetGid,
+        ...props,
+      });
+    });
+  }
   verifyColumnIds() {
-    // How should I handle when a raw row's state is missing?
     const row = this.row(this.schema.colIdRowIdx);
+    row.validateIsActive();
+
     const activeColIdxs = row.activeColIdxs;
     if (!activeColIdxs.length) {
       throw new Error(
@@ -157,36 +193,7 @@ export class SheetRaw extends SheetRawBase {
       );
     }
   }
-  gatherGetRequest({
-    rowCount,
-    columnCount = 1,
-    startRowIndex = 0,
-    startColumnIndex = 0,
-  }: MakeGetRequestProps): void {
-    this.rawState.getterGridRanges.push({
-      sheetId: this.sheetGid,
-      ...this.getGridRangeIndexes({
-        rowCount,
-        columnCount,
-        startRowIndex,
-        startColumnIndex,
-      }),
-    });
-  }
-  gatherGetRequests({
-    startRowIndex = 0,
-    rowCount,
-    startColumnIndexes,
-  }: MakeGetRequestsProps): void {
-    startColumnIndexes.map((startColumnIndex) =>
-      this.gatherGetRequest({
-        startRowIndex,
-        rowCount,
-        startColumnIndex,
-        columnCount: 1,
-      }),
-    );
-  }
+
   getGridRangeIndexes({
     // This is to ensure that all meta data is obtained even when no data rows are requested.
     startRowIndex,
@@ -197,6 +204,7 @@ export class SheetRaw extends SheetRawBase {
     GoogleGridRange,
     "startRowIndex" | "endRowIndex" | "startColumnIndex" | "endColumnIndex"
   > {
+    const minimumEndRowIndex = this.schema.topDataRowIdx;
     if (rowCount === "allFromStart") {
       if (columnCount === "allFromStart") {
         return { startRowIndex, startColumnIndex };
@@ -239,15 +247,18 @@ export class SheetRaw extends SheetRawBase {
   validateRowIndexes(): void {
     this.sheetState.rowIndexesAreValid = true;
   }
-  appendRowDefault(): RowRaw {
-    const idx = this.nextAppendedRowIdx;
+  appendRow(): RowRaw {
+    const idx = this.activeTable.endRowIndex;
     this.sheetState.rowStates[idx] = new Map();
-    this.sheetState.nextAppendedRowIdx = idx + 1;
-    return this.row(idx)
-      .resetToDefault()
-      ._addChangeToSave({ action: "append" });
+    this.activeTable.endRowIndex++;
+    return this.row(idx)._addChangeToSave({ action: "append" });
   }
-  appendRow(colValues: Map<number, Value>): RowRaw {
+  appendRowDefault(): RowRaw {
+    return this.appendRow().setDataRowToDefault(
+      ...this.topDataRow.activeColIdxsNotFormula,
+    );
+  }
+  appendRowAndValues(colValues: Map<number, Value>): RowRaw {
     const row = this.appendRowDefault();
     for (const [colIdx, value] of colValues.entries()) {
       row.setValue(colIdx, value);

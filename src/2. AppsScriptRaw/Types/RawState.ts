@@ -1,3 +1,4 @@
+import type { StrictPick } from "../../utils/Obj";
 import type { GoogleGridRange, GoogleUpdateRequest } from "./AppsScriptTypes";
 
 const updateRequestNames = [
@@ -31,8 +32,13 @@ export type RawSheetsState = Map<SheetId, RawSheetState>;
 export interface RawSheetState {
   title: string;
   sheetName: string;
-  tableId: string;
-  nextAppendedRowIdx: number;
+  activeTable: {
+    tableId: string;
+    startRowIndex: number; // headerRowIndex
+    endRowIndex: number; // lastRowIndex + 1
+    startColumnIndex: number;
+    endColumnIndex: number; // lastColumnIndex + 1
+  };
   rowIndexesAreValid: boolean;
   lastNotStaleColumnIdx: null | number;
   rowStates: RawRowStates;
@@ -85,25 +91,39 @@ export type RowChangeProps =
   | { action: "append" | "delete" }
   | RowChangeUpdateProps;
 
-export interface FetchRowsRawProps extends RowSpecifierRaw {
-  sheetColumns: SheetColumnMap;
-}
 type SheetColumnMap = Map<SheetId, ColIdx[]>;
-
-export interface RowSpecifierRaw {
-  startRowIndex: number;
-  rowCount: RowCountRaw;
-}
-export function makeRowSpecifierRaw(
-  startRowIndex: number,
-  rowCount: RowCountRaw,
-): RowSpecifierRaw {
-  return { startRowIndex, rowCount };
-}
 
 export type ColumnSpecifierRaw = ColIdx[] | "allColumns";
 export type ColumnCount = number | "allFromStart";
 export type RowCountRaw = number | "allFromStart";
+
+export type GridRangeProps = {
+  sheetId: number;
+  startRowIndex: number;
+  endRowIndex?: number;
+  startColumnIndex: number;
+  endColumnIndex?: number;
+};
+
+export interface RowRange {
+  startRowIndex: number;
+  endRowIndex?: number;
+}
+export function makeRowRange(
+  startRowIndex: number,
+  endRowIndex?: number,
+): RowRange {
+  return { startRowIndex, endRowIndex };
+}
+
+export type SheetColumnsRange = StrictPick<
+  GridRangeProps,
+  "startColumnIndex" | "endColumnIndex" | "sheetId"
+>;
+export type ColumnRange = StrictPick<
+  GridRangeProps,
+  "startColumnIndex" | "endColumnIndex"
+>;
 
 // export type InitSpecificRowsPropsRaw = {
 //   rowIdexes: number[];

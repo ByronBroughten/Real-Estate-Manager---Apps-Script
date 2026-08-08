@@ -23,6 +23,7 @@ export class SheetSchemaRaw extends SchemaBase {
     super();
     this.sheetGid = sheetGid;
   }
+
   private attribute<K extends keyof TableAttributesRaw>(
     key: K,
   ): TableAttributesRaw[K] {
@@ -36,5 +37,20 @@ export class SheetSchemaRaw extends SchemaBase {
   }
   get sheetName(): SheetName {
     return this.attribute("sheetName");
+  }
+  makeColumnId(): string {
+    return this.makeId("c", this._makeSheetDimensionId());
+  }
+  makeRowId(): string {
+    return this.makeId("r", this._makeSheetDimensionId());
+  }
+  private _makeSheetDimensionId(): string {
+    const idPrefix = this.attribute("idPrefix");
+    if (!idPrefix) {
+      throw new Error(
+        `Attempted to make id for sheet ${this.sheetName} without an idPrefix`,
+      );
+    }
+    return this.makeUniqueId(idPrefix);
   }
 }

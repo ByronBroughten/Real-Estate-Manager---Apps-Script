@@ -4,7 +4,7 @@ import {
   type SpreadsheetRawProps,
 } from "../../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
 import { SpreadsheetRaw } from "../../2. AppsScriptRaw/SpreadsheetRaw";
-import type { FetchRowsRawProps } from "../../2. AppsScriptRaw/Types/RawState";
+import type { GridRangeProps } from "../../2. AppsScriptRaw/Types/RawState";
 import type {
   SheetRowIdsToIndexes,
   SpreadsheetNamedState,
@@ -29,8 +29,8 @@ export class SpreadsheetNamedBase extends SpreadsheetRawBase {
       namedState: this.namedState,
     };
   }
-  get fetchRowsRawProps(): FetchRowsRawProps[] {
-    return this.namedState.fetchRowsRawProps;
+  get gridRangeFetchProps(): GridRangeProps[] {
+    return this.namedState.gridRangeFetchProps;
   }
   get sheetRowIdsToIndexes(): SheetRowIdsToIndexes {
     return this.namedState.sheetRowIdsToIndexes;
@@ -39,7 +39,7 @@ export class SpreadsheetNamedBase extends SpreadsheetRawBase {
     return {
       rawState: SpreadsheetRaw.initRawState(),
       namedState: {
-        fetchRowsRawProps: [],
+        gridRangeFetchProps: [],
         sheetRowIdsToIndexes: {},
       },
     };

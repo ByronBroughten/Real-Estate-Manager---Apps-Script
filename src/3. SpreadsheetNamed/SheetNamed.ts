@@ -9,6 +9,7 @@ import type { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
 import { Arr } from "../utils/Arr";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
+import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 import type { RowIdsToIndexes } from "./Types/NamedState";
@@ -27,6 +28,12 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
     return new RowNamed({
       ...this.sheetNamedProps,
       id,
+    });
+  }
+  column<CN extends ColumnName<TN>>(columnName: CN): ColumnNamed<TN, CN> {
+    return new ColumnNamed({
+      ...this.sheetNamedProps,
+      columnName,
     });
   }
   get topDataRow(): RowNamed<TN> {
@@ -99,7 +106,7 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
     if (this.raw.dataRowCount > 0) {
-      this.raw.topDataRow.resetToDefault();
+      this.raw.topDataRow.setDataRowToDefault();
     }
     if (this.raw.dataRowCount > 1) {
       this.DELETE_DATA_ROWS_AFTER_TOP();
@@ -124,11 +131,11 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
       return true;
     });
   }
-  state(): RowIdsToIndexes {
+  get state(): RowIdsToIndexes {
     return this.namedState.sheetRowIdsToIndexes[this.sheetName];
   }
   appendRowDefault(): RowNamed<TN> {
-    const rowId = this.schema.makeRowId();
+    const rowId = this.raw.schema.makeRowId();
     const rowIdx = this.raw.appendRowDefault().idxBase0;
     this.state[rowId] = rowIdx;
     return this.row(rowId);
@@ -137,25 +144,6 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
     const row = this.appendRowDefault();
     return row.setValues(values);
   }
-  addMissingColumnIds(): SheetNamed<TN> {
-    const colIdRow = this.raw.row(this.schema.colIdRowIdx);
-    this.raw.schema.allColumnIdxes.forEach((colIdx) => {
-      const colIdValue = colIdRow.value(colIdx);
-      if (!colIdValue) {
-        colIdRow.setValue(colIdx, this.schema.makeColumnId());
-      }
-    });
-    return this;
-  }
-  // validateThis<GN extends TnGroupName>(
-  //   snGroupName: GN,
-  // ): SheetNamed<GroupToTableName<GN>> {
-  //   if (isInTnGroup(snGroupName, this.sheetName)) {
-  //     return this as unknown as SheetNamed<GroupToTableName<GN>>;
-  //   } else {
-  //     throw new Error(`Not a sheet of from group "${snGroupName}"`);
-  //   }
-  // }
 }
 
 const appendReq: GoogleAppsScript.Sheets.Schema.AppendCellsRequest = {

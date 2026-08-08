@@ -10,11 +10,17 @@ export class ColumnRaw extends ColumnRawBase {
   }
   resetDataRows() {
     this.sheet.dataRows.forEach((row) => {
-      row.resetToDefault(this.columnIdx);
+      row.setDataRowToDefault(this.columnIdx);
     });
   }
-  resetDataAndActionRows() {
-    this.resetDataRows();
+  resetActionRow() {
     this.sheet.actionRow.setValue(this.columnIdx, false);
+  }
+  fillEmptyDataCellsWithDefaultValues() {
+    this.sheet.dataRows.forEach((row) => {
+      if (row.isEmptyCell(this.columnIdx)) {
+        row.setDataRowToDefault(this.columnIdx);
+      }
+    });
   }
 }

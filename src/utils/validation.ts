@@ -17,6 +17,15 @@ function assertDefined<T>(
   return value;
 }
 
+type PureValueNamesToTypes = {
+  string: string;
+  number: number;
+  boolean: boolean;
+  date: Date;
+};
+export type PureValueName = keyof PureValueNamesToTypes;
+export type PureValue<VN extends PureValueName> = PureValueNamesToTypes[VN];
+
 const _isS = {
   string(value: unknown): value is string {
     return typeof value === "string";

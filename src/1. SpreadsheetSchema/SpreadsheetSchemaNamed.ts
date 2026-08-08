@@ -13,10 +13,13 @@ import { type ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttribute
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
 import {
-  makeRowSpecifierRaw,
-  type RowSpecifierRaw,
+  makeRowRange,
+  type RowRange,
 } from "../2. AppsScriptRaw/Types/RawState";
-import type { RowSpecifierBySchemaName } from "../3. SpreadsheetNamed/Types/NamedState";
+import type {
+  RowSpecifierBySchemaName,
+  SheetColumnNamesStandard,
+} from "../3. SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
@@ -36,27 +39,29 @@ export class SpreadsheetSchema extends SchemaBase {
   get allsheetNames() {
     return allsheetNames;
   }
-  specifyAllSheetsAndColumns(): Record<SheetName, "allColumns"> {
-    return this.allsheetNames.reduce(
-      (acc, sheetName) => {
-        acc[sheetName] = "allColumns";
-        return acc;
-      },
-      {} as Record<SheetName, "allColumns">,
-    );
+  get sheetNamesWithoutIdPrefix(): SheetName[] {
+    return this.allsheetNames.filter((sheetName) => {
+      this.sheet(sheetName).attribute("idPrefix") === "";
+    });
   }
-  rawRowSpecifierByName(rowName: RowSpecifierBySchemaName): RowSpecifierRaw {
-    const mrs = makeRowSpecifierRaw;
-    const rowNameToRawSpecifier: Record<
-      RowSpecifierBySchemaName,
-      RowSpecifierRaw
-    > = {
-      all: mrs(0, "allFromStart"),
-      data: mrs(this.topDataRowIdx, "allFromStart"),
-      topDatum: mrs(this.topDataRowIdx, 1),
-      actions: mrs(this.actionRowIdx, 1),
-      columnIds: mrs(this.colIdRowIdx, 1),
-      headers: mrs(this.headerRowIdx, 1),
+  specifyAllSheetsAndColumns(): SheetColumnNamesStandard<SheetName> {
+    return this.allsheetNames.reduce((acc, sheetName) => {
+      acc[sheetName] = this.sheet(sheetName).columnNames;
+      return acc;
+    }, {} as SheetColumnNamesStandard<SheetName>);
+  }
+  rawRowSpecifierByName(rowName: RowSpecifierBySchemaName): RowRange {
+    const mrs = makeRowRange;
+    function mrs1(startRowIndex: number): RowRange {
+      return mrs(startRowIndex, 1);
+    }
+    const rowNameToRawSpecifier: Record<RowSpecifierBySchemaName, RowRange> = {
+      all: mrs(0),
+      data: mrs(this.topDataRowIdx),
+      topDatum: mrs1(this.topDataRowIdx),
+      actions: mrs1(this.actionRowIdx),
+      columnIds: mrs1(this.colIdRowIdx),
+      headers: mrs1(this.headerRowIdx),
     };
     return rowNameToRawSpecifier[rowName];
   }

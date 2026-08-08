@@ -27,8 +27,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get sheetState(): RawSheetState {
     return this.sheetState[this.sheetGid];
   }
-  get nextAppendedRowIdx(): number {
-    return this.sheetState.nextAppendedRowIdx;
+  get activeTable(): RawSheetState["activeTable"] {
+    return this.sheetState.activeTable;
   }
   get rowStates(): RawSheetState["rowStates"] {
     return this.sheetState.rowStates;

@@ -1,6 +1,7 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
 import { Str, type CombineStringsWithFlat, type RemoveFirstN } from "./Str";
+import { valS, type PureValue, type PureValueName } from "./validation";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type DistributiveOmit<T, K extends keyof T> = T extends any
@@ -149,6 +150,20 @@ export const Obj = {
         return objNext;
       },
       {} as Pick<O, KS>,
+    );
+  },
+  validatePick<O extends object, VN extends PureValueName, KS extends keyof O>(
+    obj: O,
+    valueName: VN,
+    ...keys: KS[]
+  ): Record<KS, PureValue<VN>> {
+    return keys.reduce(
+      (objNext, key) => {
+        const value = valS.validate[valueName](obj[key]) as PureValue<VN>;
+        objNext[key] = value;
+        return objNext;
+      },
+      {} as Record<KS, PureValue<VN>>,
     );
   },
   strictPick<O extends object, KS extends keyof O>(

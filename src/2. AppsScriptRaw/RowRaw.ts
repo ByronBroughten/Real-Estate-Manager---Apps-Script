@@ -1,5 +1,6 @@
 import type { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
 import { RowRawBase } from "./ClassBases/RowRawBase";
+import { ColumnRaw } from "./ColumnRaw";
 import { SheetRaw } from "./SheetRaw";
 import type {
   GoogleCellValue,
@@ -16,6 +17,12 @@ export class RowRaw extends RowRawBase {
   get sheet() {
     return new SheetRaw(this.sheetRawProps);
   }
+  column(columnIdx: number): ColumnRaw {
+    return new ColumnRaw({
+      ...this.sheetRawProps,
+      columnIdx: columnIdx,
+    });
+  }
   columnSchema(colIdx): ColumnSchemaRaw {
     return this.sheetSchema.column(colIdx);
   }
@@ -31,8 +38,30 @@ export class RowRaw extends RowRawBase {
       return !columnSchema.isFormula;
     });
   }
+  rowIsActive(): boolean {
+    return this.sheetState.rowStates.has(this.idxBase0);
+  }
+  validateIsActive(): void {
+    if (!this.rowIsActive()) {
+      throw new Error(
+        `Row ${this.idxBase0} is not active. Cannot perform this operation.`,
+      );
+    }
+  }
+  cellIsActive(colIdx: number): boolean {
+    return this.rowState.has(colIdx);
+  }
+  isEmptyCell(colIdx: number): boolean {
+    if (!this.cellIsActive(colIdx)) {
+      throw new Error(
+        `Row ${this.idxBase0} does not have a value set for column index ${colIdx}.`,
+      );
+    }
+    const value = this.rowState.get(colIdx);
+    return value === "" || value === null || value === undefined;
+  }
   value(colIdx: number): CellValue {
-    if (!this.rowState.has(colIdx)) {
+    if (!this.cellIsActive(colIdx)) {
       throw new Error(
         `Row ${this.idxBase0} does not have a value set for column index ${colIdx}.`,
       );
@@ -43,9 +72,8 @@ export class RowRaw extends RowRawBase {
     return [...this.rowState.values()];
   }
   ensureStateExists() {
-    const rowStates = this.sheetState.rowStates;
-    if (!rowStates.has(this.idxBase0)) {
-      rowStates.set(this.idxBase0, new Map());
+    if (!this.rowIsActive()) {
+      this.sheet.rowStates.set(this.idxBase0, new Map());
     }
   }
   integrateState(colIdx: number, cellValue: GoogleCellValue | undefined): void {
@@ -62,28 +90,41 @@ export class RowRaw extends RowRawBase {
       return columnSchema.extractCellValue(cellValue);
     }
   }
-  resetToDefault(...colIdxes: number[]): RowRaw {
+  _validateIsDataRow(): void {
     if (!this.isDataRow) {
       throw new Error(
-        `Cannot reset to default for row ${this.idxBase0} because it is not a data row.`,
+        `Row ${this.idxBase0} is not a data row. Cannot perform this operation.`,
       );
     }
+  }
+  _validateHasActiveNonFormulaColumns() {
+    if (this.activeColIdxsNotFormula.length === 0) {
+      throw new Error(
+        `Row ${this.idxBase0} has no active non-formula columns. Cannot perform this operation.`,
+      );
+    }
+  }
+  setDataRowToDefault(...colIdxes: number[]): RowRaw {
+    this._validateIsDataRow();
     if (colIdxes.length === 0) {
+      this._validateHasActiveNonFormulaColumns();
       colIdxes = this.activeColIdxsNotFormula;
     }
     colIdxes.forEach((colIdx) => {
-      const columnSchema = this.columnSchema(colIdx);
-      const defaultValue = columnSchema.makeDefaultValue();
-      this.setValue(colIdx, defaultValue);
+      this._setDataCellToDefaultValue(colIdx);
     });
+    return this;
+  }
+  private _setDataCellToDefaultValue(colIdx: number): RowRaw {
+    const defaultValue = this.columnSchema(colIdx).makeDefaultDataValue();
+    this.setValue(colIdx, defaultValue);
     return this;
   }
   setValue(colIdx: number, value: CellValue): RowRaw {
     this._validateNotFormulaColumn(colIdx);
     this._validateColumnIndexNotStale(colIdx);
     this.rowState.set(colIdx, value);
-    this._addChangeToSave({ action: "update", colIdxes: [colIdx] });
-    return this;
+    return this._addChangeToSave({ action: "update", colIdxes: [colIdx] });
   }
   private _validateNotFormulaColumn(colIdx) {
     const columnSchema = this.columnSchema(colIdx);
@@ -112,10 +153,10 @@ export class RowRaw extends RowRawBase {
     return this.sheetSchema.makeId(this.sheetGid, this.idxBase0);
   }
   get changesToSave(): RowChangesToSave {
-    this._ensureChnagesToSaveExists();
+    this._ensureChangesToSaveExists();
     return this.allChangesToSave.get(this.sheetRowId) as RowChangesToSave;
   }
-  private _ensureChnagesToSaveExists(): void {
+  private _ensureChangesToSaveExists(): void {
     const sheetChangesToSave = this.rawState.changesToSave;
     const sheetRowId = this.sheetRowId;
     if (!sheetChangesToSave.has(sheetRowId)) {
@@ -146,7 +187,7 @@ export class RowRaw extends RowRawBase {
     this.updateRequests.append.push({
       appendCells: {
         sheetId: this.sheetGid,
-        tableId: `${this.sheetState.tableId}`,
+        tableId: `${this.activeTable.tableId}`,
         rows: [{}],
         fields: "userEnteredValue",
       },

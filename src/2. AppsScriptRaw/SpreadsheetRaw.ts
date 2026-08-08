@@ -5,7 +5,7 @@ import type { RowRaw } from "./RowRaw";
 import { SheetRaw } from "./SheetRaw";
 import type { GoogleSpreadsheet } from "./Types/AppsScriptTypes";
 import type {
-  FetchRowsRawProps,
+  GridRangeProps,
   RowChangesToSave,
   SheetChangesToSave,
 } from "./Types/RawState";
@@ -22,6 +22,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   get activeSheetGids(): MapIterator<number> {
     return this.rawState.sheets.keys();
   }
+  get activeSheets(): SheetRaw[] {
+    return Array.from(this.activeSheetGids, (sheetGid) => this.sheet(sheetGid));
+  }
   sheet(sheetGid: number): SheetRaw {
     return new SheetRaw({
       rawState: this.rawState,
@@ -32,42 +35,20 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
   }
-  fetchRows(...propArr: FetchRowsRawProps[]): void {
-    this._gatherGridRanges(propArr);
+  fetchAllSheets() {
+    const response = Sheets.Spreadsheets.get(this.spreadsheetId, {
+      fields: "sheets(properties(sheetId,title),tables(tableId,range))",
+    });
+    this._addDataToState(response);
+  }
+  fetchSheets(...propArr: GridRangeProps[]): void {
+    this.getterGridRanges.push(...propArr);
     this._doGetByDataFilter();
   }
-  // fetchRowsSpecific(props: InitSpecificRowsPropsRaw): void {
-  //   this._gatherSpecificRowGridRanges(props);
-  //   this._doGetByDataFilter();
-  // }
-  // private _gatherSpecificRowGridRanges({
-  //   rowIdexes,
-  //   sheets,
-  // }: InitSpecificRowsPropsRaw): void {
-  //   rowIdexes.forEach((rowIdx) => {
-  //     for (const sheetId of sheets.keys()) {
-  //       this.sheet(sheetId).gatherGetRequests({
-  //         startRowIndex: rowIdx,
-  //         rowCount: 1,
-  //         columnSpecifier: sheets[sheetId],
-  //       });
-  //     }
-  //   });
-  // }
   private _doGetByDataFilter(): void {
     const data = this._getByDataFilter();
     this._addDataToState(data);
     this.rawState.getterGridRanges = [];
-  }
-  loadSheetPropertiesGetGids(): number[] {
-    const data = Sheets.Spreadsheets.get(this.spreadsheetId, {
-      includeGridData: true,
-      fields: "sheets(properties(sheetId,title),tables(name,tableId))",
-    });
-    this._addDataToState(data);
-    return data.sheets.map((s) =>
-      valS.assertDefined(s.properties.sheetId, "sheetId"),
-    );
   }
   private _getByDataFilter(): GoogleSpreadsheet {
     return Sheets.Spreadsheets.getByDataFilter(
@@ -75,7 +56,11 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.spreadsheetId,
       {
         fields:
-          "sheets(properties(sheetId,title),tables(name,tableId),data(startColumn,startRow,columnMetadata(hiddenByUser),rowData(values(effectiveValue))))",
+          "sheets(" +
+          "properties(sheetId,title)," +
+          "tables(tableId,range)," +
+          "data(startColumn,startRow,rowData(values(effectiveValue)))" +
+          ")",
       },
     );
   }
@@ -86,17 +71,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       })),
       includeGridData: true,
     };
-  }
-  private _gatherGridRanges(props: FetchRowsRawProps[]): void {
-    props.forEach(({ startRowIndex, rowCount, sheetColumns }) => {
-      for (const sheetId of sheetColumns.keys()) {
-        this.sheet(sheetId).gatherGetRequests({
-          startRowIndex,
-          rowCount,
-          startColumnIndexes: sheetColumns[sheetId],
-        });
-      }
-    });
   }
   private _addDataToState(gss: GoogleSpreadsheet) {
     gss.sheets.forEach((gSheet) => {
@@ -164,5 +138,49 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.spreadsheetId,
     );
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+  }
+  fetchOneRowAllSheets(columnIndex: number): void {
+    this.fetchAllSheets();
+    this.fetchSheets(
+      ...this.activeSheets.map((sheet) => sheet.wholeRowGridRange(columnIndex)),
+    );
+  }
+  ensureIdColumnOnAllTables() {
+    this.fetchOneRowAllSheets(this.schema.headerRowIdx);
+    const sheetsWithoutIdColumn = this.activeSheets.filter((sheet) => {
+      return sheet.headerRow.activeValueArr.includes("ID") === false;
+    });
+    let fixedCount = 0;
+    for (const sheet of sheetsWithoutIdColumn) {
+      sheet.insertColumnAt(0);
+      sheet.headerRow.setValue(0, "ID");
+      fixedCount++;
+    }
+    Logger.log(`Added an "ID" header column to ${fixedCount} table(s).`);
+  }
+  fillMissingRowIds() {
+    this.fetchOneRowAllSheets(this.schema.headerRowIdx);
+    this.activeSheets.forEach((sheet) => {
+      const headers = sheet.headerRow.activeValueArr;
+      if (headers.includes("ID") === false) {
+        throw new Error(
+          `Cannot fill missing row IDs in sheet "${sheet.sheetGid}" because it does not have an "ID" column.`,
+        );
+      }
+      const idColIdx = headers.indexOf("ID");
+      const idCol = sheet.column(idColIdx);
+      idCol.fillEmptyDataCellsWithDefaultValues();
+    });
+  }
+  addMissingColumnIds(): void {
+    this.fetchOneRowAllSheets(this.schema.colIdRowIdx);
+    let sheetUpdatedCount = 0;
+    this.activeSheets.forEach((sheet) => {
+      sheet.addMissingColumnIds();
+      sheetUpdatedCount++;
+    });
+    Logger.log(
+      `ensureColumnIds: added missing column ID(s) in ${sheetUpdatedCount} sheets.`,
+    );
   }
 }

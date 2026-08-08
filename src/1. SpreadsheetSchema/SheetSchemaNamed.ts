@@ -11,6 +11,7 @@ import {
 } from "../0. spreadsheetMetaData/5. allColumnAttributes";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
+import type { ColumnSpecifierNamed } from "../3. SpreadsheetNamed/Types/NamedState";
 import { Arr } from "../utils/Arr";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed";
@@ -34,7 +35,7 @@ export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
   columnNameByIdx(colIdx: number): ColumnName<TN> {
     return this.raw.column(colIdx).attribute("columnName") as ColumnName<TN>;
   }
-  private attribute<K extends keyof TableAttributes<TN>>(
+  attribute<K extends keyof TableAttributes<TN>>(
     key: K,
   ): TableAttributes<TN>[K] {
     return getTableAttribute(this.sheetName, key);
@@ -48,21 +49,21 @@ export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
   column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  makeColumnId(): string {
-    return this.makeId("c", this._makeSheetDimensionId());
+  columnIndex<CN extends ColumnName<TN>>(columnName: CN): number {
+    return this.column(columnName).columnIdx;
   }
-  makeRowId(): string {
-    return this.makeId("r", this._makeSheetDimensionId());
-  }
-  private _makeSheetDimensionId(): string {
-    const idPrefix = this.attribute("idPrefix");
-    if (!idPrefix) {
-      throw new Error(
-        `Attempted to make id for table ${this.sheetName} without an idPrefix`,
-      );
+  columnSpecifierToStandard(
+    columnSpecifier: ColumnSpecifierNamed<TN>,
+  ): ColumnName<TN>[] {
+    if (columnSpecifier === "allColumns") {
+      return this.columnNames;
+    } else if (Array.isArray(columnSpecifier)) {
+      return columnSpecifier;
+    } else {
+      return [columnSpecifier];
     }
-    return this.makeUniqueId(idPrefix);
   }
+
   get columnNames(): ColumnName<TN>[] {
     return getSheetColumnNames(this.sheetName);
   }
@@ -79,7 +80,7 @@ export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
         } else {
           values[columnName] = this.column(
             columnName,
-          ).makeDefaultValue() as any;
+          ).makeDefaultDataValue() as any;
         }
         return values;
       },

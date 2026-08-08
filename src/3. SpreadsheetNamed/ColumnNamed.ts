@@ -16,4 +16,7 @@ export class ColumnNamed<
   get raw() {
     return this.sheet.raw.column(this.colIdx);
   }
+  get schema() {
+    return this.sheet.schema.column(this.columnName);
+  }
 }
