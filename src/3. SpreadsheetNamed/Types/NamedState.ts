@@ -1,5 +1,5 @@
-import type { SheetName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
-import type { ColumnName } from "../../0. spreadsheetMetaData/5. allColumnAttributes";
+import type { SheetName } from "../../1.0 Configs/2.0 sheetConfigs";
+import type { ColumnName } from "../../1.0 Configs/3.0 columnConfigs";
 import type { GridRangeProps } from "../../2. AppsScriptRaw/Types/RawState";
 import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";

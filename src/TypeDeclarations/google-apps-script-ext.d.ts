@@ -15,7 +15,7 @@ declare namespace GoogleAppsScript {
       // -----------------------------------------------------------------
 
       export interface TableColumnProperties {
-        columnIndex?: number;
+        colIndex?: number;
         columnName?: string;
         columnType?: string;
         dataValidationRule?: DataValidationRule;

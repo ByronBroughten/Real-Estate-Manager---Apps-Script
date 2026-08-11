@@ -1,9 +1,4 @@
-import {
-  getValueAttribute,
-  type ValueAttributes,
-  type ValueName,
-} from "../0. spreadsheetMetaData/3.2 valueAttributes";
-import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs";
 import {
   getColumnAttribute,
   type ColumnAttributes,
@@ -11,10 +6,15 @@ import {
   type ColumnName,
   type ColumnValue,
   type ColumnValueName,
-} from "../0. spreadsheetMetaData/5. allColumnAttributes";
+} from "../1.0 Configs/3.0 columnConfigs";
 import { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { CombineStringsWithFlat } from "../utils/Str";
+import {
+  getValueAttribute,
+  type ValueAttributes,
+  type ValueName,
+} from "./3.2 valueSchemas";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class ColumnSchemaNamed<
@@ -32,7 +32,7 @@ export class ColumnSchemaNamed<
     return new SheetSchemaNamed(this.sheetName);
   }
   get raw(): ColumnSchemaRaw {
-    return new ColumnSchemaRaw(this.sheetSchema.sheetGid, this.columnIdx);
+    return new ColumnSchemaRaw(this.sheetSchema.sheetGid, this.colIndex);
   }
   get columnFullname(): CombineStringsWithFlat<TN, CN & string> {
     return `${this.sheetName}_${this.columnName as string}` as CombineStringsWithFlat<
@@ -40,14 +40,11 @@ export class ColumnSchemaNamed<
       CN & string
     >;
   }
-  get columnIdx(): number {
-    return this.colAttribute("indexBase0");
+  get colIndex(): number {
+    return this.colAttribute("colIndex");
   }
   get columnId(): string {
     return this.colAttribute("columnId");
-  }
-  get idxBase0(): number {
-    return this.colAttribute("indexBase0");
   }
   colAttribute<K extends keyof ColumnAttributesBase>(
     key: K,
@@ -70,8 +67,7 @@ export class ColumnSchemaNamed<
     );
   }
   validate(value: unknown): ColumnValue<TN, CN> {
-    const emptyAllowed = this.colAttribute("emptyAllowed");
-    return this.valueAttribute("defaultValidate")(value) as ColumnValue<TN, CN>;
+    return this.raw.validate(value) as ColumnValue<TN, CN>;
   }
   makeDefaultDataValue(): ColumnValue<TN, CN> {
     return this.valueAttribute("makeDefault")() as ColumnValue<TN, CN>;

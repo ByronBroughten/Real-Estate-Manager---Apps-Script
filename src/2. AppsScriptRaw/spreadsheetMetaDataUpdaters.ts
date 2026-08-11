@@ -1,9 +1,4 @@
 function buildSpreadsheetColumnMeta() {
-  fillMissingRowIds();
-
-  appendTableAttributes();
-  fixTableNames();
-
   // ensureColumnIds();
   pruneAllColumnAttributes();
   appendAllColumnAttributes();
@@ -143,278 +138,6 @@ const sheetIdPrefixes = {
   "1529539239": "vnm",
 };
 
-function appendTableAttributes() {
-  const ATTR_SHEET_NAME = "All Table Attributes";
-  const HEADER_GID = "Sheet GID";
-  const HEADER_NAME = "Table name";
-  const HEADER_PREFIX = "ID prefix";
-
-  const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
-
-  // 1) Metadata (properties + tables) for every sheet - unfiltered, so no
-  // sheets get dropped from the response.
-  const metaResponse = Sheets.Spreadsheets.get(spreadsheetId, {
-    fields: "sheets(properties(sheetId,title),tables(name,range))",
-  });
-  const sheets = metaResponse.sheets || [];
-
-  const attrSheetMeta = sheets.find(
-    (s) => s.properties.title === ATTR_SHEET_NAME,
-  );
-  if (!attrSheetMeta) {
-    throw new Error('Sheet "' + ATTR_SHEET_NAME + '" not found.');
-  }
-  const attrSheetId = attrSheetMeta.properties.sheetId;
-
-  const attrTables = attrSheetMeta.tables || [];
-  if (attrTables.length === 0) {
-    throw new Error('No native table found on "' + ATTR_SHEET_NAME + '".');
-  }
-  const attrTableRange = attrTables[0].range;
-  const headerRowIndex = attrTableRange.startRowIndex;
-
-  // 2) Full cell data for just the "All Table Attributes" sheet.
-  const dataResponse = Sheets.Spreadsheets.get(spreadsheetId, {
-    ranges: [ATTR_SHEET_NAME],
-    fields: "sheets(data(rowData(values(formattedValue))))",
-  });
-  const attrSheetData = (dataResponse.sheets || [])[0];
-  const rowData =
-    (attrSheetData &&
-      attrSheetData.data &&
-      attrSheetData.data[0] &&
-      attrSheetData.data[0].rowData) ||
-    [];
-
-  // Determine column positions from the header row (robust to column order).
-  const headerRow = rowData[headerRowIndex];
-  const headers = ((headerRow && headerRow.values) || []).map(
-    (v) => (v && v.formattedValue) || "",
-  );
-  const gidCol = headers.indexOf(HEADER_GID);
-  const nameCol = headers.indexOf(HEADER_NAME);
-  const prefixCol = headers.indexOf(HEADER_PREFIX);
-
-  if (gidCol === -1 || nameCol === -1 || prefixCol === -1) {
-    throw new Error(
-      'Could not locate expected headers on "' + ATTR_SHEET_NAME + '".',
-    );
-  }
-
-  // Collect GIDs already described in the table's data rows.
-  const lastDataRowExclusive =
-    attrTableRange.endRowIndex !== undefined
-      ? attrTableRange.endRowIndex
-      : rowData.length;
-
-  const existingGIDs = new Set();
-  for (let r = headerRowIndex + 1; r < lastDataRowExclusive; r++) {
-    const row = rowData[r];
-    const cell = row && row.values && row.values[gidCol];
-    if (
-      cell &&
-      cell.formattedValue !== undefined &&
-      cell.formattedValue !== ""
-    ) {
-      existingGIDs.add(Number(cell.formattedValue));
-    }
-  }
-
-  // Find every table in the spreadsheet whose sheet GID isn't yet described.
-  const missing = [];
-  sheets.forEach((sheet) => {
-    const tables = sheet.tables || [];
-    if (tables.length === 0) return;
-    const sheetId = sheet.properties.sheetId;
-    if (existingGIDs.has(sheetId)) return;
-    // Per spec, exactly one table per sheet; describe it.
-    missing.push({ sheetId: sheetId, tableName: tables[0].name });
-  });
-
-  if (missing.length === 0) {
-    Logger.log(
-      'No missing tables found. "%s" is already up to date.',
-      ATTR_SHEET_NAME,
-    );
-    return;
-  }
-
-  // Build AppendCellsRequest rows, placing values in the correct columns
-  // regardless of header order, leaving "ID prefix" blank.
-  const width = Math.max(gidCol, nameCol, prefixCol) + 1;
-  const rowsToAppend = missing.map((m) => {
-    const values = new Array(width).fill(null).map(() => ({}));
-    values[gidCol] = { userEnteredValue: { numberValue: m.sheetId } };
-    values[nameCol] = { userEnteredValue: { stringValue: m.tableName } };
-    // values[prefixCol] intentionally left as {} (blank) for manual entry.
-    return { values: values };
-  });
-
-  Sheets.Spreadsheets.batchUpdate(
-    {
-      requests: [
-        {
-          appendCells: {
-            sheetId: attrSheetId,
-            rows: rowsToAppend,
-            fields: "userEnteredValue",
-          },
-        },
-      ],
-    },
-    spreadsheetId,
-  );
-
-  Logger.log(
-    'Appended %s missing table row(s) to "%s": %s',
-    missing.length,
-    ATTR_SHEET_NAME,
-    missing.map((m) => m.sheetId + " (" + m.tableName + ")").join(", "),
-  );
-}
-
-function fixTableNames() {
-  const ATTR_SHEET_NAME = "All Table Attributes";
-  const HEADER_GID = "Sheet GID";
-  const HEADER_NAME = "Table name";
-  const HEADER_PREFIX = "ID prefix";
-
-  const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
-
-  // 1) Metadata (properties + tables) for every sheet - unfiltered, so no
-  // sheets get dropped from the response. This gives us the ACTUAL current
-  // name of each native table, keyed by its sheet's GID.
-  const metaResponse = Sheets.Spreadsheets.get(spreadsheetId, {
-    fields: "sheets(properties(sheetId,title),tables(name,range))",
-  });
-  const sheets = metaResponse.sheets || [];
-
-  const attrSheetMeta = sheets.find(
-    (s) => s.properties.title === ATTR_SHEET_NAME,
-  );
-  if (!attrSheetMeta) {
-    throw new Error('Sheet "' + ATTR_SHEET_NAME + '" not found.');
-  }
-  const attrSheetId = attrSheetMeta.properties.sheetId;
-
-  const attrTables = attrSheetMeta.tables || [];
-  if (attrTables.length === 0) {
-    throw new Error('No native table found on "' + ATTR_SHEET_NAME + '".');
-  }
-  const attrTableRange = attrTables[0].range;
-  const headerRowIndex = attrTableRange.startRowIndex;
-
-  // Map of sheetId -> actual current table name (per spec, one table/sheet).
-  const actualNameBySheetId = new Map();
-  sheets.forEach((sheet) => {
-    const tables = sheet.tables || [];
-    if (tables.length > 0) {
-      actualNameBySheetId.set(sheet.properties.sheetId, tables[0].name);
-    }
-  });
-
-  // 2) Full cell data for just the "All Table Attributes" sheet - this is
-  // what's currently RECORDED (may be stale).
-  const dataResponse = Sheets.Spreadsheets.get(spreadsheetId, {
-    ranges: [ATTR_SHEET_NAME],
-    fields: "sheets(data(rowData(values(formattedValue))))",
-  });
-  const attrSheetData = (dataResponse.sheets || [])[0];
-  const rowData =
-    (attrSheetData &&
-      attrSheetData.data &&
-      attrSheetData.data[0] &&
-      attrSheetData.data[0].rowData) ||
-    [];
-
-  // Determine column positions from the header row (robust to column order).
-  const headerRow = rowData[headerRowIndex];
-  const headers = ((headerRow && headerRow.values) || []).map(
-    (v) => (v && v.formattedValue) || "",
-  );
-  const gidCol = headers.indexOf(HEADER_GID);
-  const nameCol = headers.indexOf(HEADER_NAME);
-  const prefixCol = headers.indexOf(HEADER_PREFIX);
-
-  if (gidCol === -1 || nameCol === -1 || prefixCol === -1) {
-    throw new Error(
-      'Could not locate expected headers on "' + ATTR_SHEET_NAME + '".',
-    );
-  }
-
-  const lastDataRowExclusive =
-    attrTableRange.endRowIndex !== undefined
-      ? attrTableRange.endRowIndex
-      : rowData.length;
-
-  // 3) Walk the recorded data rows and find ones whose recorded name is stale.
-  const corrections = []; // { rowIndex, correctName }
-  for (let r = headerRowIndex + 1; r < lastDataRowExclusive; r++) {
-    const row = rowData[r];
-    if (!row || !row.values) continue;
-
-    const gidCell = row.values[gidCol];
-    if (
-      !gidCell ||
-      gidCell.formattedValue === undefined ||
-      gidCell.formattedValue === ""
-    )
-      continue;
-    const sheetId = Number(gidCell.formattedValue);
-
-    if (!actualNameBySheetId.has(sheetId)) continue; // no matching table; not our concern here
-
-    const recordedName =
-      (row.values[nameCol] && row.values[nameCol].formattedValue) || "";
-    const actualName = actualNameBySheetId.get(sheetId);
-
-    if (recordedName !== actualName) {
-      corrections.push({ rowIndex: r, correctName: actualName });
-    }
-  }
-
-  if (corrections.length === 0) {
-    Logger.log(
-      'No stale table names found. "%s" is already up to date.',
-      ATTR_SHEET_NAME,
-    );
-    return;
-  }
-
-  // Build one UpdateCellsRequest per corrected row, targeting only the
-  // "Table name" cell so nothing else in the row is touched.
-  const requests = corrections.map((c) => ({
-    updateCells: {
-      range: {
-        sheetId: attrSheetId,
-        startRowIndex: c.rowIndex,
-        endRowIndex: c.rowIndex + 1,
-        startColumnIndex: nameCol,
-        endColumnIndex: nameCol + 1,
-      },
-      rows: [
-        {
-          values: [{ userEnteredValue: { stringValue: c.correctName } }],
-        },
-      ],
-      fields: "userEnteredValue",
-    },
-  }));
-
-  Sheets.Spreadsheets.batchUpdate({ requests: requests }, spreadsheetId);
-
-  Logger.log(
-    'Corrected %s stale table name(s) in "%s": %s',
-    corrections.length,
-    ATTR_SHEET_NAME,
-    corrections
-      .map((c) => "row " + (c.rowIndex + 1) + ' -> "' + c.correctName + '"')
-      .join(", "),
-  );
-}
-
-// Ensure column ids
-
 function pruneAllColumnAttributes() {
   const SPREADSHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
   const META_SHEET_GID = 2034522667;
@@ -427,7 +150,7 @@ function pruneAllColumnAttributes() {
     fields:
       "sheets(" +
       "properties(sheetId,title)," +
-      "tables(tableId,range,columnProperties(columnIndex,columnName))," +
+      "tables(tableId,range,columnProperties(colIndex,columnName))," +
       "data(rowData(values(formattedValue)))" +
       ")",
   });
@@ -606,7 +329,7 @@ function appendColumnRows(spreadsheetId) {
     return (row && row.values) || [];
   }
 
-  // ---- 2. Locate "Column ID" / "Table name" columns in All Column Attributes. ----
+  // ---- 2. Locate "Column ID" / "Sheet name camel case" columns in All Column Attributes. ----
   const allColAttrSheet = sheetsById[ALL_COLUMN_ATTRIBUTES_GID];
   const allColAttrRows =
     (allColAttrSheet &&
@@ -618,16 +341,16 @@ function appendColumnRows(spreadsheetId) {
 
   const headerRowValues = (allColAttrRows[1] && allColAttrRows[1].values) || [];
   let colIdColIndex = -1;
-  let tableNameColIndex = -1;
+  let sheetNameColIndex = -1;
   headerRowValues.forEach(function (cell, idx) {
     const key = sentenceToCamelCase(cellText(cell));
     if (key === "id") colIdColIndex = idx;
-    if (key === "tableName") tableNameColIndex = idx;
+    if (key === "sheetName") sheetNameColIndex = idx;
   });
 
-  if (colIdColIndex === -1 || tableNameColIndex === -1) {
+  if (colIdColIndex === -1 || sheetNameColIndex === -1) {
     throw new Error(
-      'Could not locate "ID" and/or "Table name" headers in row 3 of All Column Attributes.',
+      'Could not locate "ID" and/or "Sheet name camel case" headers in row 3 of All Column Attributes.',
     );
   }
 
@@ -643,13 +366,13 @@ function appendColumnRows(spreadsheetId) {
   const missingRows = [];
   Object.keys(sheetNames).forEach(function (gidStr) {
     const sheetId = Number(gidStr);
-    const tableName = sheetNames[gidStr];
+    const sheetName = sheetNames[gidStr];
     getRow2Values(sheetId).forEach(function (cell) {
       const columnId = cellText(cell);
       if (!columnId) return; // blank/trailing cell, not a real column
       if (existingColumnIds.has(columnId)) return; // already documented
       existingColumnIds.add(columnId); // guard against duplicate IDs across sheets
-      missingRows.push({ columnId: columnId, tableName: tableName });
+      missingRows.push({ columnId: columnId, sheetName: sheetName });
     });
   });
 
@@ -661,13 +384,13 @@ function appendColumnRows(spreadsheetId) {
   }
 
   // ---- 5. One batchUpdate call to append all missing rows. ----
-  const numCols = Math.max(colIdColIndex, tableNameColIndex) + 1;
+  const numCols = Math.max(colIdColIndex, sheetNameColIndex) + 1;
   const rows = missingRows.map(function (col) {
     const values = [];
     for (let i = 0; i < numCols; i++) values.push({});
     values[colIdColIndex] = { userEnteredValue: { stringValue: col.columnId } };
-    values[tableNameColIndex] = {
-      userEnteredValue: { stringValue: col.tableName },
+    values[sheetNameColIndex] = {
+      userEnteredValue: { stringValue: col.sheetName },
     };
     return { values: values };
   });
@@ -740,7 +463,7 @@ function syncAllColumnAttributes() {
 
   response.sheets.forEach(function (sheet) {
     const sheetId = sheet.properties.sheetId;
-    const tableName = sheetNames[String(sheetId)];
+    const sheetName = sheetNames[String(sheetId)];
     const grid = sheet.data && sheet.data[0];
     const rowData = (grid && grid.rowData) || [];
     const row2 = (rowData[0] && rowData[0].values) || []; // column IDs
@@ -787,8 +510,8 @@ function syncAllColumnAttributes() {
       }
 
       actualByColumnId[columnId] = {
-        tableName: tableName,
-        columnIndex: c,
+        sheetName: sheetName,
+        colIndex: c,
         header: header,
         camelCaseHeader: camelCaseHeader,
         isFormula: isFormula,
@@ -807,8 +530,8 @@ function syncAllColumnAttributes() {
         allColAttrRecords.push({
           rowIndex0based: 1 + i, // sheet row (0-based) this record lives on
           columnId: columnId,
-          tableName: cellText(values[1]),
-          columnIndex: cellNumber(values[2]),
+          sheetName: cellText(values[1]),
+          colIndex: cellNumber(values[2]),
           header: cellText(values[3]),
           camelCaseHeader: cellText(values[4]),
           isFormula: cellBool(values[5]),
@@ -830,8 +553,8 @@ function syncAllColumnAttributes() {
     }
 
     const isStale =
-      rec.tableName !== actual.tableName ||
-      rec.columnIndex !== actual.columnIndex ||
+      rec.sheetName !== actual.sheetName ||
+      rec.colIndex !== actual.colIndex ||
       rec.header !== actual.header ||
       rec.camelCaseHeader !== actual.camelCaseHeader ||
       rec.isFormula !== actual.isFormula ||
@@ -851,14 +574,14 @@ function syncAllColumnAttributes() {
             sheetId: ALL_COL_ATTR_SHEET_ID,
             startRowIndex: u.rowIndex0based,
             endRowIndex: u.rowIndex0based + 1,
-            startColumnIndex: 1, // column B ("Table name") — column A (Column ID) is never touched
+            startColumnIndex: 1, // column B ("Sheet name camel case") — column A (Column ID) is never touched
             endColumnIndex: 7, // through column G ("Value name")
           },
           rows: [
             {
               values: [
-                { userEnteredValue: { stringValue: u.actual.tableName } },
-                { userEnteredValue: { numberValue: u.actual.columnIndex } },
+                { userEnteredValue: { stringValue: u.actual.sheetName } },
+                { userEnteredValue: { numberValue: u.actual.colIndex } },
                 { userEnteredValue: { stringValue: u.actual.header } },
                 { userEnteredValue: { stringValue: u.actual.camelCaseHeader } },
                 { userEnteredValue: { boolValue: u.actual.isFormula } },
@@ -1005,7 +728,7 @@ function appendAllColumnAttributes() {
 
   const REQUIRED_HEADERS = [
     "Column ID",
-    "Table name",
+    "Sheet name camel case",
     "Column name",
     "Is formula",
     "Value name",
@@ -1046,7 +769,7 @@ function appendAllColumnAttributes() {
 
       const rowValues = {};
       rowValues[metaColIndex["Column ID"]] = strVal(colId);
-      rowValues[metaColIndex["Table name"]] = strVal(table.name);
+      rowValues[metaColIndex["Sheet name camel case"]] = strVal(table.name);
       rowValues[metaColIndex["Column name"]] = strVal(camelHeader);
       rowValues[metaColIndex["Is formula"]] = boolVal(isFormula);
       rowValues[metaColIndex["Value name"]] = strVal(valueName);

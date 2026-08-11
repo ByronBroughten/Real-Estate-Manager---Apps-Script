@@ -1,18 +1,18 @@
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
 interface ColumnRawBaseProps extends SheetRawProps {
-  columnIdx: number;
+  colIndex: number;
 }
 
 export class ColumnRawBase extends SheetRawBase {
-  readonly columnIdx: number;
-  constructor({ columnIdx, ...rest }: ColumnRawBaseProps) {
+  readonly colIndex: number;
+  constructor({ colIndex, ...rest }: ColumnRawBaseProps) {
     super(rest);
-    this.columnIdx = columnIdx;
+    this.colIndex = colIndex;
   }
   get columnRawProps(): ColumnRawBaseProps {
     return {
-      columnIdx: this.columnIdx,
+      colIndex: this.colIndex,
       ...this.sheetRawProps,
     };
   }

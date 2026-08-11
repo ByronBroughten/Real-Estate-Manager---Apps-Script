@@ -1,19 +1,33 @@
-import { Obj } from "../utils/Obj";
-import { validationError } from "../utils/validation";
-import { makeSchemaStructure } from "./0.1 makeSchema";
 import {
   extractCellValue,
-  va,
-  type ValueAttributesBase,
-} from "./3.0 valueAttribute";
+  vsc,
+  type ValueSchemaBase,
+} from "../2.0 Schemas/3.0 valueSchema";
+import { Obj } from "../utils/Obj";
+import { validationError } from "../utils/validation";
+import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 
-type ValidationValuesBase = {
+type CellListValuesBase = {
   readonly [key: string]: readonly string[];
 };
 
-const validationLists = makeSchemaStructure(
-  {} as ValidationValuesBase,
+const valueConfig = makeStructuredConfig(
+  {} as CellListValuesBase,
   {
+    sheetConfigHeader: ["Sheet GID", "Sheet name camel case", "ID prefix"],
+    configColumnHeader: [
+      "ID",
+      "Table name",
+      "Camel case header",
+      "Column ID",
+      "Column index base 0",
+      "Header",
+      "Is formula",
+      "Value name",
+      "Is api status and run",
+      "Custom default value",
+      "Empty allowed",
+    ],
     transactionDescription: [
       "Rent (base)",
       "Rent (utilities)",
@@ -109,23 +123,6 @@ const validationLists = makeSchemaStructure(
       "Venmo",
       "Unknown",
     ],
-    firstOfEachMonthThisYear: [
-      "01-01-26",
-      "02-01-26",
-      "03-01-26",
-      "04-01-26",
-      "05-01-26",
-      "06-01-26",
-      "07-01-26",
-      "08-01-26",
-      "09-01-26",
-      "10-01-26",
-      "11-01-26",
-      "12-01-26",
-    ],
-    januaryQuartersThisYear: ["01-01-26", "04-01-26", "07-01-26", "10-01-26"],
-    februaryQuartersThisYear: ["02-01-26", "05-01-26", "08-01-26", "11-01-26"],
-    marchQuartersThisYear: ["03-01-26", "06-01-26", "09-01-26", "12-01-26"],
     yesOrNo: ["Yes", "No"],
     oneOccupancyOrAll: ["One occupancy", "All"],
     buildingType: [
@@ -142,62 +139,65 @@ const validationLists = makeSchemaStructure(
   } as const,
 );
 
-type ValidationLists = typeof validationLists;
-type ValidationName = keyof ValidationLists;
+export type ValueConfig = typeof valueConfig;
+export type ValueConfigKey = keyof ValueConfig;
+export const valueConfigKeys: readonly ValueConfigKey[] = Obj.keys(valueConfig);
 
-export type ValidationValues = {
-  [K in ValidationName]: ValidationLists[K][number] | "";
-};
+export type ValueConfigValue<N extends ValueConfigKey> = ValueConfig[N][number];
 
-export type ValidationValue<N extends ValidationName = ValidationName> =
-  ValidationValues[N];
-
-function makeDefaultValidationValue<UN extends ValidationName>(
-  name: UN,
-): ValidationValue<UN> {
-  return validationLists[name][0] as ValidationValue<UN>;
+export function valueConfigGet<VN extends keyof ValueConfig>(
+  name: VN,
+): ValueConfig[VN] {
+  return valueConfig[name];
 }
 
-function validateValidationValue<N extends ValidationName>(
+export type CellListValues = {
+  [K in ValueConfigKey]: ValueConfig[K][number];
+};
+export type CellListValue<N extends ValueConfigKey = ValueConfigKey> =
+  CellListValues[N];
+
+function makeDefaultValidationValue<UN extends ValueConfigKey>(
+  name: UN,
+): CellListValue<UN> {
+  return valueConfig[name][0] as CellListValue<UN>;
+}
+
+function validateValidationValue<N extends ValueConfigKey>(
   value: unknown,
   name: N,
-): ValidationValue<N> {
-  if (
-    (validationLists[name] as readonly unknown[]).includes(value) ||
-    value === ""
-  ) {
-    return value as ValidationValue<N>;
+): CellListValue<N> {
+  if ((valueConfig[name] as readonly unknown[]).includes(value)) {
+    return value as CellListValue<N>;
   } else {
     throw validationError(value, `'${name}' union value element.`);
   }
 }
 
-export function isValidationValueNoEmpty<N extends ValidationName>(
+export function isValidationValueNoEmpty<N extends ValueConfigKey>(
   value: unknown,
   name: N,
-): value is ValidationValue<N> {
-  return (validationLists[name] as readonly unknown[]).includes(value);
+): value is CellListValue<N> {
+  return (valueConfig[name] as readonly unknown[]).includes(value);
 }
 
-type ValidationValueAttributesBase = {
-  [K in ValidationName]: ValueAttributesBase<ValidationValue<K>>;
+type StringValueSchemasBase = {
+  [K in ValueConfigKey]: ValueSchemaBase<CellListValue<K>>;
 };
 
-export function makeValidationValueSchemas(): ValidationValueAttributesBase {
-  return Obj.keys(validationLists).reduce((attributes, name) => {
-    (attributes[name] as ValueAttributesBase<ValidationValue<typeof name>>) =
-      va({
-        type: "" as ValidationValue<typeof name>,
-        makeDefault: () => makeDefaultValidationValue(name),
-        defaultValidate: (value: unknown) =>
-          validateValidationValue(value, name),
-        extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
-        makeUserEnteredValue: (value) => ({ stringValue: value }),
-      });
+export function makeCellListValueschemas(): StringValueSchemasBase {
+  return Obj.keys(valueConfig).reduce((attributes, name) => {
+    (attributes[name] as ValueSchemaBase<CellListValue<typeof name>>) = vsc({
+      type: makeDefaultValidationValue(name) as CellListValue<typeof name>,
+      makeDefault: () => makeDefaultValidationValue(name),
+      strictValidate: (value: unknown) => validateValidationValue(value, name),
+      extractCellValue: (colCell) => extractCellValue(colCell, "stringValue"),
+      makeUserEnteredValue: (value) => ({ stringValue: value }),
+    }) as ValueSchemaBase<CellListValue<typeof name>>;
     return attributes;
-  }, {} as ValidationValueAttributesBase);
+  }, {} as StringValueSchemasBase);
 }
 
 export type ValidationValueParamsDict = {
-  [K in ValidationName]: {};
+  [K in ValueConfigKey]: {};
 };

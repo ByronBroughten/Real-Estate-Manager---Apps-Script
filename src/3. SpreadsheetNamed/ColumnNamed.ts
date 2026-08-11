@@ -1,5 +1,5 @@
-import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
-import type { ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes";
+import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs";
+import type { ColumnName } from "../1.0 Configs/3.0 columnConfigs";
 import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { SheetNamed } from "./SheetNamed";
 
@@ -8,7 +8,7 @@ export class ColumnNamed<
   CN extends ColumnName<TN>,
 > extends ColumnNamedBase<TN, CN> {
   get colIdx(): number {
-    return this.sheet.schema.column(this.columnName).columnIdx;
+    return this.sheet.schema.column(this.columnName).colIndex;
   }
   get sheet(): SheetNamed<TN> {
     return new SheetNamed(this.sheetNamedProps);

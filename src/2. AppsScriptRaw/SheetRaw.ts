@@ -1,6 +1,6 @@
-import type { Value } from "../0. spreadsheetMetaData/3.2 valueAttributes";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
-import { Obj, type StrictPickPartial } from "../utils/Obj";
+import type { Value } from "../2.0 Schemas/3.2 valueSchemas";
+import { Obj, type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
@@ -13,51 +13,37 @@ import type {
   GoogleSheetData,
 } from "./Types/AppsScriptTypes";
 import type {
-  ColumnCount,
   GridRangeProps,
-  RowCountRaw,
   SheetChangeProps,
   SheetChangePropsObj,
   SheetChangesToSave,
   SortParameters,
 } from "./Types/RawState";
 
-type GetGridRangeProps = {
-  startRowIndex: number;
-  rowCount: RowCountRaw;
-  startColumnIndex: number;
-  columnCount: ColumnCount;
-};
-
-interface MakeGetRequestProps {
-  rowCount: RowCountRaw;
-  startRowIndex?: number;
-  startColumnIndex?: number;
-  columnCount?: ColumnCount;
-}
-
-interface MakeGetRequestsProps {
-  startRowIndex: number;
-  endRowIndex?: number;
-  startColumnIndexes: number[];
-}
+type SheetGridRangeProps = StrictOmit<GridRangeProps, "sheetId">;
 
 export class SheetRaw extends SheetRawBase {
   get spreadsheet(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
+  get ss(): SpreadsheetRaw {
+    return new SpreadsheetRaw(this.spreadsheetRawProps);
+  }
   get schema(): SheetSchemaRaw {
     return new SheetSchemaRaw(this.sheetGid);
   }
+  get title(): string {
+    return this.sheetState.title;
+  }
   row(rowIdx: number): RowRaw {
     return new RowRaw({
-      idxBase0: rowIdx,
+      rowIndex: rowIdx,
       ...this.sheetRawProps,
     });
   }
-  column(columnIdx: number): ColumnRaw {
+  column(colIndex: number): ColumnRaw {
     return new ColumnRaw({
-      columnIdx,
+      colIndex,
       ...this.sheetRawProps,
     });
   }
@@ -74,13 +60,13 @@ export class SheetRaw extends SheetRawBase {
     return this.row(this.schema.colIdRowIdx);
   }
   get activeRows(): RowRaw[] {
-    return Array.from(this.sheetState.rowStates.keys()).map((idxBase0) =>
-      this.row(idxBase0),
+    return Array.from(this.sheetState.rowStates.keys()).map((rowIndex) =>
+      this.row(rowIndex),
     );
   }
   get dataRows(): RowRaw[] {
     return this.activeRows.filter(
-      (row) => row.idxBase0 >= this.schema.topDataRowIdx,
+      (row) => row.rowIndex >= this.schema.topDataRowIdx,
     );
   }
   get activeColumnIdxs(): number[] {
@@ -112,7 +98,6 @@ export class SheetRaw extends SheetRawBase {
 
     this.sheetsState.set(this.sheetGid, {
       title: valS.assertDefined(properties.title, "sheet title "),
-      sheetName: valS.assertDefined(table.name, "sheetName"),
       activeTable: {
         tableId: valS.assertDefined(table.tableId, "tableId"),
         ...tableRange,
@@ -125,15 +110,12 @@ export class SheetRaw extends SheetRawBase {
   private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
     const colsData = valS.assertDefined(sheetData, "sheetData");
     colsData.forEach((colData) => {
-      const colIdxBase = valS.assertDefined(
-        colData.startColumn,
-        "colData.startColumn",
-      );
+      const colIdxBase = colData.startColumn ?? 0;
       const columns = colData.columnMetadata || [];
       colData.rowData.forEach((colCell, rowIdxBase) => {
         columns.forEach((_, colIdxOffset) => {
           const colIdx = colIdxBase + colIdxOffset;
-          const rowIdx = rowIdxBase + colData.startRow;
+          const rowIdx = rowIdxBase + (colData.startRow ?? 0);
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
@@ -151,21 +133,31 @@ export class SheetRaw extends SheetRawBase {
       }
     });
   }
-  wholeRowGridRange(rowIndex: number): GridRangeProps {
-    return {
+  gatherGetRequest(props: SheetGridRangeProps): SheetRaw {
+    this.rawState.getterGridRanges.push({
       sheetId: this.sheetGid,
+      ...props,
+    });
+    return this;
+  }
+  gatherGetRequests(props: SheetGridRangeProps[]): SheetRaw {
+    props.forEach((props) => this.gatherGetRequest(props));
+    return this;
+  }
+  gatherOneRowGetRequest(rowIndex: number): SheetRaw {
+    return this.gatherGetRequest({
       ...this.spreadsheet.schema.oneRowSpecifier(rowIndex),
       startColumnIndex: 0,
       endColumnIndex: this.activeTable.endColumnIndex,
-    };
-  }
-  gatherGetRequests(props: GridRangeProps[]): void {
-    props.forEach((props) => {
-      this.rawState.getterGridRanges.push({
-        sheetId: this.sheetGid,
-        ...props,
-      });
     });
+  }
+  fetchHeaderRow(): RowRaw {
+    return this.fetchOneRow(this.schema.headerRowIdx);
+  }
+  fetchOneRow(rowIndex: number): RowRaw {
+    this.gatherOneRowGetRequest(rowIndex);
+    this.ss.fetchSheets();
+    return this.row(rowIndex);
   }
   verifyColumnIds() {
     const row = this.row(this.schema.colIdRowIdx);
@@ -181,6 +173,33 @@ export class SheetRaw extends SheetRawBase {
       this._verifyColumnId(colIdx);
     });
   }
+  ensureColumnsOfHeadersExist(...headers: string[]): number {
+    const missingHeaders = this.headerRow.returnMissingValues(...headers);
+    return missingHeaders.reduce<number>((acc, header) => {
+      const index = this.activeTable.endColumnIndex;
+      this.insertColumnAt(index);
+      this.headerRow.setValue(index, header);
+      return acc + 1;
+    }, 0);
+  }
+  fetchColumnOfHeader(header: string): ColumnRaw {
+    const headerRow = this.fetchHeaderRow();
+    const colIndex = headerRow.colIndexOfValue(header);
+    return this.column(colIndex).fetchData();
+  }
+  fetchColumnsOfHeaders(...headers: string[]): Record<string, ColumnRaw> {
+    const headerRow = this.fetchHeaderRow();
+    const columns = headers.reduce(
+      (acc, header) => {
+        const colIndex = headerRow.colIndexOfValue(header);
+        acc[header] = this.column(colIndex).gatherFetchDataRange();
+        return acc;
+      },
+      {} as Record<string, ColumnRaw>,
+    );
+    this.ss.fetchSheets();
+    return columns;
+  }
   private _verifyColumnId(colIdx: number): void {
     const colSchema = this.schema.column(colIdx);
     const colIdInSchema = colSchema.attribute("columnId");
@@ -191,51 +210,6 @@ export class SheetRaw extends SheetRawBase {
       throw new Error(
         `colIdValue is "${colIdValue}" but expected "${colIdInSchema}". Are all the column ids and indexes up to date?`,
       );
-    }
-  }
-
-  getGridRangeIndexes({
-    // This is to ensure that all meta data is obtained even when no data rows are requested.
-    startRowIndex,
-    rowCount,
-    startColumnIndex,
-    columnCount,
-  }: GetGridRangeProps): StrictPickPartial<
-    GoogleGridRange,
-    "startRowIndex" | "endRowIndex" | "startColumnIndex" | "endColumnIndex"
-  > {
-    const minimumEndRowIndex = this.schema.topDataRowIdx;
-    if (rowCount === "allFromStart") {
-      if (columnCount === "allFromStart") {
-        return { startRowIndex, startColumnIndex };
-      } else {
-        return {
-          startRowIndex,
-          startColumnIndex,
-          endColumnIndex: startColumnIndex + columnCount,
-        };
-      }
-    } else if (rowCount === 0) {
-      return {
-        startRowIndex,
-        startColumnIndex,
-        endColumnIndex: startColumnIndex,
-      };
-    } else {
-      if (columnCount === "allFromStart") {
-        return {
-          startRowIndex,
-          endRowIndex: startRowIndex + rowCount,
-          startColumnIndex,
-        };
-      } else {
-        return {
-          startRowIndex,
-          endRowIndex: startRowIndex + rowCount,
-          startColumnIndex,
-          endColumnIndex: startColumnIndex + columnCount,
-        };
-      }
     }
   }
   get lastRowIdx(): number {
@@ -341,6 +315,23 @@ export class SheetRaw extends SheetRawBase {
       action: "insertColumn",
       startColumnIndex,
     });
+    if (startColumnIndex <= this.activeTable.endColumnIndex) {
+      this.activeTable.endColumnIndex++;
+    } else {
+      throw new Error(
+        `Cannot insert column at index ${startColumnIndex} because it would be outside the existing table end column index of ${this.activeTable.endColumnIndex}.`,
+      );
+    }
+  }
+  gatherPropertiesGetRequest() {
+    this.ss.gatherFetchRanges({
+      sheetId: this.sheetGid,
+      startRowIndex: this.topDataRow.rowIndex,
+      endRowIndex: this.topDataRow.rowIndex,
+      startColumnIndex: 0,
+      endColumnIndex: 0,
+    });
+    return this;
   }
   gatherInsertColumnRequest(startColumnIndex: number): void {
     this.updateRequests.insertColumn.push({

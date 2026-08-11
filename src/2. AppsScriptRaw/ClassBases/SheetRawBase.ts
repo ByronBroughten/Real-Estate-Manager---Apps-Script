@@ -25,7 +25,10 @@ export class SheetRawBase extends SpreadsheetRawBase {
     return new SheetSchemaRaw(this.sheetGid);
   }
   get sheetState(): RawSheetState {
-    return this.sheetState[this.sheetGid];
+    if (!this.rawState.sheets.has(this.sheetGid)) {
+      throw new SheetRawNotFoundError(this.sheetGid);
+    }
+    return this.rawState.sheets.get(this.sheetGid);
   }
   get activeTable(): RawSheetState["activeTable"] {
     return this.sheetState.activeTable;

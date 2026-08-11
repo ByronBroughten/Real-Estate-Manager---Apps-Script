@@ -1,10 +1,10 @@
-import { SpreadsheetSchema } from "../../1. SpreadsheetSchema/SpreadsheetSchemaNamed";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
 } from "../../2. AppsScriptRaw/ClassBases/SpreadsheetRawBase";
 import { SpreadsheetRaw } from "../../2. AppsScriptRaw/SpreadsheetRaw";
 import type { GridRangeProps } from "../../2. AppsScriptRaw/Types/RawState";
+import { SpreadsheetSchema } from "../../2.0 Schemas/SpreadsheetSchemaNamed";
 import type {
   SheetRowIdsToIndexes,
   SpreadsheetNamedState,

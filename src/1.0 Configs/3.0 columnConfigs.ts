@@ -1,21 +1,21 @@
-import { Obj, type KeyedMap } from "../utils/Obj";
-import type { CombineStringsWithFlat } from "../utils/Str";
-import { makeSchemaStructure } from "./0.1 makeSchema";
 import {
   type ValidateValue,
   type Value,
   type ValueAttributes,
   type ValueName,
-} from "./3.2 valueAttributes";
+} from "../2.0 Schemas/3.2 valueSchemas";
+import { Obj, type KeyedMap } from "../utils/Obj";
+import type { CombineStringsWithFlat } from "../utils/Str";
+import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 import {
   allsheetNames,
   getTableAttribute,
-  type TableNameSimple,
-} from "./4.0 tableAttributes";
+  type SheetNameSimple,
+} from "./2.0 sheetConfigs";
 
 interface ColumnAttributesLiteral {
   columnId: string;
-  indexBase0: number;
+  colIndex: number;
   header: string;
   isFormula: boolean;
   emptyAllowed: boolean;
@@ -30,7 +30,7 @@ function makeColumnAttributes<VN extends ValueName>(
   columnId: string,
   valueName: VN,
   header: string,
-  indexBase0: number,
+  colIndex: number,
   isFormula: boolean,
   emptyAllowed: boolean = false,
   customDefaultValue: Value<VN> = null,
@@ -39,7 +39,7 @@ function makeColumnAttributes<VN extends ValueName>(
     columnId,
     valueName,
     header,
-    indexBase0,
+    colIndex,
     isFormula,
     emptyAllowed,
     customDefaultValue,
@@ -49,11 +49,11 @@ function makeColumnAttributes<VN extends ValueName>(
 const mcs = makeColumnAttributes;
 type TableColumnAttributessBase = Record<string, ColumnAttributesBase>;
 type AllColumnAttributessBase = Record<
-  TableNameSimple,
+  SheetNameSimple,
   TableColumnAttributessBase
 >;
 
-const allColumnAttributes = makeSchemaStructure(
+const allColumnAttributes = makeStructuredConfig(
   {} as AllColumnAttributessBase,
   {
     addExpenses: {
@@ -102,7 +102,6 @@ const allColumnAttributes = makeSchemaStructure(
       hhChargeNotes: mcs("col-6w_8wXP", "string", "HH charge notes", 12, false),
       householdId: mcs("col-Mx2BiCo", "string", "Household ID", 13, true),
       id: mcs("col-Wn1oOom", "string", "ID", 14, true),
-      baseId: mcs("col-KDrkgbX", "baseId", "Base ID", 15, true),
       propertyId: mcs("col-7hwOnld", "string", "Property ID", 16, true),
       unitId: mcs("col-6mhn61V", "string", "Unit ID", 17, true),
       enter: mcs("col-wipvQ46", "boolean", "Enter", 18, false),
@@ -128,7 +127,6 @@ const allColumnAttributes = makeSchemaStructure(
         false,
       ),
       id: mcs("col-kU0tGW_", "string", "ID", 6, true),
-      baseId: mcs("col-ryAlT3A", "baseId", "Base ID", 7, true),
       householdId: mcs("col-noXL_e_", "string", "Household ID", 8, true),
       unitId: mcs("col-fzBlkyl", "string", "Unit ID", 9, true),
       subsidyAgreementId: mcs(
@@ -197,13 +195,18 @@ const allColumnAttributes = makeSchemaStructure(
       unitId: mcs("col-43FJGcv", "string", "Unit ID", 6, true),
       notes: mcs("col-rEqlwlw", "string", "Notes", 7, false),
       id: mcs("col-VG-Y2z7", "string", "ID", 8, true),
-      baseId: mcs("col-wIsVf4Z", "baseId", "Base ID", 9, true),
       enter: mcs("col-auSNCDT", "boolean", "Enter", 10, false),
       enterStatus: mcs("col-MuVUEGl", "string", "Enter status", 11, false),
     },
     allColumnAttributes: {
       id: mcs("col-K9DptS1", "string", "ID", 0, false),
-      sheetName: mcs("col-U6y6xUt", "string", "Table name", 1, false),
+      sheetName: mcs(
+        "col-U6y6xUt",
+        "string",
+        "Sheet name camel case",
+        1,
+        false,
+      ),
       columnIndexBase0: mcs(
         "col-83ENHF2",
         "number",
@@ -232,14 +235,18 @@ const allColumnAttributes = makeSchemaStructure(
     },
     allTableAttributes: {
       id: mcs("col-90lQMkS", "string", "ID", 0, true),
-      baseId: mcs("col-_NrBHfg", "baseId", "Base ID", 1, false),
       sheetGid: mcs("col-fqCrMdm", "number", "Sheet GID", 2, false),
-      sheetName: mcs("col-ssYwA1T", "string", "Table name", 3, false),
+      sheetName: mcs(
+        "col-ssYwA1T",
+        "string",
+        "Sheet name camel case",
+        3,
+        false,
+      ),
       idPrefix: mcs("col-iqW3fCT", "string", "ID prefix", 4, false),
     },
     api: {
       id: mcs("col-ohQJSZw", "string", "ID", 0, true),
-      baseId: mcs("col-qqYLEfe", "baseId", "Base ID", 1, false),
       ulsLastRan: mcs("col-o3z5zKF", "string", "ULS last ran", 2, false),
       ulsEnter: mcs("col-H147sTm", "boolean", "ULS enter", 3, false),
       ulsEnterStatus: mcs(
@@ -348,7 +355,6 @@ const allColumnAttributes = makeSchemaStructure(
       name: mcs("col-IAA7ymg", "string", "Name", 0, false),
       contact: mcs("col-TECY-w9", "string", "Contact", 1, false),
       id: mcs("col-pBwZ74w", "string", "ID", 2, true),
-      baseId: mcs("col-bSgizeM", "baseId", "Base ID", 3, false),
       category: mcs("col-HmUfHCe", "string", "Category", 4, false),
       defaultExpenseCategory: mcs(
         "col-lZdCfdb",
@@ -394,7 +400,6 @@ const allColumnAttributes = makeSchemaStructure(
         true,
       ),
       id: mcs("col-qFYr3BR", "string", "ID", 8, true),
-      baseId: mcs("col-amJZBHq", "baseId", "Base ID", 9, true),
       enter: mcs("col-0pQVFbo", "boolean", "Enter", 10, false),
       enterStatus: mcs("col-NReu6z0", "string", "Enter status", 11, false),
     },
@@ -410,7 +415,6 @@ const allColumnAttributes = makeSchemaStructure(
         true,
       ),
       id: mcs("col-gI3wWFP", "string", "ID", 4, true),
-      baseId: mcs("col-ZayN3nr", "baseId", "Base ID", 5, false),
       billerName: mcs("col-ws-Kl9O", "string", "Biller name", 6, false),
       expenseCategory: mcs(
         "col-1FLurWI",
@@ -662,7 +666,6 @@ const allColumnAttributes = makeSchemaStructure(
     furnace: {
       name: mcs("col-WgcleWq", "string", "Name", 0, true),
       id: mcs("col-pjjrcyC", "string", "ID", 1, true),
-      baseId: mcs("col-8Quhgm8", "baseId", "Base ID", 2, false),
       propertyId: mcs("col-qM5MaTT", "string", "Property ID", 3, false),
       propertyName: mcs("col-MDkBZw7", "string", "Property name", 4, true),
       location: mcs("col--nrSW5N", "string", "Location", 5, false),
@@ -696,7 +699,6 @@ const allColumnAttributes = makeSchemaStructure(
     hhLedger: {
       date: mcs("col-9fBrgEn", "string", "Date", 0, false),
       id: mcs("col-K6z58MJ", "string", "ID", 1, true),
-      baseId: mcs("col-K3ai6jl", "baseId", "Base ID", 2, false),
       unit: mcs("col-Gp-A2rX", "string", "Unit", 3, false),
       issuer: mcs("col-6w2_q8O", "string", "Issuer", 4, false),
       description: mcs("col-NUiKLPH", "string", "Description", 5, false),
@@ -708,7 +710,6 @@ const allColumnAttributes = makeSchemaStructure(
     household: {
       name: mcs("col--IaO_J8", "string", "Name", 0, true),
       id: mcs("col-e0nP-e3", "string", "ID", 1, true),
-      baseId: mcs("col-2_YjdPY", "baseId", "Base ID", 2, false),
       fullName: mcs("col-YICAuy6", "string", "Full name", 3, true),
       residentCount: mcs("col-kSe11BO", "number", "Resident count", 4, true),
       residentFullNames: mcs(
@@ -1093,7 +1094,6 @@ const allColumnAttributes = makeSchemaStructure(
     householdProspect: {
       name: mcs("col-pMwl8_N", "string", "Name", 0, false),
       id: mcs("col-cqj4thW", "string", "ID", 1, true),
-      baseId: mcs("col-yuXxntB", "baseId", "Base ID", 2, false),
       totalIncomeMonthly: mcs(
         "col-7k3rBt_",
         "number",
@@ -1107,7 +1107,6 @@ const allColumnAttributes = makeSchemaStructure(
     householdYear: {
       name: mcs("col-j48UWNj", "string", "Name", 0, true),
       id: mcs("col-slPqvjH", "string", "ID", 1, true),
-      baseId: mcs("col-lWZtIG_", "baseId", "Base ID", 2, false),
       occupancyId: mcs("col-5NpZpfU", "string", "Occupancy ID", 3, false),
       year: mcs("col-JPQvvQo", "number", "Year", 4, false),
       residentCount: mcs("col-bvqNtvg", "number", "Resident count", 5, true),
@@ -1202,12 +1201,10 @@ const allColumnAttributes = makeSchemaStructure(
     nonResidentPayer: {
       name: mcs("col-K_eFNP9", "string", "Name", 0, false),
       id: mcs("col-rrScEfG", "string", "ID", 1, true),
-      baseId: mcs("col-ffgSafo", "baseId", "Base ID", 2, false),
     },
     occCharge: {
       name: mcs("col-udxK-Hf", "string", "Name", 0, true),
       id: mcs("col-nLiqq-6", "string", "ID", 1, true),
-      baseId: mcs("col-PqI8hDY", "baseId", "Base ID", 2, false),
       occupancyId: mcs("col-IrTjVUr", "string", "Occupancy ID", 3, false),
       occupancyName: mcs("col-VGP6Bgk", "string", "Occupancy name", 4, true),
       date: mcs("col-rdw667_", "date", "Date", 5, false),
@@ -1231,7 +1228,6 @@ const allColumnAttributes = makeSchemaStructure(
     },
     occChargeReduce: {
       id: mcs("col-1rSG9i_", "string", "ID", 0, true),
-      baseId: mcs("col-Vi-jfp9", "baseId", "Base ID", 1, false),
       date: mcs("col-9FwOGpt", "date", "Date", 2, false),
       chargeId: mcs("col-3zLvJOz", "string", "Charge ID", 3, false),
       chargeName: mcs("col-pW6NptW", "string", "Charge name", 4, true),
@@ -1257,7 +1253,6 @@ const allColumnAttributes = makeSchemaStructure(
       name: mcs("col-EL5Jx4e", "string", "Name", 0, true),
       occupancyName: mcs("col-vK3JZeg", "string", "Occupancy name", 1, true),
       id: mcs("col-0RTP0fy", "string", "ID", 2, true),
-      baseId: mcs("col-KlLYwOR", "string", "Base id", 3, false),
       paymentId: mcs("col-sCLgGiO", "string", "Payment id", 4, false),
       payerCategory: mcs("col-MFTWV8M", "string", "Payer category", 5, true),
       payerName: mcs("col-la7Ma45", "string", "Payer name", 6, true),
@@ -1310,7 +1305,6 @@ const allColumnAttributes = makeSchemaStructure(
       id: mcs("col-5p14Hz-", "string", "ID", 0, true),
       paymentName: mcs("col-JL9ycn7", "string", "Payment name", 1, true),
       allocationName: mcs("col-HwbqxPk", "string", "Allocation name", 2, true),
-      baseId: mcs("col--lXfPJU", "baseId", "Base ID", 3, false),
       date: mcs("col-v7ZMbTS", "date", "Date", 4, false),
       payerCategory: mcs(
         "col-jU98tyc",
@@ -1370,7 +1364,6 @@ const allColumnAttributes = makeSchemaStructure(
     occupancy: {
       name: mcs("col-jHfWw_p", "string", "Name", 0, true),
       id: mcs("col-aobYS7A", "string", "ID", 1, true),
-      baseId: mcs("col-h3Fep6G", "baseId", "Base ID", 2, false),
       householdId: mcs("col-cQbzV2A", "string", "Household ID", 3, false),
       residentCount: mcs("col-yVuonvl", "number", "Resident count", 4, true),
       unitId: mcs("col-OsokrlB", "string", "Unit ID", 5, false),
@@ -1443,7 +1436,6 @@ const allColumnAttributes = makeSchemaStructure(
         true,
       ),
       id: mcs("col-dcm4U7V", "string", "ID", 1, true),
-      baseId: mcs("col-LXSgxvk", "baseId", "Base ID", 2, false),
       occupancyId: mcs("col-OXD-Ek9", "string", "Occupancy ID", 3, false),
       noticeDate: mcs("col-0dJOCyD", "string", "Notice date", 4, false),
       startDate: mcs("col-AtT0nqz", "date", "Start date", 5, false),
@@ -1521,7 +1513,6 @@ const allColumnAttributes = makeSchemaStructure(
     paymentGroup: {
       name: mcs("col-M2AcrkT", "string", "Name", 0, false),
       id: mcs("col-8ZambHV", "string", "ID", 1, true),
-      baseId: mcs("col-7Mthxwc", "baseId", "Base ID", 2, false),
     },
     paymentStandard: {
       id: mcs("col-WSIA79A", "string", "ID", 0, false),
@@ -1610,7 +1601,6 @@ const allColumnAttributes = makeSchemaStructure(
     },
     pet: {
       id: mcs("col-UukcD_J", "string", "ID", 0, true),
-      baseId: mcs("col-Be7AKRZ", "baseId", "Base ID", 1, false),
       name: mcs("col-YfYkSGo", "string", "Name", 2, false),
       householdName: mcs("col-l9or2xk", "string", "Household name", 3, true),
       householdId: mcs("col-0zkPeRN", "string", "Household ID", 4, false),
@@ -1643,7 +1633,6 @@ const allColumnAttributes = makeSchemaStructure(
     property: {
       name: mcs("col-UKOooW1", "string", "Name", 0, false),
       id: mcs("col-NYNaEua", "string", "ID", 1, true),
-      baseId: mcs("col-BWp64W5", "baseId", "Base ID", 2, false),
       parcelNumber: mcs("col-dlhnglY", "number", "Parcel number", 3, false),
       streetAddress: mcs("col-RxPUYIT", "string", "Street address", 4, false),
       zipCode: mcs("col-mf-CiKH", "number", "Zip code", 5, false),
@@ -2008,7 +1997,6 @@ const allColumnAttributes = makeSchemaStructure(
     propertyExpense: {
       expenseName: mcs("col-w_PiWJi", "string", "Expense name", 0, true),
       id: mcs("col-Qj2-mYp", "string", "ID", 1, true),
-      baseId: mcs("col-WRWFjkO", "baseId", "Base ID", 2, false),
       propertyId: mcs("col-1hpEB5R", "string", "Property ID", 3, false),
       date: mcs("col-eg74PeC", "date", "Date", 4, false),
       year: mcs("col-4DAHsCd", "number", "Year", 5, true),
@@ -2057,7 +2045,6 @@ const allColumnAttributes = makeSchemaStructure(
     propertyProspect: {
       name: mcs("col-S0OAuTp", "string", "Name", 0, false),
       id: mcs("col-OkqJWNn", "string", "ID", 1, true),
-      baseId: mcs("col-CpPdodO", "baseId", "Base ID", 2, false),
       parcelNumberPropertyId: mcs(
         "col-0lIe4Xa",
         "string",
@@ -2510,7 +2497,6 @@ const allColumnAttributes = makeSchemaStructure(
     propertyYear: {
       name: mcs("col--GXBgqg", "string", "Name", 0, true),
       id: mcs("col-pLbR676", "string", "ID", 1, true),
-      baseId: mcs("col-pfUIsJG", "baseId", "Base ID", 2, false),
       propertyId: mcs("col-MqF-anY", "string", "Property ID", 3, false),
       year: mcs("col-TawhTyt", "number", "Year", 4, false),
       primarySpace: mcs("col-alQOQuj", "number", "Primary space", 5, false),
@@ -2659,7 +2645,6 @@ const allColumnAttributes = makeSchemaStructure(
     quotes: {
       date: mcs("col-WGt6dPd", "date", "Date", 0, false),
       id: mcs("col-h3wgJ39", "string", "ID", 1, true),
-      baseId: mcs("col-_j99KBh", "baseId", "Base ID", 2, false),
       prospectiveBillerName: mcs(
         "col-QlJe96V",
         "string",
@@ -2835,7 +2820,6 @@ const allColumnAttributes = makeSchemaStructure(
     resident: {
       fullName: mcs("col-JQF8pac", "string", "Full name", 0, true),
       id: mcs("col-8zXeQEw", "string", "ID", 1, true),
-      baseId: mcs("col-CNya1SJ", "baseId", "Base ID", 2, false),
       householdId: mcs("col-MMj5Qgq", "string", "Household ID", 3, false),
       isActive: mcs("col-7LZcJ2t", "string", "Is active", 4, true),
       firstName: mcs("col-ad6YZal", "string", "First name", 5, false),
@@ -2853,7 +2837,6 @@ const allColumnAttributes = makeSchemaStructure(
     subPayAllocation: {
       name: mcs("col-uzEH5HL", "string", "Name", 0, true),
       id: mcs("col-PJ1qm7P", "string", "ID", 1, true),
-      baseId: mcs("col-pV6BtqR", "baseId", "Base ID", 2, false),
       paymentId: mcs("col-jAnSZoZ", "string", "Payment ID", 3, false),
       paymentDate: mcs("col-ek62dJt", "date", "Payment date", 4, true),
       formOfPayment: mcs("col-3jQA3el", "string", "Form of payment", 5, true),
@@ -2904,7 +2887,6 @@ const allColumnAttributes = makeSchemaStructure(
     subsidyAgreement: {
       name: mcs("col-2LNDs6x", "string", "Name", 0, true),
       id: mcs("col-otFGzR9", "string", "ID", 1, true),
-      baseId: mcs("col-7wTwqbz", "baseId", "Base ID", 2, false),
       occupancyId: mcs("col-29TQHcp", "string", "Occupancy ID", 3, false),
       subsidyProgramId: mcs(
         "col-0WyuPph",
@@ -3025,7 +3007,6 @@ const allColumnAttributes = makeSchemaStructure(
     subsidyCharge: {
       name: mcs("col-sUaYozJ", "string", "Name", 0, true),
       id: mcs("col--nTU65W", "string", "ID", 1, true),
-      baseId: mcs("col-5BajmZs", "baseId", "Base ID", 2, false),
       subsidyAgreementId: mcs(
         "col-MONO5y5",
         "string",
@@ -3049,7 +3030,6 @@ const allColumnAttributes = makeSchemaStructure(
       date: mcs("col-_YBhAu5", "date", "Date", 0, false),
       id: mcs("col-PTux14k", "string", "ID", 1, true),
       allocationName: mcs("col-f083hYz", "string", "Allocation name", 2, true),
-      baseId: mcs("col-5KTGNWc", "baseId", "Base ID", 3, false),
       subsidyProgramId: mcs(
         "col-3wCKfdm",
         "string",
@@ -3092,7 +3072,6 @@ const allColumnAttributes = makeSchemaStructure(
     subsidyProgram: {
       name: mcs("col-o4QSWBF", "string", "Name", 0, true),
       id: mcs("col-SP4bmlN", "string", "ID", 1, true),
-      baseId: mcs("col-n0PLQe0", "baseId", "Base ID", 2, false),
       nonResidentPayerId: mcs(
         "col-_17JhlQ",
         "string",
@@ -3132,7 +3111,6 @@ const allColumnAttributes = makeSchemaStructure(
     subsidyTerms: {
       name: mcs("col-YqGL5a7", "string", "Name", 0, true),
       id: mcs("col-8MJW0am", "string", "ID", 1, true),
-      baseId: mcs("col-ktUHY0U", "baseId", "Base ID", 2, false),
       subsidyAgreementId: mcs(
         "col-NGDD5AZ",
         "string",
@@ -3232,7 +3210,6 @@ const allColumnAttributes = makeSchemaStructure(
       firstName: mcs("col-hfOt7C0", "string", "First name", 0, false),
       lastName: mcs("col-L_VYXUd", "string", "Last name", 1, false),
       id: mcs("col-TQPNwF_", "string", "ID", 2, true),
-      baseId: mcs("col-IipRE86", "baseId", "Base ID", 3, false),
       email: mcs("col-88UVmfe", "string", "Email", 4, false),
       backupEmail: mcs("col-dNdbe6y", "string", "Backup email", 5, false),
       phoneNumber: mcs("col-6VuYdwS", "string", "Phone number", 6, false),
@@ -3243,7 +3220,6 @@ const allColumnAttributes = makeSchemaStructure(
     },
     tenantPros: {
       id: mcs("col-DGFdnb-", "string", "ID", 0, true),
-      baseId: mcs("col-8SCafE_", "baseId", "Base ID", 1, false),
       firstName: mcs("col-WrouvG3", "string", "First Name", 2, false),
       lastName: mcs("col-7DS8uNK", "string", "Last Name", 3, false),
       householdProspectId: mcs(
@@ -3266,7 +3242,6 @@ const allColumnAttributes = makeSchemaStructure(
     test: {
       column5: mcs("col-Oy9WtzQ", "string", "Column 5", 0, true),
       id: mcs("col-8wOXbE6", "string", "ID", 1, true),
-      baseId: mcs("col-uHm7dGg", "baseId", "Base ID", 2, false),
       number: mcs("col-kJ47IXM", "number", "Number", 3, false),
       dropdown: mcs("col-4_IzNLS", "yesOrNo", "Dropdown", 4, false),
       date: mcs("col--K2Vvyh", "date", "Date", 5, true),
@@ -3274,7 +3249,6 @@ const allColumnAttributes = makeSchemaStructure(
     unit: {
       name: mcs("col-6WTZgxx", "string", "Name", 0, true),
       id: mcs("col-Qo3J03G", "string", "ID", 1, true),
-      baseId: mcs("col-qFMPPMl", "baseId", "Base ID", 2, false),
       propertyId: mcs("col-lrmLxqZ", "string", "Property ID", 3, false),
       unitIdentifier: mcs("col-6lzrdO8", "string", "Unit identifier", 4, false),
       addressLabel: mcs("col-jfe-foO", "string", "Address label", 5, true),
@@ -3554,7 +3528,6 @@ const allColumnAttributes = makeSchemaStructure(
     },
     year: {
       id: mcs("col-MEgZSIX", "string", "ID", 0, true),
-      baseId: mcs("col-TopsfpU", "baseId", "Base ID", 1, false),
       name: mcs("col-Z2qkqDh", "number", "Name", 2, false),
       dayCount: mcs("col-hZo8xT2", "number", "Day count", 3, true),
     },
@@ -3563,46 +3536,46 @@ const allColumnAttributes = makeSchemaStructure(
 
 export type AllColumnAttributes = typeof allColumnAttributes;
 
-export type ColumnName<TN extends TableNameSimple = TableNameSimple> =
+export type ColumnName<TN extends SheetNameSimple = SheetNameSimple> =
   keyof AllColumnAttributes[TN];
 
-export type TableColumnAttributes<TN extends TableNameSimple> =
+export type TableColumnAttributes<TN extends SheetNameSimple> =
   AllColumnAttributes[TN];
 
 export type ColumnValueName<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
 > = AllColumnAttributes[TN][CN]["valueName" &
   keyof AllColumnAttributes[TN][CN]];
 
 export type ColumnAttributes<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
 > = ColumnAttributesBase<ColumnValueName<TN, CN> & ValueName>;
 
 export type ColumnValueAttributes<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
 > = ValueAttributes<ColumnValueName<TN, CN> & ValueName>;
 
 export type ValidateVarb<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
 > = ValidateValue<ColumnValueName<TN, CN> & ValueName>;
 
 export type ColumnValue<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
 > = Value<ColumnValueName<TN, CN> & ValueName>;
 
 export type TableValues<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   VNS extends ColumnName<TN> = ColumnName<TN>,
 > = {
   [CN in VNS]: ColumnValue<TN, CN>;
 };
 
-export function getSheetColumnNames<TN extends TableNameSimple>(
+export function getSheetColumnNames<TN extends SheetNameSimple>(
   sheetName: TN,
 ): ColumnName<TN>[] {
   return Obj.keys(allColumnAttributes[sheetName]);
@@ -3610,7 +3583,7 @@ export function getSheetColumnNames<TN extends TableNameSimple>(
 
 // columnAttributes isn't actually very unique. The only unique
 export function getColumnAttribute<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
   K extends keyof ColumnAttributes<TN, CN>,
 >(sheetName: TN, columnName: CN, key: K): ColumnAttributes<TN, CN>[K] {
@@ -3621,7 +3594,7 @@ export function getColumnAttribute<
 
 export type RawIdxColumnAttributes = KeyedMap<
   Record<string, ColumnAttributesBase>,
-  "indexBase0",
+  "colIndex",
   "columnName"
 >;
 export type ColAttributesRaw =
@@ -3632,11 +3605,7 @@ function makeAllColumnAttrsGidIdx(): AllColumnAttrsGidIdx {
     const sheetGid = getTableAttribute(sheetName, "sheetGid");
     attrs.set(
       sheetGid,
-      Obj.toKeyedMap(
-        allColumnAttributes[sheetName],
-        "indexBase0",
-        "columnName",
-      ),
+      Obj.toKeyedMap(allColumnAttributes[sheetName], "colIndex", "columnName"),
     );
     return attrs;
   }, new Map() as AllColumnAttrsGidIdx);
@@ -3646,13 +3615,13 @@ const allColumnAttrsGidIdx = makeAllColumnAttrsGidIdx();
 
 export function getColumnAttributeRaw<K extends keyof ColAttributesRaw>(
   sheetId: number,
-  columnIdx: number,
+  colIndex: number,
   key: K,
 ): ColAttributesRaw[K] {
-  const columnAttrs = allColumnAttrsGidIdx.get(sheetId)?.get(columnIdx);
+  const columnAttrs = allColumnAttrsGidIdx.get(sheetId)?.get(colIndex);
   if (!columnAttrs) {
     throw new Error(
-      `No column attributes for sheetId=${sheetId}, columnIdx=${columnIdx}`,
+      `No column attributes for sheetId=${sheetId}, colIndex=${colIndex}`,
     );
   }
   return columnAttrs[key];
@@ -3665,6 +3634,6 @@ const allColumnAttributesFlat = Obj.flattenTwoLevels(allColumnAttributes);
 type AllColumnAttributesFlat = typeof allColumnAttributesFlat;
 type ColumnNameFullSimple = keyof AllColumnAttributesFlat;
 type ColumnNameFull<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
 > = CombineStringsWithFlat<TN, CN & string>;

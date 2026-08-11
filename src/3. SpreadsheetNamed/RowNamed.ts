@@ -1,16 +1,13 @@
-import type {
-  Value,
-  ValueName,
-} from "../0. spreadsheetMetaData/3.2 valueAttributes";
-import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../0. spreadsheetMetaData/5. allColumnAttributes";
-import type { ColumnSchemaNamed } from "../1. SpreadsheetSchema/ColumnSchemaNamed";
-import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed";
+} from "../1.0 Configs/3.0 columnConfigs";
 import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
+import type { Value, ValueName } from "../2.0 Schemas/3.2 valueSchemas";
+import type { ColumnSchemaNamed } from "../2.0 Schemas/ColumnSchemaNamed";
+import type { SheetSchemaNamed } from "../2.0 Schemas/SheetSchemaNamed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
@@ -30,17 +27,17 @@ export class RowNamed<TN extends SheetName> extends RowNamedBase<TN> {
   ): ColumnSchemaNamed<TN, CN> {
     return this.sheetSchema.column(columnName);
   }
-  get idxBase0(): number {
-    return this.raw.idxBase0;
+  get rowIndex(): number {
+    return this.sheetRowIdsToIndexes[this.id];
   }
   get raw(): RowRaw {
     return new RowRaw({
       ...this.sheet.raw.sheetRawProps,
-      idxBase0: this.idxBase0,
+      rowIndex: this.rowIndex,
     });
   }
   cellIsActive<CN extends ColumnName<TN>>(columnName: CN): boolean {
-    const colIdx = this.columnIdx(columnName);
+    const colIdx = this.colIndex(columnName);
     return this.raw.cellIsActive(colIdx);
   }
   value<CN extends ColumnName<TN>>(columnName: CN): ColumnValue<TN, CN> {
@@ -134,14 +131,14 @@ export class RowNamed<TN extends SheetName> extends RowNamedBase<TN> {
   get sheet(): SheetNamed<TN> {
     return new SheetNamed(this.sheetNamedProps);
   }
-  columnIdx(columnName: ColumnName<TN>): number {
-    return this.columnSchema(columnName).idxBase0;
+  colIndex(columnName: ColumnName<TN>): number {
+    return this.columnSchema(columnName).colIndex;
   }
   setValue<CN extends ColumnName<TN>, VL extends ColumnValue<TN, CN>>(
     columnName: CN,
     value: VL,
   ): RowNamed<TN> {
-    this.raw.setValue(this.columnIdx(columnName), value);
+    this.raw.setValue(this.colIndex(columnName), value);
     return this;
   }
   delete(): void {

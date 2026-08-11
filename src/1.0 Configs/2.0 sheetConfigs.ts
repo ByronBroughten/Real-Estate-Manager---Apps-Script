@@ -1,5 +1,5 @@
 import { Obj, type KeyedMap } from "../utils/Obj";
-import { makeSchemaStructure } from "./0.1 makeSchema";
+import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 
 interface TableAttributesBase {
   sheetGid: number;
@@ -17,7 +17,7 @@ function makeTableAttributes(
 }
 const mta = makeTableAttributes;
 type AllTableAttributesBase = Record<string, TableAttributesBase>;
-const allTableAttributes = makeSchemaStructure({} as AllTableAttributesBase, {
+const allTableAttributes = makeStructuredConfig({} as AllTableAttributesBase, {
   allTableAttributes: mta(210603630, "stm"),
   config: mta(1967106628, "vrb"),
   validationList: mta(2119236084, "rng"),
@@ -72,15 +72,15 @@ const allTableAttributes = makeSchemaStructure({} as AllTableAttributesBase, {
 });
 
 export type AllTableAttributes = typeof allTableAttributes;
-export type TableAttributes<TN extends TableNameSimple> =
+export type TableAttributes<TN extends SheetNameSimple> =
   AllTableAttributes[TN];
 
 export const allsheetNames = Obj.keys(allTableAttributes);
-export type TableNameSimple = (typeof allsheetNames)[number];
-export type SheetName<TN extends TableNameSimple = TableNameSimple> = TN;
+export type SheetNameSimple = (typeof allsheetNames)[number];
+export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
 
 export function getTableAttribute<
-  TN extends TableNameSimple,
+  TN extends SheetNameSimple,
   K extends keyof TableAttributes<TN>,
 >(sheetName: TN, key: K): TableAttributes<TN>[K] {
   return allTableAttributes[sheetName][key];

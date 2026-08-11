@@ -2,11 +2,11 @@ import {
   getTableAttributeByGid,
   type SheetName,
   type TableAttributesRaw,
-} from "../0. spreadsheetMetaData/4.0 tableAttributes";
+} from "../1.0 Configs/2.0 sheetConfigs";
 import {
   getSheetColumnIdxes,
   type ColumnName,
-} from "../0. spreadsheetMetaData/5. allColumnAttributes";
+} from "../1.0 Configs/3.0 columnConfigs";
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
 
@@ -29,8 +29,8 @@ export class SheetSchemaRaw extends SchemaBase {
   ): TableAttributesRaw[K] {
     return getTableAttributeByGid(this.sheetGid, key);
   }
-  column(columnIdx: number): ColumnSchemaRaw {
-    return new ColumnSchemaRaw(this.sheetGid, columnIdx);
+  column(colIndex: number): ColumnSchemaRaw {
+    return new ColumnSchemaRaw(this.sheetGid, colIndex);
   }
   get allColumnIdxes(): MapIterator<number> {
     return getSheetColumnIdxes(this.sheetGid);

@@ -1,4 +1,4 @@
-import type { SheetName } from "../../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../../1.0 Configs/2.0 sheetConfigs";
 import type { RowIdsToIndexes } from "../Types/NamedState";
 import {
   SpreadsheetNamedBase,

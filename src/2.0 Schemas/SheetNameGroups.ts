@@ -1,7 +1,7 @@
+import { allsheetNames } from "../1.0 Configs/2.0 sheetConfigs";
 import { Arr } from "../utils/Arr";
-import { allsheetNames } from "./4.0 tableAttributes";
 
-const tableNameGroups = {
+const sheetNameGroups = {
   aggregateApi: Arr.extractStrict(
     allsheetNames,
     "addOccChargeOnetime",
@@ -15,15 +15,15 @@ const tableNameGroups = {
   ),
 } as const;
 
-type TableNameGroups = typeof tableNameGroups;
-export type TnGroupName = keyof TableNameGroups;
+type SheetNameGroups = typeof sheetNameGroups;
+export type TnGroupName = keyof SheetNameGroups;
 
-export type GroupToTableName<GN extends TnGroupName> =
-  TableNameGroups[GN][number];
+export type GroupToSheetName<GN extends TnGroupName> =
+  SheetNameGroups[GN][number];
 
 export function isInTnGroup<GN extends TnGroupName>(
   groupName: GN,
   sn: string,
-): sn is GroupToTableName<GN> {
-  return (tableNameGroups[groupName] as string[]).includes(sn);
+): sn is GroupToSheetName<GN> {
+  return (sheetNameGroups[groupName] as string[]).includes(sn);
 }

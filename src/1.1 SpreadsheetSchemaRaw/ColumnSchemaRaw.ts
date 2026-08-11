@@ -1,41 +1,40 @@
+import type { CellValue } from "../1.0 Configs/0.0 ConfigPrecursors";
+import {
+  getColumnAttributeRaw,
+  type ColAttributesRaw,
+} from "../1.0 Configs/3.0 columnConfigs";
+import type {
+  GoogleCellValue,
+  UserEnteredValue,
+} from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import {
   extractCellValue,
-  type ValueAttributesBase,
-} from "../0. spreadsheetMetaData/3.0 valueAttribute";
+  type ValueSchemaBase,
+} from "../2.0 Schemas/3.0 valueSchema";
 import {
   getValueAttribute,
   type Value,
   type ValueAttributes,
   type ValueName,
-} from "../0. spreadsheetMetaData/3.2 valueAttributes";
-import {
-  getColumnAttributeRaw,
-  type ColAttributesRaw,
-} from "../0. spreadsheetMetaData/5. allColumnAttributes";
-import type {
-  GoogleCellValue,
-  UserEnteredValue,
-} from "../2. AppsScriptRaw/Types/AppsScriptTypes";
-import type { CellValue } from "../2. AppsScriptRaw/Types/RawState";
+} from "../2.0 Schemas/3.2 valueSchemas";
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchemaRaw } from "./SheetSchemaRaw";
 
 export class ColumnSchemaRaw extends SchemaBase {
   readonly sheetId: number;
-  readonly columnIdx: number;
-  constructor(sheetId: number, columnIdx: number) {
+  readonly colIndex: number;
+  constructor(sheetId: number, colIndex: number) {
     super();
     this.sheetId = sheetId;
-    this.columnIdx = columnIdx;
+    this.colIndex = colIndex;
   }
+  // What can I do about the fact that columnSchemas are sus in the raw layer?
+  // the attributes are a lie.
   attribute<K extends keyof ColAttributesRaw>(key: K): ColAttributesRaw[K] {
-    return getColumnAttributeRaw(this.sheetId, this.columnIdx, key);
+    return getColumnAttributeRaw(this.sheetId, this.colIndex, key);
   }
   get sheet(): SheetSchemaRaw {
     return new SheetSchemaRaw(this.sheetId);
-  }
-  get columnId(): string {
-    return this.attribute("columnId") as string;
   }
   get columnName(): string {
     return this.attribute("columnName") as string;
@@ -47,11 +46,12 @@ export class ColumnSchemaRaw extends SchemaBase {
   get valueName(): ValueName {
     return this.attribute("valueName");
   }
-  valueAttributes<K extends keyof ValueAttributesBase>(
-    key: K,
-  ): ValueAttributes[K] {
+  valueAttributes<K extends keyof ValueSchemaBase>(key: K): ValueAttributes[K] {
     return getValueAttribute(this.valueName, key);
   }
+
+  // Everything here will probably need to switch to ColumnRaw. The schemas are no good on the raw layer.
+  // I should probably get rid of all the raw schemas and use only active stuff. Yeah?
   makeDefaultDataValue(): Value {
     if (this.columnName === "id") {
       return this.sheet.makeRowId();
@@ -70,9 +70,10 @@ export class ColumnSchemaRaw extends SchemaBase {
   }
   validate(value: unknown) {
     const emptyAllowed = this.attribute("emptyAllowed");
-    if (!emptyAllowed && value === "") {
-      throw new Error("Empty string not allowed.");
+    if (emptyAllowed && value === "") {
+      return value;
+    } else {
+      return this.valueAttributes("strictValidate")(value);
     }
-    return this.valueAttributes("defaultValidate")(value);
   }
 }

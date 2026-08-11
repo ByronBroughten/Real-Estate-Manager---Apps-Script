@@ -5,10 +5,10 @@ import type {
 } from "../2. AppsScriptRaw/Types/AppsScriptTypes";
 import { valS } from "../utils/validation";
 
-export type ValueAttributesBase<V extends unknown = unknown> = {
+export type ValueSchemaBase<V extends unknown = unknown> = {
   type: V;
   makeDefault: MakeDefaultValueBase<V>;
-  defaultValidate: ValidateValueBase<V>;
+  strictValidate: ValidateValueBase<V>;
   extractCellValue: ExtractCellValue<V>;
   makeUserEnteredValue: MakeUserEnteredValue<V>;
 };
@@ -39,12 +39,12 @@ type ExtractCellValue<V extends unknown> = (gsCellValue: GoogleCellValue) => V;
 type MakeDefaultValueBase<V extends unknown> = () => V;
 type ValidateValueBase<V extends unknown> = (value: unknown) => V;
 
-export function va<V extends unknown>(props: {
+export function vsc<V extends unknown>(props: {
   type: V;
   makeDefault: MakeDefaultValueBase<V>;
-  defaultValidate: ValidateValueBase<V>;
+  strictValidate: ValidateValueBase<V>;
   extractCellValue: ExtractCellValue<V>;
   makeUserEnteredValue: MakeUserEnteredValue<V>;
-}): ValueAttributesBase<V> {
+}): ValueSchemaBase<V> {
   return props;
 }

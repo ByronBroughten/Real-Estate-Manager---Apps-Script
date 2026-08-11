@@ -1,18 +1,16 @@
 import {
   getTableAttribute,
   type SheetName,
+  type SheetNameSimple,
   type TableAttributes,
-  type TableNameSimple,
-} from "../0. spreadsheetMetaData/4.0 tableAttributes";
+} from "../1.0 Configs/2.0 sheetConfigs";
 import {
   getSheetColumnNames,
   type ColumnName,
-  type TableValues,
-} from "../0. spreadsheetMetaData/5. allColumnAttributes";
+} from "../1.0 Configs/3.0 columnConfigs";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
 import type { ColumnSpecifierNamed } from "../3. SpreadsheetNamed/Types/NamedState";
-import { Arr } from "../utils/Arr";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed";
 
@@ -23,7 +21,7 @@ export type VarbNameMutable<TN extends SheetName> = Exclude<
   VarbNameImmutable
 >;
 
-export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
+export class SheetSchemaNamed<TN extends SheetNameSimple> extends SchemaBase {
   readonly sheetName: TN;
   constructor(sheetName: TN) {
     super();
@@ -49,8 +47,8 @@ export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
   column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  columnIndex<CN extends ColumnName<TN>>(columnName: CN): number {
-    return this.column(columnName).columnIdx;
+  colIndex<CN extends ColumnName<TN>>(columnName: CN): number {
+    return this.column(columnName).colIndex;
   }
   columnSpecifierToStandard(
     columnSpecifier: ColumnSpecifierNamed<TN>,
@@ -66,25 +64,5 @@ export class SheetSchemaNamed<TN extends TableNameSimple> extends SchemaBase {
 
   get columnNames(): ColumnName<TN>[] {
     return getSheetColumnNames(this.sheetName);
-  }
-  makeDefaultValues<CN extends VarbNameMutable<TN>>(
-    columnNames: CN[] = Arr.exclude(
-      this.columnNames,
-      varbNameImmutable,
-    ) as CN[],
-  ): TableValues<TN, CN> {
-    return columnNames.reduce(
-      (values, columnName) => {
-        if (varbNameImmutable.includes(columnName as VarbNameImmutable)) {
-          return values;
-        } else {
-          values[columnName] = this.column(
-            columnName,
-          ).makeDefaultDataValue() as any;
-        }
-        return values;
-      },
-      {} as TableValues<TN, CN>,
-    );
   }
 }

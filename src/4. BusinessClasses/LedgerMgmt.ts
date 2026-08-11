@@ -1,11 +1,11 @@
 
-import type { GroupToTableName } from "../0. spreadsheetMetaData/4.1 tableNameGroups";
+import type { GroupToSheetName } from "../2.0 Schemas/SheetNameGroups";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
 import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { Obj } from "../utils/Obj";
 
-type LedgerInputSn = GroupToTableName<"ledgerInputs">;
+type LedgerInputSn = GroupToSheetName<"ledgerInputs">;
 
 interface IdsAndPortion {
   householdId: string;

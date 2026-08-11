@@ -1,3 +1,4 @@
+import type { CellValue } from "../../1.0 Configs/0.0 ConfigPrecursors";
 import type { StrictPick } from "../../utils/Obj";
 import type { GoogleGridRange, GoogleUpdateRequest } from "./AppsScriptTypes";
 
@@ -31,7 +32,6 @@ export type RawSheetsState = Map<SheetId, RawSheetState>;
 
 export interface RawSheetState {
   title: string;
-  sheetName: string;
   activeTable: {
     tableId: string;
     startRowIndex: number; // headerRowIndex
@@ -44,7 +44,6 @@ export interface RawSheetState {
   rowStates: RawRowStates;
 }
 
-export type CellValue = number | Date | string | boolean;
 export type RawRowStates = Map<RowIdx, RawRowState>;
 export type RawRowState = Map<ColIdx, CellValue>;
 type SheetId = number;
@@ -90,8 +89,6 @@ export type RowChangeUpdateProps = { action: "update"; colIdxes: number[] };
 export type RowChangeProps =
   | { action: "append" | "delete" }
   | RowChangeUpdateProps;
-
-type SheetColumnMap = Map<SheetId, ColIdx[]>;
 
 export type ColumnSpecifierRaw = ColIdx[] | "allColumns";
 export type ColumnCount = number | "allFromStart";

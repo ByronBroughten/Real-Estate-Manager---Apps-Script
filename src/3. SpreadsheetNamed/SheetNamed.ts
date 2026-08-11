@@ -1,12 +1,12 @@
-import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../0. spreadsheetMetaData/5. allColumnAttributes";
-import type { SheetSchemaNamed } from "../1. SpreadsheetSchema/SheetSchemaNamed";
+} from "../1.0 Configs/3.0 columnConfigs";
 import type { RowRaw } from "../2. AppsScriptRaw/RowRaw";
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
+import type { SheetSchemaNamed } from "../2.0 Schemas/SheetSchemaNamed";
 import { Arr } from "../utils/Arr";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
@@ -46,7 +46,7 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   }
   get dataRows(): RowNamed<TN>[] {
     return this.activeRows.filter(
-      (row) => row.idxBase0 >= this.schema.topDataRowIdx,
+      (row) => row.rowIndex >= this.schema.topDataRowIdx,
     );
   }
   get headerRow(): RowNamed<TN> {
@@ -60,10 +60,10 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   }
   removeRowsExcept(...rowIdsToKeep: string[]): SheetNamed<TN> {
     const rowsToKeep = rowIdsToKeep.map((rowId) => this.row(rowId));
-    this.raw.removeRowsExcept(...rowsToKeep.map((row) => row.idxBase0));
+    this.raw.removeRowsExcept(...rowsToKeep.map((row) => row.rowIndex));
     this.namedState.sheetRowIdsToIndexes[this.sheetName] = rowsToKeep.reduce(
       (acc, row) => {
-        acc[row.id] = row.idxBase0;
+        acc[row.id] = row.rowIndex;
         return acc;
       },
       {} as RowIdsToIndexes,
@@ -71,12 +71,12 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
     return this;
   }
   get activeColumnNames(): ColumnName<TN>[] {
-    return this.raw
-      .activeColumnIdxs()
-      .map((colIdx) => this.schema.columnNameByIdx(colIdx));
+    return this.raw.activeColumnIdxs.map((colIdx) =>
+      this.schema.columnNameByIdx(colIdx),
+    );
   }
   get idValueIdx(): number {
-    return this.schema.column("id").columnIdx;
+    return this.schema.column("id").colIndex;
   }
   rawToNamedRow(rowRaw: RowRaw): RowNamed<TN> {
     const id = rowRaw.value(this.idValueIdx) as string;
@@ -136,8 +136,8 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   }
   appendRowDefault(): RowNamed<TN> {
     const rowId = this.raw.schema.makeRowId();
-    const rowIdx = this.raw.appendRowDefault().idxBase0;
-    this.state[rowId] = rowIdx;
+    const rowIndex = this.raw.appendRowDefault().rowIndex;
+    this.state[rowId] = rowIndex;
     return this.row(rowId);
   }
   appendRowWithVals(values: Partial<TableValues<TN>>): RowNamed<TN> {

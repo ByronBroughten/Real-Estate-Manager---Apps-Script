@@ -1,11 +1,26 @@
 import {
   configGet,
   type SpreadsheetConfig,
-} from "../0. spreadsheetMetaData/1. spreadsheetConfig";
+} from "../1.0 Configs/1. spreadsheetConfig";
+import {
+  valueConfigGet,
+  type ValueConfig,
+  type ValueConfigKey,
+  type ValueConfigValue,
+} from "../1.0 Configs/4.0 valueConfig";
 
 export class SchemaBase {
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);
+  }
+  valueConfig<K extends ValueConfigKey>(key: K): ValueConfig[K] {
+    return valueConfigGet(key);
+  }
+  valueOfConfig<VK extends ValueConfigKey, VL extends ValueConfigValue<VK>>(
+    _: VK,
+    value: VL,
+  ): VL {
+    return value;
   }
   get colIdRowIdx(): number {
     return this.config("columnIdRowIdxBase0");

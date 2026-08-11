@@ -1,15 +1,10 @@
 import {
   allsheetNames,
   type SheetName,
-  type TableNameSimple,
-} from "../0. spreadsheetMetaData/4.0 tableAttributes";
+  type SheetNameSimple,
+} from "../1.0 Configs/2.0 sheetConfigs";
 
-import {
-  isInTnGroup,
-  type GroupToTableName,
-  type TnGroupName,
-} from "../0. spreadsheetMetaData/4.1 tableNameGroups";
-import { type ColumnName } from "../0. spreadsheetMetaData/5. allColumnAttributes";
+import { type ColumnName } from "../1.0 Configs/3.0 columnConfigs";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
 import {
@@ -21,13 +16,18 @@ import type {
   SheetColumnNamesStandard,
 } from "../3. SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
+import {
+  isInTnGroup,
+  type GroupToSheetName,
+  type TnGroupName,
+} from "./SheetNameGroups";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class SpreadsheetSchema extends SchemaBase {
   get raw(): SpreadsheetSchemaRaw {
     return new SpreadsheetSchemaRaw();
   }
-  sheet<TN extends TableNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
+  sheet<TN extends SheetNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
     return new SheetSchemaNamed(sheetName);
   }
   column<TN extends SheetName, CN extends ColumnName<TN>>(
@@ -68,7 +68,7 @@ export class SpreadsheetSchema extends SchemaBase {
   isInTnGroup<GN extends TnGroupName>(
     groupName: GN,
     sheetName: string,
-  ): sheetName is GroupToTableName<GN> {
+  ): sheetName is GroupToSheetName<GN> {
     return isInTnGroup(groupName, sheetName);
   }
 }

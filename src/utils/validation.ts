@@ -9,7 +9,7 @@ export function validationError(
 
 function assertDefined<T>(
   value: T | null | undefined,
-  whatNotFound: string,
+  whatNotFound: string = "Value",
 ): T {
   if (value === null || value === undefined) {
     throw new Error(`${whatNotFound} not found.`);

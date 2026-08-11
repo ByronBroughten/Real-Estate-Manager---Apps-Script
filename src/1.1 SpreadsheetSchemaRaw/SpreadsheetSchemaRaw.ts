@@ -1,4 +1,4 @@
-import { allSheetGids } from "../0. spreadsheetMetaData/4.0 tableAttributes";
+import { allSheetGids } from "../1.0 Configs/2.0 sheetConfigs";
 import type { RowRange } from "../2. AppsScriptRaw/Types/RawState";
 
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
@@ -9,8 +9,8 @@ export class SpreadsheetSchemaRaw extends SchemaBase {
   sheet(sheetGid: number): SheetSchemaRaw {
     return new SheetSchemaRaw(sheetGid);
   }
-  column(sheetGid: number, columnIdx: number): ColumnSchemaRaw {
-    return new ColumnSchemaRaw(sheetGid, columnIdx);
+  column(sheetGid: number, colIndex: number): ColumnSchemaRaw {
+    return new ColumnSchemaRaw(sheetGid, colIndex);
   }
   oneRowSpecifier(startRowIndex: number): RowRange {
     return {
@@ -23,10 +23,10 @@ export class SpreadsheetSchemaRaw extends SchemaBase {
   }
   idsFromSheetColumnId(sheetColumnId: string): {
     sheetGid: number;
-    columnIdx: number;
+    colIndex: number;
   } {
     const { idx, ...rest } = this._idsFromSheetIdxId(sheetColumnId);
-    return { ...rest, columnIdx: idx };
+    return { ...rest, colIndex: idx };
   }
   idsFromSheetRowId(sheetRowId: string): { sheetGid: number; rowIdx: number } {
     const { idx, ...rest } = this._idsFromSheetIdxId(sheetRowId);

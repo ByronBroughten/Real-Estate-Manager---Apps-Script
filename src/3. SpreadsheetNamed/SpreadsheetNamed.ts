@@ -1,7 +1,7 @@
-import type { SheetName } from "../0. spreadsheetMetaData/4.0 tableAttributes.js";
-import { SpreadsheetSchema } from "../1. SpreadsheetSchema/SpreadsheetSchemaNamed.js";
+import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs.js";
 import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
 import type { SheetColumnsRange } from "../2. AppsScriptRaw/Types/RawState.js";
+import { SpreadsheetSchema } from "../2.0 Schemas/SpreadsheetSchemaNamed.js";
 import { Obj } from "../utils/Obj.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
@@ -144,11 +144,11 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       const schema = this.schema.sheet(sheetName);
       const columnNames = sheetColumns[sheetName];
       columnNames.forEach((columnName) => {
-        const columnIndex = schema.columnIndex(columnName);
+        const colIndex = schema.colIndex(columnName);
         acc.push({
           sheetId: schema.sheetGid,
-          startColumnIndex: columnIndex,
-          endColumnIndex: columnIndex + 1,
+          startColumnIndex: colIndex,
+          endColumnIndex: colIndex + 1,
         });
       });
       return acc;
@@ -161,21 +161,35 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       return sheetNames.add(...Obj.keys(props.sheetColumnNames));
     }, new Set() as Set<T>);
   }
-
+  fillMissingRowIds() {
+    // change this stuff to not raw
+    this.raw.fetchAllSheetsOneRow(this.schema.headerRowIdx);
+    this.activeSheets.forEach((sheet) => {
+      const headers = sheet.raw.headerRow.activeValueArr;
+      if (headers.includes("ID") === false) {
+        throw new Error(
+          `Cannot fill missing row IDs in sheet "${sheet.raw.sheetGid}" because it does not have an "ID" column.`,
+        );
+      }
+      const idColIdx = headers.indexOf("ID");
+      const idCol = sheet.raw.column(idColIdx);
+      idCol.fillEmptyDataCellsWithDefaultValues();
+    });
+  }
   convenience() {
-    // Raw for fewer schema updates
-    this.raw.ensureIdColumnOnAllTables();
-    this.raw.fillMissingRowIds();
+    // Update these so that they only work with sheets that have ID prefixes defined.
+    this.fillMissingRowIds();
   }
-  schemaPrep() {
-    // Raw for prepping schemas
-    this.raw.addMissingColumnIds();
-  }
-  updateTableAttributes() {
-    // This must handle sheets that aren't in the schema.
-  }
-  updateColumnAttributes() {}
+
+  // I need to do something about adding data rows when fetching sheets from the named layer.
+  // That's to ensure I get the columnIds (add those specific columns and rows) and table properties (add one row 4:4 per sheet).
+
+  // Named layer only worries about data rows, yeah?
+
   // Should different row classes be on the named layer or raw layer?
+  // I want them only on the name layer, but I might not even need them there.
+  // I can possibly just handle them on the raw layer.
+
   // HeaderRow, GroupNameRow, DataRow, ActionRow, ColumnIdRow
   // GroupNameRow and HeaderRow could each be unimplemented and throw errors on operations
   // They each contain RawRow
