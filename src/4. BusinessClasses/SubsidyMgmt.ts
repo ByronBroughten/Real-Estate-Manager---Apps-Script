@@ -1,5 +1,5 @@
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
+import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { Dat } from "../utils/Dat";
 
@@ -40,14 +40,14 @@ export class SubsidyMgmt extends OperatorBase {
           unitId: contractLease.value("unitId"),
           endPriorActiveContracts: "yes",
         });
-        sa.setValue("rentPortionDateNext", "");
+        sa.updateValue("rentPortionDateNext", "");
       }
     });
   }
   private getActiveLeaseForContract(
-    sa: RowNamed<"subsidyAgreement">,
+    sa: DataRowNamed<"subsidyAgreement">,
     dateNext: Date,
-  ): RowNamed<"occupancyTerms"> {
+  ): DataRowNamed<"occupancyTerms"> {
     const leaseSheet = this.sheet("occupancyTerms");
     const occupancyTermss = leaseSheet.rowsFiltered({
       householdId: sa.value("householdId"),
@@ -88,7 +88,7 @@ export class SubsidyMgmt extends OperatorBase {
       endDate: "",
     });
     activeContracts.forEach((contract) => {
-      contract.setValue("endDate", endDate);
+      contract.updateValue("endDate", endDate);
     });
   }
 }

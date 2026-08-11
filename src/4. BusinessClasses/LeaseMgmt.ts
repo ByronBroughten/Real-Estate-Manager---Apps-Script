@@ -66,7 +66,7 @@ export class LeaseMgmt extends OperatorBase {
           rentChargeBaseMonthly: rentChargeNext,
           rentChargeUtilitiesMonthly: utilityChargeNext,
         });
-        hh.setValues({
+        hh.updateValues({
           rentChargeNextOverride: "",
           utilityChargeNextOverride: "",
         });
@@ -124,7 +124,7 @@ export class LeaseMgmt extends OperatorBase {
       endDate: "",
     });
     householdLeases.forEach((lease) => {
-      lease.setValue("endDate", endDate);
+      lease.updateValue("endDate", endDate);
     });
   }
 }

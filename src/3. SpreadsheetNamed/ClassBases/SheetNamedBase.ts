@@ -1,5 +1,4 @@
 import type { SheetName } from "../../1.0 Configs/2.0 sheetConfigs";
-import type { RowIdsToIndexes } from "../Types/NamedState";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,
@@ -16,9 +15,6 @@ export class SheetNamedBase<TN extends SheetName> extends SpreadsheetNamedBase {
   constructor({ sheetName, ...props }: SheetNamedProps<TN>) {
     super(props);
     this.sheetName = sheetName;
-  }
-  get sheetState(): RowIdsToIndexes {
-    return this.namedState.sheetRowIdsToIndexes[this.sheetName];
   }
   get sheetNamedProps(): SheetNamedProps<TN> {
     return {

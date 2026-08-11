@@ -67,8 +67,8 @@ export class Api extends SpreadsheetNamedBase {
     const eTopBodyRow = eSheet.row(ssr.schema.topDataRowIdx);
     const e2ndBodyRow = eSheet.row(ssr.schema.topDataRowIdx + 1);
 
-    eTopBodyRow.setValue(colIdx, "Processing...");
-    e2ndBodyRow.setValue(colIdx, "");
+    eTopBodyRow.updateValue(colIdx, "Processing...");
+    e2ndBodyRow.updateValue(colIdx, "");
     ssr.batchUpdateGSheets();
 
     const endpointName = this._endpointNameOrNull(sheetGid, colIdx);
@@ -78,10 +78,10 @@ export class Api extends SpreadsheetNamedBase {
       this.endpoints.addExpenses();
     } catch (error) {
       console.error(error);
-      e2ndBodyRow.setValue(colIdx, "Error: " + (error as Error).message);
+      e2ndBodyRow.updateValue(colIdx, "Error: " + (error as Error).message);
     } finally {
-      eRow.setValue(colIdx, "FALSE");
-      eTopBodyRow.setValue(
+      eRow.updateValue(colIdx, "FALSE");
+      eTopBodyRow.updateValue(
         colIdx,
         `Last ran on ${new Date().toLocaleString()}`,
       );

@@ -1,109 +1,108 @@
 import { Obj, type KeyedMap } from "../utils/Obj";
 import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 
-interface TableAttributesBase {
+export interface SheetConfig {
   sheetGid: number;
   idPrefix: string;
+  hasIdColumn: boolean;
 }
-
-function makeTableAttributes(
+function makeSheetConfig(
   sheetGid: number,
   idPrefix: string,
-): TableAttributesBase {
+  hasIdColumn = false,
+): SheetConfig {
   return {
     sheetGid,
     idPrefix,
+    hasIdColumn,
   };
 }
-const mta = makeTableAttributes;
-type AllTableAttributesBase = Record<string, TableAttributesBase>;
-const allTableAttributes = makeStructuredConfig({} as AllTableAttributesBase, {
-  allTableAttributes: mta(210603630, "stm"),
-  config: mta(1967106628, "vrb"),
-  validationList: mta(2119236084, "rng"),
-  year: mta(243663296, "yer"),
-  api: mta(290870631, "api"),
-  buildOccLedger: mta(706564734, "bol"),
-  addOccChargeOnetime: mta(1202471195, "aoco"),
-  addHhPaymentOnetime: mta(1485718763, "aopo"),
-  addExpenses: mta(1964495656, "ape"),
-  propertyProspect: mta(87312116, "ppr"),
-  householdProspect: mta(1631083349, "hpr"),
-  tenantPros: mta(522260317, "rpr"),
-  property: mta(619816967, "prp"),
-  furnace: mta(1237193065, "frn"),
-  unit: mta(321313883, "unt"),
-  resident: mta(1934805379, "rsd"),
-  pet: mta(560379920, "pet"),
-  household: mta(0, "hsh"),
-  occupancy: mta(1079739305, "occ"),
-  nonResidentPayer: mta(471889863, "nrp"),
-  paymentGroup: mta(939656506, "pgr"),
-  occupancyTerms: mta(445175805, "otr"),
-  occCharge: mta(825934775, "och"),
-  occChargeReduce: mta(1817648883, "ocr"),
-  occPayment: mta(1544131100, "opy"),
-  occPayAllocation: mta(348639454, "opa"),
-  subsidyWorker: mta(1281153954, "swr"),
-  subsidyProgram: mta(332858329, "spr"),
-  subsidyAgreement: mta(1155067179, "sag"),
-  subsidyTerms: mta(194710324, "str"),
-  subsidyCharge: mta(1467694925, "sch"),
-  subsidyPayment: mta(1105274181, "spy"),
-  subPayAllocation: mta(186254136, "spa"),
-  biller: mta(1536785367, "bil"),
-  propertyExpense: mta(449009036, "pex"),
-  businessExpense: mta(41846794, "bex"),
-  propertyYear: mta(802789198, "pyr"),
-  householdYear: mta(1452711715, "oyr"),
-  hhLedger: mta(731807482, "old"),
-  allColumnAttributes: mta(2034522667, "scm"),
-  test: mta(2089200354, "tst"),
-  export: mta(1246014413, ""),
-  finance: mta(1814139876, ""),
-  recurringTransaction: mta(443518874, ""),
-  quotes: mta(2007051676, ""),
-  rentComp: mta(368826933, ""),
-  paymentStandard: mta(1485032491, "pst"),
-  materialCost: mta(73926003, ""),
-  capex: mta(1539440300, "cpx"),
-  variable: mta(695651834, ""),
-  valueName: mta(1529539239, ""),
+const msc = makeSheetConfig;
+type SheetConfigsBase = Record<string, SheetConfig>;
+const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {
+  sheetConfig: msc(210603630, "stm"),
+  config: msc(1967106628, "vrb"),
+  validationList: msc(2119236084, "rng"),
+  year: msc(243663296, "yer"),
+  api: msc(290870631, "api"),
+  buildOccLedger: msc(706564734, "bol"),
+  addOccChargeOnetime: msc(1202471195, "aoco"),
+  addHhPaymentOnetime: msc(1485718763, "aopo"),
+  addExpenses: msc(1964495656, "ape"),
+  propertyProspect: msc(87312116, "ppr"),
+  householdProspect: msc(1631083349, "hpr"),
+  tenantPros: msc(522260317, "rpr"),
+  property: msc(619816967, "prp"),
+  furnace: msc(1237193065, "frn"),
+  unit: msc(321313883, "unt"),
+  resident: msc(1934805379, "rsd"),
+  pet: msc(560379920, "pet"),
+  household: msc(0, "hsh"),
+  occupancy: msc(1079739305, "occ"),
+  nonResidentPayer: msc(471889863, "nrp"),
+  paymentGroup: msc(939656506, "pgr"),
+  occupancyTerms: msc(445175805, "otr"),
+  occCharge: msc(825934775, "och"),
+  occChargeReduce: msc(1817648883, "ocr"),
+  occPayment: msc(1544131100, "opy"),
+  occPayAllocation: msc(348639454, "opa"),
+  subsidyWorker: msc(1281153954, "swr"),
+  subsidyProgram: msc(332858329, "spr"),
+  subsidyAgreement: msc(1155067179, "sag"),
+  subsidyTerms: msc(194710324, "str"),
+  subsidyCharge: msc(1467694925, "sch"),
+  subsidyPayment: msc(1105274181, "spy"),
+  subPayAllocation: msc(186254136, "spa"),
+  biller: msc(1536785367, "bil"),
+  propertyExpense: msc(449009036, "pex"),
+  businessExpense: msc(41846794, "bex"),
+  propertyYear: msc(802789198, "pyr"),
+  householdYear: msc(1452711715, "oyr"),
+  hhLedger: msc(731807482, "old"),
+  columnConfig: msc(2034522667, "scm"),
+  test: msc(2089200354, "tst"),
+  export: msc(1246014413, ""),
+  finance: msc(1814139876, ""),
+  recurringTransaction: msc(443518874, ""),
+  quotes: msc(2007051676, ""),
+  rentComp: msc(368826933, ""),
+  paymentStandard: msc(1485032491, "pst"),
+  materialCost: msc(73926003, ""),
+  capex: msc(1539440300, "cpx"),
+  variable: msc(695651834, ""),
+  valueName: msc(1529539239, ""),
 });
 
-export type AllTableAttributes = typeof allTableAttributes;
-export type TableAttributes<TN extends SheetNameSimple> =
-  AllTableAttributes[TN];
+export type SheetConfigs = typeof sheetConfigs;
 
-export const allsheetNames = Obj.keys(allTableAttributes);
-export type SheetNameSimple = (typeof allsheetNames)[number];
+export const allSheetNames = Obj.keys(sheetConfigs);
+export type SheetNameSimple = (typeof allSheetNames)[number];
 export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
 
-export function getTableAttribute<
+export function getSheetTraitByName<
   TN extends SheetNameSimple,
-  K extends keyof TableAttributes<TN>,
->(sheetName: TN, key: K): TableAttributes<TN>[K] {
-  return allTableAttributes[sheetName][key];
+  K extends keyof SheetConfig,
+>(sheetName: TN, key: K): SheetConfig[K] {
+  return sheetConfigs[sheetName][key];
 }
 
-type AllTableAttributesByGid = KeyedMap<
-  AllTableAttributes,
-  "sheetGid",
-  "sheetName"
->;
-export const tableAttributesByGid = Obj.toKeyedMap(
-  allTableAttributes,
+type SheetTraitsByGid = KeyedMap<SheetConfigs, "sheetGid", "sheetName">;
+export const sheetTraitsByGid = Obj.toKeyedMap(
+  sheetConfigs,
   "sheetGid",
   "sheetName",
 );
 
-export const allSheetGids = [...tableAttributesByGid.keys()];
+export const schemaSheetGids = [...sheetTraitsByGid.keys()];
 
-export type TableAttributesRaw =
-  AllTableAttributesByGid extends Map<any, infer V> ? V : never;
-export function getTableAttributeByGid<K extends keyof TableAttributesRaw>(
+type SheetTraitsRaw = SheetTraitsByGid extends Map<any, infer V> ? V : never;
+
+export type SheetTraitRaw<K extends SheetTraitRawKey> = SheetTraitsRaw[K];
+
+export type SheetTraitRawKey = keyof SheetTraitsRaw;
+export function getSheetTraitByGid<K extends SheetTraitRawKey>(
   sheetGid,
   key: K,
-): TableAttributesRaw[K] {
-  return tableAttributesByGid[sheetGid][key];
+): SheetTraitRaw<K> {
+  return sheetTraitsByGid[sheetGid][key];
 }

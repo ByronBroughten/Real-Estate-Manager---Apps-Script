@@ -5,16 +5,16 @@ import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
 export type RowState<TN extends SheetName> = TableValues<TN>;
 
 export interface RowProps<TN extends SheetName> extends SheetNamedProps<TN> {
-  id: string;
+  rowIndex: number;
 }
 
 export class RowNamedBase<TN extends SheetName> extends SheetNamedBase<TN> {
-  readonly id: string;
-  constructor({ id, ...props }: RowProps<TN>) {
+  readonly rowIndex: number;
+  constructor({ rowIndex, ...props }: RowProps<TN>) {
     super(props);
-    this.id = id;
+    this.rowIndex = rowIndex;
   }
-  get rowState(): RowState<TN> {
-    return this.sheetState.bodyRows[this.id];
+  get namedRowState(): RowState<TN> {
+    return this.namedSheetState.bodyRows[this.rowIndex];
   }
 }

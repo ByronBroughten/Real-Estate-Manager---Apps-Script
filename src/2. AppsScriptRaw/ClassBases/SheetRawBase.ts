@@ -36,6 +36,14 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get rowStates(): RawSheetState["rowStates"] {
     return this.sheetState.rowStates;
   }
+  get activeRowIndexes(): number[] {
+    return Array.from(this.sheetState.rowStates.keys());
+  }
+  get dataRowIndexes(): number[] {
+    return this.activeRowIndexes.filter((rowIndex) =>
+      this.sheetSchema.isDataRowIndex(rowIndex),
+    );
+  }
   get rowCount(): number {
     return this.sheetState.rowStates.size;
   }

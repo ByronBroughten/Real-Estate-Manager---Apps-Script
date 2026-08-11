@@ -1,18 +1,17 @@
 import {
-  getTableAttribute,
+  getSheetTraitByName,
+  type SheetConfig,
   type SheetName,
   type SheetNameSimple,
-  type TableAttributes,
 } from "../1.0 Configs/2.0 sheetConfigs";
 import {
+  getColumnTraitByIndex,
   getSheetColumnNames,
   type ColumnName,
 } from "../1.0 Configs/3.0 columnConfigs";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
-import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
 import type { ColumnSpecifierNamed } from "../3. SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
-import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed";
 
 const varbNameImmutable = ["baseId"] as const;
 type VarbNameImmutable = (typeof varbNameImmutable)[number];
@@ -27,22 +26,18 @@ export class SheetSchemaNamed<TN extends SheetNameSimple> extends SchemaBase {
     super();
     this.sheetName = sheetName;
   }
-  get raw(): SheetSchemaRaw {
-    return new SheetSchemaRaw(this.attribute("sheetGid"));
-  }
-  columnNameByIdx(colIdx: number): ColumnName<TN> {
-    return this.raw.column(colIdx).attribute("columnName") as ColumnName<TN>;
-  }
-  attribute<K extends keyof TableAttributes<TN>>(
-    key: K,
-  ): TableAttributes<TN>[K] {
-    return getTableAttribute(this.sheetName, key);
+  trait<K extends keyof SheetConfig>(key: K): SheetConfig[K] {
+    return getSheetTraitByName(this.sheetName, key);
   }
   get sheetGid(): number {
-    return this.attribute("sheetGid");
+    return this.trait("sheetGid");
   }
-  get spreadsheet(): SpreadsheetSchema {
-    return new SpreadsheetSchema();
+  columnNameByIdx(colIdx: number): ColumnName<TN> {
+    return getColumnTraitByIndex(
+      this.sheetGid,
+      colIdx,
+      "columnName",
+    ) as ColumnName<TN>;
   }
   column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
@@ -61,7 +56,6 @@ export class SheetSchemaNamed<TN extends SheetNameSimple> extends SchemaBase {
       return [columnSpecifier];
     }
   }
-
   get columnNames(): ColumnName<TN>[] {
     return getSheetColumnNames(this.sheetName);
   }

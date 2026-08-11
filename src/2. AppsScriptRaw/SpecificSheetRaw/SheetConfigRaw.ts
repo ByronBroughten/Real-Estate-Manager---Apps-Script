@@ -1,16 +1,16 @@
-import { Str } from "../utils/Str";
-import { type SheetRawProps } from "./ClassBases/SheetRawBase";
-import type { ColumnRaw } from "./ColumnRaw";
-import type { SheetRaw } from "./SheetRaw";
-import { SpecificSheetRawBase } from "./SpecificSheetRaw/Base/SpecificSheetRawBase";
-import { SpecificSheetRaw } from "./SpecificSheetRaw/SpecificSheetRaw";
-import { SpreadsheetRaw } from "./SpreadsheetRaw";
+import { Str } from "../../utils/Str";
+import { type SheetRawProps } from "../ClassBases/SheetRawBase";
+import type { ColumnRaw } from "../ColumnRaw";
+import type { SheetRaw } from "../SheetRaw";
+import { SpreadsheetRaw } from "../SpreadsheetRaw";
+import { SpecificSheetRawBase } from "./Base/SpecificSheetRawBase";
+import { SpecificSheetRaw } from "./SpecificSheetRaw";
 
 const sheetConfigHeader = ["Sheet GID", "Sheet name", "Has ID column"] as const;
 
 type SheetConfigHeaders = (typeof sheetConfigHeader)[number];
 
-export class SheetConfig extends SpecificSheetRawBase<SheetConfigHeaders> {
+export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeaders> {
   constructor({ ...rest }: SheetRawProps) {
     super({ headers: sheetConfigHeader, ...rest });
   }
@@ -44,7 +44,7 @@ export class SheetConfig extends SpecificSheetRawBase<SheetConfigHeaders> {
     const gidCol = this.fetchGidColumn();
     gidCol.dataValueArr.forEach((gid) => {
       if (!activeSheetGids.has(gid as number)) {
-        this.sheet.appendRowAndValues(new Map([[gidCol.colIndex, gid]]));
+        this.sheet.appendDataRowValues(new Map([[gidCol.colIndex, gid]]));
       }
     });
   }
@@ -74,23 +74,32 @@ export class SheetConfig extends SpecificSheetRawBase<SheetConfigHeaders> {
       const sheetName = row.value(sheetNameColIndex);
       const actualSheetName = Str.sentenceToCamelCase(sheet.title);
       if (sheetName !== actualSheetName) {
-        row.setValue(sheetNameColIndex, actualSheetName);
+        row.updateValue(sheetNameColIndex, actualSheetName);
         updatedValues++;
       }
 
       const hasIdCol = row.value(hasIdColCol.colIndex);
       const actualHasIdCol = sheet.headerRow.activeValueArr.includes("ID");
       if (hasIdCol !== actualHasIdCol) {
-        row.setValue(hasIdColCol.colIndex, actualHasIdCol);
+        row.updateValue(hasIdColCol.colIndex, actualHasIdCol);
         updatedValues++;
       }
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   maintainSheetConfigs() {
+    this.ensureHeaders();
     this.deleteStaleSheetConfigs();
     this.appendMissingSheetConfigs();
     this.updateProgrammaticSheetConfigValues();
+  }
+  private ensureHeaders() {
+    const numFixed = this.sheet.ensureColumnsOfHeadersExist(...this.headers);
+    if (numFixed > 0) {
+      Logger.log(
+        `Added ${numFixed} missing header(s) to the "Sheet Config" sheet.`,
+      );
+    }
   }
   updateCodeBasedOnSpreadsheet() {
     // TODO

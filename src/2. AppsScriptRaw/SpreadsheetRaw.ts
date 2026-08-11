@@ -1,9 +1,8 @@
-import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
+import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
-import type { RowRaw } from "./RowRaw";
-import { SheetConfig } from "./SheetConfig";
-import { SheetRaw } from "./SheetRaw";
+import { SheetRaw, type SheetRawRow } from "./SheetRaw";
+import { SheetConfigRaw } from "./SpecificSheetRaw/SheetConfigRaw";
 import type { GoogleSpreadsheet } from "./Types/AppsScriptTypes";
 import type {
   GridRangeProps,
@@ -18,10 +17,11 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
   }
   get schema() {
-    return new SpreadsheetSchemaRaw();
+    return new SchemaBase();
   }
-  get sheetConfig(): SheetConfig {
-    return new SheetConfig({
+  get sheetConfig(): SheetConfigRaw {
+    // This should perhaps live elsewhere.
+    return new SheetConfigRaw({
       sheetGid: this.schema.config("sheetConfigGid"),
       ...this.spreadsheetRawProps,
     });
@@ -41,7 +41,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   sheets(...sheetGids: number[]): SheetRaw[] {
     return sheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
-  rowBySheetRowId(sheetRowId: string): RowRaw {
+  rowBySheetRowId(sheetRowId: string): SheetRawRow {
     const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
   }
@@ -143,8 +143,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       if (change.append) {
         row.gatherAppendRequest();
       }
-      for (const columnName of change.update) {
-        row.gatherUpdateRequest(columnName);
+      for (const colIndex of change.update) {
+        row.gatherUpdateRequest(colIndex);
       }
     }
   }
@@ -172,52 +172,4 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     );
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
   }
-  addMissingColumnIds(): void {
-    this.fetchAllSheetsOneRow(this.schema.colIdRowIdx);
-    let sheetUpdatedCount = 0;
-    this.activeSheets.forEach((sheet) => {
-      sheet.addMissingColumnIds();
-      sheetUpdatedCount++;
-    });
-    Logger.log(
-      `ensureColumnIds: added missing column ID(s) in ${sheetUpdatedCount} sheets.`,
-    );
-  }
-  // get sheetConfigHeaders(): ValueConfig["sheetConfigHeader"] {
-  //   return this.schema.valueConfig("sheetConfigHeader");
-  // }
-  private ensureSheetConfigHeaders() {
-    // depreciated; the sheets are the source of truth for config headers.
-    const sheetConfig = this.sheet(this.schema.config("sheetConfigGid"));
-    const sheetConfigHeaders = this.schema.valueConfig("sheetConfigHeader");
-    const numFixed = sheetConfig.ensureColumnsOfHeadersExist(
-      ...sheetConfigHeaders,
-    );
-    if (numFixed > 0) {
-      Logger.log(
-        `Added ${numFixed} missing header(s) to the "${sheetConfig.schema.sheetName}" sheet.`,
-      );
-    }
-  }
-  // ensureIdColumnOnAllTables() {
-  //   this.fetchAllSheetsOneRow(this.schema.headerRowIdx);
-  //   let headersAdded = 0;
-  //   this.activeSheets.forEach((sheet) => {
-  //     headersAdded + sheet.ensureColumnsOfHeadersExist("ID");
-  //   });
-  //   if (headersAdded > 0) {
-  //     Logger.log(`Added an "ID" header column to ${headersAdded} table(s).`);
-  //   }
-  // }
-  columnSchemaPrep() {
-    this.addMissingColumnIds();
-  }
-
-  updateColumnAttributes() {}
-  copyAndDeleteLastRows() {}
-}
-
-class ValueConfig extends SpreadsheetRawBase {
-  // Should update before running the table operations
-  // Also, should update based on values in column schema, not all values
 }

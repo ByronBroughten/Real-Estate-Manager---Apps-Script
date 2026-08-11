@@ -1,7 +1,9 @@
+import type { CellValue } from "../1.0 Configs/0.0 ConfigPrecursors";
 import {
-  getTableAttributeByGid,
+  getSheetTraitByGid,
   type SheetName,
-  type TableAttributesRaw,
+  type SheetTraitRaw,
+  type SheetTraitRawKey,
 } from "../1.0 Configs/2.0 sheetConfigs";
 import {
   getSheetColumnIdxes,
@@ -23,34 +25,31 @@ export class SheetSchemaRaw extends SchemaBase {
     super();
     this.sheetGid = sheetGid;
   }
-
-  private attribute<K extends keyof TableAttributesRaw>(
-    key: K,
-  ): TableAttributesRaw[K] {
-    return getTableAttributeByGid(this.sheetGid, key);
+  trait<K extends SheetTraitRawKey>(key: K): SheetTraitRaw<K> {
+    return getSheetTraitByGid(this.sheetGid, key);
   }
   column(colIndex: number): ColumnSchemaRaw {
     return new ColumnSchemaRaw(this.sheetGid, colIndex);
   }
-  get allColumnIdxes(): MapIterator<number> {
+  get schemaColumnIdxes(): MapIterator<number> {
     return getSheetColumnIdxes(this.sheetGid);
   }
   get sheetName(): SheetName {
-    return this.attribute("sheetName");
+    return this.trait("sheetName");
   }
-  makeColumnId(): string {
-    return this.makeId("c", this._makeSheetDimensionId());
+  defaultValues(colIndexes: number[]): Map<number, CellValue> {
+    return colIndexes.reduce(
+      (acc, colIdx) => {
+        acc.set(colIdx, this.column(colIdx).makeDefaultDataValue());
+        return acc;
+      },
+      new Map() as Map<number, CellValue>,
+    );
   }
   makeRowId(): string {
-    return this.makeId("r", this._makeSheetDimensionId());
+    return this.makeRowIdFromPrefix(this.trait("idPrefix"));
   }
-  private _makeSheetDimensionId(): string {
-    const idPrefix = this.attribute("idPrefix");
-    if (!idPrefix) {
-      throw new Error(
-        `Attempted to make id for sheet ${this.sheetName} without an idPrefix`,
-      );
-    }
-    return this.makeUniqueId(idPrefix);
+  makeColumnId(): string {
+    return this.makeColIdFromPrefix(this.trait("idPrefix"));
   }
 }

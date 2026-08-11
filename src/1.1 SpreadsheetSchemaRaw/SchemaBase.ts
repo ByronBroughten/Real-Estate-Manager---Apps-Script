@@ -1,41 +1,97 @@
 import {
+  getUniformRowValueName,
+  type UniformRowName,
+  type UniformRowValueName,
+} from "../1.0 Configs/0.0 ConfigPrecursors";
+import {
   configGet,
   type SpreadsheetConfig,
 } from "../1.0 Configs/1. spreadsheetConfig";
-import {
-  valueConfigGet,
-  type ValueConfig,
-  type ValueConfigKey,
-  type ValueConfigValue,
-} from "../1.0 Configs/4.0 valueConfig";
+import type { RowRange } from "../2. AppsScriptRaw/Types/RawState";
+import { Obj } from "../utils/Obj";
+
+export function getHeaderNameByRowIndex(
+  rowIndex: number,
+): UniformRowName | undefined {
+  return rowIndexToUniformName.get(rowIndex);
+}
+
+const uniformRowIndexes = {
+  columnId: configGet("columnIdRowIdxBase0"),
+  colGroupName: configGet("columnGroupRowIdxBase0"),
+  action: configGet("actionRowIdxBase0"),
+  header: configGet("headerRowIdxBase0"),
+};
+
+const rowIndexToUniformName = new Map(
+  Obj.keys(uniformRowIndexes).map((name) => [uniformRowIndexes[name], name]),
+) as Map<number, UniformRowName>;
 
 export class SchemaBase {
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);
   }
-  valueConfig<K extends ValueConfigKey>(key: K): ValueConfig[K] {
-    return valueConfigGet(key);
+  uniformValueName<UN extends UniformRowName>(
+    name: UN,
+  ): UniformRowValueName<UN> {
+    return getUniformRowValueName(name);
   }
-  valueOfConfig<VK extends ValueConfigKey, VL extends ValueConfigValue<VK>>(
-    _: VK,
-    value: VL,
-  ): VL {
-    return value;
+  uniformRowIndex(name: UniformRowName): number {
+    return uniformRowIndexes[name];
+  }
+  uniformRowNameByIndex(rowIndex: number): UniformRowName | undefined {
+    return rowIndexToUniformName.get(rowIndex);
+  }
+  isUniformRowIndex(rowIndex: number): boolean {
+    return rowIndexToUniformName.has(rowIndex);
+  }
+  validateUniformRowIndex(rowIndex: number): void {
+    if (!this.isUniformRowIndex(rowIndex)) {
+      throw new Error(
+        `Row index ${rowIndex} is not a uniform row. Uniform rows are: ${Obj.keys(
+          uniformRowIndexes,
+        )
+          .map((name) => `${name} (index ${uniformRowIndexes[name]})`)
+          .join(", ")}`,
+      );
+    }
+  }
+  isDataRowIndex(rowIndex: number): boolean {
+    return rowIndex >= this.topDataRowIdx;
+  }
+  validateDataRowIndex(rowIndex: number): void {
+    if (!this.isDataRowIndex(rowIndex)) {
+      throw new Error(
+        `Row index ${rowIndex} is not a data row. Data rows start at index ${this.topDataRowIdx}.`,
+      );
+    }
   }
   get colIdRowIdx(): number {
-    return this.config("columnIdRowIdxBase0");
+    return uniformRowIndexes.columnId;
+  }
+  get headerRowIdx(): number {
+    return uniformRowIndexes.header;
+  }
+  get actionRowIdx(): number {
+    return uniformRowIndexes.action;
   }
   get topDataRowIdx(): number {
     return this.config("topDataRowIdxBase0");
   }
-  get headerRowIdx(): number {
-    return this.config("headerRowIdxBase0");
-  }
-  get actionRowIdx(): number {
-    return this.config("actionRowIdxBase0");
-  }
   get idDelimiter(): string {
     return this.config("idDelimiter");
+  }
+  makeColIdFromPrefix(idPrefix: string): string {
+    return this.makeId("c", this._makeSheetDimensionId(idPrefix));
+  }
+  makeRowIdFromPrefix(idPrefix: string): string {
+    return this.makeId("r", this._makeSheetDimensionId(idPrefix));
+  }
+  private _makeSheetDimensionId(idPrefix: string): string {
+    if (!idPrefix) {
+      throw new Error(`Attempted to make id for sheet without an idPrefix`);
+    }
+    return this.makeUniqueId(idPrefix);
   }
   makeId(prefix: unknown, suffix: unknown): string {
     return `${prefix}${this.config("idDelimiter")}${suffix}`;
@@ -63,6 +119,31 @@ export class SchemaBase {
     }
     return { prefix, suffix };
   }
+  idsFromSheetColumnId(sheetColumnId: string): {
+    sheetGid: number;
+    colIndex: number;
+  } {
+    const { idx, ...rest } = this._idsFromSheetIdxId(sheetColumnId);
+    return { ...rest, colIndex: idx };
+  }
+  idsFromSheetRowId(sheetRowId: string): { sheetGid: number; rowIdx: number } {
+    const { idx, ...rest } = this._idsFromSheetIdxId(sheetRowId);
+    return { ...rest, rowIdx: idx };
+  }
+  private _idsFromSheetIdxId(sheetRowId: string): {
+    sheetGid: number;
+    idx: number;
+  } {
+    const { prefix, suffix } = this.splitId(sheetRowId);
+    const sheetGid = parseInt(prefix);
+    const idx = parseInt(suffix);
+    if (isNaN(sheetGid) || isNaN(idx)) {
+      throw new Error(
+        `Invalid sheetRowId: ${sheetRowId}. Must be in numeric values with a delimiter.`,
+      );
+    }
+    return { sheetGid, idx };
+  }
   private _makeUniqueIdBase(): string {
     const length = 7;
     const alphabet =
@@ -72,5 +153,11 @@ export class SchemaBase {
       result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
     }
     return result;
+  }
+  oneRowSpecifier(startRowIndex: number): RowRange {
+    return {
+      startRowIndex,
+      endRowIndex: startRowIndex + 1,
+    };
   }
 }

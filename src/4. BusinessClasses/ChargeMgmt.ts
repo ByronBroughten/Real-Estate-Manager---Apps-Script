@@ -1,6 +1,6 @@
 import type { TableValues } from "../1.0 Configs/3.0 columnConfigs";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
+import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
@@ -157,7 +157,7 @@ export class ChargeMgmt extends OperatorBase {
     householdId: string;
     month: number;
     year: number;
-  }): RowNamed<"occCharge">[] {
+  }): DataRowNamed<"occCharge">[] {
     const occCharge = this.sheet("occCharge");
     return occCharge.dataRows.filter((row) => {
       const date = row.valueDate("date");
@@ -172,8 +172,8 @@ export class ChargeMgmt extends OperatorBase {
     month,
     year,
   }: HhIdMonthYear): {
-    activeoccupancyTermss: RowNamed<"occupancyTerms">[];
-    activeScCharges: RowNamed<"subsidyContract">[];
+    activeoccupancyTermss: DataRowNamed<"occupancyTerms">[];
+    activeScCharges: DataRowNamed<"subsidyContract">[];
   } {
     const occupancyTerms = this.sheet("occupancyTerms");
     const subsidyContract = this.sheet("subsidyContract");
@@ -206,7 +206,7 @@ export class ChargeMgmt extends OperatorBase {
     householdId: string;
     month: number;
     year: number;
-  }): RowNamed<TN>[] {
+  }): DataRowNamed<TN>[] {
     const firstOfMonth = utils.date.firstDayOfMonthNext({ month, year });
     const lastOfMonth = utils.date.lastDayOfMonthNext({ month, year });
     return sheet.dataRows.filter((row) => {
@@ -318,8 +318,8 @@ export class ChargeMgmt extends OperatorBase {
     sharedChargeValues: SharedChargeLeaseValues;
     month: number;
     year: number;
-    activeoccupancyTermss: RowNamed<"occupancyTerms">[];
-    activeScCharges: RowNamed<"subsidyContract">[];
+    activeoccupancyTermss: DataRowNamed<"occupancyTerms">[];
+    activeScCharges: DataRowNamed<"subsidyContract">[];
   }) {
     const occCharge = this.sheet("occCharge");
 

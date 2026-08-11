@@ -1,15 +1,15 @@
-import { allsheetNames } from "../1.0 Configs/2.0 sheetConfigs";
+import { allSheetNames } from "../1.0 Configs/2.0 sheetConfigs";
 import { Arr } from "../utils/Arr";
 
 const sheetNameGroups = {
   aggregateApi: Arr.extractStrict(
-    allsheetNames,
+    allSheetNames,
     "addOccChargeOnetime",
     "addHhPaymentOnetime",
     "addExpenses",
   ),
   ledgerInputs: Arr.extractStrict(
-    allsheetNames,
+    allSheetNames,
     "occCharge",
     "occPayAllocation",
   ),

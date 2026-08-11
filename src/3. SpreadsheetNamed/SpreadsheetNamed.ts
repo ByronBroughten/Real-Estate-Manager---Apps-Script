@@ -28,9 +28,10 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return this.spreadsheetSchema;
   }
   get activeSheetNames(): SheetName[] {
-    return Obj.keys(this.namedState.sheetRowIdsToIndexes);
+    return [...this.raw.activeSheetGids].map(
+      (sheetGid) => this.schema.raw.sheet(sheetGid).sheetName,
+    );
   }
-
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
       sheetName,
@@ -68,6 +69,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       };
     });
   }
+
   private _standardizeColumnSpecifiers<SN extends SheetName>(
     columnSpecifier: FetchColumnSpecifierNamed<SN>,
   ): SheetColumnNamesStandard<SN> {
@@ -92,6 +94,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }, {} as SheetColumnNamesStandard<SN>);
     }
   }
+
   private _reqSheetsPropsArrToRaw(
     propsArr: FetchPropsStandardNamed<SheetName>[],
   ): SpreadsheetNamed {
@@ -162,7 +165,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }, new Set() as Set<T>);
   }
   fillMissingRowIds() {
-    // change this stuff to not raw
+    // maybe change this stuff to not raw
     this.raw.fetchAllSheetsOneRow(this.schema.headerRowIdx);
     this.activeSheets.forEach((sheet) => {
       const headers = sheet.raw.headerRow.activeValueArr;
@@ -172,8 +175,8 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
         );
       }
       const idColIdx = headers.indexOf("ID");
-      const idCol = sheet.raw.column(idColIdx);
-      idCol.fillEmptyDataCellsWithDefaultValues();
+      const idCol = sheet.rich.column(idColIdx);
+      idCol.dataCellsToDefault();
     });
   }
   convenience() {
@@ -193,5 +196,5 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   // HeaderRow, GroupNameRow, DataRow, ActionRow, ColumnIdRow
   // GroupNameRow and HeaderRow could each be unimplemented and throw errors on operations
   // They each contain RawRow
-  // They are each based on RowNamed
+  // They are each based on DataRowNamed
 }

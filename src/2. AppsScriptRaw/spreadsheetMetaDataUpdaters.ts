@@ -1,8 +1,8 @@
 function buildSpreadsheetColumnMeta() {
   // ensureColumnIds();
-  pruneAllColumnAttributes();
-  appendAllColumnAttributes();
-  syncAllColumnAttributes();
+  pruneColTraits();
+  appendColTraits();
+  syncColTraits();
 }
 
 // Try claude code for reimplementing these one at a time.
@@ -32,7 +32,7 @@ function makeRowId(idPrefix) {
 }
 
 const sheetNames = {
-  "210603630": "allTableAttributes",
+  "210603630": "sheetConfig",
   "1967106628": "config",
   "2119236084": "validationList",
   "243663296": "year",
@@ -71,7 +71,7 @@ const sheetNames = {
   "802789198": "propertyYear",
   "1452711715": "householdYear",
   "731807482": "hhLedger",
-  "2034522667": "allColumnAttributes",
+  "2034522667": "columnConfig",
   "2089200354": "test",
   "1246014413": "export",
   "1814139876": "finance",
@@ -138,7 +138,7 @@ const sheetIdPrefixes = {
   "1529539239": "vnm",
 };
 
-function pruneAllColumnAttributes() {
+function pruneColTraits() {
   const SPREADSHEET_ID = SpreadsheetApp.getActiveSpreadsheet().getId();
   const META_SHEET_GID = 2034522667;
   const META_SHEET_TITLE = "All Column Attributes";
@@ -423,7 +423,7 @@ function appendColumnRows(spreadsheetId) {
   return { appended: missingRows.length, columnIds: appendedIds };
 }
 
-function syncAllColumnAttributes() {
+function syncColTraits() {
   const spreadsheetId = SpreadsheetApp.getActiveSpreadsheet().getId();
 
   const ALL_COL_ATTR_SHEET_ID = 2034522667;
@@ -671,7 +671,7 @@ function getDataType(cell) {
  * Requires the "Sheets" Advanced Google Service to be enabled
  * (Apps Script editor -> Services -> Google Sheets API).
  */
-function appendAllColumnAttributes() {
+function appendColTraits() {
   const META_SHEET_NAME = "All Column Attributes";
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const spreadsheetId = ss.getId();
@@ -755,9 +755,9 @@ function appendAllColumnAttributes() {
     const row4 = (rowData[2] && rowData[2].values) || [];
 
     table.columnProperties.forEach((cp, colIdx) => {
-      const colId = cellString(row2[colIdx]);
-      if (!colId) return; // nothing to key off of
-      if (existingIds.has(colId)) return; // already documented
+      const columnId = cellString(row2[colIdx]);
+      if (!columnId) return; // nothing to key off of
+      if (existingIds.has(columnId)) return; // already documented
 
       const header = cp.columnName || "";
       const camelHeader = sentenceToCamelCase(header);
@@ -768,14 +768,14 @@ function appendAllColumnAttributes() {
       const valueName = getValueName(header, cp, row4Cell);
 
       const rowValues = {};
-      rowValues[metaColIndex["Column ID"]] = strVal(colId);
+      rowValues[metaColIndex["Column ID"]] = strVal(columnId);
       rowValues[metaColIndex["Sheet name camel case"]] = strVal(table.name);
       rowValues[metaColIndex["Column name"]] = strVal(camelHeader);
       rowValues[metaColIndex["Is formula"]] = boolVal(isFormula);
       rowValues[metaColIndex["Value name"]] = strVal(valueName);
 
       missingRows.push(rowValues);
-      existingIds.add(colId); // guard against the same ID appearing twice
+      existingIds.add(columnId); // guard against the same ID appearing twice
     });
   });
 

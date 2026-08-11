@@ -1,38 +1,49 @@
-import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs";
 import {
-  getColumnAttribute,
-  type ColumnAttributes,
-  type ColumnAttributesBase,
+  getSheetTraitByName,
+  type SheetName,
+} from "../1.0 Configs/2.0 sheetConfigs";
+import {
+  getColumnTraitByName,
+  type ColTraits,
+  type ColTraitsBase,
   type ColumnName,
-  type ColumnValue,
   type ColumnValueName,
 } from "../1.0 Configs/3.0 columnConfigs";
 import { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
-import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { CombineStringsWithFlat } from "../utils/Str";
+import type { ValueSchemaKey } from "./3.0 valueSchema";
 import {
-  getValueAttribute,
-  type ValueAttributes,
+  getValTrait,
   type ValueName,
+  type ValueSchema,
 } from "./3.2 valueSchemas";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class ColumnSchemaNamed<
   TN extends SheetName = SheetName,
   CN extends ColumnName<TN> = ColumnName<TN>,
-> extends SchemaBase {
+> extends ColumnSchemaRaw {
   readonly sheetName: TN;
   readonly columnName: CN;
   constructor(sheetName: TN, columnName: CN) {
-    super();
+    super(
+      getSheetTraitByName(sheetName, "sheetGid"),
+      getColumnTraitByName(sheetName, columnName, "colIndex"),
+    );
     this.sheetName = sheetName;
     this.columnName = columnName;
   }
+  traitByName<K extends keyof ColTraitsBase>(
+    key: K,
+  ): ColTraits<TN, CN>[K & keyof ColTraits<TN, CN>] {
+    return getColumnTraitByName(
+      this.sheetName,
+      this.columnName,
+      key as unknown as keyof ColTraits<TN, CN>,
+    ) as ColTraits<TN, CN>[K & keyof ColTraits<TN, CN>];
+  }
   get sheetSchema(): SheetSchemaNamed<TN> {
     return new SheetSchemaNamed(this.sheetName);
-  }
-  get raw(): ColumnSchemaRaw {
-    return new ColumnSchemaRaw(this.sheetSchema.sheetGid, this.colIndex);
   }
   get columnFullname(): CombineStringsWithFlat<TN, CN & string> {
     return `${this.sheetName}_${this.columnName as string}` as CombineStringsWithFlat<
@@ -40,44 +51,12 @@ export class ColumnSchemaNamed<
       CN & string
     >;
   }
-  get colIndex(): number {
-    return this.colAttribute("colIndex");
-  }
-  get columnId(): string {
-    return this.colAttribute("columnId");
-  }
-  colAttribute<K extends keyof ColumnAttributesBase>(
+  valTrait<K extends ValueSchemaKey>(
     key: K,
-  ): ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>] {
-    return getColumnAttribute(
-      this.sheetName,
-      this.columnName,
-      key as unknown as keyof ColumnAttributes<TN, CN>,
-    ) as ColumnAttributes<TN, CN>[K & keyof ColumnAttributes<TN, CN>];
-  }
-  get valueName(): ColumnValueName<TN, CN> {
-    return this.colAttribute("valueName");
-  }
-  valueAttribute<
-    K extends keyof ValueAttributes<ColumnValueName<TN, CN> & ValueName>,
-  >(key: K) {
-    return getValueAttribute(
+  ): ValueSchema<ColumnValueName<TN, CN> & ValueName>[K] {
+    return getValTrait(
       this.valueName as ColumnValueName<TN, CN> & ValueName,
       key,
     );
-  }
-  validate(value: unknown): ColumnValue<TN, CN> {
-    return this.raw.validate(value) as ColumnValue<TN, CN>;
-  }
-  makeDefaultDataValue(): ColumnValue<TN, CN> {
-    return this.valueAttribute("makeDefault")() as ColumnValue<TN, CN>;
-  }
-  get isFormula(): boolean {
-    const defaultValue = this.makeDefaultDataValue();
-    if (typeof defaultValue === "string" && defaultValue.startsWith("=")) {
-      return true;
-    } else {
-      return false;
-    }
   }
 }

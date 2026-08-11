@@ -1,10 +1,15 @@
-import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
+import {
+  type UniformRowName,
+  type UniformRowValueName,
+} from "../1.0 Configs/0.0 ConfigPrecursors";
+import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { Value } from "../2.0 Schemas/3.2 valueSchemas";
 import { Obj, type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
+
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import type {
   GoogleCellValue,
@@ -19,27 +24,60 @@ import type {
   SheetChangesToSave,
   SortParameters,
 } from "./Types/RawState";
+import { UniformRow } from "./UniformRowRaw/UniformRow";
 
 type SheetGridRangeProps = StrictOmit<GridRangeProps, "sheetId">;
+export type SheetRawRow = RowRaw | UniformRow<"string" | "boolean">;
 
 export class SheetRaw extends SheetRawBase {
-  get spreadsheet(): SpreadsheetRaw {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
-  }
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  get schema(): SheetSchemaRaw {
-    return new SheetSchemaRaw(this.sheetGid);
+  get schema(): SchemaBase {
+    return new SchemaBase();
   }
   get title(): string {
     return this.sheetState.title;
   }
-  row(rowIdx: number): RowRaw {
+  get headerRow(): UniformRow<"string"> {
+    return this.row(this.schema.headerRowIdx) as UniformRow<"string">;
+  }
+  get actionRow(): UniformRow<"boolean"> {
+    return this.row(this.schema.actionRowIdx) as UniformRow<"boolean">;
+  }
+  get colIdRow(): UniformRow<"string"> {
+    return this.row(this.schema.colIdRowIdx) as UniformRow<"string">;
+  }
+  rowRaw(rowIdx: number): RowRaw {
     return new RowRaw({
       rowIndex: rowIdx,
       ...this.sheetRawProps,
     });
+  }
+  uniformRow<UN extends UniformRowName>(
+    rowName: UN,
+  ): UniformRow<UniformRowValueName<UN>> {
+    return new UniformRow({
+      ...this.sheetRawProps,
+      rowIndex: this.schema.uniformRowIndex(rowName),
+      valueName: this.schema.uniformValueName(rowName),
+    });
+  }
+  uniformRowByIndex(rowIndex: number): UniformRow<"string" | "boolean"> {
+    const rowName = this.schema.uniformRowNameByIndex(rowIndex);
+    if (!rowName) {
+      throw new Error(
+        `Row index ${rowIndex} does not correspond to a known uniform row name.`,
+      );
+    }
+    return this.uniformRow(rowName);
+  }
+  row(rowIdx: number): RowRaw | UniformRow<"string" | "boolean"> {
+    if (this.schema.isUniformRowIndex(rowIdx)) {
+      return this.uniformRowByIndex(rowIdx);
+    } else {
+      this.rowRaw(rowIdx);
+    }
   }
   column(colIndex: number): ColumnRaw {
     return new ColumnRaw({
@@ -47,33 +85,21 @@ export class SheetRaw extends SheetRawBase {
       ...this.sheetRawProps,
     });
   }
-  get topDataRow(): RowRaw {
-    return this.row(this.schema.topDataRowIdx);
-  }
-  get headerRow(): RowRaw {
-    return this.row(this.schema.headerRowIdx);
-  }
-  get actionRow(): RowRaw {
-    return this.row(this.schema.actionRowIdx);
-  }
-  get colIdRow(): RowRaw {
-    return this.row(this.schema.colIdRowIdx);
-  }
-  get activeRows(): RowRaw[] {
-    return Array.from(this.sheetState.rowStates.keys()).map((rowIndex) =>
-      this.row(rowIndex),
-    );
-  }
   get dataRows(): RowRaw[] {
-    return this.activeRows.filter(
-      (row) => row.rowIndex >= this.schema.topDataRowIdx,
-    );
+    return this.dataRowIndexes.map((index) => this.dataRow(index));
+  }
+  get topDataRow(): RowRaw {
+    return this.row(this.schema.topDataRowIdx) as RowRaw;
+  }
+  dataRow(index: number): RowRaw {
+    this.schema.validateDataRowIndex(index);
+    return this.row(index) as RowRaw;
+  }
+  get activeRows(): SheetRawRow[] {
+    return this.activeRowIndexes.map((rowIndex) => this.row(rowIndex));
   }
   get activeColumnIdxs(): number[] {
     return this.activeRows[0].activeColIdxs;
-  }
-  get activeRowIndexes(): number[] {
-    return Array.from(this.sheetState.rowStates.keys());
   }
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
@@ -119,19 +145,24 @@ export class SheetRaw extends SheetRawBase {
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
-          this.row(rowIdx).integrateState(colIdx, cellData);
+          this.rowRaw(rowIdx).integrateState(colIdx, cellData);
         });
       });
     });
   }
-  addMissingColumnIds(): void {
-    const colIdRow = this.row(this.schema.colIdRowIdx);
+  addMissingColumnIds(idPrefix): void {
     this.activeColumnIdxs.forEach((colIdx) => {
-      const colIdValue = colIdRow.value(colIdx);
+      const colIdValue = this.colIdRow.value(colIdx);
       if (!colIdValue) {
-        colIdRow.setValue(colIdx, this.schema.makeColumnId());
+        this.colIdRow.updateValue(colIdx, this.makeColumnId(idPrefix));
       }
     });
+  }
+  makeColumnId(idPrefix: string): string {
+    return this.schema.makeColIdFromPrefix(idPrefix);
+  }
+  makeRowId(idPrefix: string): string {
+    return this.schema.makeRowIdFromPrefix(idPrefix);
   }
   gatherGetRequest(props: SheetGridRangeProps): SheetRaw {
     this.rawState.getterGridRanges.push({
@@ -146,39 +177,25 @@ export class SheetRaw extends SheetRawBase {
   }
   gatherOneRowGetRequest(rowIndex: number): SheetRaw {
     return this.gatherGetRequest({
-      ...this.spreadsheet.schema.oneRowSpecifier(rowIndex),
+      ...this.schema.oneRowSpecifier(rowIndex),
       startColumnIndex: 0,
       endColumnIndex: this.activeTable.endColumnIndex,
     });
   }
-  fetchHeaderRow(): RowRaw {
-    return this.fetchOneRow(this.schema.headerRowIdx);
+  fetchHeaderRow(): UniformRow<"string"> {
+    return this.fetchOneRow(this.schema.headerRowIdx) as UniformRow<"string">;
   }
-  fetchOneRow(rowIndex: number): RowRaw {
+  fetchOneRow(rowIndex: number): SheetRawRow {
     this.gatherOneRowGetRequest(rowIndex);
     this.ss.fetchSheets();
     return this.row(rowIndex);
   }
-  verifyColumnIds() {
-    const row = this.row(this.schema.colIdRowIdx);
-    row.validateIsActive();
-
-    const activeColIdxs = row.activeColIdxs;
-    if (!activeColIdxs.length) {
-      throw new Error(
-        `Column ID row state not found for sheet ${this.sheetGid}. Cannot verify column IDs.`,
-      );
-    }
-    activeColIdxs.forEach((colIdx) => {
-      this._verifyColumnId(colIdx);
-    });
-  }
   ensureColumnsOfHeadersExist(...headers: string[]): number {
     const missingHeaders = this.headerRow.returnMissingValues(...headers);
-    return missingHeaders.reduce<number>((acc, header) => {
+    return missingHeaders.reduce((acc, header) => {
       const index = this.activeTable.endColumnIndex;
       this.insertColumnAt(index);
-      this.headerRow.setValue(index, header);
+      this.headerRow.updateValue(index, header);
       return acc + 1;
     }, 0);
   }
@@ -200,18 +217,6 @@ export class SheetRaw extends SheetRawBase {
     this.ss.fetchSheets();
     return columns;
   }
-  private _verifyColumnId(colIdx: number): void {
-    const colSchema = this.schema.column(colIdx);
-    const colIdInSchema = colSchema.attribute("columnId");
-
-    const colIdRow = this.row(this.schema.colIdRowIdx);
-    const colIdValue = colIdRow.value(colIdx);
-    if (colIdValue !== colIdInSchema) {
-      throw new Error(
-        `colIdValue is "${colIdValue}" but expected "${colIdInSchema}". Are all the column ids and indexes up to date?`,
-      );
-    }
-  }
   get lastRowIdx(): number {
     return Math.max(...this.sheetState.rowStates.keys());
   }
@@ -221,25 +226,18 @@ export class SheetRaw extends SheetRawBase {
   validateRowIndexes(): void {
     this.sheetState.rowIndexesAreValid = true;
   }
-  appendRow(): RowRaw {
+  appendDataRow(): RowRaw {
     const idx = this.activeTable.endRowIndex;
-    this.sheetState.rowStates[idx] = new Map();
-    this.activeTable.endRowIndex++;
-    return this.row(idx)._addChangeToSave({ action: "append" });
+    return this.dataRow(idx).append();
   }
-  appendRowDefault(): RowRaw {
-    return this.appendRow().setDataRowToDefault(
-      ...this.topDataRow.activeColIdxsNotFormula,
-    );
-  }
-  appendRowAndValues(colValues: Map<number, Value>): RowRaw {
-    const row = this.appendRowDefault();
+  appendDataRowValues(colValues: Map<number, Value>): RowRaw {
+    const row = this.appendDataRow();
     for (const [colIdx, value] of colValues.entries()) {
-      row.setValue(colIdx, value);
+      row.updateValue(colIdx, value);
     }
     return row;
   }
-  DELETE_ACTIVE_ROWS(
+  DELETE_ACTIVE_DATA_ROWS(
     startRowIdx: number,
     numRows: number = this.rowCount - startRowIdx,
   ): SheetRaw {
@@ -249,7 +247,7 @@ export class SheetRaw extends SheetRawBase {
         ([rowIdx]) => rowIdx >= startRowIdx && rowIdx < startRowIdx + numRows,
       )
       .forEach(([rowIdx]) => {
-        const row = this.row(rowIdx);
+        const row = this.dataRow(rowIdx);
         row.delete();
       });
     return this;
@@ -278,13 +276,13 @@ export class SheetRaw extends SheetRawBase {
     }
   }
   requestSortGSheet({ colIdxToSortBy, sortOrder }: SortParameters): void {
-    this._addChangeToSave({
+    this.addSheetChangeToSave({
       action: "sort",
       colIdxToSortBy,
       sortOrder,
     });
   }
-  _addChangeToSave(props: SheetChangeProps): SheetRaw {
+  addSheetChangeToSave(props: SheetChangeProps): SheetRaw {
     const changes = this.changesToSave;
     const actions: {
       [K in keyof SheetChangePropsObj]: (props: SheetChangePropsObj[K]) => any;
@@ -311,7 +309,7 @@ export class SheetRaw extends SheetRawBase {
     return this;
   }
   insertColumnAt(startColumnIndex: number = 0): void {
-    this._addChangeToSave({
+    this.addSheetChangeToSave({
       action: "insertColumn",
       startColumnIndex,
     });
@@ -362,5 +360,17 @@ export class SheetRaw extends SheetRawBase {
         sortSpecs: [{ dimensionIndex: colIdxToSortBy, sortOrder }],
       },
     });
+  }
+  copyAndDeleteLastActiveDataRow() {
+    // I'd want to insert rather than append.
+    // Can I append at the not last row? Probably not.
+    const lastRowIdx = this.lastRowIdx;
+    const lastRow = this.dataRow(lastRowIdx);
+    const newRow = this.appendDataRow();
+    lastRow.activeColIdxs.forEach((colIdx) => {
+      const value = lastRow.value(colIdx);
+      newRow.updateValue(colIdx, value);
+    });
+    lastRow.delete();
   }
 }

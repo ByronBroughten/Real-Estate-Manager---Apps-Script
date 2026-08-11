@@ -30,7 +30,7 @@ export function _testCustomTableTypes(spreadsheetId: string) {
         values: [
           {
             userEnteredValue: {
-              stringValue: "New RowNamed Entry",
+              stringValue: "New DataRowNamed Entry",
             },
           },
         ],

@@ -1,9 +1,9 @@
 import type { TableValues } from "../1.0 Configs/3.0 columnConfigs";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
+import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
 import { Obj } from "../utils/Obj";
 
-type PaymentIdToCharges = Record<string, RowNamed<"occCharge">[]>;
+type PaymentIdToCharges = Record<string, DataRowNamed<"occCharge">[]>;
 
 type ChargeIdsForPayments = {
   paymentGroup: {
@@ -120,7 +120,7 @@ export class PaymentMgmt extends OperatorBase {
           amount += charge.valueNumber("amount");
           Obj.pushByKey(paymentIdToCharges, paymentId, charge);
         }
-        payment.row(paymentId).setValue("amount", amount);
+        payment.row(paymentId).updateValue("amount", amount);
       }
 
       const handlers: Record<PaymentGroupType, () => void> = {

@@ -1,62 +1,19 @@
-import { allSheetGids } from "../1.0 Configs/2.0 sheetConfigs";
-import type { RowRange } from "../2. AppsScriptRaw/Types/RawState";
+import { schemaSheetGids } from "../1.0 Configs/2.0 sheetConfigs";
 
-import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchemaRaw } from "./SheetSchemaRaw";
 
 export class SpreadsheetSchemaRaw extends SchemaBase {
+  get schemaSheetGids(): number[] {
+    return schemaSheetGids;
+  }
   sheet(sheetGid: number): SheetSchemaRaw {
     return new SheetSchemaRaw(sheetGid);
   }
-  column(sheetGid: number, colIndex: number): ColumnSchemaRaw {
-    return new ColumnSchemaRaw(sheetGid, colIndex);
-  }
-  oneRowSpecifier(startRowIndex: number): RowRange {
-    return {
-      startRowIndex,
-      endRowIndex: startRowIndex + 1,
-    };
+  sheetNameFromGid(sheetGid: number) {
+    this.sheet(sheetGid).trait("sheetName");
   }
   makeSheetIdxId(sheetGid: number, idx: number): string {
     return this.makeId(sheetGid, idx);
-  }
-  idsFromSheetColumnId(sheetColumnId: string): {
-    sheetGid: number;
-    colIndex: number;
-  } {
-    const { idx, ...rest } = this._idsFromSheetIdxId(sheetColumnId);
-    return { ...rest, colIndex: idx };
-  }
-  idsFromSheetRowId(sheetRowId: string): { sheetGid: number; rowIdx: number } {
-    const { idx, ...rest } = this._idsFromSheetIdxId(sheetRowId);
-    return { ...rest, rowIdx: idx };
-  }
-  specifyAllSheetsAndColumns(): Map<number, number[]> {
-    return this.allSheetGids.reduce(
-      (acc, sheetGid) => {
-        acc[sheetGid] = [...this.sheet(sheetGid).allColumnIdxes];
-        return acc;
-      },
-      new Map() as Map<number, number[]>,
-    );
-  }
-  private _idsFromSheetIdxId(sheetRowId: string): {
-    sheetGid: number;
-    idx: number;
-  } {
-    const { prefix, suffix } = this.splitId(sheetRowId);
-    const sheetGid = parseInt(prefix);
-    const idx = parseInt(suffix);
-    if (isNaN(sheetGid) || isNaN(idx)) {
-      throw new Error(
-        `Invalid sheetRowId: ${sheetRowId}. Must be in numeric values with a delimiter.`,
-      );
-    }
-    return { sheetGid, idx };
-  }
-
-  get allSheetGids(): number[] {
-    return allSheetGids;
   }
 }

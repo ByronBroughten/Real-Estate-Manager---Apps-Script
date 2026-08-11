@@ -1,7 +1,7 @@
 
 import type { GroupToSheetName } from "../2.0 Schemas/SheetNameGroups";
 import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { RowNamed } from "../3. SpreadsheetNamed/RowNamed";
+import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
 import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
 import { Obj } from "../utils/Obj";
 
@@ -23,7 +23,7 @@ function rowsOfIdAndPortion<TN extends LedgerInputSn>({
   householdId,
   subsidyAgreementId,
   portion,
-}: RowsOfIdAndPortionProps<TN>): RowNamed<TN>[] {
+}: RowsOfIdAndPortionProps<TN>): DataRowNamed<TN>[] {
   const rows = sheet.dataRows;
   return rows.filter((row) => {
     const vals = row.values("portion", "householdId", "subsidyAgreementId");

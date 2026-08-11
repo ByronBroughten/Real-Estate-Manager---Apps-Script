@@ -9,7 +9,6 @@ export type RowIdsToIndexes = Record<string, number>;
 export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
 export type SpreadsheetNamedState = {
   gridRangeFetchProps: GridRangeProps[];
-  sheetRowIdsToIndexes: SheetRowIdsToIndexes;
 };
 
 type SheetColumnNames<SN extends SheetName> = {
