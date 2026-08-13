@@ -12,6 +12,7 @@ const updateRequestNames = [
 export type UpdateRequestName = (typeof updateRequestNames)[number];
 
 export interface RawState {
+  allSheetPropertiesAreFetched: boolean;
   changesToSave: ChangesToSave;
   getterGridRanges: GoogleGridRange[];
   updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;

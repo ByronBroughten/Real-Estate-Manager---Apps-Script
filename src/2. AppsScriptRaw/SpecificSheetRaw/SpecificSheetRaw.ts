@@ -11,10 +11,29 @@ export class SpecificSheetRaw<
   get sheet() {
     return this.ss.sheet(this.sheetGid);
   }
-  fetchColumnOfHeader(header: HS): ColumnRaw {
-    return this.sheet.fetchColumnOfHeader(header);
+  fetchPrerequisitesForColumns() {
+    this.sheet.prepFetchProperties();
+    this.sheet.prepFetchFullUniformRow("header");
+    this.ss.fetchAll();
   }
-  fetchColumnsOfHeaders<H extends HS>(...headers: H[]): Record<H, ColumnRaw> {
-    return this.sheet.fetchColumnsOfHeaders(...headers);
+  prepFetchDataColumnOfFetchedHeader<H extends HS>(header: H): ColumnRaw {
+    const colIndex = this.sheet.headerRow.colIndexOfValue(header);
+    return this.sheet.column(colIndex).prepFetchDataRange();
+  }
+  fetchDataColumnOfFetchedHeader<H extends HS>(header: H): ColumnRaw {
+    const column = this.prepFetchDataColumnOfFetchedHeader(header);
+    this.ss.fetchAll();
+    return column;
+  }
+  prepFetchDataColumnsOfFetchedHeaders<H extends HS>(
+    ...headers: H[]
+  ): Record<H, ColumnRaw> {
+    return headers.reduce(
+      (acc, header) => {
+        acc[header] = this.prepFetchDataColumnOfFetchedHeader(header);
+        return acc;
+      },
+      {} as Record<H, ColumnRaw>,
+    );
   }
 }

@@ -7,7 +7,7 @@ export type ValueSchemaBase<V extends unknown = unknown> = {
 export type ValueSchemaKey = keyof ValueSchemaBase;
 
 type MakeDefaultValueBase<V extends unknown> = () => V;
-type ValidateValueBase<V extends unknown> = (value: unknown) => V;
+type ValidateValueBase<V extends unknown> = (value: unknown) => Exclude<V, "">;
 
 export function vsc<V extends unknown>(props: {
   type: V;

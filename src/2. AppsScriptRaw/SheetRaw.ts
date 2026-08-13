@@ -1,6 +1,6 @@
 import {
+  type CellValueName,
   type UniformRowName,
-  type UniformRowValueName,
 } from "../1.0 Configs/0.0 ConfigPrecursors";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { Value } from "../2.0 Schemas/3.2 valueSchemas";
@@ -27,7 +27,7 @@ import type {
 import { UniformRow } from "./UniformRowRaw/UniformRow";
 
 type SheetGridRangeProps = StrictOmit<GridRangeProps, "sheetId">;
-export type SheetRawRow = RowRaw | UniformRow<"string" | "boolean">;
+export type SheetRawRow = RowRaw | UniformRow;
 
 export class SheetRaw extends SheetRawBase {
   get ss(): SpreadsheetRaw {
@@ -39,14 +39,14 @@ export class SheetRaw extends SheetRawBase {
   get title(): string {
     return this.sheetState.title;
   }
-  get headerRow(): UniformRow<"string"> {
-    return this.row(this.schema.headerRowIdx) as UniformRow<"string">;
+  get headerRow(): UniformRow<"header"> {
+    return this.uniformRow("header");
   }
-  get actionRow(): UniformRow<"boolean"> {
-    return this.row(this.schema.actionRowIdx) as UniformRow<"boolean">;
+  get actionRow(): UniformRow<"action"> {
+    return this.uniformRow("action");
   }
-  get colIdRow(): UniformRow<"string"> {
-    return this.row(this.schema.colIdRowIdx) as UniformRow<"string">;
+  get colIdRow(): UniformRow<"columnId"> {
+    return this.uniformRow("columnId");
   }
   rowRaw(rowIdx: number): RowRaw {
     return new RowRaw({
@@ -54,16 +54,14 @@ export class SheetRaw extends SheetRawBase {
       ...this.sheetRawProps,
     });
   }
-  uniformRow<UN extends UniformRowName>(
-    rowName: UN,
-  ): UniformRow<UniformRowValueName<UN>> {
+  uniformRow<UN extends UniformRowName>(uniformRowName: UN): UniformRow<UN> {
     return new UniformRow({
       ...this.sheetRawProps,
-      rowIndex: this.schema.uniformRowIndex(rowName),
-      valueName: this.schema.uniformValueName(rowName),
+      rowIndex: this.schema.uniformRowIndex(uniformRowName),
+      uniformRowName,
     });
   }
-  uniformRowByIndex(rowIndex: number): UniformRow<"string" | "boolean"> {
+  uniformRowByIndex(rowIndex: number): UniformRow {
     const rowName = this.schema.uniformRowNameByIndex(rowIndex);
     if (!rowName) {
       throw new Error(
@@ -72,16 +70,20 @@ export class SheetRaw extends SheetRawBase {
     }
     return this.uniformRow(rowName);
   }
-  row(rowIdx: number): RowRaw | UniformRow<"string" | "boolean"> {
+  row(rowIdx: number): RowRaw | UniformRow {
     if (this.schema.isUniformRowIndex(rowIdx)) {
       return this.uniformRowByIndex(rowIdx);
     } else {
       this.rowRaw(rowIdx);
     }
   }
-  column(colIndex: number): ColumnRaw {
+  column<VN extends CellValueName = CellValueName>(
+    colIndex: number,
+    valueName?: VN,
+  ): ColumnRaw<VN> {
     return new ColumnRaw({
       colIndex,
+      valueName,
       ...this.sheetRawProps,
     });
   }
@@ -175,20 +177,60 @@ export class SheetRaw extends SheetRawBase {
     props.forEach((props) => this.gatherGetRequest(props));
     return this;
   }
-  gatherOneRowGetRequest(rowIndex: number): SheetRaw {
+  prepFetchOneRow(rowIndex: number): SheetRaw {
     return this.gatherGetRequest({
       ...this.schema.oneRowSpecifier(rowIndex),
       startColumnIndex: 0,
       endColumnIndex: this.activeTable.endColumnIndex,
     });
   }
-  fetchHeaderRow(): UniformRow<"string"> {
-    return this.fetchOneRow(this.schema.headerRowIdx) as UniformRow<"string">;
+
+  // Yeah, I should hand back the rows and sheets on the gather stage.
+  // Then I can fetch them all at once.
+  // I must ensure that sheets and rows ensure their own existence when they accessed.
+
+  // Also split up the fetch request state into four groups: columnIds, misc uniform rows, empty data rows, and data rows.
+  // Ensure that for non-empty data rows, columnIds are fetched;
+  // Ensure that for columnId and uniformRows, a dataRow is fetched; use empty when needed
+
+  // the columnId thing is only needed above the raw level;
+
+  prepFetchFullUniformRows(rowNames: UniformRowName[]): SheetRaw {
+    rowNames.forEach((rowName) => this.prepFetchFullUniformRow(rowName));
+    return this;
   }
-  fetchOneRow(rowIndex: number): SheetRawRow {
-    this.gatherOneRowGetRequest(rowIndex);
-    this.ss.fetchSheets();
-    return this.row(rowIndex);
+  fetchUniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
+    const row = this.prepFetchFullUniformRow(rowName);
+    this.ss.fetchAll();
+    return row;
+  }
+  prepFetchFullUniformRow<UN extends UniformRowName>(
+    rowName: UN,
+  ): UniformRow<UN> {
+    this.gatherGetRequest({
+      ...this.schema.oneRowSpecifier(this.schema.uniformRowIndex(rowName)),
+      startColumnIndex: 0,
+      endColumnIndex: this.activeTable.endColumnIndex,
+    });
+    return this.uniformRow(rowName);
+  }
+  columnByHeader<VN extends CellValueName = CellValueName>(
+    header: string,
+    valueName?: VN,
+  ): ColumnRaw {
+    const colIndex = this.headerRow.colIndexOfValue(header);
+    return this.column(colIndex, valueName);
+  }
+  prepFetchDataColumnsOfFetchedHeaders<HD extends string>(
+    ...headers: HD[]
+  ): Record<HD, ColumnRaw> {
+    return headers.reduce(
+      (acc, header) => {
+        acc[header] = this.columnByHeader(header).prepFetchDataRange();
+        return acc;
+      },
+      {} as Record<HD, ColumnRaw>,
+    );
   }
   ensureColumnsOfHeadersExist(...headers: string[]): number {
     const missingHeaders = this.headerRow.returnMissingValues(...headers);
@@ -198,24 +240,6 @@ export class SheetRaw extends SheetRawBase {
       this.headerRow.updateValue(index, header);
       return acc + 1;
     }, 0);
-  }
-  fetchColumnOfHeader(header: string): ColumnRaw {
-    const headerRow = this.fetchHeaderRow();
-    const colIndex = headerRow.colIndexOfValue(header);
-    return this.column(colIndex).fetchData();
-  }
-  fetchColumnsOfHeaders(...headers: string[]): Record<string, ColumnRaw> {
-    const headerRow = this.fetchHeaderRow();
-    const columns = headers.reduce(
-      (acc, header) => {
-        const colIndex = headerRow.colIndexOfValue(header);
-        acc[header] = this.column(colIndex).gatherFetchDataRange();
-        return acc;
-      },
-      {} as Record<string, ColumnRaw>,
-    );
-    this.ss.fetchSheets();
-    return columns;
   }
   get lastRowIdx(): number {
     return Math.max(...this.sheetState.rowStates.keys());
@@ -321,7 +345,7 @@ export class SheetRaw extends SheetRawBase {
       );
     }
   }
-  gatherPropertiesGetRequest() {
+  prepFetchProperties(): SheetRaw {
     this.ss.gatherFetchRanges({
       sheetId: this.sheetGid,
       startRowIndex: this.topDataRow.rowIndex,

@@ -1,17 +1,23 @@
-import type { CellValue } from "../1.0 Configs/0.0 ConfigPrecursors";
+import type {
+  CellValue,
+  CellValueName,
+} from "../1.0 Configs/0.0 ConfigPrecursors";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
-export class ColumnRaw extends ColumnRawBase {
+export class ColumnRaw<
+  VN extends CellValueName = CellValueName,
+  VL extends CellValue<VN> = CellValue<VN>,
+> extends ColumnRawBase<VN> {
   get ss() {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get sheet() {
     return new SheetRaw(this.sheetRawProps);
   }
-  get dataValueArr(): CellValue[] {
-    return this.sheet.dataRows.map((row) => row.value(this.colIndex));
+  get dataValueArr(): VL[] {
+    return this.sheet.dataRowIndexes.map((rowIdx) => this.dataValue(rowIdx));
   }
   get fetchDataRange() {
     return {
@@ -22,12 +28,11 @@ export class ColumnRaw extends ColumnRawBase {
       endColumnIndex: this.colIndex + 1,
     };
   }
-  gatherFetchDataRange() {
-    this.ss.gatherFetchRanges(this.fetchDataRange);
-    return this;
+  dataValue(rowIdx: number): VL {
+    return this.sheet.row(rowIdx).value(this.colIndex, this.valueName) as VL;
   }
-  fetchData(): ColumnRaw {
-    this.ss.fetchSheets(this.fetchDataRange);
+  prepFetchDataRange() {
+    this.ss.gatherFetchRanges(this.fetchDataRange);
     return this;
   }
   validateIndexNotStale(): void {

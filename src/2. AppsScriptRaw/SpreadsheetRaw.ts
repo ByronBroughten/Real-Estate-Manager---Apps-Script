@@ -1,7 +1,9 @@
+import type { UniformRowName } from "../1.0 Configs/0.0 ConfigPrecursors";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import { SheetRaw, type SheetRawRow } from "./SheetRaw";
+import { ColumnConfigRaw } from "./SpecificSheetRaw/ColumnConfigRaw";
 import { SheetConfigRaw } from "./SpecificSheetRaw/SheetConfigRaw";
 import type { GoogleSpreadsheet } from "./Types/AppsScriptTypes";
 import type {
@@ -16,15 +18,15 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       rawState: SpreadsheetRaw.initRawState(),
     });
   }
-  get schema() {
-    return new SchemaBase();
-  }
   get sheetConfig(): SheetConfigRaw {
     // This should perhaps live elsewhere.
-    return new SheetConfigRaw({
-      sheetGid: this.schema.config("sheetConfigGid"),
-      ...this.spreadsheetRawProps,
-    });
+    return new SheetConfigRaw(this.spreadsheetRawProps);
+  }
+  get columnConfig(): ColumnConfigRaw {
+    return new ColumnConfigRaw(this.spreadsheetRawProps);
+  }
+  get schema() {
+    return new SchemaBase();
   }
   get activeSheetGids(): MapIterator<number> {
     return this.rawState.sheets.keys();
@@ -45,40 +47,33 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
   }
-  fetchAllSheetHeaders() {
-    this.fetchAllSheetsOneRow(this.schema.headerRowIdx);
+  fetchFullUniformRowAllActiveSheets(rowName: UniformRowName): void {
+    this.prepFetchFullUniformRowsAllActiveSheets(rowName);
+    this.fetchAll();
   }
-  fetchAllActiveSheetHeaders() {
-    this.fetchAllSheetsOneRow(this.schema.headerRowIdx);
+  prepFetchFullUniformRowsAllActiveSheets(...rowNames: UniformRowName[]): void {
+    this.ensureAllSheetPropertiesAreFetched();
+    this.activeSheets.forEach((sheet) => {
+      sheet.prepFetchFullUniformRows(rowNames);
+    });
   }
-  fetchAllSheetsOneRow(rowIndex: number): void {
-    this.fetchAllSheetProperties(); // Needed for active sheet ids.
-    (this.activeSheets.forEach((sheet) =>
-      sheet.gatherOneRowGetRequest(rowIndex),
-    ),
-      this.fetchSheets());
+  ensureAllSheetPropertiesAreFetched() {
+    if (!this.rawState.allSheetPropertiesAreFetched) {
+      this.fetchAllSheetProperties();
+    }
   }
   fetchAllSheetProperties() {
     const response = Sheets.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(tableId,range))",
     });
     this._addDataToState(response);
+    this.rawState.allSheetPropertiesAreFetched = true;
     return { activeSheetGids: new Set(this.activeSheetGids) };
-  }
-  fetchSheetProperties(...sheetGids: number[]): void {
-    this.sheets(...sheetGids).forEach((sheet) => {
-      sheet.gatherPropertiesGetRequest();
-    });
-    this.fetchSheets();
   }
   gatherFetchRanges(...propArr: GridRangeProps[]) {
     this.getterGridRanges.push(...propArr);
   }
-  fetchSheets(...propArr: GridRangeProps[]): void {
-    this.gatherFetchRanges(...propArr);
-    this._doGetByDataFilter();
-  }
-  private _doGetByDataFilter(): void {
+  fetchAll(): void {
     const data = this._getByDataFilter();
     this._addDataToState(data);
     this.rawState.getterGridRanges = [];

@@ -9,6 +9,7 @@ import {
 } from "../1.0 Configs/1. spreadsheetConfig";
 import type { RowRange } from "../2. AppsScriptRaw/Types/RawState";
 import { Obj } from "../utils/Obj";
+import { Str } from "../utils/Str";
 
 export function getHeaderNameByRowIndex(
   rowIndex: number,
@@ -30,6 +31,9 @@ const rowIndexToUniformName = new Map(
 export class SchemaBase {
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);
+  }
+  sheetNameFromTitle(sheetTitle: string): string {
+    return Str.sentenceToCamelCase(sheetTitle);
   }
   uniformValueName<UN extends UniformRowName>(
     name: UN,

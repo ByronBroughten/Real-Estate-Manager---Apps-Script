@@ -1,17 +1,28 @@
+import type {
+  UniformRowName,
+  UniformRowValueName,
+} from "../../1.0 Configs/0.0 ConfigPrecursors";
 import { SchemaBase } from "../../1.1 SpreadsheetSchemaRaw/SchemaBase";
-import type { ValueName } from "../../2.0 Schemas/3.2 valueSchemas";
 import { RowRawBase, type RowRawProps } from "../ClassBases/RowRawBase";
 
-export interface RowUniformProps<VN extends ValueName> extends RowRawProps {
-  valueName: VN;
+export interface RowUniformProps<
+  UN extends UniformRowName,
+> extends RowRawProps {
+  uniformRowName: UN;
 }
 
-export class UniformRowBase<VN extends ValueName> extends RowRawBase {
-  readonly valueName: VN;
-  constructor({ valueName, ...rest }: RowUniformProps<VN>) {
+export class UniformRowBase<
+  UN extends UniformRowName,
+  VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
+> extends RowRawBase {
+  readonly uniformRowName: UN;
+  constructor({ uniformRowName, ...rest }: RowUniformProps<UN>) {
     super(rest);
-    this.valueName = valueName;
+    this.uniformRowName = uniformRowName;
     this.validateUniformRowIndex();
+  }
+  get valueName(): VN {
+    return this.baseSchema.uniformValueName(this.uniformRowName) as VN;
   }
   get baseSchema(): SchemaBase {
     return new SchemaBase();

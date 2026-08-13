@@ -17,7 +17,8 @@ const cellValues = {
 export const cellValueNames: CellValueName[] = Obj.keys(cellValues);
 export type CellValueNameToValue = typeof cellValues;
 export type CellValueName = keyof CellValueNameToValue;
-export type CellValue = CellValueNameToValue[CellValueName];
+export type CellValue<VN extends CellValueName = CellValueName> =
+  CellValueNameToValue[VN];
 
 export const nameDelimiter = "_";
 

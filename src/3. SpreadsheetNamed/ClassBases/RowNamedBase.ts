@@ -14,7 +14,4 @@ export class RowNamedBase<TN extends SheetName> extends SheetNamedBase<TN> {
     super(props);
     this.rowIndex = rowIndex;
   }
-  get namedRowState(): RowState<TN> {
-    return this.namedSheetState.bodyRows[this.rowIndex];
-  }
 }

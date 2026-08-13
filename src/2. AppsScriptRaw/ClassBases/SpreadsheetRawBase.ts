@@ -47,6 +47,7 @@ export class SpreadsheetRawBase {
   }
   static initRawState(): RawState {
     return {
+      allSheetPropertiesAreFetched: false,
       getterGridRanges: [],
       changesToSave: new Map(),
       updateRequests: this.initSortedUpdateRequests(),

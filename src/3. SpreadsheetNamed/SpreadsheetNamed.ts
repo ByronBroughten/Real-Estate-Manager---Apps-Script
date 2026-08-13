@@ -51,8 +51,8 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     ...props: FetchPropsNamed<SN>[]
   ): NamedSheets<SN> {
     const standardizedProps = this._standardizeProps(props);
-    this._reqSheetsPropsArrToRaw(standardizedProps);
-    this.raw.fetchSheets(...this.gridRangeFetchProps);
+    this._namedPropArrToRaw(standardizedProps);
+    this.raw.fetchAll();
     this.namedState.gridRangeFetchProps = [];
     const sheetNames = this._sheetNamesFromReqProps(standardizedProps);
     return this.namedSheets(...sheetNames);
@@ -95,7 +95,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
   }
 
-  private _reqSheetsPropsArrToRaw(
+  private _namedPropArrToRaw(
     propsArr: FetchPropsStandardNamed<SheetName>[],
   ): SpreadsheetNamed {
     propsArr.forEach((props) => this._reqSheetsPropsToRaw(props));
@@ -166,7 +166,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   }
   fillMissingRowIds() {
     // maybe change this stuff to not raw
-    this.raw.fetchAllSheetsOneRow(this.schema.headerRowIdx);
+    this.raw.fetchAllSheetsUniformRow("header");
     this.activeSheets.forEach((sheet) => {
       const headers = sheet.raw.headerRow.activeValueArr;
       if (headers.includes("ID") === false) {

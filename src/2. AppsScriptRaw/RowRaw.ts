@@ -54,7 +54,10 @@ export class RowRaw extends RowRawBase {
     return this.rowState.has(colIdx);
   }
 
-  value(colIdx: number, valueNameAssert?: CellValueName): CellValue {
+  value<VN extends CellValueName>(
+    colIdx: number,
+    valueNameAssert?: VN,
+  ): CellValue<VN> {
     if (!this.cellIsActive(colIdx)) {
       throw new Error(
         `Row ${this.rowIndex} does not have a value set for column index ${colIdx}.`,
@@ -62,9 +65,13 @@ export class RowRaw extends RowRawBase {
     }
     const value = this.rowState.get(colIdx);
     if (valueNameAssert) {
-      this.cellTrait(valueNameAssert, "strictValidate")(value);
+      return this.cellTrait(valueNameAssert, "strictValidate")(value);
+    } else {
+      return value as CellValue<VN>;
     }
-    return this.rowState.get(colIdx);
+  }
+  hasValue(value: unknown): boolean {
+    return this.activeValueArr.includes(value as CellValue);
   }
   ensureStateExists() {
     if (!this.rowIsActive()) {

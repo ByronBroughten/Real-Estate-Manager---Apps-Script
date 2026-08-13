@@ -13,11 +13,11 @@ import { ColumnNamed } from "./ColumnNamed";
 import { DataRowNamed } from "./DataRowNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
-export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
+export class SheetNamed<SN extends SheetName> extends SheetNamedBase<SN> {
   get spreadsheet(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  get schema(): SheetSchemaNamed<TN> {
+  get schema(): SheetSchemaNamed<SN> {
     return this.spreadsheetSchema.sheet(this.sheetName);
   }
   get raw(): SheetRaw {
@@ -26,25 +26,25 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   get rich(): SchemaSheetRaw {
     return new SchemaSheetRaw(this.raw.sheetRawProps);
   }
-  dataRow(rowIndex: number): DataRowNamed<TN> {
+  dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({
       ...this.sheetNamedProps,
       rowIndex,
     });
   }
-  column<CN extends ColumnName<TN>>(columnName: CN): ColumnNamed<TN, CN> {
+  column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return new ColumnNamed({
       ...this.sheetNamedProps,
       columnName,
     });
   }
-  get topDataRow(): DataRowNamed<TN> {
+  get topDataRow(): DataRowNamed<SN> {
     return this.dataRow(this.schema.topDataRowIdx);
   }
-  get dataRows(): DataRowNamed<TN>[] {
+  get dataRows(): DataRowNamed<SN>[] {
     return this.raw.dataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
   }
-  get activeColumnNames(): ColumnName<TN>[] {
+  get activeColumnNames(): ColumnName<SN>[] {
     return this.raw.activeColumnIdxs.map((colIdx) =>
       this.schema.columnNameByIdx(colIdx),
     );
@@ -52,15 +52,15 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   get idValueIdx(): number {
     return this.schema.column("id").colIndex;
   }
-  topDataRowValue<CN extends ColumnName<TN>>(
+  topDataRowValue<CN extends ColumnName<SN>>(
     columnName: CN,
-  ): ColumnValue<TN, CN> {
+  ): ColumnValue<SN, CN> {
     return this.topDataRow.value(columnName);
   }
   sortRowsbyColumnName(
-    rows: DataRowNamed<TN>[],
-    columnName: ColumnName<TN>,
-  ): DataRowNamed<TN>[] {
+    rows: DataRowNamed<SN>[],
+    columnName: ColumnName<SN>,
+  ): DataRowNamed<SN>[] {
     return rows.sort((a, b) => {
       return Arr.compareForSort(a.value(columnName), b.value(columnName));
     });
@@ -76,7 +76,7 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
   private DELETE_DATA_ROWS_AFTER_TOP() {
     this.raw.DELETE_ACTIVE_DATA_ROWS(this.schema.topDataRowIdx + 1);
   }
-  rowsFiltered(values: Partial<TableValues<TN>>): DataRowNamed<TN>[] {
+  rowsFiltered(values: Partial<TableValues<SN>>): DataRowNamed<SN>[] {
     return this.dataRows.filter((row) => {
       for (const columnName in values) {
         if (row.value(columnName) !== values[columnName]) {
@@ -86,7 +86,7 @@ export class SheetNamed<TN extends SheetName> extends SheetNamedBase<TN> {
       return true;
     });
   }
-  appendRowWithVals(values: Partial<TableValues<TN>>): DataRowNamed<TN> {
+  appendRowWithVals(values: Partial<TableValues<SN>>): DataRowNamed<SN> {
     const { rowIndex } = this.raw.appendDataRow();
     return this.dataRow(rowIndex).updateValues(values);
   }
