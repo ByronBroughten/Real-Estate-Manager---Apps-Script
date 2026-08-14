@@ -12,9 +12,6 @@ export class RowRawBase extends SheetRawBase {
   constructor({ rowIndex, ...rest }: RowRawProps) {
     super(rest);
     this.rowIndex = rowIndex;
-    if (this.schemaBase.isUniformRowIndex(this.rowIndex)) {
-      this.ensureStateExists();
-    }
   }
   get schemaBase() {
     return new SchemaBase();

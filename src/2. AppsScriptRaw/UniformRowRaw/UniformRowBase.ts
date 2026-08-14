@@ -20,6 +20,7 @@ export class UniformRowBase<
     super(rest);
     this.uniformRowName = uniformRowName;
     this.validateUniformRowIndex();
+    this.ensureStateExists();
   }
   get valueName(): VN {
     return this.baseSchema.uniformValueName(this.uniformRowName) as VN;
