@@ -47,19 +47,24 @@ export class Api extends SpreadsheetNamedBase {
       // new LedgerMgmt(this.ssn).buildHhLedger();
     },
   };
-  static getEventRowIdxBase0(e: GoogleAppsScript.Events.SheetsOnEdit): number {
+  static getEventRowIndexBase0(
+    e: GoogleAppsScript.Events.SheetsOnEdit,
+  ): number {
     return e.range.getRow() - 1;
   }
-  static handleEventQuickStart(e: GoogleAppsScript.Events.SheetsOnEdit) {
+  static isSuspectedApiCall(e: GoogleAppsScript.Events.SheetsOnEdit): boolean {
     if (e.value !== "TRUE") {
-      return;
-    }
-    if (Api.getEventRowIdxBase0(e) !== configGet("actionRowIdxBase0")) {
-      return;
+      return false;
+    } else if (
+      Api.getEventRowIndexBase0(e) !== configGet("actionRowIdxBase0")
+    ) {
+      return false;
+    } else {
+      return true;
     }
   }
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
-    const rowIndex = Api.getEventRowIdxBase0(e);
+    const rowIndex = Api.getEventRowIndexBase0(e);
     const ssr = this.ssr;
     const sheetGid = e.range.getSheet().getSheetId();
     const colIndex = e.range.getColumn() - 1;

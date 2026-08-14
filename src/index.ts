@@ -14,25 +14,7 @@ function triggerFirstOfMonth() {
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
-  const api = Api.init();
-  api.handleSheetOnEditEvent(e);
-}
-
-function testUpdateLeaseOngoingCharges() {
-  const top = TopOperator.init();
-  top.leaseMgmt.doPeriodicLeaseUpdates();
-  top.ss.raw.batchUpdateGSheets();
-}
-
-function testUpdateSubsidyOngoingCharges() {
-  const top = TopOperator.init();
-  top.subsidyMgmt.doPeriodicSubsidyUpdates();
-  top.ss.raw.batchUpdateGSheets();
-}
-
-function testBuildOutMonthlyChargesAndPayments() {
-  const top = TopOperator.init();
-  // const cfp = top.buildOutChargesForMonth();
-  // top.buildOutPaymentsFromCharges(cfp);
-  top.ss.raw.batchUpdateGSheets();
+  if (Api.isSuspectedApiCall(e)) {
+    Api.init().handleSheetOnEditEvent(e);
+  }
 }
