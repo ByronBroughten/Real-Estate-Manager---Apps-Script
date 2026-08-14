@@ -46,11 +46,11 @@ export class SchemaBase {
   uniformRowNameByIndex(rowIndex: number): UniformRowName | undefined {
     return rowIndexToUniformName.get(rowIndex);
   }
-  isUniformRowIndex(rowIndex: number): boolean {
-    return rowIndexToUniformName.has(rowIndex);
+  isUniformRowIndex(rowIndex: number, rowName: UniformRowName): boolean {
+    return this.uniformRowNameByIndex(rowIndex) === rowName;
   }
-  validateUniformRowIndex(rowIndex: number): void {
-    if (!this.isUniformRowIndex(rowIndex)) {
+  validateUniformRowIndex(rowIndex: number, rowName: UniformRowName): void {
+    if (!this.isUniformRowIndex(rowIndex, rowName)) {
       throw new Error(
         `Row index ${rowIndex} is not a uniform row. Uniform rows are: ${Obj.keys(
           uniformRowIndexes,

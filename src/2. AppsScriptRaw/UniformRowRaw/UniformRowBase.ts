@@ -29,6 +29,6 @@ export class UniformRowBase<
     return new SchemaBase();
   }
   validateUniformRowIndex() {
-    this.baseSchema.validateUniformRowIndex(this.rowIndex);
+    this.baseSchema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
 }
