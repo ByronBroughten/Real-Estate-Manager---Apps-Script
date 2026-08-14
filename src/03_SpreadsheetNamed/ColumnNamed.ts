@@ -1,5 +1,5 @@
-import type { ColumnName } from "../1.0 Configs/3.0 columnConfigs";
-import type { SheetName } from "../1.0 Configs/sheetConfigsTypes";
+import type { SheetName } from "../01_configs/02_sheetConfigsTypes";
+import type { ColumnName } from "../01_configs/03_columnConfigs";
 import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { SheetNamed } from "./SheetNamed";
 

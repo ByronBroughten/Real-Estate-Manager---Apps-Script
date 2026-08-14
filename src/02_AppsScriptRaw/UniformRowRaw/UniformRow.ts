@@ -2,9 +2,9 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../../1.0 Configs/0.0 ConfigPrecursors";
-import type { ValueSchemaKey } from "../../2.0 Schemas/3.0 valueSchema";
-import { type ValueTrait } from "../../2.0 Schemas/3.2 valueSchemas";
+} from "../../00_configPrecursors/configPrecursors";
+import type { ValueSchemaKey } from "../../02_Schemas/03_valueSchema";
+import { type ValueTrait } from "../../02_Schemas/03_valueSchemas";
 import { RowRaw } from "../RowRaw";
 import { SheetRaw } from "../SheetRaw";
 import { UniformRowBase } from "./UniformRowBase";

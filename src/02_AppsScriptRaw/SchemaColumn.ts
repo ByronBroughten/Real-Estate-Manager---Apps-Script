@@ -1,4 +1,4 @@
-import { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
+import { ColumnSchemaRaw } from "../01_SpreadsheetSchemaRaw/ColumnSchemaRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
 import { SchemaSheetRaw } from "./SchemaSheetRaw";
 

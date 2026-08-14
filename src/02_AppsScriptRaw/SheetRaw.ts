@@ -1,9 +1,9 @@
 import {
   type CellValueName,
   type UniformRowName,
-} from "../1.0 Configs/0.0 ConfigPrecursors";
-import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
-import type { Value } from "../2.0 Schemas/3.2 valueSchemas";
+} from "../00_configPrecursors/configPrecursors";
+import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
+import type { Value } from "../02_Schemas/03_valueSchemas";
 import { type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";

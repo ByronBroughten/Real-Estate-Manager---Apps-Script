@@ -1,6 +1,6 @@
-import type { TableValues } from "../1.0 Configs/3.0 columnConfigs";
-import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
+import type { TableValues } from "../01_configs/03_columnConfigs";
+import { OperatorBase } from "../03_SpreadsheetNamed/ClassBases/OperatorBase";
+import type { DataRowNamed } from "../03_SpreadsheetNamed/DataRowNamed";
 import { Obj } from "../utils/Obj";
 
 type PaymentIdToCharges = Record<string, DataRowNamed<"occCharge">[]>;

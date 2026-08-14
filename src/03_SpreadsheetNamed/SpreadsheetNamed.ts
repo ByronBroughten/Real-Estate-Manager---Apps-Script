@@ -1,7 +1,7 @@
-import type { SheetName } from "../1.0 Configs/sheetConfigsTypes.js";
-import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
-import type { SheetColumnsRange } from "../2. AppsScriptRaw/Types/RawState.js";
-import { SpreadsheetSchema } from "../2.0 Schemas/SpreadsheetSchemaNamed.js";
+import type { SheetName } from "../01_configs/02_sheetConfigsTypes.js";
+import { SpreadsheetRaw } from "../02_AppsScriptRaw/SpreadsheetRaw.js";
+import type { SheetColumnsRange } from "../02_AppsScriptRaw/Types/RawState.js";
+import { SpreadsheetSchema } from "../02_Schemas/SpreadsheetSchemaNamed.js";
 import { Obj } from "../utils/Obj.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";

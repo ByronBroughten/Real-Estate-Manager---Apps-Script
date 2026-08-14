@@ -1,6 +1,6 @@
-import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
-import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
+import { OperatorBase } from "../03_SpreadsheetNamed/ClassBases/OperatorBase";
+import type { DataRowNamed } from "../03_SpreadsheetNamed/DataRowNamed";
+import type { SheetNamed } from "../03_SpreadsheetNamed/SheetNamed";
 import { Dat } from "../utils/Dat";
 
 interface AddSubsidyContractProps {

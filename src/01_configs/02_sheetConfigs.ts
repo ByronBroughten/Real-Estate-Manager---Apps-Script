@@ -1,5 +1,5 @@
-import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
-import { makeSheetConfig, type SheetConfigsBase } from "./sheetConfigsTypes";
+import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";
+import { makeSheetConfig, type SheetConfigsBase } from "./02_sheetConfigsTypes";
 
 export const msc = makeSheetConfig;
 export const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {

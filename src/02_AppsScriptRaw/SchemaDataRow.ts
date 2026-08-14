@@ -1,10 +1,10 @@
-import type { ValueSchemaKey } from "../2.0 Schemas/3.0 valueSchema";
+import type { ValueSchemaKey } from "../02_Schemas/03_valueSchema";
 import {
   getValTrait,
   type Value,
   type ValueName,
   type ValueTrait,
-} from "../2.0 Schemas/3.2 valueSchemas";
+} from "../02_Schemas/03_valueSchemas";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import { RowRaw } from "./RowRaw";
 import { SchemaColumn } from "./SchemaColumn";

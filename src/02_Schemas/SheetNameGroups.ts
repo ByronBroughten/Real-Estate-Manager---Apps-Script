@@ -1,4 +1,4 @@
-import { schemaSheetNames } from "../1.0 Configs/sheetConfigsTypes";
+import { schemaSheetNames } from "../01_configs/02_sheetConfigsTypes";
 import { Arr } from "../utils/Arr";
 
 const sheetNameGroups = {

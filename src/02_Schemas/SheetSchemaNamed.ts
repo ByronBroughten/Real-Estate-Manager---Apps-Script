@@ -1,16 +1,16 @@
 import {
-  getColumnTraitByIndex,
-  getSheetColumnNames,
-  type ColumnName,
-} from "../1.0 Configs/3.0 columnConfigs";
-import {
   getSheetTraitByName,
   type SheetConfig,
   type SheetName,
   type SheetNameSimple,
-} from "../1.0 Configs/sheetConfigsTypes";
-import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
-import type { ColumnSpecifierNamed } from "../3. SpreadsheetNamed/Types/NamedState";
+} from "../01_configs/02_sheetConfigsTypes";
+import {
+  getColumnTraitByIndex,
+  getSheetColumnNames,
+  type ColumnName,
+} from "../01_configs/03_columnConfigs";
+import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
+import type { ColumnSpecifierNamed } from "../03_SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 
 const varbNameImmutable = ["baseId"] as const;

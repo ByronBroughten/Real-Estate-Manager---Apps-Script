@@ -2,19 +2,19 @@ import {
   schemaSheetNames,
   type SheetName,
   type SheetNameSimple,
-} from "../1.0 Configs/sheetConfigsTypes";
+} from "../01_configs/02_sheetConfigsTypes";
 
-import { type ColumnName } from "../1.0 Configs/3.0 columnConfigs";
-import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
-import { SpreadsheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
+import { type ColumnName } from "../01_configs/03_columnConfigs";
+import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
+import { SpreadsheetSchemaRaw } from "../01_SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
 import {
   makeRowRange,
   type RowRange,
-} from "../2. AppsScriptRaw/Types/RawState";
+} from "../02_AppsScriptRaw/Types/RawState";
 import type {
   RowSpecifierBySchemaName,
   SheetColumnNamesStandard,
-} from "../3. SpreadsheetNamed/Types/NamedState";
+} from "../03_SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {
   isInTnGroup,

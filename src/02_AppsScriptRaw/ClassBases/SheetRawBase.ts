@@ -1,4 +1,4 @@
-import { SheetSchemaRaw } from "../../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
+import { SheetSchemaRaw } from "../../01_SpreadsheetSchemaRaw/SheetSchemaRaw";
 import { Obj } from "../../utils/Obj";
 import { valS } from "../../utils/validation";
 import type { GoogleSheet } from "../Types/AppsScriptTypes";
@@ -58,7 +58,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get sheetSchema() {
     return new SheetSchemaRaw(this.sheetGid);
   }
-  private get sheetState(): RawSheetState {
+  protected get sheetState(): RawSheetState {
     return this.rawState.sheets.get(this.sheetGid);
   }
   // It would probably be better if there were a function like, "set sheetState".

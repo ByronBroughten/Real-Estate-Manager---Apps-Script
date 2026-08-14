@@ -1,8 +1,8 @@
 import type {
   UniformRowName,
   UniformRowValueName,
-} from "../../1.0 Configs/0.0 ConfigPrecursors";
-import { SchemaBase } from "../../1.1 SpreadsheetSchemaRaw/SchemaBase";
+} from "../../00_configPrecursors/configPrecursors";
+import { SchemaBase } from "../../01_SpreadsheetSchemaRaw/SchemaBase";
 import { RowRawBase, type RowRawProps } from "../ClassBases/RowRawBase";
 
 export interface RowUniformProps<

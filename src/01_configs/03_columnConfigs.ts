@@ -1,16 +1,16 @@
+import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";
 import {
   type Value,
   type ValueName,
   type ValueSchema,
-} from "../2.0 Schemas/3.2 valueSchemas";
+} from "../02_Schemas/03_valueSchemas";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import type { CombineStringsWithFlat } from "../utils/Str";
-import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 import {
   getSheetTraitByName,
   schemaSheetNames,
   type SheetNameSimple,
-} from "./sheetConfigsTypes";
+} from "./02_sheetConfigsTypes";
 
 interface ColTraitsLiteral {
   columnId: string;

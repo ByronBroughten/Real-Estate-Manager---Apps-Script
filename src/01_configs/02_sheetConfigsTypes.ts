@@ -1,5 +1,5 @@
 import { Obj, type KeyedMap } from "../utils/Obj";
-import { sheetConfigs } from "./2.0 sheetConfigs";
+import { sheetConfigs } from "./02_sheetConfigs";
 
 // Pre-sheetConfigs
 export interface SheetConfig {

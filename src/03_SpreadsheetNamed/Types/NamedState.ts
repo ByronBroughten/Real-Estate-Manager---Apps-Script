@@ -1,6 +1,6 @@
-import type { ColumnName } from "../../1.0 Configs/3.0 columnConfigs";
-import type { SheetName } from "../../1.0 Configs/sheetConfigsTypes";
-import type { GridRangeProps } from "../../2. AppsScriptRaw/Types/RawState";
+import type { SheetName } from "../../01_configs/02_sheetConfigsTypes";
+import type { ColumnName } from "../../01_configs/03_columnConfigs";
+import type { GridRangeProps } from "../../02_AppsScriptRaw/Types/RawState";
 import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";

@@ -1,7 +1,7 @@
-import { OperatorBase } from "./3. SpreadsheetNamed/ClassBases/OperatorBase";
-import { SpreadsheetNamed } from "./3. SpreadsheetNamed/SpreadsheetNamed";
-import { LeaseMgmt } from "./4. BusinessClasses/LeaseMgmt";
-import { SubsidyMgmt } from "./4. BusinessClasses/SubsidyMgmt";
+import { OperatorBase } from "./03_SpreadsheetNamed/ClassBases/OperatorBase";
+import { SpreadsheetNamed } from "./03_SpreadsheetNamed/SpreadsheetNamed";
+import { LeaseMgmt } from "./04_BusinessClasses/LeaseMgmt";
+import { SubsidyMgmt } from "./04_BusinessClasses/SubsidyMgmt";
 
 // rename this "endpoints"?
 export class TopOperator extends OperatorBase {

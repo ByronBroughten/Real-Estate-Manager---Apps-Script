@@ -1,8 +1,5 @@
-import type {
-  UniformRowName,
-  UniformRowValueName,
-} from "../1.0 Configs/0.0 ConfigPrecursors";
-import { SheetSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/SheetSchemaRaw";
+import type { UniformRowName } from "../00_configPrecursors/configPrecursors";
+import { SheetSchemaRaw } from "../01_SpreadsheetSchemaRaw/SheetSchemaRaw";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { SchemaColumn } from "./SchemaColumn";
 import { SchemaDataRow } from "./SchemaDataRow";
@@ -19,9 +16,7 @@ export class SchemaSheetRaw extends SheetRawBase {
       colIndex,
     });
   }
-  uniformRow<UN extends UniformRowName>(
-    rowName: UN,
-  ): UniformRow<UniformRowValueName<UN>> {
+  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
     return this.raw.uniformRow(rowName);
   }
   get raw(): SheetRaw {

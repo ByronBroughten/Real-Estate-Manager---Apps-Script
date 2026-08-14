@@ -1,5 +1,14 @@
+import { SpreadsheetRawBase } from "./02_AppsScriptRaw/ClassBases/SpreadsheetRawBase.js";
+import { SheetConfigRaw } from "./02_AppsScriptRaw/SpecificSheetRaw/SheetConfigRaw.js";
 import { Api } from "./Api.js";
 import { TopOperator } from "./TopOperator.js";
+
+function generateSheetConfigsFile(): string {
+  const sheetConfig = new SheetConfigRaw({
+    rawState: SpreadsheetRawBase.initRawState(),
+  });
+  return sheetConfig.generateSheetConfigsFileSource();
+}
 
 function triggerFirstOfMonth() {
   const top = TopOperator.init();

@@ -3,9 +3,9 @@ import {
   getValueConfigValueArr,
   type ConfigValueName,
   type ValueConfigValue,
-} from "../1.0 Configs/4.0 valueConfig";
+} from "../01_configs/04_valueConfig";
 import { validationError } from "../utils/validation";
-import { vsc, type ValueSchemaBase } from "./3.0 valueSchema";
+import { vsc, type ValueSchemaBase } from "./03_valueSchema";
 
 function makeDefaultConfigValue<VN extends ConfigValueName>(
   valueName: VN,

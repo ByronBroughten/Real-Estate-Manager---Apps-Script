@@ -2,12 +2,12 @@ import {
   getUniformRowValueName,
   type UniformRowName,
   type UniformRowValueName,
-} from "../1.0 Configs/0.0 ConfigPrecursors";
+} from "../00_configPrecursors/configPrecursors";
 import {
   configGet,
   type SpreadsheetConfig,
-} from "../1.0 Configs/1. spreadsheetConfig";
-import type { RowRange } from "../2. AppsScriptRaw/Types/RawState";
+} from "../01_configs/01_spreadsheetConfig";
+import type { RowRange } from "../02_AppsScriptRaw/Types/RawState";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
 

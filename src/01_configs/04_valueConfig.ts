@@ -1,5 +1,5 @@
+import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";
 import { Obj } from "../utils/Obj";
-import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 
 const valueConfig = makeStructuredConfig(
   {} as Record<string, readonly string[]>,

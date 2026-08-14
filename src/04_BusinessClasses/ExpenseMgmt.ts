@@ -1,4 +1,4 @@
-import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
+import { OperatorBase } from "../03_SpreadsheetNamed/ClassBases/OperatorBase";
 
 export class ExpenseMgmt extends OperatorBase {
   // I don't need the values, right?

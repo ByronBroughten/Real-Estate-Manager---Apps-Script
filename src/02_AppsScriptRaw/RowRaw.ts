@@ -1,13 +1,13 @@
 import type {
   CellValue,
   CellValueName,
-} from "../1.0 Configs/0.0 ConfigPrecursors";
-import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
-import { type ValueSchemaKey } from "../2.0 Schemas/3.0 valueSchema";
+} from "../00_configPrecursors/configPrecursors";
+import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
+import { type ValueSchemaKey } from "../02_Schemas/03_valueSchema";
 import {
   getCellValTrait,
   type ValueTrait,
-} from "../2.0 Schemas/3.2 valueSchemas";
+} from "../02_Schemas/03_valueSchemas";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import { ColumnRaw } from "./ColumnRaw";
 import { SheetRaw } from "./SheetRaw";

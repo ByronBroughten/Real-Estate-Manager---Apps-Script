@@ -1,7 +1,7 @@
-import type { TableValues } from "../1.0 Configs/3.0 columnConfigs";
-import { OperatorBase } from "../3. SpreadsheetNamed/ClassBases/OperatorBase";
-import type { DataRowNamed } from "../3. SpreadsheetNamed/DataRowNamed";
-import type { SheetNamed } from "../3. SpreadsheetNamed/SheetNamed";
+import type { TableValues } from "../01_configs/03_columnConfigs";
+import { OperatorBase } from "../03_SpreadsheetNamed/ClassBases/OperatorBase";
+import type { DataRowNamed } from "../03_SpreadsheetNamed/DataRowNamed";
+import type { SheetNamed } from "../03_SpreadsheetNamed/SheetNamed";
 import { utils } from "../utilitiesGeneral";
 import { Arr } from "../utils/Arr";
 import type { MonthYear } from "../utils/Dat";

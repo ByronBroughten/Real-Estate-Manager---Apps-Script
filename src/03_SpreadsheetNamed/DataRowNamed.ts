@@ -1,14 +1,14 @@
+import type { SheetName } from "../01_configs/02_sheetConfigsTypes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../1.0 Configs/3.0 columnConfigs";
-import type { SheetName } from "../1.0 Configs/sheetConfigsTypes";
-import { RowRaw } from "../2. AppsScriptRaw/RowRaw";
-import { SchemaDataRow } from "../2. AppsScriptRaw/SchemaDataRow";
-import type { Value, ValueName } from "../2.0 Schemas/3.2 valueSchemas";
-import type { ColumnSchemaNamed } from "../2.0 Schemas/ColumnSchemaNamed";
-import type { SheetSchemaNamed } from "../2.0 Schemas/SheetSchemaNamed";
+} from "../01_configs/03_columnConfigs";
+import { RowRaw } from "../02_AppsScriptRaw/RowRaw";
+import { SchemaDataRow } from "../02_AppsScriptRaw/SchemaDataRow";
+import type { Value, ValueName } from "../02_Schemas/03_valueSchemas";
+import type { ColumnSchemaNamed } from "../02_Schemas/ColumnSchemaNamed";
+import type { SheetSchemaNamed } from "../02_Schemas/SheetSchemaNamed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";

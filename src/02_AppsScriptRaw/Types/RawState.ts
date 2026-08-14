@@ -1,4 +1,4 @@
-import type { CellValue } from "../../1.0 Configs/0.0 ConfigPrecursors";
+import type { CellValue } from "../../00_configPrecursors/configPrecursors";
 import type { StrictPick } from "../../utils/Obj";
 import type { GoogleGridRange, GoogleUpdateRequest } from "./AppsScriptTypes";
 

@@ -2,11 +2,11 @@ import {
   cellValueNames,
   type CellValueName,
   type CellValueNameToValue,
-} from "../1.0 Configs/0.0 ConfigPrecursors";
+} from "../00_configPrecursors/configPrecursors";
 import {
   configValueNames,
   type ValueConfigValues,
-} from "../1.0 Configs/4.0 valueConfig";
+} from "../01_configs/04_valueConfig";
 import { Dat } from "../utils/Dat";
 import type { Merge } from "../utils/Obj/merge";
 import { valS } from "../utils/validation";
@@ -14,8 +14,8 @@ import {
   vsc,
   type ValueSchemaBase,
   type ValueSchemaKey,
-} from "./3.0 valueSchema";
-import { makeSchemasFromValueConfig } from "./3.1 configValueSchemas";
+} from "./03_valueSchema";
+import { makeSchemasFromValueConfig } from "./03_configValueSchemas";
 
 const valueNames = ["id", ...cellValueNames, ...configValueNames] as const;
 type ValueNameSimple = (typeof valueNames)[number];

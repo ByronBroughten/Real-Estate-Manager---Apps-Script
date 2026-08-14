@@ -3,7 +3,7 @@ import type {
   CellValueName,
   UniformRowName,
   UniformRowValue,
-} from "../1.0 Configs/0.0 ConfigPrecursors";
+} from "../00_configPrecursors/configPrecursors";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";

@@ -1,22 +1,22 @@
 import {
+  getSheetTraitByName,
+  type SheetName,
+} from "../01_configs/02_sheetConfigsTypes";
+import {
   getColumnTraitByName,
   type ColTraits,
   type ColTraitsBase,
   type ColumnName,
   type ColumnValueName,
-} from "../1.0 Configs/3.0 columnConfigs";
-import {
-  getSheetTraitByName,
-  type SheetName,
-} from "../1.0 Configs/sheetConfigsTypes";
-import { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
+} from "../01_configs/03_columnConfigs";
+import { ColumnSchemaRaw } from "../01_SpreadsheetSchemaRaw/ColumnSchemaRaw";
 import type { CombineStringsWithFlat } from "../utils/Str";
-import type { ValueSchemaKey } from "./3.0 valueSchema";
+import type { ValueSchemaKey } from "./03_valueSchema";
 import {
   getValTrait,
   type ValueName,
   type ValueSchema,
-} from "./3.2 valueSchemas";
+} from "./03_valueSchemas";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class ColumnSchemaNamed<

@@ -1,9 +1,9 @@
 import {
   makeStructuredConfig,
   type CellValueName,
-} from "../../1.0 Configs/0.0 ConfigPrecursors";
-import { configGet } from "../../1.0 Configs/1. spreadsheetConfig";
-import { SchemaBase } from "../../1.1 SpreadsheetSchemaRaw/SchemaBase";
+} from "../../00_configPrecursors/configPrecursors";
+import { configGet } from "../../01_configs/01_spreadsheetConfig";
+import { SchemaBase } from "../../01_SpreadsheetSchemaRaw/SchemaBase";
 import { Obj } from "../../utils/Obj";
 import type { SpreadsheetRawProps } from "../ClassBases/SpreadsheetRawBase";
 import type { ColumnRaw } from "../ColumnRaw";
@@ -154,7 +154,42 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
     return updatedValues;
   }
-  updateCodeBasedOnSpreadsheet() {
-    // TODO
+  generateSheetConfigsFileSource(): string {
+    this.sheet.prepFetchProperties();
+    this.sheet.prepFetchFullUniformRow("header");
+    this.ss.fetchAll();
+    this.sheet.prepFetchDataColumnsOfFetchedHeaders(
+      "Sheet name",
+      "ID prefix",
+      "Has ID column",
+    );
+    this.ss.fetchAll();
+
+    const gidCol = this.column("Sheet GID");
+    const nameCol = this.column("Sheet name");
+    const prefixCol = this.column("ID prefix");
+    const hasIdCol = this.column("Has ID column");
+
+    const entries = this.sheet.dataRowIndexes.map((rowIndex) => {
+      const args = [
+        String(gidCol.dataValue(rowIndex)),
+        JSON.stringify(prefixCol.dataValue(rowIndex)),
+      ];
+      if (hasIdCol.dataValue(rowIndex)) {
+        args.push("true");
+      }
+      return `  ${nameCol.dataValue(rowIndex)}: msc(${args.join(", ")}),`;
+    });
+
+    return [
+      `import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";`,
+      `import { makeSheetConfig, type SheetConfigsBase } from "./02_sheetConfigsTypes";`,
+      ``,
+      `export const msc = makeSheetConfig;`,
+      `export const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {`,
+      ...entries,
+      `});`,
+      ``,
+    ].join("\n");
   }
 }

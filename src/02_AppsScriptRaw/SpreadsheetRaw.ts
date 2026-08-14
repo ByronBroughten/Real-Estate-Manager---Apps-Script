@@ -1,5 +1,5 @@
-import type { UniformRowName } from "../1.0 Configs/0.0 ConfigPrecursors";
-import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
+import type { UniformRowName } from "../00_configPrecursors/configPrecursors";
+import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import { SheetRaw, type SheetRawRow } from "./SheetRaw";

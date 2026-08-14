@@ -1,14 +1,14 @@
-import type { CellValue } from "../1.0 Configs/0.0 ConfigPrecursors";
-import {
-  getSheetColumnIdxes,
-  type ColumnName,
-} from "../1.0 Configs/3.0 columnConfigs";
+import type { CellValue } from "../00_configPrecursors/configPrecursors";
 import {
   getSheetTraitByGid,
   type SheetName,
   type SheetTraitRaw,
   type SheetTraitRawKey,
-} from "../1.0 Configs/sheetConfigsTypes";
+} from "../01_configs/02_sheetConfigsTypes";
+import {
+  getSheetColumnIdxes,
+  type ColumnName,
+} from "../01_configs/03_columnConfigs";
 import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
 import { SchemaBase } from "./SchemaBase";
 

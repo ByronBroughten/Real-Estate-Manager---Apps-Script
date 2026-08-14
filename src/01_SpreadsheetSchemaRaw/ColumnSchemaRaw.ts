@@ -1,13 +1,13 @@
 import {
   getColumnTraitByIndex,
   type ColTraitsRaw,
-} from "../1.0 Configs/3.0 columnConfigs";
+} from "../01_configs/03_columnConfigs";
 import {
   getValTrait,
   type Value,
   type ValueName,
   type ValueSchema,
-} from "../2.0 Schemas/3.2 valueSchemas";
+} from "../02_Schemas/03_valueSchemas";
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchemaRaw } from "./SheetSchemaRaw";
 

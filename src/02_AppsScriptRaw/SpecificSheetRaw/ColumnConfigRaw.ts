@@ -2,9 +2,9 @@ import {
   makeStructuredConfig,
   type CellValue,
   type CellValueName,
-} from "../../1.0 Configs/0.0 ConfigPrecursors";
-import { configGet } from "../../1.0 Configs/1. spreadsheetConfig";
-import { SchemaBase } from "../../1.1 SpreadsheetSchemaRaw/SchemaBase";
+} from "../../00_configPrecursors/configPrecursors";
+import { configGet } from "../../01_configs/01_spreadsheetConfig";
+import { SchemaBase } from "../../01_SpreadsheetSchemaRaw/SchemaBase";
 import type { SpreadsheetRawProps } from "../ClassBases/SpreadsheetRawBase";
 import type { SheetRaw } from "../SheetRaw";
 import { SpecificSheetRawBase } from "./Base/SpecificSheetRawBase";
@@ -109,7 +109,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
 
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
-    const activeColumnIdToSheet = this._activeColumnIdToSheet(includedSheetGids);
+    const activeColumnIdToSheet =
+      this._activeColumnIdToSheet(includedSheetGids);
 
     const columnIdCol = this.column("Column ID");
     const sheetGidCol = this.column("Sheet GID");
@@ -151,7 +152,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
 
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
-    const activeColumnIdToSheet = this._activeColumnIdToSheet(includedSheetGids);
+    const activeColumnIdToSheet =
+      this._activeColumnIdToSheet(includedSheetGids);
 
     const existingColumnIds = new Set(this.column("Column ID").dataValueArr);
 
@@ -181,7 +183,9 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   // Fetches every active column ID belonging to the given sheets, mapped to
   // the sheet it came from. Requires _fetchColumnIdRowsForSheets to have
   // already fetched columnId rows for these same sheetGids.
-  private _activeColumnIdToSheet(sheetGids: Set<number>): Map<string, SheetRaw> {
+  private _activeColumnIdToSheet(
+    sheetGids: Set<number>,
+  ): Map<string, SheetRaw> {
     const columnIdToSheet = new Map<string, SheetRaw>();
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
