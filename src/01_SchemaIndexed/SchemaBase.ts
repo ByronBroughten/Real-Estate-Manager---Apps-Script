@@ -1,5 +1,7 @@
 import {
   getUniformRowValueName,
+  nameDelimiter,
+  type NameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
 } from "../00_configPrecursors/configPrecursors";
@@ -29,6 +31,9 @@ const rowIndexToUniformName = new Map(
 ) as Map<number, UniformRowName>;
 
 export class SchemaBase {
+  get nameDelimiter(): NameDelimiter {
+    return nameDelimiter;
+  }
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);
   }

@@ -1,14 +1,14 @@
 import { schemaSheetGids } from "../01_configs/02_sheetConfigsTypes";
 
 import { SchemaBase } from "./SchemaBase";
-import { SheetSchemaRaw } from "./SheetSchemaRaw";
+import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
-export class SpreadsheetSchemaRaw extends SchemaBase {
+export class SpreadsheetSchemaIndexed extends SchemaBase {
   get schemaSheetGids(): number[] {
     return schemaSheetGids;
   }
-  sheet(sheetGid: number): SheetSchemaRaw {
-    return new SheetSchemaRaw(sheetGid);
+  sheet(sheetGid: number): SheetSchemaIndexed {
+    return new SheetSchemaIndexed(sheetGid);
   }
   sheetNameFromGid(sheetGid: number) {
     this.sheet(sheetGid).trait("sheetName");

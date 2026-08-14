@@ -9,9 +9,9 @@ import {
   type ValueSchema,
 } from "../02_Schemas/03_valueSchemas";
 import { SchemaBase } from "./SchemaBase";
-import { SheetSchemaRaw } from "./SheetSchemaRaw";
+import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
-export class ColumnSchemaRaw extends SchemaBase {
+export class ColumnSchemaIndexed extends SchemaBase {
   readonly sheetId: number;
   readonly colIndex: number;
   constructor(sheetId: number, colIndex: number) {
@@ -19,8 +19,8 @@ export class ColumnSchemaRaw extends SchemaBase {
     this.sheetId = sheetId;
     this.colIndex = colIndex;
   }
-  get sheet(): SheetSchemaRaw {
-    return new SheetSchemaRaw(this.sheetId);
+  get sheet(): SheetSchemaIndexed {
+    return new SheetSchemaIndexed(this.sheetId);
   }
   trait<K extends keyof ColTraitsRaw>(key: K): ColTraitsRaw[K] {
     return getColumnTraitByIndex(this.sheetId, this.colIndex, key);

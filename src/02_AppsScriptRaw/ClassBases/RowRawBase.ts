@@ -1,5 +1,5 @@
 import type { CellValue } from "../../00_configPrecursors/configPrecursors";
-import { SchemaBase } from "../../01_SpreadsheetSchemaRaw/SchemaBase";
+import { SchemaBase } from "../../01_SchemaIndexed/SchemaBase";
 import type { RawRowState } from "../Types/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 

@@ -8,7 +8,7 @@ import {
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import { RowRaw } from "./RowRaw";
 import { SchemaColumn } from "./SchemaColumn";
-import { SchemaSheetRaw } from "./SchemaSheetRaw";
+import { SchemaSheetIndexed } from "./SchemaSheetIndexed";
 
 export class SchemaDataRow extends RowRawBase {
   constructor(props) {
@@ -43,8 +43,8 @@ export class SchemaDataRow extends RowRawBase {
   get raw(): RowRaw {
     return new RowRaw(this.rowRawProps);
   }
-  get sheet(): SchemaSheetRaw {
-    return new SchemaSheetRaw(this.sheetRawProps);
+  get sheet(): SchemaSheetIndexed {
+    return new SchemaSheetIndexed(this.sheetRawProps);
   }
   column(colIndex: number): SchemaColumn {
     return new SchemaColumn({

@@ -4,7 +4,7 @@ import type {
   ColumnValue,
   TableValues,
 } from "../01_configs/03_columnConfigs";
-import { SchemaSheetRaw } from "../02_AppsScriptRaw/SchemaSheetRaw";
+import { SchemaSheetIndexed } from "../02_AppsScriptRaw/SchemaSheetIndexed";
 import type { SheetRaw } from "../02_AppsScriptRaw/SheetRaw";
 import type { SheetSchemaNamed } from "../02_Schemas/SheetSchemaNamed";
 import { Arr } from "../utils/Arr";
@@ -13,7 +13,9 @@ import { ColumnNamed } from "./ColumnNamed";
 import { DataRowNamed } from "./DataRowNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
-export class SheetNamed<SN extends SheetName> extends SheetNamedBase<SN> {
+export class SheetNamed<
+  SN extends SheetName = SheetName,
+> extends SheetNamedBase<SN> {
   get spreadsheet(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
@@ -23,8 +25,8 @@ export class SheetNamed<SN extends SheetName> extends SheetNamedBase<SN> {
   get raw(): SheetRaw {
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
   }
-  get rich(): SchemaSheetRaw {
-    return new SchemaSheetRaw(this.raw.sheetRawProps);
+  get rich(): SchemaSheetIndexed {
+    return new SchemaSheetIndexed(this.raw.sheetRawProps);
   }
   dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({

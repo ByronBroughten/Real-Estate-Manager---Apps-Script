@@ -1,3 +1,4 @@
+import type { NameDelimiter } from "../00_configPrecursors/configPrecursors";
 import {
   getSheetTraitByName,
   type SheetConfig,
@@ -9,7 +10,7 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../01_configs/03_columnConfigs";
-import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
+import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import type { ColumnSpecifierNamed } from "../03_SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 
@@ -32,15 +33,24 @@ export class SheetSchemaNamed<TN extends SheetNameSimple> extends SchemaBase {
   get sheetGid(): number {
     return this.trait("sheetGid");
   }
+  sheetColName<CN extends ColumnName<TN> & string>(
+    columnName: CN,
+  ): `${TN}${NameDelimiter}${CN}` {
+    return `${this.sheetName}${this.nameDelimiter}${columnName}`;
+  }
+  column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
+    return new ColumnSchemaNamed(this.sheetName, columnName);
+  }
+  columnByIndex(colIdx: number): ColumnSchemaNamed<TN, ColumnName<TN>> {
+    const columnName = this.columnNameByIdx(colIdx);
+    return new ColumnSchemaNamed(this.sheetName, columnName);
+  }
   columnNameByIdx(colIdx: number): ColumnName<TN> {
     return getColumnTraitByIndex(
       this.sheetGid,
       colIdx,
       "columnName",
     ) as ColumnName<TN>;
-  }
-  column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
-    return new ColumnSchemaNamed(this.sheetName, columnName);
   }
   colIndex<CN extends ColumnName<TN>>(columnName: CN): number {
     return this.column(columnName).colIndex;

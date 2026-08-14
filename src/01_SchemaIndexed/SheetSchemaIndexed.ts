@@ -9,7 +9,7 @@ import {
   getSheetColumnIdxes,
   type ColumnName,
 } from "../01_configs/03_columnConfigs";
-import { ColumnSchemaRaw } from "./ColumnSchemaRaw";
+import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SchemaBase } from "./SchemaBase";
 
 const varbNameImmutable = ["baseId"] as const;
@@ -19,7 +19,7 @@ export type VarbNameMutable<TN extends SheetName> = Exclude<
   VarbNameImmutable
 >;
 
-export class SheetSchemaRaw extends SchemaBase {
+export class SheetSchemaIndexed extends SchemaBase {
   readonly sheetGid: number;
   constructor(sheetGid: number) {
     super();
@@ -28,9 +28,10 @@ export class SheetSchemaRaw extends SchemaBase {
   trait<K extends SheetTraitRawKey>(key: K): SheetTraitRaw<K> {
     return getSheetTraitByGid(this.sheetGid, key);
   }
-  column(colIndex: number): ColumnSchemaRaw {
-    return new ColumnSchemaRaw(this.sheetGid, colIndex);
+  column(colIndex: number): ColumnSchemaIndexed {
+    return new ColumnSchemaIndexed(this.sheetGid, colIndex);
   }
+
   get schemaColumnIdxes(): MapIterator<number> {
     return getSheetColumnIdxes(this.sheetGid);
   }

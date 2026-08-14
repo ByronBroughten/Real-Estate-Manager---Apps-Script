@@ -9,7 +9,7 @@ import {
   type ColumnName,
   type ColumnValueName,
 } from "../01_configs/03_columnConfigs";
-import { ColumnSchemaRaw } from "../01_SpreadsheetSchemaRaw/ColumnSchemaRaw";
+import { ColumnSchemaIndexed } from "../01_SchemaIndexed/ColumnSchemaIndexed";
 import type { CombineStringsWithFlat } from "../utils/Str";
 import type { ValueSchemaKey } from "./03_valueSchema";
 import {
@@ -22,7 +22,7 @@ import { SheetSchemaNamed } from "./SheetSchemaNamed";
 export class ColumnSchemaNamed<
   TN extends SheetName = SheetName,
   CN extends ColumnName<TN> = ColumnName<TN>,
-> extends ColumnSchemaRaw {
+> extends ColumnSchemaIndexed {
   readonly sheetName: TN;
   readonly columnName: CN;
   constructor(sheetName: TN, columnName: CN) {

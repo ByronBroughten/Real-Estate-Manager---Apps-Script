@@ -21,6 +21,7 @@ export type CellValue<VN extends CellValueName = CellValueName> =
   CellValueNameToValue[VN];
 
 export const nameDelimiter = "_";
+export type NameDelimiter = typeof nameDelimiter;
 
 const uniformRowValueNames = {
   header: "string",

@@ -3,7 +3,7 @@ import {
   type CellValueName,
 } from "../../00_configPrecursors/configPrecursors";
 import { configGet } from "../../01_configs/01_spreadsheetConfig";
-import { SchemaBase } from "../../01_SpreadsheetSchemaRaw/SchemaBase";
+import { SchemaBase } from "../../01_SchemaIndexed/SchemaBase";
 import { Obj } from "../../utils/Obj";
 import type { SpreadsheetRawProps } from "../ClassBases/SpreadsheetRawBase";
 import type { ColumnRaw } from "../ColumnRaw";

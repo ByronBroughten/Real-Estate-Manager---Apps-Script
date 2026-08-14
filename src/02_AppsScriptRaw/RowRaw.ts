@@ -2,12 +2,12 @@ import type {
   CellValue,
   CellValueName,
 } from "../00_configPrecursors/configPrecursors";
-import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
-import { type ValueSchemaKey } from "../02_Schemas/03_valueSchema";
+import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import {
   getCellValTrait,
-  type ValueTrait,
-} from "../02_Schemas/03_valueSchemas";
+  type CellValueTrait,
+} from "../02_Schemas/03_baseValueSchemas";
+import { type ValueSchemaKey } from "../02_Schemas/03_valueSchema";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import { ColumnRaw } from "./ColumnRaw";
 import { SheetRaw } from "./SheetRaw";
@@ -32,7 +32,7 @@ export class RowRaw extends RowRawBase {
   cellTrait<VN extends CellValueName, K extends ValueSchemaKey>(
     valueName: VN,
     key: K,
-  ): ValueTrait<VN, K> {
+  ): CellValueTrait<VN, K> {
     return getCellValTrait(valueName, key);
   }
   column(colIndex: number): ColumnRaw {

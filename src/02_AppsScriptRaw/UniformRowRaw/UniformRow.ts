@@ -3,8 +3,8 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../../00_configPrecursors/configPrecursors";
+import { type CellValueTrait } from "../../02_Schemas/03_baseValueSchemas";
 import type { ValueSchemaKey } from "../../02_Schemas/03_valueSchema";
-import { type ValueTrait } from "../../02_Schemas/03_valueSchemas";
 import { RowRaw } from "../RowRaw";
 import { SheetRaw } from "../SheetRaw";
 import { UniformRowBase } from "./UniformRowBase";
@@ -22,8 +22,8 @@ export class UniformRow<
   hasValue(value: unknown): boolean {
     return this.raw.hasValue(value);
   }
-  cellTrait<K extends ValueSchemaKey>(key: K): ValueTrait<VN, K> {
-    return this.raw.cellTrait(this.valueName, key) as ValueTrait<VN, K>;
+  cellTrait<K extends ValueSchemaKey>(key: K): CellValueTrait<VN, K> {
+    return this.raw.cellTrait(this.valueName, key) as CellValueTrait<VN, K>;
   }
   value(colIndex): UniformRowValue<UN> {
     return this.raw.value(colIndex, this.valueName) as UniformRowValue<UN>;

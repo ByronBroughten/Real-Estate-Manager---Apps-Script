@@ -5,8 +5,8 @@ import {
 } from "../01_configs/02_sheetConfigsTypes";
 
 import { type ColumnName } from "../01_configs/03_columnConfigs";
-import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
-import { SpreadsheetSchemaRaw } from "../01_SpreadsheetSchemaRaw/SpreadsheetSchemaRaw";
+import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
+import { SpreadsheetSchemaIndexed } from "../01_SchemaIndexed/SpreadsheetSchemaIndexed";
 import {
   makeRowRange,
   type RowRange,
@@ -24,10 +24,14 @@ import {
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class SpreadsheetSchema extends SchemaBase {
-  get raw(): SpreadsheetSchemaRaw {
-    return new SpreadsheetSchemaRaw();
+  get raw(): SpreadsheetSchemaIndexed {
+    return new SpreadsheetSchemaIndexed();
   }
   sheet<TN extends SheetNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
+    return new SheetSchemaNamed(sheetName);
+  }
+  sheetByGid(sheetGid: number): SheetSchemaNamed<SheetName> {
+    const sheetName = this.raw.sheet(sheetGid).sheetName;
     return new SheetSchemaNamed(sheetName);
   }
   column<TN extends SheetName, CN extends ColumnName<TN>>(

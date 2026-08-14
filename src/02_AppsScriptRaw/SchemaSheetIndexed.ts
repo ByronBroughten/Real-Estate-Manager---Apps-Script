@@ -1,14 +1,14 @@
 import type { UniformRowName } from "../00_configPrecursors/configPrecursors";
-import { SheetSchemaRaw } from "../01_SpreadsheetSchemaRaw/SheetSchemaRaw";
+import { SheetSchemaIndexed } from "../01_SchemaIndexed/SheetSchemaIndexed";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { SchemaColumn } from "./SchemaColumn";
 import { SchemaDataRow } from "./SchemaDataRow";
 import { SheetRaw } from "./SheetRaw";
 import type { UniformRow } from "./UniformRowRaw/UniformRow";
 
-export class SchemaSheetRaw extends SheetRawBase {
-  get schema(): SheetSchemaRaw {
-    return new SheetSchemaRaw(this.sheetGid);
+export class SchemaSheetIndexed extends SheetRawBase {
+  get schema(): SheetSchemaIndexed {
+    return new SheetSchemaIndexed(this.sheetGid);
   }
   column(colIndex: number): SchemaColumn {
     return new SchemaColumn({

@@ -92,14 +92,13 @@ export class Api extends SpreadsheetNamedBase {
     }
   }
   private _endpointNameOrNull(sheetGid: number, colIdx: number): string | null {
-    const sheetSchema = this.ssr.schema.sheet(sheetGid);
-    const sheetName = sheetSchema.sheetName;
-    const { columnName } = sheetSchema.column(colIdx);
+    const sheetSchema = this.ssn.schema.sheetByGid(sheetGid);
+    const { columnName } = sheetSchema.columnByIndex(colIdx);
     const keyEndPhrase = "statusAndRun";
     const isStatusAndRunColumn =
       columnName.slice(-keyEndPhrase.length) === keyEndPhrase;
     if (isStatusAndRunColumn) {
-      return sheetSchema.makeId(sheetName, columnName);
+      return sheetSchema.sheetColName(columnName);
     } else {
       return null;
     }

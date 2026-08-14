@@ -2,7 +2,7 @@ import {
   type CellValueName,
   type UniformRowName,
 } from "../00_configPrecursors/configPrecursors";
-import { SchemaBase } from "../01_SpreadsheetSchemaRaw/SchemaBase";
+import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import type { Value } from "../02_Schemas/03_valueSchemas";
 import { type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";

@@ -4,7 +4,7 @@ import {
   type CellValueName,
 } from "../../00_configPrecursors/configPrecursors";
 import { configGet } from "../../01_configs/01_spreadsheetConfig";
-import { SchemaBase } from "../../01_SpreadsheetSchemaRaw/SchemaBase";
+import { SchemaBase } from "../../01_SchemaIndexed/SchemaBase";
 import type { SpreadsheetRawProps } from "../ClassBases/SpreadsheetRawBase";
 import type { SheetRaw } from "../SheetRaw";
 import { SpecificSheetRawBase } from "./Base/SpecificSheetRawBase";
