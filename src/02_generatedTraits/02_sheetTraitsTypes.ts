@@ -1,13 +1,13 @@
 import { Obj, type KeyedMap } from "../utils/Obj";
-import { sheetTraits } from "./02_sheetTraits";
+import { allSheetTraits } from "./02_sheetTraits";
 
-// Pre-sheetTraits
+// Pre-allSheetTraits
 export interface SheetTrait {
   sheetGid: number;
   idPrefix: string;
   hasIdColumn: boolean;
 }
-export function makeSheetTrait(
+export function makeAllSheetTraits(
   sheetGid: number,
   idPrefix: string,
   hasIdColumn = false,
@@ -18,11 +18,11 @@ export function makeSheetTrait(
     hasIdColumn,
   };
 }
-export type SheetTraitsBase = Record<string, SheetTrait>;
+export type AllSheetTraitsBase = Record<string, SheetTrait>;
 
-// Post-sheetTraits
-type SheetTraits = typeof sheetTraits;
-export const schemaSheetNames = Obj.keys(sheetTraits);
+// Post-allSheetTraits
+type SheetTraits = typeof allSheetTraits;
+export const schemaSheetNames = Obj.keys(allSheetTraits);
 export type SheetNameSimple = (typeof schemaSheetNames)[number];
 export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
 
@@ -30,12 +30,12 @@ export function getSheetTraitByName<
   TN extends SheetNameSimple,
   K extends keyof SheetTrait,
 >(sheetName: TN, key: K): SheetTrait[K] {
-  return sheetTraits[sheetName][key];
+  return allSheetTraits[sheetName][key];
 }
 
 type SheetTraitsByGid = KeyedMap<SheetTraits, "sheetGid", "sheetName">;
 export const sheetTraitsByGid = Obj.toKeyedMap(
-  sheetTraits,
+  allSheetTraits,
   "sheetGid",
   "sheetName",
 );

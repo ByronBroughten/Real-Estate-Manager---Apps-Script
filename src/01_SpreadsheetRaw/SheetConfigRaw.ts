@@ -183,10 +183,10 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
 
     return [
       `import { makeStructuredConfig } from "../00_rawPrecursors/base";`,
-      `import { makeSheetTrait, type SheetTraitsBase } from "./02_sheetTraitsTypes";`,
+      `import { makeAllSheetTraits, type AllSheetTraitsBase } from "./02_sheetTraitsTypes";`,
       ``,
-      `export const msc = makeSheetTrait;`,
-      `export const sheetTraits = makeStructuredConfig({} as SheetTraitsBase, {`,
+      `export const msc = makeAllSheetTraits;`,
+      `export const allSheetTraits = makeStructuredConfig({} as AllSheetTraitsBase, {`,
       ...entries,
       `});`,
       ``,
