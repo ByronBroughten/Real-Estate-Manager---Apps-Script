@@ -39,10 +39,10 @@ const sheetConfigHeaders = Obj.keys(headerToValueName);
 type HeaderToValueName = typeof headerToValueName;
 type SheetConfigHeader = (typeof sheetConfigHeaders)[number];
 
-export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeader> {
+export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   constructor({ ...rest }: SpreadsheetRawProps) {
     super({
-      headers: sheetConfigHeaders,
+      headerToValueName,
       sheetGid: configGet("sheetConfigGid"),
       ...rest,
     });
@@ -56,19 +56,11 @@ export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeader> {
   get sheet(): SheetRaw {
     return this.ss.sheet(this.sheetGid);
   }
-  get sSheet(): SpecificSheetRaw<SheetConfigHeader> {
-    return new SpecificSheetRaw<SheetConfigHeader>({
-      headers: this.headers,
+  get sSheet(): SpecificSheetRaw<HeaderToValueName> {
+    return new SpecificSheetRaw({
+      headerToValueName: this.headerToValueName,
       ...this.sheetRawProps,
     });
-  }
-  column<HD extends SheetConfigHeader>(
-    header: HD,
-  ): ColumnRaw<HeaderToValueName[HD]> {
-    return this.sheet.columnByHeader(
-      header,
-      headerToValueName[header],
-    ) as ColumnRaw<HeaderToValueName[HD]>;
   }
   fetchHeadersAndColumn<H extends SheetConfigHeader>(header: H): ColumnRaw {
     // At this level, headers are needed before the column can be fetched.
@@ -142,19 +134,21 @@ export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeader> {
     const sheetNameCol = this.column("Sheet name");
     const hasColForIdCol = this.column("Has ID column");
     let updatedValues = 0;
-    this.sheet.dataRows.forEach((row) => {
-      const sheetGid = row.value(gidCol.colIndex) as number;
+    this.sheet.dataRowIndexes.forEach((rowIndex) => {
+      const sheetGid = gidCol.dataValue(rowIndex);
+      const sheetName = sheetNameCol.dataValue(rowIndex);
+
       const sheet = this.ss.sheet(sheetGid);
-      const sheetName = row.value(sheetNameCol.colIndex);
+
       const actualSheetName = this.schema.sheetNameFromTitle(sheet.title);
       if (sheetName !== actualSheetName) {
-        row.updateValue(sheetNameCol.colIndex, actualSheetName);
+        sheetNameCol.updateDataCell(rowIndex, actualSheetName);
         updatedValues++;
       }
-      const hasIdCol = row.value(hasColForIdCol.colIndex);
+      const hasIdCol = hasColForIdCol.dataValue(rowIndex);
       const actualHasIdCol = sheet.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
-        row.updateValue(hasColForIdCol.colIndex, actualHasIdCol);
+        hasColForIdCol.updateDataCell(rowIndex, actualHasIdCol);
         updatedValues++;
       }
     });

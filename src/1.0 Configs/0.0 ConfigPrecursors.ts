@@ -34,6 +34,10 @@ export type UniformRowName = keyof UniformRowValueNames;
 export type UniformRowValueName<UN extends UniformRowName> =
   UniformRowValueNames[UN];
 
+export type UniformRowValue<UN extends UniformRowName> = CellValue<
+  UniformRowValueName<UN>
+>;
+
 export function getUniformRowValueName<UN extends UniformRowName>(
   name: UN,
 ): UniformRowValueName<UN> {

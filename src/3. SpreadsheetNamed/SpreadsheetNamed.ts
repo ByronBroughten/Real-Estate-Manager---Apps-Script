@@ -195,7 +195,4 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   convenience() {
     this.fillMissingRowIds();
   }
-
-  // I need to do something about adding data rows when fetching sheets from the named layer.
-  // That's to ensure I get the columnIds (add those specific columns and rows) and table properties (add one row 4:4 per sheet).
 }

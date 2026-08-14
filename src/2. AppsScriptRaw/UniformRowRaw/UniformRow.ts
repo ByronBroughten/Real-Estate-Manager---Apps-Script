@@ -1,12 +1,10 @@
 import type {
   UniformRowName,
+  UniformRowValue,
   UniformRowValueName,
 } from "../../1.0 Configs/0.0 ConfigPrecursors";
 import type { ValueSchemaKey } from "../../2.0 Schemas/3.0 valueSchema";
-import {
-  type Value,
-  type ValueTrait,
-} from "../../2.0 Schemas/3.2 valueSchemas";
+import { type ValueTrait } from "../../2.0 Schemas/3.2 valueSchemas";
 import { RowRaw } from "../RowRaw";
 import { SheetRaw } from "../SheetRaw";
 import { UniformRowBase } from "./UniformRowBase";
@@ -27,10 +25,10 @@ export class UniformRow<
   cellTrait<K extends ValueSchemaKey>(key: K): ValueTrait<VN, K> {
     return this.raw.cellTrait(this.valueName, key) as ValueTrait<VN, K>;
   }
-  value(colIndex): ValueTrait<VN, "type"> {
-    return this.raw.value(colIndex, this.valueName) as ValueTrait<VN, "type">;
+  value(colIndex): UniformRowValue<UN> {
+    return this.raw.value(colIndex, this.valueName) as UniformRowValue<UN>;
   }
-  updateValue(colIdx: number, value: Value<VN>): UniformRow<UN> {
+  updateValue(colIdx: number, value: UniformRowValue<UN>): UniformRow<UN> {
     this.rowState.set(colIdx, value);
     return this;
   }

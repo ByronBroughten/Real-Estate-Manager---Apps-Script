@@ -1,31 +1,27 @@
 import type { ColumnRaw } from "../ColumnRaw";
-import { SpreadsheetRaw } from "../SpreadsheetRaw";
-import { SpecificSheetRawBase } from "./Base/SpecificSheetRawBase";
+import {
+  SpecificSheetRawBase,
+  type HeaderToValueName,
+} from "./Base/SpecificSheetRawBase";
 
 export class SpecificSheetRaw<
-  HS extends string,
-> extends SpecificSheetRawBase<HS> {
-  get ss() {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
-  }
-  get sheet() {
-    return this.ss.sheet(this.sheetGid);
-  }
-  fetchPrerequisitesForColumns() {
+  H2V extends HeaderToValueName<string>,
+  HD extends keyof H2V & string = keyof H2V & string,
+> extends SpecificSheetRawBase<H2V, HD> {
+  prepFetchPrerequisitesForRawColumns() {
     this.sheet.prepFetchProperties();
     this.sheet.prepFetchFullUniformRow("header");
-    this.ss.fetchAll();
   }
-  prepFetchDataColumnOfFetchedHeader<H extends HS>(header: H): ColumnRaw {
+  prepFetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
     return this.sheet.column(colIndex).prepFetchAllDataCells();
   }
-  fetchDataColumnOfFetchedHeader<H extends HS>(header: H): ColumnRaw {
+  fetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const column = this.prepFetchDataColumnOfFetchedHeader(header);
     this.ss.fetchAll();
     return column;
   }
-  prepFetchDataColumnsOfFetchedHeaders<H extends HS>(
+  prepFetchDataColumnsOfFetchedHeaders<H extends HD>(
     ...headers: H[]
   ): Record<H, ColumnRaw> {
     return headers.reduce(

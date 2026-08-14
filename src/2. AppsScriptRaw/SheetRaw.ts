@@ -4,7 +4,7 @@ import {
 } from "../1.0 Configs/0.0 ConfigPrecursors";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { Value } from "../2.0 Schemas/3.2 valueSchemas";
-import { Obj, type StrictOmit } from "../utils/Obj";
+import { type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
@@ -35,9 +35,6 @@ export class SheetRaw extends SheetRawBase {
   }
   get schema(): SchemaBase {
     return new SchemaBase();
-  }
-  get title(): string {
-    return this.sheetState.title;
   }
   get headerRow(): UniformRow<"header"> {
     return this.uniformRow("header");
@@ -112,25 +109,7 @@ export class SheetRaw extends SheetRawBase {
       this._integrateSheetRowStates(sheet.data);
     }
   }
-  private _initSheetState(sheet: GoogleSheet): void {
-    if (sheet?.properties?.title) {
-      this.sheetState.title = sheet.properties.title;
-    }
-    if (sheet.tables?.length > 0) {
-      const table = sheet.tables[0];
-      this.sheetState.activeTable = {
-        tableId: valS.assertDefined(table.tableId, "tableId"),
-        ...Obj.validatePick(
-          table.range,
-          "number",
-          "startRowIndex",
-          "endRowIndex",
-          "startColumnIndex",
-          "endColumnIndex",
-        ),
-      };
-    }
-  }
+
   private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
     const colsData = valS.assertDefined(sheetData, "sheetData");
     colsData.forEach((colData) => {
@@ -218,7 +197,7 @@ export class SheetRaw extends SheetRawBase {
   columnByHeader<VN extends CellValueName = CellValueName>(
     header: string,
     valueName?: VN,
-  ): ColumnRaw {
+  ): ColumnRaw<VN> {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
   }
@@ -243,13 +222,13 @@ export class SheetRaw extends SheetRawBase {
     }, 0);
   }
   get lastRowIdx(): number {
-    return Math.max(...this.sheetState.rowStates.keys());
+    return Math.max(...this.rowStates.keys());
   }
   invalidateRowIndexes(): void {
-    this.sheetState.rowIndexesAreValid = false;
+    this.rowIndexesAreValid = false;
   }
   validateRowIndexes(): void {
-    this.sheetState.rowIndexesAreValid = true;
+    this.rowIndexesAreValid = true;
   }
   appendDataRow(): RowRaw {
     const idx = this.activeTable.endRowIndex;
@@ -266,7 +245,7 @@ export class SheetRaw extends SheetRawBase {
     startRowIdx: number,
     numRows: number = this.rowCount - startRowIdx,
   ): SheetRaw {
-    this.sheetState.rowStates
+    this.rowStates
       .entries()
       .filter(
         ([rowIdx]) => rowIdx >= startRowIdx && rowIdx < startRowIdx + numRows,
@@ -278,7 +257,7 @@ export class SheetRaw extends SheetRawBase {
     return this;
   }
   removeRowsExcept(...rowIdxesToKeep: number[]): void {
-    const allRowIdxs = Array.from(this.sheetState.rowStates.keys());
+    const allRowIdxs = Array.from(this.rowStates.keys());
     allRowIdxs.forEach((rowIdx) => {
       if (!rowIdxesToKeep.includes(rowIdx)) {
         this.row(rowIdx).remove();
@@ -368,9 +347,9 @@ export class SheetRaw extends SheetRawBase {
         inheritFromBefore: false, // Let the formatting and column header colors be natural.
       },
     });
-    if (this.sheetState.lastNotStaleColumnIdx !== null) {
-      if (this.sheetState.lastNotStaleColumnIdx > startColumnIndex) {
-        this.sheetState.lastNotStaleColumnIdx = startColumnIndex;
+    if (this.lastNotStaleColumnIdx !== null) {
+      if (this.lastNotStaleColumnIdx > startColumnIndex) {
+        this.lastNotStaleColumnIdx = startColumnIndex;
       }
     }
   }

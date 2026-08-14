@@ -1,6 +1,8 @@
 import type {
   CellValue,
   CellValueName,
+  UniformRowName,
+  UniformRowValue,
 } from "../1.0 Configs/0.0 ConfigPrecursors";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
 import { SheetRaw } from "./SheetRaw";
@@ -30,6 +32,17 @@ export class ColumnRaw<
   }
   dataValue(rowIdx: number): VL {
     return this.sheet.row(rowIdx).value(this.colIndex, this.valueName) as VL;
+  }
+  updateDataCell(rowIdx: number, newValue: VL): ColumnRaw<VN, VL> {
+    this.sheet.dataRow(rowIdx).updateValue(this.colIndex, newValue);
+    return this;
+  }
+  updateUniformCell<UN extends UniformRowName>(
+    rowName: UN,
+    newValue: UniformRowValue<UN>,
+  ): ColumnRaw<VN, VL> {
+    this.sheet.uniformRow(rowName).updateValue(this.colIndex, newValue);
+    return this;
   }
   prepFetchAllDataCells() {
     this.ss.gatherFetchRanges(this.makeAllDataRange);
