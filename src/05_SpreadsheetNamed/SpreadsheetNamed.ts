@@ -1,10 +1,10 @@
+import type { SheetColumnsRange } from "../01_SpreadsheetRaw/ClassTypes/RawState.js";
+import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes.js";
-import { SpreadsheetRaw } from "../01_AppsScriptRaw/SpreadsheetRaw.js";
-import type { SheetColumnsRange } from "../01_AppsScriptRaw/Types/RawState.js";
-import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed.js";
 import { Obj } from "../utils/Obj.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
+import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed.js";
 import {
   isRowSpecifierBySchemaName,
   type FetchColumnSpecifierNamed,

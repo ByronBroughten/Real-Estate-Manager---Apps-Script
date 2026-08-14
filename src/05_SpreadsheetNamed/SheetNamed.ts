@@ -1,16 +1,16 @@
+import type { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
 } from "../02_generatedTraits/03_columnTraits";
-import { SheetIndexed } from "../04_SchemaIndexed/SheetIndexed";
-import type { SheetRaw } from "../01_AppsScriptRaw/SheetRaw";
-import type { SheetSchemaNamed } from "./SheetSchemaNamed";
+import { SheetIndexed } from "../04_SpreadsheetIndexed/SheetIndexed";
 import { Arr } from "../utils/Arr";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
 import { DataRowNamed } from "./DataRowNamed";
+import type { SheetSchemaNamed } from "./SheetSchemaNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 export class SheetNamed<

@@ -1,9 +1,9 @@
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
-} from "../../01_AppsScriptRaw/ClassBases/SpreadsheetRawBase";
-import { SpreadsheetRaw } from "../../01_AppsScriptRaw/SpreadsheetRaw";
-import type { GridRangeProps } from "../../01_AppsScriptRaw/Types/RawState";
+} from "../../01_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
+import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/RawState";
+import { SpreadsheetRaw } from "../../01_SpreadsheetRaw/SpreadsheetRaw";
 import { SpreadsheetSchema } from "../SpreadsheetSchemaNamed";
 import type { SpreadsheetNamedState } from "../Types/NamedState";
 

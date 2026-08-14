@@ -1,18 +1,18 @@
+import { RowRaw } from "../01_SpreadsheetRaw/RowRaw";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
 } from "../02_generatedTraits/03_columnTraits";
-import { DataRowIndexed } from "../04_SchemaIndexed/DataRowIndexed";
-import { RowRaw } from "../01_AppsScriptRaw/RowRaw";
-import type { Value, ValueName } from "../03_Schemas/valueSchemas";
-import type { ColumnSchemaNamed } from "./ColumnSchemaNamed";
-import type { SheetSchemaNamed } from "./SheetSchemaNamed";
+import type { Value, ValueName } from "../02_generatedTraits/042_valueSchemas";
+import { DataRowIndexed } from "../04_SpreadsheetIndexed/DataRowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { RowNamedBase } from "./ClassBases/RowNamedBase";
+import type { ColumnSchemaNamed } from "./ColumnSchemaNamed";
+import type { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 import { SheetNamed } from "./SheetNamed";
 

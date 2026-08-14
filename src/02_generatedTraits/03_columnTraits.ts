@@ -1,18 +1,18 @@
 import {
   makeStructuredConfig,
   type NameDelimiter,
-} from "../00_traitPrecursors/base";
-import {
-  type Value,
-  type ValueName,
-  type ValueSchema,
-} from "../03_Schemas/valueSchemas";
+} from "../00_rawPrecursors/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import {
   getSheetTraitByName,
   schemaSheetNames,
   type SheetNameSimple,
 } from "./02_sheetTraitsTypes";
+import {
+  type Value,
+  type ValueName,
+  type ValueSchema,
+} from "./042_valueSchemas";
 
 interface ColTraitsLiteral {
   columnId: string;

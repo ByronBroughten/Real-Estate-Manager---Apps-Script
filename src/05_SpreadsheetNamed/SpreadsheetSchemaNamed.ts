@@ -4,17 +4,13 @@ import {
   type SheetNameSimple,
 } from "../02_generatedTraits/02_sheetTraitsTypes";
 
-import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../04_SchemaIndexed/SchemaBase";
-import { SpreadsheetSchemaIndexed } from "../04_SchemaIndexed/SpreadsheetSchemaIndexed";
 import {
   makeRowRange,
   type RowRange,
-} from "../01_AppsScriptRaw/Types/RawState";
-import type {
-  RowSpecifierBySchemaName,
-  SheetColumnNamesStandard,
-} from "./Types/NamedState";
+} from "../01_SpreadsheetRaw/ClassTypes/RawState";
+import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
+import { SchemaBase } from "../04_SpreadsheetIndexed/SchemaBase";
+import { SpreadsheetSchemaIndexed } from "../04_SpreadsheetIndexed/SpreadsheetSchemaIndexed";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {
   isInTnGroup,
@@ -22,6 +18,10 @@ import {
   type TnGroupName,
 } from "./SheetNameGroups";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
+import type {
+  RowSpecifierBySchemaName,
+  SheetColumnNamesStandard,
+} from "./Types/NamedState";
 
 export class SpreadsheetSchema extends SchemaBase {
   get raw(): SpreadsheetSchemaIndexed {

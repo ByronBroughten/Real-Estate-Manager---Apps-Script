@@ -1,6 +1,6 @@
+import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/RawState";
 import type { SheetName } from "../../02_generatedTraits/02_sheetTraitsTypes";
 import type { ColumnName } from "../../02_generatedTraits/03_columnTraits";
-import type { GridRangeProps } from "../../01_AppsScriptRaw/Types/RawState";
 import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";

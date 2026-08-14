@@ -1,5 +1,5 @@
-import { SpreadsheetRawBase } from "./01_AppsScriptRaw/ClassBases/SpreadsheetRawBase.js";
-import { SheetConfigRaw } from "./01_AppsScriptRaw/SpecificSheetRaw/SheetConfigRaw.js";
+import { SpreadsheetRawBase } from "./01_SpreadsheetRaw/ClassBases/SpreadsheetRawBase.js";
+import { SheetConfigRaw } from "./01_SpreadsheetRaw/SheetConfigRaw.js";
 import { Api } from "./Api.js";
 
 function generateSheetTraitsFile(): string {

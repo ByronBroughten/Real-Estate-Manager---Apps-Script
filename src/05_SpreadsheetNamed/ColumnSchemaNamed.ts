@@ -10,14 +10,14 @@ import {
   type ColumnNameFull,
   type ColumnValueName,
 } from "../02_generatedTraits/03_columnTraits";
-import { ColumnSchemaIndexed } from "../04_SchemaIndexed/ColumnSchemaIndexed";
+import { ColumnSchemaIndexed } from "../04_SpreadsheetIndexed/ColumnSchemaIndexed";
 
-import type { ValueSchemaKey } from "../03_Schemas/valueSchema";
+import type { ValueSchemaKey } from "../00_rawPrecursors/valueSchema";
 import {
   getValTrait,
   type ValueName,
   type ValueSchema,
-} from "../03_Schemas/valueSchemas";
+} from "../02_generatedTraits/042_valueSchemas";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class ColumnSchemaNamed<
