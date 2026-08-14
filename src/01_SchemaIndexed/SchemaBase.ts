@@ -4,11 +4,11 @@ import {
   type NameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
-} from "../00_traitPrecursors/configPrecursors";
+} from "../00_traitPrecursors/base";
 import {
   configGet,
   type SpreadsheetConfig,
-} from "../01_configs/01_spreadsheetConfig";
+} from "../00_traitPrecursors/spreadsheetConfig";
 import type { RowRange } from "../02_AppsScriptRaw/Types/RawState";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";

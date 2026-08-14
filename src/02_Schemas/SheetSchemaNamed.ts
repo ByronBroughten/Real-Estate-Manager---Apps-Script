@@ -1,15 +1,15 @@
 import {
   getSheetTraitByName,
-  type SheetTrait,
   type SheetName,
   type SheetNameSimple,
-} from "../01_configs/02_sheetTraitsTypes";
+  type SheetTrait,
+} from "../01_generatedTraits/02_sheetTraitsTypes";
 import {
   getColumnTraitByIndex,
   getSheetColumnNames,
   type ColumnName,
   type SheetColumnName,
-} from "../01_configs/03_columnTraits";
+} from "../01_generatedTraits/03_columnTraits";
 import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import type { ColumnSpecifierNamed } from "../03_SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";

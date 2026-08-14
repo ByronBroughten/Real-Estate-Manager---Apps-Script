@@ -1,7 +1,4 @@
-import type {
-  CellValue,
-  CellValueName,
-} from "../00_traitPrecursors/configPrecursors";
+import type { CellValue, CellValueName } from "../00_traitPrecursors/base";
 import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import {
   getCellValTrait,

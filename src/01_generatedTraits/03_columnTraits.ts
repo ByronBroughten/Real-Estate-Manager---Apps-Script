@@ -1,7 +1,7 @@
 import {
   makeStructuredConfig,
   type NameDelimiter,
-} from "../00_traitPrecursors/configPrecursors";
+} from "../00_traitPrecursors/base";
 import {
   type Value,
   type ValueName,

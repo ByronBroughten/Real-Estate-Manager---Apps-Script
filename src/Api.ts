@@ -1,10 +1,9 @@
 import { SpreadsheetRaw } from "./02_AppsScriptRaw/SpreadsheetRaw";
 import { SpreadsheetNamedBase } from "./03_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { SpreadsheetNamed } from "./03_SpreadsheetNamed/SpreadsheetNamed";
-import { ChargeMgmt } from "./04_BusinessClasses/ChargeMgmt";
+
 import { ExpenseMgmt } from "./04_BusinessClasses/ExpenseMgmt";
 import { LeaseMgmt } from "./04_BusinessClasses/LeaseMgmt";
-import { LedgerMgmt } from "./04_BusinessClasses/LedgerMgmt";
 import { PaymentMgmt } from "./04_BusinessClasses/PaymentMgmt";
 import { SubsidyMgmt } from "./04_BusinessClasses/SubsidyMgmt";
 
@@ -33,7 +32,7 @@ export class Api extends SpreadsheetNamedBase {
   }
   readonly endpoints = {
     addExpenses: () => new ExpenseMgmt(this.ssn).addPropertyExpenses(),
-    addOccChargeOnetime: () => new ChargeMgmt(this.ssn).addOccChargeOnetime(),
+    // addOccChargeOnetime: () => new ChargeMgmt(this.ssn).addOccChargeOnetime(),
     addHhPaymentOnetime: () => new PaymentMgmt(this.ssn).addOccPaymentOnetime(),
     updateLeasesAndSubsidyContracts: () => {
       // This will be contained in one function, not here;
@@ -46,7 +45,7 @@ export class Api extends SpreadsheetNamedBase {
       "TODO";
     },
     buildHhLedger: () => {
-      new LedgerMgmt(this.ssn).buildHhLedger();
+      // new LedgerMgmt(this.ssn).buildHhLedger();
     },
   };
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {

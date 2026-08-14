@@ -1,8 +1,8 @@
-import type { CellValueNameToValue } from "../00_traitPrecursors/configPrecursors";
+import type { CellValueNameToValue } from "../00_traitPrecursors/base";
 import {
   valueTraitNames,
   type ValueTraitValues,
-} from "../01_configs/04_valueTraits";
+} from "../01_generatedTraits/04_valueTraits";
 import type { Merge } from "../utils/Obj/merge";
 import { baseValueNames, baseValueSchemas } from "./03_baseValueSchemas";
 import { makeSchemasFromValueConfig } from "./03_configValueSchemas";

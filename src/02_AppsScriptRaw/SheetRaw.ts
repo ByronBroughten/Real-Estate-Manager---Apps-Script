@@ -1,7 +1,7 @@
 import {
   type CellValueName,
   type UniformRowName,
-} from "../00_traitPrecursors/configPrecursors";
+} from "../00_traitPrecursors/base";
 import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import type { Value } from "../02_Schemas/03_valueSchemas";
 import { type StrictOmit } from "../utils/Obj";

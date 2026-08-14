@@ -1,4 +1,4 @@
-import type { CellValueName } from "../../00_traitPrecursors/configPrecursors";
+import type { CellValueName } from "../../00_traitPrecursors/base";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
 interface ColumnRawBaseProps<

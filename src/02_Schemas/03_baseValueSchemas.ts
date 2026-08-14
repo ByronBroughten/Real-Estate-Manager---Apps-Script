@@ -2,7 +2,7 @@ import {
   cellValueNames,
   type CellValueName,
   type CellValueNameToValue,
-} from "../00_traitPrecursors/configPrecursors";
+} from "../00_traitPrecursors/base";
 import { Dat } from "../utils/Dat";
 import { valS } from "../utils/validation";
 import {

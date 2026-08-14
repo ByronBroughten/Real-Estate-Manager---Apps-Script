@@ -2,9 +2,9 @@ import {
   schemaSheetNames,
   type SheetName,
   type SheetNameSimple,
-} from "../01_configs/02_sheetTraitsTypes";
+} from "../01_generatedTraits/02_sheetTraitsTypes";
 
-import { type ColumnName } from "../01_configs/03_columnTraits";
+import { type ColumnName } from "../01_generatedTraits/03_columnTraits";
 import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import { SpreadsheetSchemaIndexed } from "../01_SchemaIndexed/SpreadsheetSchemaIndexed";
 import {

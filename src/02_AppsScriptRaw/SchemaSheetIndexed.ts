@@ -1,4 +1,4 @@
-import type { UniformRowName } from "../00_traitPrecursors/configPrecursors";
+import type { UniformRowName } from "../00_traitPrecursors/base";
 import { SheetSchemaIndexed } from "../01_SchemaIndexed/SheetSchemaIndexed";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { SchemaColumn } from "./SchemaColumn";

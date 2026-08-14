@@ -1,9 +1,9 @@
-import type { SheetName } from "../01_configs/02_sheetTraitsTypes";
+import type { SheetName } from "../01_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../01_configs/03_columnTraits";
+} from "../01_generatedTraits/03_columnTraits";
 import { SchemaSheetIndexed } from "../02_AppsScriptRaw/SchemaSheetIndexed";
 import type { SheetRaw } from "../02_AppsScriptRaw/SheetRaw";
 import type { SheetSchemaNamed } from "../02_Schemas/SheetSchemaNamed";

@@ -1,4 +1,4 @@
-import type { TableValues } from "../01_configs/03_columnTraits";
+import type { TableValues } from "../01_generatedTraits/03_columnTraits";
 import { OperatorBase } from "../03_SpreadsheetNamed/ClassBases/OperatorBase";
 import type { SheetNamed } from "../03_SpreadsheetNamed/SheetNamed";
 import { Arr } from "../utils/Arr";

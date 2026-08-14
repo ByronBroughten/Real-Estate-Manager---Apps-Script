@@ -1,4 +1,4 @@
-import { makeStructuredConfig } from "../00_traitPrecursors/configPrecursors";
+import { makeStructuredConfig } from "../00_traitPrecursors/base";
 import { makeSheetTrait, type SheetTraitsBase } from "./02_sheetTraitsTypes";
 
 export const msc = makeSheetTrait;

@@ -1,4 +1,4 @@
-import { makeStructuredConfig } from "../00_traitPrecursors/configPrecursors";
+import { makeStructuredConfig } from "../00_traitPrecursors/base";
 import { Obj } from "../utils/Obj";
 
 const valueTraits = makeStructuredConfig(

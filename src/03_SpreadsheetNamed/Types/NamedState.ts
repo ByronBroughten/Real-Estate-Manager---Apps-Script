@@ -1,5 +1,5 @@
-import type { SheetName } from "../../01_configs/02_sheetTraitsTypes";
-import type { ColumnName } from "../../01_configs/03_columnTraits";
+import type { SheetName } from "../../01_generatedTraits/02_sheetTraitsTypes";
+import type { ColumnName } from "../../01_generatedTraits/03_columnTraits";
 import type { GridRangeProps } from "../../02_AppsScriptRaw/Types/RawState";
 import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";

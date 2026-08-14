@@ -1,9 +1,9 @@
 import {
-  valueTraitNames,
   getValueTraitValueArr,
+  valueTraitNames,
   type ValueTraitName,
   type ValueTraitValue,
-} from "../01_configs/04_valueTraits";
+} from "../01_generatedTraits/04_valueTraits";
 import { validationError } from "../utils/validation";
 import { vsc, type ValueSchemaBase } from "./03_valueSchema";
 
