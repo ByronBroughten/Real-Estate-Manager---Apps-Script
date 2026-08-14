@@ -4,8 +4,8 @@ import type {
   ColumnValue,
   TableValues,
 } from "../01_generatedTraits/03_columnTraits";
+import { DataRowIndexed } from "../01_SchemaIndexed/DataRowIndexed";
 import { RowRaw } from "../02_AppsScriptRaw/RowRaw";
-import { SchemaDataRow } from "../02_AppsScriptRaw/SchemaDataRow";
 import type { Value, ValueName } from "../02_Schemas/03_valueSchemas";
 import type { ColumnSchemaNamed } from "../02_Schemas/ColumnSchemaNamed";
 import type { SheetSchemaNamed } from "../02_Schemas/SheetSchemaNamed";
@@ -34,8 +34,8 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
-  get rich(): SchemaDataRow {
-    return new SchemaDataRow(this.raw.rowRawProps);
+  get rich(): DataRowIndexed {
+    return new DataRowIndexed(this.raw.rowRawProps);
   }
 
   get raw(): RowRaw {
@@ -45,12 +45,12 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     });
   }
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
-    const colIdx = this.colIndex(columnName);
-    return this.raw.cellIsActive(colIdx);
+    const colIndex = this.colIndex(columnName);
+    return this.raw.cellIsActive(colIndex);
   }
   cellIsEmpty<CN extends ColumnName<SN>>(columnName: CN): boolean {
-    const colIdx = this.colIndex(columnName);
-    return this.raw.isEmptyCell(colIdx);
+    const colIndex = this.colIndex(columnName);
+    return this.raw.isEmptyCell(colIndex);
   }
   value<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
     return this.raw.value(this.colIndex(columnName)) as ColumnValue<SN, CN>;

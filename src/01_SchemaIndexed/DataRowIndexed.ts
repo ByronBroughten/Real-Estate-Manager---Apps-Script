@@ -1,3 +1,5 @@
+import { RowRawBase } from "../02_AppsScriptRaw/ClassBases/RowRawBase";
+import { RowRaw } from "../02_AppsScriptRaw/RowRaw";
 import type { ValueSchemaKey } from "../02_Schemas/03_valueSchema";
 import {
   getValTrait,
@@ -5,27 +7,25 @@ import {
   type ValueName,
   type ValueTrait,
 } from "../02_Schemas/03_valueSchemas";
-import { RowRawBase } from "./ClassBases/RowRawBase";
-import { RowRaw } from "./RowRaw";
-import { SchemaColumn } from "./SchemaColumn";
-import { SchemaSheetIndexed } from "./SchemaSheetIndexed";
+import { ColumnIndexed } from "./ColumnIndexed";
+import { SheetIndexed } from "./SheetIndexed";
 
-export class SchemaDataRow extends RowRawBase {
+export class DataRowIndexed extends RowRawBase {
   constructor(props) {
     super(props);
     this.validateIsDataRow();
   }
-  updateValue(colIdx: number, value: Value): SchemaDataRow {
-    this.column(colIdx).schema.validateDataNotFormula();
-    this.raw.updateValue(colIdx, value);
+  updateValue(colIndex: number, value: Value): DataRowIndexed {
+    this.column(colIndex).schema.validateDataNotFormula();
+    this.raw.updateValue(colIndex, value);
     return this;
   }
-  updateCellToDefault(colIndex: number): SchemaDataRow {
+  updateCellToDefault(colIndex: number): DataRowIndexed {
     const defaultValue = this.column(colIndex).schema.makeDefaultDataValue();
     this.updateValue(colIndex, defaultValue);
     return this;
   }
-  updateToDefault(...colIndexes: number[]): SchemaDataRow {
+  updateToDefault(...colIndexes: number[]): DataRowIndexed {
     if (colIndexes.length === 0) {
       this._validateHasActiveNonFormulaColumns();
       colIndexes = this.activeColIdxsNotFormula;
@@ -43,18 +43,18 @@ export class SchemaDataRow extends RowRawBase {
   get raw(): RowRaw {
     return new RowRaw(this.rowRawProps);
   }
-  get sheet(): SchemaSheetIndexed {
-    return new SchemaSheetIndexed(this.sheetRawProps);
+  get sheet(): SheetIndexed {
+    return new SheetIndexed(this.sheetRawProps);
   }
-  column(colIndex: number): SchemaColumn {
-    return new SchemaColumn({
+  column(colIndex: number): ColumnIndexed {
+    return new ColumnIndexed({
       ...this.sheetRawProps,
       colIndex,
     });
   }
   get activeColIdxsNotFormula(): number[] {
     return this.activeColIdxs.filter(
-      (colIdx) => !this.column(colIdx).schema.isFormula,
+      (colIndex) => !this.column(colIndex).schema.isFormula,
     );
   }
   valTrait<VN extends ValueName, K extends ValueSchemaKey>(

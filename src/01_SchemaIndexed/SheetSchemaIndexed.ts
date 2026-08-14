@@ -40,8 +40,8 @@ export class SheetSchemaIndexed extends SchemaBase {
   }
   defaultValues(colIndexes: number[]): Map<number, CellValue> {
     return colIndexes.reduce(
-      (acc, colIdx) => {
-        acc.set(colIdx, this.column(colIdx).makeDefaultDataValue());
+      (acc, colIndex) => {
+        acc.set(colIndex, this.column(colIndex).makeDefaultDataValue());
         return acc;
       },
       new Map() as Map<number, CellValue>,

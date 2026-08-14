@@ -1,11 +1,7 @@
+import { configGet } from "./00_traitPrecursors/spreadsheetConfig";
 import { SpreadsheetRaw } from "./02_AppsScriptRaw/SpreadsheetRaw";
 import { SpreadsheetNamedBase } from "./03_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { SpreadsheetNamed } from "./03_SpreadsheetNamed/SpreadsheetNamed";
-
-import { ExpenseMgmt } from "./04_BusinessClasses/ExpenseMgmt";
-import { LeaseMgmt } from "./04_BusinessClasses/LeaseMgmt";
-import { PaymentMgmt } from "./04_BusinessClasses/PaymentMgmt";
-import { SubsidyMgmt } from "./04_BusinessClasses/SubsidyMgmt";
 
 export type SheetEventStandard = {
   colIdxBase0: number;
@@ -24,6 +20,9 @@ export type SheetEventStandard = {
 // Probably the straight-api ones first.
 
 export class Api extends SpreadsheetNamedBase {
+  static init() {
+    return new Api(SpreadsheetNamedBase.initSpreadsheetNamedProps());
+  }
   get ssr(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
@@ -31,16 +30,16 @@ export class Api extends SpreadsheetNamedBase {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   readonly endpoints = {
-    addExpenses: () => new ExpenseMgmt(this.ssn).addPropertyExpenses(),
+    // addExpenses: () => new ExpenseMgmt(this.ssn).addPropertyExpenses(),
     // addOccChargeOnetime: () => new ChargeMgmt(this.ssn).addOccChargeOnetime(),
-    addHhPaymentOnetime: () => new PaymentMgmt(this.ssn).addOccPaymentOnetime(),
-    updateLeasesAndSubsidyContracts: () => {
-      // This will be contained in one function, not here;
-      const leaseMgmt = new LeaseMgmt(this.ssn);
-      leaseMgmt.doPeriodicLeaseUpdates();
-      const subsidyMgmt = new SubsidyMgmt(this.ssn);
-      subsidyMgmt.doPeriodicSubsidyUpdates();
-    },
+    // addHhPaymentOnetime: () => new PaymentMgmt(this.ssn).addOccPaymentOnetime(),
+    // updateLeasesAndSubsidyContracts: () => {
+    // This will be contained in one function, not here;
+    // const leaseMgmt = new LeaseMgmt(this.ssn);
+    // leaseMgmt.doPeriodicLeaseUpdates();
+    // const subsidyMgmt = new SubsidyMgmt(this.ssn);
+    // subsidyMgmt.doPeriodicSubsidyUpdates();
+    // },
     updatePeriodicCharges: () => {
       "TODO";
     },
@@ -48,40 +47,45 @@ export class Api extends SpreadsheetNamedBase {
       // new LedgerMgmt(this.ssn).buildHhLedger();
     },
   };
-  handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
-    const ssr = this.ssr;
+  static getEventRowIdxBase0(e: GoogleAppsScript.Events.SheetsOnEdit): number {
+    return e.range.getRow() - 1;
+  }
+  static handleEventQuickStart(e: GoogleAppsScript.Events.SheetsOnEdit) {
     if (e.value !== "TRUE") {
       return;
     }
-    const rowIdx = e.range.getRow() - 1;
-    if (rowIdx !== ssr.schema.actionRowIdx) {
+    if (Api.getEventRowIdxBase0(e) !== configGet("actionRowIdxBase0")) {
       return;
     }
+  }
+  handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
+    const rowIndex = Api.getEventRowIdxBase0(e);
+    const ssr = this.ssr;
     const sheetGid = e.range.getSheet().getSheetId();
-    const colIdx = e.range.getColumn() - 1;
+    const colIndex = e.range.getColumn() - 1;
     // isApiColumn
 
     const eSheet = ssr.sheet(sheetGid);
-    const eRow = eSheet.row(rowIdx);
+    const eRow = eSheet.row(rowIndex);
     const eTopBodyRow = eSheet.row(ssr.schema.topDataRowIdx);
     const e2ndBodyRow = eSheet.row(ssr.schema.topDataRowIdx + 1);
 
-    eTopBodyRow.updateValue(colIdx, "Processing...");
-    e2ndBodyRow.updateValue(colIdx, "");
+    eTopBodyRow.updateValue(colIndex, "Processing...");
+    e2ndBodyRow.updateValue(colIndex, "");
     ssr.batchUpdateGSheets();
 
-    const endpointName = this._endpointNameOrNull(sheetGid, colIdx);
+    const endpointName = this._endpointNameOrNull(sheetGid, colIndex);
 
     try {
       // TO DO: implement endpoints by valid endpoint names
-      this.endpoints.addExpenses();
+      this.endpoints.buildHhLedger();
     } catch (error) {
       console.error(error);
-      e2ndBodyRow.updateValue(colIdx, "Error: " + (error as Error).message);
+      e2ndBodyRow.updateValue(colIndex, "Error: " + (error as Error).message);
     } finally {
-      eRow.updateValue(colIdx, "FALSE");
+      eRow.updateValue(colIndex, "FALSE");
       eTopBodyRow.updateValue(
-        colIdx,
+        colIndex,
         `Last ran on ${new Date().toLocaleString()}`,
       );
       // TO DO: set "last ran" for each row;
@@ -90,9 +94,12 @@ export class Api extends SpreadsheetNamedBase {
       ssr.batchUpdateGSheets();
     }
   }
-  private _endpointNameOrNull(sheetGid: number, colIdx: number): string | null {
+  private _endpointNameOrNull(
+    sheetGid: number,
+    colIndex: number,
+  ): string | null {
     const sheetSchema = this.ssn.schema.sheetByGid(sheetGid);
-    const { columnName } = sheetSchema.columnByIndex(colIdx);
+    const { columnName } = sheetSchema.columnByIndex(colIndex);
     const keyEndPhrase = "statusAndRun";
     const isStatusAndRunColumn =
       columnName.slice(-keyEndPhrase.length) === keyEndPhrase;

@@ -1,7 +1,6 @@
 import { SpreadsheetRawBase } from "./02_AppsScriptRaw/ClassBases/SpreadsheetRawBase.js";
 import { SheetConfigRaw } from "./02_AppsScriptRaw/SpecificSheetRaw/SheetConfigRaw.js";
 import { Api } from "./Api.js";
-import { TopOperator } from "./TopOperator.js";
 
 function generateSheetTraitsFile(): string {
   const sheetConfig = new SheetConfigRaw({
@@ -11,12 +10,11 @@ function generateSheetTraitsFile(): string {
 }
 
 function triggerFirstOfMonth() {
-  const top = TopOperator.init();
-  top.monthlyRentUpdate();
+  // Placeholder
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
-  const api = new Api();
+  const api = Api.init();
   api.handleSheetOnEditEvent(e);
 }
 

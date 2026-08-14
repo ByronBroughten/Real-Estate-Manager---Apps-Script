@@ -4,7 +4,7 @@ import type {
   ColumnValue,
   TableValues,
 } from "../01_generatedTraits/03_columnTraits";
-import { SchemaSheetIndexed } from "../02_AppsScriptRaw/SchemaSheetIndexed";
+import { SheetIndexed } from "../01_SchemaIndexed/SheetIndexed";
 import type { SheetRaw } from "../02_AppsScriptRaw/SheetRaw";
 import type { SheetSchemaNamed } from "../02_Schemas/SheetSchemaNamed";
 import { Arr } from "../utils/Arr";
@@ -25,8 +25,8 @@ export class SheetNamed<
   get raw(): SheetRaw {
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
   }
-  get rich(): SchemaSheetIndexed {
-    return new SchemaSheetIndexed(this.raw.sheetRawProps);
+  get rich(): SheetIndexed {
+    return new SheetIndexed(this.raw.sheetRawProps);
   }
   dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({
@@ -47,8 +47,8 @@ export class SheetNamed<
     return this.raw.dataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
   }
   get activeColumnNames(): ColumnName<SN>[] {
-    return this.raw.activeColumnIdxs.map((colIdx) =>
-      this.schema.columnNameByIdx(colIdx),
+    return this.raw.activeColumnIdxs.map((colIndex) =>
+      this.schema.columnNameByIdx(colIndex),
     );
   }
   get idValueIdx(): number {

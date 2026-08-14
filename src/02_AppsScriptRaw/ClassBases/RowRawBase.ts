@@ -47,9 +47,9 @@ export class RowRawBase extends SheetRawBase {
     }
   }
   colIndexOfValue(value: CellValue): number {
-    this.rowState.entries().forEach(([colIdx, cellValue]) => {
+    this.rowState.entries().forEach(([colIndex, cellValue]) => {
       if (cellValue === value) {
-        return colIdx;
+        return colIndex;
       }
     });
     throw new Error(

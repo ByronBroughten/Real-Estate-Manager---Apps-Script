@@ -1,17 +1,17 @@
 import type { UniformRowName } from "../00_traitPrecursors/base";
-import { SheetSchemaIndexed } from "../01_SchemaIndexed/SheetSchemaIndexed";
-import { SheetRawBase } from "./ClassBases/SheetRawBase";
-import { SchemaColumn } from "./SchemaColumn";
-import { SchemaDataRow } from "./SchemaDataRow";
-import { SheetRaw } from "./SheetRaw";
-import type { UniformRow } from "./UniformRowRaw/UniformRow";
+import { SheetRawBase } from "../02_AppsScriptRaw/ClassBases/SheetRawBase";
+import { SheetRaw } from "../02_AppsScriptRaw/SheetRaw";
+import type { UniformRow } from "../02_AppsScriptRaw/UniformRowRaw/UniformRow";
+import { ColumnIndexed } from "./ColumnIndexed";
+import { DataRowIndexed } from "./DataRowIndexed";
+import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
-export class SchemaSheetIndexed extends SheetRawBase {
+export class SheetIndexed extends SheetRawBase {
   get schema(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
   }
-  column(colIndex: number): SchemaColumn {
-    return new SchemaColumn({
+  column(colIndex: number): ColumnIndexed {
+    return new ColumnIndexed({
       ...this.sheetRawProps,
       colIndex,
     });
@@ -22,11 +22,11 @@ export class SchemaSheetIndexed extends SheetRawBase {
   get raw(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  get topDataRow(): SchemaDataRow {
+  get topDataRow(): DataRowIndexed {
     return this.dataRow(this.schema.topDataRowIdx);
   }
-  dataRow(rowIndex: number): SchemaDataRow {
-    return new SchemaDataRow({
+  dataRow(rowIndex: number): DataRowIndexed {
+    return new DataRowIndexed({
       ...this.sheetRawProps,
       rowIndex,
     });
@@ -34,7 +34,7 @@ export class SchemaSheetIndexed extends SheetRawBase {
   get dataRows() {
     return this.raw.dataRows.map((row) => this.dataRow(row.rowIndex));
   }
-  appendRowDefault(): SchemaDataRow {
+  appendRowDefault(): DataRowIndexed {
     const defaultValues = this.schema.defaultValues(
       this.topDataRow.activeColIdxsNotFormula,
     );

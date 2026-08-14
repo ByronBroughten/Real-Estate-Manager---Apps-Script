@@ -189,8 +189,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const columnIdToSheet = new Map<string, SheetRaw>();
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
-      sheet.activeColumnIdxs.forEach((colIdx) => {
-        const columnId = sheet.colIdRow.value(colIdx);
+      sheet.activeColumnIdxs.forEach((colIndex) => {
+        const columnId = sheet.colIdRow.value(colIndex);
         if (columnId) columnIdToSheet.set(columnId, sheet);
       });
     });

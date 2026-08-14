@@ -1,13 +1,13 @@
-import { ColumnSchemaIndexed } from "../01_SchemaIndexed/ColumnSchemaIndexed";
-import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import { SchemaSheetIndexed } from "./SchemaSheetIndexed";
+import { ColumnRawBase } from "../02_AppsScriptRaw/ClassBases/ColumnRawBase";
+import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
+import { SheetIndexed } from "./SheetIndexed";
 
-export class SchemaColumn extends ColumnRawBase {
+export class ColumnIndexed extends ColumnRawBase {
   get schema(): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed(this.sheetGid, this.colIndex);
   }
-  get sheet(): SchemaSheetIndexed {
-    return new SchemaSheetIndexed(this.sheetRawProps);
+  get sheet(): SheetIndexed {
+    return new SheetIndexed(this.sheetRawProps);
   }
   verifySchemaIdWithActual(): void {
     const colIdInSchema = this.schema.trait("columnId");

@@ -38,29 +38,29 @@ export class RowRaw extends RowRawBase {
       colIndex: colIndex,
     });
   }
-  isEmptyCell(colIdx: number): boolean {
-    if (!this.cellIsActive(colIdx)) {
+  isEmptyCell(colIndex: number): boolean {
+    if (!this.cellIsActive(colIndex)) {
       throw new Error(
-        `Row ${this.rowIndex} does not have a value set for column index ${colIdx}.`,
+        `Row ${this.rowIndex} does not have a value set for column index ${colIndex}.`,
       );
     }
-    const value = this.rowState.get(colIdx);
+    const value = this.rowState.get(colIndex);
     return value === "" || value === null || value === undefined;
   }
-  cellIsActive(colIdx: number): boolean {
-    return this.rowState.has(colIdx);
+  cellIsActive(colIndex: number): boolean {
+    return this.rowState.has(colIndex);
   }
 
   value<VN extends CellValueName>(
-    colIdx: number,
+    colIndex: number,
     valueNameAssert?: VN,
   ): CellValue<VN> {
-    if (!this.cellIsActive(colIdx)) {
+    if (!this.cellIsActive(colIndex)) {
       throw new Error(
-        `Row ${this.rowIndex} does not have a value set for column index ${colIdx}.`,
+        `Row ${this.rowIndex} does not have a value set for column index ${colIndex}.`,
       );
     }
-    const value = this.rowState.get(colIdx);
+    const value = this.rowState.get(colIndex);
     if (valueNameAssert) {
       return this.cellTrait(valueNameAssert, "strictValidate")(value);
     } else {
@@ -70,22 +70,25 @@ export class RowRaw extends RowRawBase {
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
   }
-  setValueState(colIdx: number, value: CellValue): void {
+  setValueState(colIndex: number, value: CellValue): void {
     if (!this.rowIsActive()) {
       throw new Error(
         `Cannot set value for row ${this.rowIndex} because it is not active.`,
       );
     }
-    this.rowState.set(colIdx, value);
+    this.rowState.set(colIndex, value);
   }
-  updateValue(colIdx: number, value: CellValue): RowRaw {
-    this.column(colIdx).validateIndexNotStale();
-    this.setValueState(colIdx, value);
-    return this.addRowChangeToSave({ action: "update", colIdxes: [colIdx] });
+  updateValue(colIndex: number, value: CellValue): RowRaw {
+    this.column(colIndex).validateIndexNotStale();
+    this.setValueState(colIndex, value);
+    return this.addRowChangeToSave({ action: "update", colIdxes: [colIndex] });
   }
-  integrateState(colIdx: number, cellValue: GoogleCellValue | undefined): void {
+  integrateState(
+    colIndex: number,
+    cellValue: GoogleCellValue | undefined,
+  ): void {
     const value = this._extractFromSheetValue(cellValue);
-    this.setValueState(colIdx, value);
+    this.setValueState(colIndex, value);
   }
   private _extractFromSheetValue(
     cellValue: GoogleCellValue | undefined,
@@ -175,8 +178,8 @@ export class RowRaw extends RowRawBase {
       append: (_: RowChangeProps) => (changes.append = true),
       delete: (_: RowChangeProps) => (changes.delete = this.deleteRequest),
       update: (props: RowChangeProps) => {
-        for (const colIdx of (props as RowChangeUpdateProps).colIdxes) {
-          changes.update.add(colIdx);
+        for (const colIndex of (props as RowChangeUpdateProps).colIdxes) {
+          changes.update.add(colIndex);
         }
       },
     };
@@ -193,17 +196,19 @@ export class RowRaw extends RowRawBase {
       },
     });
   }
-  gatherUpdateRequest(colIdx: number): void {
+  gatherUpdateRequest(colIndex: number): void {
     this.updateRequests.update.push({
       updateCells: {
         range: {
           sheetId: this.sheetGid,
           startRowIndex: this.rowIndex,
           endRowIndex: this.rowIndex + 1,
-          startColumnIndex: colIdx,
-          endColumnIndex: colIdx + 1,
+          startColumnIndex: colIndex,
+          endColumnIndex: colIndex + 1,
         },
-        rows: [{ values: [{ userEnteredValue: this._valueForSheet(colIdx) }] }],
+        rows: [
+          { values: [{ userEnteredValue: this._valueForSheet(colIndex) }] },
+        ],
         fields: "userEnteredValue",
       },
     });

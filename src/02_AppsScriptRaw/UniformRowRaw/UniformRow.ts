@@ -28,16 +28,16 @@ export class UniformRow<
   value(colIndex): UniformRowValue<UN> {
     return this.raw.value(colIndex, this.valueName) as UniformRowValue<UN>;
   }
-  updateValue(colIdx: number, value: UniformRowValue<UN>): UniformRow<UN> {
-    this.rowState.set(colIdx, value);
+  updateValue(colIndex: number, value: UniformRowValue<UN>): UniformRow<UN> {
+    this.rowState.set(colIndex, value);
     return this;
   }
   gatherAppendRequest(): void {
     // polymorphism
     this.raw.gatherAppendRequest();
   }
-  gatherUpdateRequest(colIdx: number): void {
+  gatherUpdateRequest(colIndex: number): void {
     // polymorphism
-    this.raw.gatherUpdateRequest(colIdx);
+    this.raw.gatherUpdateRequest(colIndex);
   }
 }

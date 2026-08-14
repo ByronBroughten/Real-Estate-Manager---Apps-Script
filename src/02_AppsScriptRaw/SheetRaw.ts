@@ -118,23 +118,23 @@ export class SheetRaw extends SheetRawBase {
       const columns = colData.columnMetadata || [];
       colData.rowData.forEach((colCell, rowIdxBase) => {
         columns.forEach((_, colIdxOffset) => {
-          const colIdx = colIdxBase + colIdxOffset;
+          const colIndex = colIdxBase + colIdxOffset;
           const rowIdx = rowIdxBase + (colData.startRow ?? 0);
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
-          this.rowRaw(rowIdx).integrateState(colIdx, cellData);
+          this.rowRaw(rowIdx).integrateState(colIndex, cellData);
         });
       });
     });
   }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
-    this.activeColumnIdxs.forEach((colIdx) => {
-      const colIdValue = this.colIdRow.value(colIdx);
+    this.activeColumnIdxs.forEach((colIndex) => {
+      const colIdValue = this.colIdRow.value(colIndex);
       if (!colIdValue) {
-        this.colIdRow.updateValue(colIdx, this.makeColumnId(idPrefix));
+        this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
         addedCount++;
       }
     });
@@ -236,8 +236,8 @@ export class SheetRaw extends SheetRawBase {
   }
   appendDataRowValues(colValues: Map<number, Value>): RowRaw {
     const row = this.appendDataRow();
-    for (const [colIdx, value] of colValues.entries()) {
-      row.updateValue(colIdx, value);
+    for (const [colIndex, value] of colValues.entries()) {
+      row.updateValue(colIndex, value);
     }
     return row;
   }
@@ -371,9 +371,9 @@ export class SheetRaw extends SheetRawBase {
     const lastRowIdx = this.lastRowIdx;
     const lastRow = this.dataRow(lastRowIdx);
     const newRow = this.appendDataRow();
-    lastRow.activeColIdxs.forEach((colIdx) => {
-      const value = lastRow.value(colIdx);
-      newRow.updateValue(colIdx, value);
+    lastRow.activeColIdxs.forEach((colIndex) => {
+      const value = lastRow.value(colIndex);
+      newRow.updateValue(colIndex, value);
     });
     lastRow.delete();
   }
