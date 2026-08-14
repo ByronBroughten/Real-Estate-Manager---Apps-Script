@@ -3,11 +3,11 @@ import { SheetConfigRaw } from "./02_AppsScriptRaw/SpecificSheetRaw/SheetConfigR
 import { Api } from "./Api.js";
 import { TopOperator } from "./TopOperator.js";
 
-function generateSheetConfigsFile(): string {
+function generateSheetTraitsFile(): string {
   const sheetConfig = new SheetConfigRaw({
     rawState: SpreadsheetRawBase.initRawState(),
   });
-  return sheetConfig.generateSheetConfigsFileSource();
+  return sheetConfig.generateSheetTraitsFileSource();
 }
 
 function triggerFirstOfMonth() {

@@ -3,9 +3,9 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const OUTPUT_PATH = fileURLToPath(
-  new URL("../src/01_configs/02_sheetConfigs.ts", import.meta.url),
+  new URL("../src/01_configs/02_sheetTraits.ts", import.meta.url),
 );
-const FUNCTION_NAME = "generateSheetConfigsFile";
+const FUNCTION_NAME = "generateSheetTraitsFile";
 
 function runClaspFunction() {
   const stdout = execFileSync(

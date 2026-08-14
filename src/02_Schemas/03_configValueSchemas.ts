@@ -1,40 +1,40 @@
 import {
-  configValueNames,
-  getValueConfigValueArr,
-  type ConfigValueName,
-  type ValueConfigValue,
-} from "../01_configs/04_valueConfig";
+  valueTraitNames,
+  getValueTraitValueArr,
+  type ValueTraitName,
+  type ValueTraitValue,
+} from "../01_configs/04_valueTraits";
 import { validationError } from "../utils/validation";
 import { vsc, type ValueSchemaBase } from "./03_valueSchema";
 
-function makeDefaultConfigValue<VN extends ConfigValueName>(
+function makeDefaultValueTrait<VN extends ValueTraitName>(
   valueName: VN,
-): ValueConfigValue<VN> {
-  return getValueConfigValueArr(valueName)[0] as ValueConfigValue<VN>;
+): ValueTraitValue<VN> {
+  return getValueTraitValueArr(valueName)[0] as ValueTraitValue<VN>;
 }
-function validateConfigValue<N extends ConfigValueName>(
+function validateValueTrait<N extends ValueTraitName>(
   value: unknown,
   valueName: N,
-): ValueConfigValue<N> {
+): ValueTraitValue<N> {
   if (
-    (getValueConfigValueArr(valueName) as readonly unknown[]).includes(value)
+    (getValueTraitValueArr(valueName) as readonly unknown[]).includes(value)
   ) {
-    return value as ValueConfigValue<N>;
+    return value as ValueTraitValue<N>;
   } else {
     throw validationError(value, `'${valueName}' union value element.`);
   }
 }
 type ConfigValueSchemas = {
-  [K in ConfigValueName]: ValueSchemaBase<ValueConfigValue<K>>;
+  [K in ValueTraitName]: ValueSchemaBase<ValueTraitValue<K>>;
 };
 
 export function makeSchemasFromValueConfig(): ConfigValueSchemas {
-  return configValueNames.reduce((schemas, name) => {
-    (schemas[name] as ValueSchemaBase<ValueConfigValue<typeof name>>) = vsc({
-      type: makeDefaultConfigValue(name) as ValueConfigValue<typeof name>,
-      makeDefault: () => makeDefaultConfigValue(name),
-      strictValidate: (value: unknown) => validateConfigValue(value, name),
-    }) as ValueSchemaBase<ValueConfigValue<typeof name>>;
+  return valueTraitNames.reduce((schemas, name) => {
+    (schemas[name] as ValueSchemaBase<ValueTraitValue<typeof name>>) = vsc({
+      type: makeDefaultValueTrait(name) as ValueTraitValue<typeof name>,
+      makeDefault: () => makeDefaultValueTrait(name),
+      strictValidate: (value: unknown) => validateValueTrait(value, name),
+    }) as ValueSchemaBase<ValueTraitValue<typeof name>>;
     return schemas;
   }, {} as ConfigValueSchemas);
 }

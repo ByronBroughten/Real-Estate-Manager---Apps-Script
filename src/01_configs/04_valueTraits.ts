@@ -1,7 +1,7 @@
-import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";
+import { makeStructuredConfig } from "../00_traitPrecursors/configPrecursors";
 import { Obj } from "../utils/Obj";
 
-const valueConfig = makeStructuredConfig(
+const valueTraits = makeStructuredConfig(
   {} as Record<string, readonly string[]>,
   {
     transactionDescription: [
@@ -115,19 +115,18 @@ const valueConfig = makeStructuredConfig(
   } as const,
 );
 
-type ValueConfig = typeof valueConfig;
-export type ConfigValueName = keyof ValueConfig;
-export const configValueNames: readonly ConfigValueName[] =
-  Obj.keys(valueConfig);
+type ValueTraits = typeof valueTraits;
+export type ValueTraitName = keyof ValueTraits;
+export const valueTraitNames: readonly ValueTraitName[] = Obj.keys(valueTraits);
 
-export type ValueConfigValues = {
-  [K in ConfigValueName]: ValueConfig[K][number];
+export type ValueTraitValues = {
+  [K in ValueTraitName]: ValueTraits[K][number];
 };
-export type ValueConfigValue<N extends ConfigValueName = ConfigValueName> =
-  ValueConfigValues[N];
+export type ValueTraitValue<N extends ValueTraitName = ValueTraitName> =
+  ValueTraitValues[N];
 
-export function getValueConfigValueArr<K extends ConfigValueName>(
+export function getValueTraitValueArr<K extends ValueTraitName>(
   key: K,
-): ValueConfig[K] {
-  return valueConfig[key];
+): ValueTraits[K] {
+  return valueTraits[key];
 }

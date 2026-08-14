@@ -4,7 +4,7 @@ import {
   type NameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
-} from "../00_configPrecursors/configPrecursors";
+} from "../00_traitPrecursors/configPrecursors";
 import {
   configGet,
   type SpreadsheetConfig,

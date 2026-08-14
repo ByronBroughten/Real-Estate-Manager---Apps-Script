@@ -1,4 +1,4 @@
-import type { UniformRowName } from "../00_configPrecursors/configPrecursors";
+import type { UniformRowName } from "../00_traitPrecursors/configPrecursors";
 import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";

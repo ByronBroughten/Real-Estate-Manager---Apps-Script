@@ -1,8 +1,8 @@
-import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";
-import { makeSheetConfig, type SheetConfigsBase } from "./02_sheetConfigsTypes";
+import { makeStructuredConfig } from "../00_traitPrecursors/configPrecursors";
+import { makeSheetTrait, type SheetTraitsBase } from "./02_sheetTraitsTypes";
 
-export const msc = makeSheetConfig;
-export const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {
+export const msc = makeSheetTrait;
+export const sheetTraits = makeStructuredConfig({} as SheetTraitsBase, {
   sheetConfig: msc(210603630, "stm"),
   config: msc(1967106628, "vrb"),
   validationList: msc(2119236084, "rng"),

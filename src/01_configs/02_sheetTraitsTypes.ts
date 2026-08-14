@@ -1,41 +1,41 @@
 import { Obj, type KeyedMap } from "../utils/Obj";
-import { sheetConfigs } from "./02_sheetConfigs";
+import { sheetTraits } from "./02_sheetTraits";
 
-// Pre-sheetConfigs
-export interface SheetConfig {
+// Pre-sheetTraits
+export interface SheetTrait {
   sheetGid: number;
   idPrefix: string;
   hasIdColumn: boolean;
 }
-export function makeSheetConfig(
+export function makeSheetTrait(
   sheetGid: number,
   idPrefix: string,
   hasIdColumn = false,
-): SheetConfig {
+): SheetTrait {
   return {
     sheetGid,
     idPrefix,
     hasIdColumn,
   };
 }
-export type SheetConfigsBase = Record<string, SheetConfig>;
+export type SheetTraitsBase = Record<string, SheetTrait>;
 
-// Post-sheetConfigs
-type SheetConfigs = typeof sheetConfigs;
-export const schemaSheetNames = Obj.keys(sheetConfigs);
+// Post-sheetTraits
+type SheetTraits = typeof sheetTraits;
+export const schemaSheetNames = Obj.keys(sheetTraits);
 export type SheetNameSimple = (typeof schemaSheetNames)[number];
 export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
 
 export function getSheetTraitByName<
   TN extends SheetNameSimple,
-  K extends keyof SheetConfig,
->(sheetName: TN, key: K): SheetConfig[K] {
-  return sheetConfigs[sheetName][key];
+  K extends keyof SheetTrait,
+>(sheetName: TN, key: K): SheetTrait[K] {
+  return sheetTraits[sheetName][key];
 }
 
-type SheetTraitsByGid = KeyedMap<SheetConfigs, "sheetGid", "sheetName">;
+type SheetTraitsByGid = KeyedMap<SheetTraits, "sheetGid", "sheetName">;
 export const sheetTraitsByGid = Obj.toKeyedMap(
-  sheetConfigs,
+  sheetTraits,
   "sheetGid",
   "sheetName",
 );

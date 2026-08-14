@@ -1,7 +1,7 @@
 import type {
   UniformRowName,
   UniformRowValueName,
-} from "../../00_configPrecursors/configPrecursors";
+} from "../../00_traitPrecursors/configPrecursors";
 import { SchemaBase } from "../../01_SchemaIndexed/SchemaBase";
 import { RowRawBase, type RowRawProps } from "../ClassBases/RowRawBase";
 

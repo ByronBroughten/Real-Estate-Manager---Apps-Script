@@ -1,5 +1,5 @@
-import type { SheetName } from "../../01_configs/02_sheetConfigsTypes";
-import type { TableValues } from "../../01_configs/03_columnConfigs";
+import type { SheetName } from "../../01_configs/02_sheetTraitsTypes";
+import type { TableValues } from "../../01_configs/03_columnTraits";
 import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
 
 export type RowState<TN extends SheetName> = TableValues<TN>;

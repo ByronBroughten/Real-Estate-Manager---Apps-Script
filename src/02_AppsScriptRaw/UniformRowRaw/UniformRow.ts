@@ -2,7 +2,7 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../../00_configPrecursors/configPrecursors";
+} from "../../00_traitPrecursors/configPrecursors";
 import { type CellValueTrait } from "../../02_Schemas/03_baseValueSchemas";
 import type { ValueSchemaKey } from "../../02_Schemas/03_valueSchema";
 import { RowRaw } from "../RowRaw";

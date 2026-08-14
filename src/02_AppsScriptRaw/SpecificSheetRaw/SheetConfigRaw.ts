@@ -1,7 +1,7 @@
 import {
   makeStructuredConfig,
   type CellValueName,
-} from "../../00_configPrecursors/configPrecursors";
+} from "../../00_traitPrecursors/configPrecursors";
 import { configGet } from "../../01_configs/01_spreadsheetConfig";
 import { SchemaBase } from "../../01_SchemaIndexed/SchemaBase";
 import { Obj } from "../../utils/Obj";
@@ -154,7 +154,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
     return updatedValues;
   }
-  generateSheetConfigsFileSource(): string {
+  generateSheetTraitsFileSource(): string {
     this.sheet.prepFetchProperties();
     this.sheet.prepFetchFullUniformRow("header");
     this.ss.fetchAll();
@@ -182,11 +182,11 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
 
     return [
-      `import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";`,
-      `import { makeSheetConfig, type SheetConfigsBase } from "./02_sheetConfigsTypes";`,
+      `import { makeStructuredConfig } from "../00_traitPrecursors/configPrecursors";`,
+      `import { makeSheetTrait, type SheetTraitsBase } from "./02_sheetTraitsTypes";`,
       ``,
-      `export const msc = makeSheetConfig;`,
-      `export const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {`,
+      `export const msc = makeSheetTrait;`,
+      `export const sheetTraits = makeStructuredConfig({} as SheetTraitsBase, {`,
       ...entries,
       `});`,
       ``,

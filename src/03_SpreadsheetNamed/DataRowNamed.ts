@@ -1,9 +1,9 @@
-import type { SheetName } from "../01_configs/02_sheetConfigsTypes";
+import type { SheetName } from "../01_configs/02_sheetTraitsTypes";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
-} from "../01_configs/03_columnConfigs";
+} from "../01_configs/03_columnTraits";
 import { RowRaw } from "../02_AppsScriptRaw/RowRaw";
 import { SchemaDataRow } from "../02_AppsScriptRaw/SchemaDataRow";
 import type { Value, ValueName } from "../02_Schemas/03_valueSchemas";

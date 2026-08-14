@@ -1,63 +1,63 @@
-import type { NameDelimiter } from "../00_configPrecursors/configPrecursors";
 import {
   getSheetTraitByName,
-  type SheetConfig,
+  type SheetTrait,
   type SheetName,
   type SheetNameSimple,
-} from "../01_configs/02_sheetConfigsTypes";
+} from "../01_configs/02_sheetTraitsTypes";
 import {
   getColumnTraitByIndex,
   getSheetColumnNames,
   type ColumnName,
-} from "../01_configs/03_columnConfigs";
+  type SheetColumnName,
+} from "../01_configs/03_columnTraits";
 import { SchemaBase } from "../01_SchemaIndexed/SchemaBase";
 import type { ColumnSpecifierNamed } from "../03_SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 
 const varbNameImmutable = ["baseId"] as const;
 type VarbNameImmutable = (typeof varbNameImmutable)[number];
-export type VarbNameMutable<TN extends SheetName> = Exclude<
-  ColumnName<TN>,
+export type VarbNameMutable<SN extends SheetName> = Exclude<
+  ColumnName<SN>,
   VarbNameImmutable
 >;
 
-export class SheetSchemaNamed<TN extends SheetNameSimple> extends SchemaBase {
-  readonly sheetName: TN;
-  constructor(sheetName: TN) {
+export class SheetSchemaNamed<SN extends SheetNameSimple> extends SchemaBase {
+  readonly sheetName: SN;
+  constructor(sheetName: SN) {
     super();
     this.sheetName = sheetName;
   }
-  trait<K extends keyof SheetConfig>(key: K): SheetConfig[K] {
+  trait<K extends keyof SheetTrait>(key: K): SheetTrait[K] {
     return getSheetTraitByName(this.sheetName, key);
   }
   get sheetGid(): number {
     return this.trait("sheetGid");
   }
-  sheetColName<CN extends ColumnName<TN> & string>(
+  sheetColName<CN extends ColumnName<SN> & string>(
     columnName: CN,
-  ): `${TN}${NameDelimiter}${CN}` {
+  ): SheetColumnName<SN, CN> {
     return `${this.sheetName}${this.nameDelimiter}${columnName}`;
   }
-  column<CN extends ColumnName<TN>>(columnName: CN): ColumnSchemaNamed<TN, CN> {
+  column<CN extends ColumnName<SN>>(columnName: CN): ColumnSchemaNamed<SN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  columnByIndex(colIdx: number): ColumnSchemaNamed<TN, ColumnName<TN>> {
+  columnByIndex(colIdx: number): ColumnSchemaNamed<SN, ColumnName<SN>> {
     const columnName = this.columnNameByIdx(colIdx);
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  columnNameByIdx(colIdx: number): ColumnName<TN> {
+  columnNameByIdx(colIdx: number): ColumnName<SN> {
     return getColumnTraitByIndex(
       this.sheetGid,
       colIdx,
       "columnName",
-    ) as ColumnName<TN>;
+    ) as ColumnName<SN>;
   }
-  colIndex<CN extends ColumnName<TN>>(columnName: CN): number {
+  colIndex<CN extends ColumnName<SN>>(columnName: CN): number {
     return this.column(columnName).colIndex;
   }
   columnSpecifierToStandard(
-    columnSpecifier: ColumnSpecifierNamed<TN>,
-  ): ColumnName<TN>[] {
+    columnSpecifier: ColumnSpecifierNamed<SN>,
+  ): ColumnName<SN>[] {
     if (columnSpecifier === "allColumns") {
       return this.columnNames;
     } else if (Array.isArray(columnSpecifier)) {
@@ -66,7 +66,7 @@ export class SheetSchemaNamed<TN extends SheetNameSimple> extends SchemaBase {
       return [columnSpecifier];
     }
   }
-  get columnNames(): ColumnName<TN>[] {
+  get columnNames(): ColumnName<SN>[] {
     return getSheetColumnNames(this.sheetName);
   }
 }

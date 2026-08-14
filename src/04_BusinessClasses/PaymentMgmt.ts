@@ -1,4 +1,4 @@
-import type { TableValues } from "../01_configs/03_columnConfigs";
+import type { TableValues } from "../01_configs/03_columnTraits";
 import { OperatorBase } from "../03_SpreadsheetNamed/ClassBases/OperatorBase";
 import type { DataRowNamed } from "../03_SpreadsheetNamed/DataRowNamed";
 import { Obj } from "../utils/Obj";

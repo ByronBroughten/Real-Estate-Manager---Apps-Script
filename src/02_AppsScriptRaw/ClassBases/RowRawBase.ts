@@ -1,4 +1,4 @@
-import type { CellValue } from "../../00_configPrecursors/configPrecursors";
+import type { CellValue } from "../../00_traitPrecursors/configPrecursors";
 import { SchemaBase } from "../../01_SchemaIndexed/SchemaBase";
 import type { RawRowState } from "../Types/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";

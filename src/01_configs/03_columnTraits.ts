@@ -1,4 +1,7 @@
-import { makeStructuredConfig } from "../00_configPrecursors/configPrecursors";
+import {
+  makeStructuredConfig,
+  type NameDelimiter,
+} from "../00_traitPrecursors/configPrecursors";
 import {
   type Value,
   type ValueName,
@@ -10,7 +13,7 @@ import {
   getSheetTraitByName,
   schemaSheetNames,
   type SheetNameSimple,
-} from "./02_sheetConfigsTypes";
+} from "./02_sheetTraitsTypes";
 
 interface ColTraitsLiteral {
   columnId: string;
@@ -46,11 +49,11 @@ function makeColTraits<VN extends ValueName>(
 }
 
 const mcs = makeColTraits;
-type TableColTraitssBase = Record<string, ColTraitsBase>;
-type AllColTraitssBase = Record<SheetNameSimple, TableColTraitssBase>;
+type TableColTraitsBase = Record<string, ColTraitsBase>;
+type AllColTraitsBase = Record<SheetNameSimple, TableColTraitsBase>;
 
-const allColConfigs = makeStructuredConfig(
-  {} as AllColTraitssBase,
+const allColTraits = makeStructuredConfig(
+  {} as AllColTraitsBase,
   {
     addExpenses: {
       date: mcs("col-vXNHJps", "string", "Date", 0, false),
@@ -3530,7 +3533,7 @@ const allColConfigs = makeStructuredConfig(
   } as const,
 );
 
-export type AllColTraits = typeof allColConfigs;
+export type AllColTraits = typeof allColTraits;
 
 export type ColumnName<TN extends SheetNameSimple = SheetNameSimple> =
   keyof AllColTraits[TN];
@@ -3567,7 +3570,7 @@ export type TableValues<
 export function getSheetColumnNames<TN extends SheetNameSimple>(
   sheetName: TN,
 ): ColumnName<TN>[] {
-  return Obj.keys(allColConfigs[sheetName]);
+  return Obj.keys(allColTraits[sheetName]);
 }
 
 // columnConfig isn't actually very unique. The only unique
@@ -3576,7 +3579,7 @@ export function getColumnTraitByName<
   CN extends ColumnName<TN>,
   K extends keyof ColTraits<TN, CN>,
 >(sheetName: TN, columnName: CN, key: K): ColTraits<TN, CN>[K] {
-  return (allColConfigs[sheetName][columnName] as ColTraits<TN, CN>)[key];
+  return (allColTraits[sheetName][columnName] as ColTraits<TN, CN>)[key];
 }
 
 export type RawIdxColTraits = KeyedMap<
@@ -3591,13 +3594,13 @@ function makeAllColTraitsGidIdx(): AllColTraitsGidIdx {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
       sheetGid,
-      Obj.toKeyedMap(allColConfigs[sheetName], "colIndex", "columnName"),
+      Obj.toKeyedMap(allColTraits[sheetName], "colIndex", "columnName"),
     );
     return attrs;
   }, new Map() as AllColTraitsGidIdx);
 }
 
-const allColConfigsGidIdx = makeAllColTraitsGidIdx();
+const allColTraitsGidIdx = makeAllColTraitsGidIdx();
 
 export type ColTraitsRaw =
   RawIdxColTraits extends Map<any, infer V> ? V : never;
@@ -3607,7 +3610,7 @@ export function getColumnTraitByIndex<K extends ColTraitsRawKey>(
   colIndex: number,
   key: K,
 ): ColTraitsRaw[K] {
-  const colTraits = allColConfigsGidIdx.get(sheetId)?.get(colIndex);
+  const colTraits = allColTraitsGidIdx.get(sheetId)?.get(colIndex);
   if (!colTraits) {
     throw new Error(
       `No column attributes for sheetId=${sheetId}, colIndex=${colIndex}`,
@@ -3616,11 +3619,16 @@ export function getColumnTraitByIndex<K extends ColTraitsRawKey>(
   return colTraits[key];
 }
 export function getSheetColumnIdxes(sheetGid: number): MapIterator<number> {
-  return allColConfigsGidIdx.get(sheetGid).keys();
+  return allColTraitsGidIdx.get(sheetGid).keys();
 }
 
-const allColConfigsFlat = Obj.flattenTwoLevels(allColConfigs);
-type AllColTraitsFlat = typeof allColConfigsFlat;
+export type SheetColumnName<
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN> & string,
+> = `${SN}${NameDelimiter}${CN}`;
+
+const allColTraitsFlat = Obj.flattenTwoLevels(allColTraits);
+type AllColTraitsFlat = typeof allColTraitsFlat;
 type ColumnNameFullSimple = keyof AllColTraitsFlat;
 type ColumnNameFull<
   TN extends SheetNameSimple,

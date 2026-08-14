@@ -1,7 +1,7 @@
 import {
   getColumnTraitByIndex,
   type ColTraitsRaw,
-} from "../01_configs/03_columnConfigs";
+} from "../01_configs/03_columnTraits";
 import {
   getValTrait,
   type Value,
