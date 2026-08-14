@@ -2,7 +2,7 @@ import type {
   UniformRowName,
   UniformRowValueName,
 } from "../../00_rawPrecursors/base";
-import { SchemaBase } from "../../04_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
 import { RowRawBase, type RowRawProps } from "./RowRawBase";
 
 export interface RowUniformProps<

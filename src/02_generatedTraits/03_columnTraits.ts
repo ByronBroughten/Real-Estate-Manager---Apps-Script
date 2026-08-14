@@ -12,7 +12,7 @@ import {
   type Value,
   type ValueName,
   type ValueSchema,
-} from "./042_valueSchemas";
+} from "./06_valueSchemas";
 
 interface ColTraitsLiteral {
   columnId: string;

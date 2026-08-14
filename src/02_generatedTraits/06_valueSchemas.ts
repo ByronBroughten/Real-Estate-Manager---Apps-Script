@@ -8,8 +8,8 @@ import type {
   ValueSchemaKey,
 } from "../00_rawPrecursors/valueSchema";
 import type { Merge } from "../utils/Obj/merge";
-import { valueTraitNames, type ValueTraitValues } from "./040_valueTraits";
-import { makeSchemasFromValueConfig } from "./041_traitValueSchemas";
+import { valueTraitNames, type ValueTraitValues } from "./04_valueTraits";
+import { makeSchemasFromValueConfig } from "./05_traitValueSchemas";
 
 const valueNames = [...baseValueNames, ...valueTraitNames] as const;
 type ValueNameSimple = (typeof valueNames)[number];

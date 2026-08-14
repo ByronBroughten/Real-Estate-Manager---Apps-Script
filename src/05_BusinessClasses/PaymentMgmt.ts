@@ -1,6 +1,6 @@
 // import type { TableValues } from "../02_generatedTraits/03_columnTraits";
-// import { OperatorBase } from "../05_SpreadsheetNamed/ClassBases/OperatorBase";
-// import type { DataRowNamed } from "../05_SpreadsheetNamed/DataRowNamed";
+// import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
+// import type { DataRowNamed } from "../04_SpreadsheetNamed/DataRowNamed";
 // import { Obj } from "../utils/Obj";
 
 // type PaymentIdToCharges = Record<string, DataRowNamed<"occCharge">[]>;

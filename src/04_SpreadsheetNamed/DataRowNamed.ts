@@ -5,8 +5,8 @@ import type {
   ColumnValue,
   TableValues,
 } from "../02_generatedTraits/03_columnTraits";
-import type { Value, ValueName } from "../02_generatedTraits/042_valueSchemas";
-import { DataRowIndexed } from "../04_SpreadsheetIndexed/DataRowIndexed";
+import type { Value, ValueName } from "../02_generatedTraits/06_valueSchemas";
+import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";

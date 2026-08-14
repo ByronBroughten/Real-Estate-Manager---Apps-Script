@@ -7,7 +7,7 @@ import {
   type Value,
   type ValueName,
   type ValueSchema,
-} from "../02_generatedTraits/042_valueSchemas";
+} from "../02_generatedTraits/06_valueSchemas";
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 

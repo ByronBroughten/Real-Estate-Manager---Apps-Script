@@ -2,8 +2,8 @@ import {
   type CellValueName,
   type UniformRowName,
 } from "../00_rawPrecursors/base";
-import type { Value } from "../02_generatedTraits/042_valueSchemas";
-import { SchemaBase } from "../04_SpreadsheetIndexed/SchemaBase";
+import type { Value } from "../02_generatedTraits/06_valueSchemas";
+import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";

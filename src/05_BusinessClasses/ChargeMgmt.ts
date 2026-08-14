@@ -1,7 +1,7 @@
 // import type { TableValues } from "../02_generatedTraits/03_columnTraits";
-// import { OperatorBase } from "../05_SpreadsheetNamed/ClassBases/OperatorBase";
-// import type { DataRowNamed } from "../05_SpreadsheetNamed/DataRowNamed";
-// import type { SheetNamed } from "../05_SpreadsheetNamed/SheetNamed";
+// import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
+// import type { DataRowNamed } from "../04_SpreadsheetNamed/DataRowNamed";
+// import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 // import { utils } from "../utilitiesGeneral";
 // import { Arr } from "../utils/Arr";
 // import type { MonthYear } from "../utils/Dat";

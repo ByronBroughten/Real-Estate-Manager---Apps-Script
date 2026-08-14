@@ -9,7 +9,7 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../04_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import type { ColumnSpecifierNamed } from "./Types/NamedState";
 

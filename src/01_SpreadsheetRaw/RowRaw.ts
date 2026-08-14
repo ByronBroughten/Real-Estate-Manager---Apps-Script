@@ -9,7 +9,7 @@ import {
   type CellValueTrait,
 } from "../00_rawPrecursors/baseValueSchemas";
 import { type ValueSchemaKey } from "../00_rawPrecursors/valueSchema";
-import { SchemaBase } from "../04_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import type {
   RowChangeProps,

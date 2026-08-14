@@ -9,8 +9,8 @@ import {
   type RowRange,
 } from "../01_SpreadsheetRaw/ClassTypes/RawState";
 import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../04_SpreadsheetIndexed/SchemaBase";
-import { SpreadsheetSchemaIndexed } from "../04_SpreadsheetIndexed/SpreadsheetSchemaIndexed";
+import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { SpreadsheetSchemaIndexed } from "../03_SpreadsheetIndexed/SpreadsheetSchemaIndexed";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {
   isInTnGroup,

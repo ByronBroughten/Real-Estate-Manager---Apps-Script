@@ -5,7 +5,7 @@ import {
   valueTraitNames,
   type ValueTraitName,
   type ValueTraitValue,
-} from "./040_valueTraits";
+} from "./04_valueTraits";
 
 function makeDefaultValueTrait<VN extends ValueTraitName>(
   valueName: VN,

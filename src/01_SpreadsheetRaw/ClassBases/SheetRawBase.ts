@@ -1,5 +1,5 @@
 import type { GoogleSheet } from "../../00_rawPrecursors/AppsScriptTypes";
-import { SheetSchemaIndexed } from "../../04_SpreadsheetIndexed/SheetSchemaIndexed";
+import { SheetSchemaIndexed } from "../../03_SpreadsheetIndexed/SheetSchemaIndexed";
 import { Obj } from "../../utils/Obj";
 import { valS } from "../../utils/validation";
 import type { RawSheetState } from "../ClassTypes/RawState";

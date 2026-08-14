@@ -1,4 +1,4 @@
-export class AppScriptRaw {
+export class AppsScript {
   static projectProperties(key: string): string | null {
     return PropertiesService.getScriptProperties().getProperty(key);
   }

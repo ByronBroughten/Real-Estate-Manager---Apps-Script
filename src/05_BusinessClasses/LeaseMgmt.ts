@@ -1,6 +1,6 @@
 // import type { TableValues } from "../02_generatedTraits/03_columnTraits";
-// import { OperatorBase } from "../05_SpreadsheetNamed/ClassBases/OperatorBase";
-// import type { SheetNamed } from "../05_SpreadsheetNamed/SheetNamed";
+// import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
+// import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 // import { Arr } from "../utils/Arr";
 // import { Dat } from "../utils/Dat";
 

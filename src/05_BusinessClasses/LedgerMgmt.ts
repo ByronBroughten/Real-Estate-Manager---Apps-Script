@@ -1,7 +1,7 @@
 // import type { GroupToSheetName } from "../03_Schemas/SheetNameGroups";
-// import { OperatorBase } from "../05_SpreadsheetNamed/ClassBases/OperatorBase";
-// import type { DataRowNamed } from "../05_SpreadsheetNamed/DataRowNamed";
-// import type { SheetNamed } from "../05_SpreadsheetNamed/SheetNamed";
+// import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
+// import type { DataRowNamed } from "../04_SpreadsheetNamed/DataRowNamed";
+// import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 // import { Obj } from "../utils/Obj";
 
 // type LedgerInputSn = GroupToSheetName<"ledgerInputs">;

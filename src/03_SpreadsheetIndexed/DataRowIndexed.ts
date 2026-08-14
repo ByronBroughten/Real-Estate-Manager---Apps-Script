@@ -6,7 +6,7 @@ import {
   type Value,
   type ValueName,
   type ValueTrait,
-} from "../02_generatedTraits/042_valueSchemas";
+} from "../02_generatedTraits/06_valueSchemas";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 

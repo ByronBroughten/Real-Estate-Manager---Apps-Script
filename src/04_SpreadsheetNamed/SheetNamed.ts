@@ -5,7 +5,7 @@ import type {
   ColumnValue,
   TableValues,
 } from "../02_generatedTraits/03_columnTraits";
-import { SheetIndexed } from "../04_SpreadsheetIndexed/SheetIndexed";
+import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import { Arr } from "../utils/Arr";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import { ColumnNamed } from "./ColumnNamed";

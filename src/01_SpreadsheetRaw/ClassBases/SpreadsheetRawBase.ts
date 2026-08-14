@@ -1,5 +1,5 @@
 import type { GoogleGridRange } from "../../00_rawPrecursors/AppsScriptTypes";
-import { AppScriptRaw } from "../../AppsScript";
+import { AppsScript } from "../../00_rawPrecursors/AppsScript";
 import {
   initUpdateRequests,
   type ChangesToSave,
@@ -20,7 +20,7 @@ export class SpreadsheetRawBase {
     return this.rawState.sheets;
   }
   get spreadsheetId(): string {
-    const ssId = AppScriptRaw.projectProperties("realEstateSpreadsheetId");
+    const ssId = AppsScript.projectProperties("realEstateSpreadsheetId");
     if (!ssId) {
       throw new Error(
         "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",

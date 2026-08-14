@@ -1,7 +1,7 @@
 import { configGet } from "./00_rawPrecursors/spreadsheetConfig";
 import { SpreadsheetRaw } from "./01_SpreadsheetRaw/SpreadsheetRaw";
-import { SpreadsheetNamedBase } from "./05_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import { SpreadsheetNamed } from "./05_SpreadsheetNamed/SpreadsheetNamed";
+import { SpreadsheetNamedBase } from "./04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed";
 
 export type SheetEventStandard = {
   colIdxBase0: number;
