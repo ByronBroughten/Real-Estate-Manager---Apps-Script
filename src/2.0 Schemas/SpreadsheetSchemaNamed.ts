@@ -1,8 +1,8 @@
 import {
-  allSheetNames,
+  schemaSheetNames,
   type SheetName,
   type SheetNameSimple,
-} from "../1.0 Configs/2.0 sheetConfigs";
+} from "../1.0 Configs/sheetConfigsTypes";
 
 import { type ColumnName } from "../1.0 Configs/3.0 columnConfigs";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
@@ -37,7 +37,7 @@ export class SpreadsheetSchema extends SchemaBase {
     return new ColumnSchemaNamed(sheetName, columnName);
   }
   get sheetNames() {
-    return allSheetNames;
+    return schemaSheetNames;
   }
   get sheetNamesWithoutIdPrefix(): SheetName[] {
     return this.sheetNames.filter((sheetName) => {

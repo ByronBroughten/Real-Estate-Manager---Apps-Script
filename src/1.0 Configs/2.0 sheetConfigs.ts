@@ -1,25 +1,8 @@
-import { Obj, type KeyedMap } from "../utils/Obj";
 import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
+import { makeSheetConfig, type SheetConfigsBase } from "./sheetConfigsTypes";
 
-export interface SheetConfig {
-  sheetGid: number;
-  idPrefix: string;
-  hasIdColumn: boolean;
-}
-function makeSheetConfig(
-  sheetGid: number,
-  idPrefix: string,
-  hasIdColumn = false,
-): SheetConfig {
-  return {
-    sheetGid,
-    idPrefix,
-    hasIdColumn,
-  };
-}
-const msc = makeSheetConfig;
-type SheetConfigsBase = Record<string, SheetConfig>;
-const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {
+export const msc = makeSheetConfig;
+export const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {
   sheetConfig: msc(210603630, "stm"),
   config: msc(1967106628, "vrb"),
   validationList: msc(2119236084, "rng"),
@@ -72,37 +55,3 @@ const sheetConfigs = makeStructuredConfig({} as SheetConfigsBase, {
   variable: msc(695651834, ""),
   valueName: msc(1529539239, ""),
 });
-
-export type SheetConfigs = typeof sheetConfigs;
-
-export const allSheetNames = Obj.keys(sheetConfigs);
-export type SheetNameSimple = (typeof allSheetNames)[number];
-export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
-
-export function getSheetTraitByName<
-  TN extends SheetNameSimple,
-  K extends keyof SheetConfig,
->(sheetName: TN, key: K): SheetConfig[K] {
-  return sheetConfigs[sheetName][key];
-}
-
-type SheetTraitsByGid = KeyedMap<SheetConfigs, "sheetGid", "sheetName">;
-export const sheetTraitsByGid = Obj.toKeyedMap(
-  sheetConfigs,
-  "sheetGid",
-  "sheetName",
-);
-
-export const schemaSheetGids = [...sheetTraitsByGid.keys()];
-
-type SheetTraitsRaw = SheetTraitsByGid extends Map<any, infer V> ? V : never;
-
-export type SheetTraitRaw<K extends SheetTraitRawKey> = SheetTraitsRaw[K];
-
-export type SheetTraitRawKey = keyof SheetTraitsRaw;
-export function getSheetTraitByGid<K extends SheetTraitRawKey>(
-  sheetGid,
-  key: K,
-): SheetTraitRaw<K> {
-  return sheetTraitsByGid[sheetGid][key];
-}

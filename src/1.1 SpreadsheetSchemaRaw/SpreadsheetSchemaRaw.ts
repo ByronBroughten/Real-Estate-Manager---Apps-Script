@@ -1,4 +1,4 @@
-import { schemaSheetGids } from "../1.0 Configs/2.0 sheetConfigs";
+import { schemaSheetGids } from "../1.0 Configs/sheetConfigsTypes";
 
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchemaRaw } from "./SheetSchemaRaw";

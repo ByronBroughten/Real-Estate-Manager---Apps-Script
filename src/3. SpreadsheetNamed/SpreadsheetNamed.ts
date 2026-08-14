@@ -1,4 +1,4 @@
-import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs.js";
+import type { SheetName } from "../1.0 Configs/sheetConfigsTypes.js";
 import { SpreadsheetRaw } from "../2. AppsScriptRaw/SpreadsheetRaw.js";
 import type { SheetColumnsRange } from "../2. AppsScriptRaw/Types/RawState.js";
 import { SpreadsheetSchema } from "../2.0 Schemas/SpreadsheetSchemaNamed.js";

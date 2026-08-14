@@ -1,14 +1,14 @@
 import {
-  getSheetTraitByName,
-  type SheetName,
-} from "../1.0 Configs/2.0 sheetConfigs";
-import {
   getColumnTraitByName,
   type ColTraits,
   type ColTraitsBase,
   type ColumnName,
   type ColumnValueName,
 } from "../1.0 Configs/3.0 columnConfigs";
+import {
+  getSheetTraitByName,
+  type SheetName,
+} from "../1.0 Configs/sheetConfigsTypes";
 import { ColumnSchemaRaw } from "../1.1 SpreadsheetSchemaRaw/ColumnSchemaRaw";
 import type { CombineStringsWithFlat } from "../utils/Str";
 import type { ValueSchemaKey } from "./3.0 valueSchema";

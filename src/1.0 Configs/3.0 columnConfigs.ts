@@ -7,10 +7,10 @@ import { Obj, type KeyedMap } from "../utils/Obj";
 import type { CombineStringsWithFlat } from "../utils/Str";
 import { makeStructuredConfig } from "./0.0 ConfigPrecursors";
 import {
-  allSheetNames,
   getSheetTraitByName,
+  schemaSheetNames,
   type SheetNameSimple,
-} from "./2.0 sheetConfigs";
+} from "./sheetConfigsTypes";
 
 interface ColTraitsLiteral {
   columnId: string;
@@ -3587,7 +3587,7 @@ export type RawIdxColTraits = KeyedMap<
 
 type AllColTraitsGidIdx = Map<number, RawIdxColTraits>;
 function makeAllColTraitsGidIdx(): AllColTraitsGidIdx {
-  return allSheetNames.reduce((attrs, sheetName) => {
+  return schemaSheetNames.reduce((attrs, sheetName) => {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
       sheetGid,

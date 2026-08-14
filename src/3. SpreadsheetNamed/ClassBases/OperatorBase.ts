@@ -1,4 +1,4 @@
-import type { SheetName } from "../../1.0 Configs/2.0 sheetConfigs";
+import type { SheetName } from "../../1.0 Configs/sheetConfigsTypes";
 import type { SpreadsheetSchema } from "../../2.0 Schemas/SpreadsheetSchemaNamed";
 import type { SheetNamed } from "../SheetNamed";
 import type { SpreadsheetNamed } from "../SpreadsheetNamed";

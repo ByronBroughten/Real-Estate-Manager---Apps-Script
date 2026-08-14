@@ -1,9 +1,9 @@
-import type { SheetName } from "../1.0 Configs/2.0 sheetConfigs";
 import type {
   ColumnName,
   ColumnValue,
   TableValues,
 } from "../1.0 Configs/3.0 columnConfigs";
+import type { SheetName } from "../1.0 Configs/sheetConfigsTypes";
 import { SchemaSheetRaw } from "../2. AppsScriptRaw/SchemaSheetRaw";
 import type { SheetRaw } from "../2. AppsScriptRaw/SheetRaw";
 import type { SheetSchemaNamed } from "../2.0 Schemas/SheetSchemaNamed";

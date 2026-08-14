@@ -1,14 +1,14 @@
 import {
-  getSheetTraitByName,
-  type SheetConfig,
-  type SheetName,
-  type SheetNameSimple,
-} from "../1.0 Configs/2.0 sheetConfigs";
-import {
   getColumnTraitByIndex,
   getSheetColumnNames,
   type ColumnName,
 } from "../1.0 Configs/3.0 columnConfigs";
+import {
+  getSheetTraitByName,
+  type SheetConfig,
+  type SheetName,
+  type SheetNameSimple,
+} from "../1.0 Configs/sheetConfigsTypes";
 import { SchemaBase } from "../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { ColumnSpecifierNamed } from "../3. SpreadsheetNamed/Types/NamedState";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
