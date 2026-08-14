@@ -19,7 +19,7 @@ export class ColumnRaw<
   get dataValueArr(): VL[] {
     return this.sheet.dataRowIndexes.map((rowIdx) => this.dataValue(rowIdx));
   }
-  get fetchDataRange() {
+  get makeAllDataRange() {
     return {
       sheetId: this.sheetGid,
       startRowIndex: this.sheetSchema.topDataRowIdx,
@@ -31,8 +31,8 @@ export class ColumnRaw<
   dataValue(rowIdx: number): VL {
     return this.sheet.row(rowIdx).value(this.colIndex, this.valueName) as VL;
   }
-  prepFetchDataRange() {
-    this.ss.gatherFetchRanges(this.fetchDataRange);
+  prepFetchAllDataCells() {
+    this.ss.gatherFetchRanges(this.makeAllDataRange);
     return this;
   }
   validateIndexNotStale(): void {

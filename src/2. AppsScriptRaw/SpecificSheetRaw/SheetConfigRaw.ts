@@ -1,5 +1,10 @@
+import {
+  makeStructuredConfig,
+  type CellValueName,
+} from "../../1.0 Configs/0.0 ConfigPrecursors";
 import { configGet } from "../../1.0 Configs/1. spreadsheetConfig";
 import { SchemaBase } from "../../1.1 SpreadsheetSchemaRaw/SchemaBase";
+import { Obj } from "../../utils/Obj";
 import type { SpreadsheetRawProps } from "../ClassBases/SpreadsheetRawBase";
 import type { ColumnRaw } from "../ColumnRaw";
 import type { SheetRaw } from "../SheetRaw";
@@ -7,19 +12,31 @@ import { SpreadsheetRaw } from "../SpreadsheetRaw";
 import { SpecificSheetRawBase } from "./Base/SpecificSheetRawBase";
 import { SpecificSheetRaw } from "./SpecificSheetRaw";
 
-const programmaticConfigHeaders = [
-  "Sheet GID",
-  "Sheet name",
-  "Has ID column",
-] as const;
+const headerToValueNameAuto = makeStructuredConfig(
+  {} as Record<string, CellValueName>,
+  {
+    "Sheet GID": "number",
+    "Sheet name": "string",
+    "Has ID column": "boolean",
+  } as const,
+);
+const headerToValueNameUser = makeStructuredConfig(
+  {} as Record<string, CellValueName>,
+  {
+    "Make schema for API": "boolean" as CellValueName,
+    "ID prefix": "string" as CellValueName,
+  } as const,
+);
+const headerToValueName = {
+  ...headerToValueNameAuto,
+  ...headerToValueNameUser,
+} as const;
 
-const userConfigHeaders = ["Make schema for API", "ID prefix"] as const;
+const programmaticConfigHeaders = Obj.keys(headerToValueNameAuto);
+const userConfigHeaders = Obj.keys(headerToValueNameUser);
+const sheetConfigHeaders = Obj.keys(headerToValueName);
 
-const sheetConfigHeaders = [
-  ...programmaticConfigHeaders,
-  ...userConfigHeaders,
-] as const;
-
+type HeaderToValueName = typeof headerToValueName;
 type SheetConfigHeader = (typeof sheetConfigHeaders)[number];
 
 export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeader> {
@@ -45,8 +62,13 @@ export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeader> {
       ...this.sheetRawProps,
     });
   }
-  column(header: SheetConfigHeader): ColumnRaw {
-    return this.sheet.columnByHeader(header);
+  column<HD extends SheetConfigHeader>(
+    header: HD,
+  ): ColumnRaw<HeaderToValueName[HD]> {
+    return this.sheet.columnByHeader(
+      header,
+      headerToValueName[header],
+    ) as ColumnRaw<HeaderToValueName[HD]>;
   }
   fetchHeadersAndColumn<H extends SheetConfigHeader>(header: H): ColumnRaw {
     // At this level, headers are needed before the column can be fetched.
@@ -70,7 +92,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<SheetConfigHeader> {
   deleteStaleSheetConfigs() {
     const { activeSheetGids } = this.ss.fetchAllSheetProperties();
     this.sheet.fetchUniformRow("header");
-    this.column("Sheet GID").prepFetchDataRange().ss.fetchAll();
+    this.column("Sheet GID").prepFetchAllDataCells().ss.fetchAll();
 
     const gidCol = this.fetchHeadersAndColumn("Sheet GID");
     this.sheet.dataRows.forEach((row) => {

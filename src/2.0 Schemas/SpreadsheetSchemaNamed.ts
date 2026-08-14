@@ -36,16 +36,16 @@ export class SpreadsheetSchema extends SchemaBase {
   ): ColumnSchemaNamed<TN, CN> {
     return new ColumnSchemaNamed(sheetName, columnName);
   }
-  get schemaSheetNames() {
+  get sheetNames() {
     return allSheetNames;
   }
   get sheetNamesWithoutIdPrefix(): SheetName[] {
-    return this.schemaSheetNames.filter((sheetName) => {
+    return this.sheetNames.filter((sheetName) => {
       this.sheet(sheetName).trait("idPrefix") === "";
     });
   }
   specifyAllSheetsAndColumns(): SheetColumnNamesStandard<SheetName> {
-    return this.schemaSheetNames.reduce((acc, sheetName) => {
+    return this.sheetNames.reduce((acc, sheetName) => {
       acc[sheetName] = this.sheet(sheetName).columnNames;
       return acc;
     }, {} as SheetColumnNamesStandard<SheetName>);

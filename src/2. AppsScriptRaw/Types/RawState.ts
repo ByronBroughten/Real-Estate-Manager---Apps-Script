@@ -32,16 +32,16 @@ export function initUpdateRequests(): RawState["updateRequests"] {
 export type RawSheetsState = Map<SheetId, RawSheetState>;
 
 export interface RawSheetState {
-  title: string;
+  title: string | null;
   activeTable: {
     tableId: string;
     startRowIndex: number; // headerRowIndex
     endRowIndex: number; // lastRowIndex + 1
     startColumnIndex: number;
     endColumnIndex: number; // lastColumnIndex + 1
-  };
+  } | null;
   rowIndexesAreValid: boolean;
-  lastNotStaleColumnIdx: null | number;
+  lastNotStaleColumnIdx: number | null;
   rowStates: RawRowStates;
 }
 

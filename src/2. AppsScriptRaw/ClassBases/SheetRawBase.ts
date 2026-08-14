@@ -20,14 +20,23 @@ export class SheetRawBase extends SpreadsheetRawBase {
   constructor({ sheetGid, ...rest }: SheetRawProps) {
     super(rest);
     this.sheetGid = sheetGid;
+    this._ensureSheetState();
+  }
+  private _ensureSheetState() {
+    if (!this.rawState.sheets.has(this.sheetGid)) {
+      this.rawState.sheets.set(this.sheetGid, {
+        title: null,
+        activeTable: null,
+        rowIndexesAreValid: true,
+        lastNotStaleColumnIdx: null,
+        rowStates: new Map(),
+      });
+    }
   }
   get sheetSchema() {
     return new SheetSchemaRaw(this.sheetGid);
   }
   get sheetState(): RawSheetState {
-    if (!this.rawState.sheets.has(this.sheetGid)) {
-      throw new SheetRawNotFoundError(this.sheetGid);
-    }
     return this.rawState.sheets.get(this.sheetGid);
   }
   get activeTable(): RawSheetState["activeTable"] {

@@ -1,4 +1,5 @@
 import type { CellValue } from "../../1.0 Configs/0.0 ConfigPrecursors";
+import { SchemaBase } from "../../1.1 SpreadsheetSchemaRaw/SchemaBase";
 import type { RawRowState } from "../Types/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
@@ -11,6 +12,17 @@ export class RowRawBase extends SheetRawBase {
   constructor({ rowIndex, ...rest }: RowRawProps) {
     super(rest);
     this.rowIndex = rowIndex;
+    if (this.schemaBase.isUniformRowIndex(this.rowIndex)) {
+      this.ensureStateExists();
+    }
+  }
+  get schemaBase() {
+    return new SchemaBase();
+  }
+  ensureStateExists() {
+    if (!this.rowIsActive()) {
+      this.rowStates.set(this.rowIndex, new Map());
+    }
   }
   get isDataRow(): boolean {
     return this.rowIndex >= this.sheetSchema.topDataRowIdx;

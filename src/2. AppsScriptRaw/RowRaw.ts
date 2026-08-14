@@ -73,13 +73,12 @@ export class RowRaw extends RowRawBase {
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
   }
-  ensureStateExists() {
-    if (!this.rowIsActive()) {
-      this.sheet.rowStates.set(this.rowIndex, new Map());
-    }
-  }
   setValueState(colIdx: number, value: CellValue): void {
-    this.ensureStateExists();
+    if (!this.rowIsActive()) {
+      throw new Error(
+        `Cannot set value for row ${this.rowIndex} because it is not active.`,
+      );
+    }
     this.rowState.set(colIdx, value);
   }
   updateValue(colIdx: number, value: CellValue): RowRaw {

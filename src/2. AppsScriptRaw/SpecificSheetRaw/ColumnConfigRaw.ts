@@ -53,27 +53,28 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<ColumnConfigHeaders> {
     );
     this.ss.fetchAll();
 
-    const gidCol = this.sheetConfig.column("Sheet GID", "number");
-    const makeSchemacol = this.sheetConfig.column("Make schema for API");
+    const gidCol = this.sheetConfig.column("Sheet GID");
+    const makeSchemaCol = this.sheetConfig.column("Make schema for API");
     const idPrefixCol = this.sheetConfig.column("ID prefix");
 
+    let idsAdded = 0;
     this.sheetConfig.sheet.dataRows.forEach((row) => {
-      const sheetGid = row.value(gidCol.colIndex, "number");
-      const makeSchema = row.value(makeSchemacol.colIndex, "boolean");
+      const sheetGid = gidCol.dataValue(row.rowIndex);
+      const makeSchema = makeSchemaCol.dataValue(row.rowIndex);
+      const idPrefix = idPrefixCol.dataValue(row.rowIndex);
+
       if (makeSchema) {
+        if (typeof idPrefix !== "string" || !idPrefix) {
+          throw new Error(
+            `SheetConfigRaw: Sheet GID ${sheetGid} has "Make schema for API" true but no valid "ID prefix" value.`,
+          );
+        }
         const sheet = this.ss.sheet(sheetGid);
-        sheet.addMissingColumnIds();
+        idsAdded += sheet.addMissingColumnIds(idPrefix);
       }
     });
-
-    // I want all sheets one row and the tableSchema idPrefix column.
-    let sheetUpdatedCount = 0;
-    this.ss.activeSheets.forEach((sheet) => {
-      sheet.addMissingColumnIds();
-      sheetUpdatedCount++;
-    });
     Logger.log(
-      `ensureColumnIds: added missing column ID(s) in ${sheetUpdatedCount} sheets.`,
+      `ensureColumnIds: prepared to add ${idsAdded} missing column ID(s)`,
     );
   }
 }

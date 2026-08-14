@@ -113,31 +113,28 @@ export class SheetRaw extends SheetRawBase {
     }
   }
   private _initSheetState(sheet: GoogleSheet): void {
-    const properties = sheet.properties;
-    const table = sheet.tables[0];
-    const tableRange = Obj.validatePick(
-      table.range,
-      "number",
-      "startRowIndex",
-      "endRowIndex",
-      "startColumnIndex",
-      "endColumnIndex",
-    );
-
-    this.sheetsState.set(this.sheetGid, {
-      title: valS.assertDefined(properties.title, "sheet title "),
-      activeTable: {
+    if (sheet?.properties?.title) {
+      this.sheetState.title = sheet.properties.title;
+    }
+    if (sheet.tables?.length > 0) {
+      const table = sheet.tables[0];
+      this.sheetState.activeTable = {
         tableId: valS.assertDefined(table.tableId, "tableId"),
-        ...tableRange,
-      },
-      rowIndexesAreValid: true,
-      lastNotStaleColumnIdx: null,
-      rowStates: new Map(),
-    });
+        ...Obj.validatePick(
+          table.range,
+          "number",
+          "startRowIndex",
+          "endRowIndex",
+          "startColumnIndex",
+          "endColumnIndex",
+        ),
+      };
+    }
   }
   private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
     const colsData = valS.assertDefined(sheetData, "sheetData");
     colsData.forEach((colData) => {
+      // Payload doesn't include default values of 0
       const colIdxBase = colData.startColumn ?? 0;
       const columns = colData.columnMetadata || [];
       colData.rowData.forEach((colCell, rowIdxBase) => {
@@ -147,18 +144,22 @@ export class SheetRaw extends SheetRawBase {
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
+          // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
           this.rowRaw(rowIdx).integrateState(colIdx, cellData);
         });
       });
     });
   }
-  addMissingColumnIds(idPrefix): void {
+  addMissingColumnIds(idPrefix: string): number {
+    let addedCount = 0;
     this.activeColumnIdxs.forEach((colIdx) => {
       const colIdValue = this.colIdRow.value(colIdx);
       if (!colIdValue) {
         this.colIdRow.updateValue(colIdx, this.makeColumnId(idPrefix));
+        addedCount++;
       }
     });
+    return addedCount;
   }
   makeColumnId(idPrefix: string): string {
     return this.schema.makeColIdFromPrefix(idPrefix);
@@ -226,7 +227,7 @@ export class SheetRaw extends SheetRawBase {
   ): Record<HD, ColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] = this.columnByHeader(header).prepFetchDataRange();
+        acc[header] = this.columnByHeader(header).prepFetchAllDataCells();
         return acc;
       },
       {} as Record<HD, ColumnRaw>,

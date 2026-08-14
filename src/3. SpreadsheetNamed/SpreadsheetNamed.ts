@@ -164,37 +164,38 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       return sheetNames.add(...Obj.keys(props.sheetColumnNames));
     }, new Set() as Set<T>);
   }
+  get sheetsOfSchema(): SheetNamed<SheetName>[] {
+    return this.schema.sheetNames.map((sheetName) => this.sheet(sheetName));
+  }
   fillMissingRowIds() {
-    // maybe change this stuff to not raw
-    this.raw.fetchAllSheetsUniformRow("header");
-    this.activeSheets.forEach((sheet) => {
-      const headers = sheet.raw.headerRow.activeValueArr;
-      if (headers.includes("ID") === false) {
-        throw new Error(
-          `Cannot fill missing row IDs in sheet "${sheet.raw.sheetGid}" because it does not have an "ID" column.`,
-        );
+    const idSheets = this.sheetsOfSchema.filter((sheet) => {
+      const hasIdCol = sheet.schema.trait("hasIdColumn");
+      const idPrefix = sheet.schema.trait("idPrefix");
+      if (hasIdCol) {
+        if (!idPrefix) {
+          throw new Error(
+            `Cannot fill missing row IDs in sheet "${sheet}" because it does not have an "ID prefix" defined in the schema.`,
+          );
+        }
+        return true;
+      } else {
+        return false;
       }
-      const idColIdx = headers.indexOf("ID");
-      const idCol = sheet.rich.column(idColIdx);
-      idCol.dataCellsToDefault();
+    });
+
+    idSheets.forEach((sheet) => {
+      sheet.column("id").raw.prepFetchAllDataCells();
+      // column.prepFetchUniformCell("header")
+    });
+    this.raw.fetchAll();
+    idSheets.forEach((sheet) => {
+      sheet.column("id").rich.fillEmptyDataCellsWithDefaultValues();
     });
   }
   convenience() {
-    // Update these so that they only work with sheets that have ID prefixes defined.
     this.fillMissingRowIds();
   }
 
   // I need to do something about adding data rows when fetching sheets from the named layer.
   // That's to ensure I get the columnIds (add those specific columns and rows) and table properties (add one row 4:4 per sheet).
-
-  // Named layer only worries about data rows, yeah?
-
-  // Should different row classes be on the named layer or raw layer?
-  // I want them only on the name layer, but I might not even need them there.
-  // I can possibly just handle them on the raw layer.
-
-  // HeaderRow, GroupNameRow, DataRow, ActionRow, ColumnIdRow
-  // GroupNameRow and HeaderRow could each be unimplemented and throw errors on operations
-  // They each contain RawRow
-  // They are each based on DataRowNamed
 }

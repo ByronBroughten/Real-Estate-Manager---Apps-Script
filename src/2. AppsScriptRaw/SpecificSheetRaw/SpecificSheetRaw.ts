@@ -18,7 +18,7 @@ export class SpecificSheetRaw<
   }
   prepFetchDataColumnOfFetchedHeader<H extends HS>(header: H): ColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
-    return this.sheet.column(colIndex).prepFetchDataRange();
+    return this.sheet.column(colIndex).prepFetchAllDataCells();
   }
   fetchDataColumnOfFetchedHeader<H extends HS>(header: H): ColumnRaw {
     const column = this.prepFetchDataColumnOfFetchedHeader(header);
