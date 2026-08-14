@@ -19,10 +19,11 @@ export type TakeFirstN<
     : S;
 
 export type CombineStrings<S1 extends string, S2 extends string> = `${S1}${S2}`;
-export type CombineStringsWithFlat<
+export type TextJoin<
   S1 extends string,
   S2 extends string,
-> = `${S1}_${S2}`;
+  D extends string,
+> = `${S1}${D}${S2}`;
 
 export const Str = {
   combineStrings: <S1 extends string, S2 extends string>(

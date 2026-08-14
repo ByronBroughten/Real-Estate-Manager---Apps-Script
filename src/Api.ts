@@ -1,7 +1,7 @@
 import { configGet } from "./00_traitPrecursors/spreadsheetConfig";
-import { SpreadsheetRaw } from "./02_AppsScriptRaw/SpreadsheetRaw";
-import { SpreadsheetNamedBase } from "./03_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import { SpreadsheetNamed } from "./03_SpreadsheetNamed/SpreadsheetNamed";
+import { SpreadsheetRaw } from "./01_AppsScriptRaw/SpreadsheetRaw";
+import { SpreadsheetNamedBase } from "./05_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetNamed } from "./05_SpreadsheetNamed/SpreadsheetNamed";
 
 export type SheetEventStandard = {
   colIdxBase0: number;
@@ -109,7 +109,7 @@ export class Api extends SpreadsheetNamedBase {
     const isStatusAndRunColumn =
       columnName.slice(-keyEndPhrase.length) === keyEndPhrase;
     if (isStatusAndRunColumn) {
-      return sheetSchema.sheetColName(columnName);
+      return sheetSchema.column(columnName).fullName;
     } else {
       return null;
     }

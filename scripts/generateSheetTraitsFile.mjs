@@ -3,7 +3,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const OUTPUT_PATH = fileURLToPath(
-  new URL("../src/01_generatedTraits/02_sheetTraits.ts", import.meta.url),
+  new URL("../src/02_generatedTraits/02_sheetTraits.ts", import.meta.url),
 );
 const FUNCTION_NAME = "generateSheetTraitsFile";
 

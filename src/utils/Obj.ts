@@ -1,6 +1,6 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
-import { Str, type CombineStringsWithFlat, type RemoveFirstN } from "./Str";
+import { Str, type RemoveFirstN, type TextJoin } from "./Str";
 import { valS, type PureValue, type PureValueName } from "./validation";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
@@ -22,32 +22,30 @@ type UnionToIntersection<U> = (
   : never;
 
 // Computes the flattened type: for each outer key, remap its inner keys to "outer.inner"
-type FlattenTwoLevels<T extends Record<string, Record<string, unknown>>> =
-  UnionToIntersection<
-    {
-      [K1 in keyof T]: {
-        [K2 in keyof T[K1] as CombineStringsWithFlat<
-          K1 & string,
-          K2 & string
-        >]: T[K1][K2];
-      };
-    }[keyof T]
-  >;
+type FlattenTwoLevels<
+  T extends Record<string, Record<string, unknown>>,
+  D extends string,
+> = UnionToIntersection<
+  {
+    [K1 in keyof T]: {
+      [K2 in keyof T[K1] as TextJoin<K1 & string, K2 & string, D>]: T[K1][K2];
+    };
+  }[keyof T]
+>;
 
-function flattenTwoLevels<T extends Record<string, Record<string, unknown>>>(
-  obj: T,
-): FlattenTwoLevels<T> {
+function flattenTwoLevels<
+  T extends Record<string, Record<string, unknown>>,
+  D extends string,
+>(obj: T, keyDelimiter: D = "_" as D): FlattenTwoLevels<T, D> {
   const result: Record<string, unknown> = {};
   for (const outerKey in obj) {
     const inner = obj[outerKey];
     for (const innerKey in inner) {
-      result[`${outerKey}_${innerKey}`] = inner[innerKey];
+      result[`${outerKey}${keyDelimiter}${innerKey}`] = inner[innerKey];
     }
   }
-
-  return result as FlattenTwoLevels<T>;
+  return result as FlattenTwoLevels<T, D>;
 }
-
 export type InvertObj<O extends Record<string | number, string | number>> = {
   [K in O[keyof O]]: keyof O;
 };
