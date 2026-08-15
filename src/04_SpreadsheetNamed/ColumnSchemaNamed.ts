@@ -6,13 +6,13 @@ import {
   getColumnTraitByName,
   type ColTraits,
   type ColTraitsBase,
+  type ColumnFullName,
   type ColumnName,
-  type ColumnNameFull,
   type ColumnValueName,
 } from "../02_generatedTraits/03_columnTraits";
 import { ColumnSchemaIndexed } from "../03_SpreadsheetIndexed/ColumnSchemaIndexed";
 
-import type { ValueSchemaKey } from "../00_rawPrecursors/valueSchema";
+import type { ValueSchemaKey } from "../00_base/valueSchema";
 import {
   getValTrait,
   type ValueName,
@@ -46,8 +46,8 @@ export class ColumnSchemaNamed<
   get sheetSchema(): SheetSchemaNamed<TN> {
     return new SheetSchemaNamed(this.sheetName);
   }
-  get fullName(): ColumnNameFull<TN, CN> {
-    return `${this.sheetName}${this.nameDelimiter}${this.columnName as string}` as ColumnNameFull<
+  get fullName(): ColumnFullName<TN, CN> {
+    return `${this.sheetName}${this.nameDelimiter}${this.columnName as string}` as ColumnFullName<
       TN,
       CN
     >;

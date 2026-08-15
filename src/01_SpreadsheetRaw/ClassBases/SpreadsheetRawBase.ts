@@ -1,5 +1,5 @@
-import type { GoogleGridRange } from "../../00_rawPrecursors/AppsScriptTypes";
-import { AppsScript } from "../../00_rawPrecursors/AppsScript";
+import { AppsScript } from "../../00_base/AppsScript";
+import type { GoogleGridRange } from "../../00_base/AppsScriptTypes";
 import {
   initUpdateRequests,
   type ChangesToSave,

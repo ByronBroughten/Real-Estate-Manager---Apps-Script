@@ -36,7 +36,7 @@ type FlattenTwoLevels<
 function flattenTwoLevels<
   T extends Record<string, Record<string, unknown>>,
   D extends string,
->(obj: T, keyDelimiter: D = "_" as D): FlattenTwoLevels<T, D> {
+>(obj: T, keyDelimiter: D): FlattenTwoLevels<T, D> {
   const result: Record<string, unknown> = {};
   for (const outerKey in obj) {
     const inner = obj[outerKey];

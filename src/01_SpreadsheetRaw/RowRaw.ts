@@ -2,13 +2,13 @@ import type {
   GoogleCellValue,
   GoogleUpdateRequest,
   UserEnteredValue,
-} from "../00_rawPrecursors/AppsScriptTypes";
-import type { CellValue, CellValueName } from "../00_rawPrecursors/base";
+} from "../00_base/AppsScriptTypes";
+import type { CellValue, CellValueName } from "../00_base/base";
 import {
   getCellValTrait,
   type CellValueTrait,
-} from "../00_rawPrecursors/baseValueSchemas";
-import { type ValueSchemaKey } from "../00_rawPrecursors/valueSchema";
+} from "../00_base/baseValueSchemas";
+import { type ValueSchemaKey } from "../00_base/valueSchema";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import type {

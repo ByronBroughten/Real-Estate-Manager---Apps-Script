@@ -4,11 +4,11 @@ import {
   type NameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
-} from "../00_rawPrecursors/base";
+} from "../00_base/base";
 import {
   configGet,
   type SpreadsheetConfig,
-} from "../00_rawPrecursors/spreadsheetConfig";
+} from "../00_base/spreadsheetConfig";
 import type { RowRange } from "../01_SpreadsheetRaw/ClassTypes/RawState";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
@@ -33,6 +33,12 @@ const rowIndexToUniformName = new Map(
 export class SchemaBase {
   get nameDelimiter(): NameDelimiter {
     return nameDelimiter;
+  }
+  combineNames<S1 extends string, S2 extends string>(
+    name1: S1,
+    name2: S2,
+  ): `${S1}${NameDelimiter}${S2}` {
+    return `${name1}${this.nameDelimiter}${name2}`;
   }
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);

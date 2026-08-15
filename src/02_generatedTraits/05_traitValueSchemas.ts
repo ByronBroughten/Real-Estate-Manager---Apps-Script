@@ -1,4 +1,4 @@
-import { vsc, type ValueSchemaBase } from "../00_rawPrecursors/valueSchema";
+import { vsc, type ValueSchemaBase } from "../00_base/valueSchema";
 import { validationError } from "../utils/validation";
 import {
   getValueTraitValueArr,

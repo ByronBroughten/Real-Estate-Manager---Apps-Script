@@ -4,8 +4,8 @@ import { allSheetTraits } from "./02_sheetTraits";
 // Pre-allSheetTraits
 export interface SheetTrait {
   sheetGid: number;
-  idPrefix: string;
   hasIdColumn: boolean;
+  idPrefix: string;
 }
 export function makeAllSheetTraits(
   sheetGid: number,

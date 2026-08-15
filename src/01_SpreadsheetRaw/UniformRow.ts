@@ -2,9 +2,9 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../00_rawPrecursors/base";
-import { type CellValueTrait } from "../00_rawPrecursors/baseValueSchemas";
-import type { ValueSchemaKey } from "../00_rawPrecursors/valueSchema";
+} from "../00_base/base";
+import { type CellValueTrait } from "../00_base/baseValueSchemas";
+import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { UniformRowBase } from "./ClassBases/UniformRowBase";
 import { RowRaw } from "./RowRaw";
 import { SheetRaw } from "./SheetRaw";

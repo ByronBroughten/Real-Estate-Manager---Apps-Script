@@ -25,6 +25,11 @@ export type TextJoin<
   D extends string,
 > = `${S1}${D}${S2}`;
 
+export type FilterWithSuffix<U extends string, Suffix extends string> = Extract<
+  U,
+  `${string}${Suffix}`
+>;
+
 export const Str = {
   combineStrings: <S1 extends string, S2 extends string>(
     str1: S1,

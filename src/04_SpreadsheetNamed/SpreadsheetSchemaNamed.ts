@@ -24,14 +24,14 @@ import type {
 } from "./Types/NamedState";
 
 export class SpreadsheetSchema extends SchemaBase {
-  get raw(): SpreadsheetSchemaIndexed {
+  get indexed(): SpreadsheetSchemaIndexed {
     return new SpreadsheetSchemaIndexed();
   }
   sheet<TN extends SheetNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
     return new SheetSchemaNamed(sheetName);
   }
   sheetByGid(sheetGid: number): SheetSchemaNamed<SheetName> {
-    const sheetName = this.raw.sheet(sheetGid).sheetName;
+    const { sheetName } = this.indexed.sheet(sheetGid);
     return new SheetSchemaNamed(sheetName);
   }
   column<TN extends SheetName, CN extends ColumnName<TN>>(

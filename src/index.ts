@@ -1,6 +1,7 @@
 import { SpreadsheetRawBase } from "./01_SpreadsheetRaw/ClassBases/SpreadsheetRawBase.js";
 import { SheetConfigRaw } from "./01_SpreadsheetRaw/SheetConfigRaw.js";
-import { Api } from "./Api.js";
+import { Api } from "./05_Api/Api.js";
+import { businessEndpoints } from "./BusinessEndpoints/businessEndpoints.js";
 
 function generateSheetTraitsFile(): string {
   const sheetConfig = new SheetConfigRaw({
@@ -15,6 +16,11 @@ function triggerFirstOfMonth() {
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (Api.isSuspectedApiCall(e)) {
-    Api.init().handleSheetOnEditEvent(e);
+    const api = new Api({
+      endpoints: businessEndpoints,
+      ...Api.initSpreadsheetNamedProps(),
+    });
+
+    Api.init(businessEndpoints).handleSheetOnEditEvent(e);
   }
 }

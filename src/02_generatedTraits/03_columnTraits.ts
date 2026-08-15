@@ -1,7 +1,8 @@
 import {
   makeStructuredConfig,
+  nameDelimiter,
   type NameDelimiter,
-} from "../00_rawPrecursors/base";
+} from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import {
   getSheetTraitByName,
@@ -54,6 +55,36 @@ type AllColTraitsBase = Record<SheetNameSimple, TableColTraitsBase>;
 const allColTraits = makeStructuredConfig(
   {} as AllColTraitsBase,
   {
+    spreadsheetControls: {
+      fillRowIdsLastRan: mcs(
+        "col-045qGg4",
+        "string",
+        "Fill row IDs, last ran",
+        0,
+        false,
+      ),
+      fillRowIdsRunAndStatus: mcs(
+        "col-0g24qGg",
+        "string",
+        "Fill row IDs, run and status",
+        0,
+        false,
+      ),
+      appendSheetAndColumnConfigRowsLastRan: mcs(
+        "col-0g340Gg",
+        "string",
+        "Append sheet and column config rows, last ran",
+        0,
+        false,
+      ),
+      appendSheetAndColumnConfigRowsRunAndStatus: mcs(
+        "col-0g34slk",
+        "string",
+        "Append sheet and column config rows, run and status",
+        0,
+        false,
+      ),
+    },
     addExpenses: {
       date: mcs("col-vXNHJps", "string", "Date", 0, false),
       propertyName: mcs("col-_iOHEPj", "string", "Property name", 1, false),
@@ -1424,6 +1455,27 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       subsidyCount: mcs("col-6GjBcbG", "number", "Subsidy count", 16, true),
+      buildLedgerLastRan: mcs(
+        "col-0g1jOuv",
+        "date",
+        "Build ledger last ran",
+        17,
+        false,
+      ),
+      buildLedgerSelect: mcs(
+        "col-0g1jY1d",
+        "boolean",
+        "Build ledger, select",
+        18,
+        false,
+      ),
+      buildLedgerRunAndStatus: mcs(
+        "col-0g1jopp",
+        "string",
+        "Build ledger, run and status",
+        19,
+        false,
+      ),
     },
     occupancyTerms: {
       residentAndUnitName: mcs(
@@ -3534,41 +3586,41 @@ const allColTraits = makeStructuredConfig(
 
 export type AllColTraits = typeof allColTraits;
 
-export type ColumnName<TN extends SheetNameSimple = SheetNameSimple> =
-  keyof AllColTraits[TN];
+export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
+  keyof AllColTraits[SN];
 
-export type TableColTraits<TN extends SheetNameSimple> = AllColTraits[TN];
+export type TableColTraits<SN extends SheetNameSimple> = AllColTraits[SN];
 
 export type ColumnValueName<
-  TN extends SheetNameSimple,
-  CN extends ColumnName<TN>,
-> = AllColTraits[TN][CN]["valueName" & keyof AllColTraits[TN][CN]];
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> = AllColTraits[SN][CN]["valueName" & keyof AllColTraits[SN][CN]];
 
 export type ColTraits<
-  TN extends SheetNameSimple,
-  CN extends ColumnName<TN>,
-> = ColTraitsBase<ColumnValueName<TN, CN> & ValueName>;
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> = ColTraitsBase<ColumnValueName<SN, CN> & ValueName>;
 
 export type ColumnValueSchema<
-  TN extends SheetNameSimple,
-  CN extends ColumnName<TN>,
-> = ValueSchema<ColumnValueName<TN, CN> & ValueName>;
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> = ValueSchema<ColumnValueName<SN, CN> & ValueName>;
 
 export type ColumnValue<
-  TN extends SheetNameSimple,
-  CN extends ColumnName<TN>,
-> = Value<ColumnValueName<TN, CN> & ValueName>;
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> = Value<ColumnValueName<SN, CN> & ValueName>;
 
 export type TableValues<
-  TN extends SheetNameSimple,
-  VNS extends ColumnName<TN> = ColumnName<TN>,
+  SN extends SheetNameSimple,
+  VNS extends ColumnName<SN> = ColumnName<SN>,
 > = {
-  [CN in VNS]: ColumnValue<TN, CN>;
+  [CN in VNS]: ColumnValue<SN, CN>;
 };
 
-export function getSheetColumnNames<TN extends SheetNameSimple>(
-  sheetName: TN,
-): ColumnName<TN>[] {
+export function getSheetColumnNames<SN extends SheetNameSimple>(
+  sheetName: SN,
+): ColumnName<SN>[] {
   return Obj.keys(allColTraits[sheetName]);
 }
 
@@ -3621,11 +3673,11 @@ export function getSheetColumnIdxes(sheetGid: number): MapIterator<number> {
   return allColTraitsGidIdx.get(sheetGid).keys();
 }
 
-const allColTraitsFlat = Obj.flattenTwoLevels(allColTraits);
+const allColTraitsFlat = Obj.flattenTwoLevels(allColTraits, nameDelimiter);
 type AllColTraitsFlat = typeof allColTraitsFlat;
-type ColumnNameFullSimple = keyof AllColTraitsFlat;
+export type ColumnFullNameSimple = keyof AllColTraitsFlat;
 
-export type ColumnNameFull<
+export type ColumnFullName<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
 > = `${SN}${NameDelimiter}${CN & string}`;

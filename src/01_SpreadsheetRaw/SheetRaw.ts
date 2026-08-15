@@ -1,7 +1,4 @@
-import {
-  type CellValueName,
-  type UniformRowName,
-} from "../00_rawPrecursors/base";
+import { type CellValueName, type UniformRowName } from "../00_base/base";
 import type { Value } from "../02_generatedTraits/06_valueSchemas";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { type StrictOmit } from "../utils/Obj";
@@ -15,7 +12,7 @@ import type {
   GoogleGridRange,
   GoogleSheet,
   GoogleSheetData,
-} from "../00_rawPrecursors/AppsScriptTypes";
+} from "../00_base/AppsScriptTypes";
 import type {
   GridRangeProps,
   SheetChangeProps,

@@ -25,7 +25,7 @@ export type NameDelimiter = typeof nameDelimiter;
 
 const uniformRowValueNames = {
   header: "string",
-  action: "boolean",
+  action: "boolean", // Should perhaps be "boolean" | "string"
   columnId: "string",
   colGroupName: "string",
 } as const;

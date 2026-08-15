@@ -34,6 +34,13 @@ export class SheetNamed<
       rowIndex,
     });
   }
+  columnByIndex(colIndex: number): ColumnNamed<SN> {
+    const columnName = this.schema.columnNameByIdx(colIndex);
+    return new ColumnNamed({
+      ...this.sheetNamedProps,
+      columnName,
+    });
+  }
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return new ColumnNamed({
       ...this.sheetNamedProps,

@@ -1,4 +1,4 @@
-import type { CellValueName } from "../../00_rawPrecursors/base";
+import type { CellValueName } from "../../00_base/base";
 import type { ColumnRaw } from "../ColumnRaw";
 import type { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";

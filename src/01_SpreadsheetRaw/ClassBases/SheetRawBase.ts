@@ -1,4 +1,4 @@
-import type { GoogleSheet } from "../../00_rawPrecursors/AppsScriptTypes";
+import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
 import { SheetSchemaIndexed } from "../../03_SpreadsheetIndexed/SheetSchemaIndexed";
 import { Obj } from "../../utils/Obj";
 import { valS } from "../../utils/validation";

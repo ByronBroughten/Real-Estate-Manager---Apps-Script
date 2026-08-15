@@ -1,11 +1,15 @@
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
-import type { ColumnName } from "../02_generatedTraits/03_columnTraits";
+import type {
+  ColumnFullName,
+  ColumnName,
+} from "../02_generatedTraits/03_columnTraits";
+
 import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { SheetNamed } from "./SheetNamed";
 
 export class ColumnNamed<
   TN extends SheetName,
-  CN extends ColumnName<TN>,
+  CN extends ColumnName<TN> = ColumnName<TN>,
 > extends ColumnNamedBase<TN, CN> {
   get colIndex(): number {
     return this.sheet.schema.column(this.columnName).colIndex;
@@ -21,6 +25,9 @@ export class ColumnNamed<
   }
   get schema() {
     return this.sheet.schema.column(this.columnName);
+  }
+  get fullName(): ColumnFullName<TN, CN> {
+    return this.schema.fullName;
   }
   dataCellsToDefault() {
     this.rich.dataCellsToDefault();

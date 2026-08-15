@@ -1,6 +1,7 @@
 import type { SheetColumnsRange } from "../01_SpreadsheetRaw/ClassTypes/RawState.js";
 import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes.js";
+import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
@@ -24,12 +25,15 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
+  get indexed(): SpreadsheetIndexed {
+    return new SpreadsheetIndexed(this.spreadsheetRawProps);
+  }
   get schema(): SpreadsheetSchema {
     return this.spreadsheetSchema;
   }
   get activeSheetNames(): SheetName[] {
     return [...this.raw.activeSheetGids].map(
-      (sheetGid) => this.schema.raw.sheet(sheetGid).sheetName,
+      (sheetGid) => this.indexed.sheet(sheetGid).sheetName,
     );
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {

@@ -1,7 +1,4 @@
-import type {
-  UniformRowName,
-  UniformRowValueName,
-} from "../../00_rawPrecursors/base";
+import type { UniformRowName, UniformRowValueName } from "../../00_base/base";
 import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
 import { RowRawBase, type RowRawProps } from "./RowRawBase";
 

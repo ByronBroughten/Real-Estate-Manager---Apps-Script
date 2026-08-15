@@ -1,5 +1,5 @@
-import type { GoogleSpreadsheet } from "../00_rawPrecursors/AppsScriptTypes";
-import type { UniformRowName } from "../00_rawPrecursors/base";
+import type { GoogleSpreadsheet } from "../00_base/AppsScriptTypes";
+import type { UniformRowName } from "../00_base/base";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";

@@ -1,4 +1,4 @@
-import type { ValueSchemaKey } from "../00_rawPrecursors/valueSchema";
+import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { RowRawBase } from "../01_SpreadsheetRaw/ClassBases/RowRawBase";
 import { RowRaw } from "../01_SpreadsheetRaw/RowRaw";
 import {

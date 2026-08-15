@@ -1,6 +1,7 @@
 import {
   getColumnTraitByIndex,
   type ColTraitsRaw,
+  type ColumnFullNameSimple,
 } from "../02_generatedTraits/03_columnTraits";
 import {
   getValTrait,
@@ -21,6 +22,15 @@ export class ColumnSchemaIndexed extends SchemaBase {
   }
   get sheet(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetId);
+  }
+  get columnName(): ColumnFullNameSimple {
+    return this.trait("columnName") as ColumnFullNameSimple;
+  }
+  get fullName(): ColumnFullNameSimple {
+    return this.combineNames(
+      this.sheet.sheetName,
+      this.columnName,
+    ) as ColumnFullNameSimple;
   }
   trait<K extends keyof ColTraitsRaw>(key: K): ColTraitsRaw[K] {
     return getColumnTraitByIndex(this.sheetId, this.colIndex, key);

@@ -1,7 +1,8 @@
-import type { UniformRowName } from "../00_rawPrecursors/base";
+import type { UniformRowName } from "../00_base/base";
 import { SheetRawBase } from "../01_SpreadsheetRaw/ClassBases/SheetRawBase";
 import { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { UniformRow } from "../01_SpreadsheetRaw/UniformRow";
+import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
@@ -9,6 +10,12 @@ import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 export class SheetIndexed extends SheetRawBase {
   get schema(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
+  }
+  get raw(): SheetRaw {
+    return new SheetRaw(this.sheetRawProps);
+  }
+  get sheetName(): SheetName {
+    return this.schema.sheetName;
   }
   column(colIndex: number): ColumnIndexed {
     return new ColumnIndexed({
@@ -18,9 +25,6 @@ export class SheetIndexed extends SheetRawBase {
   }
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
     return this.raw.uniformRow(rowName);
-  }
-  get raw(): SheetRaw {
-    return new SheetRaw(this.sheetRawProps);
   }
   get topDataRow(): DataRowIndexed {
     return this.dataRow(this.schema.topDataRowIdx);

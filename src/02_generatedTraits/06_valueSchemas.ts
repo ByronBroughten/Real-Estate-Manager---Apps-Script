@@ -1,12 +1,6 @@
-import type { CellValueNameToValue } from "../00_rawPrecursors/base";
-import {
-  baseValueNames,
-  baseValueSchemas,
-} from "../00_rawPrecursors/baseValueSchemas";
-import type {
-  ValueSchemaBase,
-  ValueSchemaKey,
-} from "../00_rawPrecursors/valueSchema";
+import type { CellValueNameToValue } from "../00_base/base";
+import { baseValueNames, baseValueSchemas } from "../00_base/baseValueSchemas";
+import type { ValueSchemaBase, ValueSchemaKey } from "../00_base/valueSchema";
 import type { Merge } from "../utils/Obj/merge";
 import { valueTraitNames, type ValueTraitValues } from "./04_valueTraits";
 import { makeSchemasFromValueConfig } from "./05_traitValueSchemas";

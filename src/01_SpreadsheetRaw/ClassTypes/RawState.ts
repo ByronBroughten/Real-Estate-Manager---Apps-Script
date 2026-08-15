@@ -1,8 +1,8 @@
 import type {
   GoogleGridRange,
   GoogleUpdateRequest,
-} from "../../00_rawPrecursors/AppsScriptTypes";
-import type { CellValue } from "../../00_rawPrecursors/base";
+} from "../../00_base/AppsScriptTypes";
+import type { CellValue } from "../../00_base/base";
 import type { StrictPick } from "../../utils/Obj";
 
 const updateRequestNames = [

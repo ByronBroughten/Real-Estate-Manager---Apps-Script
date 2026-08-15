@@ -2,8 +2,8 @@ import {
   makeStructuredConfig,
   type CellValue,
   type CellValueName,
-} from "../00_rawPrecursors/base";
-import { configGet } from "../00_rawPrecursors/spreadsheetConfig";
+} from "../00_base/base";
+import { configGet } from "../00_base/spreadsheetConfig";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";
 import type { SpreadsheetRawProps } from "./ClassBases/SpreadsheetRawBase";

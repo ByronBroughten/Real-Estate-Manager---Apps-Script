@@ -10,6 +10,9 @@ export class SpreadsheetSchemaIndexed extends SchemaBase {
   sheet(sheetGid: number): SheetSchemaIndexed {
     return new SheetSchemaIndexed(sheetGid);
   }
+  column(sheetGid: number, colIndex: number) {
+    return this.sheet(sheetGid).column(colIndex);
+  }
   sheetNameFromGid(sheetGid: number) {
     this.sheet(sheetGid).trait("sheetName");
   }

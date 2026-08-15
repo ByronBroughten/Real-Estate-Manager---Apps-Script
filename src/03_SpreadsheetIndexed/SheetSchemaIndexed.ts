@@ -1,4 +1,4 @@
-import type { CellValue } from "../00_rawPrecursors/base";
+import type { CellValue } from "../00_base/base";
 import {
   getSheetTraitByGid,
   type SheetName,

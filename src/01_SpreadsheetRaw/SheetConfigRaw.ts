@@ -1,8 +1,5 @@
-import {
-  makeStructuredConfig,
-  type CellValueName,
-} from "../00_rawPrecursors/base";
-import { configGet } from "../00_rawPrecursors/spreadsheetConfig";
+import { makeStructuredConfig, type CellValueName } from "../00_base/base";
+import { configGet } from "../00_base/spreadsheetConfig";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { Obj } from "../utils/Obj";
 import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";
@@ -182,7 +179,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
 
     return [
-      `import { makeStructuredConfig } from "../00_rawPrecursors/base";`,
+      `import { makeStructuredConfig } from "../00_base/base";`,
       `import { makeAllSheetTraits, type AllSheetTraitsBase } from "./02_sheetTraitsTypes";`,
       ``,
       `export const msc = makeAllSheetTraits;`,
