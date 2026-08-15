@@ -15,13 +15,14 @@ export type EventOrigin = {
   sheetGid: number;
 };
 
+type EndpointsBase<CNF extends ColumnFullNameSimple> = Partial<
+  Record<CNF, () => void>
+>;
 interface ApiProps<
   EP extends EndpointsBase<ColumnFullNameSimple>,
 > extends SpreadsheetNamedProps {
   endpoints: EP;
 }
-
-type EndpointsBase<CNF extends ColumnFullNameSimple> = Record<CNF, () => void>;
 type EndpointName<EP extends EndpointsBase<ColumnFullNameSimple>> = keyof EP &
   ColumnFullNameSimple;
 export class Api<

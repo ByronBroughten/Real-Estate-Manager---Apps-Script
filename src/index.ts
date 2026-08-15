@@ -16,11 +16,6 @@ function triggerFirstOfMonth() {
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (Api.isSuspectedApiCall(e)) {
-    const api = new Api({
-      endpoints: businessEndpoints,
-      ...Api.initSpreadsheetNamedProps(),
-    });
-
     Api.init(businessEndpoints).handleSheetOnEditEvent(e);
   }
 }
