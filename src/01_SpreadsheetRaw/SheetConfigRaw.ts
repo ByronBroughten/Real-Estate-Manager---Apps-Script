@@ -4,7 +4,6 @@ import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { Obj } from "../utils/Obj";
 import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";
 import type { SpreadsheetRawProps } from "./ClassBases/SpreadsheetRawBase";
-import type { ColumnRaw } from "./ColumnRaw";
 import type { SheetRaw } from "./SheetRaw";
 import { SpecificSheetRaw } from "./SpecificSheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
@@ -13,14 +12,14 @@ const headerToValueNameAuto = makeStructuredConfig(
   {} as Record<string, CellValueName>,
   {
     "Sheet GID": "number",
-    "Sheet name": "string",
+    "Sheet title": "string",
     "Has ID column": "boolean",
   } as const,
 );
 const headerToValueNameUser = makeStructuredConfig(
   {} as Record<string, CellValueName>,
   {
-    "Make schema for API": "boolean" as CellValueName,
+    "Let api access traits": "boolean" as CellValueName,
     "ID prefix": "string" as CellValueName,
   } as const,
 );
@@ -39,7 +38,7 @@ type SheetConfigHeader = (typeof sheetConfigHeaders)[number];
 export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   constructor({ ...rest }: SpreadsheetRawProps) {
     super({
-      headerToValueName,
+      headerToValueName: headerToValueName,
       sheetGid: configGet("sheetConfigGid"),
       ...rest,
     });
@@ -59,18 +58,25 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       ...this.sheetRawProps,
     });
   }
-  fetchHeadersAndColumn<H extends SheetConfigHeader>(header: H): ColumnRaw {
-    // At this level, headers are needed before the column can be fetched.
-    this.sheet.fetchUniformRow("header");
-    return this.sSheet.fetchDataColumnOfFetchedHeader(header);
+  fetchAndUpdateAll() {
+    this.ss.fetchAllSheetProperties();
+    this.sheet.fetchHeaderRowUsingSheetProperties();
+    // TODO: fetch GID column
+    const gidCol = this.column("Sheet GID");
+    gidCol.dataValueArr.forEach((gid) => {
+      const sheet = this.ss.sheet(gid);
+      sheet.prepFetchHeaderRowUsingSheetProperties();
+    });
+    this.sheet.prepFetchDataColumnsUsingHeaders(...programmaticConfigHeaders);
+
+    this.ss.fetchAll();
+
+    this._ensureHeaders();
+    this._deleteStaleSheetConfigs();
+    this._appendMissingSheetConfigs();
+    this._updateProgrammaticValues();
   }
-  maintainSheetConfigs() {
-    this.ensureHeaders();
-    this.deleteStaleSheetConfigs();
-    this.appendMissingSheetConfigs();
-    this.updateProgrammaticSheetConfigValues();
-  }
-  private ensureHeaders() {
+  private _ensureHeaders() {
     const numFixed = this.sheet.ensureColumnsOfHeadersExist(...this.headers);
     if (numFixed > 0) {
       Logger.log(
@@ -78,84 +84,52 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       );
     }
   }
-  deleteStaleSheetConfigs() {
-    const { activeSheetGids } = this.ss.fetchAllSheetProperties();
-    this.sheet.fetchUniformRow("header");
-    this.column("Sheet GID").prepFetchAllDataCells().ss.fetchAll();
-
-    const gidCol = this.fetchHeadersAndColumn("Sheet GID");
+  private _deleteStaleSheetConfigs() {
+    const gidCol = this.column("Sheet GID");
     this.sheet.dataRows.forEach((row) => {
       const configGid = row.value(gidCol.colIndex) as number;
-      if (!activeSheetGids.has(configGid)) {
+      if (!this.ss.activeSheetGids.has(configGid)) {
         row.delete();
       }
     });
   }
-  appendMissingSheetConfigs() {
-    const { activeSheetGids } = this.ss.fetchAllSheetProperties();
-    const gidCol = this.fetchHeadersAndColumn("Sheet GID");
+  private _appendMissingSheetConfigs() {
+    const { activeSheetGids } = this.ss;
+    const gidCol = this.column("Sheet GID");
     gidCol.dataValueArr.forEach((gid) => {
       if (!activeSheetGids.has(gid as number)) {
         this.sheet.appendDataRowValues(new Map([[gidCol.colIndex, gid]]));
       }
     });
   }
-  updateProgrammaticSheetConfigValues() {
-    this.sheet.prepFetchProperties();
-    this.sheet.prepFetchFullUniformRow("header");
-    this.ss.fetchAll();
-
-    this.sheet.prepFetchDataColumnsOfFetchedHeaders(
-      ...programmaticConfigHeaders,
-    );
-    this.ss.fetchAll();
-
-    this._fetchSheetHeadersInGidColumn();
-    const updatedValues = this._updateConfigSheetNamesAndHasIdCol();
-    Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
-  }
-  private _fetchSheetHeadersInGidColumn() {
+  private _updateProgrammaticValues(): void {
     const gidCol = this.column("Sheet GID");
-    gidCol.dataValueArr.forEach((gid) => {
-      if (gid === this.sheetGid) {
-        return;
-      }
-      const sheet = this.ss.sheet(gid as number);
-      sheet.prepFetchProperties();
-      sheet.prepFetchFullUniformRow("header");
-    });
-    this.ss.fetchAll();
-  }
-  private _updateConfigSheetNamesAndHasIdCol(): number {
-    const gidCol = this.column("Sheet GID");
-    const sheetNameCol = this.column("Sheet name");
+    const sheetTitleCol = this.column("Sheet title");
     const hasColForIdCol = this.column("Has ID column");
     let updatedValues = 0;
     this.sheet.dataRowIndexes.forEach((rowIndex) => {
       const sheetGid = gidCol.dataValue(rowIndex);
-      const sheetName = sheetNameCol.dataValue(rowIndex);
+      const sheetTitle = sheetTitleCol.dataValue(rowIndex);
 
-      const sheet = this.ss.sheet(sheetGid);
-
-      const actualSheetName = this.schema.sheetNameFromTitle(sheet.title);
-      if (sheetName !== actualSheetName) {
-        sheetNameCol.updateDataCell(rowIndex, actualSheetName);
+      const activeSheet = this.ss.sheet(sheetGid);
+      if (sheetTitle !== activeSheet.title) {
+        sheetTitleCol.updateDataCell(rowIndex, activeSheet.title);
         updatedValues++;
       }
       const hasIdCol = hasColForIdCol.dataValue(rowIndex);
-      const actualHasIdCol = sheet.headerRow.hasValue("ID");
+      const actualHasIdCol = activeSheet.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
         hasColForIdCol.updateDataCell(rowIndex, actualHasIdCol);
         updatedValues++;
       }
     });
-    return updatedValues;
+    Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetTraitsFileSource(): string {
     this.sheet.prepFetchProperties();
-    this.sheet.prepFetchFullUniformRow("header");
+    this.sheet.prepFetchUniformRowUsingSheetProperties("header");
     this.ss.fetchAll();
-    this.sheet.prepFetchDataColumnsOfFetchedHeaders(
+    this.sheet.prepFetchDataColumnsUsingHeaders(
       "Sheet name",
       "ID prefix",
       "Has ID column",
@@ -163,7 +137,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     this.ss.fetchAll();
 
     const gidCol = this.column("Sheet GID");
-    const nameCol = this.column("Sheet name");
+    const titleCol = this.column("Sheet title");
     const prefixCol = this.column("ID prefix");
     const hasIdCol = this.column("Has ID column");
 
@@ -175,7 +149,9 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       if (hasIdCol.dataValue(rowIndex)) {
         args.push("true");
       }
-      return `  ${nameCol.dataValue(rowIndex)}: msc(${args.join(", ")}),`;
+      const title = titleCol.dataValue(rowIndex);
+      const sheetName = this.schema.sheetNameFromTitle(title);
+      return `  ${sheetName}: msc(${args.join(", ")}),`;
     });
 
     return [

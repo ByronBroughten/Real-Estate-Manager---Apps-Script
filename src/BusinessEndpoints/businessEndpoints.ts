@@ -1,4 +1,5 @@
 import { makeStructuredConfig } from "../00_base/base";
+import { ColumnConfigRaw } from "../01_SpreadsheetRaw/ColumnConfigRaw";
 import type { ColumnFullNameSimple } from "../02_generatedTraits/03_columnTraits";
 import type { FilterWithSuffix } from "../utils/Str";
 
@@ -12,6 +13,9 @@ export const businessEndpoints = makeStructuredConfig(
   {} as Record<ApiEndpointName, () => void>,
   {
     spreadsheetControls_appendSheetAndColumnConfigRowsRunAndStatus: () => {
+      const columnConfig = ColumnConfigRaw.init();
+      const { sheetConfig } = columnConfig;
+      sheetConfig.fetchAndUpdateAll();
       // TO DO: implement this endpoint
     },
     spreadsheetControls_fillRowIdsRunAndStatus: () => {

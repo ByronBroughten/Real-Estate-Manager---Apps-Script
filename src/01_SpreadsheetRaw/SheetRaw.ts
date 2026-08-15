@@ -172,16 +172,15 @@ export class SheetRaw extends SheetRawBase {
 
   // the columnId thing is only needed above the raw level;
 
-  prepFetchFullUniformRows(rowNames: UniformRowName[]): SheetRaw {
-    rowNames.forEach((rowName) => this.prepFetchFullUniformRow(rowName));
-    return this;
+  prepFetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
+    return this.prepFetchUniformRowUsingSheetProperties("header");
   }
-  fetchUniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
-    const row = this.prepFetchFullUniformRow(rowName);
+  fetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
+    const row = this.prepFetchHeaderRowUsingSheetProperties();
     this.ss.fetchAll();
     return row;
   }
-  prepFetchFullUniformRow<UN extends UniformRowName>(
+  prepFetchUniformRowUsingSheetProperties<UN extends UniformRowName>(
     rowName: UN,
   ): UniformRow<UN> {
     this.gatherGetRequest({
@@ -191,6 +190,14 @@ export class SheetRaw extends SheetRawBase {
     });
     return this.uniformRow(rowName);
   }
+  prepFetchUniformRowsUsingSheetProperties(
+    rowNames: UniformRowName[],
+  ): SheetRaw {
+    rowNames.forEach((rowName) =>
+      this.prepFetchUniformRowUsingSheetProperties(rowName),
+    );
+    return this;
+  }
   columnByHeader<VN extends CellValueName = CellValueName>(
     header: string,
     valueName?: VN,
@@ -198,7 +205,7 @@ export class SheetRaw extends SheetRawBase {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
   }
-  prepFetchDataColumnsOfFetchedHeaders<HD extends string>(
+  prepFetchDataColumnsUsingHeaders<HD extends string>(
     ...headers: HD[]
   ): Record<HD, ColumnRaw> {
     return headers.reduce(
@@ -212,9 +219,9 @@ export class SheetRaw extends SheetRawBase {
   ensureColumnsOfHeadersExist(...headers: string[]): number {
     const missingHeaders = this.headerRow.returnMissingValues(...headers);
     return missingHeaders.reduce((acc, header) => {
-      const index = this.activeTable.endColumnIndex;
-      this.insertColumnAt(index);
-      this.headerRow.updateValue(index, header);
+      const columnIndex = this.activeTable.endColumnIndex;
+      this.insertColumnAt(columnIndex);
+      this.headerRow.updateValue(columnIndex, header);
       return acc + 1;
     }, 0);
   }

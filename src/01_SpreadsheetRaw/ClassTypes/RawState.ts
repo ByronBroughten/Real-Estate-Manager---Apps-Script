@@ -22,16 +22,6 @@ export interface RawState {
   sheets: RawSheetsState;
 }
 
-export function initUpdateRequests(): RawState["updateRequests"] {
-  return {
-    append: [],
-    update: [],
-    delete: [],
-    sort: [],
-    insertColumn: [],
-  };
-}
-
 export type RawSheetsState = Map<SheetId, RawSheetState>;
 
 export interface RawSheetState {

@@ -31,7 +31,7 @@ export class SpreadsheetNamedBase extends SpreadsheetRawBase {
   }
   static initSpreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
-      rawState: SpreadsheetRaw.initRawState(),
+      ...SpreadsheetRaw.initSpreadsheetRawProps(),
       namedState: {
         gridRangeFetchProps: [],
       },

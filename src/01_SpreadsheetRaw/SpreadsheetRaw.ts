@@ -14,9 +14,7 @@ import { SheetRaw, type SheetRawRow } from "./SheetRaw";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
-    return new SpreadsheetRaw({
-      rawState: SpreadsheetRaw.initRawState(),
-    });
+    return new SpreadsheetRaw(SpreadsheetRaw.initSpreadsheetRawProps());
   }
   get sheetConfig(): SheetConfigRaw {
     // This should perhaps live elsewhere.
@@ -28,8 +26,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   get schema() {
     return new SchemaBase();
   }
-  get activeSheetGids(): MapIterator<number> {
-    return this.rawState.sheets.keys();
+  get activeSheetGids(): Set<number> {
+    return new Set(this.rawState.sheets.keys());
   }
   get activeSheets(): SheetRaw[] {
     return Array.from(this.activeSheetGids, (sheetGid) => this.sheet(sheetGid));
@@ -48,13 +46,15 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return this.sheet(sheetGid).row(rowIdx);
   }
   fetchFullUniformRowAllActiveSheets(rowName: UniformRowName): void {
-    this.prepFetchFullUniformRowsAllActiveSheets(rowName);
+    this.prepFetchUniformRowUsingSheetPropertiessAllActiveSheets(rowName);
     this.fetchAll();
   }
-  prepFetchFullUniformRowsAllActiveSheets(...rowNames: UniformRowName[]): void {
+  prepFetchUniformRowUsingSheetPropertiessAllActiveSheets(
+    ...rowNames: UniformRowName[]
+  ): void {
     this.ensureAllSheetPropertiesAreFetched();
     this.activeSheets.forEach((sheet) => {
-      sheet.prepFetchFullUniformRows(rowNames);
+      sheet.prepFetchUniformRowUsingSheetPropertiess(rowNames);
     });
   }
   ensureAllSheetPropertiesAreFetched() {
@@ -68,7 +68,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
     this._addDataToState(response);
     this.rawState.allSheetPropertiesAreFetched = true;
-    return { activeSheetGids: new Set(this.activeSheetGids) };
+    return { activeSheetGids: this.activeSheetGids };
   }
   gatherFetchRanges(...propArr: GridRangeProps[]) {
     this.getterGridRanges.push(...propArr);

@@ -10,7 +10,7 @@ export class SpecificSheetRaw<
 > extends SpecificSheetRawBase<H2V, HD> {
   prepFetchPrerequisitesForRawColumns() {
     this.sheet.prepFetchProperties();
-    this.sheet.prepFetchFullUniformRow("header");
+    this.sheet.prepFetchUniformRowUsingSheetProperties("header");
   }
   prepFetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
@@ -21,7 +21,7 @@ export class SpecificSheetRaw<
     this.ss.fetchAll();
     return column;
   }
-  prepFetchDataColumnsOfFetchedHeaders<H extends HD>(
+  prepFetchDataColumnsUsingHeaders<H extends HD>(
     ...headers: H[]
   ): Record<H, ColumnRaw> {
     return headers.reduce(

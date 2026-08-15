@@ -1,7 +1,6 @@
 import { AppsScript } from "../../00_base/AppsScript";
 import type { GoogleGridRange } from "../../00_base/AppsScriptTypes";
 import {
-  initUpdateRequests,
   type ChangesToSave,
   type RawSheetsState,
   type RawState,
@@ -42,16 +41,24 @@ export class SpreadsheetRawBase {
       rawState: this.rawState,
     };
   }
-  static initSortedUpdateRequests(): RawState["updateRequests"] {
-    return initUpdateRequests();
-  }
-  static initRawState(): RawState {
+  static initSpreadsheetRawProps(): SpreadsheetRawProps {
     return {
-      allSheetPropertiesAreFetched: false,
-      getterGridRanges: [],
-      changesToSave: new Map(),
-      updateRequests: this.initSortedUpdateRequests(),
-      sheets: new Map(),
+      rawState: {
+        allSheetPropertiesAreFetched: false,
+        getterGridRanges: [],
+        changesToSave: new Map(),
+        updateRequests: this.initSortedUpdateRequests(),
+        sheets: new Map(),
+      },
+    };
+  }
+  static initSortedUpdateRequests(): RawState["updateRequests"] {
+    return {
+      append: [],
+      update: [],
+      delete: [],
+      sort: [],
+      insertColumn: [],
     };
   }
 }

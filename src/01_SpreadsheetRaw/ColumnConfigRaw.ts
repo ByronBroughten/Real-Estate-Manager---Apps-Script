@@ -40,10 +40,13 @@ type HeaderToValueName = typeof headerToValueName;
 export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   constructor({ ...rest }: SpreadsheetRawProps) {
     super({
-      headerToValueName,
+      headerToValueName: headerToValueName,
       sheetGid: configGet("columnConfigGid"),
       ...rest,
     });
+  }
+  static init() {
+    return new ColumnConfigRaw(ColumnConfigRaw.initSpreadsheetRawProps());
   }
   get sheetConfig(): SheetConfigRaw {
     return new SheetConfigRaw(this.spreadsheetRawProps);
@@ -60,9 +63,9 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   addMissingColumnIds(): void {
     this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
     this.ss.fetchAll();
-    this.sheetConfig.sSheet.prepFetchDataColumnsOfFetchedHeaders(
+    this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
       "Sheet GID",
-      "Make schema for API",
+      "Let api access traits",
       "ID prefix",
     );
     this.ss.fetchAll();
@@ -80,7 +83,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       const idPrefix = idPrefixCol.dataValue(rowIndex);
       if (typeof idPrefix !== "string" || !idPrefix) {
         throw new Error(
-          `SheetConfigRaw: Sheet GID ${sheetGid} has "Make schema for API" true but no valid "ID prefix" value.`,
+          `SheetConfigRaw: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
         );
       }
       const sheet = this.ss.sheet(sheetGid);
@@ -100,11 +103,11 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     this.sSheet.prepFetchPrerequisitesForRawColumns();
     this.ss.fetchAll();
 
-    this.sheetConfig.sSheet.prepFetchDataColumnsOfFetchedHeaders(
+    this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
       "Sheet GID",
-      "Make schema for API",
+      "Let api access traits",
     );
-    this.sSheet.prepFetchDataColumnsOfFetchedHeaders("Column ID", "Sheet GID");
+    this.sSheet.prepFetchDataColumnsUsingHeaders("Column ID", "Sheet GID");
     this.ss.fetchAll();
 
     const includedSheetGids = this._includedSheetGids();
@@ -143,11 +146,11 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     this.sSheet.prepFetchPrerequisitesForRawColumns();
     this.ss.fetchAll();
 
-    this.sheetConfig.sSheet.prepFetchDataColumnsOfFetchedHeaders(
+    this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
       "Sheet GID",
-      "Make schema for API",
+      "Let api access traits",
     );
-    this.sSheet.prepFetchDataColumnsOfFetchedHeaders("Column ID");
+    this.sSheet.prepFetchDataColumnsUsingHeaders("Column ID");
     this.ss.fetchAll();
 
     const includedSheetGids = this._includedSheetGids();
@@ -202,13 +205,13 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
       sheet.prepFetchProperties();
-      sheet.prepFetchFullUniformRow("columnId");
+      sheet.prepFetchUniformRowUsingSheetProperties("columnId");
     });
     this.ss.fetchAll();
   }
   private _includedSheetGids(): Set<number> {
     const sheetGidCol = this.sheetConfig.column("Sheet GID");
-    const makeSchemaCol = this.sheetConfig.column("Make schema for API");
+    const makeSchemaCol = this.sheetConfig.column("Let api access traits");
 
     const includedSheetGids = new Set<number>();
     this.sheetConfig.sheet.dataRowIndexes.forEach((rowIndex) => {
