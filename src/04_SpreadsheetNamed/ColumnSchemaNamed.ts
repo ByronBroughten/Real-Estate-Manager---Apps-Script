@@ -1,7 +1,4 @@
-import {
-  getSheetTraitByName,
-  type SheetName,
-} from "../02_generatedTraits/02_sheetTraitsTypes";
+import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import {
   getColumnTraitByName,
   type ColTraits,
@@ -10,54 +7,46 @@ import {
   type ColumnName,
   type ColumnValueName,
 } from "../02_generatedTraits/03_columnTraits";
-import { ColumnSchemaIndexed } from "../03_SpreadsheetIndexed/ColumnSchemaIndexed";
-
-import type { ValueSchemaKey } from "../00_base/valueSchema";
-import {
-  getValTrait,
-  type ValueName,
-  type ValueSchema,
-} from "../02_generatedTraits/06_valueSchemas";
+import type { ValueName } from "../02_generatedTraits/06_valueSchemas";
+import { ColumnSchemaCommon } from "../03_SpreadsheetIndexed/ColumnSchemaCommon";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export class ColumnSchemaNamed<
-  TN extends SheetName = SheetName,
-  CN extends ColumnName<TN> = ColumnName<TN>,
-> extends ColumnSchemaIndexed {
-  readonly sheetName: TN;
+  SN extends SheetName = SheetName,
+  CN extends ColumnName<SN> = ColumnName<SN>,
+> extends ColumnSchemaCommon<ColumnValueName<SN, CN> & ValueName> {
+  readonly sheetName: SN;
   readonly columnName: CN;
-  constructor(sheetName: TN, columnName: CN) {
-    super(
-      getSheetTraitByName(sheetName, "sheetGid"),
-      getColumnTraitByName(sheetName, columnName, "colIndex"),
-    );
+  constructor(sheetName: SN, columnName: CN) {
+    super();
     this.sheetName = sheetName;
     this.columnName = columnName;
   }
-  traitByName<K extends keyof ColTraitsBase>(
+  trait<K extends keyof ColTraitsBase>(
     key: K,
-  ): ColTraits<TN, CN>[K & keyof ColTraits<TN, CN>] {
+  ): ColTraits<SN, CN>[K & keyof ColTraits<SN, CN>] {
     return getColumnTraitByName(
       this.sheetName,
       this.columnName,
-      key as unknown as keyof ColTraits<TN, CN>,
-    ) as ColTraits<TN, CN>[K & keyof ColTraits<TN, CN>];
+      key as unknown as keyof ColTraits<SN, CN>,
+    ) as ColTraits<SN, CN>[K & keyof ColTraits<SN, CN>];
   }
-  get sheetSchema(): SheetSchemaNamed<TN> {
+  get colIndex(): number {
+    return this.trait("colIndex");
+  }
+  get valueName(): ColumnValueName<SN, CN> & ValueName {
+    return this.trait("valueName");
+  }
+  get sheetSchema(): SheetSchemaNamed<SN> {
     return new SheetSchemaNamed(this.sheetName);
   }
-  get fullName(): ColumnFullName<TN, CN> {
+  makeRowId(): string {
+    return this.sheetSchema.makeRowId();
+  }
+  get fullName(): ColumnFullName<SN, CN> {
     return `${this.sheetName}${this.nameDelimiter}${this.columnName as string}` as ColumnFullName<
-      TN,
+      SN,
       CN
     >;
-  }
-  valTrait<K extends ValueSchemaKey>(
-    key: K,
-  ): ValueSchema<ColumnValueName<TN, CN> & ValueName>[K] {
-    return getValTrait(
-      this.valueName as ColumnValueName<TN, CN> & ValueName,
-      key,
-    );
   }
 }

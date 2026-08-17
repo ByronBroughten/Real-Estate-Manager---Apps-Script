@@ -15,7 +15,7 @@ import {
   type ValueSchema,
 } from "./06_valueSchemas";
 
-interface ColTraitsLiteral {
+export interface ColTraitsLiteral {
   columnId: string;
   colIndex: number;
   header: string;

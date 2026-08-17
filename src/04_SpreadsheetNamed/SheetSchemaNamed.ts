@@ -1,15 +1,15 @@
+import type { SheetTrait } from "../00_base/makeSheetsTraits";
 import {
   getSheetTraitByName,
   type SheetName,
   type SheetNameSimple,
-  type SheetTrait,
 } from "../02_generatedTraits/02_sheetTraitsTypes";
 import {
   getColumnTraitByIndex,
   getSheetColumnNames,
   type ColumnName,
 } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { SheetSchemaCommon } from "../03_SpreadsheetIndexed/SheetSchemaCommon";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import type { ColumnSpecifierNamed } from "./Types/NamedState";
 
@@ -20,7 +20,9 @@ export type VarbNameMutable<SN extends SheetName> = Exclude<
   VarbNameImmutable
 >;
 
-export class SheetSchemaNamed<SN extends SheetNameSimple> extends SchemaBase {
+export class SheetSchemaNamed<
+  SN extends SheetNameSimple,
+> extends SheetSchemaCommon {
   readonly sheetName: SN;
   constructor(sheetName: SN) {
     super();

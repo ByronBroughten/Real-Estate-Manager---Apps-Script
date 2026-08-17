@@ -1,4 +1,6 @@
 import { makeStructuredConfig, type CellValueName } from "../00_base/base";
+import { baseSheetsTraits } from "../00_base/baseSheetTraits";
+import { type SheetTraitsBase } from "../00_base/makeSheetsTraits";
 import { configGet } from "../00_base/spreadsheetConfig";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { Arr } from "../utils/Arr";
@@ -144,27 +146,30 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const prefixCol = this.column("ID prefix");
     const hasIdCol = this.column("Has ID column");
 
-    const entries = this.sheet.dataRowIndexes.map((rowIndex) => {
-      const args = [
-        String(gidCol.dataValue(rowIndex)),
-        JSON.stringify(prefixCol.dataValue(rowIndex)),
-      ];
-      if (hasIdCol.dataValue(rowIndex)) {
-        args.push("true");
-      }
+    const entries: SheetTraitsBase = {};
+    this.sheet.dataRowIndexes.forEach((rowIndex) => {
       const title = titleCol.dataValue(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
-      return `  ${sheetName}: msc(${args.join(", ")}),`;
+      entries[sheetName] = {
+        sheetGid: Number(gidCol.dataValue(rowIndex)),
+        idPrefix: String(prefixCol.dataValue(rowIndex)),
+        hasIdColumn: Boolean(hasIdCol.dataValue(rowIndex)),
+      };
     });
 
-    return [
-      `import { makeStructuredConfig } from "../00_base/base";`,
-      `import { makeSheetTraits, type AllSheetTraitsBase } from "./02_sheetTraitsTypes";`,
-      ``,
-      `export const msc = makeSheetTraits;`,
-      `export const allSheetTraits = makeStructuredConfig({} as AllSheetTraitsBase, {`,
+    const allSheetTraits: SheetTraitsBase = {
+      ...baseSheetsTraits,
       ...entries,
-      `});`,
+    };
+
+    return [
+      `import { makeSheetsTraits } from "../00_base/makeSheetsTraits";`,
+      ``,
+      `export const allSheetTraits = makeSheetsTraits(${JSON.stringify(
+        allSheetTraits,
+        null,
+        2,
+      )});`,
       ``,
     ].join("\n");
   }

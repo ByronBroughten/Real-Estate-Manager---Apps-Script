@@ -10,7 +10,7 @@ import {
   type ColumnName,
 } from "../02_generatedTraits/03_columnTraits";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
-import { SchemaBase } from "./SchemaBase";
+import { SheetSchemaCommon } from "./SheetSchemaCommon";
 
 const varbNameImmutable = ["baseId"] as const;
 type VarbNameImmutable = (typeof varbNameImmutable)[number];
@@ -19,7 +19,7 @@ export type VarbNameMutable<TN extends SheetName> = Exclude<
   VarbNameImmutable
 >;
 
-export class SheetSchemaIndexed extends SchemaBase {
+export class SheetSchemaIndexed extends SheetSchemaCommon {
   readonly sheetGid: number;
   constructor(sheetGid: number) {
     super();
@@ -46,9 +46,6 @@ export class SheetSchemaIndexed extends SchemaBase {
       },
       new Map() as Map<number, CellValue>,
     );
-  }
-  makeRowId(): string {
-    return this.makeRowIdFromPrefix(this.trait("idPrefix"));
   }
   makeColumnId(): string {
     return this.makeColIdFromPrefix(this.trait("idPrefix"));

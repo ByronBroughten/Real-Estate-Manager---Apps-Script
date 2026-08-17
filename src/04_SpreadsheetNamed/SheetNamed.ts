@@ -58,9 +58,6 @@ export class SheetNamed<
       this.schema.columnNameByIdx(colIndex),
     );
   }
-  get idValueIdx(): number {
-    return this.schema.column("id").colIndex;
-  }
   topDataRowValue<CN extends ColumnName<SN>>(
     columnName: CN,
   ): ColumnValue<SN, CN> {
