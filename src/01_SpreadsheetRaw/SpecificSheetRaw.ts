@@ -3,11 +3,15 @@ import {
   type HeaderToValueName,
 } from "./ClassBases/SpecificSheetRawBase";
 import type { ColumnRaw } from "./ColumnRaw";
+import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 export class SpecificSheetRaw<
   H2V extends HeaderToValueName<string>,
   HD extends keyof H2V & string = keyof H2V & string,
 > extends SpecificSheetRawBase<H2V, HD> {
+  get ss(): SpreadsheetRaw {
+    return new SpreadsheetRaw(this.spreadsheetRawProps);
+  }
   prepFetchPrerequisitesForRawColumns() {
     this.sheet.prepFetchProperties();
     this.sheet.prepFetchUniformRowUsingSheetProperties("header");

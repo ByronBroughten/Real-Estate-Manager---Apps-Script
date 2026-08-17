@@ -8,6 +8,9 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "target": "ES2022", //esnext
+    // Apps Script's V8 runtime doesn't support native public class fields;
+    // this keeps TS emitting `this.x = ...` in the constructor instead.
+    "useDefineForClassFields": false,
     "module": "esnext", //nodenext, commonjs
     "moduleResolution": "bundler", //nodenext, node
     "lib": ["esnext"], //esnext

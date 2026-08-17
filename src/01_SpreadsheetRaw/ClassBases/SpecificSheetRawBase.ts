@@ -1,7 +1,7 @@
 import type { CellValueName } from "../../00_base/base";
 import type { ColumnRaw } from "../ColumnRaw";
 import type { SheetRaw } from "../SheetRaw";
-import { SpreadsheetRaw } from "../SpreadsheetRaw";
+import type { SpreadsheetRaw } from "../SpreadsheetRaw";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
 export type HeaderToValueName<HD extends string> = Record<HD, CellValueName>;
@@ -12,7 +12,7 @@ interface SpecificSheetRawProps<
   headerToValueName: H2V;
 }
 
-export class SpecificSheetRawBase<
+export abstract class SpecificSheetRawBase<
   H2V extends HeaderToValueName<string>,
   HD extends keyof H2V & string = keyof H2V & string,
 > extends SheetRawBase {
@@ -21,9 +21,7 @@ export class SpecificSheetRawBase<
     super(rest);
     this.headerToValueName = headerToValueName;
   }
-  get ss() {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
-  }
+  abstract get ss(): SpreadsheetRaw;
   get sheet(): SheetRaw {
     return this.ss.sheet(this.sheetGid);
   }

@@ -8,7 +8,7 @@ export interface MonthYear {
 // ---------------------------------------------------------------------
 class DateUtils {
   readonly SHEETS_EPOCH_UTC_MS: number = Date.UTC(1899, 11, 30); // Dec 30, 1899, 00:00 UTC
-  readonly MS_PER_DAY: number = 86_400_000;
+  readonly MS_PER_DAY: number = 86400000;
   getDayBefore(date: Date): Date {
     const dayBefore = new Date(date.getTime());
     dayBefore.setDate(dayBefore.getDate() - 1);

@@ -8,20 +8,11 @@ import type {
   RowChangesToSave,
   SheetChangesToSave,
 } from "./ClassTypes/RawState";
-import { ColumnConfigRaw } from "./ColumnConfigRaw";
-import { SheetConfigRaw } from "./SheetConfigRaw";
 import { SheetRaw, type SheetRawRow } from "./SheetRaw";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
     return new SpreadsheetRaw(SpreadsheetRaw.initSpreadsheetRawProps());
-  }
-  get sheetConfig(): SheetConfigRaw {
-    // This should perhaps live elsewhere.
-    return new SheetConfigRaw(this.spreadsheetRawProps);
-  }
-  get columnConfig(): ColumnConfigRaw {
-    return new ColumnConfigRaw(this.spreadsheetRawProps);
   }
   get schema() {
     return new SchemaBase();

@@ -10,6 +10,7 @@ import type { SpreadsheetRawProps } from "./ClassBases/SpreadsheetRawBase";
 import { SheetConfigRaw } from "./SheetConfigRaw";
 import type { SheetRaw } from "./SheetRaw";
 import { SpecificSheetRaw } from "./SpecificSheetRaw";
+import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 const headerToValueNameAuto = makeStructuredConfig(
   {} as Record<string, CellValueName>,
@@ -47,6 +48,9 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   }
   static init() {
     return new ColumnConfigRaw(ColumnConfigRaw.initSpreadsheetRawProps());
+  }
+  get ss(): SpreadsheetRaw {
+    return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get sheetConfig(): SheetConfigRaw {
     return new SheetConfigRaw(this.spreadsheetRawProps);
