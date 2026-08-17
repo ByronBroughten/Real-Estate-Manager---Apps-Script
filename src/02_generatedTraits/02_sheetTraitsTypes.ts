@@ -1,27 +1,9 @@
+import type { SheetTrait } from "../00_base/makeSheetsTraits";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import { allSheetTraits } from "./02_sheetTraits";
 
-// Pre-allSheetTraits
-export interface SheetTrait {
-  sheetGid: number;
-  hasIdColumn: boolean;
-  idPrefix: string;
-}
-export function makeAllSheetTraits(
-  sheetGid: number,
-  idPrefix: string,
-  hasIdColumn = false,
-): SheetTrait {
-  return {
-    sheetGid,
-    idPrefix,
-    hasIdColumn,
-  };
-}
-export type AllSheetTraitsBase = Record<string, SheetTrait>;
-
 // Post-allSheetTraits
-type SheetTraits = typeof allSheetTraits;
+export type SheetTraits = typeof allSheetTraits;
 export const schemaSheetNames = Obj.keys(allSheetTraits);
 export type SheetNameSimple = (typeof schemaSheetNames)[number];
 export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;

@@ -177,7 +177,7 @@ export class SheetRaw extends SheetRawBase {
   }
   fetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
     const row = this.prepFetchHeaderRowUsingSheetProperties();
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
     return row;
   }
   prepFetchUniformRowUsingSheetProperties<UN extends UniformRowName>(
@@ -210,7 +210,8 @@ export class SheetRaw extends SheetRawBase {
   ): Record<HD, ColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] = this.columnByHeader(header).prepFetchAllDataCells();
+        acc[header] =
+          this.columnByHeader(header).prepfetchAllPreppedDataCells();
         return acc;
       },
       {} as Record<HD, ColumnRaw>,

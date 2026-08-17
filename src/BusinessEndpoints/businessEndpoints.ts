@@ -1,6 +1,7 @@
 import { makeStructuredConfig } from "../00_base/base";
 import { ColumnConfigRaw } from "../01_SpreadsheetRaw/ColumnConfigRaw";
 import type { ColumnFullNameSimple } from "../02_generatedTraits/03_columnTraits";
+import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import type { FilterWithSuffix } from "../utils/Str";
 
 const endpointSuffix = "RunAndStatus";
@@ -16,10 +17,12 @@ export const businessEndpoints = makeStructuredConfig(
       const columnConfig = ColumnConfigRaw.init();
       const { sheetConfig } = columnConfig;
       sheetConfig.fetchAndUpdateAll();
-      // TO DO: implement this endpoint
     },
     spreadsheetControls_fillRowIdsRunAndStatus: () => {
-      // TO DO: implement this endpoint
+      const spreadsheet = SpreadsheetNamed.init();
+      spreadsheet.fillMissingRowIds();
+      spreadsheet.raw.batchUpdateGSheets();
+      // Test this first on just Test spreadsheet, then on all spreadsheets. Make sure to test on a spreadsheet that has no missing row IDs, and one that does.
     },
     occupancy_buildLedgerRunAndStatus: () => {
       // TO DO: implement this endpoint

@@ -31,7 +31,7 @@ function makeRowId(idPrefix) {
 const sheetNames = {
   "210603630": "sheetConfig",
   "1967106628": "config",
-  "2119236084": "validationList",
+  "2119236084": "valueConfig",
   "243663296": "year",
   "290870631": "api",
   "706564734": "buildOccLedger",
@@ -84,7 +84,7 @@ const sheetNames = {
 const sheetIdPrefixes = {
   "210603630": "tab",
   "1967106628": "cnf",
-  "2119236084": "rng",
+  "2119236084": "vcf",
   "243663296": "yer",
   "290870631": "api",
   "706564734": "bol",
@@ -213,7 +213,7 @@ function syncColTraits() {
           colProps.dataValidationRule.condition.values[0] &&
           colProps.dataValidationRule.condition.values[0].userEnteredValue;
         const match =
-          rawValidation && rawValidation.match(/^=validationList\[(.+)\]$/);
+          rawValidation && rawValidation.match(/^=valueConfig\[(.+)\]$/);
         if (match) {
           valueName = sentenceToCamelCase(match[1]);
         } else {

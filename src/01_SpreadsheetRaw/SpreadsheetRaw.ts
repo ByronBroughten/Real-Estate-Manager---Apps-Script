@@ -46,23 +46,23 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return this.sheet(sheetGid).row(rowIdx);
   }
   fetchFullUniformRowAllActiveSheets(rowName: UniformRowName): void {
-    this.prepFetchUniformRowUsingSheetPropertiessAllActiveSheets(rowName);
-    this.fetchAll();
+    this.prepFetchUniformRowsUsingSheetPropertiessAllActiveSheets(rowName);
+    this.fetchAllPrepped();
   }
-  prepFetchUniformRowUsingSheetPropertiessAllActiveSheets(
+  prepFetchUniformRowsUsingSheetPropertiessAllActiveSheets(
     ...rowNames: UniformRowName[]
   ): void {
     this.ensureAllSheetPropertiesAreFetched();
     this.activeSheets.forEach((sheet) => {
-      sheet.prepFetchUniformRowUsingSheetPropertiess(rowNames);
+      sheet.prepFetchUniformRowsUsingSheetProperties(rowNames);
     });
   }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.rawState.allSheetPropertiesAreFetched) {
-      this.fetchAllSheetProperties();
+      this.fetchAllPreppedSheetProperties();
     }
   }
-  fetchAllSheetProperties() {
+  fetchAllPreppedSheetProperties() {
     const response = Sheets.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(tableId,range))",
     });
@@ -73,7 +73,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   gatherFetchRanges(...propArr: GridRangeProps[]) {
     this.getterGridRanges.push(...propArr);
   }
-  fetchAll(): void {
+  fetchAllPrepped(): void {
     const data = this._getByDataFilter();
     this._addDataToState(data);
     this.rawState.getterGridRanges = [];

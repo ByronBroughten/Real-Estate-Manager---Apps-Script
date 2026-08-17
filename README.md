@@ -1,3 +1,9 @@
+# Updates
+
+There will be a script to initialize spreadsheetControls, valueConfig, sheetsTraitsBase, columnsTraitsBase, spreadsheetConfig, and test, using only their sheet names, column names, and column data types. This must of course all be done on the raw level.
+
+That initalizes each of their base traits in the code (which could be in the code initially as defaults for typing purposes, "run clasp initialize").
+
 # Real Estate Manager — Apps Script
 
 A Google Apps Script project (TypeScript, compiled and pushed via `clasp`) for managing real estate operations — properties, units, households, leases, subsidies, charges, and payments — on top of a Google Sheets spreadsheet that acts as the database and the UI.

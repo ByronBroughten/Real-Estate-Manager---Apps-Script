@@ -14,11 +14,11 @@ export class SpecificSheetRaw<
   }
   prepFetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
-    return this.sheet.column(colIndex).prepFetchAllDataCells();
+    return this.sheet.column(colIndex).prepfetchAllPreppedDataCells();
   }
   fetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const column = this.prepFetchDataColumnOfFetchedHeader(header);
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
     return column;
   }
   prepFetchDataColumnsUsingHeaders<H extends HD>(

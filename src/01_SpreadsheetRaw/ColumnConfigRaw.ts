@@ -62,13 +62,13 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   }
   addMissingColumnIds(): void {
     this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
     this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
       "Sheet GID",
       "Let api access traits",
       "ID prefix",
     );
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
 
     const gidCol = this.sheetConfig.column("Sheet GID");
     const idPrefixCol = this.sheetConfig.column("ID prefix");
@@ -101,14 +101,14 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   pruneColTraits(): ColumnConfigRaw {
     this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
     this.sSheet.prepFetchPrerequisitesForRawColumns();
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
 
     this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
       "Sheet GID",
       "Let api access traits",
     );
     this.sSheet.prepFetchDataColumnsUsingHeaders("Column ID", "Sheet GID");
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
 
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
@@ -144,14 +144,14 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   appendColumnRows(): ColumnConfigRaw {
     this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
     this.sSheet.prepFetchPrerequisitesForRawColumns();
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
 
     this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
       "Sheet GID",
       "Let api access traits",
     );
     this.sSheet.prepFetchDataColumnsUsingHeaders("Column ID");
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
 
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
@@ -207,7 +207,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       sheet.prepFetchProperties();
       sheet.prepFetchUniformRowUsingSheetProperties("columnId");
     });
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
   }
   private _includedSheetGids(): Set<number> {
     const sheetGidCol = this.sheetConfig.column("Sheet GID");

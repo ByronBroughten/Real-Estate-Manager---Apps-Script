@@ -5,6 +5,7 @@ import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.
 import { Obj } from "../utils/Obj.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
+import type { SheetNameByGroup } from "./SheetNameGroups.js";
 import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed.js";
 import {
   isRowSpecifierBySchemaName,
@@ -49,7 +50,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       ...this.spreadsheetNamedProps,
     });
   }
-  namedSheets<TN extends SheetName>(...sheetNames: TN[]): NamedSheets<TN> {
+  sheets<TN extends SheetName>(...sheetNames: TN[]): NamedSheets<TN> {
     return sheetNames.reduce((acc, sheetName) => {
       acc[sheetName] = this.sheet(sheetName);
       return acc;
@@ -58,15 +59,19 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get activeSheets(): SheetNamed<SheetName>[] {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
+  fetchAllPrepped(): SpreadsheetNamed {
+    this.raw.fetchAllPrepped();
+    return this;
+  }
   fetch<SN extends SheetName>(
     ...props: FetchPropsNamed<SN>[]
   ): NamedSheets<SN> {
     const standardizedProps = this._standardizeProps(props);
     this._namedPropArrToRaw(standardizedProps);
-    this.raw.fetchAll();
+    this.raw.fetchAllPrepped();
     this.namedState.gridRangeFetchProps = [];
     const sheetNames = this._sheetNamesFromReqProps(standardizedProps);
-    return this.namedSheets(...sheetNames);
+    return this.sheets(...sheetNames);
   }
   private _standardizeProps<SN extends SheetName>(
     propsArr: FetchPropsNamed<SN>[],
@@ -178,6 +183,9 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get sheetsOfSchema(): SheetNamed<SheetName>[] {
     return this.schema.sheetNames.map((sheetName) => this.sheet(sheetName));
   }
+  batchUpdateGSheets(): void {
+    this.raw.batchUpdateGSheets();
+  }
   fillMissingRowIds() {
     const idSheets = this.sheetsOfSchema.filter((sheet) => {
       const hasIdCol = sheet.schema.trait("hasIdColumn");
@@ -192,18 +200,14 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       } else {
         return false;
       }
-    });
-
+    }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
-      sheet.column("id").raw.prepFetchAllDataCells();
+      sheet.column("id").prepfetchAllPreppedDataCells();
       // column.prepFetchUniformCell("header")
     });
-    this.raw.fetchAll();
+    this.fetchAllPrepped();
     idSheets.forEach((sheet) => {
-      sheet.column("id").rich.fillEmptyDataCellsWithDefaultValues();
+      sheet.column("id").fillEmptyDataCellsWithDefaultValues();
     });
-  }
-  convenience() {
-    this.fillMissingRowIds();
   }
 }

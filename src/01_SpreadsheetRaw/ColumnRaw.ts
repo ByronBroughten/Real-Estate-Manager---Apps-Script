@@ -44,7 +44,12 @@ export class ColumnRaw<
     this.sheet.uniformRow(rowName).updateValue(this.colIndex, newValue);
     return this;
   }
-  prepFetchAllDataCells() {
+  fetchDataCellsUsingHeaders() {
+    this.prepfetchAllPreppedDataCells();
+    this.ss.fetchAllPrepped();
+    return this;
+  }
+  prepfetchAllPreppedDataCells() {
     this.ss.gatherFetchRanges(this.makeAllDataRange);
     return this;
   }

@@ -483,7 +483,7 @@ const allColTraits = makeStructuredConfig(
       lifespanMonths: mcs("col-YqvaRuI", "number", "Lifespan months", 5, true),
       preference: mcs("col-4zmF0qs", "string", "Preference", 6, false),
     },
-    config: {
+    spreadsheetConfig: {
       id: mcs("col-LAM-LoC", "string", "ID", 0, false),
       headerRowIdxBase1: mcs(
         "col-hOXiFmz",
@@ -3433,7 +3433,7 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
     },
-    validationList: {
+    valueConfig: {
       id: mcs("col-KISd0k_", "string", "ID", 0, false),
       transactionDescription: mcs(
         "col-My0v9xM",

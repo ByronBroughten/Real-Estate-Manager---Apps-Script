@@ -14,7 +14,7 @@ import { SpreadsheetSchemaIndexed } from "../03_SpreadsheetIndexed/SpreadsheetSc
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {
   isInTnGroup,
-  type GroupToSheetName,
+  type SheetNameByGroup,
   type TnGroupName,
 } from "./SheetNameGroups";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
@@ -72,7 +72,7 @@ export class SpreadsheetSchema extends SchemaBase {
   isInTnGroup<GN extends TnGroupName>(
     groupName: GN,
     sheetName: string,
-  ): sheetName is GroupToSheetName<GN> {
+  ): sheetName is SheetNameByGroup<GN> {
     return isInTnGroup(groupName, sheetName);
   }
 }

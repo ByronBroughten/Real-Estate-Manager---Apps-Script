@@ -1,6 +1,7 @@
 import { makeStructuredConfig, type CellValueName } from "../00_base/base";
 import { configGet } from "../00_base/spreadsheetConfig";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";
 import type { SpreadsheetRawProps } from "./ClassBases/SpreadsheetRawBase";
@@ -59,22 +60,24 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
   }
   fetchAndUpdateAll() {
-    this.ss.fetchAllSheetProperties();
-    this.sheet.fetchHeaderRowUsingSheetProperties();
-    // TODO: fetch GID column
-    const gidCol = this.column("Sheet GID");
-    gidCol.dataValueArr.forEach((gid) => {
-      const sheet = this.ss.sheet(gid);
-      sheet.prepFetchHeaderRowUsingSheetProperties();
-    });
-    this.sheet.prepFetchDataColumnsUsingHeaders(...programmaticConfigHeaders);
-
-    this.ss.fetchAll();
-
+    this._fetchAllPreppedneededForUpdate();
     this._ensureHeaders();
     this._deleteStaleSheetConfigs();
     this._appendMissingSheetConfigs();
     this._updateProgrammaticValues();
+  }
+  private _fetchAllPreppedneededForUpdate() {
+    this.ss.fetchAllPreppedSheetProperties();
+    this.sheet.fetchHeaderRowUsingSheetProperties();
+    const gidCol = this.column("Sheet GID").fetchDataCellsUsingHeaders();
+    gidCol.dataValueArr.forEach((gid) => {
+      const sheet = this.ss.sheet(gid);
+      sheet.prepFetchHeaderRowUsingSheetProperties();
+    });
+    this.sheet.prepFetchDataColumnsUsingHeaders(
+      ...Arr.excludeStrict(sheetConfigHeaders, "Sheet GID"),
+    );
+    this.ss.fetchAllPrepped();
   }
   private _ensureHeaders() {
     const numFixed = this.sheet.ensureColumnsOfHeadersExist(...this.headers);
@@ -128,13 +131,13 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   generateSheetTraitsFileSource(): string {
     this.sheet.prepFetchProperties();
     this.sheet.prepFetchUniformRowUsingSheetProperties("header");
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
     this.sheet.prepFetchDataColumnsUsingHeaders(
       "Sheet name",
       "ID prefix",
       "Has ID column",
     );
-    this.ss.fetchAll();
+    this.ss.fetchAllPrepped();
 
     const gidCol = this.column("Sheet GID");
     const titleCol = this.column("Sheet title");
@@ -156,9 +159,9 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
 
     return [
       `import { makeStructuredConfig } from "../00_base/base";`,
-      `import { makeAllSheetTraits, type AllSheetTraitsBase } from "./02_sheetTraitsTypes";`,
+      `import { makeSheetTraits, type AllSheetTraitsBase } from "./02_sheetTraitsTypes";`,
       ``,
-      `export const msc = makeAllSheetTraits;`,
+      `export const msc = makeSheetTraits;`,
       `export const allSheetTraits = makeStructuredConfig({} as AllSheetTraitsBase, {`,
       ...entries,
       `});`,

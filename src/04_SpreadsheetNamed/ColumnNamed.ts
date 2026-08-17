@@ -29,6 +29,9 @@ export class ColumnNamed<
   get fullName(): ColumnFullName<TN, CN> {
     return this.schema.fullName;
   }
+  prepfetchAllPreppedDataCells() {
+    this.raw.prepfetchAllPreppedDataCells();
+  }
   dataCellsToDefault() {
     this.rich.dataCellsToDefault();
   }
