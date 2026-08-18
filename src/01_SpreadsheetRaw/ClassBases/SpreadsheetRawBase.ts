@@ -1,10 +1,10 @@
 import { AppsScript } from "../../00_base/AppsScript";
-import type { GoogleGridRange } from "../../00_base/AppsScriptTypes";
 import {
   type ChangesToSave,
   type RawSheetsState,
   type RawState,
 } from "../ClassTypes/RawState";
+import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 
 export interface SpreadsheetRawProps {
   rawState: RawState;
@@ -27,7 +27,7 @@ export class SpreadsheetRawBase {
     }
     return ssId;
   }
-  get fetcherGridRanges(): GoogleGridRange[] {
+  get fetcherGridRanges(): GridRangeProps[] {
     return this.rawState.fetcherGridRanges;
   }
   get allChangesToSave(): ChangesToSave {

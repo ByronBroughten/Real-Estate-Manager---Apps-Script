@@ -14,7 +14,7 @@ interface EndpointHandlerProps<
   SLN extends ColumnName<SN>, // boolean
 > extends SpreadsheetNamedProps {
   sheetName: SN;
-  endpointName?: EN;
+  endpointName: EN;
   lastRanName?: LRN;
   lastRunSucceededName?: LSN;
   selectorName?: SLN;

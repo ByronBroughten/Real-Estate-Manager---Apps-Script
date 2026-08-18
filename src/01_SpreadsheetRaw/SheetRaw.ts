@@ -66,7 +66,7 @@ export class SheetRaw extends SheetRawBase {
     if (this.schema.isUniformRowIndex(rowIdx)) {
       return this.uniformRowByIndex(rowIdx);
     } else {
-      this.rowRaw(rowIdx);
+      return this.rowRaw(rowIdx);
     }
   }
   column<VN extends CellValueName = CellValueName>(
@@ -93,7 +93,10 @@ export class SheetRaw extends SheetRawBase {
     return this.activeRowIndexes.map((rowIndex) => this.row(rowIndex));
   }
   get activeColumnIdxs(): number[] {
-    return this.activeRows[0].activeColIdxs;
+    // TODO: This would be better off looping through all active
+    // rows to find any columns that have values.
+    return valS.assertDefined(this.activeRows[0], "activeRows[0]")
+      .activeColIdxs;
   }
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
@@ -111,7 +114,7 @@ export class SheetRaw extends SheetRawBase {
       // Payload doesn't include default values of 0
       const colIdxBase = colData.startColumn ?? 0;
       const columns = colData.columnMetadata || [];
-      colData.rowData.forEach((colCell, rowIdxBase) => {
+      (colData.rowData || []).forEach((colCell, rowIdxBase) => {
         columns.forEach((_, colIdxOffset) => {
           const colIndex = colIdxBase + colIdxOffset;
           const rowIdx = rowIdxBase + (colData.startRow ?? 0);
@@ -127,9 +130,17 @@ export class SheetRaw extends SheetRawBase {
   addIndexOfColToFinalize(colIndex: number): void {
     this.sheetState.colIndexesOfDataToFetch.add(colIndex);
   }
+  get allDataRows(): RowRaw[] {
+    return this.allDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
+  }
   finalizeFetchedColumnData() {
+    this.allDataRows.forEach((row) => row.ensureStateExists());
     this.sheetState.colIndexesOfDataToFetch.forEach((colIndex) => {
-      this.column(colIndex).integrateMissingDataWithEmpty();
+      this.allDataRows.forEach((row) => {
+        if (!row.hasValue(colIndex)) {
+          row.integrateState(colIndex, "" as GoogleCellValue);
+        }
+      });
     });
     this.sheetState.colIndexesOfDataToFetch.clear();
   }

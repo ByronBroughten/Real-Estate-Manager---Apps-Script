@@ -13,6 +13,12 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
     return new SpreadsheetRaw(SpreadsheetRaw.initSpreadsheetRawProps());
   }
+  private get sheetsService(): GoogleAppsScript.Sheets {
+    return valS.assertDefined(
+      Sheets,
+      "Sheets (enable the Advanced Sheets Service)",
+    );
+  }
   get schema() {
     return new SchemaBase();
   }
@@ -53,7 +59,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     }
   }
   fetchAllPreppedSheetProperties() {
-    const response = Sheets.Spreadsheets.get(this.spreadsheetId, {
+    const response = this.sheetsService.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(tableId,range))",
     });
     this._addDataToState(response);
@@ -77,7 +83,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
   }
   private _fetchByDataFilter(): GoogleSpreadsheet {
-    return Sheets.Spreadsheets.getByDataFilter(
+    return this.sheetsService.Spreadsheets.getByDataFilter(
       this._makeFetchResource(),
       this.spreadsheetId,
       {
@@ -99,8 +105,12 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     };
   }
   private _addDataToState(gss: GoogleSpreadsheet) {
-    gss.sheets.forEach((gSheet) => {
-      const sheetGid = valS.assertDefined(gSheet.properties.sheetId, "sheetId");
+    valS.assertDefined(gss.sheets, "gss.sheets").forEach((gSheet) => {
+      const properties = valS.assertDefined(
+        gSheet.properties,
+        "gSheet.properties",
+      );
+      const sheetGid = valS.assertDefined(properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
       sheet.integrateSheetState(gSheet);
     });
@@ -154,7 +164,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _sendUpdateRequests() {
     const surs = this.rawState.updateRequests;
-    Sheets.Spreadsheets.batchUpdate(
+    this.sheetsService.Spreadsheets.batchUpdate(
       {
         requests: [
           ...surs.append,

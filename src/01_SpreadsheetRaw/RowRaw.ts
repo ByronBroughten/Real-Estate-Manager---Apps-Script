@@ -10,6 +10,7 @@ import {
 } from "../00_base/baseValueSchemas";
 import { type ValueSchemaKey } from "../00_base/valueSchema";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { valS } from "../utils/validation";
 import { RowRawBase } from "./ClassBases/RowRawBase";
 import type {
   RowChangeProps,
@@ -101,11 +102,11 @@ export class RowRaw extends RowRawBase {
       return "";
     }
     if ("stringValue" in effectiveValue) {
-      return effectiveValue.stringValue;
+      return valS.assertDefined(effectiveValue.stringValue, "stringValue");
     } else if ("boolValue" in effectiveValue) {
-      return effectiveValue.boolValue;
+      return valS.assertDefined(effectiveValue.boolValue, "boolValue");
     } else if ("numberValue" in effectiveValue) {
-      return effectiveValue.numberValue;
+      return valS.assertDefined(effectiveValue.numberValue, "numberValue");
     } else {
       return "";
     }
@@ -134,7 +135,7 @@ export class RowRaw extends RowRawBase {
         `Cannot append row ${this.rowIndex} because it is already active.`,
       );
     }
-    this.sheetState.rowStates[this.rowIndex] = new Map();
+    this.sheetState.rowStates.set(this.rowIndex, new Map());
     this.activeTable.endRowIndex++;
     this.addRowChangeToSave({ action: "append" });
     return this;
@@ -173,7 +174,7 @@ export class RowRaw extends RowRawBase {
   }
   addRowChangeToSave(props: RowChangeProps): RowRaw {
     const changes = this.changesToSave;
-    if (changes.delete) return;
+    if (changes.delete) return this;
     const actions = {
       append: (_: RowChangeProps) => (changes.append = true),
       delete: (_: RowChangeProps) => (changes.delete = this.deleteRequest),

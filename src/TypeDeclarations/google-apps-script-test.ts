@@ -1,16 +1,21 @@
+import { valS } from "../utils/validation";
+
 export function _testCustomTableTypes(spreadsheetId: string) {
   // 1. Reading tables from a SheetNamed response
-  const ss = Sheets.Spreadsheets.get(spreadsheetId);
-  const firstSheet = ss.sheets[0];
+  const sheetsService = valS.assertDefined(Sheets, "Sheets");
+  const ss = sheetsService.Spreadsheets.get(spreadsheetId);
+  const sheets = valS.assertDefined(ss.sheets, "ss.sheets");
+  const firstSheet = valS.assertDefined(sheets[0], "sheets[0]");
 
-  ss.sheets[0].properties.title;
+  firstSheet.properties?.title;
 
   // Fully typed access to sheet tables array!
   const tables: GoogleAppsScript.Sheets.Schema.Table[] | undefined =
     firstSheet.tables;
 
   if (tables && tables.length > 0) {
-    console.log(`Found table: ${tables[0].name} (ID: ${tables[0].tableId})`);
+    const table = valS.assertDefined(tables[0], "tables[0]");
+    console.log(`Found table: ${table.name} (ID: ${table.tableId})`);
   }
 
   // 2. Constructing an UpdateTableRequest
@@ -45,5 +50,5 @@ export function _testCustomTableTypes(spreadsheetId: string) {
       requests: [{ updateTable: updateReq }, { appendCells: appendReq }],
     };
 
-  Sheets.Spreadsheets?.batchUpdate(batchRequest, spreadsheetId);
+  sheetsService.Spreadsheets.batchUpdate(batchRequest, spreadsheetId);
 }

@@ -1,5 +1,8 @@
 import type { ValueSchemaKey } from "../00_base/valueSchema";
-import { RowRawBase } from "../01_SpreadsheetRaw/ClassBases/RowRawBase";
+import {
+  RowRawBase,
+  type RowRawProps,
+} from "../01_SpreadsheetRaw/ClassBases/RowRawBase";
 import { RowRaw } from "../01_SpreadsheetRaw/RowRaw";
 import {
   getValTrait,
@@ -11,7 +14,7 @@ import { ColumnIndexed } from "./ColumnIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 
 export class DataRowIndexed extends RowRawBase {
-  constructor(props) {
+  constructor(props: RowRawProps) {
     super(props);
     this.validateIsDataRow();
   }

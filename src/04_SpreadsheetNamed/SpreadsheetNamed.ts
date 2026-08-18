@@ -3,12 +3,14 @@ import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes.js";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
+import { valS } from "../utils/validation.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
 import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed.js";
 import {
   isRowSpecifierBySchemaName,
+  type ColumnSpecifierNamed,
   type FetchColumnSpecifierNamed,
   type FetchPropsNamed,
   type FetchPropsStandardNamed,
@@ -105,10 +107,19 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       return Obj.keys(sheetColumnNames).reduce((acc, sheetName) => {
         const schema = this.schema.sheet(sheetName);
         acc[sheetName] = schema.columnSpecifierToStandard(
-          sheetColumnNames[sheetName],
+          valS.assertDefined<ColumnSpecifierNamed<SN>>(
+            sheetColumnNames[sheetName],
+            `sheetColumnNames[${sheetName}]`,
+          ),
         );
         return acc;
       }, {} as SheetColumnNamesStandard<SN>);
+    } else {
+      throw new Error(
+        `Invalid sheetColumnMode: ${
+          (columnSpecifier as FetchColumnSpecifierNamed<SN>).sheetColumnMode
+        }. Must be a valid ColumnMode.`,
+      );
     }
   }
 
@@ -162,7 +173,10 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   ): SheetColumnsRange[] {
     return Obj.keys(sheetColumns).reduce((acc, sheetName) => {
       const schema = this.schema.sheet(sheetName);
-      const columnNames = sheetColumns[sheetName];
+      const columnNames = valS.assertDefined(
+        sheetColumns[sheetName],
+        `sheetColumns[${sheetName}]`,
+      );
       columnNames.forEach((columnName) => {
         const colIndex = schema.colIndex(columnName);
         acc.push({

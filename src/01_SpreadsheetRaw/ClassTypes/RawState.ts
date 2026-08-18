@@ -1,8 +1,6 @@
-import type {
-  GoogleGridRange,
-  GoogleUpdateRequest,
-} from "../../00_base/AppsScriptTypes";
+import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue } from "../../00_base/base";
+import type { GridRangeProps } from "./AccessorsRaw";
 
 const updateRequestNames = [
   "append",
@@ -16,7 +14,7 @@ export type UpdateRequestName = (typeof updateRequestNames)[number];
 export interface RawState {
   allSheetPropertiesAreFetched: boolean;
   changesToSave: ChangesToSave;
-  fetcherGridRanges: GoogleGridRange[];
+  fetcherGridRanges: GridRangeProps[];
   updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;
   sheets: RawSheetsState;
 }

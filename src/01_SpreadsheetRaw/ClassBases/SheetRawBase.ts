@@ -41,8 +41,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
     if (sheet?.properties?.title) {
       this.sheetState.title = sheet.properties.title;
     }
-    if (sheet.tables?.length > 0) {
-      const table = sheet.tables[0];
+    const tables = sheet.tables;
+    if (tables && tables.length > 0) {
+      const table = valS.assertDefined(tables[0], "table");
       this.sheetState.activeTable = {
         tableId: valS.assertDefined(table.tableId, "tableId"),
         ...Obj.validatePick(
@@ -61,7 +62,10 @@ export class SheetRawBase extends SpreadsheetRawBase {
     return new SheetSchemaIndexed(this.sheetGid);
   }
   protected get sheetState(): RawSheetState {
-    return this.rawState.sheets.get(this.sheetGid);
+    return valS.assertDefined(
+      this.rawState.sheets.get(this.sheetGid),
+      `sheetState for sheetGid ${this.sheetGid}`,
+    );
   }
   // It would probably be better if there were a function like, "set sheetState".
   get rowIndexesAreValid(): boolean {
@@ -84,13 +88,14 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     return this.sheetState.title;
   }
-  get activeTable(): RawSheetState["activeTable"] {
-    if (this.sheetState.activeTable === null) {
+  get activeTable(): NonNullable<RawSheetState["activeTable"]> {
+    const activeTable = this.sheetState.activeTable;
+    if (activeTable === null) {
       throw new Error(
         `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
       );
     }
-    return this.sheetState.activeTable;
+    return activeTable;
   }
   get colIndexesOfDataToFetch(): Set<number> {
     return this.sheetState.colIndexesOfDataToFetch;

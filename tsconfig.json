@@ -33,7 +33,8 @@
     "allowImportingTsExtensions": false,
     // "outFile": "./dist/bundle.js", // For single file output
 
-    // "noImplicitAny": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
     // "typeRoots": ["./node_modules/@types"],
 
     // For nodejs:
@@ -48,7 +49,7 @@
     // "exactOptionalPropertyTypes": true,
 
     // Style Options
-    // "noImplicitReturns": true,
+    "noImplicitReturns": true,
     // "noImplicitOverride": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
@@ -63,5 +64,9 @@
     "moduleDetection": "force",
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": [
+    "src/01_SpreadsheetRaw/toIntegrate.ts",
+    "src/testingGoogleApiFunctions.ts"
+  ]
 }

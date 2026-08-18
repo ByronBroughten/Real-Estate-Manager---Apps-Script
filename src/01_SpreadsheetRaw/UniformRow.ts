@@ -25,7 +25,7 @@ export class UniformRow<
   cellTrait<K extends ValueSchemaKey>(key: K): CellValueTrait<VN, K> {
     return this.raw.cellTrait(this.valueName, key) as CellValueTrait<VN, K>;
   }
-  value(colIndex): UniformRowValue<UN> {
+  value(colIndex: number): UniformRowValue<UN> {
     return this.raw.value(colIndex, this.valueName) as UniformRowValue<UN>;
   }
   updateValue(colIndex: number, value: UniformRowValue<UN>): UniformRow<UN> {

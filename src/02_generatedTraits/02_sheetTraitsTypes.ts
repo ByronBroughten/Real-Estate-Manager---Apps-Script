@@ -30,8 +30,8 @@ export type SheetTraitRaw<K extends SheetTraitRawKey> = SheetTraitsRaw[K];
 
 export type SheetTraitRawKey = keyof SheetTraitsRaw;
 export function getSheetTraitByGid<K extends SheetTraitRawKey>(
-  sheetGid,
+  sheetGid: number,
   key: K,
 ): SheetTraitRaw<K> {
-  return sheetTraitsByGid[sheetGid][key];
+  return sheetTraitsByGid.get(sheetGid)![key];
 }

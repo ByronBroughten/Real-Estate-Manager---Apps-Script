@@ -49,7 +49,7 @@ export const Str = {
   ): TakeFirstN<T, N> {
     return str.split("").slice(0, n).join("") as TakeFirstN<T, N>;
   },
-  sentenceToCamelCase(sentence) {
+  sentenceToCamelCase(sentence: string) {
     /**
      * Converts a header sentence (e.g. "Column ID") into a camelCase key
      * (e.g. "columnId"), used to robustly match row-3 headers regardless of

@@ -1,5 +1,6 @@
 import type { CellValue } from "../../00_base/base";
 import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
+import { valS } from "../../utils/validation";
 import type { RawRowState } from "../ClassTypes/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
@@ -25,7 +26,10 @@ export class RowRawBase extends SheetRawBase {
     return this.rowIndex >= this.sheetSchema.topDataRowIdx;
   }
   get rowState(): RawRowState {
-    return this.sheetState.rowStates.get(this.rowIndex);
+    return valS.assertDefined(
+      this.sheetState.rowStates.get(this.rowIndex),
+      `rowState for row ${this.rowIndex}`,
+    );
   }
   get activeValueArr(): CellValue[] {
     return [...this.rowState.values()];
@@ -47,11 +51,11 @@ export class RowRawBase extends SheetRawBase {
     }
   }
   colIndexOfValue(value: CellValue): number {
-    this.rowState.entries().forEach(([colIndex, cellValue]) => {
+    for (const [colIndex, cellValue] of this.rowState.entries()) {
       if (cellValue === value) {
         return colIndex;
       }
-    });
+    }
     throw new Error(
       `Value ${value} not found in row ${this.rowIndex}. Cannot find column index.`,
     );

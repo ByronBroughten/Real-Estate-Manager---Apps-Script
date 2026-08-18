@@ -32,18 +32,18 @@ export const Arr = {
   oneOrThrow<V extends any>(arr: readonly V[]): V {
     if (arr.length !== 1) {
       throw new Error("There is more than one item in this array.");
-    } else return arr[0];
+    } else return arr[0]!;
   },
   firstOrThrow<V extends any>(arr: readonly V[]): V {
     if (arr.length < 1) {
       throw new Error("This array is empty.");
-    } else return arr[0];
+    } else return arr[0]!;
   },
   lastOrThrow<V extends any>(arr: readonly V[]): V {
     const idx = this.lastIdx(arr);
     if (idx < 0) {
       throw new Error("This array has no last value—it has no value.");
-    } else return arr[idx];
+    } else return arr[idx]!;
   },
   getOnlyItem<T extends any>(arr: T[], arrayOf?: string): T {
     const strArrayOf = arrayOf ?? "items";
@@ -52,7 +52,7 @@ export const Arr = {
     } else if (arr.length > 1) {
       throw new Error(`The array has too many ${strArrayOf}`);
     } else {
-      return arr[0];
+      return arr[0]!;
     }
   },
   insert<V>(arr: readonly V[], value: V, idx: number): V[] {
@@ -61,9 +61,12 @@ export const Arr = {
     return nextArr;
   },
   nextRotatingValue<T>(arr: readonly T[], currentValue: T): T {
+    if (arr.length === 0) {
+      throw new Error("Cannot get next rotating value of an empty array.");
+    }
     const currentIdx = arr.indexOf(currentValue as any);
     const nextIdx = (currentIdx + 1) % arr.length;
-    return arr[nextIdx];
+    return arr[nextIdx]!;
   },
   replaceAtIdx<V>(arr: readonly V[], value: V, idx: number): V[] {
     const nextArr = [...arr];
@@ -149,16 +152,13 @@ export const Arr = {
     return nextArr;
   },
   findAll<T>(arr: readonly T[], fn: (value: T) => boolean): T[] {
-    const arrClone = [...arr];
+    const workingArr = [...arr];
     const all: T[] = [];
     while (true) {
-      const idx = arr.findIndex(fn);
-      if (idx >= 0) {
-        all.push(arr[idx]);
-        arrClone.splice(idx, 1);
-      } else {
-        return all;
-      }
+      const idx = workingArr.findIndex(fn);
+      if (idx < 0) return all;
+      all.push(workingArr[idx]!);
+      workingArr.splice(idx, 1);
     }
   },
   has<T>(arr: T[], fn: (value: T) => boolean): boolean {

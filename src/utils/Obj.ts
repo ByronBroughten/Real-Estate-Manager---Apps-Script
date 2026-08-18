@@ -108,7 +108,7 @@ export const Obj = {
     V extends O[K][number],
   >(obj: O, key: K, value: V) {
     if (!obj[key]) {
-      obj[key] = [] as O[K];
+      obj[key] = [] as unknown as O[K];
     }
     obj[key].push(value);
   },
@@ -116,7 +116,7 @@ export const Obj = {
     obj: O,
     value: V,
   ): keyof O {
-    const key = this.keys(obj).find((key) => obj[key] === value);
+    const key = Obj.keys(obj).find((key) => obj[key] === value);
     if (!key) {
       throw new Error("Value not found in object");
     }
@@ -238,7 +238,7 @@ export const Obj = {
     obj: O,
     value: V,
   ): PropKeyOfValue<O, V>[] {
-    const keys = this.keys(obj).filter((key) => obj[key] === value);
+    const keys = Obj.keys(obj).filter((key) => obj[key] === value);
     return keys as PropKeyOfValue<O, V>[];
   },
   invert<O extends Record<string | number, string | number>>(

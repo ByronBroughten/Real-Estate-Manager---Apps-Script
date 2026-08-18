@@ -4,6 +4,7 @@ import {
   type NameDelimiter,
 } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
+import { valS } from "../utils/validation";
 import {
   getSheetTraitByName,
   schemaSheetNames,
@@ -35,7 +36,7 @@ function makeColTraits<VN extends ValueName>(
   colIndex: number,
   isFormula: boolean,
   emptyAllowed: boolean = false,
-  customDefaultValue: Value<VN> = null,
+  customDefaultValue: Value<VN> | null = null,
 ): ColTraitsBase<VN> {
   return {
     columnId,
@@ -3661,16 +3662,19 @@ export function getColumnTraitByIndex<K extends ColTraitsRawKey>(
   colIndex: number,
   key: K,
 ): ColTraitsRaw[K] {
-  const colTraits = allColTraitsGidIdx.get(sheetId)?.get(colIndex);
-  if (!colTraits) {
-    throw new Error(
-      `No column attributes for sheetId=${sheetId}, colIndex=${colIndex}`,
-    );
-  }
+  const colTraits = valS.assertDefined(
+    allColTraitsGidIdx.get(sheetId)?.get(colIndex),
+    `column attributes for sheetId=${sheetId}, colIndex=${colIndex}`,
+  );
   return colTraits[key];
 }
 export function getSheetColumnIdxes(sheetGid: number): MapIterator<number> {
-  return allColTraitsGidIdx.get(sheetGid).keys();
+  return valS
+    .assertDefined(
+      allColTraitsGidIdx.get(sheetGid),
+      `column attributes for sheetId=${sheetGid}`,
+    )
+    .keys();
 }
 
 const allColTraitsFlat = Obj.flattenTwoLevels(allColTraits, nameDelimiter);

@@ -1,4 +1,3 @@
-import type { GoogleCellValue } from "../00_base/AppsScriptTypes";
 import type {
   CellValue,
   CellValueName,
@@ -51,21 +50,6 @@ export class ColumnRaw<
   }
   cellHasValue(rowIndex: number): boolean {
     return this.sheet.row(rowIndex).hasValue(this.colIndex);
-  }
-  integrateState(
-    rowIndex: number,
-    newValue: GoogleCellValue,
-  ): ColumnRaw<VN, VL> {
-    this.sheet.rowRaw(rowIndex).integrateState(this.colIndex, newValue);
-    return this;
-  }
-  integrateMissingDataWithEmpty(): ColumnRaw<VN, VL> {
-    this.sheet.allDataRowIndexes.forEach((rowIndex) => {
-      if (!this.cellHasValue(rowIndex)) {
-        this.integrateState(rowIndex, "" as GoogleCellValue);
-      }
-    });
-    return this;
   }
   dataValue(rowIdx: number): VL {
     return this.sheet.row(rowIdx).value(this.colIndex, this.valueName) as VL;

@@ -5,8 +5,9 @@ export type GoogleSheetData = GoogleAppsScript.Sheets.Schema.Sheet["data"];
 
 export type GoogleUpdateRequest = GoogleAppsScript.Sheets.Schema.Request;
 
-export type DataFilter =
-  GoogleAppsScript.Sheets.Schema.GetSpreadsheetByDataFilterRequest["dataFilters"][number];
+export type DataFilter = NonNullable<
+  GoogleAppsScript.Sheets.Schema.GetSpreadsheetByDataFilterRequest["dataFilters"]
+>[number];
 
 export type GetByDataFilterRequest =
   GoogleAppsScript.Sheets.Schema.GetSpreadsheetByDataFilterRequest;
@@ -19,5 +20,6 @@ export type GoogleCellValue = GoogleAppsScript.Sheets.Schema.CellData;
 
 export type UpdateCellsRequest =
   GoogleAppsScript.Sheets.Schema.UpdateCellsRequest;
-export type UserEnteredValue =
-  UpdateCellsRequest["rows"][number]["values"][number]["userEnteredValue"];
+export type UserEnteredValue = NonNullable<
+  NonNullable<UpdateCellsRequest["rows"]>[number]["values"]
+>[number]["userEnteredValue"];

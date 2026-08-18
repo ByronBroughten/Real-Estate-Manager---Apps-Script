@@ -84,7 +84,10 @@ export class Api<
     const { colIndex, rowIndex, sheetGid } = this.getEventOrigin(e);
     const { fullName } = this.ssi.schema.column(sheetGid, colIndex);
     if (this.isApiEndpointName(fullName)) {
-      this.endpoints[fullName]();
+      const endpoint = this.endpoints[fullName];
+      if (endpoint) {
+        endpoint();
+      }
     }
   }
 }
