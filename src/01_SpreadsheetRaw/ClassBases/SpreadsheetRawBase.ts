@@ -27,8 +27,8 @@ export class SpreadsheetRawBase {
     }
     return ssId;
   }
-  get getterGridRanges(): GoogleGridRange[] {
-    return this.rawState.getterGridRanges;
+  get fetcherGridRanges(): GoogleGridRange[] {
+    return this.rawState.fetcherGridRanges;
   }
   get allChangesToSave(): ChangesToSave {
     return this.rawState.changesToSave;
@@ -45,7 +45,7 @@ export class SpreadsheetRawBase {
     return {
       rawState: {
         allSheetPropertiesAreFetched: false,
-        getterGridRanges: [],
+        fetcherGridRanges: [],
         changesToSave: new Map(),
         updateRequests: this.initSortedUpdateRequests(),
         sheets: new Map(),

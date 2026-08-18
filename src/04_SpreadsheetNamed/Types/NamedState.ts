@@ -1,4 +1,4 @@
-import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/RawState";
+import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/AccessorsRaw";
 import type { SheetName } from "../../02_generatedTraits/02_sheetTraitsTypes";
 import type { ColumnName } from "../../02_generatedTraits/03_columnTraits";
 import { Arr } from "../../utils/Arr";

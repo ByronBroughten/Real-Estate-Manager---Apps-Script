@@ -112,7 +112,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const sheetTitleCol = this.column("Sheet title");
     const hasColForIdCol = this.column("Has ID column");
     let updatedValues = 0;
-    this.sheet.dataRowIndexes.forEach((rowIndex) => {
+    this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const sheetGid = gidCol.dataValue(rowIndex);
       const sheetTitle = sheetTitleCol.dataValue(rowIndex);
 
@@ -131,7 +131,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetTraitsFileSource(): string {
-    this.sheet.prepFetchProperties();
+    this.sheet.prepFetchPropertiesOnly();
     this.sheet.prepFetchUniformRowUsingSheetProperties("header");
     this.ss.fetchAllPrepped();
     this.sheet.prepFetchDataColumnsUsingHeaders(
@@ -147,7 +147,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const hasIdCol = this.column("Has ID column");
 
     const entries: SheetTraitsBase = {};
-    this.sheet.dataRowIndexes.forEach((rowIndex) => {
+    this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const title = titleCol.dataValue(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
       entries[sheetName] = {

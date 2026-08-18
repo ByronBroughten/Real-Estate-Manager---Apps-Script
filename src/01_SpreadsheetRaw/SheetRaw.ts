@@ -1,7 +1,6 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import type { Value } from "../02_generatedTraits/06_valueSchemas";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
-import { type StrictOmit } from "../utils/Obj";
 import { valS } from "../utils/validation";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
@@ -13,8 +12,8 @@ import type {
   GoogleSheet,
   GoogleSheetData,
 } from "../00_base/AppsScriptTypes";
+import type { SheetGridRangeProps } from "./ClassTypes/AccessorsRaw";
 import type {
-  GridRangeProps,
   SheetChangeProps,
   SheetChangePropsObj,
   SheetChangesToSave,
@@ -23,7 +22,6 @@ import type {
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import { UniformRow } from "./UniformRow";
 
-type SheetGridRangeProps = StrictOmit<GridRangeProps, "sheetId">;
 export type SheetRawRow = RowRaw | UniformRow;
 
 export class SheetRaw extends SheetRawBase {
@@ -82,7 +80,7 @@ export class SheetRaw extends SheetRawBase {
     });
   }
   get dataRows(): RowRaw[] {
-    return this.dataRowIndexes.map((index) => this.dataRow(index));
+    return this.activeDataRowIndexes.map((index) => this.dataRow(index));
   }
   get topDataRow(): RowRaw {
     return this.row(this.schema.topDataRowIdx) as RowRaw;
@@ -126,6 +124,15 @@ export class SheetRaw extends SheetRawBase {
       });
     });
   }
+  addIndexOfColToFinalize(colIndex: number): void {
+    this.sheetState.colIndexesOfDataToFetch.add(colIndex);
+  }
+  finalizeFetchedColumnData() {
+    this.sheetState.colIndexesOfDataToFetch.forEach((colIndex) => {
+      this.column(colIndex).integrateMissingDataWithEmpty();
+    });
+    this.sheetState.colIndexesOfDataToFetch.clear();
+  }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
     this.activeColumnIdxs.forEach((colIndex) => {
@@ -143,35 +150,31 @@ export class SheetRaw extends SheetRawBase {
   makeRowId(idPrefix: string): string {
     return this.schema.makeRowIdFromPrefix(idPrefix);
   }
-  gatherGetRequest(props: SheetGridRangeProps): SheetRaw {
-    this.rawState.getterGridRanges.push({
+  gatherFetchRange(gr: SheetGridRangeProps): SheetRaw {
+    if (
+      gr.startColumnIndex !== undefined &&
+      gr.startRowIndex >= this.schema.topDataRowIdx
+    ) {
+      this.addIndexOfColToFinalize(gr.startColumnIndex);
+    }
+
+    this.rawState.fetcherGridRanges.push({
       sheetId: this.sheetGid,
-      ...props,
+      ...gr,
     });
     return this;
   }
-  gatherGetRequests(props: SheetGridRangeProps[]): SheetRaw {
-    props.forEach((props) => this.gatherGetRequest(props));
+  gatherFetchRanges(props: SheetGridRangeProps[]): SheetRaw {
+    props.forEach((props) => this.gatherFetchRange(props));
     return this;
   }
   prepFetchOneRow(rowIndex: number): SheetRaw {
-    return this.gatherGetRequest({
+    return this.gatherFetchRange({
       ...this.schema.oneRowSpecifier(rowIndex),
       startColumnIndex: 0,
       endColumnIndex: this.activeTable.endColumnIndex,
     });
   }
-
-  // Yeah, I should hand back the rows and sheets on the gather stage.
-  // Then I can fetch them all at once.
-  // I must ensure that sheets and rows ensure their own existence when they accessed.
-
-  // Also split up the fetch request state into four groups: columnIds, misc uniform rows, empty data rows, and data rows.
-  // Ensure that for non-empty data rows, columnIds are fetched;
-  // Ensure that for columnId and uniformRows, a dataRow is fetched; use empty when needed
-
-  // the columnId thing is only needed above the raw level;
-
   prepFetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
     return this.prepFetchUniformRowUsingSheetProperties("header");
   }
@@ -183,7 +186,7 @@ export class SheetRaw extends SheetRawBase {
   prepFetchUniformRowUsingSheetProperties<UN extends UniformRowName>(
     rowName: UN,
   ): UniformRow<UN> {
-    this.gatherGetRequest({
+    this.gatherFetchRange({
       ...this.schema.oneRowSpecifier(this.schema.uniformRowIndex(rowName)),
       startColumnIndex: 0,
       endColumnIndex: this.activeTable.endColumnIndex,
@@ -210,8 +213,7 @@ export class SheetRaw extends SheetRawBase {
   ): Record<HD, ColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] =
-          this.columnByHeader(header).prepfetchAllPreppedDataCells();
+        acc[header] = this.columnByHeader(header).prepFetchAllDataCells();
         return acc;
       },
       {} as Record<HD, ColumnRaw>,
@@ -330,9 +332,8 @@ export class SheetRaw extends SheetRawBase {
       );
     }
   }
-  prepFetchProperties(): SheetRaw {
-    this.ss.gatherFetchRanges({
-      sheetId: this.sheetGid,
+  prepFetchPropertiesOnly(): SheetRaw {
+    this.gatherFetchRange({
       startRowIndex: this.topDataRow.rowIndex,
       endRowIndex: this.topDataRow.rowIndex,
       startColumnIndex: 0,

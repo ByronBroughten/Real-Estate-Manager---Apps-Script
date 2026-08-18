@@ -3,7 +3,6 @@ import type {
   GoogleUpdateRequest,
 } from "../../00_base/AppsScriptTypes";
 import type { CellValue } from "../../00_base/base";
-import type { StrictPick } from "../../utils/Obj";
 
 const updateRequestNames = [
   "append",
@@ -17,7 +16,7 @@ export type UpdateRequestName = (typeof updateRequestNames)[number];
 export interface RawState {
   allSheetPropertiesAreFetched: boolean;
   changesToSave: ChangesToSave;
-  getterGridRanges: GoogleGridRange[];
+  fetcherGridRanges: GoogleGridRange[];
   updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;
   sheets: RawSheetsState;
 }
@@ -35,6 +34,7 @@ export interface RawSheetState {
   } | null;
   rowIndexesAreValid: boolean;
   lastNotStaleColumnIdx: number | null;
+  colIndexesOfDataToFetch: Set<ColIdx>;
   rowStates: RawRowStates;
 }
 
@@ -88,14 +88,6 @@ export type ColumnSpecifierRaw = ColIdx[] | "allColumns";
 export type ColumnCount = number | "allFromStart";
 export type RowCountRaw = number | "allFromStart";
 
-export type GridRangeProps = {
-  sheetId: number;
-  startRowIndex: number;
-  endRowIndex?: number;
-  startColumnIndex: number;
-  endColumnIndex?: number;
-};
-
 export interface RowRange {
   startRowIndex: number;
   endRowIndex?: number;
@@ -106,17 +98,3 @@ export function makeRowRange(
 ): RowRange {
   return { startRowIndex, endRowIndex };
 }
-
-export type SheetColumnsRange = StrictPick<
-  GridRangeProps,
-  "startColumnIndex" | "endColumnIndex" | "sheetId"
->;
-export type ColumnRange = StrictPick<
-  GridRangeProps,
-  "startColumnIndex" | "endColumnIndex"
->;
-
-// export type InitSpecificRowsPropsRaw = {
-//   rowIdexes: number[];
-//   sheets: SheetColumnMap;
-// };

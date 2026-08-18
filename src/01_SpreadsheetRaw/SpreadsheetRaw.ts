@@ -4,7 +4,6 @@ import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
-  GridRangeProps,
   RowChangesToSave,
   SheetChangesToSave,
 } from "./ClassTypes/RawState";
@@ -61,17 +60,25 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this.rawState.allSheetPropertiesAreFetched = true;
     return { activeSheetGids: this.activeSheetGids };
   }
-  gatherFetchRanges(...propArr: GridRangeProps[]) {
-    this.getterGridRanges.push(...propArr);
-  }
   fetchAllPrepped(): void {
-    const data = this._getByDataFilter();
+    this._supplementFetch();
+    const data = this._fetchByDataFilter();
     this._addDataToState(data);
-    this.rawState.getterGridRanges = [];
+    this.rawState.fetcherGridRanges = [];
   }
-  private _getByDataFilter(): GoogleSpreadsheet {
+  private _supplementFetch() {
+    this.fetcherGridRanges.forEach((gr) => {
+      if (
+        gr.startColumnIndex !== undefined &&
+        gr.startRowIndex >= this.schema.topDataRowIdx
+      ) {
+        this.sheet(gr.sheetId).addIndexOfColToFinalize(gr.startColumnIndex);
+      }
+    });
+  }
+  private _fetchByDataFilter(): GoogleSpreadsheet {
     return Sheets.Spreadsheets.getByDataFilter(
-      this._makeGetterResource(),
+      this._makeFetchResource(),
       this.spreadsheetId,
       {
         fields:
@@ -83,9 +90,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       },
     );
   }
-  private _makeGetterResource() {
+  private _makeFetchResource() {
     return {
-      dataFilters: this.rawState.getterGridRanges.map((gr) => ({
+      dataFilters: this.fetcherGridRanges.map((gr) => ({
         gridRange: gr,
       })),
       includeGridData: true,
@@ -96,6 +103,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       const sheetGid = valS.assertDefined(gSheet.properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
       sheet.integrateSheetState(gSheet);
+    });
+    this.activeSheets.forEach((sheet) => {
+      sheet.finalizeFetchedColumnData();
     });
   }
   batchUpdateGSheets() {

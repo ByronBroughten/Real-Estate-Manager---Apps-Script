@@ -22,8 +22,8 @@ export function getHeaderNameByRowIndex(
 const uniformRowIndexes = {
   columnId: configGet("columnIdRowIdxBase0"),
   colGroupName: configGet("columnGroupRowIdxBase0"),
-  action: configGet("actionRowIdxBase0"),
-  header: configGet("headerRowIdxBase0"),
+  action: configGet("actionRowIndexBase0"),
+  header: configGet("headerRowIndexBase0"),
 };
 
 const rowIndexToUniformName = new Map(
@@ -86,13 +86,13 @@ export class SchemaBase {
       );
     }
   }
-  get colIdRowIdx(): number {
+  get colIdRowIndex(): number {
     return uniformRowIndexes.columnId;
   }
-  get headerRowIdx(): number {
+  get headerRowIndex(): number {
     return uniformRowIndexes.header;
   }
-  get actionRowIdx(): number {
+  get actionRowIndex(): number {
     return uniformRowIndexes.action;
   }
   get topDataRowIdx(): number {

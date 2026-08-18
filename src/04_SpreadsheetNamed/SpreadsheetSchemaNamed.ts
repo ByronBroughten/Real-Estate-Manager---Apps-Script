@@ -63,9 +63,9 @@ export class SpreadsheetSchema extends SchemaBase {
       all: mrs(0),
       data: mrs(this.topDataRowIdx),
       topDatum: mrs1(this.topDataRowIdx),
-      actions: mrs1(this.actionRowIdx),
-      columnIds: mrs1(this.colIdRowIdx),
-      headers: mrs1(this.headerRowIdx),
+      actions: mrs1(this.actionRowIndex),
+      columnIds: mrs1(this.colIdRowIndex),
+      headers: mrs1(this.headerRowIndex),
     };
     return rowNameToRawSpecifier[rowName];
   }

@@ -65,7 +65,8 @@ export class Api<
     if (e.value !== "TRUE") {
       return false;
     } else if (
-      Api.eventIndexToBase0(e.range.getRow()) !== configGet("actionRowIdxBase0")
+      Api.eventIndexToBase0(e.range.getRow()) !==
+      configGet("actionRowIndexBase0")
     ) {
       return false;
     } else {

@@ -2,7 +2,7 @@ import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
 } from "../../01_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
-import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/RawState";
+import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/AccessorsRaw";
 import { SpreadsheetRaw } from "../../01_SpreadsheetRaw/SpreadsheetRaw";
 import { SpreadsheetSchema } from "../SpreadsheetSchemaNamed";
 import type { SpreadsheetNamedState } from "../Types/NamedState";

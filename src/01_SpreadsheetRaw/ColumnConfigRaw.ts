@@ -80,7 +80,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     this._fetchColumnIdRowsForSheets(includedSheetGids);
 
     let idsAdded = 0;
-    this.sheetConfig.sheet.dataRowIndexes.forEach((rowIndex) => {
+    this.sheetConfig.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const sheetGid = gidCol.dataValue(rowIndex);
       if (!includedSheetGids.has(sheetGid)) return;
 
@@ -123,7 +123,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const sheetGidCol = this.column("Sheet GID");
 
     let staleCount = 0;
-    this.sheet.dataRowIndexes.forEach((rowIndex) => {
+    this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const columnId = columnIdCol.dataValue(rowIndex);
       const sheetGid = sheetGidCol.dataValue(rowIndex);
 
@@ -208,7 +208,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   private _fetchColumnIdRowsForSheets(sheetGids: Set<number>): void {
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
-      sheet.prepFetchProperties();
+      sheet.prepFetchPropertiesOnly();
       sheet.prepFetchUniformRowUsingSheetProperties("columnId");
     });
     this.ss.fetchAllPrepped();
@@ -218,7 +218,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const makeSchemaCol = this.sheetConfig.column("Let api access traits");
 
     const includedSheetGids = new Set<number>();
-    this.sheetConfig.sheet.dataRowIndexes.forEach((rowIndex) => {
+    this.sheetConfig.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       if (makeSchemaCol.dataValue(rowIndex)) {
         includedSheetGids.add(sheetGidCol.dataValue(rowIndex));
       }

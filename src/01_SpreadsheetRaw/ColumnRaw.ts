@@ -1,10 +1,13 @@
+import type { GoogleCellValue } from "../00_base/AppsScriptTypes";
 import type {
   CellValue,
   CellValueName,
   UniformRowName,
   UniformRowValue,
 } from "../00_base/base";
+import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
+import type { ColumnGridRangeProps } from "./ClassTypes/AccessorsRaw";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
@@ -18,17 +21,51 @@ export class ColumnRaw<
   get sheet() {
     return new SheetRaw(this.sheetRawProps);
   }
-  get dataValueArr(): VL[] {
-    return this.sheet.dataRowIndexes.map((rowIdx) => this.dataValue(rowIdx));
+  get schema() {
+    return new SchemaBase();
   }
-  get makeAllDataRange() {
-    return {
-      sheetId: this.sheetGid,
-      startRowIndex: this.sheetSchema.topDataRowIdx,
-      endRowIndex: this.sheet.activeTable.endRowIndex,
+  get dataValueArr(): VL[] {
+    return this.sheet.activeDataRowIndexes.map((rowIdx) =>
+      this.dataValue(rowIdx),
+    );
+  }
+  gatherFetchRange(props: ColumnGridRangeProps): ColumnRaw<VN, VL> {
+    this.sheet.gatherFetchRange({
+      ...props,
       startColumnIndex: this.colIndex,
       endColumnIndex: this.colIndex + 1,
-    };
+    });
+    return this;
+  }
+  prepFetchUniformCell(rowName: UniformRowName): ColumnRaw<VN, VL> {
+    const rowIndex = this.schema.uniformRowIndex(rowName);
+    this.gatherFetchRange({
+      startRowIndex: rowIndex,
+      endRowIndex: rowIndex + 1,
+    });
+    return this;
+  }
+  prepFetchAllDataCells() {
+    this.gatherFetchRange({ startRowIndex: this.sheetSchema.topDataRowIdx });
+    return this;
+  }
+  cellHasValue(rowIndex: number): boolean {
+    return this.sheet.row(rowIndex).hasValue(this.colIndex);
+  }
+  integrateState(
+    rowIndex: number,
+    newValue: GoogleCellValue,
+  ): ColumnRaw<VN, VL> {
+    this.sheet.rowRaw(rowIndex).integrateState(this.colIndex, newValue);
+    return this;
+  }
+  integrateMissingDataWithEmpty(): ColumnRaw<VN, VL> {
+    this.sheet.allDataRowIndexes.forEach((rowIndex) => {
+      if (!this.cellHasValue(rowIndex)) {
+        this.integrateState(rowIndex, "" as GoogleCellValue);
+      }
+    });
+    return this;
   }
   dataValue(rowIdx: number): VL {
     return this.sheet.row(rowIdx).value(this.colIndex, this.valueName) as VL;
@@ -45,12 +82,8 @@ export class ColumnRaw<
     return this;
   }
   fetchDataCellsUsingHeaders() {
-    this.prepfetchAllPreppedDataCells();
+    this.prepFetchAllDataCells();
     this.ss.fetchAllPrepped();
-    return this;
-  }
-  prepfetchAllPreppedDataCells() {
-    this.ss.gatherFetchRanges(this.makeAllDataRange);
     return this;
   }
   validateIndexNotStale(): void {

@@ -1,4 +1,4 @@
-import type { SheetColumnsRange } from "../01_SpreadsheetRaw/ClassTypes/RawState.js";
+import type { SheetColumnsRange } from "../01_SpreadsheetRaw/ClassTypes/AccessorsRaw.js";
 import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes.js";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
@@ -32,11 +32,6 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get schema(): SpreadsheetSchema {
     return this.spreadsheetSchema;
   }
-  get activeSheetNames(): SheetName[] {
-    return [...this.raw.activeSheetGids].map(
-      (sheetGid) => this.indexed.sheet(sheetGid).sheetName,
-    );
-  }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
       sheetName,
@@ -56,10 +51,16 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       return acc;
     }, {} as NamedSheets<TN>);
   }
+  get activeSheetNames(): SheetName[] {
+    return [...this.raw.activeSheetGids].map(
+      (sheetGid) => this.indexed.sheet(sheetGid).sheetName,
+    );
+  }
   get activeSheets(): SheetNamed<SheetName>[] {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
   fetchAllPrepped(): SpreadsheetNamed {
+    this.activeSheets.forEach((sheet) => {});
     this.raw.fetchAllPrepped();
     return this;
   }
@@ -68,7 +69,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   ): NamedSheets<SN> {
     const standardizedProps = this._standardizeProps(props);
     this._namedPropArrToRaw(standardizedProps);
-    this.raw.fetchAllPrepped();
+    this.fetchAllPrepped();
     this.namedState.gridRangeFetchProps = [];
     const sheetNames = this._sheetNamesFromReqProps(standardizedProps);
     return this.sheets(...sheetNames);
@@ -202,7 +203,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
-      sheet.column("id").prepfetchAllPreppedDataCells();
+      sheet.column("id").prepFetchAllDataCells();
       // column.prepFetchUniformCell("header")
     });
     this.fetchAllPrepped();

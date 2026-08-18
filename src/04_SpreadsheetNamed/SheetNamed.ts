@@ -1,3 +1,4 @@
+import type { SheetGridRangeProps } from "../01_SpreadsheetRaw/ClassTypes/AccessorsRaw";
 import type { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
@@ -28,6 +29,16 @@ export class SheetNamed<
   get rich(): SheetIndexed {
     return new SheetIndexed(this.raw.sheetRawProps);
   }
+  gatherFetchRange(props: SheetGridRangeProps): SheetNamed<SN> {
+    this.raw.gatherFetchRange(props);
+    return this;
+  }
+  prepFetchColIdsForDataToFetch() {
+    this.raw.colIndexesOfDataToFetch.forEach((colIdx) => {
+      const columnName = this.schema.columnNameByIdx(colIdx);
+      this.column(columnName).prepFetchUniformCell("columnId");
+    });
+  }
   dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({
       ...this.sheetNamedProps,
@@ -51,7 +62,9 @@ export class SheetNamed<
     return this.dataRow(this.schema.topDataRowIdx);
   }
   get dataRows(): DataRowNamed<SN>[] {
-    return this.raw.dataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
+    return this.raw.activeDataRowIndexes.map((rowIndex) =>
+      this.dataRow(rowIndex),
+    );
   }
   get activeColumnNames(): ColumnName<SN>[] {
     return this.raw.activeColumnIdxs.map((colIndex) =>

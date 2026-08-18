@@ -1,3 +1,4 @@
+import type { UniformRowName } from "../00_base/base";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnFullName,
@@ -8,13 +9,13 @@ import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { SheetNamed } from "./SheetNamed";
 
 export class ColumnNamed<
-  TN extends SheetName,
-  CN extends ColumnName<TN> = ColumnName<TN>,
-> extends ColumnNamedBase<TN, CN> {
+  SN extends SheetName,
+  CN extends ColumnName<SN> = ColumnName<SN>,
+> extends ColumnNamedBase<SN, CN> {
   get colIndex(): number {
     return this.sheet.schema.column(this.columnName).colIndex;
   }
-  get sheet(): SheetNamed<TN> {
+  get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
   get raw() {
@@ -26,19 +27,27 @@ export class ColumnNamed<
   get schema() {
     return this.sheet.schema.column(this.columnName);
   }
-  get fullName(): ColumnFullName<TN, CN> {
+  get fullName(): ColumnFullName<SN, CN> {
     return this.schema.fullName;
   }
-  prepfetchAllPreppedDataCells() {
-    this.raw.prepfetchAllPreppedDataCells();
+  prepFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
+    this.raw.prepFetchUniformCell(rowName);
+    return this;
   }
-  dataCellsToDefault() {
+  prepFetchAllDataCells(): ColumnNamed<SN, CN> {
+    this.raw.prepFetchAllDataCells();
+    return this;
+  }
+  dataCellsToDefault(): ColumnNamed<SN, CN> {
     this.rich.dataCellsToDefault();
+    return this;
   }
-  fillEmptyDataCellsWithDefaultValues() {
+  fillEmptyDataCellsWithDefaultValues(): ColumnNamed<SN, CN> {
     this.rich.fillEmptyDataCellsWithDefaultValues();
+    return this;
   }
-  actionRowToDefault() {
+  actionRowToDefault(): ColumnNamed<SN, CN> {
     this.sheet.rich.uniformRow("action").updateValue(this.colIndex, false);
+    return this;
   }
 }

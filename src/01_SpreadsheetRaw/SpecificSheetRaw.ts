@@ -13,12 +13,12 @@ export class SpecificSheetRaw<
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   prepFetchPrerequisitesForRawColumns() {
-    this.sheet.prepFetchProperties();
+    this.sheet.prepFetchPropertiesOnly();
     this.sheet.prepFetchUniformRowUsingSheetProperties("header");
   }
   prepFetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
-    return this.sheet.column(colIndex).prepfetchAllPreppedDataCells();
+    return this.sheet.column(colIndex).prepFetchAllDataCells();
   }
   fetchDataColumnOfFetchedHeader<H extends HD>(header: H): ColumnRaw {
     const column = this.prepFetchDataColumnOfFetchedHeader(header);

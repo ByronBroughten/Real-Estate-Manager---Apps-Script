@@ -485,7 +485,7 @@ const allColTraits = makeStructuredConfig(
     },
     spreadsheetConfig: {
       id: mcs("col-LAM-LoC", "string", "ID", 0, false),
-      headerRowIdxBase1: mcs(
+      headerRowIndexBase1: mcs(
         "col-hOXiFmz",
         "number",
         "Header row idx base 1",

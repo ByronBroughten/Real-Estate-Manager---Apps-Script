@@ -33,6 +33,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         rowIndexesAreValid: true,
         lastNotStaleColumnIdx: null,
         rowStates: new Map(),
+        colIndexesOfDataToFetch: new Set(),
       });
     }
   }
@@ -54,6 +55,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         ),
       };
     }
+    //
   }
   get sheetSchema() {
     return new SheetSchemaIndexed(this.sheetGid);
@@ -90,13 +92,25 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     return this.sheetState.activeTable;
   }
+  get colIndexesOfDataToFetch(): Set<number> {
+    return this.sheetState.colIndexesOfDataToFetch;
+  }
   get rowStates(): RawSheetState["rowStates"] {
     return this.sheetState.rowStates;
   }
   get activeRowIndexes(): number[] {
     return Array.from(this.sheetState.rowStates.keys());
   }
-  get dataRowIndexes(): number[] {
+  get allDataRowIndexes(): number[] {
+    const start = this.sheetSchema.topDataRowIdx;
+    const end = this.activeTable.endRowIndex;
+    const indexes = [];
+    for (let i = start; i < end; i++) {
+      indexes.push(i);
+    }
+    return indexes;
+  }
+  get activeDataRowIndexes(): number[] {
     return this.activeRowIndexes.filter((rowIndex) =>
       this.sheetSchema.isDataRowIndex(rowIndex),
     );
