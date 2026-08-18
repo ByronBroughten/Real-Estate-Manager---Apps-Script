@@ -6,11 +6,8 @@ import { businessEndpoints } from "./businessEndpoints/businessEndpoints.js";
 const testSheetId = 2089200354;
 const testSheetName = "test";
 
-//Named
-// Ensure that for non-empty data row columns, columnIds are fetched;
-// Ok, so when gathering a column at the named level, add fetching of columnIds for non-empty data row columns
-
 //Raw
+// I kind of need properties still for filling missing columnIds.
 // Ensure that for columnIds and uniformRows, properties are fetched
 // the columnId thing is only needed above the raw level;
 // No, I keep this at the named level, but I make a version that builds on it at the raw level in one way (ensuring sheet properties, ensuring headers)
@@ -19,7 +16,7 @@ const testSheetName = "test";
 function testFillMissingrowIds() {
   const ss = SpreadsheetNamed.init();
   const idColumn = ss.sheet(testSheetName).column("id");
-  idColumn.prepFetchAllDataCells(); //
+  idColumn.prepFetchAllDataCells();
 
   ss.fetchAllPrepped();
   idColumn.fillEmptyDataCellsWithDefaultValues();

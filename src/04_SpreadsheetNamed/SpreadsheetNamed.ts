@@ -60,7 +60,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
   fetchAllPrepped(): SpreadsheetNamed {
-    this.activeSheets.forEach((sheet) => {});
+    this.activeSheets.forEach((sheet) => sheet.prepFetchColIdsForDataToFetch());
     this.raw.fetchAllPrepped();
     return this;
   }
