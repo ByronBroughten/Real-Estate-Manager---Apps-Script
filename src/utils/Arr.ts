@@ -2,6 +2,13 @@ export type StrictExtract<T, K extends T> = Extract<T, K>;
 export type StrictExclude<T, K extends T> = Exclude<T, K>;
 
 export const Arr = {
+  indexesFromUntil(from: number, until: number): number[] {
+    const indexes: number[] = [];
+    for (let i = from; i < until; i++) {
+      indexes.push(i);
+    }
+    return indexes;
+  },
   hasDuplicates(arr: unknown[]): boolean {
     return new Set(arr).size !== arr.length;
   },
@@ -19,12 +26,12 @@ export const Arr = {
     const stringB = String(b);
     return stringA.localeCompare(stringB);
   },
-  sortAscending(arr: unknown[]) {
+  sortAscending<A extends unknown>(arr: A[]): A[] {
     return [...arr].sort((a, b) => {
       return this.compareForSort(a, b);
     });
   },
-  sortDescending(arr: unknown[]) {
+  sortDescending<A extends unknown>(arr: A[]): A[] {
     return [...arr].sort((a, b) => {
       return this.compareForSort(b, a);
     });

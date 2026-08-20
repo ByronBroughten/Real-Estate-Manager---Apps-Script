@@ -2,29 +2,29 @@ import type {
   GoogleCellValue,
   GoogleUpdateRequest,
   UserEnteredValue,
-} from "../00_base/AppsScriptTypes";
-import type { CellValue, CellValueName } from "../00_base/base";
+} from "../../00_base/AppsScriptTypes";
+import type { CellValue, CellValueName } from "../../00_base/base";
 import {
   getCellValTrait,
   type CellValueTrait,
-} from "../00_base/baseValueSchemas";
-import { type ValueSchemaKey } from "../00_base/valueSchema";
-import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
-import { valS } from "../utils/validation";
-import { RowRawBase } from "./ClassBases/RowRawBase";
+} from "../../00_base/baseValueSchemas";
+import { type ValueSchemaKey } from "../../00_base/valueSchema";
+import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
+import { valS } from "../../utils/validation";
 import type {
   RowChangeProps,
   RowChangesToSave,
   RowChangeUpdateProps,
-} from "./ClassTypes/RawState";
-import { ColumnRaw } from "./ColumnRaw";
-import { SheetRaw } from "./SheetRaw";
+} from "../ClassTypes/RawState";
+import { ColumnRaw } from "../ColumnRaw";
+import { SheetRaw } from "../SheetRaw";
+import { RowRawBase } from "./RowRawBase";
 
-export class RowRaw extends RowRawBase {
+export abstract class RowCommon extends RowRawBase {
   get schema() {
     return new SchemaBase();
   }
-  get sheet() {
+  get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
   cellTrait<VN extends CellValueName, K extends ValueSchemaKey>(
@@ -33,7 +33,7 @@ export class RowRaw extends RowRawBase {
   ): CellValueTrait<VN, K> {
     return getCellValTrait(valueName, key);
   }
-  column(colIndex: number): ColumnRaw {
+  protected column(colIndex: number): ColumnRaw {
     return new ColumnRaw({
       ...this.sheetRawProps,
       colIndex: colIndex,
@@ -51,7 +51,6 @@ export class RowRaw extends RowRawBase {
   cellIsActive(colIndex: number): boolean {
     return this.rowState.has(colIndex);
   }
-
   value<VN extends CellValueName>(
     colIndex: number,
     valueNameAssert?: VN,
@@ -79,10 +78,13 @@ export class RowRaw extends RowRawBase {
     }
     this.rowState.set(colIndex, value);
   }
-  updateValue(colIndex: number, value: CellValue): RowRaw {
+  updateValue(colIndex: number, value: CellValue): this {
     this.column(colIndex).validateIndexNotStale();
     this.setValueState(colIndex, value);
     return this.addRowChangeToSave({ action: "update", colIdxes: [colIndex] });
+  }
+  integrateEmptyState(colIndex: number): void {
+    this.setValueState(colIndex, "");
   }
   integrateState(
     colIndex: number,
@@ -102,11 +104,11 @@ export class RowRaw extends RowRawBase {
       return "";
     }
     if ("stringValue" in effectiveValue) {
-      return valS.assertDefined(effectiveValue.stringValue, "stringValue");
+      return valS.assert(effectiveValue.stringValue, "stringValue");
     } else if ("boolValue" in effectiveValue) {
-      return valS.assertDefined(effectiveValue.boolValue, "boolValue");
+      return valS.assert(effectiveValue.boolValue, "boolValue");
     } else if ("numberValue" in effectiveValue) {
-      return valS.assertDefined(effectiveValue.numberValue, "numberValue");
+      return valS.assert(effectiveValue.numberValue, "numberValue");
     } else {
       return "";
     }
@@ -129,7 +131,7 @@ export class RowRaw extends RowRawBase {
     this.remove();
     this.addRowChangeToSave({ action: "delete" });
   }
-  append(): RowRaw {
+  append(): this {
     if (this.rowIsActive()) {
       throw new Error(
         `Cannot append row ${this.rowIndex} because it is already active.`,
@@ -172,7 +174,7 @@ export class RowRaw extends RowRawBase {
       });
     }
   }
-  addRowChangeToSave(props: RowChangeProps): RowRaw {
+  addRowChangeToSave(props: RowChangeProps): this {
     const changes = this.changesToSave;
     if (changes.delete) return this;
     const actions = {
@@ -185,6 +187,14 @@ export class RowRaw extends RowRawBase {
       },
     };
     actions[props.action](props);
+    return this;
+  }
+  prepFetchFull(): this {
+    this.sheetState.indexesOfFullRowsToFetch.add(this.rowIndex);
+    this.sheet.gatherFetchRange({
+      ...this.schema.oneRowSpecifier(this.rowIndex),
+      startColumnIndex: 0,
+    });
     return this;
   }
   gatherAppendRequest(): void {

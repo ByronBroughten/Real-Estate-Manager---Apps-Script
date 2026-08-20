@@ -38,10 +38,10 @@ export class SheetSchemaNamed<
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
   columnByIndex(colIndex: number): ColumnSchemaNamed<SN, ColumnName<SN>> {
-    const columnName = this.columnNameByIdx(colIndex);
+    const columnName = this.colNameByIndex(colIndex);
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  columnNameByIdx(colIndex: number): ColumnName<SN> {
+  colNameByIndex(colIndex: number): ColumnName<SN> {
     return getColumnTraitByIndex(
       this.sheetGid,
       colIndex,

@@ -26,7 +26,7 @@ export class SheetNamed<
   get raw(): SheetRaw {
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
   }
-  get rich(): SheetIndexed {
+  get indexed(): SheetIndexed {
     return new SheetIndexed(this.raw.sheetRawProps);
   }
   gatherFetchRange(props: SheetGridRangeProps): SheetNamed<SN> {
@@ -34,8 +34,8 @@ export class SheetNamed<
     return this;
   }
   prepFetchColIdsForDataToFetch() {
-    this.raw.colIndexesOfDataToFetch.forEach((colIdx) => {
-      const columnName = this.schema.columnNameByIdx(colIdx);
+    this.raw.indexesOfColDataToFetch.forEach((colIdx) => {
+      const columnName = this.schema.colNameByIndex(colIdx);
       this.column(columnName).prepFetchUniformCell("columnId");
     });
   }
@@ -46,11 +46,14 @@ export class SheetNamed<
     });
   }
   columnByIndex(colIndex: number): ColumnNamed<SN> {
-    const columnName = this.schema.columnNameByIdx(colIndex);
+    const columnName = this.schema.colNameByIndex(colIndex);
     return new ColumnNamed({
       ...this.sheetNamedProps,
       columnName,
     });
+  }
+  addMissingColumnIds(): void {
+    this.raw.addMissingColumnIds(this.schema.trait("idPrefix"));
   }
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return new ColumnNamed({
@@ -64,11 +67,6 @@ export class SheetNamed<
   get dataRows(): DataRowNamed<SN>[] {
     return this.raw.activeDataRowIndexes.map((rowIndex) =>
       this.dataRow(rowIndex),
-    );
-  }
-  get activeColumnNames(): ColumnName<SN>[] {
-    return this.raw.activeColumnIdxs.map((colIndex) =>
-      this.schema.columnNameByIdx(colIndex),
     );
   }
   topDataRowValue<CN extends ColumnName<SN>>(
@@ -86,7 +84,7 @@ export class SheetNamed<
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
     if (this.raw.dataRowCount > 0) {
-      this.rich.topDataRow.updateToDefault();
+      this.topDataRow.updateToDefault(...this.schema.columnNames);
     }
     if (this.raw.dataRowCount > 1) {
       this.DELETE_DATA_ROWS_AFTER_TOP();

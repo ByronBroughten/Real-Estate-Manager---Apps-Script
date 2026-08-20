@@ -7,7 +7,7 @@ export function validationError(
   return new ValidationError(`value "${value}" is not a ${notAWhat}`);
 }
 
-function assertDefined<T>(
+function assert<T>(
   value: T | null | undefined,
   whatNotFound: string = "Value",
 ): T {
@@ -111,7 +111,7 @@ const _validateS = {
 export const valS = {
   is: _isS,
   validate: _validateS,
-  assertDefined,
+  assert,
 
   // isString(value)
   // objToAny(value: any, e: Error): any {

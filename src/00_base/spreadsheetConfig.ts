@@ -1,6 +1,7 @@
 export const spreadsheetConfig = {
   idDelimiter: ":",
   idHeader: "ID",
+  startTableColIndex: 0,
   columnIdRowIdxBase0: 0,
   columnGroupRowIdxBase0: 1,
   actionRowIndexBase0: 2,

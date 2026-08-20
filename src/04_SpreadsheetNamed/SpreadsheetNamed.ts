@@ -107,7 +107,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       return Obj.keys(sheetColumnNames).reduce((acc, sheetName) => {
         const schema = this.schema.sheet(sheetName);
         acc[sheetName] = schema.columnSpecifierToStandard(
-          valS.assertDefined<ColumnSpecifierNamed<SN>>(
+          valS.assert<ColumnSpecifierNamed<SN>>(
             sheetColumnNames[sheetName],
             `sheetColumnNames[${sheetName}]`,
           ),
@@ -173,7 +173,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   ): SheetColumnsRange[] {
     return Obj.keys(sheetColumns).reduce((acc, sheetName) => {
       const schema = this.schema.sheet(sheetName);
-      const columnNames = valS.assertDefined(
+      const columnNames = valS.assert(
         sheetColumns[sheetName],
         `sheetColumns[${sheetName}]`,
       );

@@ -86,6 +86,9 @@ export class SchemaBase {
       );
     }
   }
+  get startTableColIndex(): number {
+    return this.config("startTableColIndex");
+  }
   get colIdRowIndex(): number {
     return uniformRowIndexes.columnId;
   }

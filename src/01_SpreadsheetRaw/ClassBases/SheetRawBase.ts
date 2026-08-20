@@ -2,7 +2,7 @@ import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
 import { SheetSchemaIndexed } from "../../03_SpreadsheetIndexed/SheetSchemaIndexed";
 import { Obj } from "../../utils/Obj";
 import { valS } from "../../utils/validation";
-import type { RawSheetState } from "../ClassTypes/RawState";
+import type { PreFetchGridRange, RawSheetState } from "../ClassTypes/RawState";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
@@ -31,9 +31,11 @@ export class SheetRawBase extends SpreadsheetRawBase {
         title: null,
         activeTable: null,
         rowIndexesAreValid: true,
-        lastNotStaleColumnIdx: null,
+        firstStaleColIndex: null,
         rowStates: new Map(),
-        colIndexesOfDataToFetch: new Set(),
+        preFetchGridRanges: [],
+        indexesOfFullRowsToFetch: new Set(),
+        indexesOfColDataToFetch: new Set(),
       });
     }
   }
@@ -43,9 +45,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     const tables = sheet.tables;
     if (tables && tables.length > 0) {
-      const table = valS.assertDefined(tables[0], "table");
+      const table = valS.assert(tables[0], "table");
       this.sheetState.activeTable = {
-        tableId: valS.assertDefined(table.tableId, "tableId"),
+        tableId: valS.assert(table.tableId, "tableId"),
         ...Obj.validatePick(
           table.range,
           "number",
@@ -56,37 +58,19 @@ export class SheetRawBase extends SpreadsheetRawBase {
         ),
       };
     }
-    //
   }
   get sheetSchema() {
     return new SheetSchemaIndexed(this.sheetGid);
   }
   protected get sheetState(): RawSheetState {
-    return valS.assertDefined(
+    return valS.assert(
       this.rawState.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }
   // It would probably be better if there were a function like, "set sheetState".
-  get rowIndexesAreValid(): boolean {
-    return this.sheetState.rowIndexesAreValid;
-  }
-  set rowIndexesAreValid(value: boolean) {
-    this.sheetState.rowIndexesAreValid = value;
-  }
-  get lastNotStaleColumnIdx(): number | null {
-    return this.sheetState.lastNotStaleColumnIdx;
-  }
-  set lastNotStaleColumnIdx(value: number | null) {
-    this.sheetState.lastNotStaleColumnIdx = value;
-  }
-  get title(): string {
-    if (this.sheetState.title === null) {
-      throw new Error(
-        `Sheet title is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
-      );
-    }
-    return this.sheetState.title;
+  get preFetchGridRanges(): PreFetchGridRange[] {
+    return this.sheetState.preFetchGridRanges;
   }
   get activeTable(): NonNullable<RawSheetState["activeTable"]> {
     const activeTable = this.sheetState.activeTable;
@@ -97,34 +81,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     return activeTable;
   }
-  get colIndexesOfDataToFetch(): Set<number> {
-    return this.sheetState.colIndexesOfDataToFetch;
-  }
   get rowStates(): RawSheetState["rowStates"] {
     return this.sheetState.rowStates;
-  }
-  get activeRowIndexes(): number[] {
-    return Array.from(this.sheetState.rowStates.keys());
-  }
-  get allDataRowIndexes(): number[] {
-    const start = this.sheetSchema.topDataRowIdx;
-    const end = this.activeTable.endRowIndex;
-    const indexes = [];
-    for (let i = start; i < end; i++) {
-      indexes.push(i);
-    }
-    return indexes;
-  }
-  get activeDataRowIndexes(): number[] {
-    return this.activeRowIndexes.filter((rowIndex) =>
-      this.sheetSchema.isDataRowIndex(rowIndex),
-    );
-  }
-  get rowCount(): number {
-    return this.sheetState.rowStates.size;
-  }
-  get dataRowCount(): number {
-    return this.rowCount - this.sheetSchema.topDataRowIdx;
   }
   get sheetRawProps(): SheetRawProps {
     return {

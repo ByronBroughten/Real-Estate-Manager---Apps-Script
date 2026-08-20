@@ -5,10 +5,7 @@ import {
   type SheetTraitRaw,
   type SheetTraitRawKey,
 } from "../02_generatedTraits/02_sheetTraitsTypes";
-import {
-  getSheetColumnIdxes,
-  type ColumnName,
-} from "../02_generatedTraits/03_columnTraits";
+import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetSchemaCommon } from "./SheetSchemaCommon";
 
@@ -29,14 +26,16 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
     return getSheetTraitByGid(this.sheetGid, key);
   }
   column(colIndex: number): ColumnSchemaIndexed {
-    return new ColumnSchemaIndexed(this.sheetGid, colIndex);
-  }
-
-  get schemaColumnIdxes(): MapIterator<number> {
-    return getSheetColumnIdxes(this.sheetGid);
+    return new ColumnSchemaIndexed({
+      sheetGid: this.sheetGid,
+      colIndex,
+    });
   }
   get sheetName(): SheetName {
     return this.trait("sheetName");
+  }
+  allDefaultVValues(): Map<number, CellValue> {
+    return this.defaultValues([...this.colIndexes]);
   }
   defaultValues(colIndexes: number[]): Map<number, CellValue> {
     return colIndexes.reduce(

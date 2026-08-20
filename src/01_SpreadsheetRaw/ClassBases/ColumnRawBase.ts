@@ -18,9 +18,10 @@ export class ColumnRawBase<
     this.colIndex = colIndex;
     this.valueName = valueName;
   }
-  get columnRawProps(): ColumnRawBaseProps {
+  get columnRawProps(): ColumnRawBaseProps<VN> {
     return {
       colIndex: this.colIndex,
+      valueName: this.valueName,
       ...this.sheetRawProps,
     };
   }

@@ -4,7 +4,10 @@ import { SheetIndexed } from "./SheetIndexed";
 
 export class ColumnIndexed extends ColumnRawBase {
   get schema(): ColumnSchemaIndexed {
-    return new ColumnSchemaIndexed(this.sheetGid, this.colIndex);
+    return new ColumnSchemaIndexed({
+      sheetGid: this.sheetGid,
+      columnId: this.colIndex,
+    });
   }
   get sheet(): SheetIndexed {
     return new SheetIndexed(this.sheetRawProps);
@@ -12,7 +15,7 @@ export class ColumnIndexed extends ColumnRawBase {
   verifySchemaIdWithActual(): void {
     const colIdInSchema = this.schema.trait("columnId");
     const colIdRow = this.sheet.raw.uniformRow("columnId");
-    const actualColId = colIdRow.value(this.colIndex);
+    const actualColId = colIdRow.uniformValue(this.colIndex);
     if (actualColId !== colIdInSchema) {
       throw new Error(
         `actualColId is "${actualColId}" but expected "${colIdInSchema}". Are all the column ids and indexes up to date?`,

@@ -7,16 +7,21 @@ import type { ValueName } from "../02_generatedTraits/06_valueSchemas";
 import { ColumnSchemaCommon } from "./ColumnSchemaCommon";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
+interface ColumnSchemaIndexedProps {
+  sheetGid: number;
+  colIndex: number;
+}
+
 export class ColumnSchemaIndexed extends ColumnSchemaCommon {
-  readonly sheetId: number;
+  readonly sheetGid: number;
   readonly colIndex: number;
-  constructor(sheetId: number, colIndex: number) {
+  constructor(props: ColumnSchemaIndexedProps) {
     super();
-    this.sheetId = sheetId;
-    this.colIndex = colIndex;
+    this.sheetGid = props.sheetGid;
+    this.colIndex = props.colIndex;
   }
   get sheet(): SheetSchemaIndexed {
-    return new SheetSchemaIndexed(this.sheetId);
+    return new SheetSchemaIndexed(this.sheetGid);
   }
   get columnName(): ColumnFullNameSimple {
     return this.trait("columnName") as ColumnFullNameSimple;
@@ -28,7 +33,7 @@ export class ColumnSchemaIndexed extends ColumnSchemaCommon {
     ) as ColumnFullNameSimple;
   }
   trait<K extends keyof ColTraitsRaw>(key: K): ColTraitsRaw[K] {
-    return getColumnTraitByIndex(this.sheetId, this.colIndex, key);
+    return getColumnTraitByIndex(this.sheetGid, this.colIndex, key);
   }
   get valueName(): ValueName {
     return this.trait("valueName");

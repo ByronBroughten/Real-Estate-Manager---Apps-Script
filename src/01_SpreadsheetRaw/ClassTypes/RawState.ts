@@ -30,10 +30,51 @@ export interface RawSheetState {
     startColumnIndex: number;
     endColumnIndex: number; // lastColumnIndex + 1
   } | null;
+  preFetchGridRanges: PreFetchGridRange[];
   rowIndexesAreValid: boolean;
-  lastNotStaleColumnIdx: number | null;
-  colIndexesOfDataToFetch: Set<ColIdx>;
+  firstStaleColIndex: number | null;
+  indexesOfFullRowsToFetch: Set<RowIdx>;
+  indexesOfColDataToFetch: Set<ColIdx>;
   rowStates: RawRowStates;
+}
+
+interface FullRowPreFetch {
+  row: number;
+  column: "allDataColumns";
+}
+interface FullColumnPreFetch {
+  column: string;
+  row: "allDataRows";
+}
+interface SingleCellPreFetch {
+  row: number;
+  column: string;
+}
+
+export type PreFetchType = keyof PreFetchTypes;
+interface PreFetchTypes {
+  fullRow: FullRowPreFetch;
+  fullDataColumn: FullColumnPreFetch;
+  singleCell: SingleCellPreFetch;
+}
+export type PreFetchGridRange = PreFetchTypes[PreFetchTypeName];
+type PreFetchTypeName = keyof PreFetchTypes;
+
+export function isPreFetchType<PFN extends PreFetchTypeName>(
+  preFetch: PreFetchGridRange,
+  pfName: PFN,
+): preFetch is PreFetchTypes[PFN] {
+  if (pfName === "fullRow") {
+    return preFetch.column === "allDataColumns";
+  } else if (pfName === "fullDataColumn") {
+    return preFetch.row === "allDataRows";
+  } else if (pfName === "singleCell") {
+    return (
+      preFetch.row !== "allDataRows" && preFetch.column !== "allDataColumns"
+    );
+  } else {
+    return false;
+  }
 }
 
 export type RawRowStates = Map<RowIdx, RawRowState>;

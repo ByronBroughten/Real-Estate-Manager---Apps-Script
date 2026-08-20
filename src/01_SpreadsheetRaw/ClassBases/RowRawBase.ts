@@ -26,16 +26,13 @@ export class RowRawBase extends SheetRawBase {
     return this.rowIndex >= this.sheetSchema.topDataRowIdx;
   }
   get rowState(): RawRowState {
-    return valS.assertDefined(
+    return valS.assert(
       this.sheetState.rowStates.get(this.rowIndex),
       `rowState for row ${this.rowIndex}`,
     );
   }
   get activeValueArr(): CellValue[] {
     return [...this.rowState.values()];
-  }
-  get activeColIdxs(): number[] {
-    return Array.from(this.rowState.keys());
   }
   returnMissingValues<V extends CellValue>(...values: V[]): V[] {
     return values.filter((value) => !this.activeValueArr.includes(value));

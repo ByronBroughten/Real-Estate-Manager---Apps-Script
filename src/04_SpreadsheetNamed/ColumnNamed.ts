@@ -35,7 +35,7 @@ export class ColumnNamed<
     return this;
   }
   prepFetchAllDataCells(): ColumnNamed<SN, CN> {
-    this.raw.prepFetchAllDataCells();
+    this.raw.data.prepFetchAllDataCells();
     return this;
   }
   dataCellsToDefault(): ColumnNamed<SN, CN> {

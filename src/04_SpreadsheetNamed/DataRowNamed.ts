@@ -1,4 +1,4 @@
-import { RowRaw } from "../01_SpreadsheetRaw/RowRaw";
+import { DataRowRaw } from "../01_SpreadsheetRaw/ClassBases/DataRowRaw";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnName,
@@ -38,8 +38,8 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     return new DataRowIndexed(this.raw.rowRawProps);
   }
 
-  get raw(): RowRaw {
-    return new RowRaw({
+  get raw(): DataRowRaw {
+    return new DataRowRaw({
       ...this.sheet.raw.sheetRawProps,
       rowIndex: this.rowIndex,
     });
@@ -137,7 +137,9 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     return values;
   }
   get activeColumnNames(): ColumnName<SN>[] {
-    return this.sheet.activeColumnNames;
+    return this.raw.activeColIndexes.map((index) =>
+      this.sheetSchema.colNameByIndex(index),
+    );
   }
   updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {
     this.rich.updateToDefault(...this.colIndexes(columnNames));

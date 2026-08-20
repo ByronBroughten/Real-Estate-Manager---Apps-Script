@@ -1,5 +1,5 @@
 import type { UniformRowName } from "../00_base/base";
-import { SheetRawBase } from "../01_SpreadsheetRaw/ClassBases/SheetRawBase";
+import { SheetCommon } from "../01_SpreadsheetRaw/ClassBases/SheetCommon";
 import { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { UniformRow } from "../01_SpreadsheetRaw/UniformRow";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
@@ -7,7 +7,7 @@ import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
-export class SheetIndexed extends SheetRawBase {
+export class SheetIndexed extends SheetCommon {
   get schema(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
   }
@@ -39,9 +39,9 @@ export class SheetIndexed extends SheetRawBase {
     return this.raw.dataRows.map((row) => this.dataRow(row.rowIndex));
   }
   appendRowDefault(): DataRowIndexed {
-    const defaultValues = this.schema.defaultValues(
-      this.topDataRow.activeColIdxsNotFormula,
-    );
+    const defaultValues = this.schema.defaultValues([
+      ...this.schema.colIndexes,
+    ]);
     const { rowIndex } = this.raw.appendDataRowValues(defaultValues);
     return this.dataRow(rowIndex);
   }

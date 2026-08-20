@@ -3292,7 +3292,7 @@ const allColTraits = makeStructuredConfig(
     },
     test: {
       column5: mcs("col-Oy9WtzQ", "string", "Column 5", 0, true),
-      id: mcs("col-8wOXbE6", "string", "ID", 1, true),
+      id: mcs("col-8wOXbE6", "string", "ID", 1, false),
       number: mcs("col-kJ47IXM", "number", "Number", 3, false),
       dropdown: mcs("col-4_IzNLS", "yesOrNo", "Dropdown", 4, false),
       date: mcs("col--K2Vvyh", "date", "Date", 5, true),
@@ -3662,7 +3662,7 @@ export function getColumnTraitByIndex<K extends ColTraitsRawKey>(
   colIndex: number,
   key: K,
 ): ColTraitsRaw[K] {
-  const colTraits = valS.assertDefined(
+  const colTraits = valS.assert(
     allColTraitsGidIdx.get(sheetId)?.get(colIndex),
     `column attributes for sheetId=${sheetId}, colIndex=${colIndex}`,
   );
@@ -3670,7 +3670,7 @@ export function getColumnTraitByIndex<K extends ColTraitsRawKey>(
 }
 export function getSheetColumnIdxes(sheetGid: number): MapIterator<number> {
   return valS
-    .assertDefined(
+    .assert(
       allColTraitsGidIdx.get(sheetGid),
       `column attributes for sheetId=${sheetGid}`,
     )

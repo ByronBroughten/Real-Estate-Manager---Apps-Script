@@ -11,6 +11,7 @@ import type { SheetRaw } from "./SheetRaw";
 import { SpecificSheetRaw } from "./SpecificSheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
+const idPrefix = baseSheetsTraits.sheetConfig.idPrefix;
 const headerToValueNameAuto = makeStructuredConfig(
   {} as Record<string, CellValueName>,
   {
@@ -71,7 +72,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   private _fetchAllPreppedneededForUpdate() {
     this.ss.fetchAllPreppedSheetProperties();
     this.sheet.fetchHeaderRowUsingSheetProperties();
-    const gidCol = this.column("Sheet GID").fetchDataCellsUsingHeaders();
+    const gidCol = this.column("Sheet GID").data.fetchDataCellsUsingHeaders();
     gidCol.dataValueArr.forEach((gid) => {
       const sheet = this.ss.sheet(gid);
       sheet.prepFetchHeaderRowUsingSheetProperties();
@@ -82,7 +83,10 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     this.ss.fetchAllPrepped();
   }
   private _ensureHeaders() {
-    const numFixed = this.sheet.ensureColumnsOfHeadersExist(...this.headers);
+    const numFixed = this.sheet.ensureColumnsOfHeadersExist(
+      idPrefix,
+      ...this.headers,
+    );
     if (numFixed > 0) {
       Logger.log(
         `Added ${numFixed} missing header(s) to the "Sheet Config" sheet.`,
@@ -101,16 +105,16 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   private _appendMissingSheetConfigs() {
     const { activeSheetGids } = this.ss;
     const gidCol = this.column("Sheet GID");
-    gidCol.dataValueArr.forEach((gid) => {
+    gidCol.data.dataValueArr.forEach((gid) => {
       if (!activeSheetGids.has(gid as number)) {
         this.sheet.appendDataRowValues(new Map([[gidCol.colIndex, gid]]));
       }
     });
   }
   private _updateProgrammaticValues(): void {
-    const gidCol = this.column("Sheet GID");
-    const sheetTitleCol = this.column("Sheet title");
-    const hasColForIdCol = this.column("Has ID column");
+    const gidCol = this.column("Sheet GID").data;
+    const sheetTitleCol = this.column("Sheet title").data;
+    const hasColForIdCol = this.column("Has ID column").data;
     let updatedValues = 0;
     this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const sheetGid = gidCol.dataValue(rowIndex);
@@ -132,7 +136,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   }
   generateSheetTraitsFileSource(): string {
     this.sheet.prepFetchPropertiesOnly();
-    this.sheet.prepFetchUniformRowUsingSheetProperties("header");
+    this.sheet.prepFetchFullUniformRow("header");
     this.ss.fetchAllPrepped();
     this.sheet.prepFetchDataColumnsUsingHeaders(
       "Sheet name",
@@ -141,10 +145,10 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     );
     this.ss.fetchAllPrepped();
 
-    const gidCol = this.column("Sheet GID");
-    const titleCol = this.column("Sheet title");
-    const prefixCol = this.column("ID prefix");
-    const hasIdCol = this.column("Has ID column");
+    const gidCol = this.column("Sheet GID").data;
+    const titleCol = this.column("Sheet title").data;
+    const prefixCol = this.column("ID prefix").data;
+    const hasIdCol = this.column("Has ID column").data;
 
     const entries: SheetTraitsBase = {};
     this.sheet.activeDataRowIndexes.forEach((rowIndex) => {

@@ -74,8 +74,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     );
     this.ss.fetchAllPrepped();
 
-    const gidCol = this.sheetConfig.column("Sheet GID");
-    const idPrefixCol = this.sheetConfig.column("ID prefix");
+    const gidCol = this.sheetConfig.column("Sheet GID").data;
+    const idPrefixCol = this.sheetConfig.column("ID prefix").data;
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
 
@@ -117,10 +117,10 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
     const activeColumnIdToSheet =
-      this._activeColumnIdToSheet(includedSheetGids);
+      this._existingColumnIdToSheet(includedSheetGids);
 
-    const columnIdCol = this.column("Column ID");
-    const sheetGidCol = this.column("Sheet GID");
+    const columnIdCol = this.column("Column ID").data;
+    const sheetGidCol = this.column("Sheet GID").data;
 
     let staleCount = 0;
     this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
@@ -160,9 +160,11 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
     const activeColumnIdToSheet =
-      this._activeColumnIdToSheet(includedSheetGids);
+      this._existingColumnIdToSheet(includedSheetGids);
 
-    const existingColumnIds = new Set(this.column("Column ID").dataValueArr);
+    const existingColumnIds = new Set(
+      this.column("Column ID").data.dataValueArr,
+    );
 
     const columnIdCol = this.column("Column ID");
     const sheetGidCol = this.column("Sheet GID");
@@ -190,14 +192,14 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   // Fetches every active column ID belonging to the given sheets, mapped to
   // the sheet it came from. Requires _fetchColumnIdRowsForSheets to have
   // already fetched columnId rows for these same sheetGids.
-  private _activeColumnIdToSheet(
+  private _existingColumnIdToSheet(
     sheetGids: Set<number>,
   ): Map<string, SheetRaw> {
     const columnIdToSheet = new Map<string, SheetRaw>();
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
-      sheet.activeColumnIdxs.forEach((colIndex) => {
-        const columnId = sheet.colIdRow.value(colIndex);
+      sheet.fullDataColIndexes.forEach((colIndex) => {
+        const columnId = sheet.colIdRow.uniformValue(colIndex);
         if (columnId) columnIdToSheet.set(columnId, sheet);
       });
     });
@@ -209,13 +211,13 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
       sheet.prepFetchPropertiesOnly();
-      sheet.prepFetchUniformRowUsingSheetProperties("columnId");
+      sheet.prepFetchFullUniformRow("columnId");
     });
     this.ss.fetchAllPrepped();
   }
   private _includedSheetGids(): Set<number> {
-    const sheetGidCol = this.sheetConfig.column("Sheet GID");
-    const makeSchemaCol = this.sheetConfig.column("Let api access traits");
+    const sheetGidCol = this.sheetConfig.column("Sheet GID").data;
+    const makeSchemaCol = this.sheetConfig.column("Let api access traits").data;
 
     const includedSheetGids = new Set<number>();
     this.sheetConfig.sheet.activeDataRowIndexes.forEach((rowIndex) => {

@@ -14,10 +14,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return new SpreadsheetRaw(SpreadsheetRaw.initSpreadsheetRawProps());
   }
   private get sheetsService(): GoogleAppsScript.Sheets {
-    return valS.assertDefined(
-      Sheets,
-      "Sheets (enable the Advanced Sheets Service)",
-    );
+    return valS.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
   }
   get schema() {
     return new SchemaBase();
@@ -67,20 +64,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return { activeSheetGids: this.activeSheetGids };
   }
   fetchAllPrepped(): void {
-    this._supplementFetch();
     const data = this._fetchByDataFilter();
     this._addDataToState(data);
     this.rawState.fetcherGridRanges = [];
-  }
-  private _supplementFetch() {
-    this.fetcherGridRanges.forEach((gr) => {
-      if (
-        gr.startColumnIndex !== undefined &&
-        gr.startRowIndex >= this.schema.topDataRowIdx
-      ) {
-        this.sheet(gr.sheetId).addIndexOfColToFinalize(gr.startColumnIndex);
-      }
-    });
   }
   private _fetchByDataFilter(): GoogleSpreadsheet {
     return this.sheetsService.Spreadsheets.getByDataFilter(
@@ -105,17 +91,14 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     };
   }
   private _addDataToState(gss: GoogleSpreadsheet) {
-    valS.assertDefined(gss.sheets, "gss.sheets").forEach((gSheet) => {
-      const properties = valS.assertDefined(
-        gSheet.properties,
-        "gSheet.properties",
-      );
-      const sheetGid = valS.assertDefined(properties.sheetId, "sheetId");
+    valS.assert(gss.sheets, "gss.sheets").forEach((gSheet) => {
+      const properties = valS.assert(gSheet.properties, "gSheet.properties");
+      const sheetGid = valS.assert(properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
       sheet.integrateSheetState(gSheet);
     });
     this.activeSheets.forEach((sheet) => {
-      sheet.finalizeFetchedColumnData();
+      sheet.finalizeFetchedData();
     });
   }
   batchUpdateGSheets() {
@@ -164,18 +147,19 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _sendUpdateRequests() {
     const surs = this.rawState.updateRequests;
-    this.sheetsService.Spreadsheets.batchUpdate(
-      {
-        requests: [
-          ...surs.append,
-          ...surs.insertColumn,
-          ...surs.update,
-          ...surs.delete,
-          ...surs.sort,
-        ],
-      },
-      this.spreadsheetId,
-    );
+    const requests = [
+      ...surs.append,
+      ...surs.insertColumn,
+      ...surs.update,
+      ...surs.delete,
+      ...surs.sort,
+    ];
+    if (requests.length > 0) {
+      this.sheetsService.Spreadsheets.batchUpdate(
+        { requests },
+        this.spreadsheetId,
+      );
+    }
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
   }
 }

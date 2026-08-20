@@ -2,29 +2,25 @@ import { type CellValueName, type UniformRowName } from "../00_base/base";
 import type { Value } from "../02_generatedTraits/06_valueSchemas";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../utils/validation";
-import { SheetRawBase } from "./ClassBases/SheetRawBase";
+import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
+import { DataRowRaw } from "./ClassBases/DataRowRaw";
+import { SheetCommon } from "./ClassBases/SheetCommon";
 import { ColumnRaw } from "./ColumnRaw";
-import { RowRaw } from "./RowRaw";
 
 import type {
-  GoogleCellValue,
-  GoogleGridRange,
-  GoogleSheet,
-  GoogleSheetData,
+    GoogleCellValue
 } from "../00_base/AppsScriptTypes";
-import type { SheetGridRangeProps } from "./ClassTypes/AccessorsRaw";
-import type {
-  SheetChangeProps,
-  SheetChangePropsObj,
-  SheetChangesToSave,
-  SortParameters,
+import {
+    isPreFetchType,
+    type SheetChangeProps,
+    type SheetChangesToSave
 } from "./ClassTypes/RawState";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import { UniformRow } from "./UniformRow";
 
-export type SheetRawRow = RowRaw | UniformRow;
+export type SheetRawRow = DataRowRaw | UniformRow;
 
-export class SheetRaw extends SheetRawBase {
+export class SheetRaw extends SheetCommon {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
@@ -40,8 +36,8 @@ export class SheetRaw extends SheetRawBase {
   get colIdRow(): UniformRow<"columnId"> {
     return this.uniformRow("columnId");
   }
-  rowRaw(rowIdx: number): RowRaw {
-    return new RowRaw({
+  dataRowRaw(rowIdx: number): DataRowRaw {
+    return new DataRowRaw({
       rowIndex: rowIdx,
       ...this.sheetRawProps,
     });
@@ -62,11 +58,11 @@ export class SheetRaw extends SheetRawBase {
     }
     return this.uniformRow(rowName);
   }
-  row(rowIdx: number): RowRaw | UniformRow {
+  row(rowIdx: number): DataRowRaw | UniformRow {
     if (this.schema.isUniformRowIndex(rowIdx)) {
       return this.uniformRowByIndex(rowIdx);
     } else {
-      return this.rowRaw(rowIdx);
+      return this.dataRowRaw(rowIdx);
     }
   }
   column<VN extends CellValueName = CellValueName>(
@@ -79,25 +75,68 @@ export class SheetRaw extends SheetRawBase {
       ...this.sheetRawProps,
     });
   }
-  get dataRows(): RowRaw[] {
+  get dataRows(): DataRowRaw[] {
     return this.activeDataRowIndexes.map((index) => this.dataRow(index));
   }
-  get topDataRow(): RowRaw {
-    return this.row(this.schema.topDataRowIdx) as RowRaw;
+  get topDataRow(): DataRowRaw {
+    return this.row(this.schema.topDataRowIdx) as DataRowRaw;
   }
-  dataRow(index: number): RowRaw {
+  dataRow(index: number): DataRowRaw {
     this.schema.validateDataRowIndex(index);
-    return this.row(index) as RowRaw;
+    return this.row(index) as DataRowRaw;
   }
   get activeRows(): SheetRawRow[] {
     return this.activeRowIndexes.map((rowIndex) => this.row(rowIndex));
   }
-  get activeColumnIdxs(): number[] {
-    // TODO: This would be better off looping through all active
-    // rows to find any columns that have values.
-    return valS.assertDefined(this.activeRows[0], "activeRows[0]")
-      .activeColIdxs;
+  gatherFetchGridRanges() {
+    this.preFetchGridRanges.forEach((pf) => {
+      if (isPreFetchType(pf, "fullRow")) {
+        this.prepFetchFullRow(pf.row);
+      } else if (isPreFetchType(pf, "fullDataColumn")) {
+        this.column(pf.column);
+      } else if (isPreFetchType(pf, "singleCell")) {
+        this.prepFetchSingleCell(pf.row, pf.column);
+      } else {
+        throw new Error(`Unknown pre-fetch type: ${pf}`);
+      }
+    });
   }
+  prepFetchFullRow(rowIndex: number): SheetRaw {
+    this.sheetState.indexesOfFullRowsToFetch.add(rowIndex);
+    return this.gatherFetchRange({
+      ...this.schema.oneRowSpecifier(rowIndex),
+      startColumnIndex: 0,
+    });
+  }
+  prepFetch()
+
+  prepFetchFullRowNext(rowIndex: number) {
+    this.preFetchGridRanges.push({ type: "fullRow", row: rowIndex });
+  }
+
+  }
+
+  gatherFetchRange(gr: SheetGridRangeProps): SheetRaw {
+    if (
+      gr.startColumnIndex !== undefined &&
+      gr.startRowIndex >= this.schema.topDataRowIdx
+    ) {
+      this.sheetState.indexesOfColDataToFetch.add(gr.startColumnIndex);
+    }
+    if (
+      gr.endRowIndex === gr.startRowIndex + 1 &&
+      gr.startColumnIndex === 0 &&
+      gr.endColumnIndex === undefined
+    ) {
+      this.sheetState.indexesOfFullRowsToFetch.add(gr.startRowIndex);
+    }
+    this.rawState.fetcherGridRanges.push({
+      sheetId: this.sheetGid,
+      ...gr,
+    });
+    return this;
+  }
+
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
   }
@@ -109,7 +148,7 @@ export class SheetRaw extends SheetRawBase {
   }
 
   private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
-    const colsData = valS.assertDefined(sheetData, "sheetData");
+    const colsData = valS.assert(sheetData, "sheetData");
     colsData.forEach((colData) => {
       // Payload doesn't include default values of 0
       const colIdxBase = colData.startColumn ?? 0;
@@ -122,32 +161,44 @@ export class SheetRaw extends SheetRawBase {
             | GoogleCellValue
             | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
-          this.rowRaw(rowIdx).integrateState(colIndex, cellData);
+          this.row(rowIdx).integrateState(colIndex, cellData);
         });
       });
     });
   }
-  addIndexOfColToFinalize(colIndex: number): void {
-    this.sheetState.colIndexesOfDataToFetch.add(colIndex);
+  get allDataRows(): DataRowRaw[] {
+    return this.fullDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
   }
-  get allDataRows(): RowRaw[] {
-    return this.allDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
-  }
-  finalizeFetchedColumnData() {
+  finalizeFetchedData() {
     this.allDataRows.forEach((row) => row.ensureStateExists());
-    this.sheetState.colIndexesOfDataToFetch.forEach((colIndex) => {
-      this.allDataRows.forEach((row) => {
+    this._finalizeFetchedFullRows();
+    this._finalizeFetchedDataColumns();
+  }
+  private _finalizeFetchedFullRows(): void {
+    this.sheetState.indexesOfFullRowsToFetch.forEach((rowIndex) => {
+      this.fullDataColIndexes.forEach((colIndex) => {
+        const row = this.row(rowIndex);
         if (!row.hasValue(colIndex)) {
-          row.integrateState(colIndex, "" as GoogleCellValue);
+          row.integrateEmptyState(colIndex);
         }
       });
     });
-    this.sheetState.colIndexesOfDataToFetch.clear();
+    this.sheetState.indexesOfFullRowsToFetch.clear();
+  }
+  private _finalizeFetchedDataColumns(): void {
+    this.sheetState.indexesOfColDataToFetch.forEach((colIndex) => {
+      this.allDataRows.forEach((row) => {
+        if (!row.hasValue(colIndex)) {
+          row.integrateEmptyState(colIndex);
+        }
+      });
+    });
+    this.sheetState.indexesOfColDataToFetch.clear();
   }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
-    this.activeColumnIdxs.forEach((colIndex) => {
-      const colIdValue = this.colIdRow.value(colIndex);
+    this.fullDataColIndexes.forEach((colIndex) => {
+      const colIdValue = this.colIdRow.uniformValue(colIndex);
       if (!colIdValue) {
         this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
         addedCount++;
@@ -161,55 +212,28 @@ export class SheetRaw extends SheetRawBase {
   makeRowId(idPrefix: string): string {
     return this.schema.makeRowIdFromPrefix(idPrefix);
   }
-  gatherFetchRange(gr: SheetGridRangeProps): SheetRaw {
-    if (
-      gr.startColumnIndex !== undefined &&
-      gr.startRowIndex >= this.schema.topDataRowIdx
-    ) {
-      this.addIndexOfColToFinalize(gr.startColumnIndex);
-    }
-
-    this.rawState.fetcherGridRanges.push({
-      sheetId: this.sheetGid,
-      ...gr,
-    });
-    return this;
-  }
   gatherFetchRanges(props: SheetGridRangeProps[]): SheetRaw {
     props.forEach((props) => this.gatherFetchRange(props));
     return this;
   }
-  prepFetchOneRow(rowIndex: number): SheetRaw {
-    return this.gatherFetchRange({
-      ...this.schema.oneRowSpecifier(rowIndex),
-      startColumnIndex: 0,
-      endColumnIndex: this.activeTable.endColumnIndex,
-    });
-  }
   prepFetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
-    return this.prepFetchUniformRowUsingSheetProperties("header");
+    return this.prepFetchFullUniformRow("header");
   }
   fetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
     const row = this.prepFetchHeaderRowUsingSheetProperties();
     this.ss.fetchAllPrepped();
     return row;
   }
-  prepFetchUniformRowUsingSheetProperties<UN extends UniformRowName>(
+  prepFetchFullUniformRow<UN extends UniformRowName>(
     rowName: UN,
   ): UniformRow<UN> {
-    this.gatherFetchRange({
-      ...this.schema.oneRowSpecifier(this.schema.uniformRowIndex(rowName)),
-      startColumnIndex: 0,
-      endColumnIndex: this.activeTable.endColumnIndex,
-    });
+    this.prepFetchFullRow(this.schema.uniformRowIndex(rowName));
     return this.uniformRow(rowName);
   }
   prepFetchUniformRowsUsingSheetProperties(
     rowNames: UniformRowName[],
   ): SheetRaw {
-    rowNames.forEach((rowName) =>
-      this.prepFetchUniformRowUsingSheetProperties(rowName),
-    );
+    rowNames.forEach((rowName) => this.prepFetchFullUniformRow(rowName));
     return this;
   }
   columnByHeader<VN extends CellValueName = CellValueName>(
@@ -221,38 +245,33 @@ export class SheetRaw extends SheetRawBase {
   }
   prepFetchDataColumnsUsingHeaders<HD extends string>(
     ...headers: HD[]
-  ): Record<HD, ColumnRaw> {
+  ): Record<HD, DataColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] = this.columnByHeader(header).prepFetchAllDataCells();
+        acc[header] = this.columnByHeader(header).data.prepFetchAllDataCells();
         return acc;
       },
-      {} as Record<HD, ColumnRaw>,
+      {} as Record<HD, DataColumnRaw>,
     );
   }
-  ensureColumnsOfHeadersExist(...headers: string[]): number {
+  ensureColumnsOfHeadersExist(idPrefix: string, ...headers: string[]): number {
     const missingHeaders = this.headerRow.returnMissingValues(...headers);
     return missingHeaders.reduce((acc, header) => {
-      const columnIndex = this.activeTable.endColumnIndex;
-      this.insertColumnAt(columnIndex);
-      this.headerRow.updateValue(columnIndex, header);
+      this.insertColumnAtEnd({
+        idPrefix,
+        header,
+      });
       return acc + 1;
     }, 0);
   }
   get lastRowIdx(): number {
     return Math.max(...this.rowStates.keys());
   }
-  invalidateRowIndexes(): void {
-    this.rowIndexesAreValid = false;
-  }
-  validateRowIndexes(): void {
-    this.rowIndexesAreValid = true;
-  }
-  appendDataRow(): RowRaw {
+  appendDataRow(): DataRowRaw {
     const idx = this.activeTable.endRowIndex;
     return this.dataRow(idx).append();
   }
-  appendDataRowValues(colValues: Map<number, Value>): RowRaw {
+  appendDataRowValues(colValues: Map<number, Value>): DataRowRaw {
     const row = this.appendDataRow();
     for (const [colIndex, value] of colValues.entries()) {
       row.updateValue(colIndex, value);
@@ -306,22 +325,15 @@ export class SheetRaw extends SheetRawBase {
   }
   addSheetChangeToSave(props: SheetChangeProps): SheetRaw {
     const changes = this.changesToSave;
-    const actions: {
-      [K in keyof SheetChangePropsObj]: (props: SheetChangePropsObj[K]) => any;
-    } = {
-      sort: (props) =>
-        (changes.sort = {
-          colIdxToSortBy: props.colIdxToSortBy,
-          sortOrder: props.sortOrder,
-        }),
-      insertColumn: (props) => (changes.insertColumn = props.startColumnIndex),
-    };
     switch (props.action) {
       case "sort":
-        actions.sort(props);
+        changes.sort = {
+          colIdxToSortBy: props.colIdxToSortBy,
+          sortOrder: props.sortOrder,
+        };
         break;
       case "insertColumn":
-        actions.insertColumn(props);
+        changes.insertColumn = props.startColumnIndex;
         break;
       default:
         throw new Error(
@@ -330,25 +342,24 @@ export class SheetRaw extends SheetRawBase {
     }
     return this;
   }
-  insertColumnAt(startColumnIndex: number = 0): void {
+  insertColumnAtEnd(props: { idPrefix: string; header: string }): number {
+    const columnIndex = this.activeTable.endColumnIndex;
+    this.column(columnIndex).insert(props);
     this.addSheetChangeToSave({
       action: "insertColumn",
-      startColumnIndex,
+      startColumnIndex: columnIndex,
     });
-    if (startColumnIndex <= this.activeTable.endColumnIndex) {
-      this.activeTable.endColumnIndex++;
-    } else {
-      throw new Error(
-        `Cannot insert column at index ${startColumnIndex} because it would be outside the existing table end column index of ${this.activeTable.endColumnIndex}.`,
-      );
-    }
+    return columnIndex;
   }
   prepFetchPropertiesOnly(): SheetRaw {
+    // getByDataFilter only returns a sheet's `tables` metadata for filters whose
+    // gridRange overlaps the table. The table always starts at the header row,
+    // so pre-activate it and request one of its cells to reliably pull properties.
+    this.uniformRow("header");
     this.gatherFetchRange({
-      startRowIndex: this.topDataRow.rowIndex,
-      endRowIndex: this.topDataRow.rowIndex,
-      startColumnIndex: 0,
-      endColumnIndex: 0,
+      ...this.schema.oneRowSpecifier(this.schema.headerRowIndex),
+      startColumnIndex: this.schema.startTableColIndex,
+      endColumnIndex: this.schema.startTableColIndex + 1,
     });
     return this;
   }
@@ -364,10 +375,10 @@ export class SheetRaw extends SheetRawBase {
         inheritFromBefore: false, // Let the formatting and column header colors be natural.
       },
     });
-    if (this.lastNotStaleColumnIdx !== null) {
-      if (this.lastNotStaleColumnIdx > startColumnIndex) {
-        this.lastNotStaleColumnIdx = startColumnIndex;
-      }
+    if (startColumnIndex === this.activeTable.endColumnIndex) {
+      this.activeTable.endColumnIndex++;
+    } else {
+      this.ensureColIndexIsStale(startColumnIndex);
     }
   }
   gatherSortRequest({ colIdxToSortBy, sortOrder }: SortParameters): void {
@@ -385,10 +396,11 @@ export class SheetRaw extends SheetRawBase {
   copyAndDeleteLastActiveDataRow() {
     // I'd want to insert rather than append.
     // Can I append at the not last row? Probably not.
+    // Is there a way for me to verify that rows or values are fetched?
     const lastRowIdx = this.lastRowIdx;
     const lastRow = this.dataRow(lastRowIdx);
     const newRow = this.appendDataRow();
-    lastRow.activeColIdxs.forEach((colIndex) => {
+    this.fullDataColIndexes.forEach((colIndex) => {
       const value = lastRow.value(colIndex);
       newRow.updateValue(colIndex, value);
     });
