@@ -1,28 +1,23 @@
-import {
-  SpreadsheetRawBase,
-  type SpreadsheetRawProps,
-} from "../../01_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
 import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/AccessorsRaw";
-import { SpreadsheetRaw } from "../../01_SpreadsheetRaw/SpreadsheetRaw";
-import { SpreadsheetSchema } from "../SpreadsheetSchemaNamed";
+import {
+  SpreadsheetIndexedBase,
+  type SpreadsheetIndexedProps,
+} from "../../03_SpreadsheetIndexed/SpreadsheetIndexedBase";
 import type { SpreadsheetNamedState } from "../Types/NamedState";
 
-export interface SpreadsheetNamedProps extends SpreadsheetRawProps {
+export interface SpreadsheetNamedProps extends SpreadsheetIndexedProps {
   namedState: SpreadsheetNamedState;
 }
 
-export class SpreadsheetNamedBase extends SpreadsheetRawBase {
+export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
   protected namedState: SpreadsheetNamedState;
   constructor({ namedState, ...rest }: SpreadsheetNamedProps) {
     super(rest);
     this.namedState = namedState;
   }
-  get spreadsheetSchema(): SpreadsheetSchema {
-    return new SpreadsheetSchema();
-  }
   get spreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
-      rawState: this.rawState,
+      ...super.spreadsheetIndexedProps,
       namedState: this.namedState,
     };
   }
@@ -31,7 +26,7 @@ export class SpreadsheetNamedBase extends SpreadsheetRawBase {
   }
   static initSpreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
-      ...SpreadsheetRaw.initSpreadsheetRawProps(),
+      ...SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
       namedState: {
         gridRangeFetchProps: [],
       },

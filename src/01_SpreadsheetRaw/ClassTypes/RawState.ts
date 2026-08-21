@@ -2,6 +2,14 @@ import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue } from "../../00_base/base";
 import type { GridRangeProps } from "./AccessorsRaw";
 
+export interface RawState {
+  allSheetPropertiesAreFetched: boolean;
+  changesToSave: ChangesToSave;
+  fetcherGridRanges: GridRangeProps[];
+  updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;
+  sheets: RawSheetsState;
+}
+
 const updateRequestNames = [
   "append",
   "update",
@@ -10,14 +18,6 @@ const updateRequestNames = [
   "insertColumn",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
-
-export interface RawState {
-  allSheetPropertiesAreFetched: boolean;
-  changesToSave: ChangesToSave;
-  fetcherGridRanges: GridRangeProps[];
-  updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;
-  sheets: RawSheetsState;
-}
 
 export type RawSheetsState = Map<SheetId, RawSheetState>;
 
@@ -30,58 +30,16 @@ export interface RawSheetState {
     startColumnIndex: number;
     endColumnIndex: number; // lastColumnIndex + 1
   } | null;
-  preFetchGridRanges: PreFetchGridRange[];
   rowIndexesAreValid: boolean;
   firstStaleColIndex: number | null;
-  indexesOfFullRowsToFetch: Set<RowIdx>;
-  indexesOfColDataToFetch: Set<ColIdx>;
   rowStates: RawRowStates;
 }
 
-interface FullRowPreFetch {
-  row: number;
-  column: "allDataColumns";
-}
-interface FullColumnPreFetch {
-  column: string;
-  row: "allDataRows";
-}
-interface SingleCellPreFetch {
-  row: number;
-  column: string;
-}
-
-export type PreFetchType = keyof PreFetchTypes;
-interface PreFetchTypes {
-  fullRow: FullRowPreFetch;
-  fullDataColumn: FullColumnPreFetch;
-  singleCell: SingleCellPreFetch;
-}
-export type PreFetchGridRange = PreFetchTypes[PreFetchTypeName];
-type PreFetchTypeName = keyof PreFetchTypes;
-
-export function isPreFetchType<PFN extends PreFetchTypeName>(
-  preFetch: PreFetchGridRange,
-  pfName: PFN,
-): preFetch is PreFetchTypes[PFN] {
-  if (pfName === "fullRow") {
-    return preFetch.column === "allDataColumns";
-  } else if (pfName === "fullDataColumn") {
-    return preFetch.row === "allDataRows";
-  } else if (pfName === "singleCell") {
-    return (
-      preFetch.row !== "allDataRows" && preFetch.column !== "allDataColumns"
-    );
-  } else {
-    return false;
-  }
-}
-
-export type RawRowStates = Map<RowIdx, RawRowState>;
-export type RawRowState = Map<ColIdx, CellValue>;
+export type RawRowStates = Map<RowIndex, RawRowState>;
+export type RawRowState = Map<ColIndex, CellValue>;
 type SheetId = number;
-type RowIdx = number;
-type ColIdx = number;
+type RowIndex = number;
+type ColIndex = number;
 type SheetRowId = string;
 
 export type SortParameters = {
@@ -97,12 +55,12 @@ export type RowChangesToSave = {
   level: "row";
   append: boolean;
   delete: null | GoogleAppsScript.Sheets.Schema.Request;
-  update: Set<ColIdx>;
+  update: Set<ColIndex>;
 };
 export type SheetChangesToSave = {
   level: "sheet";
   sort: null | SortParameters;
-  insertColumn: null | ColIdx;
+  insertColumn: null | ColIndex;
 };
 
 export interface SheetChangeSortProps extends SortParameters {
@@ -123,7 +81,7 @@ export type RowChangeProps =
   | { action: "append" | "delete" }
   | RowChangeUpdateProps;
 
-export type ColumnSpecifierRaw = ColIdx[] | "allColumns";
+export type ColumnSpecifierRaw = ColIndex[] | "allColumns";
 export type ColumnCount = number | "allFromStart";
 export type RowCountRaw = number | "allFromStart";
 

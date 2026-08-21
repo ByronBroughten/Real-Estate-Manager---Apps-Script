@@ -1,26 +1,26 @@
 import type { UniformRowName } from "../00_base/base";
-import { SheetCommon } from "../01_SpreadsheetRaw/ClassBases/SheetCommon";
 import { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { UniformRow } from "../01_SpreadsheetRaw/UniformRow";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
+import { SheetIndexedBase } from "./SheetIndexedBase";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
-export class SheetIndexed extends SheetCommon {
+export class SheetIndexed extends SheetIndexedBase {
   get schema(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
   }
   get raw(): SheetRaw {
-    return new SheetRaw(this.sheetRawProps);
+    return new SheetRaw(this.sheetIndexedProps);
   }
   get sheetName(): SheetName {
     return this.schema.sheetName;
   }
-  column(colIndex: number): ColumnIndexed {
+  column(columnId: string): ColumnIndexed {
     return new ColumnIndexed({
-      ...this.sheetRawProps,
-      colIndex,
+      ...this.sheetIndexedProps,
+      columnId,
     });
   }
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
@@ -31,7 +31,7 @@ export class SheetIndexed extends SheetCommon {
   }
   dataRow(rowIndex: number): DataRowIndexed {
     return new DataRowIndexed({
-      ...this.sheetRawProps,
+      ...this.sheetIndexedProps,
       rowIndex,
     });
   }

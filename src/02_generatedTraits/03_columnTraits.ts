@@ -3634,44 +3634,44 @@ export function getColumnTraitByName<
   return (allColTraits[sheetName][columnName] as ColTraits<TN, CN>)[key];
 }
 
-export type RawIdxColTraits = KeyedMap<
+export type IndexedColIdTraits = KeyedMap<
   Record<string, ColTraitsBase>,
-  "colIndex",
+  "columnId",
   "columnName"
 >;
 
-type AllColTraitsGidIdx = Map<number, RawIdxColTraits>;
-function makeAllColTraitsGidIdx(): AllColTraitsGidIdx {
+type AllColTraitsGidColId = Map<number, IndexedColIdTraits>;
+function makeAllColTraitsGidColId(): AllColTraitsGidColId {
   return schemaSheetNames.reduce((attrs, sheetName) => {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
       sheetGid,
-      Obj.toKeyedMap(allColTraits[sheetName], "colIndex", "columnName"),
+      Obj.toKeyedMap(allColTraits[sheetName], "columnId", "columnName"),
     );
     return attrs;
-  }, new Map() as AllColTraitsGidIdx);
+  }, new Map() as AllColTraitsGidColId);
 }
 
-const allColTraitsGidIdx = makeAllColTraitsGidIdx();
+const allColTraitsGidColId = makeAllColTraitsGidColId();
 
 export type ColTraitsRaw =
-  RawIdxColTraits extends Map<any, infer V> ? V : never;
+  IndexedColIdTraits extends Map<any, infer V> ? V : never;
 export type ColTraitsRawKey = keyof ColTraitsRaw;
 export function getColumnTraitByIndex<K extends ColTraitsRawKey>(
   sheetId: number,
-  colIndex: number,
+  columnId: string,
   key: K,
 ): ColTraitsRaw[K] {
   const colTraits = valS.assert(
-    allColTraitsGidIdx.get(sheetId)?.get(colIndex),
-    `column attributes for sheetId=${sheetId}, colIndex=${colIndex}`,
+    allColTraitsGidColId.get(sheetId)?.get(columnId),
+    `column attributes for sheetId=${sheetId}, columnId=${columnId}`,
   );
   return colTraits[key];
 }
-export function getSheetColumnIdxes(sheetGid: number): MapIterator<number> {
+export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
   return valS
     .assert(
-      allColTraitsGidIdx.get(sheetGid),
+      allColTraitsGidColId.get(sheetGid),
       `column attributes for sheetId=${sheetGid}`,
     )
     .keys();

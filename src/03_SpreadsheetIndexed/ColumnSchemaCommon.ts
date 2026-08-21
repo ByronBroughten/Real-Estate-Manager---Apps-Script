@@ -1,5 +1,5 @@
-import type { ColTraitsLiteral } from "../02_generatedTraits/03_columnTraits";
 import type { ValueSchemaKey } from "../00_base/valueSchema";
+import type { ColTraitsLiteral } from "../02_generatedTraits/03_columnTraits";
 import {
   getValTrait,
   type Value,
@@ -8,13 +8,13 @@ import {
 } from "../02_generatedTraits/06_valueSchemas";
 import { SchemaBase } from "./SchemaBase";
 
-type ColumnTraitLiteral = Omit<ColTraitsLiteral, "colIndex">;
+type ColumnTraitLiteral = Omit<ColTraitsLiteral, "columnId">;
 
 export abstract class ColumnSchemaCommon<
   VN extends ValueName = ValueName,
 > extends SchemaBase {
   abstract columnName: PropertyKey;
-  abstract colIndex: number;
+  abstract columnId: string;
   abstract valueName: VN;
   abstract trait<K extends keyof ColumnTraitLiteral>(
     key: K,
@@ -27,13 +27,10 @@ export abstract class ColumnSchemaCommon<
   get isFormula(): boolean {
     return this.trait("isFormula");
   }
-  get columnId(): string {
-    return this.trait("columnId");
-  }
   validateDataNotFormula() {
     if (this.isFormula) {
       throw new Error(
-        `Column at index ${this.colIndex} is a formula column and cannot be used for this operation.`,
+        `Column with id "${this.columnId}" is a formula column and cannot be used for this operation.`,
       );
     }
   }

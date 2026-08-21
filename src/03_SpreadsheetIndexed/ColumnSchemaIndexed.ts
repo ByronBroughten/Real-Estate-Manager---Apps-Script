@@ -9,16 +9,16 @@ import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
 interface ColumnSchemaIndexedProps {
   sheetGid: number;
-  colIndex: number;
+  columnId: string;
 }
 
 export class ColumnSchemaIndexed extends ColumnSchemaCommon {
   readonly sheetGid: number;
-  readonly colIndex: number;
+  readonly columnId: string;
   constructor(props: ColumnSchemaIndexedProps) {
     super();
     this.sheetGid = props.sheetGid;
-    this.colIndex = props.colIndex;
+    this.columnId = props.columnId;
   }
   get sheet(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
@@ -33,7 +33,7 @@ export class ColumnSchemaIndexed extends ColumnSchemaCommon {
     ) as ColumnFullNameSimple;
   }
   trait<K extends keyof ColTraitsRaw>(key: K): ColTraitsRaw[K] {
-    return getColumnTraitByIndex(this.sheetGid, this.colIndex, key);
+    return getColumnTraitByIndex(this.sheetGid, this.columnId, key);
   }
   get valueName(): ValueName {
     return this.trait("valueName");

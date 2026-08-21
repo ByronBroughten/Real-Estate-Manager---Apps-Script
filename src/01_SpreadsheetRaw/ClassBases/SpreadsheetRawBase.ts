@@ -1,10 +1,10 @@
 import { AppsScript } from "../../00_base/AppsScript";
+import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   type ChangesToSave,
   type RawSheetsState,
   type RawState,
 } from "../ClassTypes/RawState";
-import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 
 export interface SpreadsheetRawProps {
   rawState: RawState;
@@ -15,7 +15,7 @@ export class SpreadsheetRawBase {
   constructor(props: SpreadsheetRawProps) {
     this.rawState = props.rawState;
   }
-  protected get sheetsState(): RawSheetsState {
+  protected get rawSheetsState(): RawSheetsState {
     return this.rawState.sheets;
   }
   get spreadsheetId(): string {

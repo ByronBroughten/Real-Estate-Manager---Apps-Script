@@ -7,13 +7,11 @@ import { DataRowRaw } from "./ClassBases/DataRowRaw";
 import { SheetCommon } from "./ClassBases/SheetCommon";
 import { ColumnRaw } from "./ColumnRaw";
 
-import type {
-    GoogleCellValue
-} from "../00_base/AppsScriptTypes";
+import type { GoogleCellValue } from "../00_base/AppsScriptTypes";
 import {
-    isPreFetchType,
-    type SheetChangeProps,
-    type SheetChangesToSave
+  isPreFetchType,
+  type SheetChangeProps,
+  type SheetChangesToSave,
 } from "./ClassTypes/RawState";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import { UniformRow } from "./UniformRow";
@@ -108,14 +106,11 @@ export class SheetRaw extends SheetCommon {
       startColumnIndex: 0,
     });
   }
-  prepFetch()
+  prepFetch() {}
 
   prepFetchFullRowNext(rowIndex: number) {
     this.preFetchGridRanges.push({ type: "fullRow", row: rowIndex });
   }
-
-  }
-
   gatherFetchRange(gr: SheetGridRangeProps): SheetRaw {
     if (
       gr.startColumnIndex !== undefined &&
@@ -136,7 +131,6 @@ export class SheetRaw extends SheetCommon {
     });
     return this;
   }
-
   get emptyGridRange(): GoogleGridRange {
     return { sheetId: this.sheetGid, startRowIndex: 0, endRowIndex: 0 };
   }

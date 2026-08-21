@@ -1,8 +1,7 @@
 import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
-import { SheetSchemaIndexed } from "../../03_SpreadsheetIndexed/SheetSchemaIndexed";
 import { Obj } from "../../utils/Obj";
 import { valS } from "../../utils/validation";
-import type { PreFetchGridRange, RawSheetState } from "../ClassTypes/RawState";
+import type { RawSheetState } from "../ClassTypes/RawState";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
@@ -33,9 +32,6 @@ export class SheetRawBase extends SpreadsheetRawBase {
         rowIndexesAreValid: true,
         firstStaleColIndex: null,
         rowStates: new Map(),
-        preFetchGridRanges: [],
-        indexesOfFullRowsToFetch: new Set(),
-        indexesOfColDataToFetch: new Set(),
       });
     }
   }
@@ -59,18 +55,11 @@ export class SheetRawBase extends SpreadsheetRawBase {
       };
     }
   }
-  get sheetSchema() {
-    return new SheetSchemaIndexed(this.sheetGid);
-  }
   protected get sheetState(): RawSheetState {
     return valS.assert(
       this.rawState.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
-  }
-  // It would probably be better if there were a function like, "set sheetState".
-  get preFetchGridRanges(): PreFetchGridRange[] {
-    return this.sheetState.preFetchGridRanges;
   }
   get activeTable(): NonNullable<RawSheetState["activeTable"]> {
     const activeTable = this.sheetState.activeTable;

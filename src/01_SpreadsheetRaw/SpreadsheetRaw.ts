@@ -1,5 +1,4 @@
 import type { GoogleSpreadsheet } from "../00_base/AppsScriptTypes";
-import type { UniformRowName } from "../00_base/base";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
@@ -11,7 +10,7 @@ import { SheetRaw, type SheetRawRow } from "./SheetRaw";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
-    return new SpreadsheetRaw(SpreadsheetRaw.initSpreadsheetRawProps());
+    return new SpreadsheetRaw(SpreadsheetRawBase.initSpreadsheetRawProps());
   }
   private get sheetsService(): GoogleAppsScript.Sheets {
     return valS.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
@@ -37,18 +36,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   rowBySheetRowId(sheetRowId: string): SheetRawRow {
     const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
     return this.sheet(sheetGid).row(rowIdx);
-  }
-  fetchFullUniformRowAllActiveSheets(rowName: UniformRowName): void {
-    this.prepFetchUniformRowsUsingSheetPropertiessAllActiveSheets(rowName);
-    this.fetchAllPrepped();
-  }
-  prepFetchUniformRowsUsingSheetPropertiessAllActiveSheets(
-    ...rowNames: UniformRowName[]
-  ): void {
-    this.ensureAllSheetPropertiesAreFetched();
-    this.activeSheets.forEach((sheet) => {
-      sheet.prepFetchUniformRowsUsingSheetProperties(rowNames);
-    });
   }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.rawState.allSheetPropertiesAreFetched) {
@@ -95,6 +82,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       const properties = valS.assert(gSheet.properties, "gSheet.properties");
       const sheetGid = valS.assert(properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
+
       sheet.integrateSheetState(gSheet);
     });
     this.activeSheets.forEach((sheet) => {

@@ -6,7 +6,6 @@ import { businessEndpoints } from "./businessEndpoints/businessEndpoints.js";
 const testSheetId = 2089200354;
 const testSheetName = "test";
 
-// Make DataColumn to differentiate it from Column
 // activeDataColIndexes
 
 // implement the PreGridRange and store them in sheetStates

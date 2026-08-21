@@ -1,36 +1,29 @@
-import { ColumnRawBase } from "../01_SpreadsheetRaw/ClassBases/ColumnRawBase";
+import { ColumnIndexedBase } from "./ColumnIndexedBase";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 
-export class ColumnIndexed extends ColumnRawBase {
+export class ColumnIndexed extends ColumnIndexedBase {
   get schema(): ColumnSchemaIndexed {
-    return new ColumnSchemaIndexed({
-      sheetGid: this.sheetGid,
-      columnId: this.colIndex,
-    });
+    return new ColumnSchemaIndexed(this.columnIndexedProps);
   }
   get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetRawProps);
+    return new SheetIndexed(this.sheetIndexedProps);
   }
-  verifySchemaIdWithActual(): void {
-    const colIdInSchema = this.schema.trait("columnId");
-    const colIdRow = this.sheet.raw.uniformRow("columnId");
-    const actualColId = colIdRow.uniformValue(this.colIndex);
-    if (actualColId !== colIdInSchema) {
-      throw new Error(
-        `actualColId is "${actualColId}" but expected "${colIdInSchema}". Are all the column ids and indexes up to date?`,
-      );
-    }
+  get colIndex() {
+    return this.sheet.raw.uniformRow("columnId").colIndexOfValue(this.columnId);
   }
   dataCellsToDefault() {
     this.sheet.dataRows.forEach((row) => {
-      row.updateToDefault(this.colIndex);
+      row.updateToDefault(this.columnId);
     });
   }
+  // Hmmm... Interesting.
+  //
+
   fillEmptyDataCellsWithDefaultValues() {
     this.sheet.dataRows.forEach((row) => {
-      if (row.raw.isEmptyCell(this.colIndex)) {
-        row.updateToDefault(this.colIndex);
+      if (row.raw.isEmptyCell(this.columnId)) {
+        row.updateToDefault(this.columnId);
       }
     });
   }
