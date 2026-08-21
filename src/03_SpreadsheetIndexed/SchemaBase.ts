@@ -9,7 +9,6 @@ import {
   configGet,
   type SpreadsheetConfig,
 } from "../00_base/spreadsheetConfig";
-import type { RowRange } from "../01_SpreadsheetRaw/ClassTypes/RawState";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
 
@@ -176,11 +175,5 @@ export class SchemaBase {
       result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
     }
     return result;
-  }
-  oneRowSpecifier(startRowIndex: number): RowRange {
-    return {
-      startRowIndex,
-      endRowIndex: startRowIndex + 1,
-    };
   }
 }

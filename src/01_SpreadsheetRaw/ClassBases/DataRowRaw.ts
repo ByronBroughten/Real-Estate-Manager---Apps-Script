@@ -1,7 +1,7 @@
-import { RowCommon } from "./RowCommon";
+import { RowCommonRaw } from "./RowCommonRaw";
 import type { RowRawProps } from "./RowRawBase";
 
-export class DataRowRaw extends RowCommon {
+export class DataRowRaw extends RowCommonRaw {
   constructor(props: RowRawProps) {
     super(props);
     this.validateIsDataRow();

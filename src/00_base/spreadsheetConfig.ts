@@ -7,6 +7,7 @@ export const spreadsheetConfig = {
   actionRowIndexBase0: 2,
   headerRowIndexBase0: 3,
   topDataRowIdxBase0: 4,
+  firstDataColIndexBase0: 0,
   spreadsheetConfigGid: 1967106628,
   sheetConfigGid: 210603630,
   columnConfigGid: 2034522667,

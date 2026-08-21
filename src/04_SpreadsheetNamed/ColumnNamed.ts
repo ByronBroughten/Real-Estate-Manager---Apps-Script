@@ -12,42 +12,46 @@ export class ColumnNamed<
   SN extends SheetName,
   CN extends ColumnName<SN> = ColumnName<SN>,
 > extends ColumnNamedBase<SN, CN> {
-  get colIndex(): number {
-    return this.sheet.schema.column(this.columnName).colIndex;
+  get columnId(): string {
+    return this.sheet.schema.column(this.columnName).columnId;
   }
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
   get raw() {
-    return this.sheet.raw.column(this.colIndex);
+    return this.sheet.raw.column(this.indexed.colIndex);
   }
-  get rich() {
-    return this.sheet.rich.column(this.colIndex);
+  get indexed() {
+    return this.sheet.indexed.column(this.columnId);
   }
+  get colIndex() {
+    return this.indexed.colIndex;
+  }
+
   get schema() {
     return this.sheet.schema.column(this.columnName);
   }
   get fullName(): ColumnFullName<SN, CN> {
     return this.schema.fullName;
   }
-  prepFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
-    this.raw.prepFetchUniformCell(rowName);
+  gatherFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
+    this.raw.uniformCell(rowName).gatherFetchRange();
     return this;
   }
-  prepFetchAllDataCells(): ColumnNamed<SN, CN> {
-    this.raw.data.prepFetchAllDataCells();
+  gatherFetchAllDataCells(): ColumnNamed<SN, CN> {
+    this.raw.data.gatherFetchAll();
     return this;
   }
   dataCellsToDefault(): ColumnNamed<SN, CN> {
-    this.rich.dataCellsToDefault();
+    this.indexed.dataCellsToDefault();
     return this;
   }
   fillEmptyDataCellsWithDefaultValues(): ColumnNamed<SN, CN> {
-    this.rich.fillEmptyDataCellsWithDefaultValues();
+    this.indexed.fillEmptyDataCellsWithDefaultValues();
     return this;
   }
   actionRowToDefault(): ColumnNamed<SN, CN> {
-    this.sheet.rich.uniformRow("action").updateValue(this.colIndex, false);
+    this.sheet.indexed.uniformRow("action").updateValue(this.colIndex, false);
     return this;
   }
 }

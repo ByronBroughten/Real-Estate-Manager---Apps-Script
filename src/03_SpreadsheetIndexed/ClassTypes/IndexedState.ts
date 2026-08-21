@@ -7,7 +7,7 @@ export type IndexedSheetsState = Map<SheetId, IndexedSheetState>;
 export interface IndexedSheetState {
   preFetchGridRanges: PreFetchGridRange[];
   indexesOfFullRowsToFetch: Set<RowIndex>;
-  idsOfDataColsToFetch: Set<ColumnId>;
+  idsOfFullDataColsToFetch: Set<ColumnId>;
 }
 
 type SheetId = number;

@@ -1,14 +1,8 @@
 import type {
   GoogleCellValue,
   GoogleUpdateRequest,
-  UserEnteredValue,
 } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
-import {
-  getCellValTrait,
-  type CellValueTrait,
-} from "../../00_base/baseValueSchemas";
-import { type ValueSchemaKey } from "../../00_base/valueSchema";
 import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../../utils/validation";
 import type {
@@ -16,8 +10,8 @@ import type {
   RowChangesToSave,
   RowChangeUpdateProps,
 } from "../ClassTypes/RawState";
-import { ColumnRaw } from "../ColumnRaw";
 import { SheetRaw } from "../SheetRaw";
+import { CellRaw } from "./CellRaw";
 import { RowRawBase } from "./RowRawBase";
 
 export abstract class RowCommonRaw extends RowRawBase {
@@ -27,45 +21,25 @@ export abstract class RowCommonRaw extends RowRawBase {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  cellTrait<VN extends CellValueName, K extends ValueSchemaKey>(
-    valueName: VN,
-    key: K,
-  ): CellValueTrait<VN, K> {
-    return getCellValTrait(valueName, key);
-  }
-  protected column(colIndex: number): ColumnRaw {
-    return new ColumnRaw({
+  cell<VN extends CellValueName>(
+    colIndex: number,
+    valueNameAssert?: VN,
+  ): CellRaw<VN> {
+    return new CellRaw<VN>({
       ...this.sheetRawProps,
+      rowIndex: this.rowIndex,
       colIndex: colIndex,
+      valueName: valueNameAssert,
     });
   }
-  isEmptyCell(colIndex: number): boolean {
-    if (!this.cellIsActive(colIndex)) {
-      throw new Error(
-        `Row ${this.rowIndex} does not have a value set for column index ${colIndex}.`,
-      );
-    }
-    const value = this.rowState.get(colIndex);
-    return value === "" || value === null || value === undefined;
-  }
-  cellIsActive(colIndex: number): boolean {
-    return this.rowState.has(colIndex);
+  firstTableCell(): CellRaw {
+    return this.cell(this.schema.startTableColIndex);
   }
   value<VN extends CellValueName>(
     colIndex: number,
     valueNameAssert?: VN,
   ): CellValue<VN> {
-    if (!this.cellIsActive(colIndex)) {
-      throw new Error(
-        `Row ${this.rowIndex} does not have a value set for column index ${colIndex}.`,
-      );
-    }
-    const value = this.rowState.get(colIndex);
-    if (valueNameAssert) {
-      return this.cellTrait(valueNameAssert, "strictValidate")(value);
-    } else {
-      return value as CellValue<VN>;
-    }
+    return this.cell(colIndex, valueNameAssert).value();
   }
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
@@ -79,7 +53,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     this.rowState.set(colIndex, value);
   }
   updateValue(colIndex: number, value: CellValue): this {
-    this.column(colIndex).validateIndexNotStale();
+    this.cell(colIndex).validateIndexNotStale();
     this.setValueState(colIndex, value);
     return this.addRowChangeToSave({ action: "update", colIdxes: [colIndex] });
   }
@@ -113,20 +87,6 @@ export abstract class RowCommonRaw extends RowRawBase {
       return "";
     }
   }
-  private _valueForSheet(colIndex: number): UserEnteredValue {
-    const value = this.value(colIndex);
-    if (typeof value === "string") {
-      return { stringValue: value };
-    } else if (typeof value === "number") {
-      return { numberValue: value };
-    } else if (typeof value === "boolean") {
-      return { boolValue: value };
-    } else {
-      throw new Error(
-        `Cannot make user entered value for unsupported type "${typeof value}".`,
-      );
-    }
-  }
   delete(): void {
     this.remove();
     this.addRowChangeToSave({ action: "delete" });
@@ -156,7 +116,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     };
   }
   get sheetRowId(): string {
-    return this.sheetSchema.makeId(this.sheetGid, this.rowIndex);
+    return this.schema.makeId(this.sheetGid, this.rowIndex);
   }
   get changesToSave(): RowChangesToSave {
     this._ensureChangesToSaveExists();
@@ -190,10 +150,10 @@ export abstract class RowCommonRaw extends RowRawBase {
     return this;
   }
   gatherFetchFull(): this {
-    this.sheetState.indexesOfFullRowsToFetch.add(this.rowIndex);
     this.sheet.gatherFetchRange({
-      ...this.schema.oneRowSpecifier(this.rowIndex),
-      startColumnIndex: 0,
+      startRowIndex: this.rowIndex,
+      endRowIndex: this.rowIndex + 1,
+      startColumnIndex: this.schema.startTableColIndex,
     });
     return this;
   }
@@ -203,23 +163,6 @@ export abstract class RowCommonRaw extends RowRawBase {
         sheetId: this.sheetGid,
         tableId: `${this.activeTable.tableId}`,
         rows: [{}],
-        fields: "userEnteredValue",
-      },
-    });
-  }
-  gatherUpdateRequest(colIndex: number): void {
-    this.updateRequests.update.push({
-      updateCells: {
-        range: {
-          sheetId: this.sheetGid,
-          startRowIndex: this.rowIndex,
-          endRowIndex: this.rowIndex + 1,
-          startColumnIndex: colIndex,
-          endColumnIndex: colIndex + 1,
-        },
-        rows: [
-          { values: [{ userEnteredValue: this._valueForSheet(colIndex) }] },
-        ],
         fields: "userEnteredValue",
       },
     });

@@ -75,9 +75,9 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const gidCol = this.column("Sheet GID").data.fetchDataCellsUsingHeaders();
     gidCol.dataValueArr.forEach((gid) => {
       const sheet = this.ss.sheet(gid);
-      sheet.prepFetchHeaderRowUsingSheetProperties();
+      sheet.gatherFetchHeaderRowUsingSheetProperties();
     });
-    this.sheet.prepFetchDataColumnsUsingHeaders(
+    this.sheet.gatherFetchDataColumnsUsingHeaders(
       ...Arr.excludeStrict(sheetConfigHeaders, "Sheet GID"),
     );
     this.ss.fetchAllPrepped();
@@ -135,10 +135,10 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetTraitsFileSource(): string {
-    this.sheet.prepFetchPropertiesOnly();
-    this.sheet.prepFetchFullUniformRow("header");
+    this.sheet.gatherFetchPropertiesOnly();
+    this.sheet.gatherFetchFullUniformRow("header");
     this.ss.fetchAllPrepped();
-    this.sheet.prepFetchDataColumnsUsingHeaders(
+    this.sheet.gatherFetchDataColumnsUsingHeaders(
       "Sheet name",
       "ID prefix",
       "Has ID column",

@@ -31,12 +31,12 @@ const testSheetName = "test";
 function _tests() {
   const ss = SpreadsheetNamed.init();
   // const idColumn = ss.sheet(testSheetName).column("id");
-  // idColumn.prepFetchAllDataCells();
+  // idColumn.gatherFetchAllDataCells();
   // ss.fetchAllPrepped();
   // idColumn.fillEmptyDataCellsWithDefaultValues();
   const test = ss.sheet(testSheetName);
-  test.raw.prepFetchPropertiesOnly();
-  test.raw.prepFetchFullUniformRow("columnId");
+  test.raw.gatherFetchPropertiesOnly();
+  test.raw.gatherFetchFullUniformRow("columnId");
   ss.fetchAllPrepped();
   ss.sheet(testSheetName).addMissingColumnIds();
   ss.batchUpdateGSheets();

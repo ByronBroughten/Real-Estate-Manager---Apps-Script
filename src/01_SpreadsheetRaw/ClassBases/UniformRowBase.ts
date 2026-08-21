@@ -1,6 +1,6 @@
 import type { UniformRowName, UniformRowValueName } from "../../00_base/base";
 import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
-import { RowCommon } from "./RowCommon";
+import { RowCommonRaw } from "./RowCommonRaw";
 import type { RowRawProps } from "./RowRawBase";
 
 export interface RowUniformProps<
@@ -12,7 +12,7 @@ export interface RowUniformProps<
 export class UniformRowBase<
   UN extends UniformRowName,
   VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
-> extends RowCommon {
+> extends RowCommonRaw {
   readonly uniformRowName: UN;
   constructor({ uniformRowName, ...rest }: RowUniformProps<UN>) {
     super(rest);

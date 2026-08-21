@@ -3,8 +3,8 @@ import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
-  RowChangesToSave,
-  SheetChangesToSave,
+    RowChangesToSave,
+    SheetChangesToSave,
 } from "./ClassTypes/RawState";
 import { SheetRaw, type SheetRawRow } from "./SheetRaw";
 
@@ -121,7 +121,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         row.gatherAppendRequest();
       }
       for (const colIndex of change.update) {
-        row.gatherUpdateRequest(colIndex);
+        row.cell(colIndex).gatherUpdateRequest();
       }
     }
   }

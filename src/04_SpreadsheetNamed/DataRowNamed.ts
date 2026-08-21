@@ -46,7 +46,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   }
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
     const colIndex = this.colIndex(columnName);
-    return this.raw.cellIsActive(colIndex);
+    return this.raw.cell(colIndex).isActive;
   }
   cellIsEmpty<CN extends ColumnName<SN>>(columnName: CN): boolean {
     const colIndex = this.colIndex(columnName);

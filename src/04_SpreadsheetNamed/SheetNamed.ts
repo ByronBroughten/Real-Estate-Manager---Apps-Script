@@ -27,16 +27,19 @@ export class SheetNamed<
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
   }
   get indexed(): SheetIndexed {
-    return new SheetIndexed(this.raw.sheetRawProps);
+    return new SheetIndexed({
+      ...this.sheetNamedProps,
+      sheetGid: this.schema.sheetGid,
+    });
   }
   gatherFetchRange(props: SheetGridRangeProps): SheetNamed<SN> {
     this.raw.gatherFetchRange(props);
     return this;
   }
-  prepFetchColIdsForDataToFetch() {
+  gatherFetchColIdsForDataToFetch() {
     this.raw.indexesOfColDataToFetch.forEach((colIdx) => {
       const columnName = this.schema.colNameByIndex(colIdx);
-      this.column(columnName).prepFetchUniformCell("columnId");
+      this.column(columnName).gatherFetchUniformCell("columnId");
     });
   }
   dataRow(rowIndex: number): DataRowNamed<SN> {

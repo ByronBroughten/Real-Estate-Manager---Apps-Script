@@ -1,16 +1,27 @@
+import type { CellValueName } from "../../00_base/base";
+import type { RawRowState } from "../ClassTypes/RawState";
 import { ColumnRawBase, type ColumnRawProps } from "./ColumnRawBase";
-
-interface CellRawProps extends ColumnRawProps {
+interface CellRawProps<
+  VN extends CellValueName = CellValueName,
+> extends ColumnRawProps<VN> {
   rowIndex: number;
 }
 
-export class CellRawBase extends ColumnRawBase {
+export class CellRawBase<
+  VN extends CellValueName = CellValueName,
+> extends ColumnRawBase<VN> {
   readonly rowIndex: number;
-  constructor({ rowIndex, ...rest }: CellRawProps) {
+  constructor({ rowIndex, ...rest }: CellRawProps<VN>) {
     super(rest);
     this.rowIndex = rowIndex;
   }
-  get cellRawProps(): CellRawProps {
+  get rowState(): RawRowState {
+    return this.getRowState(this.rowIndex);
+  }
+  get isActive(): boolean {
+    return this.rowState.has(this.colIndex);
+  }
+  get cellRawProps(): CellRawProps<VN> {
     return {
       rowIndex: this.rowIndex,
       ...this.columnRawProps,

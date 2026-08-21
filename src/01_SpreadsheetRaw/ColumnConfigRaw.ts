@@ -65,9 +65,9 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
   }
   addMissingColumnIds(): void {
-    this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
+    this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.ss.fetchAllPrepped();
-    this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
+    this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
       "Sheet GID",
       "Let api access traits",
       "ID prefix",
@@ -103,15 +103,15 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   // stale if its Column ID no longer exists on its sheet, or its Sheet GID
   // isn't marked "Make schema for API" = true in SheetConfigRaw.
   pruneColTraits(): ColumnConfigRaw {
-    this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
-    this.sSheet.prepFetchPrerequisitesForRawColumns();
+    this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
+    this.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.ss.fetchAllPrepped();
 
-    this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
+    this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
       "Sheet GID",
       "Let api access traits",
     );
-    this.sSheet.prepFetchDataColumnsUsingHeaders("Column ID", "Sheet GID");
+    this.sSheet.gatherFetchDataColumnsUsingHeaders("Column ID", "Sheet GID");
     this.ss.fetchAllPrepped();
 
     const includedSheetGids = this._includedSheetGids();
@@ -146,15 +146,15 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   // columns from sheets marked "Make schema for API" = true in
   // SheetConfigRaw are considered.
   appendColumnRows(): ColumnConfigRaw {
-    this.sheetConfig.sSheet.prepFetchPrerequisitesForRawColumns();
-    this.sSheet.prepFetchPrerequisitesForRawColumns();
+    this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
+    this.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.ss.fetchAllPrepped();
 
-    this.sheetConfig.sSheet.prepFetchDataColumnsUsingHeaders(
+    this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
       "Sheet GID",
       "Let api access traits",
     );
-    this.sSheet.prepFetchDataColumnsUsingHeaders("Column ID");
+    this.sSheet.gatherFetchDataColumnsUsingHeaders("Column ID");
     this.ss.fetchAllPrepped();
 
     const includedSheetGids = this._includedSheetGids();
@@ -210,8 +210,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   private _fetchColumnIdRowsForSheets(sheetGids: Set<number>): void {
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
-      sheet.prepFetchPropertiesOnly();
-      sheet.prepFetchFullUniformRow("columnId");
+      sheet.gatherFetchPropertiesOnly();
+      sheet.gatherFetchFullUniformRow("columnId");
     });
     this.ss.fetchAllPrepped();
   }

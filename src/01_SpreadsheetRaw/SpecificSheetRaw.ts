@@ -12,25 +12,25 @@ export class SpecificSheetRaw<
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  prepFetchPrerequisitesForRawColumns() {
-    this.sheet.prepFetchPropertiesOnly();
-    this.sheet.prepFetchFullUniformRow("header");
+  gatherFetchPrerequisitesForRawColumns() {
+    this.sheet.gatherFetchPropertiesOnly();
+    this.sheet.gatherFetchFullUniformRow("header");
   }
-  prepFetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {
+  gatherFetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
-    return this.sheet.column(colIndex).data.prepFetchAllDataCells();
+    return this.sheet.column(colIndex).data.gatherFetchAllDataCells();
   }
   fetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {
-    const column = this.prepFetchDataColumnOfFetchedHeader(header);
+    const column = this.gatherFetchDataColumnOfFetchedHeader(header);
     this.ss.fetchAllPrepped();
     return column;
   }
-  prepFetchDataColumnsUsingHeaders<H extends HD>(
+  gatherFetchDataColumnsUsingHeaders<H extends HD>(
     ...headers: H[]
   ): Record<H, DataColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] = this.prepFetchDataColumnOfFetchedHeader(header);
+        acc[header] = this.gatherFetchDataColumnOfFetchedHeader(header);
         return acc;
       },
       {} as Record<H, DataColumnRaw>,

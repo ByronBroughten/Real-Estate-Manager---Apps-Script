@@ -21,13 +21,12 @@ export class DataColumnRaw<
     this.sheet.dataRow(rowIdx).updateValue(this.colIndex, newValue);
     return this;
   }
-  prepFetchAllDataCells(): this {
-    this.gatherFetchRange({ startRowIndex: this.sheetSchema.topDataRowIdx });
-    return this;
-  }
-  fetchDataCellsUsingHeaders(): this {
-    this.prepFetchAllDataCells();
-    this.ss.fetchAllPrepped();
+  gatherFetchAll(): this {
+    this.sheet.gatherFetchRange({
+      startRowIndex: this.schema.topDataRowIdx,
+      startColumnIndex: this.colIndex,
+      endColumnIndex: this.colIndex + 1,
+    });
     return this;
   }
 }

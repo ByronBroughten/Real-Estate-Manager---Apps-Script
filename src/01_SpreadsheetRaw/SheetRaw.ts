@@ -7,11 +7,17 @@ import { DataRowRaw } from "./ClassBases/DataRowRaw";
 import { SheetCommon } from "./ClassBases/SheetCommon";
 import { ColumnRaw } from "./ColumnRaw";
 
-import type { GoogleCellValue } from "../00_base/AppsScriptTypes";
+import type {
+  GoogleCellValue,
+  GoogleGridRange,
+  GoogleSheet,
+  GoogleSheetData,
+} from "../00_base/AppsScriptTypes";
+import type { SheetGridRangeProps } from "./ClassTypes/AccessorsRaw";
 import {
-  isPreFetchType,
   type SheetChangeProps,
   type SheetChangesToSave,
+  type SortParameters,
 } from "./ClassTypes/RawState";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import { UniformRow } from "./UniformRow";
@@ -86,45 +92,7 @@ export class SheetRaw extends SheetCommon {
   get activeRows(): SheetRawRow[] {
     return this.activeRowIndexes.map((rowIndex) => this.row(rowIndex));
   }
-  gatherFetchGridRanges() {
-    this.preFetchGridRanges.forEach((pf) => {
-      if (isPreFetchType(pf, "fullRow")) {
-        this.prepFetchFullRow(pf.row);
-      } else if (isPreFetchType(pf, "fullDataColumn")) {
-        this.column(pf.column);
-      } else if (isPreFetchType(pf, "singleCell")) {
-        this.prepFetchSingleCell(pf.row, pf.column);
-      } else {
-        throw new Error(`Unknown pre-fetch type: ${pf}`);
-      }
-    });
-  }
-  prepFetchFullRow(rowIndex: number): SheetRaw {
-    this.sheetState.indexesOfFullRowsToFetch.add(rowIndex);
-    return this.gatherFetchRange({
-      ...this.schema.oneRowSpecifier(rowIndex),
-      startColumnIndex: 0,
-    });
-  }
-  prepFetch() {}
-
-  prepFetchFullRowNext(rowIndex: number) {
-    this.preFetchGridRanges.push({ type: "fullRow", row: rowIndex });
-  }
   gatherFetchRange(gr: SheetGridRangeProps): SheetRaw {
-    if (
-      gr.startColumnIndex !== undefined &&
-      gr.startRowIndex >= this.schema.topDataRowIdx
-    ) {
-      this.sheetState.indexesOfColDataToFetch.add(gr.startColumnIndex);
-    }
-    if (
-      gr.endRowIndex === gr.startRowIndex + 1 &&
-      gr.startColumnIndex === 0 &&
-      gr.endColumnIndex === undefined
-    ) {
-      this.sheetState.indexesOfFullRowsToFetch.add(gr.startRowIndex);
-    }
     this.rawState.fetcherGridRanges.push({
       sheetId: this.sheetGid,
       ...gr,
@@ -140,7 +108,6 @@ export class SheetRaw extends SheetCommon {
       this._integrateSheetRowStates(sheet.data);
     }
   }
-
   private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
     const colsData = valS.assert(sheetData, "sheetData");
     colsData.forEach((colData) => {
@@ -163,32 +130,7 @@ export class SheetRaw extends SheetCommon {
   get allDataRows(): DataRowRaw[] {
     return this.fullDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
   }
-  finalizeFetchedData() {
-    this.allDataRows.forEach((row) => row.ensureStateExists());
-    this._finalizeFetchedFullRows();
-    this._finalizeFetchedDataColumns();
-  }
-  private _finalizeFetchedFullRows(): void {
-    this.sheetState.indexesOfFullRowsToFetch.forEach((rowIndex) => {
-      this.fullDataColIndexes.forEach((colIndex) => {
-        const row = this.row(rowIndex);
-        if (!row.hasValue(colIndex)) {
-          row.integrateEmptyState(colIndex);
-        }
-      });
-    });
-    this.sheetState.indexesOfFullRowsToFetch.clear();
-  }
-  private _finalizeFetchedDataColumns(): void {
-    this.sheetState.indexesOfColDataToFetch.forEach((colIndex) => {
-      this.allDataRows.forEach((row) => {
-        if (!row.hasValue(colIndex)) {
-          row.integrateEmptyState(colIndex);
-        }
-      });
-    });
-    this.sheetState.indexesOfColDataToFetch.clear();
-  }
+
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
     this.fullDataColIndexes.forEach((colIndex) => {
@@ -210,26 +152,6 @@ export class SheetRaw extends SheetCommon {
     props.forEach((props) => this.gatherFetchRange(props));
     return this;
   }
-  prepFetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
-    return this.prepFetchFullUniformRow("header");
-  }
-  fetchHeaderRowUsingSheetProperties(): UniformRow<"header"> {
-    const row = this.prepFetchHeaderRowUsingSheetProperties();
-    this.ss.fetchAllPrepped();
-    return row;
-  }
-  prepFetchFullUniformRow<UN extends UniformRowName>(
-    rowName: UN,
-  ): UniformRow<UN> {
-    this.prepFetchFullRow(this.schema.uniformRowIndex(rowName));
-    return this.uniformRow(rowName);
-  }
-  prepFetchUniformRowsUsingSheetProperties(
-    rowNames: UniformRowName[],
-  ): SheetRaw {
-    rowNames.forEach((rowName) => this.prepFetchFullUniformRow(rowName));
-    return this;
-  }
   columnByHeader<VN extends CellValueName = CellValueName>(
     header: string,
     valueName?: VN,
@@ -237,12 +159,12 @@ export class SheetRaw extends SheetCommon {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
   }
-  prepFetchDataColumnsUsingHeaders<HD extends string>(
+  gatherFetchDataColumnsUsingHeaders<HD extends string>(
     ...headers: HD[]
   ): Record<HD, DataColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] = this.columnByHeader(header).data.prepFetchAllDataCells();
+        acc[header] = this.columnByHeader(header).data.gatherFetchAll();
         return acc;
       },
       {} as Record<HD, DataColumnRaw>,
@@ -345,16 +267,15 @@ export class SheetRaw extends SheetCommon {
     });
     return columnIndex;
   }
-  prepFetchPropertiesOnly(): SheetRaw {
+  gatherFetchAllColumnIds(): SheetRaw {
+    this.uniformRow("columnId").gatherFetchFull();
+    return this;
+  }
+  gatherFetchPropertiesOnly(): SheetRaw {
     // getByDataFilter only returns a sheet's `tables` metadata for filters whose
     // gridRange overlaps the table. The table always starts at the header row,
     // so pre-activate it and request one of its cells to reliably pull properties.
-    this.uniformRow("header");
-    this.gatherFetchRange({
-      ...this.schema.oneRowSpecifier(this.schema.headerRowIndex),
-      startColumnIndex: this.schema.startTableColIndex,
-      endColumnIndex: this.schema.startTableColIndex + 1,
-    });
+    this.uniformRow("header").firstTableCell().gatherFetchRange();
     return this;
   }
   gatherInsertColumnRequest(startColumnIndex: number): void {

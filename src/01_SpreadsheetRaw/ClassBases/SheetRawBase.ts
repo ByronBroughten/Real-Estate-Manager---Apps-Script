@@ -1,7 +1,7 @@
 import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
 import { Obj } from "../../utils/Obj";
 import { valS } from "../../utils/validation";
-import type { RawSheetState } from "../ClassTypes/RawState";
+import type { RawRowState, RawSheetState } from "../ClassTypes/RawState";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
@@ -59,6 +59,12 @@ export class SheetRawBase extends SpreadsheetRawBase {
     return valS.assert(
       this.rawState.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
+    );
+  }
+  getRowState(rowIndex: number): RawRowState {
+    return valS.assert(
+      this.sheetState.rowStates.get(rowIndex),
+      `rowState for row ${rowIndex}`,
     );
   }
   get activeTable(): NonNullable<RawSheetState["activeTable"]> {

@@ -25,4 +25,12 @@ export class ColumnRawBase<
       ...this.sheetRawProps,
     };
   }
+  validateIndexNotStale(): void {
+    const { firstStaleColIndex } = this.sheetState;
+    if (firstStaleColIndex !== null && this.colIndex >= firstStaleColIndex) {
+      throw new Error(
+        `Column index ${this.colIndex} is stale. First stale column index is ${firstStaleColIndex}.`,
+      );
+    }
+  }
 }

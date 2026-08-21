@@ -62,7 +62,9 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
   fetchAllPrepped(): SpreadsheetNamed {
-    this.activeSheets.forEach((sheet) => sheet.prepFetchColIdsForDataToFetch());
+    this.activeSheets.forEach((sheet) =>
+      sheet.gatherFetchColIdsForDataToFetch(),
+    );
     this.raw.fetchAllPrepped();
     return this;
   }
@@ -217,8 +219,8 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
-      sheet.column("id").prepFetchAllDataCells();
-      // column.prepFetchUniformCell("header")
+      sheet.column("id").gatherFetchAllDataCells();
+      // column.gatherFetchUniformCell("header")
     });
     this.fetchAllPrepped();
     idSheets.forEach((sheet) => {

@@ -15,18 +15,18 @@ export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
     super(rest);
     this.indexedState = indexedState;
   }
+  get spreadsheetIndexedProps(): SpreadsheetIndexedProps {
+    return {
+      ...this.spreadsheetRawProps,
+      indexedState: this.indexedState,
+    };
+  }
   static initSpreadsheetIndexedProps(): SpreadsheetIndexedProps {
     return {
       ...SpreadsheetRawBase.initSpreadsheetRawProps(),
       indexedState: {
         sheets: new Map(),
       },
-    };
-  }
-  get spreadsheetIndexedProps(): SpreadsheetIndexedProps {
-    return {
-      ...this.spreadsheetRawProps,
-      indexedState: this.indexedState,
     };
   }
   get indexedSheetsState(): IndexedState["sheets"] {

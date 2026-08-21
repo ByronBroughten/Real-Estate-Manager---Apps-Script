@@ -1,6 +1,5 @@
 import type { CellValue } from "../../00_base/base";
 import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
-import { valS } from "../../utils/validation";
 import type { RawRowState } from "../ClassTypes/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
@@ -23,13 +22,10 @@ export class RowRawBase extends SheetRawBase {
     }
   }
   get isDataRow(): boolean {
-    return this.rowIndex >= this.sheetSchema.topDataRowIdx;
+    return this.rowIndex >= this.schemaBase.topDataRowIdx;
   }
   get rowState(): RawRowState {
-    return valS.assert(
-      this.sheetState.rowStates.get(this.rowIndex),
-      `rowState for row ${this.rowIndex}`,
-    );
+    return this.getRowState(this.rowIndex);
   }
   get activeValueArr(): CellValue[] {
     return [...this.rowState.values()];

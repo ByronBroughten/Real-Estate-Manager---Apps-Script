@@ -1,25 +1,25 @@
 import { DataRowRaw } from "../01_SpreadsheetRaw/ClassBases/DataRowRaw";
-import { RowCommon } from "../01_SpreadsheetRaw/ClassBases/RowCommon";
-import type { RowRawProps } from "../01_SpreadsheetRaw/ClassBases/RowRawBase";
 import { type Value } from "../02_generatedTraits/06_valueSchemas";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
+import type { RowIndexedProps } from "./RowIndexedBase";
+import { RowIndexedBase } from "./RowIndexedBase";
 import { SheetIndexed } from "./SheetIndexed";
 
-export class DataRowIndexed extends RowCommon {
-  constructor(props: RowRawProps) {
+export class DataRowIndexed extends RowIndexedBase {
+  constructor(props: RowIndexedProps) {
     super(props);
     void this.raw;
   }
   get raw(): DataRowRaw {
-    return new DataRowRaw(this.rowRawProps);
+    return new DataRowRaw(this.rowIndexedProps);
   }
   get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetRawProps);
+    return new SheetIndexed(this.sheetIndexedProps);
   }
-  columnSchema(colIndex: number): ColumnSchemaIndexed {
+  columnSchema(columnId: string): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed({
       sheetGid: this.sheetGid,
-      colIndex,
+      columnId,
     });
   }
   updateValue(colIndex: number, value: Value): this {

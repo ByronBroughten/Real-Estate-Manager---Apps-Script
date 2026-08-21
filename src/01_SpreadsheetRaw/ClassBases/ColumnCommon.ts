@@ -1,5 +1,5 @@
 import type { CellValueName } from "../../00_base/base";
-import type { ColumnGridRangeProps } from "../ClassTypes/AccessorsRaw";
+import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
 import { SheetRaw } from "../SheetRaw";
 import { ColumnRawBase } from "./ColumnRawBase";
 
@@ -9,12 +9,7 @@ export abstract class ColumnCommon<
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  gatherFetchRange(props: ColumnGridRangeProps): this {
-    this.sheet.gatherFetchRange({
-      ...props,
-      startColumnIndex: this.colIndex,
-      endColumnIndex: this.colIndex + 1,
-    });
-    return this;
+  get schema() {
+    return new SchemaBase();
   }
 }
