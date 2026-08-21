@@ -26,7 +26,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     return this.sheetSchema.column(columnName);
   }
   colIndex(columnName: ColumnName<SN>): number {
-    return this.columnSchema(columnName).colIndex;
+    return this.sheet.column(columnName).colIndex;
   }
   colIndexes(columnNames: ColumnName<SN>[]): number[] {
     return columnNames.map((name) => this.colIndex(name));

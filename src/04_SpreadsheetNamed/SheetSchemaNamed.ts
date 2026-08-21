@@ -48,9 +48,6 @@ export class SheetSchemaNamed<
       "columnName",
     ) as ColumnName<SN>;
   }
-  colIndex<CN extends ColumnName<SN>>(columnName: CN): number {
-    return this.column(columnName).colIndex;
-  }
   columnSpecifierToStandard(
     columnSpecifier: ColumnSpecifierNamed<SN>,
   ): ColumnName<SN>[] {

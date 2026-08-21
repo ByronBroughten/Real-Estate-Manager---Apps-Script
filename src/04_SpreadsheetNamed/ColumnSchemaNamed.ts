@@ -31,9 +31,6 @@ export class ColumnSchemaNamed<
       key as unknown as keyof ColTraits<SN, CN>,
     ) as ColTraits<SN, CN>[K & keyof ColTraits<SN, CN>];
   }
-  get colIndex(): number {
-    return this.trait("colIndex");
-  }
   get valueName(): ColumnValueName<SN, CN> & ValueName {
     return this.trait("valueName");
   }
