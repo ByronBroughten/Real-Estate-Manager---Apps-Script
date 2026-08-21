@@ -1,12 +1,18 @@
 # Dependencies
+
 node_modules/
+.agents/
+.cluade/
 
 # Build output
+
 dist/
 
 # Build caches / lockfiles (large, generated, low signal for reading code)
+
 tsconfig.tsbuildinfo
 package-lock.json
 
 # Editor/OS cruft
+
 .DS_Store
