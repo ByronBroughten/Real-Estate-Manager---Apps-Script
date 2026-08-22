@@ -1,12 +1,12 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
-import { SchemaBase } from "./SchemaBase";
 import { Arr } from "../utils/Arr";
 import { valS } from "../utils/validation";
 import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
+import { SchemaBase } from "./SchemaBase";
 
 import type {
   GoogleCellValue,
@@ -321,8 +321,13 @@ export class SheetRaw extends SheetRawBase {
     });
     return columnIndex;
   }
-  gatherFetchAllColumnIds(): SheetRaw {
+  gatherFetchColumnIds(): SheetRaw {
     this.uniformRow("columnId").gatherFetchFull();
+    return this;
+  }
+  fetchColumnIds(): SheetRaw {
+    this.gatherFetchColumnIds();
+    this.ss.fetchAllPrepped();
     return this;
   }
   gatherFetchProperties(): SheetRaw {

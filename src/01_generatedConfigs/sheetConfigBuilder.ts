@@ -1,14 +1,22 @@
-export interface SheetConfig<H extends boolean = boolean> {
+export interface SheetConfigStored<H extends boolean = boolean> {
   sheetGid: number;
   hasIdColumn: H;
   idPrefix: string;
+}
+// The full record: everything in SheetConfigStored, plus sheetName, which
+// isn't stored on the literal entry itself (it's the entry's key in
+// sheetConfigs.ts) but is available as a trait via getSheetTraitByName /
+// getSheetTraitByGid regardless of which way the record was looked up.
+export interface SheetConfig<H extends boolean = boolean>
+  extends SheetConfigStored<H> {
+  sheetName: string;
 }
 
 export function makeSheetConfig<H extends boolean = false>(
   sheetGid: number,
   idPrefix: string,
   hasIdColumn: H = false as H,
-): SheetConfig<H> {
+): SheetConfigStored<H> {
   return {
     sheetGid,
     idPrefix,
@@ -17,4 +25,4 @@ export function makeSheetConfig<H extends boolean = false>(
 }
 export const msc = makeSheetConfig;
 
-export type SheetConfigsBase = Record<string, SheetConfig>;
+export type SheetConfigsBase = Record<string, SheetConfigStored>;

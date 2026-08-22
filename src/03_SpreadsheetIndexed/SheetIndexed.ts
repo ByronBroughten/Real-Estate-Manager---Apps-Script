@@ -1,7 +1,7 @@
 import type { CellValue, UniformRowName } from "../00_base/base";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import type { UniformRow } from "../02_SpreadsheetRaw/UniformRow";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { Arr } from "../utils/Arr";
 import { isPreFetchType } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";
@@ -56,13 +56,13 @@ export class SheetIndexed extends SheetIndexedBase {
     );
   }
   fetchOnlyColumnIds(): this {
-    this.raw.gatherFetchAllColumnIds();
+    this.raw.gatherFetchColumnIds();
     this.raw.ss.fetchAllPrepped();
     return this;
   }
   gatherDataPrerequisites() {
     this.raw.gatherFetchProperties();
-    this.raw.gatherFetchAllColumnIds();
+    this.raw.gatherFetchColumnIds();
   }
   prepFetchFullUniformRow<UN extends UniformRowName>(rowName: UN) {
     const rowIndex = this.schema.uniformRowIndex(rowName);

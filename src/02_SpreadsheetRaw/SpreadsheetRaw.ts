@@ -41,10 +41,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.rawState.allSheetPropertiesAreFetched) {
-      this.fetchAllPreppedSheetProperties();
+      this.fetchAllSheetProperties();
     }
   }
-  fetchAllPreppedSheetProperties() {
+  fetchAllSheetProperties() {
     const response = this.sheetsService.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(tableId,range))",
     });

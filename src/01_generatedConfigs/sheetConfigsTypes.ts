@@ -1,5 +1,5 @@
-import { Obj, type KeyedMap } from "../utils/Obj";
-import type { SheetConfig } from "./sheetConfigBuilder";
+import { Obj } from "../utils/Obj";
+import type { SheetConfig, SheetConfigStored } from "./sheetConfigBuilder";
 import { sheetConfigs } from "./sheetConfigs";
 
 // Post-sheetConfigs
@@ -12,10 +12,14 @@ export function getSheetTraitByName<
   TN extends SheetNameSimple,
   K extends keyof SheetConfig,
 >(sheetName: TN, key: K): SheetConfig[K] {
-  return sheetConfigs[sheetName][key];
+  if (key === "sheetName") {
+    return sheetName as unknown as SheetConfig[K];
+  }
+  return sheetConfigs[sheetName][
+    key as keyof SheetConfigStored
+  ] as SheetConfig[K];
 }
 
-type SheetConfigsIndexed = KeyedMap<SheetConfigs, "sheetGid", "sheetName">;
 export const sheetConfigsIndexed = Obj.toKeyedMap(
   sheetConfigs,
   "sheetGid",
@@ -24,16 +28,9 @@ export const sheetConfigsIndexed = Obj.toKeyedMap(
 
 export const configSheetGids = [...sheetConfigsIndexed.keys()];
 
-type SheetConfigIndexed =
-  SheetConfigsIndexed extends Map<any, infer V> ? V : never;
-
-export type SheetTraitIndexed<K extends SheetTraitIndexedKey> =
-  SheetConfigIndexed[K];
-
-export type SheetTraitIndexedKey = keyof SheetConfigIndexed;
-export function getSheetTraitByGid<K extends SheetTraitIndexedKey>(
+export function getSheetTraitByGid<K extends keyof SheetConfig>(
   sheetGid: number,
   key: K,
-): SheetTraitIndexed<K> {
+): SheetConfig[K] {
   return sheetConfigsIndexed.get(sheetGid)![key];
 }

@@ -67,11 +67,14 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     this._updateProgrammaticValues();
   }
   private _fetchAllPreppedNeededForUpdate() {
-    this.ss.fetchAllPreppedSheetProperties();
-    this.sheet.uniformRow("header").gatherFetchFull();
+    this.ss.raw.fetchAllSheetProperties();
+    this.sheet.raw.fetchColumnIds();
+
+    this.sheet.indexed.prepFetchFullDataColumn(
+      this.column("sheetGid").indexed.columnId,
+    );
     this.ss.fetchAllPrepped();
-    const gidCol = this.column("Sheet GID").data.gatherFetchAll();
-    this.ss.fetchAllPrepped();
+
     gidCol.valueArr.forEach((gid) => {
       const sheet = this.ss.sheet(gid);
       sheet.uniformRow("header").gatherFetchFull();
@@ -90,17 +93,17 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     });
   }
   private _appendMissingSheetConfigs() {
-    const gidCol = this.column("sheetGid");
-    gidCol.indexed.dataValueArr.forEach((gid) => {
-      if (!this.ss.raw.gidIsActive(gid)) {
-        this.sheet.appendDataRowValues(new Map([[gidCol.colIndex, gid]]));
+    this.sheet.dataRows.forEach((row) => {
+      const sheetGid = row.value("sheetGid");
+      if (sheetGid !== "" && !this.ss.raw.gidIsActive(sheetGid)) {
+        this.sheet.appendRowWithVals({ sheetGid });
       }
     });
   }
   private _updateProgrammaticValues(): void {
-    const gidCol = this.column("Sheet GID").data;
-    const sheetTitleCol = this.column("Sheet title").data;
-    const hasColForIdCol = this.column("Has ID column").data;
+    const gidCol = this.column("sheetGid");
+    const sheetTitleCol = this.column("sheetTitle");
+    const hasColForIdCol = this.column("hasIdColumn");
     let updatedValues = 0;
     this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const sheetGid = gidCol.dataValue(rowIndex);

@@ -1,7 +1,7 @@
 import { nameDelimiter, type NameDelimiter } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import { valS } from "../utils/validation";
-import type { ColumnConfig } from "./columnConfigBuilder";
+import type { ColumnConfig, ColumnConfigStored } from "./columnConfigBuilder";
 import { columnConfigs } from "./columnConfigs";
 import {
   configSheetNames,
@@ -54,11 +54,14 @@ export function getColumnTraitByName<
   CN extends ColumnName<TN>,
   K extends keyof ColumnConfigAt<TN, CN>,
 >(sheetName: TN, columnName: CN, key: K): ColumnConfigAt<TN, CN>[K] {
+  if (key === "columnName") {
+    return columnName as ColumnConfigAt<TN, CN>[K];
+  }
   return (columnConfigs[sheetName][columnName] as ColumnConfigAt<TN, CN>)[key];
 }
 
 export type TableColumnConfigsIndexed = KeyedMap<
-  Record<string, ColumnConfig>,
+  Record<string, ColumnConfigStored>,
   "columnId",
   "columnName"
 >;
@@ -77,14 +80,11 @@ function makeColumnConfigsByGidAndColId(): ColumnConfigsIndexed {
 
 const columnConfigsIndexed = makeColumnConfigsByGidAndColId();
 
-export type ColumnConfigIndexed =
-  TableColumnConfigsIndexed extends Map<any, infer V> ? V : never;
-export type ColumnTraitRawKey = keyof ColumnConfigIndexed;
-export function getColumnTraitByIndex<K extends ColumnTraitRawKey>(
+export function getColumnTraitByIndex<K extends keyof ColumnConfig>(
   sheetId: number,
   columnId: string,
   key: K,
-): ColumnConfigIndexed[K] {
+): ColumnConfig[K] {
   const colTraits = valS.assert(
     columnConfigsIndexed.get(sheetId)?.get(columnId),
     `column attributes for sheetId=${sheetId}, columnId=${columnId}`,

@@ -142,10 +142,11 @@ export const columnConfigs = makeColumnConfigs({
     ),
   },
   sheetConfig: {
-    id: mcc("col-90lQMkS", "string", "ID", true),
     sheetGid: mcc("col-fqCrMdm", "number", "Sheet GID", false),
-    sheetName: mcc("col-ssYwA1T", "string", "Sheet name camel case", false),
+    sheetTitle: mcc("c:scf:eiclwid", "string", "Sheet title", false),
+    hasIdColumn: mcc("col-i394slk", "boolean", "Has ID column", false),
     idPrefix: mcc("col-iqW3fCT", "string", "ID prefix", false),
+    letApiAccess: mcc("col-0g34jjj", "boolean", "Let API access", false),
   },
   api: {
     id: mcc("col-ohQJSZw", "string", "ID", true),

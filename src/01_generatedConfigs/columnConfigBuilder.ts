@@ -8,11 +8,19 @@ export interface ColumnConfigLiteral {
   isFormula: boolean;
   emptyAllowed: boolean;
 }
-export interface ColumnConfig<
+export interface ColumnConfigStored<
   VN extends ValueName = ValueName,
 > extends ColumnConfigLiteral {
   valueName: VN;
   customDefaultValue: Value<VN> | null;
+}
+// The full record: everything in ColumnConfigStored, plus columnName, which
+// isn't stored on the literal entry itself (it's the entry's key in
+// columnConfigs.ts) but is available as a trait via getColumnTraitByName /
+// getColumnTraitByIndex regardless of which way the record was looked up.
+export interface ColumnConfig<VN extends ValueName = ValueName>
+  extends ColumnConfigStored<VN> {
+  columnName: string;
 }
 function makeColumnConfig<VN extends ValueName>(
   columnId: string,
@@ -21,7 +29,7 @@ function makeColumnConfig<VN extends ValueName>(
   isFormula: boolean,
   emptyAllowed: boolean = false,
   customDefaultValue: Value<VN> | null = null,
-): ColumnConfig<VN> {
+): ColumnConfigStored<VN> {
   return {
     columnId,
     valueName,
@@ -33,7 +41,7 @@ function makeColumnConfig<VN extends ValueName>(
 }
 export const mcc = makeColumnConfig;
 
-type TableColumnConfigs = Record<string, ColumnConfig>;
+type TableColumnConfigs = Record<string, ColumnConfigStored>;
 type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
 
 export function makeColumnConfigs<T extends ColumnConfigsBase>(

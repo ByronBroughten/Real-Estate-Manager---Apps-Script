@@ -77,10 +77,7 @@ export type KeyedMap<
   T extends Record<PropertyKey, object>, // was Record<PropertyKey, unknown>
   F extends keyof T[keyof T],
   N extends PropertyKey = "name",
-> = Map<
-  T[keyof T][F],
-  { [K in keyof T]: Omit<T[K], F> & { [P in N]: K } }[keyof T]
->;
+> = Map<T[keyof T][F], { [K in keyof T]: T[K] & { [P in N]: K } }[keyof T]>;
 
 function toKeyedMap<
   const T extends Record<PropertyKey, object>, // was Record<PropertyKey, unknown>
@@ -90,11 +87,11 @@ function toKeyedMap<
   const map = new Map() as KeyedMap<T, F, N>;
 
   for (const outerKey of Object.keys(obj) as (keyof T)[]) {
-    const { [idField]: id, ...rest } = obj[outerKey] as Record<
-      PropertyKey,
-      unknown
-    >;
-    map.set(id as any, { [nameField]: outerKey, ...rest } as any);
+    const entry = obj[outerKey] as Record<PropertyKey, unknown>;
+    map.set(entry[idField as PropertyKey] as any, {
+      ...entry,
+      [nameField]: outerKey,
+    } as any);
   }
 
   return map;

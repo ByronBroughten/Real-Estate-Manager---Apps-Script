@@ -3,9 +3,8 @@ import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   getSheetTraitByGid,
   type SheetName,
-  type SheetTraitIndexed,
-  type SheetTraitIndexedKey,
 } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { SheetConfig } from "../01_generatedConfigs/sheetConfigBuilder";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetSchemaCommon } from "./SheetSchemaCommon";
 
@@ -22,7 +21,7 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
     super();
     this.sheetGid = sheetGid;
   }
-  trait<K extends SheetTraitIndexedKey>(key: K): SheetTraitIndexed<K> {
+  trait<K extends keyof SheetConfig>(key: K): SheetConfig[K] {
     return getSheetTraitByGid(this.sheetGid, key);
   }
   column(columnId: string): ColumnSchemaIndexed {
@@ -40,7 +39,7 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
     return this.makeColIdFromPrefix(this.trait("idPrefix"));
   }
   get sheetName(): SheetName {
-    return this.trait("sheetName");
+    return this.trait("sheetName") as SheetName;
   }
   allDefaultValues(): Map<string, CellValue> {
     return this.defaultValues(...this.columnIds);

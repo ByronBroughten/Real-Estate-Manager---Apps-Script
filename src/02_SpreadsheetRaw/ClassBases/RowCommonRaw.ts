@@ -1,11 +1,11 @@
 import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
-import { SchemaBase } from "../SchemaBase";
 import type {
   RowChangeProps,
   RowChangesToSave,
   RowChangeUpdateProps,
 } from "../ClassTypes/RawState";
+import { SchemaBase } from "../SchemaBase";
 import { SheetRaw } from "../SheetRaw";
 import { CellRaw } from "./CellRaw";
 import { RowRawBase } from "./RowRawBase";
