@@ -53,9 +53,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }, {} as NamedSheets<TN>);
   }
   get activeSheetNames(): SheetName[] {
-    return [...this.raw.activeSheetGids].map(
-      (sheetGid) => this.indexed.sheet(sheetGid).sheetName,
-    );
+    return this.indexed.activeSheets.map((sheet) => sheet.sheetName);
   }
   get activeSheets(): SheetNamed<SheetName>[] {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));

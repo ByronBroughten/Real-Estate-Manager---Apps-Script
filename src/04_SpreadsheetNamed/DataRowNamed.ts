@@ -138,10 +138,9 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     return values;
   }
   get activeCellNames(): ColumnName<SN>[] {
-    return [...this.raw.rowState.keys()].map((colIndex) => {
-      const columnId = this.sheet.indexed.columnIdByIndex(colIndex);
-      return this.sheetSchema.colNameByColumnId(columnId);
-    });
+    return this.indexed.activeColumnIds.map((columnId) =>
+      this.sheetSchema.colNameByColumnId(columnId),
+    );
   }
   updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {
     columnNames.forEach((columnName) => this.cell(columnName).updateToDefault());
@@ -159,8 +158,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     return this;
   }
   delete(): void {
-    this.raw.delete();
-    this;
+    this.indexed.delete();
   }
   setValueType<CN extends ColumnName<SN>>(
     columnName: CN,

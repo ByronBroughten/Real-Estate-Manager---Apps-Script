@@ -46,6 +46,9 @@ export class SheetIndexed extends SheetIndexedBase {
   get topDataRow(): DataRowIndexed {
     return this.dataRow(this.schema.topDataRowIdx);
   }
+  get dataRowCount(): number {
+    return this.raw.dataRowCount;
+  }
   get fullDataRowIndexes(): number[] {
     return Arr.indexesFromUntil(
       this.ssSchema.topDataRowIdx,

@@ -1,4 +1,3 @@
-import type { SheetGridRangeProps } from "../01_SpreadsheetRaw/ClassTypes/AccessorsRaw";
 import type { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
@@ -35,10 +34,6 @@ export class SheetNamed<
       sheetGid: this.schema.sheetGid,
     });
   }
-  gatherFetchRange(props: SheetGridRangeProps): SheetNamed<SN> {
-    this.raw.gatherFetchRange(props);
-    return this;
-  }
   dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({
       ...this.sheetNamedProps,
@@ -66,9 +61,7 @@ export class SheetNamed<
     return this.dataRow(this.schema.topDataRowIdx);
   }
   get dataRows(): DataRowNamed<SN>[] {
-    return this.raw.activeDataRowIndexes.map((rowIndex) =>
-      this.dataRow(rowIndex),
-    );
+    return this.indexed.dataRows.map((row) => this.dataRow(row.rowIndex));
   }
   topDataRowValue<CN extends ColumnName<SN>>(
     columnName: CN,
@@ -84,10 +77,10 @@ export class SheetNamed<
     });
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
-    if (this.raw.dataRowCount > 0) {
+    if (this.indexed.dataRowCount > 0) {
       this.topDataRow.updateToDefault(...this.schema.columnNames);
     }
-    if (this.raw.dataRowCount > 1) {
+    if (this.indexed.dataRowCount > 1) {
       this.DELETE_DATA_ROWS_AFTER_TOP();
     }
   }
@@ -105,7 +98,7 @@ export class SheetNamed<
     });
   }
   appendRowWithVals(values: Partial<SheetDataValues<SN>>): DataRowNamed<SN> {
-    const { rowIndex } = this.raw.appendDataRow();
+    const { rowIndex } = this.indexed.appendRowDefault();
     return this.dataRow(rowIndex).updateValues(values);
   }
 }

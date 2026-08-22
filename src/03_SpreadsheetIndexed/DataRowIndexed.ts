@@ -37,4 +37,12 @@ export class DataRowIndexed extends RowIndexedBase {
     columnIds.forEach((columnId) => this.cell(columnId).updateToDefault());
     return this;
   }
+  get activeColumnIds(): string[] {
+    return [...this.raw.rowState.keys()].map((colIndex) =>
+      this.sheet.columnIdByIndex(colIndex),
+    );
+  }
+  delete(): void {
+    this.raw.delete();
+  }
 }

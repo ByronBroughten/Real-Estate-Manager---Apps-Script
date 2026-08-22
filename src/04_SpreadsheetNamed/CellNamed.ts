@@ -24,10 +24,10 @@ export class CellNamed<
     return this.indexed.raw;
   }
   get isActive(): boolean {
-    return this.raw.isActive;
+    return this.indexed.isActive;
   }
   value(): ColumnValue<SN, CN> {
-    return this.raw.value() as ColumnValue<SN, CN>;
+    return this.indexed.value() as ColumnValue<SN, CN>;
   }
   updateValue(value: ColumnValue<SN, CN>): this {
     this.indexed.updateValue(value as Value<ValueName>);

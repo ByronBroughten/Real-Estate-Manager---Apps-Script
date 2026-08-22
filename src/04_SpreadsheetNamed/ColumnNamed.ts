@@ -42,11 +42,12 @@ export class ColumnNamed<
     });
   }
   gatherFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
-    this.raw.uniformCell(rowName).gatherFetchRange();
+    const rowIndex = this.sheet.schema.uniformRowIndex(rowName);
+    this.sheet.indexed.prepFetchSingleCell(rowIndex, this.columnId);
     return this;
   }
   gatherFetchAllDataCells(): ColumnNamed<SN, CN> {
-    this.raw.data.gatherFetchAll();
+    this.sheet.indexed.prepFetchFullDataColumn(this.columnId);
     return this;
   }
   activeDataCellsToDefault(): ColumnNamed<SN, CN> {

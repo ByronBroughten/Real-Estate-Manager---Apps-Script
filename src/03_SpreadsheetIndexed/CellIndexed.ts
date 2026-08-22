@@ -24,6 +24,12 @@ export class CellIndexed<
   get raw(): CellRaw<VnToCvn<VN>> {
     return this.column.raw.cell(this.rowIndex);
   }
+  get isActive(): boolean {
+    return this.raw.isActive;
+  }
+  value(): Value<VN> {
+    return this.raw.value() as Value<VN>;
+  }
   updateValue(value: Value<VN>): this {
     this.columnSchema.validateDataNotFormula();
     this.raw.updateValue(value as CellValue<VnToCvn<VN>>);
