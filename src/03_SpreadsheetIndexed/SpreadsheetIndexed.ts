@@ -31,8 +31,7 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
   fetchAllPrepped() {
     const sheetsPreppedForFetch = this.sheetsPreppedForFetch;
     sheetsPreppedForFetch.forEach((sheet) => {
-      sheet.raw.gatherFetchProperties();
-      sheet.raw.gatherFetchAllColumnIds();
+      sheet.gatherDataPrerequisites();
     });
     this.raw.fetchAllPrepped();
     sheetsPreppedForFetch.forEach((sheet) => {

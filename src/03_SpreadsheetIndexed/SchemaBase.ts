@@ -9,6 +9,7 @@ import {
   configGet,
   type SpreadsheetConfig,
 } from "../00_base/spreadsheetConfig";
+import { schemaSheetGids } from "../02_generatedTraits/02_sheetTraitsTypes";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
 
@@ -38,6 +39,21 @@ export class SchemaBase {
     name2: S2,
   ): `${S1}${NameDelimiter}${S2}` {
     return `${name1}${this.nameDelimiter}${name2}`;
+  }
+  sheetGids(): number[] {
+    return schemaSheetGids;
+  }
+  isInSheetGids(sheetGid: number): boolean {
+    return schemaSheetGids.includes(sheetGid);
+  }
+  validateSheetGid(sheetGid: number): void {
+    if (!this.isInSheetGids(sheetGid)) {
+      throw new Error(
+        `Invalid sheetGid: ${sheetGid}. Must be one of: ${schemaSheetGids.join(
+          ", ",
+        )}`,
+      );
+    }
   }
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);

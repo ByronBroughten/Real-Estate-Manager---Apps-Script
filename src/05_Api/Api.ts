@@ -82,8 +82,15 @@ export class Api<
   }
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
     const { colIndex, rowIndex, sheetGid } = this.getEventOrigin(e);
-    const columnId = this.ssi.sheet(sheetGid).columnIdByIndex(colIndex);
-    const { fullName } = this.ssi.schema.column(sheetGid, columnId);
+    if (!this.baseSchema.isInSheetGids(sheetGid)) {
+      return;
+    }
+    const sheet = this.ssi.sheet(sheetGid).fetchOnlyColumnIds();
+    const columnId = sheet.columnIdByIndex(colIndex);
+    if (columnId === "") {
+      return;
+    }
+    const { fullName } = sheet.schema.column(columnId);
     if (this.isApiEndpointName(fullName)) {
       const endpoint = this.endpoints[fullName];
       if (endpoint) {

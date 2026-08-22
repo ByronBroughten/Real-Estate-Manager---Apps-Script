@@ -55,6 +55,15 @@ export class SheetIndexed extends SheetIndexedBase {
       this.raw.activeTable.endRowIndex,
     );
   }
+  fetchOnlyColumnIds(): this {
+    this.raw.gatherFetchAllColumnIds();
+    this.raw.ss.fetchAllPrepped();
+    return this;
+  }
+  gatherDataPrerequisites() {
+    this.raw.gatherFetchProperties();
+    this.raw.gatherFetchAllColumnIds();
+  }
   prepFetchFullUniformRow<UN extends UniformRowName>(rowName: UN) {
     const rowIndex = this.schema.uniformRowIndex(rowName);
     this.prepFetchFullRow(rowIndex);
