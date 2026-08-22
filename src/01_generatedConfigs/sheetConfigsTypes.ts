@@ -15,23 +15,25 @@ export function getSheetTraitByName<
   return sheetConfigs[sheetName][key];
 }
 
-type SheetConfigsByGid = KeyedMap<SheetConfigs, "sheetGid", "sheetName">;
-export const sheetConfigsByGid = Obj.toKeyedMap(
+type SheetConfigsIndexed = KeyedMap<SheetConfigs, "sheetGid", "sheetName">;
+export const sheetConfigsIndexed = Obj.toKeyedMap(
   sheetConfigs,
   "sheetGid",
   "sheetName",
 );
 
-export const configSheetGids = [...sheetConfigsByGid.keys()];
+export const configSheetGids = [...sheetConfigsIndexed.keys()];
 
-type SheetConfigsRaw = SheetConfigsByGid extends Map<any, infer V> ? V : never;
+type SheetConfigIndexed =
+  SheetConfigsIndexed extends Map<any, infer V> ? V : never;
 
-export type SheetTraitRaw<K extends SheetTraitRawKey> = SheetConfigsRaw[K];
+export type SheetTraitIndexed<K extends SheetTraitIndexedKey> =
+  SheetConfigIndexed[K];
 
-export type SheetTraitRawKey = keyof SheetConfigsRaw;
-export function getSheetTraitByGid<K extends SheetTraitRawKey>(
+export type SheetTraitIndexedKey = keyof SheetConfigIndexed;
+export function getSheetTraitByGid<K extends SheetTraitIndexedKey>(
   sheetGid: number,
   key: K,
-): SheetTraitRaw<K> {
-  return sheetConfigsByGid.get(sheetGid)![key];
+): SheetTraitIndexed<K> {
+  return sheetConfigsIndexed.get(sheetGid)![key];
 }

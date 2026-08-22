@@ -1,11 +1,11 @@
 import type { CellValue } from "../00_base/base";
+import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   getSheetTraitByGid,
   type SheetName,
-  type SheetTraitRaw,
-  type SheetTraitRawKey,
+  type SheetTraitIndexed,
+  type SheetTraitIndexedKey,
 } from "../01_generatedConfigs/sheetConfigsTypes";
-import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetSchemaCommon } from "./SheetSchemaCommon";
 
@@ -22,7 +22,7 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
     super();
     this.sheetGid = sheetGid;
   }
-  trait<K extends SheetTraitRawKey>(key: K): SheetTraitRaw<K> {
+  trait<K extends SheetTraitIndexedKey>(key: K): SheetTraitIndexed<K> {
     return getSheetTraitByGid(this.sheetGid, key);
   }
   column(columnId: string): ColumnSchemaIndexed {

@@ -1,6 +1,6 @@
 import {
   getColumnTraitByIndex,
-  type ColumnTraitRaw,
+  type ColumnConfigIndexed,
   type ColumnFullNameSimple,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
@@ -34,7 +34,7 @@ export class ColumnSchemaIndexed<
       this.columnName,
     ) as ColumnFullNameSimple;
   }
-  trait<K extends keyof ColumnTraitRaw>(key: K): ColumnTraitRaw[K] {
+  trait<K extends keyof ColumnConfigIndexed>(key: K): ColumnConfigIndexed[K] {
     return getColumnTraitByIndex(this.sheetGid, this.columnId, key);
   }
   get valueName(): VN {

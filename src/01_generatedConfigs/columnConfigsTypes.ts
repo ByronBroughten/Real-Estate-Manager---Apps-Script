@@ -57,14 +57,14 @@ export function getColumnTraitByName<
   return (columnConfigs[sheetName][columnName] as ColumnConfigAt<TN, CN>)[key];
 }
 
-export type TableColumnConfigsByColId = KeyedMap<
+export type TableColumnConfigsIndexed = KeyedMap<
   Record<string, ColumnConfig>,
   "columnId",
   "columnName"
 >;
 
-type ColumnConfigsByGidAndColId = Map<number, TableColumnConfigsByColId>;
-function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
+type ColumnConfigsIndexed = Map<number, TableColumnConfigsIndexed>;
+function makeColumnConfigsByGidAndColId(): ColumnConfigsIndexed {
   return configSheetNames.reduce((attrs, sheetName) => {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
@@ -72,21 +72,21 @@ function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
       Obj.toKeyedMap(columnConfigs[sheetName], "columnId", "columnName"),
     );
     return attrs;
-  }, new Map() as ColumnConfigsByGidAndColId);
+  }, new Map() as ColumnConfigsIndexed);
 }
 
-const columnConfigsByGidAndColId = makeColumnConfigsByGidAndColId();
+const columnConfigsIndexed = makeColumnConfigsByGidAndColId();
 
-export type ColumnTraitRaw =
-  TableColumnConfigsByColId extends Map<any, infer V> ? V : never;
-export type ColumnTraitRawKey = keyof ColumnTraitRaw;
+export type ColumnConfigIndexed =
+  TableColumnConfigsIndexed extends Map<any, infer V> ? V : never;
+export type ColumnTraitRawKey = keyof ColumnConfigIndexed;
 export function getColumnTraitByIndex<K extends ColumnTraitRawKey>(
   sheetId: number,
   columnId: string,
   key: K,
-): ColumnTraitRaw[K] {
+): ColumnConfigIndexed[K] {
   const colTraits = valS.assert(
-    columnConfigsByGidAndColId.get(sheetId)?.get(columnId),
+    columnConfigsIndexed.get(sheetId)?.get(columnId),
     `column attributes for sheetId=${sheetId}, columnId=${columnId}`,
   );
   return colTraits[key];
@@ -94,7 +94,7 @@ export function getColumnTraitByIndex<K extends ColumnTraitRawKey>(
 export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
   return valS
     .assert(
-      columnConfigsByGidAndColId.get(sheetGid),
+      columnConfigsIndexed.get(sheetGid),
       `column attributes for sheetId=${sheetGid}`,
     )
     .keys();
