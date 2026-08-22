@@ -32,7 +32,7 @@ export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
   get indexedSheetsState(): IndexedState["sheets"] {
     return this.indexedState.sheets;
   }
-  get spreadsheetSchema(): SpreadsheetSchema {
+  get ssSchema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
 }

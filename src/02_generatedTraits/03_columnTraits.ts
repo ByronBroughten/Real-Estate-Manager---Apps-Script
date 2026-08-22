@@ -92,12 +92,7 @@ const allColTraits = makeStructuredConfig(
         "Expense category",
         false,
       ),
-      taxAdjust: mcs(
-        "col-T6Qbxvk",
-        "residenceTaxAdjust",
-        "Tax adjust",
-        false,
-      ),
+      taxAdjust: mcs("col-T6Qbxvk", "residenceTaxAdjust", "Tax adjust", false),
       receiptFormat: mcs(
         "col-yQtzinN",
         "receiptFormat",
@@ -152,12 +147,7 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       date: mcs("col-u5S1p53", "date", "Date", true),
-      detailsVerified: mcs(
-        "col-Wb5wdwz",
-        "string",
-        "Details verified",
-        false,
-      ),
+      detailsVerified: mcs("col-Wb5wdwz", "string", "Details verified", false),
       payerCategory: mcs(
         "col-bXBsrNU",
         "payerCategory",
@@ -171,12 +161,7 @@ const allColTraits = makeStructuredConfig(
         "Subsidy program name",
         false,
       ),
-      otherPayerName: mcs(
-        "col-W7b2hGx",
-        "string",
-        "Other payer name",
-        false,
-      ),
+      otherPayerName: mcs("col-W7b2hGx", "string", "Other payer name", false),
       paymentHhId: mcs("col-TGUKG69", "string", "Payment HH ID", true),
       subsidyProgramId: mcs(
         "col-XedCXAM",
@@ -209,12 +194,7 @@ const allColTraits = makeStructuredConfig(
     },
     columnConfig: {
       id: mcs("col-K9DptS1", "string", "ID", false),
-      sheetName: mcs(
-        "col-U6y6xUt",
-        "string",
-        "Sheet name camel case",
-        false,
-      ),
+      sheetName: mcs("col-U6y6xUt", "string", "Sheet name camel case", false),
       columnIndexBase0: mcs(
         "col-83ENHF2",
         "number",
@@ -222,12 +202,7 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       header: mcs("col-imgVzE3", "string", "Header", false),
-      camelCaseHeader: mcs(
-        "col-wHrc1Q3",
-        "string",
-        "Camel case header",
-        false,
-      ),
+      camelCaseHeader: mcs("col-wHrc1Q3", "string", "Camel case header", false),
       isFormula: mcs("col-F2caCWz", "boolean", "Is formula", false),
       valueName: mcs("col-PeplPjS", "string", "Value name", false),
       emptyAllowed: mcs("col-chk-U97", "boolean", "Empty allowed", false),
@@ -241,50 +216,25 @@ const allColTraits = makeStructuredConfig(
     sheetConfig: {
       id: mcs("col-90lQMkS", "string", "ID", true),
       sheetGid: mcs("col-fqCrMdm", "number", "Sheet GID", false),
-      sheetName: mcs(
-        "col-ssYwA1T",
-        "string",
-        "Sheet name camel case",
-        false,
-      ),
+      sheetName: mcs("col-ssYwA1T", "string", "Sheet name camel case", false),
       idPrefix: mcs("col-iqW3fCT", "string", "ID prefix", false),
     },
     api: {
       id: mcs("col-ohQJSZw", "string", "ID", true),
       ulsLastRan: mcs("col-o3z5zKF", "string", "ULS last ran", false),
       ulsEnter: mcs("col-H147sTm", "boolean", "ULS enter", false),
-      ulsEnterStatus: mcs(
-        "col-2Hh5Tiv",
-        "string",
-        "ULS enter status",
-        false,
-      ),
+      ulsEnterStatus: mcs("col-2Hh5Tiv", "string", "ULS enter status", false),
       upcLastRan: mcs("col-MVPM3jg", "string", "UPC last ran", false),
       upcStartMonth: mcs("col-dBUrfx_", "date", "UPC start month", false),
       upcEndMonth: mcs("col-QIU-hI6", "date", "UPC end month", false),
       upcMode: mcs("col-lw1GArS", "oneOccupancyOrAll", "UPC mode", false),
       upcHousehold: mcs("col-JAZwV4Z", "string", "UPC household", false),
-      upcHouseholdId: mcs(
-        "col-jL103Fz",
-        "string",
-        "UPC household ID",
-        true,
-      ),
+      upcHouseholdId: mcs("col-jL103Fz", "string", "UPC household ID", true),
       upcEnter: mcs("col-2CcZP7l", "boolean", "UPC enter", false),
-      upcEnterStatus: mcs(
-        "col-7zKZtJP",
-        "string",
-        "UPC enter status",
-        false,
-      ),
+      upcEnterStatus: mcs("col-7zKZtJP", "string", "UPC enter status", false),
       aepLastRan: mcs("col-NpC_m7j", "string", "AEP last ran", false),
       aepEnter: mcs("col-SkBfBWg", "boolean", "AEP enter", false),
-      aepEnterStatus: mcs(
-        "col-lhC7IXV",
-        "string",
-        "AEP enter status",
-        false,
-      ),
+      aepEnterStatus: mcs("col-lhC7IXV", "string", "AEP enter status", false),
       bhlLastRan: mcs("col-s3TA0Js", "date", "BHL last ran", false),
       bhlLastRanHouseholdAndUnit: mcs(
         "col-koaPkot",
@@ -310,18 +260,8 @@ const allColTraits = makeStructuredConfig(
         "BHL household name",
         false,
       ),
-      bhlHouseholdId: mcs(
-        "col-L2Vwjlr",
-        "string",
-        "BHL household ID",
-        true,
-      ),
-      bhlPortion: mcs(
-        "col-66PEBlM",
-        "rentPortionName",
-        "BHL portion",
-        false,
-      ),
+      bhlHouseholdId: mcs("col-L2Vwjlr", "string", "BHL household ID", true),
+      bhlPortion: mcs("col-66PEBlM", "rentPortionName", "BHL portion", false),
       bhlSubsidyAgreementName: mcs(
         "col-7Dl8V9w",
         "string",
@@ -335,12 +275,7 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       bhlEnter: mcs("col-bBZV44s", "boolean", "BHL enter", false),
-      bhlEnterStatus: mcs(
-        "col-VHVRiOc",
-        "string",
-        "BHL enter status",
-        false,
-      ),
+      bhlEnterStatus: mcs("col-VHVRiOc", "string", "BHL enter status", false),
     },
     biller: {
       name: mcs("col-IAA7ymg", "string", "Name", false),
@@ -393,12 +328,7 @@ const allColTraits = makeStructuredConfig(
       date: mcs("col-viByQSW", "date", "Date", false),
       amount: mcs("col-wH6T9oD", "number", "Amount", false),
       description: mcs("col-sGzmf3i", "string", "Description", false),
-      deductibleAmount: mcs(
-        "col-D4Um8gD",
-        "string",
-        "Deductible amount",
-        true,
-      ),
+      deductibleAmount: mcs("col-D4Um8gD", "string", "Deductible amount", true),
       id: mcs("col-gI3wWFP", "string", "ID", true),
       billerName: mcs("col-ws-Kl9O", "string", "Biller name", false),
       expenseCategory: mcs(
@@ -413,12 +343,7 @@ const allColTraits = makeStructuredConfig(
         "Receipt format",
         false,
       ),
-      taxAdjust: mcs(
-        "col-FjnqqGg",
-        "residenceTaxAdjust",
-        "Tax adjust",
-        false,
-      ),
+      taxAdjust: mcs("col-FjnqqGg", "residenceTaxAdjust", "Tax adjust", false),
       notes: mcs("col--TmFGAd", "string", "Notes", false),
     },
     capex: {
@@ -627,18 +552,8 @@ const allColTraits = makeStructuredConfig(
       yearBuilt: mcs("col-Jv4pMFL", "number", "Year built", false),
       age: mcs("col-333qv5F", "number", "Age", true),
       filterSize: mcs("col-sPRYcYC", "string", "Filter size", false),
-      filterLocation: mcs(
-        "col-aOWKf6H",
-        "string",
-        "Filter location",
-        false,
-      ),
-      filtersPresent: mcs(
-        "col-Q5FZff_",
-        "number",
-        "Filters present",
-        false,
-      ),
+      filterLocation: mcs("col-aOWKf6H", "string", "Filter location", false),
+      filtersPresent: mcs("col-Q5FZff_", "number", "Filters present", false),
       filterLastReplaced: mcs(
         "col-VnZPpE8",
         "date",
@@ -745,12 +660,7 @@ const allColTraits = makeStructuredConfig(
         "Increase annual date",
         true,
       ),
-      currentLeaseId: mcs(
-        "col-NTsT2xI",
-        "string",
-        "Current lease ID",
-        false,
-      ),
+      currentLeaseId: mcs("col-NTsT2xI", "string", "Current lease ID", false),
       lastRentChangeDate: mcs(
         "col-Y0_rdiQ",
         "date",
@@ -851,19 +761,9 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       gasHeating: mcs("col-RWqNDKN", "boolean", "Gas Heating", false),
-      electricHeating: mcs(
-        "col-s6dJhNw",
-        "boolean",
-        "Electric Heating",
-        false,
-      ),
+      electricHeating: mcs("col-s6dJhNw", "boolean", "Electric Heating", false),
       gasCooking: mcs("col-lTFdWvg", "boolean", "Gas Cooking", false),
-      electricCooking: mcs(
-        "col-JkMRVe3",
-        "boolean",
-        "Electric Cooking",
-        false,
-      ),
+      electricCooking: mcs("col-JkMRVe3", "boolean", "Electric Cooking", false),
       otherElectric: mcs("col-OT1NP05", "boolean", "Other Electric", false),
       gasWaterHeating: mcs(
         "col-1u19gB4",
@@ -878,12 +778,7 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       waterSewer: mcs("col-d96lUou", "boolean", "Water & Sewer", false),
-      trashCollection: mcs(
-        "col-uYwbwrh",
-        "boolean",
-        "Trash Collection",
-        false,
-      ),
+      trashCollection: mcs("col-uYwbwrh", "boolean", "Trash Collection", false),
       districtEnergyHeating: mcs(
         "col-C6cHg7u",
         "boolean",
@@ -933,25 +828,10 @@ const allColTraits = makeStructuredConfig(
         "Current hh balance",
         true,
       ),
-      totalHhCharges: mcs(
-        "col-oaHTV9l",
-        "string",
-        "Total hh charges",
-        true,
-      ),
-      totalHhPayments: mcs(
-        "col-D6EPFV3",
-        "string",
-        "Total hh payments",
-        true,
-      ),
+      totalHhCharges: mcs("col-oaHTV9l", "string", "Total hh charges", true),
+      totalHhPayments: mcs("col-D6EPFV3", "string", "Total hh payments", true),
       depositCharged: mcs("col-ft6MFJu", "number", "Deposit charged", true),
-      depositReceived: mcs(
-        "col-FDyT3Vx",
-        "number",
-        "Deposit received",
-        true,
-      ),
+      depositReceived: mcs("col-FDyT3Vx", "number", "Deposit received", true),
       currentSubsidyBalance: mcs(
         "col-0OkeFPc",
         "string",
@@ -1067,12 +947,7 @@ const allColTraits = makeStructuredConfig(
         "Last date charged rent",
         true,
       ),
-      subsidyRentPaid: mcs(
-        "col-OipY03K",
-        "number",
-        "Subsidy rent paid",
-        true,
-      ),
+      subsidyRentPaid: mcs("col-OipY03K", "number", "Subsidy rent paid", true),
       scrollSpace: mcs("col-SqUK6d0", "string", "_scroll space", false),
     },
     materialCost: {
@@ -1096,12 +971,7 @@ const allColTraits = makeStructuredConfig(
       date: mcs("col-rdw667_", "date", "Date", false),
       description: mcs("col-Z5b__-f", "string", "Description", false),
       amount: mcs("col-bDbtLKn", "number", "Amount", false),
-      amountAccounted: mcs(
-        "col-OCiouvy",
-        "number",
-        "Amount accounted",
-        true,
-      ),
+      amountAccounted: mcs("col-OCiouvy", "number", "Amount accounted", true),
       amountUnaccounted: mcs(
         "col-N4oYQrk",
         "number",
@@ -1139,12 +1009,7 @@ const allColTraits = makeStructuredConfig(
       payerCategory: mcs("col-MFTWV8M", "string", "Payer category", true),
       payerName: mcs("col-la7Ma45", "string", "Payer name", true),
       formOfPayment: mcs("col-M6W-rV_", "string", "Form of payment", true),
-      paymentAllocated: mcs(
-        "col-_q_cK2F",
-        "number",
-        "Payment allocated",
-        true,
-      ),
+      paymentAllocated: mcs("col-_q_cK2F", "number", "Payment allocated", true),
       paymentDate: mcs("col-6ORlom4", "date", "Payment date", true),
       paymentAmount: mcs("col-LDzLVDD", "number", "Payment amount", true),
       chargeId: mcs("col-9zJ7Xt4", "string", "Charge id", false),
@@ -1205,24 +1070,9 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       amount: mcs("col-UzaXtjU", "number", "Amount", false),
-      detailsVerified: mcs(
-        "col-YrD2LQj",
-        "yesOrNo",
-        "Details verified",
-        false,
-      ),
-      amountAllocated: mcs(
-        "col-SZpwM52",
-        "number",
-        "Amount allocated",
-        true,
-      ),
-      allocationCount: mcs(
-        "col-aip45rN",
-        "number",
-        "Allocation count",
-        true,
-      ),
+      detailsVerified: mcs("col-YrD2LQj", "yesOrNo", "Details verified", false),
+      amountAllocated: mcs("col-SZpwM52", "number", "Amount allocated", true),
+      allocationCount: mcs("col-aip45rN", "number", "Allocation count", true),
       amountUnallocated: mcs(
         "col-3SmJeZz",
         "number",
@@ -1334,19 +1184,9 @@ const allColTraits = makeStructuredConfig(
       ),
       petFeeMonthly: mcs("col-NXjOs5W", "number", "Pet fee monthly", false),
       gasHeating: mcs("col-mdfuos3", "boolean", "Gas Heating", false),
-      electricHeating: mcs(
-        "col-C2tyPDA",
-        "boolean",
-        "Electric Heating",
-        false,
-      ),
+      electricHeating: mcs("col-C2tyPDA", "boolean", "Electric Heating", false),
       gasCooking: mcs("col-y4Tjo7G", "boolean", "Gas Cooking", false),
-      electricCooking: mcs(
-        "col-J5X2by5",
-        "boolean",
-        "Electric Cooking",
-        false,
-      ),
+      electricCooking: mcs("col-J5X2by5", "boolean", "Electric Cooking", false),
       otherElectric: mcs("col-3XZWzZb", "boolean", "Other Electric", false),
       gasWaterHeating: mcs(
         "col-5q18yvd",
@@ -1361,12 +1201,7 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       waterSewer: mcs("col-TV-65-Y", "boolean", "Water & Sewer", false),
-      trashCollection: mcs(
-        "col-ahrWo52",
-        "boolean",
-        "Trash Collection",
-        false,
-      ),
+      trashCollection: mcs("col-ahrWo52", "boolean", "Trash Collection", false),
       districtEnergyHeating: mcs(
         "col-hgRDXpl",
         "boolean",
@@ -1412,25 +1247,10 @@ const allColTraits = makeStructuredConfig(
       bedroomCount: mcs("col-ayrEE8U", "number", "Bedroom count", false),
       grossRent: mcs("col-2NN5vKf", "number", "Gross rent", false),
       gasHeating: mcs("col-D5Mq2iT", "number", "Gas Heating", false),
-      electricHeating: mcs(
-        "col-Tk7-gts",
-        "number",
-        "Electric Heating",
-        false,
-      ),
+      electricHeating: mcs("col-Tk7-gts", "number", "Electric Heating", false),
       gasCooking: mcs("col-TQGm_hh", "number", "Gas Cooking", false),
-      electricCooking: mcs(
-        "col-usiVwX-",
-        "number",
-        "Electric Cooking",
-        false,
-      ),
-      gasWaterHeating: mcs(
-        "col--PXRLlq",
-        "number",
-        "Gas Water Heating",
-        false,
-      ),
+      electricCooking: mcs("col-usiVwX-", "number", "Electric Cooking", false),
+      gasWaterHeating: mcs("col--PXRLlq", "number", "Gas Water Heating", false),
       electricWaterHeating: mcs(
         "col-bijwMhk",
         "number",
@@ -1439,12 +1259,7 @@ const allColTraits = makeStructuredConfig(
       ),
       otherElectric: mcs("col-huaucO6", "number", "Other Electric", false),
       waterSewer: mcs("col-1GsKsEm", "number", "Water & Sewer", false),
-      trashCollection: mcs(
-        "col-nAb9KBk",
-        "number",
-        "Trash Collection",
-        false,
-      ),
+      trashCollection: mcs("col-nAb9KBk", "number", "Trash Collection", false),
       districtEnergyHeating: mcs(
         "col-Z428AUE",
         "number",
@@ -1502,12 +1317,7 @@ const allColTraits = makeStructuredConfig(
         "Paved driveway count",
         false,
       ),
-      garageDoorCount: mcs(
-        "col-sppZ7na",
-        "number",
-        "Garage door count",
-        false,
-      ),
+      garageDoorCount: mcs("col-sppZ7na", "number", "Garage door count", false),
       unitLabelPrepend: mcs(
         "col-ij_IAXs",
         "string",
@@ -1575,26 +1385,11 @@ const allColTraits = makeStructuredConfig(
         "Mortgage balance original",
         false,
       ),
-      mortgageHolder: mcs(
-        "col-oeUhWvv",
-        "string",
-        "Mortgage holder",
-        false,
-      ),
+      mortgageHolder: mcs("col-oeUhWvv", "string", "Mortgage holder", false),
       ltv: mcs("col-EeeukQT", "number", "LTV %", true),
       pmi: mcs("col-QxQPjIT", "string", "PMI", false),
-      mortgageBalance: mcs(
-        "col-KhZEP9D",
-        "number",
-        "Mortgage balance",
-        false,
-      ),
-      mortgageNumber: mcs(
-        "col-UH9nd_C",
-        "number",
-        "Mortgage number",
-        false,
-      ),
+      mortgageBalance: mcs("col-KhZEP9D", "number", "Mortgage balance", false),
+      mortgageNumber: mcs("col-UH9nd_C", "number", "Mortgage number", false),
       helocPaymentMonthly: mcs(
         "col-7pB1h02",
         "number",
@@ -1623,12 +1418,7 @@ const allColTraits = makeStructuredConfig(
         "HELOC interest rate",
         false,
       ),
-      helocPaymentDay: mcs(
-        "col-7oATSzG",
-        "number",
-        "HELOC payment day",
-        false,
-      ),
+      helocPaymentDay: mcs("col-7oATSzG", "number", "HELOC payment day", false),
       helocNumber: mcs("col-Jw8ApcW", "number", "HELOC number", false),
       helocStartDate: mcs("col-1gA69gI", "date", "HELOC start date", false),
       utilityPaymentMonthlyAvg: mcs(
@@ -1773,30 +1563,15 @@ const allColTraits = makeStructuredConfig(
         "Insurance premium monthly",
         true,
       ),
-      insuranceNotes: mcs(
-        "col-fmolBdG",
-        "string",
-        "Insurance notes",
-        false,
-      ),
+      insuranceNotes: mcs("col-fmolBdG", "string", "Insurance notes", false),
       outdoorWaterSource: mcs(
         "col-aBMOpUk",
         "string",
         "Outdoor water source",
         false,
       ),
-      gardenBedSqFt: mcs(
-        "col-xgNmSP2",
-        "number",
-        "Garden bed sq ft",
-        false,
-      ),
-      gardenYardSqFt: mcs(
-        "col-lLGiPJ-",
-        "number",
-        "Garden yard sq ft",
-        true,
-      ),
+      gardenBedSqFt: mcs("col-xgNmSP2", "number", "Garden bed sq ft", false),
+      gardenYardSqFt: mcs("col-lLGiPJ-", "number", "Garden yard sq ft", true),
       boulevardSqFt: mcs("col-xPhh3bL", "number", "Boulevard sq ft", true),
       kidsPlayBackYardSqFt: mcs(
         "col-HmSzSso",
@@ -1830,18 +1605,8 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       amount: mcs("col-Tum3aH7", "number", "Amount", false),
-      deductibleAmount: mcs(
-        "col-55XKM_i",
-        "number",
-        "Deductible amount",
-        true,
-      ),
-      taxAdjust: mcs(
-        "col-V2BAd2p",
-        "residenceTaxAdjust",
-        "Tax adjust",
-        false,
-      ),
+      deductibleAmount: mcs("col-55XKM_i", "number", "Deductible amount", true),
+      taxAdjust: mcs("col-V2BAd2p", "residenceTaxAdjust", "Tax adjust", false),
       isUpfrontInvestment: mcs(
         "col-bK8A6h_",
         "yesOrNo",
@@ -1876,12 +1641,7 @@ const allColTraits = makeStructuredConfig(
         "Paved driveway count",
         false,
       ),
-      garageDoorCount: mcs(
-        "col-yYgBB3-",
-        "string",
-        "Garage door count",
-        false,
-      ),
+      garageDoorCount: mcs("col-yYgBB3-", "string", "Garage door count", false),
       purchasePrice: mcs("col-FpFVeeU", "string", "Purchase price", false),
       comission: mcs("col-QZfm4Rg", "string", "Comission", false),
       downPayment: mcs("col-E6lZNsV", "number", "Down payment", true),
@@ -1931,19 +1691,9 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       waterMonthly: mcs("col-ybMqgFN", "number", "Water monthly", true),
-      waterQuarterly: mcs(
-        "col-B3xgDQf",
-        "string",
-        "Water quarterly",
-        false,
-      ),
+      waterQuarterly: mcs("col-B3xgDQf", "string", "Water quarterly", false),
       garbageMonthly: mcs("col-tbRXTof", "number", "Garbage monthly", true),
-      garbageQuarterly: mcs(
-        "col-P29jxIM",
-        "number",
-        "Garbage quarterly",
-        true,
-      ),
+      garbageQuarterly: mcs("col-P29jxIM", "number", "Garbage quarterly", true),
       capexTotalMonthly: mcs(
         "col-BTE_UBh",
         "number",
@@ -1987,12 +1737,7 @@ const allColTraits = makeStructuredConfig(
         "Maintenance budget monthly",
         true,
       ),
-      loanAmountBase: mcs(
-        "col-nwkgCz7",
-        "number",
-        "Loan amount base",
-        true,
-      ),
+      loanAmountBase: mcs("col-nwkgCz7", "number", "Loan amount base", true),
       ltvRatio: mcs("col-IYtSZG9", "string", "LTV ratio", true),
       interestRateYearly: mcs(
         "col-BB4uKDl",
@@ -2007,12 +1752,7 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       loanTermYears: mcs("col-HOqeQW_", "number", "Loan term years", true),
-      loanTermMonths: mcs(
-        "col-Db1veZf",
-        "number",
-        "Loan term months",
-        true,
-      ),
+      loanTermMonths: mcs("col-Db1veZf", "number", "Loan term months", true),
       closingCosts: mcs("col-MF8af4Z", "number", "Closing costs", true),
       sellerPaidClosingCosts: mcs(
         "col-XDKvGiw",
@@ -2067,18 +1807,8 @@ const allColTraits = makeStructuredConfig(
         "Total expenses monthly",
         true,
       ),
-      cashFlowMonthly: mcs(
-        "col-O8benrs",
-        "number",
-        "Cash flow monthly",
-        true,
-      ),
-      cashFlowAnnual: mcs(
-        "col-JNeUlZP",
-        "number",
-        "Cash flow annual",
-        true,
-      ),
+      cashFlowMonthly: mcs("col-O8benrs", "number", "Cash flow monthly", true),
+      cashFlowAnnual: mcs("col-JNeUlZP", "number", "Cash flow annual", true),
       roi: mcs("col-2JBw-J8", "number", "ROI", true),
       column96: mcs("col--9HLvkP", "string", "Column 96", false),
       insurancePremiumYearly: mcs(
@@ -2117,12 +1847,7 @@ const allColTraits = makeStructuredConfig(
         "Insurance deductible",
         false,
       ),
-      insuranceNotes: mcs(
-        "col-6atkGeu",
-        "string",
-        "Insurance notes",
-        false,
-      ),
+      insuranceNotes: mcs("col-6atkGeu", "string", "Insurance notes", false),
       utilityMonthlyTotal: mcs(
         "col-51JutEB",
         "number",
@@ -2197,32 +1922,12 @@ const allColTraits = makeStructuredConfig(
         "Mortgage payment monthly",
         false,
       ),
-      mortgageHolder: mcs(
-        "col-tvtnSGs",
-        "string",
-        "Mortgage holder",
-        false,
-      ),
-      mortgageNumber: mcs(
-        "col-f0TEYw-",
-        "string",
-        "Mortgage number",
-        false,
-      ),
-      mortgageBalance: mcs(
-        "col-XSvoDWo",
-        "string",
-        "Mortgage balance",
-        false,
-      ),
+      mortgageHolder: mcs("col-tvtnSGs", "string", "Mortgage holder", false),
+      mortgageNumber: mcs("col-f0TEYw-", "string", "Mortgage number", false),
+      mortgageBalance: mcs("col-XSvoDWo", "string", "Mortgage balance", false),
       ltv: mcs("col-7HKVmK_", "string", "LTV %", true),
       pmi: mcs("col-nto9Ao2", "string", "PMI", false),
-      helocAvailable: mcs(
-        "col-P2LYFfH",
-        "number",
-        "HELOC available",
-        true,
-      ),
+      helocAvailable: mcs("col-P2LYFfH", "number", "HELOC available", true),
       helocPaymentMonthly: mcs(
         "col--vU01TX",
         "string",
@@ -2231,12 +1936,7 @@ const allColTraits = makeStructuredConfig(
       ),
       helocHolder: mcs("col--wsHtE_", "string", "HELOC holder", false),
       helocNumber: mcs("col-RBLV5s_", "string", "HELOC number", false),
-      helocStartDate: mcs(
-        "col-0dnlzzL",
-        "string",
-        "HELOC start date",
-        false,
-      ),
+      helocStartDate: mcs("col-0dnlzzL", "string", "HELOC start date", false),
       helocLimit: mcs("col-PhrD5vU", "string", "HELOC limit", false),
       helocBalance: mcs("col-mNIXW1Y", "string", "HELOC balance", false),
       helocInterestRate: mcs(
@@ -2252,12 +1952,7 @@ const allColTraits = makeStructuredConfig(
       propertyId: mcs("col-MqF-anY", "string", "Property ID", false),
       year: mcs("col-TawhTyt", "number", "Year", false),
       primarySpace: mcs("col-alQOQuj", "number", "Primary space", false),
-      notPrimarySpace: mcs(
-        "col-QkHxyMW",
-        "number",
-        "Not primary space",
-        true,
-      ),
+      notPrimarySpace: mcs("col-QkHxyMW", "number", "Not primary space", true),
       primaryTimeOwned: mcs(
         "col-iSuANXq",
         "number",
@@ -2290,12 +1985,7 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       "1099Misc": mcs("col-dcCSLJn", "string", "1099-Misc", false),
-      incomeExptected: mcs(
-        "col-8LhB3qW",
-        "string",
-        "Income exptected",
-        false,
-      ),
+      incomeExptected: mcs("col-8LhB3qW", "string", "Income exptected", false),
       incomeExpectedMaximum: mcs(
         "col-M08K-ca",
         "string",
@@ -2315,12 +2005,7 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       vacancyBudget: mcs("col-vBhf-u-", "string", "Vacancy budget", false),
-      lawncareBudget: mcs(
-        "col-PT5uv-S",
-        "string",
-        "Lawncare budget",
-        false,
-      ),
+      lawncareBudget: mcs("col-PT5uv-S", "string", "Lawncare budget", false),
       capexBudget: mcs("col-p54csmV", "string", "CapEx budget", false),
       utilityCostEstimate: mcs(
         "col-xy2UuPt",
@@ -2401,12 +2086,7 @@ const allColTraits = makeStructuredConfig(
     recurringTransaction: {
       id: mcs("col-gP8cSSs", "string", "ID", false),
       item: mcs("col-T5ui0fF", "string", "Item", false),
-      transactionType: mcs(
-        "col-ViD8IQV",
-        "string",
-        "Transaction type",
-        false,
-      ),
+      transactionType: mcs("col-ViD8IQV", "string", "Transaction type", false),
       transactWith: mcs("col-1lm7yg5", "string", "Transact with", false),
       propertyId: mcs("col-0Hg4hkA", "string", "Property ID", false),
       transactionDayOfMonth: mcs(
@@ -2458,12 +2138,7 @@ const allColTraits = makeStructuredConfig(
         "Payment standard year",
         false,
       ),
-      buildingType: mcs(
-        "col-kwd1nJf",
-        "buildingType",
-        "Building type",
-        false,
-      ),
+      buildingType: mcs("col-kwd1nJf", "buildingType", "Building type", false),
       bedroomCount: mcs("col-zUPaL7J", "number", "Bedroom count", false),
       zipCode: mcs("col-SCKjbMh", "number", "Zip code", false),
       baseRentChargeMonthly: mcs(
@@ -2485,19 +2160,9 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       gasHeating: mcs("col-v6ruJbN", "boolean", "Gas Heating", false),
-      electricHeating: mcs(
-        "col-1tFVepW",
-        "boolean",
-        "Electric Heating",
-        false,
-      ),
+      electricHeating: mcs("col-1tFVepW", "boolean", "Electric Heating", false),
       gasCooking: mcs("col-yXPEotT", "boolean", "Gas Cooking", false),
-      electricCooking: mcs(
-        "col-lEpzVR-",
-        "boolean",
-        "Electric Cooking",
-        false,
-      ),
+      electricCooking: mcs("col-lEpzVR-", "boolean", "Electric Cooking", false),
       gasWaterHeating: mcs(
         "col-fRt2Yns",
         "boolean",
@@ -2512,12 +2177,7 @@ const allColTraits = makeStructuredConfig(
       ),
       otherElectric: mcs("col-kDXrKLj", "boolean", "Other Electric", false),
       waterSewer: mcs("col-d1u_yOr", "boolean", "Water & Sewer", false),
-      trashCollection: mcs(
-        "col-xXD5Eot",
-        "boolean",
-        "Trash Collection",
-        false,
-      ),
+      trashCollection: mcs("col-xXD5Eot", "boolean", "Trash Collection", false),
       districtEnergyHeating: mcs(
         "col-qyoPjKZ",
         "boolean",
@@ -2554,12 +2214,7 @@ const allColTraits = makeStructuredConfig(
       paymentId: mcs("col-jAnSZoZ", "string", "Payment ID", false),
       paymentDate: mcs("col-ek62dJt", "date", "Payment date", true),
       formOfPayment: mcs("col-3jQA3el", "string", "Form of payment", true),
-      paymentAllocated: mcs(
-        "col-ci9Olfh",
-        "number",
-        "Payment allocated",
-        true,
-      ),
+      paymentAllocated: mcs("col-ci9Olfh", "number", "Payment allocated", true),
       chargeId: mcs("col-dWzWhmG", "string", "Charge ID", false),
       chargeDescription: mcs(
         "col-20hJLMV",
@@ -2603,12 +2258,7 @@ const allColTraits = makeStructuredConfig(
         "Subsidy program ID",
         false,
       ),
-      paymentGroupId: mcs(
-        "col-hltQiWS",
-        "string",
-        "Payment group ID",
-        false,
-      ),
+      paymentGroupId: mcs("col-hltQiWS", "string", "Payment group ID", false),
       paymentGroupName: mcs(
         "col-CNLvSX-",
         "string",
@@ -2675,12 +2325,7 @@ const allColTraits = makeStructuredConfig(
         "Update subsidy contract enter",
         false,
       ),
-      subsidyWorkerId: mcs(
-        "col-0Ep6gXa",
-        "string",
-        "Subsidy worker ID",
-        false,
-      ),
+      subsidyWorkerId: mcs("col-0Ep6gXa", "string", "Subsidy worker ID", false),
       subsidyWorkerFirstName: mcs(
         "col-B0Dj4Od",
         "string",
@@ -2735,18 +2380,8 @@ const allColTraits = makeStructuredConfig(
         false,
       ),
       amount: mcs("col-AcmAj-n", "number", "Amount", false),
-      detailsVerified: mcs(
-        "col-V9Ue8yu",
-        "yesOrNo",
-        "Details verified",
-        false,
-      ),
-      amountAllocated: mcs(
-        "col-OHWAx0k",
-        "number",
-        "Amount allocated",
-        true,
-      ),
+      detailsVerified: mcs("col-V9Ue8yu", "yesOrNo", "Details verified", false),
+      amountAllocated: mcs("col-OHWAx0k", "number", "Amount allocated", true),
       amountUnallocated: mcs(
         "col-4kyYlK4",
         "number",
@@ -2828,26 +2463,11 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       gasHeating: mcs("col-3Cxid3J", "boolean", "Gas Heating", true),
-      electricHeating: mcs(
-        "col-2jWsE7c",
-        "boolean",
-        "Electric Heating",
-        true,
-      ),
+      electricHeating: mcs("col-2jWsE7c", "boolean", "Electric Heating", true),
       gasCooking: mcs("col-RNh1HKZ", "boolean", "Gas Cooking", true),
-      electricCooking: mcs(
-        "col-Qz2zH70",
-        "boolean",
-        "Electric Cooking",
-        true,
-      ),
+      electricCooking: mcs("col-Qz2zH70", "boolean", "Electric Cooking", true),
       otherElectric: mcs("col-rc7bLdS", "boolean", "Other Electric", true),
-      gasWaterHeating: mcs(
-        "col-zVC9R-p",
-        "boolean",
-        "Gas Water Heating",
-        true,
-      ),
+      gasWaterHeating: mcs("col-zVC9R-p", "boolean", "Gas Water Heating", true),
       electricWaterHeating: mcs(
         "col-jxHTX7M",
         "boolean",
@@ -2855,12 +2475,7 @@ const allColTraits = makeStructuredConfig(
         true,
       ),
       waterSewer: mcs("col-WElsMcQ", "boolean", "Water & Sewer", true),
-      trashCollection: mcs(
-        "col-YJt59t-",
-        "boolean",
-        "Trash Collection",
-        true,
-      ),
+      trashCollection: mcs("col-YJt59t-", "boolean", "Trash Collection", true),
       districtEnergyHeating: mcs(
         "col-TQGePfn",
         "boolean",
@@ -2945,12 +2560,7 @@ const allColTraits = makeStructuredConfig(
         "Total monthly rent",
         false,
       ),
-      securityDeposit: mcs(
-        "col-s6Coo3X",
-        "string",
-        "Security deposit",
-        false,
-      ),
+      securityDeposit: mcs("col-s6Coo3X", "string", "Security deposit", false),
       rentIncreaseDates: mcs(
         "col-FDIXEKX",
         "string",
@@ -2981,12 +2591,7 @@ const allColTraits = makeStructuredConfig(
         "Window unit air conditioner",
         false,
       ),
-      showerRodLength: mcs(
-        "col-7xQbB7A",
-        "string",
-        "Shower rod length",
-        false,
-      ),
+      showerRodLength: mcs("col-7xQbB7A", "string", "Shower rod length", false),
       furnaceId: mcs("col-oCIcC_4", "string", "Furnace ID", false),
       furnaceName: mcs("col-1b27zS9", "string", "Furnace name", true),
       needAccessForFurnaceTuneUp: mcs(
@@ -3065,12 +2670,7 @@ const allColTraits = makeStructuredConfig(
         "Charge reduce description",
         false,
       ),
-      rentPortionName: mcs(
-        "col-LtgQHTi",
-        "string",
-        "Rent portion name",
-        false,
-      ),
+      rentPortionName: mcs("col-LtgQHTi", "string", "Rent portion name", false),
       paymentType: mcs("col-9CulPu2", "string", "Payment type", false),
       payerCategory: mcs("col-_DwO2R3", "string", "Payer category", false),
       paymentAllocateWhat: mcs(
@@ -3079,12 +2679,7 @@ const allColTraits = makeStructuredConfig(
         "Payment allocate what",
         false,
       ),
-      expenseCategory: mcs(
-        "col-u0Fstxj",
-        "string",
-        "Expense category",
-        false,
-      ),
+      expenseCategory: mcs("col-u0Fstxj", "string", "Expense category", false),
       expenseCategoryTaxable: mcs(
         "col-9XaRDGK",
         "string",
@@ -3150,12 +2745,7 @@ const allColTraits = makeStructuredConfig(
     variable: {
       id: mcs("col-bMRolLy", "string", "ID", false),
       today: mcs("col-07PPMWD", "date", "Today", true),
-      "15thOfThisMonth": mcs(
-        "col-yfTbEv-",
-        "date",
-        "15th of this month",
-        true,
-      ),
+      "15thOfThisMonth": mcs("col-yfTbEv-", "date", "15th of this month", true),
       "2MonthsOut": mcs("col-_P8yYla", "date", "2 months out", true),
     },
     year: {
@@ -3193,7 +2783,7 @@ export type ColumnValue<
   CN extends ColumnName<SN>,
 > = Value<ColumnValueName<SN, CN> & ValueName>;
 
-export type TableValues<
+export type SheetDataValues<
   SN extends SheetNameSimple,
   VNS extends ColumnName<SN> = ColumnName<SN>,
 > = {

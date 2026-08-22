@@ -1,4 +1,4 @@
-// import type { TableValues } from "../02_generatedTraits/03_columnTraits";
+// import type { SheetDataValues } from "../02_generatedTraits/03_columnTraits";
 // import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
 // import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 // import { Arr } from "../utils/Arr";
@@ -26,7 +26,7 @@
 // type LeaseAmountValueNames = (typeof leaseAmountValueNames)[number];
 
 // type LeaseAmountValues = Pick<
-//   TableValues<"occupancyTerms">,
+//   SheetDataValues<"occupancyTerms">,
 //   LeaseAmountValueNames
 // >;
 

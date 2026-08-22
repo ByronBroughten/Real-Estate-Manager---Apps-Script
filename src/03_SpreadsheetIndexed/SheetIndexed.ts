@@ -1,7 +1,8 @@
-import type { UniformRowName } from "../00_base/base";
+import type { CellValue, UniformRowName } from "../00_base/base";
 import { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
 import type { UniformRow } from "../01_SpreadsheetRaw/UniformRow";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
+import { Arr } from "../utils/Arr";
 import { isPreFetchType } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
@@ -11,6 +12,9 @@ import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 export class SheetIndexed extends SheetIndexedBase {
   get schema(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
+  }
+  colSchema(columnId: string): ColumnIndexed {
+    return this.column(columnId);
   }
   get raw(): SheetRaw {
     return new SheetRaw(this.sheetIndexedProps);
@@ -27,9 +31,6 @@ export class SheetIndexed extends SheetIndexedBase {
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
     return this.raw.uniformRow(rowName);
   }
-  get topDataRow(): DataRowIndexed {
-    return this.dataRow(this.schema.topDataRowIdx);
-  }
   dataRow(rowIndex: number): DataRowIndexed {
     return new DataRowIndexed({
       ...this.sheetIndexedProps,
@@ -38,6 +39,15 @@ export class SheetIndexed extends SheetIndexedBase {
   }
   get dataRows() {
     return this.raw.dataRows.map((row) => this.dataRow(row.rowIndex));
+  }
+  get topDataRow(): DataRowIndexed {
+    return this.dataRow(this.schema.topDataRowIdx);
+  }
+  get fullDataRowIndexes(): number[] {
+    return Arr.indexesFromUntil(
+      this.ssSchema.topDataRowIdx,
+      this.raw.activeTable.endRowIndex,
+    );
   }
   prepFetchFullUniformRow<UN extends UniformRowName>(rowName: UN) {
     const rowIndex = this.schema.uniformRowIndex(rowName);
@@ -57,7 +67,7 @@ export class SheetIndexed extends SheetIndexedBase {
   prepFetchSingleCell(rowIndex: number, columnId: string) {
     this.preFetchGridRanges.push({ row: rowIndex, column: columnId });
   }
-  gatherFetchGridRangesFromColIds() {
+  gatherFetchDataPrepped() {
     this.preFetchGridRanges.forEach((pf) => {
       if (isPreFetchType(pf, "fullRow")) {
         this.raw.row(pf.row).gatherFetchFull();
@@ -74,7 +84,7 @@ export class SheetIndexed extends SheetIndexedBase {
   finalizeFetchedData() {
     this.raw.allDataRows.forEach((row) => row.ensureStateExists());
     this._finalizeFetchedFullRows();
-    this._finalizeFetchedDataColumns();
+    this._finalizeFetchedFullDataColumns();
   }
   private _finalizeFetchedFullRows(): void {
     this.sheetState.indexesOfFullRowsToFetch.forEach((rowIndex) => {
@@ -87,21 +97,30 @@ export class SheetIndexed extends SheetIndexedBase {
     });
     this.sheetState.indexesOfFullRowsToFetch.clear();
   }
-  private _finalizeFetchedDataColumns(): void {
-    this.sheetState.indexesOfColDataToFetch.forEach((colIndex) => {
-      this.allDataRows.forEach((row) => {
+  private _finalizeFetchedFullDataColumns(): void {
+    this.sheetState.idsOfFullDataColsToFetch.forEach((columnId) => {
+      this.column(columnId).addMissingValuesWithEmpty();
+      this.fullDataRowIndexes.forEach((rowIndex) => {
+        column;
+
         if (!row.hasValue(colIndex)) {
           row.integrateEmptyState(colIndex);
         }
       });
     });
-    this.sheetState.indexesOfColDataToFetch.clear();
+    this.sheetState.idsOfFullDataColsToFetch.clear();
   }
-
   appendRowDefault(): DataRowIndexed {
-    const defaultValues = this.schema.defaultValues([
-      ...this.schema.colIndexes,
-    ]);
+    const defaultValues = this.schema.nonFormulaColumnIds.reduce(
+      (acc, columnId) => {
+        const colIndex = this.column(columnId).colIndex;
+        const colSchema = this.schema.column(columnId);
+        const defaultValue = colSchema.makeDefaultDataValue();
+        acc.set(colIndex, defaultValue);
+        return acc;
+      },
+      new Map() as Map<number, CellValue>,
+    );
     const { rowIndex } = this.raw.appendDataRowValues(defaultValues);
     return this.dataRow(rowIndex);
   }

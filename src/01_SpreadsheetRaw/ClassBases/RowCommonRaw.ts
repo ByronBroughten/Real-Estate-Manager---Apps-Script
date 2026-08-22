@@ -1,10 +1,6 @@
-import type {
-  GoogleCellValue,
-  GoogleUpdateRequest,
-} from "../../00_base/AppsScriptTypes";
+import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
-import { valS } from "../../utils/validation";
 import type {
   RowChangeProps,
   RowChangesToSave,
@@ -44,48 +40,9 @@ export abstract class RowCommonRaw extends RowRawBase {
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
   }
-  setValueState(colIndex: number, value: CellValue): void {
-    if (!this.rowIsActive()) {
-      throw new Error(
-        `Cannot set value for row ${this.rowIndex} because it is not active.`,
-      );
-    }
-    this.rowState.set(colIndex, value);
-  }
   updateValue(colIndex: number, value: CellValue): this {
-    this.cell(colIndex).validateIndexNotStale();
-    this.setValueState(colIndex, value);
-    return this.addRowChangeToSave({ action: "update", colIdxes: [colIndex] });
-  }
-  integrateEmptyState(colIndex: number): void {
-    this.setValueState(colIndex, "");
-  }
-  integrateState(
-    colIndex: number,
-    cellValue: GoogleCellValue | undefined,
-  ): void {
-    const value = this._extractFromSheetValue(cellValue);
-    this.setValueState(colIndex, value);
-  }
-  private _extractFromSheetValue(
-    cellValue: GoogleCellValue | undefined,
-  ): CellValue {
-    if (cellValue === undefined) {
-      return "";
-    }
-    const effectiveValue = cellValue.effectiveValue;
-    if (effectiveValue === undefined) {
-      return "";
-    }
-    if ("stringValue" in effectiveValue) {
-      return valS.assert(effectiveValue.stringValue, "stringValue");
-    } else if ("boolValue" in effectiveValue) {
-      return valS.assert(effectiveValue.boolValue, "boolValue");
-    } else if ("numberValue" in effectiveValue) {
-      return valS.assert(effectiveValue.numberValue, "numberValue");
-    } else {
-      return "";
-    }
+    this.cell(colIndex).updateValue(value);
+    return this;
   }
   delete(): void {
     this.remove();

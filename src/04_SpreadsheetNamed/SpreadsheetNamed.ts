@@ -32,7 +32,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return new SpreadsheetIndexed(this.spreadsheetRawProps);
   }
   get schema(): SpreadsheetSchema {
-    return this.spreadsheetSchema;
+    return this.ssSchema;
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({

@@ -25,28 +25,33 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
   trait<K extends SheetTraitRawKey>(key: K): SheetTraitRaw<K> {
     return getSheetTraitByGid(this.sheetGid, key);
   }
-  column(colIndex: number): ColumnSchemaIndexed {
+  column(columnId: string): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed({
       sheetGid: this.sheetGid,
-      colIndex,
+      columnId,
     });
+  }
+  get nonFormulaColumnIds(): string[] {
+    return [...this.columnIds].filter((columnId) => {
+      return this.column(columnId).isFormula;
+    });
+  }
+  makeColumnId(): string {
+    return this.makeColIdFromPrefix(this.trait("idPrefix"));
   }
   get sheetName(): SheetName {
     return this.trait("sheetName");
   }
-  allDefaultVValues(): Map<number, CellValue> {
-    return this.defaultValues([...this.colIndexes]);
+  allDefaultValues(): Map<string, CellValue> {
+    return this.defaultValues(...this.columnIds);
   }
-  defaultValues(colIndexes: number[]): Map<number, CellValue> {
-    return colIndexes.reduce(
-      (acc, colIndex) => {
-        acc.set(colIndex, this.column(colIndex).makeDefaultDataValue());
+  defaultValues(...columnIds: string[]): Map<string, CellValue> {
+    return columnIds.reduce(
+      (acc, columnId) => {
+        acc.set(columnId, this.column(columnId).makeDefaultDataValue());
         return acc;
       },
-      new Map() as Map<number, CellValue>,
+      new Map() as Map<string, CellValue>,
     );
-  }
-  makeColumnId(): string {
-    return this.makeColIdFromPrefix(this.trait("idPrefix"));
   }
 }

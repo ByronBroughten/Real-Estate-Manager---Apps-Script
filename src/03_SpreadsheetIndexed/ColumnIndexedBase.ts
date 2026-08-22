@@ -1,19 +1,28 @@
+import type { CellValueName } from "../00_base/base";
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
 
-interface ColumnIndexedBaseProps extends SheetIndexedProps {
+export interface ColumnIndexedProps<
+  VN extends CellValueName = CellValueName,
+> extends SheetIndexedProps {
   columnId: string;
+  valueName?: VN;
 }
 
-export class ColumnIndexedBase extends SheetIndexedBase {
+export class ColumnIndexedBase<
+  VN extends CellValueName = CellValueName,
+> extends SheetIndexedBase {
   readonly columnId: string;
-  constructor(props: ColumnIndexedBaseProps) {
+  readonly valueName?: VN;
+  constructor({ columnId, valueName, ...props }: ColumnIndexedProps<VN>) {
     super(props);
-    this.columnId = props.columnId;
+    this.columnId = columnId;
+    this.valueName = valueName;
   }
-  get columnIndexedProps(): ColumnIndexedBaseProps {
+  get columnIndexedProps(): ColumnIndexedProps<VN> {
     return {
       ...this.sheetIndexedProps,
       columnId: this.columnId,
+      valueName: this.valueName,
     };
   }
 }

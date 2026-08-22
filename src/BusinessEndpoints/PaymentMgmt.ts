@@ -1,4 +1,4 @@
-// import type { TableValues } from "../02_generatedTraits/03_columnTraits";
+// import type { SheetDataValues } from "../02_generatedTraits/03_columnTraits";
 // import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
 // import type { DataRowNamed } from "../04_SpreadsheetNamed/DataRowNamed";
 // import { Obj } from "../utils/Obj";
@@ -106,7 +106,7 @@
 //     const paymentIdToCharges: PaymentIdToCharges = {};
 //     for (const [groupId, chargeIds] of Obj.entries(idToChargeIds)) {
 //       const charges = chargeIds.map((chargeId) => occCharge.row(chargeId));
-//       function addPayment(values: Partial<TableValues<"occPayment">>) {
+//       function addPayment(values: Partial<SheetDataValues<"occPayment">>) {
 //         const topCharge = charges[0];
 //         const paymentId = payment.appendRowWithVals({
 //           detailsVerified: "No",

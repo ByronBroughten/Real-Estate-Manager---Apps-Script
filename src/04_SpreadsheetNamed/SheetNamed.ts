@@ -4,7 +4,7 @@ import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnName,
   ColumnValue,
-  TableValues,
+  SheetDataValues,
 } from "../02_generatedTraits/03_columnTraits";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import { Arr } from "../utils/Arr";
@@ -21,10 +21,13 @@ export class SheetNamed<
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   get schema(): SheetSchemaNamed<SN> {
-    return this.spreadsheetSchema.sheet(this.sheetName);
+    return this.ssSchema.sheet(this.sheetName);
   }
   get raw(): SheetRaw {
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
+  }
+  get sheetGid(): number {
+    return this.schema.sheetGid;
   }
   get indexed(): SheetIndexed {
     return new SheetIndexed({
@@ -96,7 +99,7 @@ export class SheetNamed<
   private DELETE_DATA_ROWS_AFTER_TOP() {
     this.raw.DELETE_ACTIVE_DATA_ROWS(this.schema.topDataRowIdx + 1);
   }
-  rowsFiltered(values: Partial<TableValues<SN>>): DataRowNamed<SN>[] {
+  rowsFiltered(values: Partial<SheetDataValues<SN>>): DataRowNamed<SN>[] {
     return this.dataRows.filter((row) => {
       for (const columnName in values) {
         if (row.value(columnName) !== values[columnName]) {
@@ -106,7 +109,7 @@ export class SheetNamed<
       return true;
     });
   }
-  appendRowWithVals(values: Partial<TableValues<SN>>): DataRowNamed<SN> {
+  appendRowWithVals(values: Partial<SheetDataValues<SN>>): DataRowNamed<SN> {
     const { rowIndex } = this.raw.appendDataRow();
     return this.dataRow(rowIndex).updateValues(values);
   }

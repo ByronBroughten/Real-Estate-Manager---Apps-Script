@@ -1,4 +1,5 @@
 import { AppsScript } from "../../00_base/AppsScript";
+import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   type ChangesToSave,
@@ -17,6 +18,9 @@ export class SpreadsheetRawBase {
   }
   protected get rawSheetsState(): RawSheetsState {
     return this.rawState.sheets;
+  }
+  get baseSchema(): SchemaBase {
+    return new SchemaBase();
   }
   get spreadsheetId(): string {
     const ssId = AppsScript.projectProperties("realEstateSpreadsheetId");

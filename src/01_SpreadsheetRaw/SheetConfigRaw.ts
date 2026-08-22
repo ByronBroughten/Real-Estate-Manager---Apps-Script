@@ -135,7 +135,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetTraitsFileSource(): string {
-    this.sheet.gatherFetchPropertiesOnly();
+    this.sheet.gatherFetchProperties();
     this.sheet.gatherFetchFullUniformRow("header");
     this.ss.fetchAllPrepped();
     this.sheet.gatherFetchDataColumnsUsingHeaders(

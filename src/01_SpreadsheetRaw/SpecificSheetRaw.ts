@@ -13,7 +13,7 @@ export class SpecificSheetRaw<
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   gatherFetchPrerequisitesForRawColumns() {
-    this.sheet.gatherFetchPropertiesOnly();
+    this.sheet.gatherFetchProperties();
     this.sheet.gatherFetchFullUniformRow("header");
   }
   gatherFetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {

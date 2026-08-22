@@ -1,10 +1,11 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import type { Value } from "../02_generatedTraits/06_valueSchemas";
 import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { Arr } from "../utils/Arr";
 import { valS } from "../utils/validation";
 import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
-import { SheetCommon } from "./ClassBases/SheetCommon";
+import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
 
 import type {
@@ -24,12 +25,60 @@ import { UniformRow } from "./UniformRow";
 
 export type SheetRawRow = DataRowRaw | UniformRow;
 
-export class SheetRaw extends SheetCommon {
+export class SheetRaw extends SheetRawBase {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get schema(): SchemaBase {
     return new SchemaBase();
+  }
+  get rowIndexesAreValid(): boolean {
+    return this.sheetState.rowIndexesAreValid;
+  }
+  invalidateRowIndexes(): void {
+    this.sheetState.rowIndexesAreValid = false;
+  }
+  validateRowIndexes(): void {
+    this.sheetState.rowIndexesAreValid = true;
+  }
+  get firstStaleColIndex(): number | null {
+    return this.sheetState.firstStaleColIndex;
+  }
+  ensureColIndexIsStale(colIndex: number): void {
+    this.sheetState.firstStaleColIndex = Math.min(
+      this.sheetState.firstStaleColIndex ?? Infinity,
+      colIndex,
+    );
+  }
+  get title(): string {
+    if (this.sheetState.title === null) {
+      throw new Error(
+        `Sheet title is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
+      );
+    }
+    return this.sheetState.title;
+  }
+
+  get activeRowIndexes(): number[] {
+    const indexes = Array.from(this.sheetState.rowStates.keys());
+    return Arr.sortAscending(indexes);
+  }
+  get activeDataRowIndexes(): number[] {
+    return this.activeRowIndexes.filter((rowIndex) =>
+      this.schema.isDataRowIndex(rowIndex),
+    );
+  }
+  get fullDataColIndexes(): number[] {
+    return Arr.indexesFromUntil(
+      this.schema.startTableColIndex,
+      this.activeTable.endColumnIndex,
+    );
+  }
+  get rowCount(): number {
+    return this.sheetState.rowStates.size;
+  }
+  get dataRowCount(): number {
+    return this.rowCount - this.schema.topDataRowIdx;
   }
   get headerRow(): UniformRow<"header"> {
     return this.uniformRow("header");
@@ -122,15 +171,11 @@ export class SheetRaw extends SheetCommon {
             | GoogleCellValue
             | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
-          this.row(rowIdx).integrateState(colIndex, cellData);
+          this.row(rowIdx).cell(colIndex).integrateGState(cellData);
         });
       });
     });
   }
-  get allDataRows(): DataRowRaw[] {
-    return this.fullDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
-  }
-
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
     this.fullDataColIndexes.forEach((colIndex) => {
@@ -271,7 +316,7 @@ export class SheetRaw extends SheetCommon {
     this.uniformRow("columnId").gatherFetchFull();
     return this;
   }
-  gatherFetchPropertiesOnly(): SheetRaw {
+  gatherFetchProperties(): SheetRaw {
     // getByDataFilter only returns a sheet's `tables` metadata for filters whose
     // gridRange overlaps the table. The table always starts at the header row,
     // so pre-activate it and request one of its cells to reliably pull properties.

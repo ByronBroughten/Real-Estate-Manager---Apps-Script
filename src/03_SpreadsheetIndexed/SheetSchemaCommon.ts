@@ -1,5 +1,5 @@
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
-import { getSheetColumnIdxes } from "../02_generatedTraits/03_columnTraits";
+import { getSheetColumnIds } from "../02_generatedTraits/03_columnTraits";
 import { SchemaBase } from "./SchemaBase";
 
 interface SheetTraitCommon {
@@ -17,7 +17,7 @@ export abstract class SheetSchemaCommon extends SchemaBase {
   get idPrefix(): string {
     return this.trait("idPrefix");
   }
-  get colIndexes(): MapIterator<number> {
-    return getSheetColumnIdxes(this.sheetGid);
+  get columnIds(): MapIterator<string> {
+    return getSheetColumnIds(this.sheetGid);
   }
 }

@@ -1,4 +1,4 @@
-// import type { TableValues } from "../02_generatedTraits/03_columnTraits";
+// import type { SheetDataValues } from "../02_generatedTraits/03_columnTraits";
 // import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
 // import type { DataRowNamed } from "../04_SpreadsheetNamed/DataRowNamed";
 // import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
@@ -20,7 +20,7 @@
 //   householdId: string;
 // }
 // type SharedChargeLeaseValues = StrictPick<
-//   TableValues<"occCharge">,
+//   SheetDataValues<"occCharge">,
 //   | "amount"
 //   | "portion"
 //   | "date"

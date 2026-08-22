@@ -1,10 +1,16 @@
-import type { UserEnteredValue } from "../../00_base/AppsScriptTypes";
+import type {
+  GoogleCellValue,
+  UserEnteredValue,
+} from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import type { CellValueTrait } from "../../00_base/baseValueSchemas";
 import { getCellValTrait } from "../../00_base/baseValueSchemas";
 import type { ValueSchemaKey } from "../../00_base/valueSchema";
+import { valS } from "../../utils/validation";
 import { SheetRaw } from "../SheetRaw";
+import type { UniformRow } from "../UniformRow";
 import { CellRawBase } from "./CellRawBase";
+import type { DataRowRaw } from "./DataRowRaw";
 
 export class CellRaw<
   VN extends CellValueName = CellValueName,
@@ -17,6 +23,9 @@ export class CellRaw<
   }
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
+  }
+  get row(): DataRowRaw | UniformRow {
+    return this.sheet.row(this.rowIndex);
   }
   get gridRange() {
     return {
@@ -44,14 +53,30 @@ export class CellRaw<
       },
     });
   }
-  isEmptyCell(): boolean {
+  get isEmpty(): boolean {
     if (!this.isActive) {
       throw new Error(
         `Row ${this.rowIndex} does not have a value set for column index ${this.colIndex}.`,
       );
     }
     const value = this.rowState.get(this.colIndex);
-    return value === "" || value === null || value === undefined;
+    return value === "";
+  }
+  get isActive(): boolean {
+    return this.rowState.has(this.colIndex);
+  }
+  setValueState(value: CellValue): void {
+    if (!this.row.rowIsActive()) {
+      throw new Error(
+        `Cannot set value for row ${this.rowIndex} because it is not active.`,
+      );
+    }
+    this.rowState.set(this.colIndex, value);
+  }
+  ensureActiveWithEmpty() {
+    if (!this.isActive) {
+      this.setValueState("");
+    }
   }
   value(): CellValue<VN> {
     if (!this.isActive) {
@@ -66,6 +91,39 @@ export class CellRaw<
       return test as CellValue<VN>;
     } else {
       return value as CellValue<VN>;
+    }
+  }
+  updateValue(value: CellValue): this {
+    this.validateIndexNotStale();
+    this.setValueState(value);
+    this.row.addRowChangeToSave({
+      action: "update",
+      colIdxes: [this.colIndex],
+    });
+    return this;
+  }
+  integrateGState(cellValue: GoogleCellValue | undefined): void {
+    const value = this._extractFromSheetValue(cellValue);
+    this.setValueState(value);
+  }
+  private _extractFromSheetValue(
+    cellValue: GoogleCellValue | undefined,
+  ): CellValue {
+    if (cellValue === undefined) {
+      return "";
+    }
+    const effectiveValue = cellValue.effectiveValue;
+    if (effectiveValue === undefined) {
+      return "";
+    }
+    if ("stringValue" in effectiveValue) {
+      return valS.assert(effectiveValue.stringValue, "stringValue");
+    } else if ("boolValue" in effectiveValue) {
+      return valS.assert(effectiveValue.boolValue, "boolValue");
+    } else if ("numberValue" in effectiveValue) {
+      return valS.assert(effectiveValue.numberValue, "numberValue");
+    } else {
+      return "";
     }
   }
   _valueForSheet(): UserEnteredValue {

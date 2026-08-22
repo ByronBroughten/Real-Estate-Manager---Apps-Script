@@ -18,9 +18,6 @@ export class CellRawBase<
   get rowState(): RawRowState {
     return this.getRowState(this.rowIndex);
   }
-  get isActive(): boolean {
-    return this.rowState.has(this.colIndex);
-  }
   get cellRawProps(): CellRawProps<VN> {
     return {
       rowIndex: this.rowIndex,

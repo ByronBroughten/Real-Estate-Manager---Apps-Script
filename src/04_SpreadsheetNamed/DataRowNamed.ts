@@ -3,7 +3,7 @@ import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
 import type {
   ColumnName,
   ColumnValue,
-  TableValues,
+  SheetDataValues,
 } from "../02_generatedTraits/03_columnTraits";
 import type { Value, ValueName } from "../02_generatedTraits/06_valueSchemas";
 import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
@@ -34,10 +34,12 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
-  get rich(): DataRowIndexed {
-    return new DataRowIndexed(this.raw.rowRawProps);
+  get indexed(): DataRowIndexed {
+    return new DataRowIndexed({
+      ...this.rowNamedProps,
+      sheetGid: this.sheet.sheetGid,
+    });
   }
-
   get raw(): DataRowRaw {
     return new DataRowRaw({
       ...this.sheet.raw.sheetRawProps,
@@ -47,10 +49,6 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
     const colIndex = this.colIndex(columnName);
     return this.raw.cell(colIndex).isActive;
-  }
-  cellIsEmpty<CN extends ColumnName<SN>>(columnName: CN): boolean {
-    const colIndex = this.colIndex(columnName);
-    return this.raw.isEmptyCell(colIndex);
   }
   value<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
     return this.raw.value(this.colIndex(columnName)) as ColumnValue<SN, CN>;
@@ -114,39 +112,39 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   }
   values<CN extends ColumnName<SN> = ColumnName<SN>>(
     ...columnNames: readonly CN[]
-  ): TableValues<SN, CN> {
+  ): SheetDataValues<SN, CN> {
     const keys =
-      columnNames.length > 0 ? columnNames : (this.activeColumnNames as CN[]);
+      columnNames.length > 0 ? columnNames : (this.activeCellNames as CN[]);
     return keys.reduce(
       (values, columnName) => {
-        (values[columnName] as TableValues<SN, CN>[CN]) = this.value(
+        (values[columnName] as SheetDataValues<SN, CN>[CN]) = this.value(
           columnName,
-        ) as TableValues<SN, CN>[CN];
+        ) as SheetDataValues<SN, CN>[CN];
         return values;
       },
-      {} as TableValues<SN, CN>,
+      {} as SheetDataValues<SN, CN>,
     );
   }
   validateValues<CN extends ColumnName<SN> = ColumnName<SN>>(
     ...columnNames: CN[]
-  ): TableValues<SN, CN> {
+  ): SheetDataValues<SN, CN> {
     const values = this.values(...columnNames);
     for (const [columnName, value] of Obj.entries(values)) {
       this.columnSchema(columnName).validate(value);
     }
     return values;
   }
-  get activeColumnNames(): ColumnName<SN>[] {
-    return this.raw.activeColIndexes.map((index) =>
+  get activeCellNames(): ColumnName<SN>[] {
+    return this.raw.activeColIds.map((index) =>
       this.sheetSchema.colNameByIndex(index),
     );
   }
   updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {
-    this.rich.updateToDefault(...this.colIndexes(columnNames));
+    this.indexed.updateToDefault(...this.colIndexes(columnNames));
     return this;
   }
   updateCellToDefault(columnName: ColumnName<SN>): DataRowNamed<SN> {
-    this.rich.updateCellToDefault(this.colIndex(columnName));
+    this.indexed.updateCellToDefault(this.colIndex(columnName));
     return this;
   }
   updateValue<CN extends ColumnName<SN>, VL extends ColumnValue<SN, CN>>(
@@ -176,10 +174,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     this.updateValue(columnName, value as ColumnValue<SN, CN>);
     return this;
   }
-  updateValues(sectionValues: Partial<TableValues<SN>>): DataRowNamed<SN> {
-    sectionValues = Obj.pick(sectionValues, this.activeColumnNames) as Partial<
-      TableValues<SN>
-    >;
+  updateValues(sectionValues: Partial<SheetDataValues<SN>>): DataRowNamed<SN> {
     for (const [columnName, value] of Obj.entries(sectionValues)) {
       this.updateValue(columnName, value as ColumnValue<SN, typeof columnName>);
     }

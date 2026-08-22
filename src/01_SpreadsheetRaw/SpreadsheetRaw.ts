@@ -1,10 +1,9 @@
 import type { GoogleSpreadsheet } from "../00_base/AppsScriptTypes";
-import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
 import { valS } from "../utils/validation";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
-    RowChangesToSave,
-    SheetChangesToSave,
+  RowChangesToSave,
+  SheetChangesToSave,
 } from "./ClassTypes/RawState";
 import { SheetRaw, type SheetRawRow } from "./SheetRaw";
 
@@ -16,10 +15,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return valS.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
   }
   get schema() {
-    return new SchemaBase();
+    return this.baseSchema;
   }
-  get activeSheetGids(): Set<number> {
-    return new Set(this.rawState.sheets.keys());
+  get activeSheetGids(): number[] {
+    return Array.from(this.rawState.sheets.keys());
   }
   get activeSheets(): SheetRaw[] {
     return Array.from(this.activeSheetGids, (sheetGid) => this.sheet(sheetGid));
@@ -82,11 +81,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       const properties = valS.assert(gSheet.properties, "gSheet.properties");
       const sheetGid = valS.assert(properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
-
       sheet.integrateSheetState(gSheet);
-    });
-    this.activeSheets.forEach((sheet) => {
-      sheet.finalizeFetchedData();
     });
   }
   batchUpdateGSheets() {

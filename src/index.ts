@@ -35,7 +35,7 @@ function _tests() {
   // ss.fetchAllPrepped();
   // idColumn.fillEmptyDataCellsWithDefaultValues();
   const test = ss.sheet(testSheetName);
-  test.raw.gatherFetchPropertiesOnly();
+  test.raw.gatherFetchProperties();
   test.raw.gatherFetchFullUniformRow("columnId");
   ss.fetchAllPrepped();
   ss.sheet(testSheetName).addMissingColumnIds();
