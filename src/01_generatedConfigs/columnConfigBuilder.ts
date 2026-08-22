@@ -1,5 +1,6 @@
-import type { Value, ValueName } from "./valueSchemas";
+import { makeStructuredConfig } from "../00_base/base";
 import type { SheetNameSimple } from "./sheetConfigsTypes";
+import type { Value, ValueName } from "./valueSchemas";
 
 export interface ColumnConfigLiteral {
   columnId: string;
@@ -7,8 +8,9 @@ export interface ColumnConfigLiteral {
   isFormula: boolean;
   emptyAllowed: boolean;
 }
-export interface ColumnConfig<VN extends ValueName = ValueName>
-  extends ColumnConfigLiteral {
+export interface ColumnConfig<
+  VN extends ValueName = ValueName,
+> extends ColumnConfigLiteral {
   valueName: VN;
   customDefaultValue: Value<VN> | null;
 }
@@ -31,5 +33,11 @@ function makeColumnConfig<VN extends ValueName>(
 }
 export const mcc = makeColumnConfig;
 
-export type TableColumnConfigs = Record<string, ColumnConfig>;
-export type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
+type TableColumnConfigs = Record<string, ColumnConfig>;
+type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
+
+export function makeColumnConfigs<T extends ColumnConfigsBase>(
+  columnConfigs: T,
+): T {
+  return makeStructuredConfig({} as ColumnConfigsBase, columnConfigs);
+}
