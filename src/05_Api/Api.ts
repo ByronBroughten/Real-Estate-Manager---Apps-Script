@@ -11,7 +11,6 @@ import { Obj } from "../utils/Obj";
 
 export type EventOrigin = {
   colIndex: number;
-  rowIndex: number;
   sheetGid: number;
 };
 
@@ -62,26 +61,24 @@ export class Api<
     return eventIndex - 1;
   }
   static isSuspectedApiCall(e: GoogleAppsScript.Events.SheetsOnEdit): boolean {
-    if (e.value !== "TRUE") {
-      return false;
-    } else if (
-      Api.eventIndexToBase0(e.range.getRow()) !==
-      configGet("actionRowIndexBase0")
+    if (
+      e.value === "TRUE" &&
+      Api.eventIndexToBase0(e.range.getRow()) ===
+        configGet("actionRowIndexBase0")
     ) {
-      return false;
-    } else {
       return true;
+    } else {
+      return false;
     }
   }
   getEventOrigin(e: GoogleAppsScript.Events.SheetsOnEdit): EventOrigin {
     return {
       colIndex: Api.eventIndexToBase0(e.range.getColumn()),
-      rowIndex: Api.eventIndexToBase0(e.range.getRow()),
       sheetGid: e.range.getSheet().getSheetId(),
     };
   }
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
-    const { colIndex, rowIndex, sheetGid } = this.getEventOrigin(e);
+    const { colIndex, sheetGid } = this.getEventOrigin(e);
     if (!this.baseSchema.isInSheetGids(sheetGid)) {
       return;
     }
