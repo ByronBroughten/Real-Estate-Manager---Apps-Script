@@ -2761,8 +2761,6 @@ export type AllColTraits = typeof allColTraits;
 export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
   keyof AllColTraits[SN];
 
-export type TableColTraits<SN extends SheetNameSimple> = AllColTraits[SN];
-
 export type ColumnValueName<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
