@@ -28,6 +28,9 @@ export class SheetIndexed extends SheetIndexedBase {
       columnId,
     });
   }
+  columnIdByIndex(colIndex: number): string {
+    return this.raw.colIdRow.uniformValue(colIndex);
+  }
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
     return this.raw.uniformRow(rowName);
   }

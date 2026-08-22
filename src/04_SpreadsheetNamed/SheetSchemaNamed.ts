@@ -37,14 +37,14 @@ export class SheetSchemaNamed<
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnSchemaNamed<SN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  columnByIndex(colIndex: number): ColumnSchemaNamed<SN, ColumnName<SN>> {
-    const columnName = this.colNameByIndex(colIndex);
+  columnByColumnId(columnId: string): ColumnSchemaNamed<SN, ColumnName<SN>> {
+    const columnName = this.colNameByColumnId(columnId);
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
-  colNameByIndex(colIndex: number): ColumnName<SN> {
+  colNameByColumnId(columnId: string): ColumnName<SN> {
     return getColumnTraitByIndex(
       this.sheetGid,
-      colIndex,
+      columnId,
       "columnName",
     ) as ColumnName<SN>;
   }

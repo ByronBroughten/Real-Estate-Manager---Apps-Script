@@ -53,7 +53,7 @@ export class Api<
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get ssi(): SpreadsheetIndexed {
-    return new SpreadsheetIndexed(this.spreadsheetRawProps);
+    return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
   }
   get ssn(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
@@ -82,7 +82,8 @@ export class Api<
   }
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
     const { colIndex, rowIndex, sheetGid } = this.getEventOrigin(e);
-    const { fullName } = this.ssi.schema.column(sheetGid, colIndex);
+    const columnId = this.ssi.sheet(sheetGid).columnIdByIndex(colIndex);
+    const { fullName } = this.ssi.schema.column(sheetGid, columnId);
     if (this.isApiEndpointName(fullName)) {
       const endpoint = this.endpoints[fullName];
       if (endpoint) {

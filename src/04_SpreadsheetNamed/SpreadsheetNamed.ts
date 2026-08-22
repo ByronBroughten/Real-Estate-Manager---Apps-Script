@@ -1,6 +1,6 @@
-import type { SheetColumnsRange } from "../01_SpreadsheetRaw/ClassTypes/AccessorsRaw.js";
 import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes.js";
+import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed.js";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
 import { valS } from "../utils/validation.js";
@@ -9,7 +9,6 @@ import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
 import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed.js";
 import {
-  isRowSpecifierBySchemaName,
   type ColumnSpecifierNamed,
   type FetchColumnSpecifierNamed,
   type FetchPropsNamed,
@@ -29,7 +28,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get indexed(): SpreadsheetIndexed {
-    return new SpreadsheetIndexed(this.spreadsheetRawProps);
+    return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
   }
   get schema(): SpreadsheetSchema {
     return this.ssSchema;
@@ -62,19 +61,15 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
   fetchAllPrepped(): SpreadsheetNamed {
-    this.activeSheets.forEach((sheet) =>
-      sheet.gatherFetchColIdsForDataToFetch(),
-    );
-    this.raw.fetchAllPrepped();
+    this.indexed.fetchAllPrepped();
     return this;
   }
   fetch<SN extends SheetName>(
     ...props: FetchPropsNamed<SN>[]
   ): NamedSheets<SN> {
     const standardizedProps = this._standardizeProps(props);
-    this._namedPropArrToRaw(standardizedProps);
+    this._prepFetchStandardizedProps(standardizedProps);
     this.fetchAllPrepped();
-    this.namedState.gridRangeFetchProps = [];
     const sheetNames = this._sheetNamesFromReqProps(standardizedProps);
     return this.sheets(...sheetNames);
   }
@@ -125,70 +120,66 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
   }
 
-  private _namedPropArrToRaw(
+  private _prepFetchStandardizedProps(
     propsArr: FetchPropsStandardNamed<SheetName>[],
-  ): SpreadsheetNamed {
-    propsArr.forEach((props) => this._reqSheetsPropsToRaw(props));
-    return this;
+  ): void {
+    propsArr.forEach((props) => this._prepFetchStandardProps(props));
   }
-  private _reqSheetsPropsToRaw({
+  private _prepFetchStandardProps({
     rowSpecifier,
     sheetColumnNames,
-  }: FetchPropsStandardNamed) {
-    const arrSpecifier =
+  }: FetchPropsStandardNamed): void {
+    const specifiers =
       typeof rowSpecifier === "string" ? [rowSpecifier] : rowSpecifier;
-    arrSpecifier.forEach((specifier) => {
-      this._rowSpecifierNameToRaw(specifier, sheetColumnNames);
-    });
-  }
-  private _rowSpecifierNameToRaw(
-    rowSpecifier: RowSpecifierName,
-    sheetColumnNames: FetchPropsStandardNamed["sheetColumnNames"],
-  ): void {
-    const columnSheetGrids =
-      this._namedToRawSheetColumnSpecifiers(sheetColumnNames);
-    const schema = this.schema;
-    columnSheetGrids.forEach((columnSheetGrid) => {
-      if (rowSpecifier === "activeRows") {
-        const sheet = this.raw.sheet(columnSheetGrid.sheetId);
-        sheet.activeRowIndexes.forEach((rowIdx) => {
-          this.gridRangeFetchProps.push({
-            ...columnSheetGrid,
-            startRowIndex: rowIdx,
-            endRowIndex: rowIdx + 1,
-          });
-        });
-      } else if (isRowSpecifierBySchemaName(rowSpecifier)) {
-        this.gridRangeFetchProps.push({
-          ...schema.rawRowSpecifierByName(rowSpecifier),
-          ...columnSheetGrid,
-        });
-      } else {
-        throw new Error(
-          `Invalid rowSpecifier: ${rowSpecifier}. Must be a valid RowSpecifierName.`,
-        );
-      }
-    });
-  }
-  private _namedToRawSheetColumnSpecifiers(
-    sheetColumns: FetchPropsStandardNamed["sheetColumnNames"],
-  ): SheetColumnsRange[] {
-    return Obj.keys(sheetColumns).reduce((acc, sheetName) => {
-      const schema = this.schema.sheet(sheetName);
+    Obj.keys(sheetColumnNames).forEach((sheetName) => {
       const columnNames = valS.assert(
-        sheetColumns[sheetName],
-        `sheetColumns[${sheetName}]`,
+        sheetColumnNames[sheetName],
+        `sheetColumnNames[${sheetName}]`,
       );
+      const namedSheet = this.sheet(sheetName);
+      const indexedSheet = namedSheet.indexed;
       columnNames.forEach((columnName) => {
-        const colIndex = schema.colIndex(columnName);
-        acc.push({
-          sheetId: schema.sheetGid,
-          startColumnIndex: colIndex,
-          endColumnIndex: colIndex + 1,
+        const columnId = namedSheet.schema.column(columnName).columnId;
+        specifiers.forEach((specifier) => {
+          this._prepFetchRowSpecifier(indexedSheet, specifier, columnId);
         });
       });
-      return acc;
-    }, [] as SheetColumnsRange[]);
+    });
+  }
+  private _prepFetchRowSpecifier(
+    sheet: SheetIndexed,
+    rowSpecifier: RowSpecifierName,
+    columnId: string,
+  ): void {
+    const schema = sheet.schema;
+    switch (rowSpecifier) {
+      case "activeRows":
+      case "data":
+        sheet.prepFetchFullDataColumn(columnId);
+        break;
+      case "topDatum":
+        sheet.prepFetchSingleCell(schema.topDataRowIdx, columnId);
+        break;
+      case "actions":
+        sheet.prepFetchSingleCell(schema.actionRowIndex, columnId);
+        break;
+      case "columnIds":
+        sheet.prepFetchSingleCell(schema.colIdRowIndex, columnId);
+        break;
+      case "headers":
+        sheet.prepFetchSingleCell(schema.headerRowIndex, columnId);
+        break;
+      case "all":
+        sheet.prepFetchSingleCell(schema.headerRowIndex, columnId);
+        sheet.prepFetchSingleCell(schema.actionRowIndex, columnId);
+        sheet.prepFetchSingleCell(schema.colIdRowIndex, columnId);
+        sheet.prepFetchFullDataColumn(columnId);
+        break;
+      default:
+        throw new Error(
+          `Invalid rowSpecifier: ${rowSpecifier as string}. Must be a valid RowSpecifierName.`,
+        );
+    }
   }
   private _sheetNamesFromReqProps<T extends SheetName>(
     propsArr: FetchPropsStandardNamed<T>[],

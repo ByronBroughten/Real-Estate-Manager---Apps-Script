@@ -6,6 +6,7 @@ import type {
 } from "../02_generatedTraits/03_columnTraits";
 
 import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
+import { CellNamed } from "./CellNamed";
 import { SheetNamed } from "./SheetNamed";
 
 export class ColumnNamed<
@@ -33,6 +34,12 @@ export class ColumnNamed<
   }
   get fullName(): ColumnFullName<SN, CN> {
     return this.schema.fullName;
+  }
+  dataCell(rowIndex: number): CellNamed<SN, CN> {
+    return new CellNamed({
+      ...this.columnNamedProps,
+      rowIndex,
+    });
   }
   gatherFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
     this.raw.uniformCell(rowName).gatherFetchRange();

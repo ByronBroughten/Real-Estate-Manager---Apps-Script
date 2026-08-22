@@ -24,9 +24,7 @@ export class DataRowIndexed extends RowIndexedBase {
     });
   }
   updateValue(columnId: string, value: Value): this {
-    this.columnSchema(columnId).validateDataNotFormula();
-    const { colIndex } = this.sheet.column(columnId);
-    this.raw.updateValue(colIndex, value);
+    this.cell(columnId).updateValue(value);
     return this;
   }
   cell(columnId: string) {

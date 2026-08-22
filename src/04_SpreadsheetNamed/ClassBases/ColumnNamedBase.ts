@@ -2,7 +2,7 @@ import type { SheetName } from "../../02_generatedTraits/02_sheetTraitsTypes";
 import type { ColumnName } from "../../02_generatedTraits/03_columnTraits";
 import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
 
-interface ColumnNamedProps<
+export interface ColumnNamedProps<
   TN extends SheetName,
   CN extends ColumnName<TN>,
 > extends SheetNamedProps<TN> {

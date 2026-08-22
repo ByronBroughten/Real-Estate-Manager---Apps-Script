@@ -10,6 +10,7 @@ import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { valS } from "../utils/validation";
+import { CellNamed } from "./CellNamed";
 import { RowNamedBase } from "./ClassBases/RowNamedBase";
 import type { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import type { SheetSchemaNamed } from "./SheetSchemaNamed";
@@ -46,12 +47,14 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
       rowIndex: this.rowIndex,
     });
   }
+  cell<CN extends ColumnName<SN>>(columnName: CN): CellNamed<SN, CN> {
+    return this.sheet.column(columnName).dataCell(this.rowIndex);
+  }
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
-    const colIndex = this.colIndex(columnName);
-    return this.raw.cell(colIndex).isActive;
+    return this.cell(columnName).isActive;
   }
   value<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
-    return this.raw.value(this.colIndex(columnName)) as ColumnValue<SN, CN>;
+    return this.cell(columnName).value();
   }
   valueStringNotEmpty<CN extends ColumnName<SN>>(columnName: CN): string {
     const value = this.value(columnName);
@@ -135,23 +138,24 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     return values;
   }
   get activeCellNames(): ColumnName<SN>[] {
-    return this.raw.activeColIds.map((index) =>
-      this.sheetSchema.colNameByIndex(index),
-    );
+    return [...this.raw.rowState.keys()].map((colIndex) => {
+      const columnId = this.sheet.indexed.columnIdByIndex(colIndex);
+      return this.sheetSchema.colNameByColumnId(columnId);
+    });
   }
   updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {
-    this.indexed.updateToDefault(...this.colIndexes(columnNames));
+    columnNames.forEach((columnName) => this.cell(columnName).updateToDefault());
     return this;
   }
   updateCellToDefault(columnName: ColumnName<SN>): DataRowNamed<SN> {
-    this.indexed.updateCellToDefault(this.colIndex(columnName));
+    this.cell(columnName).updateToDefault();
     return this;
   }
-  updateValue<CN extends ColumnName<SN>, VL extends ColumnValue<SN, CN>>(
+  updateValue<CN extends ColumnName<SN>>(
     columnName: CN,
-    value: VL,
+    value: ColumnValue<SN, CN>,
   ): DataRowNamed<SN> {
-    this.raw.updateValue(this.colIndex(columnName), value);
+    this.cell(columnName).updateValue(value);
     return this;
   }
   delete(): void {
@@ -163,15 +167,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     valueName: ValueName,
     value: Value,
   ): DataRowNamed<SN> {
-    const schema = this.columnSchema(columnName);
-    if (schema.valueName !== valueName) {
-      throw new Error(
-        `Value name ${valueName} does not match varb value name ${schema.valueName}`,
-      );
-    }
-
-    value = schema.validate(value);
-    this.updateValue(columnName, value as ColumnValue<SN, CN>);
+    this.cell(columnName).setValueType(valueName, value);
     return this;
   }
   updateValues(sectionValues: Partial<SheetDataValues<SN>>): DataRowNamed<SN> {

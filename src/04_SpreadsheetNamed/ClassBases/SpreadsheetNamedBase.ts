@@ -1,4 +1,3 @@
-import type { GridRangeProps } from "../../01_SpreadsheetRaw/ClassTypes/AccessorsRaw";
 import {
   SpreadsheetIndexedBase,
   type SpreadsheetIndexedProps,
@@ -21,15 +20,10 @@ export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
       namedState: this.namedState,
     };
   }
-  get gridRangeFetchProps(): GridRangeProps[] {
-    return this.namedState.gridRangeFetchProps;
-  }
   static initSpreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
       ...SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
-      namedState: {
-        gridRangeFetchProps: [],
-      },
+      namedState: {},
     };
   }
 }

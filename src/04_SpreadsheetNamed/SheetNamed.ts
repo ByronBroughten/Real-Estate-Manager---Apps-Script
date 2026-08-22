@@ -39,12 +39,6 @@ export class SheetNamed<
     this.raw.gatherFetchRange(props);
     return this;
   }
-  gatherFetchColIdsForDataToFetch() {
-    this.raw.indexesOfColDataToFetch.forEach((colIdx) => {
-      const columnName = this.schema.colNameByIndex(colIdx);
-      this.column(columnName).gatherFetchUniformCell("columnId");
-    });
-  }
   dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({
       ...this.sheetNamedProps,
@@ -52,7 +46,8 @@ export class SheetNamed<
     });
   }
   columnByIndex(colIndex: number): ColumnNamed<SN> {
-    const columnName = this.schema.colNameByIndex(colIndex);
+    const columnId = this.indexed.columnIdByIndex(colIndex);
+    const columnName = this.schema.colNameByColumnId(columnId);
     return new ColumnNamed({
       ...this.sheetNamedProps,
       columnName,
