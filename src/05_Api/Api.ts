@@ -1,6 +1,6 @@
-import { configGet } from "../00_base/spreadsheetConfig";
-import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw";
-import type { ColumnFullNameSimple } from "../02_generatedTraits/03_columnTraits";
+import { configGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
+import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetNamedBase,

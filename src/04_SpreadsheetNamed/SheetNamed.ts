@@ -1,10 +1,10 @@
-import type { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
+import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
-} from "../02_generatedTraits/03_columnTraits";
+} from "../01_generatedConfigs/columnConfigsTypes";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import { Arr } from "../utils/Arr";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";

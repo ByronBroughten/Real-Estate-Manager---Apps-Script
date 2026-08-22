@@ -1,4 +1,4 @@
-import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { type ColumnIndexed } from "./ColumnIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";

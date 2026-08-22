@@ -1,7 +1,7 @@
 import type { CellValue, UniformRowName } from "../00_base/base";
-import { SheetRaw } from "../01_SpreadsheetRaw/SheetRaw";
-import type { UniformRow } from "../01_SpreadsheetRaw/UniformRow";
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
+import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import type { UniformRow } from "../02_SpreadsheetRaw/UniformRow";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { Arr } from "../utils/Arr";
 import { isPreFetchType } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";

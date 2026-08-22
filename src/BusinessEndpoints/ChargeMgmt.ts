@@ -1,4 +1,4 @@
-// import type { SheetDataValues } from "../02_generatedTraits/03_columnTraits";
+// import type { SheetDataValues } from "../01_generatedConfigs/columnConfigsTypes";
 // import { OperatorBase } from "../04_SpreadsheetNamed/ClassBases/OperatorBase";
 // import type { DataRowNamed } from "../04_SpreadsheetNamed/DataRowNamed";
 // import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";

@@ -1,15 +1,15 @@
 import {
-  schemaSheetNames,
+  configSheetNames,
   type SheetName,
   type SheetNameSimple,
-} from "../02_generatedTraits/02_sheetTraitsTypes";
+} from "../01_generatedConfigs/sheetConfigsTypes";
 
 import {
   makeRowRange,
   type RowRange,
-} from "../01_SpreadsheetRaw/ClassTypes/RawState";
-import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
+} from "../02_SpreadsheetRaw/ClassTypes/RawState";
+import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
+import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { SpreadsheetSchemaIndexed } from "../03_SpreadsheetIndexed/SpreadsheetSchemaIndexed";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {
@@ -23,7 +23,7 @@ import type {
   SheetColumnNamesStandard,
 } from "./Types/NamedState";
 
-export class SpreadsheetSchema extends SchemaBase {
+export class SpreadsheetSchemaNamed extends SchemaBase {
   get indexed(): SpreadsheetSchemaIndexed {
     return new SpreadsheetSchemaIndexed();
   }
@@ -41,7 +41,7 @@ export class SpreadsheetSchema extends SchemaBase {
     return new ColumnSchemaNamed(sheetName, columnName);
   }
   get sheetNames() {
-    return schemaSheetNames;
+    return configSheetNames;
   }
   get sheetNamesWithoutIdPrefix(): SheetName[] {
     return this.sheetNames.filter((sheetName) => {

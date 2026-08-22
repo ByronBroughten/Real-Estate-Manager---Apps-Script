@@ -1,14 +1,14 @@
-import type { SheetTrait } from "../00_base/makeSheetsTraits";
+import type { SheetConfig } from "../01_generatedConfigs/sheetConfigBuilder";
 import {
   getSheetTraitByName,
   type SheetName,
   type SheetNameSimple,
-} from "../02_generatedTraits/02_sheetTraitsTypes";
+} from "../01_generatedConfigs/sheetConfigsTypes";
 import {
   getColumnTraitByIndex,
   getSheetColumnNames,
   type ColumnName,
-} from "../02_generatedTraits/03_columnTraits";
+} from "../01_generatedConfigs/columnConfigsTypes";
 import { SheetSchemaCommon } from "../03_SpreadsheetIndexed/SheetSchemaCommon";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import type { ColumnSpecifierNamed } from "./Types/NamedState";
@@ -28,7 +28,7 @@ export class SheetSchemaNamed<
     super();
     this.sheetName = sheetName;
   }
-  trait<K extends keyof SheetTrait>(key: K): SheetTrait[K] {
+  trait<K extends keyof SheetConfig>(key: K): SheetConfig[K] {
     return getSheetTraitByName(this.sheetName, key);
   }
   get sheetGid(): number {

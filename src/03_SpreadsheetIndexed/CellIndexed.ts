@@ -1,10 +1,10 @@
 import type { CellValue } from "../00_base/base";
-import { CellRaw } from "../01_SpreadsheetRaw/ClassBases/CellRaw";
+import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
 import type {
   Value,
   ValueName,
   VnToCvn,
-} from "../02_generatedTraits/06_valueSchemas";
+} from "../01_generatedConfigs/valueSchemas";
 import { CellIndexedBase } from "./CellIndexedBase";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";

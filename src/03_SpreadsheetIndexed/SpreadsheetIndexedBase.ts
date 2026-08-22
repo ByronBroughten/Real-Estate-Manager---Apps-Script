@@ -1,8 +1,8 @@
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
-} from "../01_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
-import { SpreadsheetSchema } from "../04_SpreadsheetNamed/SpreadsheetSchemaNamed";
+} from "../02_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
+import { SpreadsheetSchemaNamed } from "../04_SpreadsheetNamed/SpreadsheetSchemaNamed";
 import type { IndexedState } from "./ClassTypes/IndexedState";
 
 export interface SpreadsheetIndexedProps extends SpreadsheetRawProps {
@@ -32,7 +32,7 @@ export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
   get indexedSheetsState(): IndexedState["sheets"] {
     return this.indexedState.sheets;
   }
-  get ssSchema(): SpreadsheetSchema {
-    return new SpreadsheetSchema();
+  get ssSchema(): SpreadsheetSchemaNamed {
+    return new SpreadsheetSchemaNamed();
   }
 }

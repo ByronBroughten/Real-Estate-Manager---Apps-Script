@@ -2,16 +2,16 @@ import type { CellValueName, CellValueNameToValue } from "../00_base/base";
 import { baseValueNames, baseValueSchemas } from "../00_base/baseValueSchemas";
 import type { ValueSchemaBase, ValueSchemaKey } from "../00_base/valueSchema";
 import type { Merge } from "../utils/Obj/merge";
-import { valueTraitNames, type ValueTraitValues } from "./04_valueTraits";
-import { makeSchemasFromValueConfig } from "./05_traitValueSchemas";
+import { valueConfigNames, type ValueConfigValues } from "./valueConfigsTypes";
+import { makeSchemasFromValueConfig } from "./valueConfigSchemas";
 
-const valueNames = [...baseValueNames, ...valueTraitNames] as const;
+const valueNames = [...baseValueNames, ...valueConfigNames] as const;
 type ValueNameSimple = (typeof valueNames)[number];
 
 interface BaseValues extends CellValueNameToValue {
   id: string;
 }
-type AllValues = Merge<BaseValues, ValueTraitValues>;
+type AllValues = Merge<BaseValues, ValueConfigValues>;
 type AllValuesOrEmpty = {
   [VN in ValueNameSimple]: AllValues[VN] | "";
 };

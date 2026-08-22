@@ -1,4 +1,4 @@
-import type { SheetName } from "../../02_generatedTraits/02_sheetTraitsTypes";
+import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,

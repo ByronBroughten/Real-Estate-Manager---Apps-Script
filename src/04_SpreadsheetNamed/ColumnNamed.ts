@@ -1,9 +1,9 @@
 import type { UniformRowName } from "../00_base/base";
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
   ColumnFullName,
   ColumnName,
-} from "../02_generatedTraits/03_columnTraits";
+} from "../01_generatedConfigs/columnConfigsTypes";
 
 import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { CellNamed } from "./CellNamed";

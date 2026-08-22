@@ -1,6 +1,6 @@
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
-import { getSheetColumnIds } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import { getSheetColumnIds } from "../01_generatedConfigs/columnConfigsTypes";
+import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
 
 interface SheetTraitCommon {
   idPrefix: string;

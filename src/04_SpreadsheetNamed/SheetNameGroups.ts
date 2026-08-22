@@ -1,28 +1,28 @@
-import type { SheetTraits } from "../02_generatedTraits/02_sheetTraitsTypes";
 import {
+  configSheetNames,
   getSheetTraitByName,
-  schemaSheetNames,
-} from "../02_generatedTraits/02_sheetTraitsTypes";
+  type SheetConfigs,
+} from "../01_generatedConfigs/sheetConfigsTypes";
 import { Arr } from "../utils/Arr";
 import { type SubType } from "../utils/Obj";
 
 export type SheetNameWithIdColumn = keyof SubType<
-  SheetTraits,
+  SheetConfigs,
   { hasIdColumn: true }
 >;
 
 const sheetNameGroups = {
-  hasIdColumn: schemaSheetNames.filter((sheetName) =>
+  hasIdColumn: configSheetNames.filter((sheetName) =>
     getSheetTraitByName(sheetName, "hasIdColumn"),
   ) as SheetNameWithIdColumn[],
   aggregateApi: Arr.extractStrict(
-    schemaSheetNames,
+    configSheetNames,
     "addOccChargeOnetime",
     "addHhPaymentOnetime",
     "addExpenses",
   ),
   ledgerInputs: Arr.extractStrict(
-    schemaSheetNames,
+    configSheetNames,
     "occCharge",
     "occPayAllocation",
   ),

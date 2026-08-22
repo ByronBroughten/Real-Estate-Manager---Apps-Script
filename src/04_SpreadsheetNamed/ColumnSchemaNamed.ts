@@ -1,13 +1,13 @@
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { ColumnConfig } from "../01_generatedConfigs/columnConfigBuilder";
 import {
   getColumnTraitByName,
-  type ColTraits,
-  type ColTraitsBase,
+  type ColumnConfigAt,
   type ColumnFullName,
   type ColumnName,
   type ColumnValueName,
-} from "../02_generatedTraits/03_columnTraits";
-import type { ValueName } from "../02_generatedTraits/06_valueSchemas";
+} from "../01_generatedConfigs/columnConfigsTypes";
+import type { ValueName } from "../01_generatedConfigs/valueSchemas";
 import { ColumnSchemaCommon } from "../03_SpreadsheetIndexed/ColumnSchemaCommon";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
@@ -25,14 +25,14 @@ export class ColumnSchemaNamed<
   get columnId(): string {
     return this.trait("columnId");
   }
-  trait<K extends keyof ColTraitsBase>(
+  trait<K extends keyof ColumnConfig>(
     key: K,
-  ): ColTraits<SN, CN>[K & keyof ColTraits<SN, CN>] {
+  ): ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>] {
     return getColumnTraitByName(
       this.sheetName,
       this.columnName,
-      key as unknown as keyof ColTraits<SN, CN>,
-    ) as ColTraits<SN, CN>[K & keyof ColTraits<SN, CN>];
+      key as unknown as keyof ColumnConfigAt<SN, CN>,
+    ) as ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>];
   }
   get valueName(): ColumnValueName<SN, CN> & ValueName {
     return this.trait("valueName");

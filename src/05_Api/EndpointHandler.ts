@@ -1,8 +1,8 @@
 // TODO
 
-import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw";
-import type { SheetNameSimple } from "../02_generatedTraits/02_sheetTraitsTypes";
-import type { ColumnName } from "../02_generatedTraits/03_columnTraits";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
+import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { EndpointHandlerBase } from "./EndpointHandlerBase";
 

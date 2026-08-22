@@ -1,5 +1,5 @@
-import { DataRowRaw } from "../01_SpreadsheetRaw/ClassBases/DataRowRaw";
-import { type Value } from "../02_generatedTraits/06_valueSchemas";
+import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
+import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";

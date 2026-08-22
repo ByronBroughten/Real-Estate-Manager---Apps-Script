@@ -1,4 +1,10 @@
-export const spreadsheetConfig = {
+export function makeSpreadsheetConfig<T extends Record<string, string | number>>(
+  config: T,
+): T {
+  return config;
+}
+
+export const spreadsheetConfig = makeSpreadsheetConfig({
   idDelimiter: ":",
   idHeader: "ID",
   startTableColIndex: 0,
@@ -12,11 +18,4 @@ export const spreadsheetConfig = {
   sheetConfigGid: 210603630,
   columnConfigGid: 2034522667,
   valueConfigGid: 2119236084,
-} as const;
-
-export type SpreadsheetConfig = typeof spreadsheetConfig;
-export function configGet<K extends keyof SpreadsheetConfig>(
-  key: K,
-): SpreadsheetConfig[K] {
-  return spreadsheetConfig[key];
-}
+} as const);

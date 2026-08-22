@@ -4,8 +4,8 @@ import {
   type SheetName,
   type SheetTraitRaw,
   type SheetTraitRawKey,
-} from "../02_generatedTraits/02_sheetTraitsTypes";
-import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
+} from "../01_generatedConfigs/sheetConfigsTypes";
+import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetSchemaCommon } from "./SheetSchemaCommon";
 

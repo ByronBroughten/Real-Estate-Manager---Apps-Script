@@ -3,14 +3,14 @@ import {
   type CellValue,
   type CellValueName,
 } from "../00_base/base";
-import { configGet } from "../00_base/spreadsheetConfig";
-import { SchemaBase } from "./SchemaBase";
-import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";
-import type { SpreadsheetRawProps } from "./ClassBases/SpreadsheetRawBase";
-import { SheetConfigRaw } from "./SheetConfigRaw";
-import type { SheetRaw } from "./SheetRaw";
-import { SpecificSheetRaw } from "./SpecificSheetRaw";
-import { SpreadsheetRaw } from "./SpreadsheetRaw";
+import { configGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import { SpecificSheetRawBase } from "../02_SpreadsheetRaw/ClassBases/SpecificSheetRawBase";
+import type { SpreadsheetRawProps } from "../02_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
+import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
+import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import { SpecificSheetRaw } from "../02_SpreadsheetRaw/SpecificSheetRaw";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
+import { SheetConfigOperator } from "./SheetConfigOperator";
 
 const headerToValueNameAuto = makeStructuredConfig(
   {} as Record<string, CellValueName>,
@@ -38,7 +38,7 @@ const headerToValueName = {
 
 type HeaderToValueName = typeof headerToValueName;
 
-export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
+export class ColumnConfigOperator extends SpecificSheetRawBase<HeaderToValueName> {
   constructor({ ...rest }: SpreadsheetRawProps) {
     super({
       headerToValueName: headerToValueName,
@@ -47,13 +47,15 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
   }
   static init() {
-    return new ColumnConfigRaw(ColumnConfigRaw.initSpreadsheetRawProps());
+    return new ColumnConfigOperator(
+      ColumnConfigOperator.initSpreadsheetRawProps(),
+    );
   }
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  get sheetConfig(): SheetConfigRaw {
-    return new SheetConfigRaw(this.spreadsheetRawProps);
+  get sheetConfig(): SheetConfigOperator {
+    return new SheetConfigOperator(this.spreadsheetRawProps);
   }
   get schema(): SchemaBase {
     return new SchemaBase();
@@ -87,7 +89,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       const idPrefix = idPrefixCol.dataValue(rowIndex);
       if (typeof idPrefix !== "string" || !idPrefix) {
         throw new Error(
-          `SheetConfigRaw: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
+          `SheetConfigOperator: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
         );
       }
       const sheet = this.ss.sheet(sheetGid);
@@ -101,8 +103,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   // sending a batchUpdate, so it can be chained with other gathering methods
   // before a single shared flush (e.g. via ss.batchUpdateGSheets()). A row is
   // stale if its Column ID no longer exists on its sheet, or its Sheet GID
-  // isn't marked "Make schema for API" = true in SheetConfigRaw.
-  pruneColTraits(): ColumnConfigRaw {
+  // isn't marked "Make schema for API" = true in SheetConfigOperator.
+  pruneColTraits(): ColumnConfigOperator {
     this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.ss.fetchAllPrepped();
@@ -144,8 +146,8 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   // documented in this sheet, into changesToSave without sending a
   // batchUpdate, so it can be chained the same way pruneColTraits is. Only
   // columns from sheets marked "Make schema for API" = true in
-  // SheetConfigRaw are considered.
-  appendColumnRows(): ColumnConfigRaw {
+  // SheetConfigOperator are considered.
+  appendColumnRows(): ColumnConfigOperator {
     this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.ss.fetchAllPrepped();
@@ -162,9 +164,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const activeColumnIdToSheet =
       this._existingColumnIdToSheet(includedSheetGids);
 
-    const existingColumnIds = new Set(
-      this.column("Column ID").data.dataValueArr,
-    );
+    const existingColumnIds = new Set(this.column("Column ID").data.valueArr);
 
     const columnIdCol = this.column("Column ID");
     const sheetGidCol = this.column("Sheet GID");

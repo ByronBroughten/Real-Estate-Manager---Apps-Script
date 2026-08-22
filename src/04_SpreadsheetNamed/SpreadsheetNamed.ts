@@ -1,5 +1,5 @@
-import { SpreadsheetRaw } from "../01_SpreadsheetRaw/SpreadsheetRaw.js";
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes.js";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes.js";
 import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed.js";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
@@ -7,7 +7,7 @@ import { valS } from "../utils/validation.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
-import { SpreadsheetSchema } from "./SpreadsheetSchemaNamed.js";
+import { SpreadsheetSchemaNamed } from "./SpreadsheetSchemaNamed.js";
 import {
   type ColumnSpecifierNamed,
   type FetchColumnSpecifierNamed,
@@ -30,7 +30,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get indexed(): SpreadsheetIndexed {
     return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
   }
-  get schema(): SpreadsheetSchema {
+  get schema(): SpreadsheetSchemaNamed {
     return this.ssSchema;
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {

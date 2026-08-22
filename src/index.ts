@@ -1,4 +1,4 @@
-import { SheetConfigRaw } from "./01_SpreadsheetRaw/SheetConfigRaw.js";
+import { SheetConfigOperator } from "./04_SpreadsheetNamed/SheetConfigOperator.js";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { Api } from "./05_Api/Api.js";
 import { businessEndpoints } from "./businessEndpoints/businessEndpoints.js";
@@ -42,11 +42,11 @@ function _tests() {
   ss.batchUpdateGSheets();
 }
 
-function generateSheetTraitsFile(): string {
-  const sheetConfig = new SheetConfigRaw(
-    SheetConfigRaw.initSpreadsheetRawProps(),
+function generateSheetConfigFile(): string {
+  const sheetConfigNamed = new SheetConfigOperator(
+    SheetConfigOperator.initSpreadsheetRawProps(),
   );
-  return sheetConfig.generateSheetTraitsFileSource();
+  return sheetConfigNamed.generateSheetConfigFileSource();
 }
 
 function triggerFirstOfMonth() {

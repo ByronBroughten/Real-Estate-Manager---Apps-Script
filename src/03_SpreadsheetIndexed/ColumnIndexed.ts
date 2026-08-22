@@ -1,5 +1,5 @@
-import { ColumnRaw } from "../01_SpreadsheetRaw/ColumnRaw";
-import type { ValueName, VnToCvn } from "../02_generatedTraits/06_valueSchemas";
+import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
+import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnIndexedBase } from "./ColumnIndexedBase";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";

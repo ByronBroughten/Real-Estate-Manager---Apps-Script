@@ -1,4 +1,4 @@
-import type { ValueName } from "../02_generatedTraits/06_valueSchemas";
+import type { ValueName } from "../01_generatedConfigs/valueSchemas";
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
 
 export interface ColumnIndexedProps<

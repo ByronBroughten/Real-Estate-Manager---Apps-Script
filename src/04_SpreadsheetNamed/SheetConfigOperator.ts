@@ -1,17 +1,17 @@
 import { makeStructuredConfig, type CellValueName } from "../00_base/base";
-import { baseSheetsTraits } from "../00_base/baseSheetTraits";
-import { type SheetTraitsBase } from "../00_base/makeSheetsTraits";
-import { configGet } from "../00_base/spreadsheetConfig";
-import { SchemaBase } from "./SchemaBase";
+import { baseSheetConfigs } from "../01_generatedConfigs/baseSheetConfigs";
+import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import { type SheetConfigsBase } from "../01_generatedConfigs/sheetConfigBuilder";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
-import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";
-import type { SpreadsheetRawProps } from "./ClassBases/SpreadsheetRawBase";
-import type { SheetRaw } from "./SheetRaw";
-import { SpecificSheetRaw } from "./SpecificSheetRaw";
-import { SpreadsheetRaw } from "./SpreadsheetRaw";
+import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
+import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
+import type { ColumnNamed } from "./ColumnNamed";
+import type { SheetNamed } from "./SheetNamed";
+import { SpreadsheetNamed } from "./SpreadsheetNamed";
+import { SpreadsheetSchemaNamed } from "./SpreadsheetSchemaNamed";
 
-const idPrefix = baseSheetsTraits.sheetConfig.idPrefix;
+const idPrefix = baseSheetConfigs.sheetConfig.idPrefix;
 const headerToValueNameAuto = makeStructuredConfig(
   {} as Record<string, CellValueName>,
   {
@@ -39,43 +39,40 @@ const sheetConfigHeaders = Obj.keys(headerToValueName);
 type HeaderToValueName = typeof headerToValueName;
 type SheetConfigHeader = (typeof sheetConfigHeaders)[number];
 
-export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
-  constructor({ ...rest }: SpreadsheetRawProps) {
+export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
+  constructor(props: SpreadsheetNamedProps) {
     super({
-      headerToValueName: headerToValueName,
-      sheetGid: configGet("sheetConfigGid"),
-      ...rest,
+      sheetName: "sheetConfig",
+      ...props,
     });
   }
-  get ss(): SpreadsheetRaw {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
+  get sheet(): SheetNamed<"sheetConfig"> {
+    return this.ss.sheet(this.sheetName);
   }
-  get schema(): SchemaBase {
-    return new SchemaBase();
+  column<CN extends ColumnName<"sheetConfig">>(
+    columnName: CN,
+  ): ColumnNamed<"sheetConfig", CN> {
+    return this.sheet.column(columnName);
   }
-  get sheet(): SheetRaw {
-    return this.ss.sheet(this.sheetGid);
+  get ss(): SpreadsheetNamed {
+    return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  get sSheet(): SpecificSheetRaw<HeaderToValueName> {
-    return new SpecificSheetRaw({
-      headerToValueName: this.headerToValueName,
-      ...this.sheetRawProps,
-    });
+  get schema(): SpreadsheetSchemaNamed {
+    return new SpreadsheetSchemaNamed();
   }
   fetchAndUpdateAll() {
-    this._fetchAllPreppedneededForUpdate();
-    this._ensureHeaders();
+    this._fetchAllPreppedNeededForUpdate();
     this._deleteStaleSheetConfigs();
     this._appendMissingSheetConfigs();
     this._updateProgrammaticValues();
   }
-  private _fetchAllPreppedneededForUpdate() {
+  private _fetchAllPreppedNeededForUpdate() {
     this.ss.fetchAllPreppedSheetProperties();
     this.sheet.uniformRow("header").gatherFetchFull();
     this.ss.fetchAllPrepped();
     const gidCol = this.column("Sheet GID").data.gatherFetchAll();
     this.ss.fetchAllPrepped();
-    gidCol.dataValueArr.forEach((gid) => {
+    gidCol.valueArr.forEach((gid) => {
       const sheet = this.ss.sheet(gid);
       sheet.uniformRow("header").gatherFetchFull();
     });
@@ -84,31 +81,18 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     );
     this.ss.fetchAllPrepped();
   }
-  private _ensureHeaders() {
-    const numFixed = this.sheet.ensureColumnsOfHeadersExist(
-      idPrefix,
-      ...this.headers,
-    );
-    if (numFixed > 0) {
-      Logger.log(
-        `Added ${numFixed} missing header(s) to the "Sheet Config" sheet.`,
-      );
-    }
-  }
   private _deleteStaleSheetConfigs() {
-    const gidCol = this.column("Sheet GID");
     this.sheet.dataRows.forEach((row) => {
-      const configGid = row.value(gidCol.colIndex) as number;
-      if (!this.ss.activeSheetGids.includes(configGid)) {
+      const configGid = row.value("sheetGid");
+      if (configGid === "" || !this.ss.raw.gidIsActive(configGid)) {
         row.delete();
       }
     });
   }
   private _appendMissingSheetConfigs() {
-    const { activeSheetGids } = this.ss;
-    const gidCol = this.column("Sheet GID");
-    gidCol.data.dataValueArr.forEach((gid) => {
-      if (!activeSheetGids.includes(gid as number)) {
+    const gidCol = this.column("sheetGid");
+    gidCol.indexed.dataValueArr.forEach((gid) => {
+      if (!this.ss.raw.gidIsActive(gid)) {
         this.sheet.appendDataRowValues(new Map([[gidCol.colIndex, gid]]));
       }
     });
@@ -136,7 +120,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
-  generateSheetTraitsFileSource(): string {
+  generateSheetConfigFileSource(): string {
     this.sheet.gatherFetchProperties();
     this.sheet.uniformRow("header").gatherFetchFull();
     this.ss.fetchAllPrepped();
@@ -152,7 +136,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const prefixCol = this.column("ID prefix").data;
     const hasIdCol = this.column("Has ID column").data;
 
-    const entries: SheetTraitsBase = {};
+    const entries: SheetConfigsBase = {};
     this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
       const title = titleCol.dataValue(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
@@ -163,20 +147,37 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
       };
     });
 
-    const allSheetTraits: SheetTraitsBase = {
-      ...baseSheetsTraits,
+    const sheetConfigsData: SheetConfigsBase = {
+      ...baseSheetConfigs,
       ...entries,
     };
 
     return [
-      `import { makeSheetsTraits } from "../00_base/makeSheetsTraits";`,
+      `import { type SheetConfigsBase } from "./sheetConfigBuilder";`,
       ``,
-      `export const allSheetTraits = makeSheetsTraits(${JSON.stringify(
-        allSheetTraits,
+      `export function makeSheetConfigs<T extends SheetConfigsBase>(`,
+      `  sheetConfigs: T,`,
+      `): T {`,
+      `  return sheetConfigs;`,
+      `}`,
+      ``,
+      `export const sheetConfigs = makeSheetConfigs(${JSON.stringify(
+        sheetConfigsData,
         null,
         2,
       )});`,
       ``,
     ].join("\n");
   }
+  // private _ensureHeaders() {
+  //   const numFixed = this.sheet.ensureColumnsOfHeadersExist(
+  //     idPrefix,
+  //     ...this.headers,
+  //   );
+  //   if (numFixed > 0) {
+  //     Logger.log(
+  //       `Added ${numFixed} missing header(s) to the "Sheet Config" sheet.`,
+  //     );
+  //   }
+  // }
 }

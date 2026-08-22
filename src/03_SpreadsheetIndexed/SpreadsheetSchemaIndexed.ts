@@ -1,11 +1,11 @@
-import { schemaSheetGids } from "../02_generatedTraits/02_sheetTraitsTypes";
+import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
 
-import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
+import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
 export class SpreadsheetSchemaIndexed extends SchemaBase {
-  get schemaSheetGids(): number[] {
-    return schemaSheetGids;
+  get configSheetGids(): number[] {
+    return configSheetGids;
   }
   sheet(sheetGid: number): SheetSchemaIndexed {
     return new SheetSchemaIndexed(sheetGid);

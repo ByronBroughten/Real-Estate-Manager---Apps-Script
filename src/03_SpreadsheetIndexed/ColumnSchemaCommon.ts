@@ -1,14 +1,14 @@
 import type { ValueSchemaKey } from "../00_base/valueSchema";
-import type { ColTraitsLiteral } from "../02_generatedTraits/03_columnTraits";
+import type { ColumnConfigLiteral } from "../01_generatedConfigs/columnConfigBuilder";
 import {
   getValTrait,
   type Value,
   type ValueName,
   type ValueSchema,
-} from "../02_generatedTraits/06_valueSchemas";
-import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
+} from "../01_generatedConfigs/valueSchemas";
+import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
 
-type ColumnTraitLiteral = Omit<ColTraitsLiteral, "columnId">;
+type ColumnTraitLiteral = Omit<ColumnConfigLiteral, "columnId">;
 
 export abstract class ColumnSchemaCommon<
   VN extends ValueName = ValueName,

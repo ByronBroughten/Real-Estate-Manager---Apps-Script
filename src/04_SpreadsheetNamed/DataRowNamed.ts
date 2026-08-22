@@ -1,11 +1,11 @@
-import { DataRowRaw } from "../01_SpreadsheetRaw/ClassBases/DataRowRaw";
-import type { SheetName } from "../02_generatedTraits/02_sheetTraitsTypes";
+import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
-} from "../02_generatedTraits/03_columnTraits";
-import type { Value, ValueName } from "../02_generatedTraits/06_valueSchemas";
+} from "../01_generatedConfigs/columnConfigsTypes";
+import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
 import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
