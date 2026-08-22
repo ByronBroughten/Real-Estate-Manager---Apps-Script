@@ -12,7 +12,9 @@ interface ColumnSchemaIndexedProps {
   columnId: string;
 }
 
-export class ColumnSchemaIndexed extends ColumnSchemaCommon {
+export class ColumnSchemaIndexed<
+  VN extends ValueName = ValueName,
+> extends ColumnSchemaCommon<VN> {
   readonly sheetGid: number;
   readonly columnId: string;
   constructor(props: ColumnSchemaIndexedProps) {
@@ -35,8 +37,8 @@ export class ColumnSchemaIndexed extends ColumnSchemaCommon {
   trait<K extends keyof ColTraitsRaw>(key: K): ColTraitsRaw[K] {
     return getColumnTraitByIndex(this.sheetGid, this.columnId, key);
   }
-  get valueName(): ValueName {
-    return this.trait("valueName");
+  get valueName(): VN {
+    return this.trait("valueName") as VN;
   }
   makeRowId(): string {
     return this.sheet.makeRowId();

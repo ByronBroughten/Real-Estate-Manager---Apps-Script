@@ -42,12 +42,12 @@ export class ColumnNamed<
     this.raw.data.gatherFetchAll();
     return this;
   }
-  dataCellsToDefault(): ColumnNamed<SN, CN> {
-    this.indexed.dataCellsToDefault();
+  activeDataCellsToDefault(): ColumnNamed<SN, CN> {
+    this.indexed.activeDataCellsToDefault();
     return this;
   }
-  fillEmptyDataCellsWithDefaultValues(): ColumnNamed<SN, CN> {
-    this.indexed.fillEmptyDataCellsWithDefaultValues();
+  emptyDataCellsToDefault(): ColumnNamed<SN, CN> {
+    this.indexed.emptyDataCellsToDefault();
     return this;
   }
   actionRowToDefault(): ColumnNamed<SN, CN> {

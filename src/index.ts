@@ -33,7 +33,7 @@ function _tests() {
   // const idColumn = ss.sheet(testSheetName).column("id");
   // idColumn.gatherFetchAllDataCells();
   // ss.fetchAllPrepped();
-  // idColumn.fillEmptyDataCellsWithDefaultValues();
+  // idColumn.emptyDataCellsToDefault();
   const test = ss.sheet(testSheetName);
   test.raw.gatherFetchProperties();
   test.raw.gatherFetchFullUniformRow("columnId");

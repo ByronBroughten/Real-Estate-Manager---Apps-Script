@@ -17,6 +17,11 @@ export abstract class RowCommonRaw extends RowRawBase {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
+  ensureFullActiveDataCells() {
+    this.sheet.fullTableColIndexes.forEach((colIndex) => {
+      this.cell(colIndex).ensureActive();
+    });
+  }
   cell<VN extends CellValueName>(
     colIndex: number,
     valueNameAssert?: VN,

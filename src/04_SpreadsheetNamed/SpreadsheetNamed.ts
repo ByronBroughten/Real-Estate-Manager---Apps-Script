@@ -224,7 +224,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     });
     this.fetchAllPrepped();
     idSheets.forEach((sheet) => {
-      sheet.column("id").fillEmptyDataCellsWithDefaultValues();
+      sheet.column("id").emptyDataCellsToDefault();
     });
   }
 }

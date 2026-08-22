@@ -1,15 +1,15 @@
-import type { CellValueName } from "../00_base/base";
+import type { ValueName } from "../02_generatedTraits/06_valueSchemas";
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
 
 export interface ColumnIndexedProps<
-  VN extends CellValueName = CellValueName,
+  VN extends ValueName = ValueName,
 > extends SheetIndexedProps {
   columnId: string;
   valueName?: VN;
 }
 
 export class ColumnIndexedBase<
-  VN extends CellValueName = CellValueName,
+  VN extends ValueName = ValueName,
 > extends SheetIndexedBase {
   readonly columnId: string;
   readonly valueName?: VN;

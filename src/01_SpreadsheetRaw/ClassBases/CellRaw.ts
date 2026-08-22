@@ -53,6 +53,14 @@ export class CellRaw<
       },
     });
   }
+  setValueState(value: CellValue): void {
+    if (!this.row.rowIsActive()) {
+      throw new Error(
+        `Cannot set value for row ${this.rowIndex} because it is not active.`,
+      );
+    }
+    this.rowState.set(this.colIndex, value);
+  }
   get isEmpty(): boolean {
     if (!this.isActive) {
       throw new Error(
@@ -65,15 +73,7 @@ export class CellRaw<
   get isActive(): boolean {
     return this.rowState.has(this.colIndex);
   }
-  setValueState(value: CellValue): void {
-    if (!this.row.rowIsActive()) {
-      throw new Error(
-        `Cannot set value for row ${this.rowIndex} because it is not active.`,
-      );
-    }
-    this.rowState.set(this.colIndex, value);
-  }
-  ensureActiveWithEmpty() {
+  ensureActive() {
     if (!this.isActive) {
       this.setValueState("");
     }
@@ -93,7 +93,7 @@ export class CellRaw<
       return value as CellValue<VN>;
     }
   }
-  updateValue(value: CellValue): this {
+  updateValue(value: CellValue<VN>): this {
     this.validateIndexNotStale();
     this.setValueState(value);
     this.row.addRowChangeToSave({

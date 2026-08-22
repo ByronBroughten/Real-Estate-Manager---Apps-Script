@@ -1,19 +1,39 @@
-import type { CellValueName } from "../00_base/base";
-import type { ColumnIndexedProps } from "./ColumnIndexedBase";
-import { ColumnIndexedBase } from "./ColumnIndexedBase";
+import type { CellValue } from "../00_base/base";
+import { CellRaw } from "../01_SpreadsheetRaw/ClassBases/CellRaw";
+import type {
+  Value,
+  ValueName,
+  VnToCvn,
+} from "../02_generatedTraits/06_valueSchemas";
+import { CellIndexedBase } from "./CellIndexedBase";
+import { ColumnIndexed } from "./ColumnIndexed";
+import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 
-export interface CellIndexedProps<
-  VN extends CellValueName = CellValueName,
-> extends ColumnIndexedProps<VN> {
-  rowIndex: number;
-}
-
-export class CellIndexedBase<
-  VN extends CellValueName = CellValueName,
-> extends ColumnIndexedBase<VN> {
-  readonly rowIndex: number;
-  constructor({ rowIndex, ...props }: CellIndexedProps<VN>) {
-    super(props);
-    this.rowIndex = rowIndex;
+export class CellIndexed<
+  VN extends ValueName = ValueName,
+> extends CellIndexedBase<VN> {
+  get columnSchema(): ColumnSchemaIndexed<VN> {
+    return new ColumnSchemaIndexed({
+      sheetGid: this.sheetGid,
+      columnId: this.columnId,
+    });
+  }
+  get column(): ColumnIndexed<VN> {
+    return new ColumnIndexed(this.cellIndexedProps);
+  }
+  get raw(): CellRaw<VnToCvn<VN>> {
+    return this.column.raw.cell(this.rowIndex);
+  }
+  updateValue(value: Value<VN>): this {
+    this.columnSchema.validateDataNotFormula();
+    this.raw.updateValue(value as CellValue<VnToCvn<VN>>);
+    return this;
+  }
+  updateToDefault(): this {
+    if (!this.columnSchema.isFormula) {
+      const defaultValue = this.columnSchema.makeDefaultDataValue();
+      this.updateValue(defaultValue);
+    }
+    return this;
   }
 }

@@ -1,4 +1,4 @@
-import type { CellValueNameToValue } from "../00_base/base";
+import type { CellValueName, CellValueNameToValue } from "../00_base/base";
 import { baseValueNames, baseValueSchemas } from "../00_base/baseValueSchemas";
 import type { ValueSchemaBase, ValueSchemaKey } from "../00_base/valueSchema";
 import type { Merge } from "../utils/Obj/merge";
@@ -20,6 +20,10 @@ export type ValueSchemas = {
   [VN in ValueNameSimple]: ValueSchemaBase<AllValuesOrEmpty[VN]>;
 };
 export type ValueName<V extends ValueNameSimple = ValueNameSimple> = V;
+export type VnToCvn<VN extends ValueNameSimple> = VN extends CellValueName
+  ? VN
+  : "string";
+
 export type ValueSchema<VN extends ValueName = ValueName> = ValueSchemas[VN];
 
 const valueSchemas: ValueSchemas = {

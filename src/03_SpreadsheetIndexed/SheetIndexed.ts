@@ -82,31 +82,19 @@ export class SheetIndexed extends SheetIndexedBase {
     });
   }
   finalizeFetchedData() {
-    this.raw.allDataRows.forEach((row) => row.ensureStateExists());
     this._finalizeFetchedFullRows();
     this._finalizeFetchedFullDataColumns();
   }
   private _finalizeFetchedFullRows(): void {
     this.sheetState.indexesOfFullRowsToFetch.forEach((rowIndex) => {
-      this.fullDataColIndexes.forEach((colIndex) => {
-        const row = this.row(rowIndex);
-        if (!row.hasValue(colIndex)) {
-          row.integrateEmptyState(colIndex);
-        }
-      });
+      this.raw.row(rowIndex).ensureFullActiveDataCells();
     });
     this.sheetState.indexesOfFullRowsToFetch.clear();
   }
   private _finalizeFetchedFullDataColumns(): void {
+    this.raw.dataRowsFull.forEach((row) => row.ensureStateExists());
     this.sheetState.idsOfFullDataColsToFetch.forEach((columnId) => {
-      this.column(columnId).addMissingValuesWithEmpty();
-      this.fullDataRowIndexes.forEach((rowIndex) => {
-        column;
-
-        if (!row.hasValue(colIndex)) {
-          row.integrateEmptyState(colIndex);
-        }
-      });
+      this.column(columnId).ensureFullActiveDataCells();
     });
     this.sheetState.idsOfFullDataColsToFetch.clear();
   }

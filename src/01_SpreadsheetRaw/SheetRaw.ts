@@ -68,7 +68,16 @@ export class SheetRaw extends SheetRawBase {
       this.schema.isDataRowIndex(rowIndex),
     );
   }
-  get fullDataColIndexes(): number[] {
+  get dataRowsFull(): DataRowRaw[] {
+    return this.fullDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
+  }
+  get fullDataRowIndexes(): number[] {
+    return Arr.indexesFromUntil(
+      this.schema.topDataRowIdx,
+      this.activeTable.endRowIndex,
+    );
+  }
+  get fullTableColIndexes(): number[] {
     return Arr.indexesFromUntil(
       this.schema.startTableColIndex,
       this.activeTable.endColumnIndex,
@@ -178,7 +187,7 @@ export class SheetRaw extends SheetRawBase {
   }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
-    this.fullDataColIndexes.forEach((colIndex) => {
+    this.fullTableColIndexes.forEach((colIndex) => {
       const colIdValue = this.colIdRow.uniformValue(colIndex);
       if (!colIdValue) {
         this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
@@ -360,7 +369,7 @@ export class SheetRaw extends SheetRawBase {
     const lastRowIdx = this.lastRowIdx;
     const lastRow = this.dataRow(lastRowIdx);
     const newRow = this.appendDataRow();
-    this.fullDataColIndexes.forEach((colIndex) => {
+    this.fullTableColIndexes.forEach((colIndex) => {
       const value = lastRow.value(colIndex);
       newRow.updateValue(colIndex, value);
     });

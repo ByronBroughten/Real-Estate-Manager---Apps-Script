@@ -34,9 +34,9 @@ export abstract class ColumnSchemaCommon<
       );
     }
   }
-  makeDefaultDataValue(): Value {
+  makeDefaultDataValue(): Value<VN> {
     if (this.columnName === "id") {
-      return this.makeRowId();
+      return this.makeRowId() as Value<VN>;
     } else {
       return this.valTrait("makeDefault")();
     }
