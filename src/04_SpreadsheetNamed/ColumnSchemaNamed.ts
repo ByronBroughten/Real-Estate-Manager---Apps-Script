@@ -22,6 +22,9 @@ export class ColumnSchemaNamed<
     this.sheetName = sheetName;
     this.columnName = columnName;
   }
+  get columnId(): string {
+    return this.trait("columnId");
+  }
   trait<K extends keyof ColTraitsBase>(
     key: K,
   ): ColTraits<SN, CN>[K & keyof ColTraits<SN, CN>] {

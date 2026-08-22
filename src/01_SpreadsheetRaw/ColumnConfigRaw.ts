@@ -211,7 +211,7 @@ export class ColumnConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     sheetGids.forEach((sheetGid) => {
       const sheet = this.ss.sheet(sheetGid);
       sheet.gatherFetchProperties();
-      sheet.gatherFetchFullUniformRow("columnId");
+      sheet.uniformRow("columnId").gatherFetchFull();
     });
     this.ss.fetchAllPrepped();
   }

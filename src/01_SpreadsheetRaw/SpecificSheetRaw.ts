@@ -14,11 +14,11 @@ export class SpecificSheetRaw<
   }
   gatherFetchPrerequisitesForRawColumns() {
     this.sheet.gatherFetchProperties();
-    this.sheet.gatherFetchFullUniformRow("header");
+    this.sheet.uniformRow("header").gatherFetchFull();
   }
   gatherFetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {
     const colIndex = this.sheet.headerRow.colIndexOfValue(header);
-    return this.sheet.column(colIndex).data.gatherFetchAllDataCells();
+    return this.sheet.column(colIndex).data.gatherFetchAll();
   }
   fetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {
     const column = this.gatherFetchDataColumnOfFetchedHeader(header);

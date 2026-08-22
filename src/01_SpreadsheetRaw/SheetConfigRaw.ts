@@ -71,11 +71,13 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   }
   private _fetchAllPreppedneededForUpdate() {
     this.ss.fetchAllPreppedSheetProperties();
-    this.sheet.fetchHeaderRowUsingSheetProperties();
-    const gidCol = this.column("Sheet GID").data.fetchDataCellsUsingHeaders();
+    this.sheet.uniformRow("header").gatherFetchFull();
+    this.ss.fetchAllPrepped();
+    const gidCol = this.column("Sheet GID").data.gatherFetchAll();
+    this.ss.fetchAllPrepped();
     gidCol.dataValueArr.forEach((gid) => {
       const sheet = this.ss.sheet(gid);
-      sheet.gatherFetchHeaderRowUsingSheetProperties();
+      sheet.uniformRow("header").gatherFetchFull();
     });
     this.sheet.gatherFetchDataColumnsUsingHeaders(
       ...Arr.excludeStrict(sheetConfigHeaders, "Sheet GID"),
@@ -97,7 +99,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const gidCol = this.column("Sheet GID");
     this.sheet.dataRows.forEach((row) => {
       const configGid = row.value(gidCol.colIndex) as number;
-      if (!this.ss.activeSheetGids.has(configGid)) {
+      if (!this.ss.activeSheetGids.includes(configGid)) {
         row.delete();
       }
     });
@@ -106,7 +108,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
     const { activeSheetGids } = this.ss;
     const gidCol = this.column("Sheet GID");
     gidCol.data.dataValueArr.forEach((gid) => {
-      if (!activeSheetGids.has(gid as number)) {
+      if (!activeSheetGids.includes(gid as number)) {
         this.sheet.appendDataRowValues(new Map([[gidCol.colIndex, gid]]));
       }
     });
@@ -136,7 +138,7 @@ export class SheetConfigRaw extends SpecificSheetRawBase<HeaderToValueName> {
   }
   generateSheetTraitsFileSource(): string {
     this.sheet.gatherFetchProperties();
-    this.sheet.gatherFetchFullUniformRow("header");
+    this.sheet.uniformRow("header").gatherFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.gatherFetchDataColumnsUsingHeaders(
       "Sheet name",
