@@ -2,7 +2,7 @@ import { makeStructuredConfig, type CellValueName } from "../00_base/base";
 import { baseSheetsTraits } from "../00_base/baseSheetTraits";
 import { type SheetTraitsBase } from "../00_base/makeSheetsTraits";
 import { configGet } from "../00_base/spreadsheetConfig";
-import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "./SchemaBase";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import { SpecificSheetRawBase } from "./ClassBases/SpecificSheetRawBase";

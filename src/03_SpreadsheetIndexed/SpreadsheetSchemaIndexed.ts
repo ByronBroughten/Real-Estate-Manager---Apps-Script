@@ -1,6 +1,6 @@
 import { schemaSheetGids } from "../02_generatedTraits/02_sheetTraitsTypes";
 
-import { SchemaBase } from "./SchemaBase";
+import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
 export class SpreadsheetSchemaIndexed extends SchemaBase {

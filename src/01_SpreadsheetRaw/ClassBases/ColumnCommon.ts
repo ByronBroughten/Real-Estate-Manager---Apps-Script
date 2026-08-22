@@ -1,5 +1,5 @@
 import type { CellValueName } from "../../00_base/base";
-import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../SchemaBase";
 import { SheetRaw } from "../SheetRaw";
 import { ColumnRawBase } from "./ColumnRawBase";
 

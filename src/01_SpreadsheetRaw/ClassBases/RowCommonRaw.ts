@@ -1,6 +1,6 @@
 import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
-import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../SchemaBase";
 import type {
   RowChangeProps,
   RowChangesToSave,

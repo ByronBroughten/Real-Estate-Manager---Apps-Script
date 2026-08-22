@@ -1,6 +1,6 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import type { Value } from "../02_generatedTraits/06_valueSchemas";
-import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "./SchemaBase";
 import { Arr } from "../utils/Arr";
 import { valS } from "../utils/validation";
 import { DataColumnRaw } from "./ClassBases/DataColumnRaw";

@@ -1,8 +1,12 @@
-import { baseSheetsTraits } from "../00_base/baseSheetTraits";
 import { makeSheetsTraits, mst } from "../00_base/makeSheetsTraits";
 
 export const allSheetTraits = makeSheetsTraits({
-  ...baseSheetsTraits,
+  spreadsheetConfig: mst(1967106628, "vrb"),
+  sheetConfig: mst(210603630, "stm"),
+  columnConfig: mst(2034522667, "scm"),
+  valueConfig: mst(2119236084, "vcf"),
+  spreadsheetControls: mst(1971630928, "sct"),
+  test: mst(2089200354, "tst", true),
   year: mst(243663296, "yer"),
   api: mst(290870631, "api"),
   buildOccLedger: mst(706564734, "bol"),

@@ -6,7 +6,7 @@ import {
   type ValueName,
   type ValueSchema,
 } from "../02_generatedTraits/06_valueSchemas";
-import { SchemaBase } from "./SchemaBase";
+import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
 
 type ColumnTraitLiteral = Omit<ColTraitsLiteral, "columnId">;
 

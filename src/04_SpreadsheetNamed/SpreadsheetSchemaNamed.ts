@@ -9,7 +9,7 @@ import {
   type RowRange,
 } from "../01_SpreadsheetRaw/ClassTypes/RawState";
 import { type ColumnName } from "../02_generatedTraits/03_columnTraits";
-import { SchemaBase } from "../03_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../01_SpreadsheetRaw/SchemaBase";
 import { SpreadsheetSchemaIndexed } from "../03_SpreadsheetIndexed/SpreadsheetSchemaIndexed";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {

@@ -1,5 +1,5 @@
 import type { UniformRowName, UniformRowValueName } from "../../00_base/base";
-import { SchemaBase } from "../../03_SpreadsheetIndexed/SchemaBase";
+import { SchemaBase } from "../SchemaBase";
 import { RowCommonRaw } from "./RowCommonRaw";
 import type { RowRawProps } from "./RowRawBase";
 
