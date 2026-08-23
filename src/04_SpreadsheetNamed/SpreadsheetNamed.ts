@@ -151,28 +151,28 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     columnId: string,
   ): void {
     const schema = sheet.schema;
-    const column = sheet.column(columnId);
+    const column = sheet.column(columnId).data;
     switch (rowSpecifier) {
       case "activeRows":
       case "data":
         column.prepFetchDataFull();
         break;
       case "topDatum":
-        column.dataCell(schema.topDataRowIdx).prepFetch();
+        column.cell(schema.topDataRowIdx).prepFetch();
         break;
       case "actions":
-        column.dataCell(schema.actionRowIndex).prepFetch();
+        column.cell(schema.actionRowIndex).prepFetch();
         break;
       case "columnIds":
-        column.dataCell(schema.colIdRowIndex).prepFetch();
+        column.cell(schema.colIdRowIndex).prepFetch();
         break;
       case "headers":
-        column.dataCell(schema.headerRowIndex).prepFetch();
+        column.cell(schema.headerRowIndex).prepFetch();
         break;
       case "all":
-        column.dataCell(schema.headerRowIndex).prepFetch();
-        column.dataCell(schema.actionRowIndex).prepFetch();
-        column.dataCell(schema.colIdRowIndex).prepFetch();
+        column.cell(schema.headerRowIndex).prepFetch();
+        column.cell(schema.actionRowIndex).prepFetch();
+        column.cell(schema.colIdRowIndex).prepFetch();
         column.prepFetchDataFull();
         break;
       default:
@@ -210,12 +210,12 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
-      sheet.column("id").prepFetchDataFull();
+      sheet.column("id").data.prepFetchDataFull();
       // column.gatherFetchUniformCell("header")
     });
     this.fetchAllPrepped();
     idSheets.forEach((sheet) => {
-      sheet.column("id").emptyDataCellsToDefault();
+      sheet.column("id").data.emptyDataCellsToDefault();
     });
   }
 }

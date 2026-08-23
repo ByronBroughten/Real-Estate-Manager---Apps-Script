@@ -42,7 +42,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     });
   }
   cell<CN extends ColumnName<SN>>(columnName: CN): CellNamed<SN, CN> {
-    return this.sheet.column(columnName).dataCell(this.rowIndex);
+    return this.sheet.column(columnName).data.cell(this.rowIndex);
   }
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
     return this.cell(columnName).isActive;

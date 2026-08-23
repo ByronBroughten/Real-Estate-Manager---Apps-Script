@@ -25,7 +25,7 @@ export class CellNamed<
     return this.column.schema;
   }
   get indexed(): CellIndexed {
-    return this.column.indexed.dataCell(this.rowIndex);
+    return this.column.indexed.data.cell(this.rowIndex);
   }
   get raw(): CellRaw<VnToCvn<ValueName>> {
     return this.indexed.raw;

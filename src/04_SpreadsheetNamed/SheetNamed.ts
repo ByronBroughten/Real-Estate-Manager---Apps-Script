@@ -10,6 +10,7 @@ import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
+import { DataColumnNamed } from "./DataColumnNamed";
 import { DataRowNamed } from "./DataRowNamed";
 import type { SheetSchemaNamed } from "./SheetSchemaNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
@@ -72,10 +73,10 @@ export class SheetNamed<
   }
   prepFetchColumnsFull<CNs extends readonly ColumnName<SN>[]>(
     ...columnNames: CNs
-  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
-    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+  ): { [K in CNs[number]]: DataColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: DataColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
-      columns[columnName] = this.column(columnName).prepFetchDataFull();
+      columns[columnName] = this.column(columnName).data.prepFetchDataFull();
     });
     return columns;
   }

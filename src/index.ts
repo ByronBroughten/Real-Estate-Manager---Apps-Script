@@ -1,5 +1,6 @@
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
-import { Api } from "./05_Api/Api.js";
+import { Api } from "./06_API/Api.js";
+
 import { businessEndpoints } from "./businessEndpoints.js";
 
 const testSheetId = 2089200354;

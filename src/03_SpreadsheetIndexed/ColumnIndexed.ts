@@ -1,26 +1,14 @@
-import type {
-  Value,
-  ValueName,
-  VnToCvn,
-} from "../01_generatedConfigs/valueSchemas";
+import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
-import type { StrictExclude } from "../utils/Arr";
-import { CellIndexed } from "./CellIndexed";
-import { ColumnIndexedBase } from "./ColumnIndexedBase";
+import { ColumnCommon } from "./ColumnCommon";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import { DataColumnIndexed } from "./DataColumnIndexed";
 
 export class ColumnIndexed<
   VN extends ValueName = ValueName,
-> extends ColumnIndexedBase<VN> {
+> extends ColumnCommon<VN> {
   get schema(): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed(this.columnIndexedProps);
-  }
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
-  }
-  get colIndex() {
-    return this.sheet.raw.uniformRow("columnId").colIndexOfValue(this.columnId);
   }
   get raw(): ColumnRaw<VnToCvn<VN>> {
     return new ColumnRaw({
@@ -28,56 +16,7 @@ export class ColumnIndexed<
       colIndex: this.colIndex,
     });
   }
-  get fullDataCellIndexes(): number[] {
-    return this.sheet.fullDataRowIndexes;
-  }
-  prepFetchDataFull(): this {
-    this.sheetState.idsOfFullDataColsToFetch.add(this.columnId);
-    this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
-    return this;
-  }
-  get activeDataCellIndexes(): number[] {
-    return this.raw.sheet.dataRowIndexesActive;
-  }
-  get dataValueArr(): Value<VN>[] {
-    return this.raw.data.valueArr as Value<VN>[];
-  }
-  hasDataValue(value: Value<VN>): boolean {
-    return this.dataValueArr.includes(value);
-  }
-  dataValue(rowIndex: number): Value<VN> {
-    return this.dataCell(rowIndex).value();
-  }
-  dataValueNotEmpty(rowIndex: number): StrictExclude<Value<VN>, ""> {
-    return this.dataCell(rowIndex).valueNotEmpty();
-  }
-  dataCell(rowIndex: number): CellIndexed<VN> {
-    return new CellIndexed({
-      ...this.columnIndexedProps,
-      rowIndex,
-    });
-  }
-  get activeDataCells(): CellIndexed<VN>[] {
-    return this.activeDataCellIndexes.map((rowIndex) =>
-      this.dataCell(rowIndex),
-    );
-  }
-  activeDataCellsToDefault() {
-    this.activeDataCells.forEach((cell) => {
-      cell.updateToDefault();
-    });
-  }
-  ensureFullActiveDataCells() {
-    this.fullDataCellIndexes.forEach((rowIndex) => {
-      this.dataCell(rowIndex).raw.ensureActive();
-    });
-  }
-  emptyDataCellsToDefault() {
-    this.activeDataCellIndexes.forEach((rowIndex) => {
-      const cell = this.dataCell(rowIndex);
-      if (cell.raw.isEmpty) {
-        cell.updateToDefault();
-      }
-    });
+  get data(): DataColumnIndexed<VN> {
+    return new DataColumnIndexed(this.columnIndexedProps);
   }
 }

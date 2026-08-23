@@ -80,9 +80,9 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     });
   }
   private _appendMissingSheetConfigs() {
-    const colGid = this.sheet.column("sheetGid");
+    const colGid = this.sheet.column("sheetGid").data;
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
-      if (!colGid.hasDataValue(sheetGid)) {
+      if (!colGid.hasValue(sheetGid)) {
         this.sheet.appendRowWithVals({ sheetGid });
       }
     });
@@ -91,27 +91,31 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
     let updatedValues = 0;
     this.sheet.dataRowIndexesActive.forEach((rowIndex) => {
-      const sheetTitle = col.sheetTitle.dataValue(rowIndex);
-      const sheetGid = col.sheetGid.dataValueNotEmpty(rowIndex);
+      const sheetTitle = col.sheetTitle.data.value(rowIndex);
+      const sheetGid = col.sheetGid.data.valueNotEmpty(rowIndex);
       const activeSheet = this.ss.sheetByGid(sheetGid);
       if (sheetTitle !== activeSheet.raw.title) {
-        col.sheetTitle.dataCell(rowIndex).updateValue(activeSheet.raw.title);
+        col.sheetTitle.data.cell(rowIndex).updateValue(activeSheet.raw.title);
         updatedValues++;
       }
-      const hasIdCol = col.hasIdColumn.dataValue(rowIndex);
+      const hasIdCol = col.hasIdColumn.data.value(rowIndex);
       const actualHasIdCol = activeSheet.raw.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
-        col.hasIdColumn.dataCell(rowIndex).updateValue(actualHasIdCol);
+        col.hasIdColumn.data.cell(rowIndex).updateValue(actualHasIdCol);
         updatedValues++;
       }
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetConfigFileSource(): string {
-    const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
+    const col = this.sheet.columns(
+      "sheetGid",
+      "sheetTitle",
+      "idPrefix",
+      "hasIdColumn",
+    );
 
     this.sheet.gatherFetchProperties();
-    this.sheet.uniformRow("header").gatherFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.gatherFetchDataColumnsUsingHeaders(
       "Sheet name",
@@ -120,19 +124,19 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     );
     this.ss.fetchAllPrepped();
 
-    const gidCol = this.column("Sheet GID").data;
-    const titleCol = this.column("Sheet title").data;
-    const prefixCol = this.column("ID prefix").data;
-    const hasIdCol = this.column("Has ID column").data;
+    const gidCol = col.sheetGid.data;
+    const titleCol = col.sheetTitle.data;
+    const prefixCol = col.idPrefix.data;
+    const hasIdCol = col.hasIdColumn.data;
 
     const entries: SheetConfigsBase = {};
     this.sheet.dataRowIndexesActive.forEach((rowIndex) => {
-      const title = titleCol.dataValue(rowIndex);
+      const title = titleCol.value(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
       entries[sheetName] = {
-        sheetGid: Number(gidCol.dataValue(rowIndex)),
-        idPrefix: String(prefixCol.dataValue(rowIndex)),
-        hasIdColumn: Boolean(hasIdCol.dataValue(rowIndex)),
+        sheetGid: Number(gidCol.value(rowIndex)),
+        idPrefix: String(prefixCol.value(rowIndex)),
+        hasIdColumn: Boolean(hasIdCol.value(rowIndex)),
       };
     });
 

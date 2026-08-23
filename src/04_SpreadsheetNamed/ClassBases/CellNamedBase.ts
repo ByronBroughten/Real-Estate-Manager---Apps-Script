@@ -1,6 +1,6 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
-import { ColumnNamedBase, type ColumnNamedProps } from "./ColumnNamedBase";
+import { ColumnNamedBase, type ColumnNamedProps } from "../ColumnNamedBase";
 
 export interface CellNamedProps<
   TN extends SheetName,

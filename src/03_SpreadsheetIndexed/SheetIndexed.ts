@@ -117,7 +117,7 @@ export class SheetIndexed extends SheetIndexedBase {
   private _finalizeFetchedFullDataColumns(): void {
     this.raw.dataRowsFull.forEach((row) => row.ensureStateExists());
     this.sheetState.idsOfFullDataColsToFetch.forEach((columnId) => {
-      this.column(columnId).ensureFullActiveDataCells();
+      this.column(columnId).data.ensureFullActiveDataCells();
     });
     this.sheetState.idsOfFullDataColsToFetch.clear();
   }
