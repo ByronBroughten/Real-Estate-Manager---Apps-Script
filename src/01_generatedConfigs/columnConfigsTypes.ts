@@ -13,7 +13,7 @@ import { type Value, type ValueName, type ValueSchema } from "./valueSchemas";
 export type ColumnConfigs = typeof columnConfigs;
 
 export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
-  keyof ColumnConfigs[SN];
+  SN extends SheetNameSimple ? keyof ColumnConfigs[SN] : never;
 
 export type ColumnValueName<
   SN extends SheetNameSimple,
@@ -45,7 +45,7 @@ export type SheetDataValues<
 export function getSheetColumnNames<SN extends SheetNameSimple>(
   sheetName: SN,
 ): ColumnName<SN>[] {
-  return Obj.keys(columnConfigs[sheetName]);
+  return Obj.keys(columnConfigs[sheetName]) as unknown as ColumnName<SN>[];
 }
 
 // columnConfig isn't actually very unique. The only unique

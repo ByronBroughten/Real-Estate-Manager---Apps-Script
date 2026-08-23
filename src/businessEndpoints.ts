@@ -1,8 +1,8 @@
-import { makeStructuredConfig } from "../00_base/base";
-import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
-import { ColumnConfigOperator } from "../04_SpreadsheetNamed/ColumnConfigOperator";
-import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
-import type { FilterWithSuffix } from "../utils/Str";
+import { makeStructuredConfig } from "./00_base/base";
+import type { ColumnFullNameSimple } from "./01_generatedConfigs/columnConfigsTypes";
+import { ColumnConfigOperator } from "./04_SpreadsheetNamed/ColumnConfigOperator";
+import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed";
+import type { FilterWithSuffix } from "./utils/Str";
 
 const endpointSuffix = "RunAndStatus";
 export type ApiEndpointName = FilterWithSuffix<

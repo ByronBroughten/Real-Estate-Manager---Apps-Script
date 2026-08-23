@@ -8,6 +8,7 @@ import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
 import { SheetIndexedBase } from "./SheetIndexedBase";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
+import { UniformRowIndexed } from "./UniformRowIndexed";
 
 export class SheetIndexed extends SheetIndexedBase {
   get schema(): SheetSchemaIndexed {
@@ -40,6 +41,20 @@ export class SheetIndexed extends SheetIndexedBase {
       rowIndex,
     });
   }
+  uniformRowByIndex(rowIndex: number): UniformRowIndexed {
+    return new UniformRowIndexed({
+      ...this.sheetIndexedProps,
+      rowIndex,
+      uniformRowName: this.schema.uniformRowNameByIndex(rowIndex),
+    });
+  }
+  row(rowIndex: number): DataRowIndexed | UniformRowIndexed {
+    if (this.schema.isUniformRowIndex(rowIndex)) {
+      return this.uniformRowByIndex(rowIndex);
+    } else {
+      return this.dataRow(rowIndex);
+    }
+  }
   get dataRows() {
     return this.raw.dataRows.map((row) => this.dataRow(row.rowIndex));
   }
@@ -60,27 +75,9 @@ export class SheetIndexed extends SheetIndexedBase {
     this.raw.ss.fetchAllPrepped();
     return this;
   }
-  gatherDataPrerequisites() {
+  _gatherDataPrerequisites() {
     this.raw.gatherFetchProperties();
     this.raw.gatherFetchColumnIds();
-  }
-  prepFetchFullUniformRow<UN extends UniformRowName>(rowName: UN) {
-    const rowIndex = this.schema.uniformRowIndex(rowName);
-    this.prepFetchFullRow(rowIndex);
-  }
-  prepFetchUniformRows<UN extends UniformRowName>(rowNames: UN[]) {
-    rowNames.forEach((rowName) => this.prepFetchFullUniformRow(rowName));
-  }
-  prepFetchFullRow(rowIndex: number) {
-    this.sheetState.indexesOfFullRowsToFetch.add(rowIndex);
-    this.preFetchGridRanges.push({ row: rowIndex, column: "allDataColumns" });
-  }
-  prepFetchFullDataColumn(columnId: string) {
-    this.sheetState.idsOfFullDataColsToFetch.add(columnId);
-    this.preFetchGridRanges.push({ row: "allDataRows", column: columnId });
-  }
-  prepFetchSingleCell(rowIndex: number, columnId: string) {
-    this.preFetchGridRanges.push({ row: rowIndex, column: columnId });
   }
   gatherFetchDataPrepped() {
     this.preFetchGridRanges.forEach((pf) => {

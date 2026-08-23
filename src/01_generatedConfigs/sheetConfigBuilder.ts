@@ -7,8 +7,9 @@ export interface SheetConfigStored<H extends boolean = boolean> {
 // isn't stored on the literal entry itself (it's the entry's key in
 // sheetConfigs.ts) but is available as a trait via getSheetTraitByName /
 // getSheetTraitByGid regardless of which way the record was looked up.
-export interface SheetConfig<H extends boolean = boolean>
-  extends SheetConfigStored<H> {
+export interface SheetConfig<
+  H extends boolean = boolean,
+> extends SheetConfigStored<H> {
   sheetName: string;
 }
 

@@ -112,13 +112,7 @@ export class SheetRaw extends SheetRawBase {
     });
   }
   uniformRowByIndex(rowIndex: number): UniformRow {
-    const rowName = this.schema.uniformRowNameByIndex(rowIndex);
-    if (!rowName) {
-      throw new Error(
-        `Row index ${rowIndex} does not correspond to a known uniform row name.`,
-      );
-    }
-    return this.uniformRow(rowName);
+    return this.uniformRow(this.schema.uniformRowNameByIndex(rowIndex));
   }
   row(rowIdx: number): DataRowRaw | UniformRow {
     if (this.schema.isUniformRowIndex(rowIdx)) {

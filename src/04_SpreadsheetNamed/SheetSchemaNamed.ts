@@ -41,6 +41,10 @@ export class SheetSchemaNamed<
     const columnName = this.colNameByColumnId(columnId);
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }
+  // Delegates to the Indexed-flavored accessor (tier 01, so this is a
+  // downward and allowed dependency) because it's the only place with an
+  // O(1) columnId -> columnName index; a Named-only implementation would
+  // have to scan every column in the sheet.
   colNameByColumnId(columnId: string): ColumnName<SN> {
     return getColumnTraitByIndex(
       this.sheetGid,

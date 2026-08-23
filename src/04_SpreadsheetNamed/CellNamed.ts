@@ -1,7 +1,14 @@
-import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
+import type {
+  ColumnName,
+  ColumnValue,
+} from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { ColumnName, ColumnValue } from "../01_generatedConfigs/columnConfigsTypes";
-import type { Value, ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
+import type {
+  Value,
+  ValueName,
+  VnToCvn,
+} from "../01_generatedConfigs/valueSchemas";
+import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
 import { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { CellNamedBase } from "./ClassBases/CellNamedBase";
 import { ColumnNamed } from "./ColumnNamed";

@@ -2,7 +2,6 @@ import { makeStructuredConfig, type CellValueName } from "../00_base/base";
 import { baseSheetConfigs } from "../01_generatedConfigs/baseSheetConfigs";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { type SheetConfigsBase } from "../01_generatedConfigs/sheetConfigBuilder";
-import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
@@ -69,18 +68,10 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   private _fetchAllPreppedNeededForUpdate() {
     this.ss.raw.fetchAllSheetProperties();
     this.sheet.raw.fetchColumnIds();
-
-    this.sheet.indexed.prepFetchFullDataColumn(
-      this.column("sheetGid").indexed.columnId,
-    );
-    this.ss.fetchAllPrepped();
-
-    gidCol.valueArr.forEach((gid) => {
-      const sheet = this.ss.sheet(gid);
-      sheet.uniformRow("header").gatherFetchFull();
-    });
-    this.sheet.gatherFetchDataColumnsUsingHeaders(
-      ...Arr.excludeStrict(sheetConfigHeaders, "Sheet GID"),
+    const col = this.sheet.columnsPrepFetchAllDataCells(
+      "sheetGid",
+      "sheetTitle",
+      "hasIdColumn",
     );
     this.ss.fetchAllPrepped();
   }
@@ -101,23 +92,25 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     });
   }
   private _updateProgrammaticValues(): void {
-    const gidCol = this.column("sheetGid");
-    const sheetTitleCol = this.column("sheetTitle");
-    const hasColForIdCol = this.column("hasIdColumn");
+    const col = this.sheet.columnsPrepFetchAllDataCells(
+      "sheetGid",
+      "sheetTitle",
+      "hasIdColumn",
+    );
+    this.ss.fetchAllPrepped();
     let updatedValues = 0;
-    this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
-      const sheetGid = gidCol.dataValue(rowIndex);
-      const sheetTitle = sheetTitleCol.dataValue(rowIndex);
-
-      const activeSheet = this.ss.sheet(sheetGid);
-      if (sheetTitle !== activeSheet.title) {
-        sheetTitleCol.updateDataCell(rowIndex, activeSheet.title);
+    this.sheet.raw.activeDataRowIndexes.forEach((rowIndex) => {
+      const sheetTitle = col.sheetTitle.dataValue(rowIndex);
+      const sheetGid = col.sheetGid.dataValueNotEmpty(rowIndex);
+      const activeSheet = this.ss.sheetByGid(sheetGid);
+      if (sheetTitle !== activeSheet.raw.title) {
+        col.sheetTitle.dataCell(rowIndex).updateValue(activeSheet.raw.title);
         updatedValues++;
       }
-      const hasIdCol = hasColForIdCol.dataValue(rowIndex);
-      const actualHasIdCol = activeSheet.headerRow.hasValue("ID");
+      const hasIdCol = col.hasIdColumn.dataValue(rowIndex);
+      const actualHasIdCol = activeSheet.raw.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
-        hasColForIdCol.updateDataCell(rowIndex, actualHasIdCol);
+        col.hasIdColumn.dataCell(rowIndex).updateValue(actualHasIdCol);
         updatedValues++;
       }
     });

@@ -1,7 +1,7 @@
 import { SheetConfigOperator } from "./04_SpreadsheetNamed/SheetConfigOperator.js";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { Api } from "./05_Api/Api.js";
-import { businessEndpoints } from "./businessEndpoints/businessEndpoints.js";
+import { businessEndpoints } from "./businessEndpoints.js";
 
 const testSheetId = 2089200354;
 const testSheetName = "test";

@@ -1,5 +1,10 @@
+import type {
+  Value,
+  ValueName,
+  VnToCvn,
+} from "../01_generatedConfigs/valueSchemas";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
-import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
+import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnIndexedBase } from "./ColumnIndexedBase";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
@@ -26,8 +31,23 @@ export class ColumnIndexed<
   get fullDataCellIndexes(): number[] {
     return this.sheet.fullDataRowIndexes;
   }
+  prepFetchAllDataCells(): this {
+    this.prepFetchDataFull();
+    return this;
+  }
+  prepFetchDataFull(): this {
+    this.sheetState.idsOfFullDataColsToFetch.add(this.columnId);
+    this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
+    return this;
+  }
   get activeDataCellIndexes(): number[] {
     return this.raw.sheet.activeDataRowIndexes;
+  }
+  dataValue(rowIndex: number): Value<VN> {
+    return this.dataCell(rowIndex).value();
+  }
+  dataValueNotEmpty(rowIndex: number): StrictExclude<Value<VN>, ""> {
+    return this.dataCell(rowIndex).valueNotEmpty();
   }
   dataCell(rowIndex: number): CellIndexed<VN> {
     return new CellIndexed({

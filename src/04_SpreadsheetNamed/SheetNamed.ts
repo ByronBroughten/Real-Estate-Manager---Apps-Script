@@ -1,12 +1,13 @@
-import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
 } from "../01_generatedConfigs/columnConfigsTypes";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import { Arr } from "../utils/Arr";
+import { Obj } from "../utils/Obj";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
 import { DataRowNamed } from "./DataRowNamed";
@@ -57,6 +58,15 @@ export class SheetNamed<
       columnName,
     });
   }
+  columnsPrepFetchAllDataCells<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+    columnNames.forEach((columnName) => {
+      columns[columnName] = this.column(columnName).prepFetchAllDataCells();
+    });
+    return columns;
+  }
   get topDataRow(): DataRowNamed<SN> {
     return this.dataRow(this.schema.topDataRowIdx);
   }
@@ -89,7 +99,7 @@ export class SheetNamed<
   }
   rowsFiltered(values: Partial<SheetDataValues<SN>>): DataRowNamed<SN>[] {
     return this.dataRows.filter((row) => {
-      for (const columnName in values) {
+      for (const columnName of Obj.keys(values)) {
         if (row.value(columnName) !== values[columnName]) {
           return false;
         }

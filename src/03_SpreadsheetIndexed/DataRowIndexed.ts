@@ -3,19 +3,15 @@ import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
-import { RowIndexedBase } from "./RowIndexedBase";
-import { SheetIndexed } from "./SheetIndexed";
+import { RowCommonIndexed } from "./RowCommonIndexed";
 
-export class DataRowIndexed extends RowIndexedBase {
+export class DataRowIndexed extends RowCommonIndexed {
   constructor(props: RowIndexedProps) {
     super(props);
     void this.raw;
   }
   get raw(): DataRowRaw {
     return new DataRowRaw(this.rowIndexedProps);
-  }
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
   }
   columnSchema(columnId: string): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed({

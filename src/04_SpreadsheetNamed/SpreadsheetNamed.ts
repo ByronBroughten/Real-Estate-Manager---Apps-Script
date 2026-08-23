@@ -150,28 +150,29 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     columnId: string,
   ): void {
     const schema = sheet.schema;
+    const column = sheet.column(columnId);
     switch (rowSpecifier) {
       case "activeRows":
       case "data":
-        sheet.prepFetchFullDataColumn(columnId);
+        column.prepFetchDataFull();
         break;
       case "topDatum":
-        sheet.prepFetchSingleCell(schema.topDataRowIdx, columnId);
+        column.dataCell(schema.topDataRowIdx).prepFetch();
         break;
       case "actions":
-        sheet.prepFetchSingleCell(schema.actionRowIndex, columnId);
+        column.dataCell(schema.actionRowIndex).prepFetch();
         break;
       case "columnIds":
-        sheet.prepFetchSingleCell(schema.colIdRowIndex, columnId);
+        column.dataCell(schema.colIdRowIndex).prepFetch();
         break;
       case "headers":
-        sheet.prepFetchSingleCell(schema.headerRowIndex, columnId);
+        column.dataCell(schema.headerRowIndex).prepFetch();
         break;
       case "all":
-        sheet.prepFetchSingleCell(schema.headerRowIndex, columnId);
-        sheet.prepFetchSingleCell(schema.actionRowIndex, columnId);
-        sheet.prepFetchSingleCell(schema.colIdRowIndex, columnId);
-        sheet.prepFetchFullDataColumn(columnId);
+        column.dataCell(schema.headerRowIndex).prepFetch();
+        column.dataCell(schema.actionRowIndex).prepFetch();
+        column.dataCell(schema.colIdRowIndex).prepFetch();
+        column.prepFetchDataFull();
         break;
       default:
         throw new Error(

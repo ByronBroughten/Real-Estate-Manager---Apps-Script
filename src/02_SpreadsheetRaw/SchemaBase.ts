@@ -69,8 +69,14 @@ export class SchemaBase {
   uniformRowIndex(name: UniformRowName): number {
     return uniformRowIndexes[name];
   }
-  uniformRowNameByIndex(rowIndex: number): UniformRowName | undefined {
-    return rowIndexToUniformName.get(rowIndex);
+  uniformRowNameByIndex(rowIndex: number): UniformRowName {
+    const uniformRowName = rowIndexToUniformName.get(rowIndex);
+    if (!uniformRowName) {
+      throw new Error(
+        `Row index ${rowIndex} does not correspond to a known uniform row name.`,
+      );
+    }
+    return uniformRowName;
   }
   isUniformRowIndex(rowIndex: number, rowName?: UniformRowName): boolean {
     const isUniform = rowIndexToUniformName.has(rowIndex);

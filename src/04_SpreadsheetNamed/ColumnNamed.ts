@@ -1,12 +1,14 @@
 import type { UniformRowName } from "../00_base/base";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
-  ColumnFullName,
-  ColumnName,
+    ColumnFullName,
+    ColumnName,
+    ColumnValue
 } from "../01_generatedConfigs/columnConfigsTypes";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { StrictExclude } from "../utils/Arr";
 
-import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { CellNamed } from "./CellNamed";
+import { ColumnNamedBase } from "./ClassBases/ColumnNamedBase";
 import { SheetNamed } from "./SheetNamed";
 
 export class ColumnNamed<
@@ -35,6 +37,18 @@ export class ColumnNamed<
   get fullName(): ColumnFullName<SN, CN> {
     return this.schema.fullName;
   }
+  dataValueNotEmpty(
+    rowIndex: number,
+  ): StrictExclude<ColumnValue<SN, CN>, ""> {
+    return this.indexed.dataValueNotEmpty(rowIndex) as StrictExclude<
+      ColumnValue<SN, CN>,
+      ""
+    >;
+  }
+  dataValue(rowIndex: number): ColumnValue<SN, CN> {
+    return this.dataCell(rowIndex).value();
+  }
+
   dataCell(rowIndex: number): CellNamed<SN, CN> {
     return new CellNamed({
       ...this.columnNamedProps,
@@ -43,11 +57,11 @@ export class ColumnNamed<
   }
   gatherFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
     const rowIndex = this.sheet.schema.uniformRowIndex(rowName);
-    this.sheet.indexed.prepFetchSingleCell(rowIndex, this.columnId);
+    this.indexed.dataCell(rowIndex).prepFetch();
     return this;
   }
-  gatherFetchAllDataCells(): ColumnNamed<SN, CN> {
-    this.sheet.indexed.prepFetchFullDataColumn(this.columnId);
+  prepFetchAllDataCells(): ColumnNamed<SN, CN> {
+    this.indexed.prepFetchAllDataCells();
     return this;
   }
   activeDataCellsToDefault(): ColumnNamed<SN, CN> {
