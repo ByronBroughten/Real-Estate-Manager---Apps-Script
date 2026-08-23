@@ -1,8 +1,8 @@
 import type { UniformRowName } from "../00_base/base";
 import type {
-    ColumnFullName,
-    ColumnName,
-    ColumnValue
+  ColumnFullName,
+  ColumnName,
+  ColumnValue,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { StrictExclude } from "../utils/Arr";
@@ -37,9 +37,13 @@ export class ColumnNamed<
   get fullName(): ColumnFullName<SN, CN> {
     return this.schema.fullName;
   }
-  dataValueNotEmpty(
-    rowIndex: number,
-  ): StrictExclude<ColumnValue<SN, CN>, ""> {
+  get dataValueArr(): ColumnValue<SN, CN>[] {
+    return this.indexed.dataValueArr as ColumnValue<SN, CN>[];
+  }
+  hasDataValue(value: ColumnValue<SN, CN>): boolean {
+    return this.dataValueArr.includes(value);
+  }
+  dataValueNotEmpty(rowIndex: number): StrictExclude<ColumnValue<SN, CN>, ""> {
     return this.indexed.dataValueNotEmpty(rowIndex) as StrictExclude<
       ColumnValue<SN, CN>,
       ""
@@ -60,8 +64,8 @@ export class ColumnNamed<
     this.indexed.dataCell(rowIndex).prepFetch();
     return this;
   }
-  prepFetchAllDataCells(): ColumnNamed<SN, CN> {
-    this.indexed.prepFetchAllDataCells();
+  prepFetchDataFull(): ColumnNamed<SN, CN> {
+    this.indexed.prepFetchDataFull();
     return this;
   }
   activeDataCellsToDefault(): ColumnNamed<SN, CN> {

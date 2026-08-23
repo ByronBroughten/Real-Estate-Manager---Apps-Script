@@ -1,6 +1,9 @@
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { type ColumnIndexed } from "./ColumnIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import {
+  SheetIndexed,
+  type GatherDataPrerequisitesProps,
+} from "./SheetIndexed";
 import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";
 import { SpreadsheetSchemaIndexed } from "./SpreadsheetSchemaIndexed";
 
@@ -28,16 +31,16 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
       .map((sheetGid) => this.sheet(sheetGid))
       .filter((sheet) => sheet.isPreppedToFetch);
   }
-  fetchAllPrepped() {
+  fetchAllPrepped(props: GatherDataPrerequisitesProps = {}) {
     const sheetsPreppedForFetch = this.sheetsPreppedForFetch;
     sheetsPreppedForFetch.forEach((sheet) => {
-      sheet._gatherDataPrerequisites();
+      sheet._gatherDataPrerequisites(props);
     });
-    this.raw.fetchAllPrepped();
+    this.raw.fetchAllGathered();
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet.gatherFetchDataPrepped();
     });
-    this.raw.fetchAllPrepped();
+    this.raw.fetchAllGathered();
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet.finalizeFetchedData();
     });

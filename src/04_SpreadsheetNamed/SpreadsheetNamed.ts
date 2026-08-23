@@ -1,5 +1,6 @@
-import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes.js";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
+import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/SheetIndexed";
 import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed.js";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
@@ -58,8 +59,8 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   get activeSheets(): SheetNamed<SheetName>[] {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
-  fetchAllPrepped(): SpreadsheetNamed {
-    this.indexed.fetchAllPrepped();
+  fetchAllPrepped(props: GatherDataPrerequisitesProps = {}): SpreadsheetNamed {
+    this.indexed.fetchAllPrepped(props);
     return this;
   }
   fetch<SN extends SheetName>(
@@ -209,7 +210,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
-      sheet.column("id").gatherFetchAllDataCells();
+      sheet.column("id").prepFetchDataFull();
       // column.gatherFetchUniformCell("header")
     });
     this.fetchAllPrepped();

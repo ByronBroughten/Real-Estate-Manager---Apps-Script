@@ -35,6 +35,9 @@ export class SheetNamed<
       sheetGid: this.schema.sheetGid,
     });
   }
+  get dataRowIndexesActive(): number[] {
+    return this.indexed.dataRowIndexesActive;
+  }
   dataRow(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({
       ...this.sheetNamedProps,
@@ -58,12 +61,21 @@ export class SheetNamed<
       columnName,
     });
   }
-  columnsPrepFetchAllDataCells<CNs extends readonly ColumnName<SN>[]>(
+  columns<CNs extends readonly ColumnName<SN>[]>(
     ...columnNames: CNs
   ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
     const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
-      columns[columnName] = this.column(columnName).prepFetchAllDataCells();
+      columns[columnName] = this.column(columnName);
+    });
+    return columns;
+  }
+  prepFetchColumnsFull<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+    columnNames.forEach((columnName) => {
+      columns[columnName] = this.column(columnName).prepFetchDataFull();
     });
     return columns;
   }

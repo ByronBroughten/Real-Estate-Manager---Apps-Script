@@ -63,7 +63,7 @@ export class SheetRaw extends SheetRawBase {
     const indexes = Array.from(this.sheetState.rowStates.keys());
     return Arr.sortAscending(indexes);
   }
-  get activeDataRowIndexes(): number[] {
+  get dataRowIndexesActive(): number[] {
     return this.activeRowIndexes.filter((rowIndex) =>
       this.schema.isDataRowIndex(rowIndex),
     );
@@ -132,7 +132,7 @@ export class SheetRaw extends SheetRawBase {
     });
   }
   get dataRows(): DataRowRaw[] {
-    return this.activeDataRowIndexes.map((index) => this.dataRow(index));
+    return this.dataRowIndexesActive.map((index) => this.dataRow(index));
   }
   get topDataRow(): DataRowRaw {
     return this.row(this.schema.topDataRowIdx) as DataRowRaw;
@@ -321,7 +321,7 @@ export class SheetRaw extends SheetRawBase {
   }
   fetchColumnIds(): SheetRaw {
     this.gatherFetchColumnIds();
-    this.ss.fetchAllPrepped();
+    this.ss.fetchAllGathered();
     return this;
   }
   gatherFetchProperties(): SheetRaw {

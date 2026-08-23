@@ -10,7 +10,7 @@ export class DataColumnRaw<
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get valueArr(): VL[] {
-    return this.sheet.activeDataRowIndexes.map((rowIdx) =>
+    return this.sheet.dataRowIndexesActive.map((rowIdx) =>
       this.dataValue(rowIdx),
     );
   }

@@ -22,7 +22,7 @@ export class SpecificSheetRaw<
   }
   fetchDataColumnOfFetchedHeader<H extends HD>(header: H): DataColumnRaw {
     const column = this.gatherFetchDataColumnOfFetchedHeader(header);
-    this.ss.fetchAllPrepped();
+    this.ss.fetchAllGathered();
     return column;
   }
   gatherFetchDataColumnsUsingHeaders<H extends HD>(

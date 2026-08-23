@@ -31,17 +31,19 @@ export class ColumnIndexed<
   get fullDataCellIndexes(): number[] {
     return this.sheet.fullDataRowIndexes;
   }
-  prepFetchAllDataCells(): this {
-    this.prepFetchDataFull();
-    return this;
-  }
   prepFetchDataFull(): this {
     this.sheetState.idsOfFullDataColsToFetch.add(this.columnId);
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
     return this;
   }
   get activeDataCellIndexes(): number[] {
-    return this.raw.sheet.activeDataRowIndexes;
+    return this.raw.sheet.dataRowIndexesActive;
+  }
+  get dataValueArr(): Value<VN>[] {
+    return this.raw.data.valueArr as Value<VN>[];
+  }
+  hasDataValue(value: Value<VN>): boolean {
+    return this.dataValueArr.includes(value);
   }
   dataValue(rowIndex: number): Value<VN> {
     return this.dataCell(rowIndex).value();

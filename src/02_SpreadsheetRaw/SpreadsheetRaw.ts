@@ -52,7 +52,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this.rawState.allSheetPropertiesAreFetched = true;
     return { activeSheetGids: this.activeSheetGids };
   }
-  fetchAllPrepped(): void {
+  fetchAllGathered(): void {
     const data = this._fetchByDataFilter();
     this._addDataToState(data);
     this.rawState.fetcherGridRanges = [];

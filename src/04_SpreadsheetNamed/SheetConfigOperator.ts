@@ -68,12 +68,8 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   private _fetchAllPreppedNeededForUpdate() {
     this.ss.raw.fetchAllSheetProperties();
     this.sheet.raw.fetchColumnIds();
-    const col = this.sheet.columnsPrepFetchAllDataCells(
-      "sheetGid",
-      "sheetTitle",
-      "hasIdColumn",
-    );
-    this.ss.fetchAllPrepped();
+    this.sheet.prepFetchColumnsFull("sheetGid", "sheetTitle", "hasIdColumn");
+    this.ss.fetchAllPrepped({ skipFetchingProperties: true });
   }
   private _deleteStaleSheetConfigs() {
     this.sheet.dataRows.forEach((row) => {
@@ -84,22 +80,17 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     });
   }
   private _appendMissingSheetConfigs() {
-    this.sheet.dataRows.forEach((row) => {
-      const sheetGid = row.value("sheetGid");
-      if (sheetGid !== "" && !this.ss.raw.gidIsActive(sheetGid)) {
+    const colGid = this.sheet.column("sheetGid");
+    this.ss.raw.activeSheetGids.forEach((sheetGid) => {
+      if (!colGid.hasDataValue(sheetGid)) {
         this.sheet.appendRowWithVals({ sheetGid });
       }
     });
   }
   private _updateProgrammaticValues(): void {
-    const col = this.sheet.columnsPrepFetchAllDataCells(
-      "sheetGid",
-      "sheetTitle",
-      "hasIdColumn",
-    );
-    this.ss.fetchAllPrepped();
+    const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
     let updatedValues = 0;
-    this.sheet.raw.activeDataRowIndexes.forEach((rowIndex) => {
+    this.sheet.dataRowIndexesActive.forEach((rowIndex) => {
       const sheetTitle = col.sheetTitle.dataValue(rowIndex);
       const sheetGid = col.sheetGid.dataValueNotEmpty(rowIndex);
       const activeSheet = this.ss.sheetByGid(sheetGid);
@@ -117,6 +108,8 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetConfigFileSource(): string {
+    const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
+
     this.sheet.gatherFetchProperties();
     this.sheet.uniformRow("header").gatherFetchFull();
     this.ss.fetchAllPrepped();
@@ -133,7 +126,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     const hasIdCol = this.column("Has ID column").data;
 
     const entries: SheetConfigsBase = {};
-    this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
+    this.sheet.dataRowIndexesActive.forEach((rowIndex) => {
       const title = titleCol.dataValue(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
       entries[sheetName] = {

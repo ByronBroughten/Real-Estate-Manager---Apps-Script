@@ -82,7 +82,7 @@ export class ColumnConfigOperator extends SpecificSheetRawBase<HeaderToValueName
     this._fetchColumnIdRowsForSheets(includedSheetGids);
 
     let idsAdded = 0;
-    this.sheetConfig.sheet.activeDataRowIndexes.forEach((rowIndex) => {
+    this.sheetConfig.sheet.dataRowIndexesActive.forEach((rowIndex) => {
       const sheetGid = gidCol.dataValue(rowIndex);
       if (!includedSheetGids.has(sheetGid)) return;
 
@@ -125,7 +125,7 @@ export class ColumnConfigOperator extends SpecificSheetRawBase<HeaderToValueName
     const sheetGidCol = this.column("Sheet GID").data;
 
     let staleCount = 0;
-    this.sheet.activeDataRowIndexes.forEach((rowIndex) => {
+    this.sheet.dataRowIndexesActive.forEach((rowIndex) => {
       const columnId = columnIdCol.dataValue(rowIndex);
       const sheetGid = sheetGidCol.dataValue(rowIndex);
 
@@ -220,7 +220,7 @@ export class ColumnConfigOperator extends SpecificSheetRawBase<HeaderToValueName
     const makeSchemaCol = this.sheetConfig.column("Let api access traits").data;
 
     const includedSheetGids = new Set<number>();
-    this.sheetConfig.sheet.activeDataRowIndexes.forEach((rowIndex) => {
+    this.sheetConfig.sheet.dataRowIndexesActive.forEach((rowIndex) => {
       if (makeSchemaCol.dataValue(rowIndex)) {
         includedSheetGids.add(sheetGidCol.dataValue(rowIndex));
       }

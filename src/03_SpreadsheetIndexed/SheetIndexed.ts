@@ -10,6 +10,10 @@ import { SheetIndexedBase } from "./SheetIndexedBase";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 import { UniformRowIndexed } from "./UniformRowIndexed";
 
+export interface GatherDataPrerequisitesProps {
+  skipFetchingProperties?: boolean;
+}
+
 export class SheetIndexed extends SheetIndexedBase {
   get schema(): SheetSchemaIndexed {
     return new SheetSchemaIndexed(this.sheetGid);
@@ -34,6 +38,9 @@ export class SheetIndexed extends SheetIndexedBase {
   }
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
     return this.raw.uniformRow(rowName);
+  }
+  get dataRowIndexesActive(): number[] {
+    return this.raw.dataRowIndexesActive;
   }
   dataRow(rowIndex: number): DataRowIndexed {
     return new DataRowIndexed({
@@ -72,11 +79,15 @@ export class SheetIndexed extends SheetIndexedBase {
   }
   fetchOnlyColumnIds(): this {
     this.raw.gatherFetchColumnIds();
-    this.raw.ss.fetchAllPrepped();
+    this.raw.ss.fetchAllGathered();
     return this;
   }
-  _gatherDataPrerequisites() {
-    this.raw.gatherFetchProperties();
+  _gatherDataPrerequisites({
+    skipFetchingProperties,
+  }: GatherDataPrerequisitesProps = {}): void {
+    if (!skipFetchingProperties) {
+      this.raw.gatherFetchProperties();
+    }
     this.raw.gatherFetchColumnIds();
   }
   gatherFetchDataPrepped() {
