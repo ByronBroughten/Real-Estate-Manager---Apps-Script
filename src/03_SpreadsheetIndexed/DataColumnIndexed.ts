@@ -22,7 +22,7 @@ export class DataColumnIndexed<
     });
   }
   get fullDataCellIndexes(): number[] {
-    return this.sheet.fullDataRowIndexes;
+    return this.sheet.data.fullDataRowIndexes;
   }
   prepFetchDataFull(): this {
     this.sheetState.idsOfFullDataColsToFetch.add(this.columnId);

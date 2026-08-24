@@ -1,28 +1,19 @@
-import type {
-  ColumnName,
-  ColumnValue,
-  SheetDataValues,
-} from "../01_generatedConfigs/columnConfigsTypes";
+import type { UniformRowName } from "../00_base/base";
+import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import type { UniformRow } from "../02_SpreadsheetRaw/UniformRow";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
-import { Arr } from "../utils/Arr";
-import { Obj } from "../utils/Obj";
-import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
-import { DataColumnNamed } from "./DataColumnNamed";
-import { DataRowNamed } from "./DataRowNamed";
-import type { SheetSchemaNamed } from "./SheetSchemaNamed";
+import { DataSheetNamed } from "./DataSheetNamed";
+import { SheetCommon } from "./SheetCommon";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 export class SheetNamed<
   SN extends SheetName = SheetName,
-> extends SheetNamedBase<SN> {
+> extends SheetCommon<SN> {
   get spreadsheet(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
-  }
-  get schema(): SheetSchemaNamed<SN> {
-    return this.ssSchema.sheet(this.sheetName);
   }
   get raw(): SheetRaw {
     return this.spreadsheet.raw.sheet(this.schema.sheetGid);
@@ -36,14 +27,11 @@ export class SheetNamed<
       sheetGid: this.schema.sheetGid,
     });
   }
-  get dataRowIndexesActive(): number[] {
-    return this.indexed.dataRowIndexesActive;
+  get data(): DataSheetNamed<SN> {
+    return new DataSheetNamed(this.sheetNamedProps);
   }
-  dataRow(rowIndex: number): DataRowNamed<SN> {
-    return new DataRowNamed({
-      ...this.sheetNamedProps,
-      rowIndex,
-    });
+  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
+    return this.indexed.uniformRow(rowName);
   }
   columnByIndex(colIndex: number): ColumnNamed<SN> {
     const columnId = this.indexed.columnIdByIndex(colIndex);
@@ -61,67 +49,5 @@ export class SheetNamed<
       ...this.sheetNamedProps,
       columnName,
     });
-  }
-  columns<CNs extends readonly ColumnName<SN>[]>(
-    ...columnNames: CNs
-  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
-    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
-    columnNames.forEach((columnName) => {
-      columns[columnName] = this.column(columnName);
-    });
-    return columns;
-  }
-  prepFetchColumnsFull<CNs extends readonly ColumnName<SN>[]>(
-    ...columnNames: CNs
-  ): { [K in CNs[number]]: DataColumnNamed<SN, K> } {
-    const columns = {} as { [K in CNs[number]]: DataColumnNamed<SN, K> };
-    columnNames.forEach((columnName) => {
-      columns[columnName] = this.column(columnName).data.prepFetchDataFull();
-    });
-    return columns;
-  }
-  get topDataRow(): DataRowNamed<SN> {
-    return this.dataRow(this.schema.topDataRowIdx);
-  }
-  get dataRows(): DataRowNamed<SN>[] {
-    return this.indexed.dataRows.map((row) => this.dataRow(row.rowIndex));
-  }
-  topDataRowValue<CN extends ColumnName<SN>>(
-    columnName: CN,
-  ): ColumnValue<SN, CN> {
-    return this.topDataRow.value(columnName);
-  }
-  sortRowsbyColumnName(
-    rows: DataRowNamed<SN>[],
-    columnName: ColumnName<SN>,
-  ): DataRowNamed<SN>[] {
-    return rows.sort((a, b) => {
-      return Arr.compareForSort(a.value(columnName), b.value(columnName));
-    });
-  }
-  RESET_TOP_DATA_ROW_DELETE_REST() {
-    if (this.indexed.dataRowCount > 0) {
-      this.topDataRow.updateToDefault(...this.schema.columnNames);
-    }
-    if (this.indexed.dataRowCount > 1) {
-      this.DELETE_DATA_ROWS_AFTER_TOP();
-    }
-  }
-  private DELETE_DATA_ROWS_AFTER_TOP() {
-    this.raw.DELETE_ACTIVE_DATA_ROWS(this.schema.topDataRowIdx + 1);
-  }
-  rowsFiltered(values: Partial<SheetDataValues<SN>>): DataRowNamed<SN>[] {
-    return this.dataRows.filter((row) => {
-      for (const columnName of Obj.keys(values)) {
-        if (row.value(columnName) !== values[columnName]) {
-          return false;
-        }
-      }
-      return true;
-    });
-  }
-  appendRowWithVals(values: Partial<SheetDataValues<SN>>): DataRowNamed<SN> {
-    const { rowIndex } = this.indexed.appendRowDefault();
-    return this.dataRow(rowIndex).updateValues(values);
   }
 }

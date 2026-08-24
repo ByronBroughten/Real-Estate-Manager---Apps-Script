@@ -1,23 +1,19 @@
-import type { CellValue, UniformRowName } from "../00_base/base";
+import type { UniformRowName } from "../00_base/base";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import type { UniformRow } from "../02_SpreadsheetRaw/UniformRow";
-import { Arr } from "../utils/Arr";
 import { isPreFetchType } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
-import { SheetIndexedBase } from "./SheetIndexedBase";
-import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
+import { DataSheetIndexed } from "./DataSheetIndexed";
+import { SheetCommon } from "./SheetCommon";
 import { UniformRowIndexed } from "./UniformRowIndexed";
 
 export interface GatherDataPrerequisitesProps {
   skipFetchingProperties?: boolean;
 }
 
-export class SheetIndexed extends SheetIndexedBase {
-  get schema(): SheetSchemaIndexed {
-    return new SheetSchemaIndexed(this.sheetGid);
-  }
+export class SheetIndexed extends SheetCommon {
   colSchema(columnId: string): ColumnIndexed {
     return this.column(columnId);
   }
@@ -26,6 +22,9 @@ export class SheetIndexed extends SheetIndexedBase {
   }
   get sheetName(): SheetName {
     return this.schema.sheetName;
+  }
+  get data(): DataSheetIndexed {
+    return new DataSheetIndexed(this.sheetIndexedProps);
   }
   column(columnId: string): ColumnIndexed {
     return new ColumnIndexed({
@@ -39,15 +38,6 @@ export class SheetIndexed extends SheetIndexedBase {
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
     return this.raw.uniformRow(rowName);
   }
-  get dataRowIndexesActive(): number[] {
-    return this.raw.dataRowIndexesActive;
-  }
-  dataRow(rowIndex: number): DataRowIndexed {
-    return new DataRowIndexed({
-      ...this.sheetIndexedProps,
-      rowIndex,
-    });
-  }
   uniformRowByIndex(rowIndex: number): UniformRowIndexed {
     return new UniformRowIndexed({
       ...this.sheetIndexedProps,
@@ -59,23 +49,8 @@ export class SheetIndexed extends SheetIndexedBase {
     if (this.schema.isUniformRowIndex(rowIndex)) {
       return this.uniformRowByIndex(rowIndex);
     } else {
-      return this.dataRow(rowIndex);
+      return this.data.row(rowIndex);
     }
-  }
-  get dataRows() {
-    return this.raw.dataRows.map((row) => this.dataRow(row.rowIndex));
-  }
-  get topDataRow(): DataRowIndexed {
-    return this.dataRow(this.schema.topDataRowIdx);
-  }
-  get dataRowCount(): number {
-    return this.raw.dataRowCount;
-  }
-  get fullDataRowIndexes(): number[] {
-    return Arr.indexesFromUntil(
-      this.ssSchema.topDataRowIdx,
-      this.raw.activeTable.endRowIndex,
-    );
   }
   fetchOnlyColumnIds(): this {
     this.raw.gatherFetchColumnIds();
@@ -120,19 +95,5 @@ export class SheetIndexed extends SheetIndexedBase {
       this.column(columnId).data.ensureFullActiveDataCells();
     });
     this.sheetState.idsOfFullDataColsToFetch.clear();
-  }
-  appendRowDefault(): DataRowIndexed {
-    const defaultValues = this.schema.nonFormulaColumnIds.reduce(
-      (acc, columnId) => {
-        const colIndex = this.column(columnId).colIndex;
-        const colSchema = this.schema.column(columnId);
-        const defaultValue = colSchema.makeDefaultDataValue();
-        acc.set(colIndex, defaultValue);
-        return acc;
-      },
-      new Map() as Map<number, CellValue>,
-    );
-    const { rowIndex } = this.raw.appendDataRowValues(defaultValues);
-    return this.dataRow(rowIndex);
   }
 }
