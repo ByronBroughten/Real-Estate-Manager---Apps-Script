@@ -15,6 +15,11 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       ...props,
     });
   }
+  static init(): SheetConfigOperator {
+    return new SheetConfigOperator(
+      SheetConfigOperator.initSpreadsheetNamedProps(),
+    );
+  }
   get sheet(): SheetNamed<"sheetConfig"> {
     return this.ss.sheet(this.sheetName);
   }
@@ -31,14 +36,15 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   }
   fetchAndUpdateAll() {
     this.ss.raw.fetchAllSheetProperties();
-    this.sheet.raw.fetchColumnIds();
     this.sheet.data.prepFetchColumnsFull(
       "sheetGid",
       "sheetTitle",
       "hasIdColumn",
     );
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
-
+    this._updateAll();
+  }
+  private _updateAll() {
     this._deleteStaleSheetConfigs();
     this._appendMissingSheetConfigs();
     this._updateProgrammaticValues();
@@ -85,7 +91,6 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   }
   generateSheetConfigFileSource(): string {
     this.ss.raw.fetchAllSheetProperties();
-    this.sheet.raw.fetchColumnIds();
     const col = this.sheet.data.prepFetchColumnsFull(
       "sheetGid",
       "sheetTitle",
@@ -93,7 +98,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       "idPrefix",
     );
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
-
+    this._updateAll();
     const entries: SheetConfigsBase = {};
     this.sheet.data.dataRowIndexesActive.forEach((rowIndex) => {
       const title = col.sheetTitle.value(rowIndex);

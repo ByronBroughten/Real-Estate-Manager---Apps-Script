@@ -1,109 +1,79 @@
-import {
-  makeStructuredConfig,
-  type CellValue,
-  type CellValueName,
-} from "../00_base/base";
-import { configGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import { SpecificSheetRawBase } from "../02_SpreadsheetRaw/ClassBases/SpecificSheetRawBase";
-import type { SpreadsheetRawProps } from "../02_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
+import { type CellValue } from "../00_base/base";
 import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import { SpecificSheetRaw } from "../02_SpreadsheetRaw/SpecificSheetRaw";
-import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
+import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
+import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
 import { SheetConfigOperator } from "./SheetConfigOperator";
+import type { SheetNamed } from "./SheetNamed";
+import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
-const headerToValueNameAuto = makeStructuredConfig(
-  {} as Record<string, CellValueName>,
-  {
-    "Sheet GID": "number",
-    "Sheet name": "string",
-    "Column ID": "string",
-    "Column name": "string",
-    "Is formula": "boolean",
-    "Value name": "string",
-    "Is api status and run": "boolean",
-  } as const,
-);
-const headerToValueNameUser = makeStructuredConfig(
-  {} as Record<string, CellValueName>,
-  {
-    "Custom default value": "boolean" as CellValueName,
-    "Empty is allowed": "boolean" as CellValueName,
-  } as const,
-);
-const headerToValueName = {
-  ...headerToValueNameAuto,
-  ...headerToValueNameUser,
-} as const;
+// const headerToValueNameAuto = makeStructuredConfig(
+//   {} as Record<string, CellValueName>,
+//   {
+//     "Sheet GID": "number",
+//     "Sheet name": "string",
+//     "Column ID": "string",
+//     "Column name": "string",
+//     "Is formula": "boolean",
+//     "Value name": "string",
+//     "Is api status and run": "boolean",
+//   } as const,
+// );
 
-type HeaderToValueName = typeof headerToValueName;
-
-export class ColumnConfigOperator extends SpecificSheetRawBase<HeaderToValueName> {
-  constructor({ ...rest }: SpreadsheetRawProps) {
+export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
+  constructor(props: SpreadsheetNamedProps) {
     super({
-      headerToValueName: headerToValueName,
-      sheetGid: configGet("columnConfigGid"),
-      ...rest,
+      sheetName: "columnConfig",
+      ...props,
     });
   }
   static init() {
     return new ColumnConfigOperator(
-      ColumnConfigOperator.initSpreadsheetRawProps(),
+      ColumnConfigOperator.initSpreadsheetNamedProps(),
     );
   }
-  get ss(): SpreadsheetRaw {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
+  get ss(): SpreadsheetNamed {
+    return new SpreadsheetNamed(this.spreadsheetNamedProps);
+  }
+  get sheet(): SheetNamed<"columnConfig"> {
+    return this.ss.sheet(this.sheetName);
   }
   get sheetConfig(): SheetConfigOperator {
-    return new SheetConfigOperator(this.spreadsheetRawProps);
+    return new SheetConfigOperator(this.spreadsheetNamedProps);
   }
   get schema(): SchemaBase {
     return new SchemaBase();
   }
-  get sSheet(): SpecificSheetRaw<HeaderToValueName> {
-    return new SpecificSheetRaw<HeaderToValueName>({
-      headerToValueName: this.headerToValueName,
-      ...this.sheetRawProps,
-    });
-  }
   addMissingColumnIds(): void {
-    this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
-    this.ss.fetchAllPrepped();
-    this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
-      "Sheet GID",
-      "Let api access traits",
-      "ID prefix",
+    this.ss.raw.fetchAllSheetProperties();
+    const col = this.sheetConfig.sheet.data.prepFetchColumnsFull(
+      "sheetGid",
+      "letApiAccess",
+      "idPrefix",
     );
     this.ss.fetchAllPrepped();
 
-    const gidCol = this.sheetConfig.column("Sheet GID").data;
-    const idPrefixCol = this.sheetConfig.column("ID prefix").data;
     const includedSheetGids = this._includedSheetGids();
     this._fetchColumnIdRowsForSheets(includedSheetGids);
 
     let idsAdded = 0;
     this.sheetConfig.sheet.dataRowIndexesActive.forEach((rowIndex) => {
-      const sheetGid = gidCol.dataValue(rowIndex);
-      if (!includedSheetGids.has(sheetGid)) return;
-
-      const idPrefix = idPrefixCol.dataValue(rowIndex);
-      if (typeof idPrefix !== "string" || !idPrefix) {
-        throw new Error(
-          `SheetConfigOperator: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
-        );
+      const sheetGid = col.sheetGid.value(rowIndex);
+      if (sheetGid !== "" && !includedSheetGids.has(sheetGid)) {
+        const idPrefix = col.idPrefix.value(rowIndex);
+        if (idPrefix === "") {
+          throw new Error(
+            `SheetConfigOperator: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
+          );
+        }
+        const sheet = this.ss.indexed.sheet(sheetGid);
+        idsAdded += sheet.addMissingColumnIds(idPrefix);
       }
-      const sheet = this.ss.sheet(sheetGid);
-      idsAdded += sheet.addMissingColumnIds(idPrefix);
     });
     Logger.log(
       `ensureColumnIds: prepared to add ${idsAdded} missing column ID(s)`,
     );
   }
-  // Queues deletion of stale column-trait rows into changesToSave without
-  // sending a batchUpdate, so it can be chained with other gathering methods
-  // before a single shared flush (e.g. via ss.batchUpdateGSheets()). A row is
-  // stale if its Column ID no longer exists on its sheet, or its Sheet GID
-  // isn't marked "Make schema for API" = true in SheetConfigOperator.
   pruneColTraits(): ColumnConfigOperator {
     this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
     this.sSheet.gatherFetchPrerequisitesForRawColumns();

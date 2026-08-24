@@ -252,11 +252,6 @@ export class SheetRaw extends SheetCommonRaw {
     this.uniformRow("columnId").gatherFetchFull();
     return this;
   }
-  fetchColumnIds(): SheetRaw {
-    this.gatherFetchColumnIds();
-    this.ss.fetchAllGathered();
-    return this;
-  }
   gatherFetchProperties(): SheetRaw {
     // getByDataFilter only returns a sheet's `tables` metadata for filters whose
     // gridRange overlaps the table. The table always starts at the header row,

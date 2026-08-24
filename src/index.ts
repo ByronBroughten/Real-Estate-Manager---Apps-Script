@@ -43,9 +43,7 @@ function _tests() {
 }
 
 function generateSheetConfigFile(): string {
-  const sheetConfigNamed = new SheetConfigOperator(
-    SheetConfigOperator.initSpreadsheetNamedProps(),
-  );
+  const sheetConfigNamed = SheetConfigOperator.init();
   return sheetConfigNamed.generateSheetConfigFileSource();
 }
 
