@@ -47,6 +47,10 @@ function generateSheetConfigFile(): string {
   return sheetConfigNamed.generateSheetConfigFileSource();
 }
 
+function triggerAuth(): void {
+  return;
+}
+
 function triggerFirstOfMonth() {
   // Placeholder
 }

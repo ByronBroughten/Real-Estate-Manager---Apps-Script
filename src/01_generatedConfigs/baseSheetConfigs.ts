@@ -1,5 +1,4 @@
-import { msc } from "./sheetConfigBuilder";
-import { makeSheetConfigs } from "./sheetConfigs";
+import { makeSheetConfigs, msc } from "./sheetConfigBuilder";
 
 export const baseSheetConfigs = makeSheetConfigs({
   spreadsheetConfig: msc(1967106628, "vrb"),

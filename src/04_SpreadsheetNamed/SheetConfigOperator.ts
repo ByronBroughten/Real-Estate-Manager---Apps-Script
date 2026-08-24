@@ -1,4 +1,3 @@
-import { baseSheetConfigs } from "../01_generatedConfigs/baseSheetConfigs";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { type SheetConfigsBase } from "../01_generatedConfigs/sheetConfigBuilder";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
@@ -110,7 +109,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       };
     });
     const sheetConfigsData: SheetConfigsBase = {
-      ...baseSheetConfigs,
+      // ...baseSheetConfigs,
       ...entries,
     };
     return [
