@@ -1,24 +1,23 @@
 import type { CellValue, CellValueName } from "../../00_base/base";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
-import { ColumnCommon } from "./ColumnCommon";
+import { ColumnCommonRaw } from "./ColumnCommonRaw";
 
 export class DataColumnRaw<
   VN extends CellValueName = CellValueName,
-  VL extends CellValue<VN> = CellValue<VN>,
-> extends ColumnCommon<VN> {
+> extends ColumnCommonRaw<VN> {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  get valueArr(): VL[] {
-    return this.sheet.dataRowIndexesActive.map((rowIdx) =>
-      this.dataValue(rowIdx),
+  get valueArr(): CellValue<VN>[] {
+    return this.sheet.dataRowIndexesActive.map((rowIndex) =>
+      this.value(rowIndex),
     );
   }
-  dataValue(rowIdx: number): VL {
-    return this.sheet.row(rowIdx).value(this.colIndex, this.valueName) as VL;
+  value(rowIndex: number): CellValue<VN> {
+    return this.cell(rowIndex).value();
   }
-  updateDataCell(rowIdx: number, newValue: VL): this {
-    this.sheet.dataRow(rowIdx).updateValue(this.colIndex, newValue);
+  updateValue(rowIndex: number, newValue: CellValue<VN>): this {
+    this.cell(rowIndex).updateValue(newValue);
     return this;
   }
   gatherFetchAll(): this {

@@ -36,8 +36,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return sheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
   rowBySheetRowId(sheetRowId: string): SheetRawRow {
-    const { sheetGid, rowIdx } = this.schema.idsFromSheetRowId(sheetRowId);
-    return this.sheet(sheetGid).row(rowIdx);
+    const { sheetGid, rowIndex } = this.schema.idsFromSheetRowId(sheetRowId);
+    return this.sheet(sheetGid).row(rowIndex);
   }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.rawState.allSheetPropertiesAreFetched) {

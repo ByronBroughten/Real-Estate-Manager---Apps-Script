@@ -29,7 +29,7 @@ export class ColumnNamed<
   get data(): DataColumnNamed<SN, CN> {
     return new DataColumnNamed(this.columnNamedProps);
   }
-  gatherFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
+  prepFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
     const rowIndex = this.sheet.schema.uniformRowIndex(rowName);
     this.indexed.data.cell(rowIndex).prepFetch();
     return this;

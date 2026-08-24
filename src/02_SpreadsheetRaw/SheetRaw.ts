@@ -98,9 +98,9 @@ export class SheetRaw extends SheetRawBase {
   get colIdRow(): UniformRow<"columnId"> {
     return this.uniformRow("columnId");
   }
-  dataRowRaw(rowIdx: number): DataRowRaw {
+  dataRowRaw(rowIndex: number): DataRowRaw {
     return new DataRowRaw({
-      rowIndex: rowIdx,
+      rowIndex: rowIndex,
       ...this.sheetRawProps,
     });
   }
@@ -114,11 +114,11 @@ export class SheetRaw extends SheetRawBase {
   uniformRowByIndex(rowIndex: number): UniformRow {
     return this.uniformRow(this.schema.uniformRowNameByIndex(rowIndex));
   }
-  row(rowIdx: number): DataRowRaw | UniformRow {
-    if (this.schema.isUniformRowIndex(rowIdx)) {
-      return this.uniformRowByIndex(rowIdx);
+  row(rowIndex: number): DataRowRaw | UniformRow {
+    if (this.schema.isUniformRowIndex(rowIndex)) {
+      return this.uniformRowByIndex(rowIndex);
     } else {
-      return this.dataRowRaw(rowIdx);
+      return this.dataRowRaw(rowIndex);
     }
   }
   column<VN extends CellValueName = CellValueName>(
@@ -169,12 +169,12 @@ export class SheetRaw extends SheetRawBase {
       (colData.rowData || []).forEach((colCell, rowIdxBase) => {
         columns.forEach((_, colIdxOffset) => {
           const colIndex = colIdxBase + colIdxOffset;
-          const rowIdx = rowIdxBase + (colData.startRow ?? 0);
+          const rowIndex = rowIdxBase + (colData.startRow ?? 0);
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
-          this.row(rowIdx).cell(colIndex).integrateGState(cellData);
+          this.row(rowIndex).cell(colIndex).integrateGState(cellData);
         });
       });
     });
@@ -249,19 +249,20 @@ export class SheetRaw extends SheetRawBase {
     this.rowStates
       .entries()
       .filter(
-        ([rowIdx]) => rowIdx >= startRowIdx && rowIdx < startRowIdx + numRows,
+        ([rowIndex]) =>
+          rowIndex >= startRowIdx && rowIndex < startRowIdx + numRows,
       )
-      .forEach(([rowIdx]) => {
-        const row = this.dataRow(rowIdx);
+      .forEach(([rowIndex]) => {
+        const row = this.dataRow(rowIndex);
         row.delete();
       });
     return this;
   }
   removeRowsExcept(...rowIdxesToKeep: number[]): void {
     const allRowIdxs = Array.from(this.rowStates.keys());
-    allRowIdxs.forEach((rowIdx) => {
-      if (!rowIdxesToKeep.includes(rowIdx)) {
-        this.row(rowIdx).remove();
+    allRowIdxs.forEach((rowIndex) => {
+      if (!rowIdxesToKeep.includes(rowIndex)) {
+        this.row(rowIndex).remove();
       }
     });
   }
@@ -308,7 +309,7 @@ export class SheetRaw extends SheetRawBase {
   }
   insertColumnAtEnd(props: { idPrefix: string; header: string }): number {
     const columnIndex = this.activeTable.endColumnIndex;
-    this.column(columnIndex).insert(props);
+    this.column(columnIndex).initUniformCells(props);
     this.addSheetChangeToSave({
       action: "insertColumn",
       startColumnIndex: columnIndex,

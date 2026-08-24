@@ -5,11 +5,11 @@ import {
   type UniformRowName,
   type UniformRowValueName,
 } from "../00_base/base";
+import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
 import {
   configGet,
   type SpreadsheetConfig,
 } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
 
@@ -170,9 +170,12 @@ export class SchemaBase {
     const { idx, ...rest } = this._idsFromSheetIdxId(sheetColumnId);
     return { ...rest, colIndex: idx };
   }
-  idsFromSheetRowId(sheetRowId: string): { sheetGid: number; rowIdx: number } {
+  idsFromSheetRowId(sheetRowId: string): {
+    sheetGid: number;
+    rowIndex: number;
+  } {
     const { idx, ...rest } = this._idsFromSheetIdxId(sheetRowId);
-    return { ...rest, rowIdx: idx };
+    return { ...rest, rowIndex: idx };
   }
   private _idsFromSheetIdxId(sheetRowId: string): {
     sheetGid: number;

@@ -211,7 +211,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
       sheet.column("id").data.prepFetchDataFull();
-      // column.gatherFetchUniformCell("header")
+      // column.prepFetchUniformCell("header")
     });
     this.fetchAllPrepped();
     idSheets.forEach((sheet) => {

@@ -87,7 +87,7 @@ export class CellRaw<
     const value = this.rowState.get(this.colIndex);
     const valueName = this.valueName;
     if (valueName) {
-      const test = this.trait(this.valueName, "strictValidate")(value);
+      const test = this.trait(valueName, "strictValidate")(value);
       return test as CellValue<VN>;
     } else {
       return value as CellValue<VN>;

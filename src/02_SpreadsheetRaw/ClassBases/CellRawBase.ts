@@ -5,15 +5,18 @@ interface CellRawProps<
   VN extends CellValueName = CellValueName,
 > extends ColumnRawProps<VN> {
   rowIndex: number;
+  valueName?: VN;
 }
 
 export class CellRawBase<
   VN extends CellValueName = CellValueName,
 > extends ColumnRawBase<VN> {
   readonly rowIndex: number;
-  constructor({ rowIndex, ...rest }: CellRawProps<VN>) {
+  valueName?: VN;
+  constructor({ rowIndex, valueName, ...rest }: CellRawProps<VN>) {
     super(rest);
     this.rowIndex = rowIndex;
+    this.valueName = valueName;
   }
   get rowState(): RawRowState {
     return this.getRowState(this.rowIndex);
