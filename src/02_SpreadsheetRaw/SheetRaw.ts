@@ -1,12 +1,10 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
-import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
 import { valS } from "../utils/validation";
-import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
-import { SheetRawBase } from "./ClassBases/SheetRawBase";
+import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnRaw } from "./ColumnRaw";
-import { SchemaBase } from "./SchemaBase";
+import { DataSheetRaw } from "./DataSheetRaw";
 
 import type {
   GoogleCellValue,
@@ -25,12 +23,12 @@ import { UniformRow } from "./UniformRow";
 
 export type SheetRawRow = DataRowRaw | UniformRow;
 
-export class SheetRaw extends SheetRawBase {
+export class SheetRaw extends SheetCommonRaw {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  get schema(): SchemaBase {
-    return new SchemaBase();
+  get data(): DataSheetRaw {
+    return new DataSheetRaw(this.sheetRawProps);
   }
   get rowIndexesAreValid(): boolean {
     return this.sheetState.rowIndexesAreValid;
@@ -58,24 +56,9 @@ export class SheetRaw extends SheetRawBase {
     }
     return this.sheetState.title;
   }
-
   get activeRowIndexes(): number[] {
     const indexes = Array.from(this.sheetState.rowStates.keys());
     return Arr.sortAscending(indexes);
-  }
-  get dataRowIndexesActive(): number[] {
-    return this.activeRowIndexes.filter((rowIndex) =>
-      this.schema.isDataRowIndex(rowIndex),
-    );
-  }
-  get dataRowsFull(): DataRowRaw[] {
-    return this.fullDataRowIndexes.map((rowIndex) => this.dataRow(rowIndex));
-  }
-  get fullDataRowIndexes(): number[] {
-    return Arr.indexesFromUntil(
-      this.schema.topDataRowIdx,
-      this.activeTable.endRowIndex,
-    );
   }
   get fullTableColIndexes(): number[] {
     return Arr.indexesFromUntil(
@@ -85,9 +68,6 @@ export class SheetRaw extends SheetRawBase {
   }
   get rowCount(): number {
     return this.sheetState.rowStates.size;
-  }
-  get dataRowCount(): number {
-    return this.rowCount - this.schema.topDataRowIdx;
   }
   get headerRow(): UniformRow<"header"> {
     return this.uniformRow("header");
@@ -130,16 +110,6 @@ export class SheetRaw extends SheetRawBase {
       valueName,
       ...this.sheetRawProps,
     });
-  }
-  get dataRows(): DataRowRaw[] {
-    return this.dataRowIndexesActive.map((index) => this.dataRow(index));
-  }
-  get topDataRow(): DataRowRaw {
-    return this.row(this.schema.topDataRowIdx) as DataRowRaw;
-  }
-  dataRow(index: number): DataRowRaw {
-    this.schema.validateDataRowIndex(index);
-    return this.row(index) as DataRowRaw;
   }
   get activeRows(): SheetRawRow[] {
     return this.activeRowIndexes.map((rowIndex) => this.row(rowIndex));
@@ -207,17 +177,6 @@ export class SheetRaw extends SheetRawBase {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
   }
-  gatherFetchDataColumnsUsingHeaders<HD extends string>(
-    ...headers: HD[]
-  ): Record<HD, DataColumnRaw> {
-    return headers.reduce(
-      (acc, header) => {
-        acc[header] = this.columnByHeader(header).data.gatherFetchAll();
-        return acc;
-      },
-      {} as Record<HD, DataColumnRaw>,
-    );
-  }
   ensureColumnsOfHeadersExist(idPrefix: string, ...headers: string[]): number {
     const missingHeaders = this.headerRow.returnMissingValues(...headers);
     return missingHeaders.reduce((acc, header) => {
@@ -230,33 +189,6 @@ export class SheetRaw extends SheetRawBase {
   }
   get lastRowIdx(): number {
     return Math.max(...this.rowStates.keys());
-  }
-  appendDataRow(): DataRowRaw {
-    const idx = this.activeTable.endRowIndex;
-    return this.dataRow(idx).append();
-  }
-  appendDataRowValues(colValues: Map<number, Value>): DataRowRaw {
-    const row = this.appendDataRow();
-    for (const [colIndex, value] of colValues.entries()) {
-      row.updateValue(colIndex, value);
-    }
-    return row;
-  }
-  DELETE_ACTIVE_DATA_ROWS(
-    startRowIdx: number,
-    numRows: number = this.rowCount - startRowIdx,
-  ): SheetRaw {
-    this.rowStates
-      .entries()
-      .filter(
-        ([rowIndex]) =>
-          rowIndex >= startRowIdx && rowIndex < startRowIdx + numRows,
-      )
-      .forEach(([rowIndex]) => {
-        const row = this.dataRow(rowIndex);
-        row.delete();
-      });
-    return this;
   }
   removeRowsExcept(...rowIdxesToKeep: number[]): void {
     const allRowIdxs = Array.from(this.rowStates.keys());
@@ -361,18 +293,5 @@ export class SheetRaw extends SheetRawBase {
         sortSpecs: [{ dimensionIndex: colIdxToSortBy, sortOrder }],
       },
     });
-  }
-  copyAndDeleteLastActiveDataRow() {
-    // I'd want to insert rather than append.
-    // Can I append at the not last row? Probably not.
-    // Is there a way for me to verify that rows or values are fetched?
-    const lastRowIdx = this.lastRowIdx;
-    const lastRow = this.dataRow(lastRowIdx);
-    const newRow = this.appendDataRow();
-    this.fullTableColIndexes.forEach((colIndex) => {
-      const value = lastRow.value(colIndex);
-      newRow.updateValue(colIndex, value);
-    });
-    lastRow.delete();
   }
 }

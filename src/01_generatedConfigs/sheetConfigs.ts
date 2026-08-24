@@ -1,10 +1,4 @@
-import { msc, type SheetConfigsBase } from "./sheetConfigBuilder";
-
-export function makeSheetConfigs<T extends SheetConfigsBase>(
-  sheetConfigs: T,
-): T {
-  return sheetConfigs;
-}
+import { makeSheetConfigs, msc } from "./sheetConfigBuilder";
 
 export const sheetConfigs = makeSheetConfigs({
   spreadsheetConfig: msc(1967106628, "vrb"),

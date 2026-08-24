@@ -21,9 +21,7 @@ import {
 
 export class SpreadsheetNamed extends SpreadsheetNamedBase {
   static init(): SpreadsheetNamed {
-    return new SpreadsheetNamed(
-      SpreadsheetNamedBase.initSpreadsheetNamedProps(),
-    );
+    return new SpreadsheetNamed(SpreadsheetNamed.initSpreadsheetNamedProps());
   }
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);

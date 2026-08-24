@@ -1,5 +1,5 @@
 import type { CellValue } from "../00_base/base";
-import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import { DataSheetRaw } from "../02_SpreadsheetRaw/DataSheetRaw";
 import { Arr } from "../utils/Arr";
 import { DataColumnIndexed } from "./DataColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
@@ -10,8 +10,8 @@ export class DataSheetIndexed extends SheetCommon {
   get sheet(): SheetIndexed {
     return new SheetIndexed(this.sheetIndexedProps);
   }
-  get raw(): SheetRaw {
-    return new SheetRaw(this.sheetIndexedProps);
+  get raw(): DataSheetRaw {
+    return new DataSheetRaw(this.sheetIndexedProps);
   }
   column(columnId: string): DataColumnIndexed {
     return new DataColumnIndexed({
@@ -29,7 +29,7 @@ export class DataSheetIndexed extends SheetCommon {
     });
   }
   get rows(): DataRowIndexed[] {
-    return this.raw.dataRows.map((row) => this.row(row.rowIndex));
+    return this.raw.rows.map((row) => this.row(row.rowIndex));
   }
   get topRow(): DataRowIndexed {
     return this.row(this.schema.topDataRowIdx);

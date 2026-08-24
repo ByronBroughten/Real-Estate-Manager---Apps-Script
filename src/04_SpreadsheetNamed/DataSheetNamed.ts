@@ -4,7 +4,7 @@ import type {
   SheetDataValues,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import type { DataSheetRaw } from "../02_SpreadsheetRaw/DataSheetRaw";
 import { DataSheetIndexed } from "../03_SpreadsheetIndexed/DataSheetIndexed";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
@@ -19,8 +19,8 @@ export class DataSheetNamed<
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
-  get raw(): SheetRaw {
-    return this.sheet.raw;
+  get raw(): DataSheetRaw {
+    return this.indexed.raw;
   }
   get indexed(): DataSheetIndexed {
     return new DataSheetIndexed({

@@ -1,6 +1,6 @@
+import { SheetConfigOperator } from "./04_SpreadsheetNamed/SheetConfigOperator.js";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { Api } from "./06_API/Api.js";
-
 import { businessEndpoints } from "./businessEndpoints.js";
 
 const testSheetId = 2089200354;
@@ -42,12 +42,12 @@ function _tests() {
   ss.batchUpdateGSheets();
 }
 
-// function generateSheetConfigFile(): string {
-//   const sheetConfigNamed = new SheetConfigOperator(
-//     SheetConfigOperator.initSpreadsheetRawProps(),
-//   );
-//   return sheetConfigNamed.generateSheetConfigFileSource();
-// }
+function generateSheetConfigFile(): string {
+  const sheetConfigNamed = new SheetConfigOperator(
+    SheetConfigOperator.initSpreadsheetNamedProps(),
+  );
+  return sheetConfigNamed.generateSheetConfigFileSource();
+}
 
 function triggerFirstOfMonth() {
   // Placeholder

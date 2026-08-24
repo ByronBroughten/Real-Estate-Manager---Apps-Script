@@ -27,3 +27,9 @@ export function makeSheetConfig<H extends boolean = false>(
 export const msc = makeSheetConfig;
 
 export type SheetConfigsBase = Record<string, SheetConfigStored>;
+
+export function makeSheetConfigs<T extends SheetConfigsBase>(
+  sheetConfigs: T,
+): T {
+  return sheetConfigs;
+}

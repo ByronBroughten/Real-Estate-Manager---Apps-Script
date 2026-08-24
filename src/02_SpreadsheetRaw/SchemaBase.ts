@@ -100,13 +100,6 @@ export class SchemaBase {
   isDataRowIndex(rowIndex: number): boolean {
     return rowIndex >= this.topDataRowIdx;
   }
-  validateDataRowIndex(rowIndex: number): void {
-    if (!this.isDataRowIndex(rowIndex)) {
-      throw new Error(
-        `Row index ${rowIndex} is not a data row. Data rows start at index ${this.topDataRowIdx}.`,
-      );
-    }
-  }
   get startTableColIndex(): number {
     return this.config("startTableColIndex");
   }

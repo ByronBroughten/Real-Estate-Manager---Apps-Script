@@ -90,7 +90,7 @@ export class SheetIndexed extends SheetCommon {
     this.sheetState.indexesOfFullRowsToFetch.clear();
   }
   private _finalizeFetchedFullDataColumns(): void {
-    this.raw.dataRowsFull.forEach((row) => row.ensureStateExists());
+    this.raw.data.dataRowsFull.forEach((row) => row.ensureStateExists());
     this.sheetState.idsOfFullDataColsToFetch.forEach((columnId) => {
       this.column(columnId).data.ensureFullActiveDataCells();
     });
