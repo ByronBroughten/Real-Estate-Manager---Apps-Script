@@ -2,13 +2,13 @@ import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import { CellIndexed } from "./CellIndexed";
-import { ColumnCommon } from "./ColumnCommon";
+import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { DataColumnIndexed } from "./DataColumnIndexed";
 
 export class ColumnIndexed<
   VN extends ValueName = ValueName,
-> extends ColumnCommon<VN> {
+> extends ColumnCommonIndexed<VN> {
   get schema(): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed(this.columnIndexedProps);
   }

@@ -6,12 +6,12 @@ import type {
 import { DataColumnRaw } from "../02_SpreadsheetRaw/ClassBases/DataColumnRaw";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
-import { ColumnCommon } from "./ColumnCommon";
+import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 
 export class DataColumnIndexed<
   VN extends ValueName = ValueName,
-> extends ColumnCommon<VN> {
+> extends ColumnCommonIndexed<VN> {
   get column(): ColumnIndexed<VN> {
     return new ColumnIndexed(this.columnIndexedProps);
   }

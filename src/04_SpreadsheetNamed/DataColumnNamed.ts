@@ -6,13 +6,13 @@ import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { DataColumnIndexed } from "../03_SpreadsheetIndexed/DataColumnIndexed";
 import type { StrictExclude } from "../utils/Arr";
 import { CellNamed } from "./CellNamed";
-import { ColumnCommon } from "./ColumnCommon";
+import { ColumnCommonNamed } from "./ColumnCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 
 export class DataColumnNamed<
   SN extends SheetName,
   CN extends ColumnName<SN> = ColumnName<SN>,
-> extends ColumnCommon<SN, CN> {
+> extends ColumnCommonNamed<SN, CN> {
   get column(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
   }

@@ -5,13 +5,13 @@ import type {
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
-import { ColumnCommon } from "./ColumnCommon";
+import { ColumnCommonNamed } from "./ColumnCommonNamed";
 import { DataColumnNamed } from "./DataColumnNamed";
 
 export class ColumnNamed<
   SN extends SheetName,
   CN extends ColumnName<SN> = ColumnName<SN>,
-> extends ColumnCommon<SN, CN> {
+> extends ColumnCommonNamed<SN, CN> {
   get raw() {
     return this.sheet.raw.column(this.indexed.colIndex);
   }

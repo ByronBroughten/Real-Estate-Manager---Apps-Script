@@ -2,7 +2,7 @@ import type { ValueName } from "../01_generatedConfigs/valueSchemas";
 import { ColumnIndexedBase } from "./ColumnIndexedBase";
 import { SheetIndexed } from "./SheetIndexed";
 
-export abstract class ColumnCommon<
+export abstract class ColumnCommonIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnIndexedBase<VN> {
   get sheet(): SheetIndexed {
