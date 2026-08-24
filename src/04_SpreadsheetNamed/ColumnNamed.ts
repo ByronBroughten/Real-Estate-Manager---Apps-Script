@@ -1,9 +1,10 @@
-import type { UniformRowName } from "../00_base/base";
+import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type {
   ColumnFullName,
   ColumnName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { ColumnCommon } from "./ColumnCommon";
 import { DataColumnNamed } from "./DataColumnNamed";
 
@@ -29,13 +30,18 @@ export class ColumnNamed<
   get data(): DataColumnNamed<SN, CN> {
     return new DataColumnNamed(this.columnNamedProps);
   }
+  uniformCell<UN extends UniformRowName>(
+    rowName: UN,
+  ): CellIndexed<UniformRowValueName<UN>> {
+    // intentionally not cell named, because named cells only work for data
+    return this.indexed.uniformCell(rowName);
+  }
   prepFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
-    const rowIndex = this.sheet.schema.uniformRowIndex(rowName);
-    this.indexed.data.cell(rowIndex).prepFetch();
+    this.uniformCell(rowName).prepFetch();
     return this;
   }
   actionRowToDefault(): ColumnNamed<SN, CN> {
-    this.sheet.indexed.uniformRow("action").updateValue(this.colIndex, false);
+    this.uniformCell("action").updateValue(false);
     return this;
   }
 }

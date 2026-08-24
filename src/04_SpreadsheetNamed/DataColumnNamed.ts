@@ -43,8 +43,8 @@ export class DataColumnNamed<
       rowIndex,
     });
   }
-  prepFetchDataFull(): this {
-    this.indexed.prepFetchDataFull();
+  prepFetchFull(): this {
+    this.indexed.prepFetchFull();
     return this;
   }
   cellsToDefault(): this {

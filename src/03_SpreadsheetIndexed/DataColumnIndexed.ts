@@ -21,16 +21,16 @@ export class DataColumnIndexed<
       colIndex: this.colIndex,
     });
   }
-  get fullDataCellIndexes(): number[] {
+  get activeCellIndexes(): number[] {
+    return this.raw.sheet.dataRowIndexesActive;
+  }
+  get fullCellIndexes(): number[] {
     return this.sheet.data.fullDataRowIndexes;
   }
-  prepFetchDataFull(): this {
+  prepFetchFull(): this {
     this.sheetState.idsOfFullDataColsToFetch.add(this.columnId);
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
     return this;
-  }
-  get activeDataCellIndexes(): number[] {
-    return this.raw.sheet.dataRowIndexesActive;
   }
   get valueArr(): Value<VN>[] {
     return this.raw.valueArr as Value<VN>[];
@@ -51,7 +51,7 @@ export class DataColumnIndexed<
     });
   }
   get activeDataCells(): CellIndexed<VN>[] {
-    return this.activeDataCellIndexes.map((rowIndex) => this.cell(rowIndex));
+    return this.activeCellIndexes.map((rowIndex) => this.cell(rowIndex));
   }
   cellsToDefault() {
     this.activeDataCells.forEach((cell) => {
@@ -59,12 +59,12 @@ export class DataColumnIndexed<
     });
   }
   ensureFullActiveDataCells() {
-    this.fullDataCellIndexes.forEach((rowIndex) => {
+    this.fullCellIndexes.forEach((rowIndex) => {
       this.cell(rowIndex).raw.ensureActive();
     });
   }
   emptyDataCellsToDefault() {
-    this.activeDataCellIndexes.forEach((rowIndex) => {
+    this.activeCellIndexes.forEach((rowIndex) => {
       const cell = this.cell(rowIndex);
       if (cell.raw.isEmpty) {
         cell.updateToDefault();

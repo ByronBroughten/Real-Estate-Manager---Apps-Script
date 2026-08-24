@@ -1,5 +1,7 @@
+import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
+import { CellIndexed } from "./CellIndexed";
 import { ColumnCommon } from "./ColumnCommon";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { DataColumnIndexed } from "./DataColumnIndexed";
@@ -18,5 +20,16 @@ export class ColumnIndexed<
   }
   get data(): DataColumnIndexed<VN> {
     return new DataColumnIndexed(this.columnIndexedProps);
+  }
+  uniformCell<UN extends UniformRowName>(
+    rowName: UN,
+  ): CellIndexed<UniformRowValueName<UN>> {
+    const rowIndex = this.schema.uniformRowIndex(rowName);
+    const valueName = this.schema.uniformValueName(rowName);
+    return new CellIndexed<UniformRowValueName<UN>>({
+      ...this.columnIndexedProps,
+      rowIndex,
+      valueName,
+    });
   }
 }

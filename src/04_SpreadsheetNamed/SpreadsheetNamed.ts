@@ -155,7 +155,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     switch (rowSpecifier) {
       case "activeRows":
       case "data":
-        column.prepFetchDataFull();
+        column.prepFetchFull();
         break;
       case "topDatum":
         column.cell(schema.topDataRowIdx).prepFetch();
@@ -173,7 +173,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
         column.cell(schema.headerRowIndex).prepFetch();
         column.cell(schema.actionRowIndex).prepFetch();
         column.cell(schema.colIdRowIndex).prepFetch();
-        column.prepFetchDataFull();
+        column.prepFetchFull();
         break;
       default:
         throw new Error(
@@ -210,7 +210,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       }
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
     idSheets.forEach((sheet) => {
-      sheet.column("id").data.prepFetchDataFull();
+      sheet.column("id").data.prepFetchFull();
       // column.prepFetchUniformCell("header")
     });
     this.fetchAllPrepped();

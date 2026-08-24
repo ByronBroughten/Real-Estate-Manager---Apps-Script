@@ -66,7 +66,7 @@ export class DataSheetNamed<
   ): { [K in CNs[number]]: DataColumnNamed<SN, K> } {
     const columns = {} as { [K in CNs[number]]: DataColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
-      columns[columnName] = this.column(columnName).prepFetchDataFull();
+      columns[columnName] = this.column(columnName).prepFetchFull();
     });
     return columns;
   }
