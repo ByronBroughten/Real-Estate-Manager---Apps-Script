@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
@@ -8,14 +8,27 @@ const OUTPUT_PATH = fileURLToPath(
 const FUNCTION_NAME = "generateSheetConfigFile";
 
 function runClaspFunction() {
-  const stdout = execFileSync(
+  const { stdout, stderr, status, error } = spawnSync(
     "npx",
     ["clasp", "run", "--json", FUNCTION_NAME],
     { encoding: "utf8" },
   );
-  const { response, error } = JSON.parse(stdout);
   if (error) {
-    throw new Error(`clasp run failed: ${JSON.stringify(error)}`);
+    throw error;
+  }
+  if (status !== 0) {
+    throw new Error(
+      `clasp run exited with status ${status}.${stderr.trim() ? ` stderr: ${stderr.trim()}` : ""}`,
+    );
+  }
+  if (!stdout.trim()) {
+    throw new Error(
+      `clasp run produced no output on stdout.${stderr.trim() ? ` stderr: ${stderr.trim()}` : ""}`,
+    );
+  }
+  const { response, error: claspError } = JSON.parse(stdout);
+  if (claspError) {
+    throw new Error(`clasp run failed: ${JSON.stringify(claspError)}`);
   }
   if (typeof response !== "string") {
     throw new Error(

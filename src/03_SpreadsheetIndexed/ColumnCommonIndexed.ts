@@ -1,14 +1,13 @@
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
+import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { ColumnIndexedBase } from "./ColumnIndexedBase";
-import { SheetIndexed } from "./SheetIndexed";
 
 export abstract class ColumnCommonIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnIndexedBase<VN> {
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
-  }
   get colIndex() {
-    return this.sheet.raw.uniformRow("columnId").colIndexOfValue(this.columnId);
+    return new SheetRaw(this.sheetIndexedProps)
+      .uniformRow("columnId")
+      .colIndexOfValue(this.columnId);
   }
 }

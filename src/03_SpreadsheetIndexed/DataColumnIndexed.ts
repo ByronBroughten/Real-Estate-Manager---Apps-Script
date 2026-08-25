@@ -8,10 +8,14 @@ import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
+import { SheetIndexed } from "./SheetIndexed";
 
 export class DataColumnIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnCommonIndexed<VN> {
+  get sheet(): SheetIndexed {
+    return new SheetIndexed(this.sheetIndexedProps);
+  }
   get column(): ColumnIndexed<VN> {
     return new ColumnIndexed(this.columnIndexedProps);
   }
