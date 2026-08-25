@@ -16,7 +16,6 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   constructor(props: SheetIndexedProps) {
     super(props);
     this.sheetGid = props.sheetGid;
-    this.baseSchema.validateSheetGid(this.sheetGid);
     this._ensureSheetState();
   }
   get sheetIndexedProps(): SheetIndexedProps {

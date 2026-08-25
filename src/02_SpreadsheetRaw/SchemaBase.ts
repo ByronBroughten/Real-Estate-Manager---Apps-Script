@@ -46,15 +46,6 @@ export class SchemaBase {
   isInSheetGids(sheetGid: number): boolean {
     return configSheetGids.includes(sheetGid);
   }
-  validateSheetGid(sheetGid: number): void {
-    if (!this.isInSheetGids(sheetGid)) {
-      throw new Error(
-        `Invalid sheetGid: ${sheetGid}. Must be one of: ${configSheetGids.join(
-          ", ",
-        )}`,
-      );
-    }
-  }
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);
   }
