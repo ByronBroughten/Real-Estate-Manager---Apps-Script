@@ -89,6 +89,8 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
   generateSheetConfigFileSource(): string {
+    this.fetchAndUpdateAll();
+
     this.ss.raw.fetchAllSheetProperties();
     const col = this.sheet.data.prepFetchColumnsFull(
       "sheetGid",
