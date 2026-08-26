@@ -61,7 +61,12 @@ export class SheetIndexed extends SheetCommon {
     if (!skipFetchingProperties) {
       this.raw.gatherFetchProperties();
     }
-    this.raw.gatherFetchColumnIds();
+    // Skip if a prior prepFetchFull() on the columnId row already covers this identical fetch.
+    if (
+      !this.sheetState.indexesOfFullRowsToFetch.has(this.baseSchema.colIdRowIndex)
+    ) {
+      this.raw.gatherFetchColumnIds();
+    }
   }
   gatherFetchDataPrepped() {
     this.preFetchGridRanges.forEach((pf) => {

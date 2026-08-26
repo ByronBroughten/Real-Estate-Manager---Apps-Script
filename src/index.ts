@@ -3,9 +3,6 @@ import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { Api } from "./06_API/Api.js";
 import { businessEndpoints } from "./businessEndpoints.js";
 
-const testSheetId = 2089200354;
-const testSheetName = "test";
-
 // activeDataColIndexes
 
 // implement the PreGridRange and store them in sheetStates
@@ -28,17 +25,29 @@ const testSheetName = "test";
 // No, I keep this at the named level, but I make a version that builds on it at the raw level in one way (ensuring sheet properties, ensuring headers)
 // - Map<sheegGid, properties get request>, Map<sheetGid, headers get request>, Map<sheetGid, data get request
 
-function _mainTests() {
+function _indexMainTest() {
+  const testSheetId = 2089200354;
+  const testSheetName = "test";
+  type TestName = keyof typeof mainTests;
+  const nameOfTestToRun: TestName = "addRowIds";
   const ss = SpreadsheetNamed.init();
-  // const idColumn = ss.sheet(testSheetName).column("id");
-  // idColumn.gatherFetchAllDataCells();
-  // ss.fetchAllPrepped();
-  // idColumn.emptyDataCellsToDefault();
-  const test = ss.sheet("test");
-  test.uniformRow("columnId").prepFetchFull();
-  ss.fetchAllPrepped();
-  ss.sheet("test").addMissingColumnIds();
-  ss.batchUpdateGSheets();
+  const mainTests = {
+    addRowIds() {
+      const idColumn = ss.sheet("test").column("id").data;
+      idColumn.prepFetchFull();
+      ss.fetchAllPrepped();
+      idColumn.emptyDataCellsToDefault();
+      ss.batchUpdateGSheets();
+    },
+    addColumnIds() {
+      const test = ss.sheet("test");
+      test.uniformRow("columnId").prepFetchFull();
+      ss.fetchAllPrepped();
+      ss.sheet("test").addMissingColumnIds();
+      ss.batchUpdateGSheets();
+    },
+  } as const;
+  mainTests[nameOfTestToRun]();
 }
 
 function generateSheetConfigFile(): string {

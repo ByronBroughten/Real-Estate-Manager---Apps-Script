@@ -151,21 +151,14 @@ export class SheetRaw extends SheetCommonRaw {
     });
   }
   addMissingColumnIds(idPrefix: string): number {
-    Logger.log(
-      `[_tests debug] activeTable=${JSON.stringify(this.sheetState.activeTable)} fullTableColIndexes=${JSON.stringify(this.fullTableColIndexes)}`,
-    );
     let addedCount = 0;
     this.fullTableColIndexes.forEach((colIndex) => {
       const colIdValue = this.colIdRow.value(colIndex);
-      Logger.log(
-        `[_tests debug] colIndex=${colIndex} colIdValue=${JSON.stringify(colIdValue)}`,
-      );
       if (!colIdValue) {
         this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
         addedCount++;
       }
     });
-    Logger.log(`[_tests debug] addedCount=${addedCount}`);
     return addedCount;
   }
   makeColumnId(idPrefix: string): string {

@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "tsc": "tsc",
-    "build": "rollup --config; clasp push",
+    "build": "rollup --config && clasp push",
     "gen:sheet-config": "node scripts/generateSheetConfigFile.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
