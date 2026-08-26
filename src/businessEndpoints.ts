@@ -15,8 +15,6 @@ export const businessEndpoints = makeStructuredConfig(
   {
     spreadsheetControls_appendSheetAndColumnConfigRowsRunAndStatus: () => {
       const columnConfig = ColumnConfigOperator.init();
-      const { sheetConfig } = columnConfig;
-      sheetConfig.fetchAndUpdateAll();
     },
     spreadsheetControls_fillRowIdsRunAndStatus: () => {
       const spreadsheet = SpreadsheetNamed.init();
