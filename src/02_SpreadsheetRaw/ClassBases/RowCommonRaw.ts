@@ -17,10 +17,6 @@ export abstract class RowCommonRaw extends RowRawBase {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  abstract get activeValueArr(): CellValue[];
-  returnMissingValues<V extends CellValue>(...values: V[]): V[] {
-    return values.filter((value) => !this.activeValueArr.includes(value));
-  }
   ensureFullActiveDataCells() {
     this.sheet.fullTableColIndexes.forEach((colIndex) => {
       this.cell(colIndex).ensureActive();
@@ -40,8 +36,12 @@ export abstract class RowCommonRaw extends RowRawBase {
   firstTableCell(): CellRaw {
     return this.cell(this.schema.startTableColIndex);
   }
+  abstract get activeValueArr(): CellValue[];
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
+  }
+  returnMissingValues<V extends CellValue>(...values: V[]): V[] {
+    return values.filter((value) => !this.activeValueArr.includes(value));
   }
   updateValue(colIndex: number, value: CellValue): this {
     this.cell(colIndex).updateValue(value);

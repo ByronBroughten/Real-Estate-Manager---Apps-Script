@@ -1,4 +1,3 @@
-import { type CellValue } from "../00_base/base";
 import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
@@ -49,7 +48,7 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   gatherColumnIdsForSheetGidsApiAccesses() {
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
       const sheet = this.ss.sheetByGid(sheetGid);
-      sheet.uniformRow("columnId").gatherFetchFull();
+      sheet.uniformRow("columnId").raw.gatherFetchFull();
     });
   }
   get ss(): SpreadsheetNamed {
@@ -107,15 +106,16 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this.ss.fetchAllPrepped();
 
     this.addMissingColumnids();
-    this.pruneColTraits();
-    this.appendColumnRows();
+    this._pruneColumnRows();
+    this._appendColumnRows();
+    this._updateProgrammaticValues();
     return this;
   }
   isActiveColumnId(sheetGid: number, columnId: string): boolean {
     const sheet = this.ss.sheetByGid(sheetGid);
     return sheet.uniformRow("columnId").hasValue(columnId);
   }
-  pruneColTraits(): ColumnConfigOperator {
+  _pruneColumnRows(): ColumnConfigOperator {
     const col = this.sheetData.columns("sheetGid", "columnId");
     let staleCount = 0;
     this.sheetData.rowIndexesActive.forEach((rowIndex) => {
@@ -135,37 +135,30 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
     return this;
   }
-  appendColumnRows(): ColumnConfigOperator {
+  _appendColumnRows(): this {
     const col = this.sheetData.columns("sheetGid", "columnId");
     const existingColumnIds = col.columnId.valueArr;
 
     let appendedCount = 0;
-
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
       const sheet = this.ss.sheetByGid(sheetGid);
-      const columnIds = sheet.uniformRow("columnId").activeValueArr;
-      columnIds.forEach((columnId) => {
+      const activeColIds = sheet.uniformRow("columnId").activeValueArr;
+      activeColIds.forEach((columnId) => {
         if (!existingColumnIds.includes(columnId)) {
-      }
-
-    })
-
-    activeColumnIdToSheet.forEach((sheet, columnId) => {
-      if (existingColumnIds.has(columnId)) return;
-      existingColumnIds.add(columnId); // guard against duplicate IDs across sheets
-
-      this.sheet.appendDataRowValues(
-        new Map<number, CellValue>([
-          [columnIdCol.colIndex, columnId],
-          [sheetGidCol.colIndex, sheet.sheetGid],
-          [sheetNameCol.colIndex, this.schema.sheetNameFromTitle(sheet.title)],
-        ]),
-      );
-      appendedCount++;
+          this.sheetData.appendRowWithVals({
+            sheetGid: sheetGid,
+            columnId: columnId,
+          });
+        }
+        appendedCount++;
+      });
     });
     Logger.log(
       `appendColumnRows: queued ${appendedCount} new row(s) for append.`,
     );
     return this;
+  }
+  _updateProgrammaticValues() {
+    // Loop through the existing rows and update the values. You'll need sheet properties and top data rows.
   }
 }

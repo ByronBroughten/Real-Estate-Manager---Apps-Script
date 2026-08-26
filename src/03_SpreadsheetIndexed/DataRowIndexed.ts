@@ -1,9 +1,10 @@
-import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
+import type { CellValue } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
+import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
-import type { RowIndexedProps } from "./RowIndexedBase";
 import { RowCommonIndexed } from "./RowCommonIndexed";
+import type { RowIndexedProps } from "./RowIndexedBase";
 
 export class DataRowIndexed extends RowCommonIndexed {
   constructor(props: RowIndexedProps) {
@@ -12,6 +13,9 @@ export class DataRowIndexed extends RowCommonIndexed {
   }
   get raw(): DataRowRaw {
     return new DataRowRaw(this.rowIndexedProps);
+  }
+  get activeValueArr(): CellValue[] {
+    return this.raw.activeValueArr;
   }
   columnSchema(columnId: string): ColumnSchemaIndexed {
     return new ColumnSchemaIndexed({
