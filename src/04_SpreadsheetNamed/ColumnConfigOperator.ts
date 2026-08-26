@@ -1,7 +1,8 @@
 import { type CellValue } from "../00_base/base";
-import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
+import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
+import type { DataSheetNamed } from "./DataSheetNamed";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import type { SheetNamed } from "./SheetNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
@@ -57,14 +58,17 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   get sheet(): SheetNamed<"columnConfig"> {
     return this.ss.sheet(this.sheetName);
   }
+  get sheetData(): DataSheetNamed<"columnConfig"> {
+    return this.sheet.data;
+  }
   get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
     return new SheetConfigOperator(this.spreadsheetNamedProps).sheet.data;
   }
   get schema(): SchemaBase {
     return new SchemaBase();
   }
-  addMissingColumnIds(): this {
-    const col = this.sheetConfigData.prepFetchColumnsFull(
+  fetchAndAddMissingColumnIds(): this {
+    this.sheetConfigData.prepFetchColumnsFull(
       "sheetGid",
       "letApiAccess", // for initSheetGidsApiAccesses
     );
@@ -72,7 +76,14 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this.initSheetGidsApiAccesses();
     this.gatherColumnIdsForSheetGidsApiAccesses();
     this.ss.fetchAllPrepped();
-
+    this.addMissingColumnids();
+    return this;
+  }
+  addMissingColumnids() {
+    const col = this.sheetConfigData.columns(
+      "sheetGid",
+      "letApiAccess", // for initSheetGidsApiAccesses
+    );
     let idsAdded = 0;
     this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
@@ -86,36 +97,36 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
     return this;
   }
+  fetchAndUpdateColumnConfig() {
+    // for initSheetGidsApiAccesses
+    this.sheetConfigData.prepFetchColumnsFull("sheetGid", "letApiAccess");
+    this.sheetData.prepFetchColumnsFull("sheetGid", "columnId");
+    this.ss.fetchAllPrepped();
+    this.initSheetGidsApiAccesses();
+    this.gatherColumnIdsForSheetGidsApiAccesses();
+    this.ss.fetchAllPrepped();
+
+    this.addMissingColumnids();
+    this.pruneColTraits();
+    this.appendColumnRows();
+    return this;
+  }
+  isActiveColumnId(sheetGid: number, columnId: string): boolean {
+    const sheet = this.ss.sheetByGid(sheetGid);
+    return sheet.uniformRow("columnId").hasValue(columnId);
+  }
   pruneColTraits(): ColumnConfigOperator {
-    this.sheetConfigData.gatherFetchPrerequisitesForRawColumns();
-    this.sheetConfigData.gatherFetchPrerequisitesForRawColumns();
-    this.ss.fetchAllPrepped();
-
-    this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
-      "Sheet GID",
-      "Let api access traits",
-    );
-    this.sSheet.gatherFetchDataColumnsUsingHeaders("Column ID", "Sheet GID");
-    this.ss.fetchAllPrepped();
-
-    const includedSheetGids = this._includedSheetGids();
-    this._fetchColumnIdRowsForSheets(includedSheetGids);
-    const activeColumnIdToSheet =
-      this._existingColumnIdToSheet(includedSheetGids);
-
-    const columnIdCol = this.column("Column ID").data;
-    const sheetGidCol = this.column("Sheet GID").data;
-
+    const col = this.sheetData.columns("sheetGid", "columnId");
     let staleCount = 0;
-    this.sheet.rowIndexesActive.forEach((rowIndex) => {
-      const columnId = columnIdCol.dataValue(rowIndex);
-      const sheetGid = sheetGidCol.dataValue(rowIndex);
+    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+      const columnId = col.columnId.valueNotEmpty(rowIndex);
+      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
 
-      const hasInactiveColumnId = !activeColumnIdToSheet.has(columnId);
-      const belongsToExcludedSheet = !includedSheetGids.has(sheetGid);
-
-      if (hasInactiveColumnId || belongsToExcludedSheet) {
-        this.sheet.dataRow(rowIndex).delete();
+      if (
+        !this.isSheetGidApiAccesses(sheetGid) ||
+        !this.isActiveColumnId(sheetGid, columnId)
+      ) {
+        this.sheetData.row(rowIndex).delete();
         staleCount++;
       }
     });
@@ -124,35 +135,21 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
     return this;
   }
-  // Queues appending a row for every active column that isn't yet
-  // documented in this sheet, into changesToSave without sending a
-  // batchUpdate, so it can be chained the same way pruneColTraits is. Only
-  // columns from sheets marked "Make schema for API" = true in
-  // SheetConfigOperator are considered.
   appendColumnRows(): ColumnConfigOperator {
-    this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
-    this.sSheet.gatherFetchPrerequisitesForRawColumns();
-    this.ss.fetchAllPrepped();
-
-    this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
-      "Sheet GID",
-      "Let api access traits",
-    );
-    this.sSheet.gatherFetchDataColumnsUsingHeaders("Column ID");
-    this.ss.fetchAllPrepped();
-
-    const includedSheetGids = this._includedSheetGids();
-    this._fetchColumnIdRowsForSheets(includedSheetGids);
-    const activeColumnIdToSheet =
-      this._existingColumnIdToSheet(includedSheetGids);
-
-    const existingColumnIds = new Set(this.column("Column ID").data.valueArr);
-
-    const columnIdCol = this.column("Column ID");
-    const sheetGidCol = this.column("Sheet GID");
-    const sheetNameCol = this.column("Sheet name");
+    const col = this.sheetData.columns("sheetGid", "columnId");
+    const existingColumnIds = col.columnId.valueArr;
 
     let appendedCount = 0;
+
+    this.sheetGidsApiAccesses.forEach((sheetGid) => {
+      const sheet = this.ss.sheetByGid(sheetGid);
+      const columnIds = sheet.uniformRow("columnId").activeValueArr;
+      columnIds.forEach((columnId) => {
+        if (!existingColumnIds.includes(columnId)) {
+      }
+
+    })
+
     activeColumnIdToSheet.forEach((sheet, columnId) => {
       if (existingColumnIds.has(columnId)) return;
       existingColumnIds.add(columnId); // guard against duplicate IDs across sheets

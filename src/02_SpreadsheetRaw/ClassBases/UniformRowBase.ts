@@ -1,11 +1,17 @@
-import type { UniformRowName, UniformRowValueName } from "../../00_base/base";
-import { SchemaBase } from "../SchemaBase";
+import type {
+  UniformRowName,
+  UniformRowValue,
+  UniformRowValueName,
+} from "../../00_base/base";
+import type { StrictOmit } from "../../utils/Obj";
+import { getUniformRowIndex } from "../BaseSchema";
 import { RowCommonRaw } from "./RowCommonRaw";
 import type { RowRawProps } from "./RowRawBase";
 
-export interface RowUniformProps<
-  UN extends UniformRowName,
-> extends RowRawProps {
+export interface RowUniformProps<UN extends UniformRowName> extends StrictOmit<
+  RowRawProps,
+  "rowIndex"
+> {
   uniformRowName: UN;
 }
 
@@ -15,18 +21,24 @@ export class UniformRowBase<
 > extends RowCommonRaw {
   readonly uniformRowName: UN;
   constructor({ uniformRowName, ...rest }: RowUniformProps<UN>) {
-    super(rest);
+    super({
+      ...rest,
+      rowIndex: getUniformRowIndex(uniformRowName),
+    });
     this.uniformRowName = uniformRowName;
-    this.validateUniformRowIndex();
-    this.ensureStateExists();
+    this.validateUniformState();
   }
   get valueName(): VN {
     return this.baseSchema.uniformValueName(this.uniformRowName) as VN;
   }
-  get baseSchema(): SchemaBase {
-    return new SchemaBase();
+  get activeValueArr(): UniformRowValue<UN>[] {
+    return [...this.rowState.values()] as UniformRowValue<UN>[];
   }
-  validateUniformRowIndex() {
+  validateUniformState() {
+    this.validateUniformRowIndex();
+    this.ensureStateExists();
+  }
+  private validateUniformRowIndex() {
     this.baseSchema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
 }

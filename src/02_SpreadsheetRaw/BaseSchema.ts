@@ -25,6 +25,9 @@ const uniformRowIndexes = {
   action: configGet("actionRowIndexBase0"),
   header: configGet("headerRowIndexBase0"),
 };
+export function getUniformRowIndex(name: UniformRowName): number {
+  return uniformRowIndexes[name];
+}
 
 const rowIndexToUniformName = new Map(
   Obj.keys(uniformRowIndexes).map((name) => [uniformRowIndexes[name], name]),
@@ -58,7 +61,7 @@ export class SchemaBase {
     return getUniformRowValueName(name);
   }
   uniformRowIndex(name: UniformRowName): number {
-    return uniformRowIndexes[name];
+    return getUniformRowIndex(name);
   }
   uniformRowNameByIndex(rowIndex: number): UniformRowName {
     const uniformRowName = rowIndexToUniformName.get(rowIndex);

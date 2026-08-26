@@ -12,7 +12,7 @@ import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { UniformRowBase } from "./ClassBases/UniformRowBase";
 import { SheetRaw } from "./SheetRaw";
 
-export class UniformRow<
+export class UniformRowRaw<
   UN extends UniformRowName = UniformRowName,
   VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
 > extends UniformRowBase<UN> {
@@ -25,14 +25,14 @@ export class UniformRow<
   ): CellValueTrait<VN, K> {
     return getCellValTrait(valueName, key);
   }
-  uniformCellTrait<K extends ValueSchemaKey>(key: K): CellValueTrait<VN, K> {
+  cellTrait<K extends ValueSchemaKey>(key: K): CellValueTrait<VN, K> {
     return this.trait(this.valueName, key) as CellValueTrait<VN, K>;
   }
-  uniformValue(colIndex: number): UniformRowValue<UN> {
-    return super.value(colIndex, this.valueName) as UniformRowValue<UN>;
+  value(colIndex: number): UniformRowValue<UN> {
+    return this.cell(colIndex, this.valueName).value();
   }
   updateValue(colIndex: number, value: UniformRowValue<UN>): this {
-    this.rowState.set(colIndex, value);
+    this.cell(colIndex).updateValue(value);
     return this;
   }
 }

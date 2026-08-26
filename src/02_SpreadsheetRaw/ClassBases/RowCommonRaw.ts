@@ -1,11 +1,11 @@
 import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
+import { SchemaBase } from "../BaseSchema";
 import type {
   RowChangeProps,
   RowChangesToSave,
   RowChangeUpdateProps,
 } from "../ClassTypes/RawState";
-import { SchemaBase } from "../SchemaBase";
 import { SheetRaw } from "../SheetRaw";
 import { CellRaw } from "./CellRaw";
 import { RowRawBase } from "./RowRawBase";
@@ -16,6 +16,10 @@ export abstract class RowCommonRaw extends RowRawBase {
   }
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
+  }
+  abstract get activeValueArr(): CellValue[];
+  returnMissingValues<V extends CellValue>(...values: V[]): V[] {
+    return values.filter((value) => !this.activeValueArr.includes(value));
   }
   ensureFullActiveDataCells() {
     this.sheet.fullTableColIndexes.forEach((colIndex) => {
@@ -36,12 +40,6 @@ export abstract class RowCommonRaw extends RowRawBase {
   firstTableCell(): CellRaw {
     return this.cell(this.schema.startTableColIndex);
   }
-  value<VN extends CellValueName>(
-    colIndex: number,
-    valueNameAssert?: VN,
-  ): CellValue<VN> {
-    return this.cell(colIndex, valueNameAssert).value();
-  }
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
   }
@@ -49,36 +47,17 @@ export abstract class RowCommonRaw extends RowRawBase {
     this.cell(colIndex).updateValue(value);
     return this;
   }
-  delete(): void {
-    this.remove();
-    this.addRowChangeToSave({ action: "delete" });
-  }
-  append(): this {
-    if (this.rowIsActive()) {
-      throw new Error(
-        `Cannot append row ${this.rowIndex} because it is already active.`,
-      );
-    }
-    this.sheetState.rowStates.set(this.rowIndex, new Map());
-    this.activeTable.endRowIndex++;
-    this.addRowChangeToSave({ action: "append" });
-    return this;
-  }
 
-  get deleteRequest(): GoogleUpdateRequest {
-    return {
-      deleteDimension: {
-        range: {
-          sheetId: this.sheetGid,
-          dimension: "ROWS",
-          startIndex: this.rowIndex,
-          endIndex: this.rowIndex + 1,
-        },
-      },
-    };
-  }
   get sheetRowId(): string {
     return this.schema.makeId(this.sheetGid, this.rowIndex);
+  }
+  gatherFetchFull(): this {
+    this.sheet.gatherFetchRange({
+      startRowIndex: this.rowIndex,
+      endRowIndex: this.rowIndex + 1,
+      startColumnIndex: this.schema.startTableColIndex,
+    });
+    return this;
   }
   get changesToSave(): RowChangesToSave {
     this._ensureChangesToSaveExists();
@@ -111,13 +90,17 @@ export abstract class RowCommonRaw extends RowRawBase {
     actions[props.action](props);
     return this;
   }
-  gatherFetchFull(): this {
-    this.sheet.gatherFetchRange({
-      startRowIndex: this.rowIndex,
-      endRowIndex: this.rowIndex + 1,
-      startColumnIndex: this.schema.startTableColIndex,
-    });
-    return this;
+  get deleteRequest(): GoogleUpdateRequest {
+    return {
+      deleteDimension: {
+        range: {
+          sheetId: this.sheetGid,
+          dimension: "ROWS",
+          startIndex: this.rowIndex,
+          endIndex: this.rowIndex + 1,
+        },
+      },
+    };
   }
   gatherAppendRequest(): void {
     this.updateRequests.append.push({

@@ -3,7 +3,7 @@ import {
   configSheetGids,
   type SheetName,
 } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
+import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
 
 interface SheetTraitCommon {
   idPrefix: string;

@@ -1,5 +1,5 @@
 import type { CellValue } from "../../00_base/base";
-import { SchemaBase } from "../SchemaBase";
+import { SchemaBase } from "../BaseSchema";
 import type { RawRowState } from "../ClassTypes/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
@@ -26,12 +26,6 @@ export class RowRawBase extends SheetRawBase {
   }
   get rowState(): RawRowState {
     return this.getRowState(this.rowIndex);
-  }
-  get activeValueArr(): CellValue[] {
-    return [...this.rowState.values()];
-  }
-  returnMissingValues<V extends CellValue>(...values: V[]): V[] {
-    return values.filter((value) => !this.activeValueArr.includes(value));
   }
   rowIsActive(): boolean {
     return this.sheetState.rowStates.has(this.rowIndex);

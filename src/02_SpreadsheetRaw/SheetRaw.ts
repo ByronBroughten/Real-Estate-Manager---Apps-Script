@@ -19,9 +19,9 @@ import {
   type SortParameters,
 } from "./ClassTypes/RawState";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
-import { UniformRow } from "./UniformRow";
+import { UniformRowRaw } from "./UniformRowRaw";
 
-export type SheetRawRow = DataRowRaw | UniformRow;
+export type SheetRawRow = DataRowRaw | UniformRowRaw;
 
 export class SheetRaw extends SheetCommonRaw {
   get ss(): SpreadsheetRaw {
@@ -69,13 +69,13 @@ export class SheetRaw extends SheetCommonRaw {
   get rowCount(): number {
     return this.sheetState.rowStates.size;
   }
-  get headerRow(): UniformRow<"header"> {
+  get headerRow(): UniformRowRaw<"header"> {
     return this.uniformRow("header");
   }
-  get actionRow(): UniformRow<"action"> {
+  get actionRow(): UniformRowRaw<"action"> {
     return this.uniformRow("action");
   }
-  get colIdRow(): UniformRow<"columnId"> {
+  get colIdRow(): UniformRowRaw<"columnId"> {
     return this.uniformRow("columnId");
   }
   dataRowRaw(rowIndex: number): DataRowRaw {
@@ -84,17 +84,16 @@ export class SheetRaw extends SheetCommonRaw {
       ...this.sheetRawProps,
     });
   }
-  uniformRow<UN extends UniformRowName>(uniformRowName: UN): UniformRow<UN> {
-    return new UniformRow({
+  uniformRow<UN extends UniformRowName>(uniformRowName: UN): UniformRowRaw<UN> {
+    return new UniformRowRaw({
       ...this.sheetRawProps,
-      rowIndex: this.schema.uniformRowIndex(uniformRowName),
       uniformRowName,
     });
   }
-  uniformRowByIndex(rowIndex: number): UniformRow {
+  uniformRowByIndex(rowIndex: number): UniformRowRaw {
     return this.uniformRow(this.schema.uniformRowNameByIndex(rowIndex));
   }
-  row(rowIndex: number): DataRowRaw | UniformRow {
+  row(rowIndex: number): DataRowRaw | UniformRowRaw {
     if (this.schema.isUniformRowIndex(rowIndex)) {
       return this.uniformRowByIndex(rowIndex);
     } else {
@@ -154,7 +153,7 @@ export class SheetRaw extends SheetCommonRaw {
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
     this.fullTableColIndexes.forEach((colIndex) => {
-      const colIdValue = this.colIdRow.uniformValue(colIndex);
+      const colIdValue = this.colIdRow.value(colIndex);
       if (!colIdValue) {
         this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
         addedCount++;
@@ -178,16 +177,6 @@ export class SheetRaw extends SheetCommonRaw {
   ): ColumnRaw<VN> {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
-  }
-  ensureColumnsOfHeadersExist(idPrefix: string, ...headers: string[]): number {
-    const missingHeaders = this.headerRow.returnMissingValues(...headers);
-    return missingHeaders.reduce((acc, header) => {
-      this.insertColumnAtEnd({
-        idPrefix,
-        header,
-      });
-      return acc + 1;
-    }, 0);
   }
   get lastRowIdx(): number {
     return Math.max(...this.rowStates.keys());

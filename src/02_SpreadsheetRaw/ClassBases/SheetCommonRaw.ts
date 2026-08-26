@@ -1,4 +1,4 @@
-import { SchemaBase } from "../SchemaBase";
+import { SchemaBase } from "../BaseSchema";
 import { SheetRawBase } from "./SheetRawBase";
 
 export abstract class SheetCommonRaw extends SheetRawBase {

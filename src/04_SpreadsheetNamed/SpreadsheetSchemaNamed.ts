@@ -4,12 +4,12 @@ import {
   type SheetNameSimple,
 } from "../01_generatedConfigs/sheetConfigsTypes";
 
+import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
 import {
   makeRowRange,
   type RowRange,
 } from "../02_SpreadsheetRaw/ClassTypes/RawState";
-import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
-import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { SpreadsheetSchemaIndexed } from "../03_SpreadsheetIndexed/SpreadsheetSchemaIndexed";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import {

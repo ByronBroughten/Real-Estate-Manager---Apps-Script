@@ -2,8 +2,8 @@ import type { UniformRowName } from "../00_base/base";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import type { UniformRow } from "../02_SpreadsheetRaw/UniformRow";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
+import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";
 import { ColumnNamed } from "./ColumnNamed";
 import { DataSheetNamed } from "./DataSheetNamed";
 import { SheetCommon } from "./SheetCommon";
@@ -30,7 +30,7 @@ export class SheetNamed<
   get data(): DataSheetNamed<SN> {
     return new DataSheetNamed(this.sheetNamedProps);
   }
-  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
+  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIndexed<UN> {
     return this.indexed.uniformRow(rowName);
   }
   columnByIndex(colIndex: number): ColumnNamed<SN> {

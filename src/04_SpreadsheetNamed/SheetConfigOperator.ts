@@ -123,15 +123,4 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       ``,
     ].join("\n");
   }
-  // private _ensureHeaders() {
-  //   const numFixed = this.sheet.ensureColumnsOfHeadersExist(
-  //     idPrefix,
-  //     ...this.headers,
-  //   );
-  //   if (numFixed > 0) {
-  //     Logger.log(
-  //       `Added ${numFixed} missing header(s) to the "Sheet Config" sheet.`,
-  //     );
-  //   }
-  // }
 }

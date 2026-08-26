@@ -1,5 +1,5 @@
 import { AppsScript } from "../../00_base/AppsScript";
-import { SchemaBase } from "../SchemaBase";
+import { SchemaBase } from "../BaseSchema";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   type ChangesToSave,

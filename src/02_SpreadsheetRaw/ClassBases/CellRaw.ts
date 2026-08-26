@@ -8,7 +8,7 @@ import { getCellValTrait } from "../../00_base/baseValueSchemas";
 import type { ValueSchemaKey } from "../../00_base/valueSchema";
 import { valS } from "../../utils/validation";
 import { SheetRaw } from "../SheetRaw";
-import type { UniformRow } from "../UniformRow";
+import type { UniformRowRaw } from "../UniformRowRaw";
 import { CellRawBase } from "./CellRawBase";
 import type { DataRowRaw } from "./DataRowRaw";
 
@@ -24,7 +24,7 @@ export class CellRaw<
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  get row(): DataRowRaw | UniformRow {
+  get row(): DataRowRaw | UniformRowRaw {
     return this.sheet.row(this.rowIndex);
   }
   get gridRange() {

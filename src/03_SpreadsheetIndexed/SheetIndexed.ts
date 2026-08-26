@@ -1,7 +1,6 @@
 import type { UniformRowName } from "../00_base/base";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import type { UniformRow } from "../02_SpreadsheetRaw/UniformRow";
 import { isPreFetchType } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
@@ -33,17 +32,16 @@ export class SheetIndexed extends SheetCommon {
     });
   }
   columnIdByIndex(colIndex: number): string {
-    return this.raw.colIdRow.uniformValue(colIndex);
+    return this.raw.colIdRow.value(colIndex);
   }
-  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRow<UN> {
-    return this.raw.uniformRow(rowName);
-  }
-  uniformRowByIndex(rowIndex: number): UniformRowIndexed {
+  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIndexed<UN> {
     return new UniformRowIndexed({
       ...this.sheetIndexedProps,
-      rowIndex,
-      uniformRowName: this.schema.uniformRowNameByIndex(rowIndex),
+      uniformRowName: rowName,
     });
+  }
+  uniformRowByIndex(rowIndex: number): UniformRowIndexed {
+    return this.uniformRow(this.schema.uniformRowNameByIndex(rowIndex));
   }
   row(rowIndex: number): DataRowIndexed | UniformRowIndexed {
     if (this.schema.isUniformRowIndex(rowIndex)) {
