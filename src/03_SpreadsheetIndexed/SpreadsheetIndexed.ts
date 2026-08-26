@@ -27,7 +27,7 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
     return this.raw.activeSheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
   get sheetsPreppedForFetch() {
-    return this.raw.activeSheetGids
+    return Array.from(this.indexedSheetsState.keys())
       .map((sheetGid) => this.sheet(sheetGid))
       .filter((sheet) => sheet.isPreppedToFetch);
   }
