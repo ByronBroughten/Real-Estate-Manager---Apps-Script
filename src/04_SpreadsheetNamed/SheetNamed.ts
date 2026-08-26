@@ -41,8 +41,8 @@ export class SheetNamed<
       columnName,
     });
   }
-  addMissingColumnIds(): void {
-    this.raw.addMissingColumnIds(this.schema.trait("idPrefix"));
+  addMissingColumnIds(): number {
+    return this.indexed.addMissingColumnIds();
   }
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return new ColumnNamed({

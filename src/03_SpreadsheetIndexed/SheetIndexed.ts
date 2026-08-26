@@ -96,4 +96,7 @@ export class SheetIndexed extends SheetCommon {
     });
     this.sheetState.idsOfFullDataColsToFetch.clear();
   }
+  addMissingColumnIds(): number {
+    return this.raw.addMissingColumnIds(this.schema.idPrefix);
+  }
 }

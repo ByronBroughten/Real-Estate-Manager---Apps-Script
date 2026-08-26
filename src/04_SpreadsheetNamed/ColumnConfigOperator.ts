@@ -1,6 +1,5 @@
 import { type CellValue } from "../00_base/base";
 import { SchemaBase } from "../02_SpreadsheetRaw/SchemaBase";
-import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
 import { SheetConfigOperator } from "./SheetConfigOperator";
@@ -35,13 +34,8 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
   }
   private initSheetGidsApiAccesses(): this {
-    const sheetConfigData = this.sheetConfig.sheet.data;
-    const col = sheetConfigData.prepFetchColumnsFull(
-      "sheetGid",
-      "letApiAccess",
-    );
-    this.ss.fetchAllPrepped();
-    sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
+    const col = this.sheetConfigData.columns("sheetGid", "letApiAccess");
+    this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
       if (col.letApiAccess.value(rowIndex)) {
         this.sheetGidsApiAccesses.add(col.sheetGid.valueNotEmpty(rowIndex));
       }
@@ -51,49 +45,50 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   private isSheetGidApiAccesses(sheetGid: number): boolean {
     return this.sheetGidsApiAccesses.has(sheetGid);
   }
+  gatherColumnIdsForSheetGidsApiAccesses() {
+    this.sheetGidsApiAccesses.forEach((sheetGid) => {
+      const sheet = this.ss.sheetByGid(sheetGid);
+      sheet.uniformRow("columnId").gatherFetchFull();
+    });
+  }
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   get sheet(): SheetNamed<"columnConfig"> {
     return this.ss.sheet(this.sheetName);
   }
-  get sheetConfig(): SheetConfigOperator {
-    return new SheetConfigOperator(this.spreadsheetNamedProps);
+  get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
+    return new SheetConfigOperator(this.spreadsheetNamedProps).sheet.data;
   }
   get schema(): SchemaBase {
     return new SchemaBase();
   }
-  addMissingColumnIds(): void {
-    const col = this.sheetConfig.sheet.data.prepFetchColumnsFull(
+  addMissingColumnIds(): this {
+    const col = this.sheetConfigData.prepFetchColumnsFull(
       "sheetGid",
-      "letApiAccess",
-      "idPrefix",
+      "letApiAccess", // for initSheetGidsApiAccesses
     );
     this.ss.fetchAllPrepped();
     this.initSheetGidsApiAccesses();
-    this._fetchColumnIdRowsForSheets();
+    this.gatherColumnIdsForSheetGidsApiAccesses();
+    this.ss.fetchAllPrepped();
 
     let idsAdded = 0;
-    this.sheetConfig.sheet.data.rowIndexesActive.forEach((rowIndex) => {
+    this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
       if (sheetGid !== "" && !this.isSheetGidApiAccesses(sheetGid)) {
-        const idPrefix = col.idPrefix.value(rowIndex);
-        if (idPrefix === "") {
-          throw new Error(
-            `SheetConfigOperator: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
-          );
-        }
-        const sheet = this.ss.indexed.sheet(sheetGid);
-        idsAdded += sheet.addMissingColumnIds(idPrefix);
+        const sheet = this.ss.sheetByGid(sheetGid);
+        idsAdded += sheet.addMissingColumnIds();
       }
     });
     Logger.log(
       `ensureColumnIds: prepared to add ${idsAdded} missing column ID(s)`,
     );
+    return this;
   }
   pruneColTraits(): ColumnConfigOperator {
-    this.sheetConfig.sSheet.gatherFetchPrerequisitesForRawColumns();
-    this.sSheet.gatherFetchPrerequisitesForRawColumns();
+    this.sheetConfigData.gatherFetchPrerequisitesForRawColumns();
+    this.sheetConfigData.gatherFetchPrerequisitesForRawColumns();
     this.ss.fetchAllPrepped();
 
     this.sheetConfig.sSheet.gatherFetchDataColumnsUsingHeaders(
@@ -175,21 +170,5 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
       `appendColumnRows: queued ${appendedCount} new row(s) for append.`,
     );
     return this;
-  }
-  // Fetches every active column ID belonging to the given sheets, mapped to
-  // the sheet it came from. Requires _fetchColumnIdRowsForSheets to have
-  // already fetched columnId rows for these same sheetGids.
-  private _existingColumnIdToSheet(
-    sheetGids: Set<number>,
-  ): Map<string, SheetRaw> {
-    const columnIdToSheet = new Map<string, SheetRaw>();
-    sheetGids.forEach((sheetGid) => {
-      const sheet = this.ss.sheet(sheetGid);
-      sheet.fullTableColIndexes.forEach((colIndex) => {
-        const columnId = sheet.colIdRow.uniformValue(colIndex);
-        if (columnId) columnIdToSheet.set(columnId, sheet);
-      });
-    });
-    return columnIdToSheet;
   }
 }
