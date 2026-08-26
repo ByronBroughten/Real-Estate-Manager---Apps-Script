@@ -210,6 +210,13 @@ export const columnConfigs = makeColumnConfigs({
       false,
     ),
   },
+  test: {
+    name: mcc("c:tst:Xr9XZGV", "string", "Name", true),
+    id: mcc("c:tst:-uGn8dY", "string", "ID", false),
+    number: mcc("c:tst:VzKaUqz", "number", "Number", false),
+    dropdown: mcc("c:tst:cQEliR8", "yesOrNo", "Dropdown", false),
+    date: mcc("c:tst:UOdgAnq", "date", "Date", true),
+  },
   addExpenses: {
     date: mcc("col-vXNHJps", "string", "Date", false),
     propertyName: mcc("col-_iOHEPj", "string", "Property name", false),
@@ -2420,13 +2427,6 @@ export const columnConfigs = makeColumnConfigs({
       true,
     ),
     issues: mcc("col-amHKB33", "string", "Issues", false),
-  },
-  test: {
-    column5: mcc("col-Oy9WtzQ", "string", "Column 5", true),
-    id: mcc("col-8wOXbE6", "string", "ID", false),
-    number: mcc("col-kJ47IXM", "number", "Number", false),
-    dropdown: mcc("col-4_IzNLS", "yesOrNo", "Dropdown", false),
-    date: mcc("col--K2Vvyh", "date", "Date", true),
   },
   unit: {
     name: mcc("col-6WTZgxx", "string", "Name", true),
