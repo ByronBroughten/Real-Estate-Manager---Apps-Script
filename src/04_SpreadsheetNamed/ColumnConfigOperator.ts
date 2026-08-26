@@ -35,14 +35,21 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
   }
   private initSheetGidsApiAccesses(): this {
-    const col = this.sheetConfig.sheet.data.columns("sheetGid", "letApiAccess");
-
-    this.sheetConfig.sheet.data.rowIndexesActive.forEach((rowIndex) => {
+    const sheetConfigData = this.sheetConfig.sheet.data;
+    const col = sheetConfigData.prepFetchColumnsFull(
+      "sheetGid",
+      "letApiAccess",
+    );
+    this.ss.fetchAllPrepped();
+    sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
       if (col.letApiAccess.value(rowIndex)) {
         this.sheetGidsApiAccesses.add(col.sheetGid.valueNotEmpty(rowIndex));
       }
     });
     return this;
+  }
+  private isSheetGidApiAccesses(sheetGid: number): boolean {
+    return this.sheetGidsApiAccesses.has(sheetGid);
   }
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
@@ -57,23 +64,19 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     return new SchemaBase();
   }
   addMissingColumnIds(): void {
-    this.ss.raw.fetchAllSheetProperties();
     const col = this.sheetConfig.sheet.data.prepFetchColumnsFull(
       "sheetGid",
       "letApiAccess",
       "idPrefix",
     );
     this.ss.fetchAllPrepped();
-
     this.initSheetGidsApiAccesses();
-
-    const includedSheetGids = this.sheetGidsApiAccesses;
     this._fetchColumnIdRowsForSheets();
 
     let idsAdded = 0;
     this.sheetConfig.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
-      if (sheetGid !== "" && !includedSheetGids.has(sheetGid)) {
+      if (sheetGid !== "" && !this.isSheetGidApiAccesses(sheetGid)) {
         const idPrefix = col.idPrefix.value(rowIndex);
         if (idPrefix === "") {
           throw new Error(
@@ -188,15 +191,5 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
       });
     });
     return columnIdToSheet;
-  }
-  // Fetches properties + the columnId uniform row for exactly the given
-  // sheets, rather than every active sheet in the spreadsheet.
-  private _fetchColumnIdRowsForSheets(sheetGids: Set<number>): void {
-    sheetGids.forEach((sheetGid) => {
-      const sheet = this.ss.sheet(sheetGid);
-      sheet.gatherFetchProperties();
-      sheet.uniformRow("columnId").gatherFetchFull();
-    });
-    this.ss.fetchAllPrepped();
   }
 }

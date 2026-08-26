@@ -137,14 +137,16 @@ export class SheetRaw extends SheetCommonRaw {
       const colIdxBase = colData.startColumn ?? 0;
       const columns = colData.columnMetadata || [];
       (colData.rowData || []).forEach((colCell, rowIdxBase) => {
+        const rowIndex = rowIdxBase + (colData.startRow ?? 0);
+        const row = this.row(rowIndex);
+        row.ensureStateExists();
         columns.forEach((_, colIdxOffset) => {
           const colIndex = colIdxBase + colIdxOffset;
-          const rowIndex = rowIdxBase + (colData.startRow ?? 0);
           const cellData = colCell?.values?.[colIdxOffset] as
             | GoogleCellValue
             | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
-          this.row(rowIndex).cell(colIndex).integrateGState(cellData);
+          row.cell(colIndex).integrateGState(cellData);
         });
       });
     });
