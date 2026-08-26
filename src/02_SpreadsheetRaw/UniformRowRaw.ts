@@ -9,13 +9,13 @@ import {
   type CellValueTrait,
 } from "../00_base/baseValueSchemas";
 import type { ValueSchemaKey } from "../00_base/valueSchema";
-import { UniformRowBase } from "./ClassBases/UniformRowBase";
+import { UniformRowRawBase } from "./ClassBases/UniformRowRawBase";
 import { SheetRaw } from "./SheetRaw";
 
 export class UniformRowRaw<
   UN extends UniformRowName = UniformRowName,
   VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
-> extends UniformRowBase<UN> {
+> extends UniformRowRawBase<UN> {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }

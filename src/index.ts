@@ -34,10 +34,10 @@ function _tests() {
   // idColumn.gatherFetchAllDataCells();
   // ss.fetchAllPrepped();
   // idColumn.emptyDataCellsToDefault();
-  const test = ss.sheet(testSheetName);
+  const test = ss.sheet("test");
   test.uniformRow("columnId").prepFetchFull();
   ss.fetchAllPrepped();
-  ss.sheet(testSheetName).addMissingColumnIds();
+  ss.sheet("test").addMissingColumnIds();
   ss.batchUpdateGSheets();
 }
 

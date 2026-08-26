@@ -15,7 +15,7 @@ export interface RowUniformProps<UN extends UniformRowName> extends StrictOmit<
   uniformRowName: UN;
 }
 
-export class UniformRowBase<
+export class UniformRowRawBase<
   UN extends UniformRowName,
   VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
 > extends RowCommonRaw {
