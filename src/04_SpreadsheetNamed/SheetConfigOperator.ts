@@ -71,7 +71,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       "hasIdColumn",
     );
     let updatedValues = 0;
-    this.sheet.data.dataRowIndexesActive.forEach((rowIndex) => {
+    this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const sheetTitle = col.sheetTitle.value(rowIndex);
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       const activeSheet = this.ss.sheetByGid(sheetGid);
@@ -99,7 +99,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
     this._updateAll();
     const entries: SheetConfigsBase = {};
-    this.sheet.data.dataRowIndexesActive.forEach((rowIndex) => {
+    this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
       entries[sheetName] = {

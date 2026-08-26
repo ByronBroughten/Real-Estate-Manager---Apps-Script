@@ -19,8 +19,8 @@ export class DataSheetIndexed extends SheetCommon {
       columnId,
     });
   }
-  get dataRowIndexesActive(): number[] {
-    return this.raw.dataRowIndexesActive;
+  get rowIndexesActive(): number[] {
+    return this.raw.rowIndexesActive;
   }
   row(rowIndex: number): DataRowIndexed {
     return new DataRowIndexed({

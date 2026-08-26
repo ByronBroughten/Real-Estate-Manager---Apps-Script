@@ -66,7 +66,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
           "sheets(" +
           "properties(sheetId,title)," +
           "tables(tableId,range)," +
-          "data(startColumn,startRow,rowData(values(effectiveValue)))" +
+          "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
           ")",
       },
     );

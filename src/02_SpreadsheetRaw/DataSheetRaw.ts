@@ -10,7 +10,7 @@ export class DataSheetRaw extends SheetCommonRaw {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  get dataRowIndexesActive(): number[] {
+  get rowIndexesActive(): number[] {
     return this.sheet.activeRowIndexes.filter((rowIndex) =>
       this.schema.isDataRowIndex(rowIndex),
     );
@@ -34,7 +34,7 @@ export class DataSheetRaw extends SheetCommonRaw {
     });
   }
   get rows(): DataRowRaw[] {
-    return this.dataRowIndexesActive.map((index) => this.row(index));
+    return this.rowIndexesActive.map((index) => this.row(index));
   }
   get topRow(): DataRowRaw {
     return this.row(this.schema.topDataRowIdx);

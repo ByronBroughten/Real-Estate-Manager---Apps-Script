@@ -28,8 +28,8 @@ export class DataSheetNamed<
       sheetGid: this.schema.sheetGid,
     });
   }
-  get dataRowIndexesActive(): number[] {
-    return this.indexed.dataRowIndexesActive;
+  get rowIndexesActive(): number[] {
+    return this.indexed.rowIndexesActive;
   }
   row(rowIndex: number): DataRowNamed<SN> {
     return new DataRowNamed({

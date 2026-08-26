@@ -21,16 +21,28 @@ import { SpreadsheetNamed } from "./SpreadsheetNamed";
 // );
 
 export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
+  private sheetGidsApiAccesses: Set<number>;
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "columnConfig",
       ...props,
     });
+    this.sheetGidsApiAccesses = new Set();
   }
   static init() {
     return new ColumnConfigOperator(
       ColumnConfigOperator.initSpreadsheetNamedProps(),
     );
+  }
+  private initSheetGidsApiAccesses(): this {
+    const col = this.sheetConfig.sheet.data.columns("sheetGid", "letApiAccess");
+
+    this.sheetConfig.sheet.data.rowIndexesActive.forEach((rowIndex) => {
+      if (col.letApiAccess.value(rowIndex)) {
+        this.sheetGidsApiAccesses.add(col.sheetGid.valueNotEmpty(rowIndex));
+      }
+    });
+    return this;
   }
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
@@ -53,11 +65,13 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
     this.ss.fetchAllPrepped();
 
-    const includedSheetGids = this._includedSheetGids();
-    this._fetchColumnIdRowsForSheets(includedSheetGids);
+    this.initSheetGidsApiAccesses();
+
+    const includedSheetGids = this.sheetGidsApiAccesses;
+    this._fetchColumnIdRowsForSheets();
 
     let idsAdded = 0;
-    this.sheetConfig.sheet.dataRowIndexesActive.forEach((rowIndex) => {
+    this.sheetConfig.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
       if (sheetGid !== "" && !includedSheetGids.has(sheetGid)) {
         const idPrefix = col.idPrefix.value(rowIndex);
@@ -95,7 +109,7 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     const sheetGidCol = this.column("Sheet GID").data;
 
     let staleCount = 0;
-    this.sheet.dataRowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActive.forEach((rowIndex) => {
       const columnId = columnIdCol.dataValue(rowIndex);
       const sheetGid = sheetGidCol.dataValue(rowIndex);
 
@@ -184,17 +198,5 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
       sheet.uniformRow("columnId").gatherFetchFull();
     });
     this.ss.fetchAllPrepped();
-  }
-  private _includedSheetGids(): Set<number> {
-    const sheetGidCol = this.sheetConfig.column("Sheet GID").data;
-    const makeSchemaCol = this.sheetConfig.column("Let api access traits").data;
-
-    const includedSheetGids = new Set<number>();
-    this.sheetConfig.sheet.dataRowIndexesActive.forEach((rowIndex) => {
-      if (makeSchemaCol.dataValue(rowIndex)) {
-        includedSheetGids.add(sheetGidCol.dataValue(rowIndex));
-      }
-    });
-    return includedSheetGids;
   }
 }

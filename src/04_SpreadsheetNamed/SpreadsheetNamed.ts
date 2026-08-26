@@ -200,30 +200,6 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     this.raw.ensureAllSheetPropertiesAreFetched();
     return this;
   }
-  addMissingColumnIds(): void {
-    this.ensureAllSheetPropertiesAreFetched();
-
-    const includedSheetGids = this._includedSheetGids();
-    this._fetchColumnIdRowsForSheets(includedSheetGids);
-
-    let idsAdded = 0;
-    this.sheetConfig.sheet.dataRowIndexesActive.forEach((rowIndex) => {
-      const sheetGid = col.sheetGid.value(rowIndex);
-      if (sheetGid !== "" && !includedSheetGids.has(sheetGid)) {
-        const idPrefix = col.idPrefix.value(rowIndex);
-        if (idPrefix === "") {
-          throw new Error(
-            `SheetConfigOperator: Sheet GID ${sheetGid} has "Let api access traits" true but no valid "ID prefix" value.`,
-          );
-        }
-        const sheet = this.ss.indexed.sheet(sheetGid);
-        idsAdded += sheet.addMissingColumnIds(idPrefix);
-      }
-    });
-    Logger.log(
-      `ensureColumnIds: prepared to add ${idsAdded} missing column ID(s)`,
-    );
-  }
   fillMissingRowIds() {
     const idSheets = this.sheetsOfSchema.filter((sheet) => {
       const hasIdCol = sheet.schema.trait("hasIdColumn");
