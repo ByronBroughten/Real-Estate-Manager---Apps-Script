@@ -1,11 +1,11 @@
 import { makeSheetConfigs, msc } from "./sheetConfigBuilder";
 
 export const sheetConfigs = makeSheetConfigs({
-  spreadsheetConfig: msc(1967106628, "vrb"),
-  sheetConfig: msc(210603630, "stm"),
-  columnConfig: msc(2034522667, "scm"),
-  valueConfig: msc(2119236084, "vcf"),
   spreadsheetControls: msc(1971630928, "sct"),
+  valueConfig: msc(2119236084, "vcf"),
+  sheetConfig: msc(210603630, "scf"),
+  columnConfig: msc(2034522667, "ccf"),
+  spreadsheetConfig: msc(1967106628, "sscf"),
   test: msc(2089200354, "tst", true),
   year: msc(243663296, "yer"),
   api: msc(290870631, "api"),
