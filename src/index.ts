@@ -28,7 +28,7 @@ const testSheetName = "test";
 // No, I keep this at the named level, but I make a version that builds on it at the raw level in one way (ensuring sheet properties, ensuring headers)
 // - Map<sheegGid, properties get request>, Map<sheetGid, headers get request>, Map<sheetGid, data get request
 
-function _tests() {
+function _mainTests() {
   const ss = SpreadsheetNamed.init();
   // const idColumn = ss.sheet(testSheetName).column("id");
   // idColumn.gatherFetchAllDataCells();
