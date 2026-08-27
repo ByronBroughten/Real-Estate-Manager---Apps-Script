@@ -7,7 +7,7 @@ A Google Apps Script project (TypeScript, compiled and pushed via `clasp`) for m
 This repo is really two things stacked on top of each other:
 
 - **`src/00_*` through `src/05_Api/` are a project-agnostic framework** for building typed, structured apps on top of Google Sheets + Apps Script. The Raw tier talks to the Sheets Advanced API purely in terms of raw row/column indexes and sheet properties; the Indexed and Named tiers resolve and maintain the typed schema on top of that — including generating and updating `01_generatedConfigs` from the live "Sheet Config"/"Column Config" sheets, which is now a Named-tier job, not Raw's. `05_Api` sits on top as a generic endpoint-dispatch layer (`Api`, `EndpointHandler`/`EndpointHandlerBase`) that routes sheet-edit events to registered endpoints by column name. Nothing in these folders should reference real-estate concepts (properties, leases, tenants, etc.). If you're adding something reusable that any Sheets-backed app would want, it belongs here.
-- **`src/businessEndpoints/` is this specific project** — it's the only place real-estate domain logic (charges, leases, subsidies, payments, ledgers) should live, and the `endpoints` record passed into `05_Api`'s `Api` class. Everything in here is built on top of the framework layers below it.
+- **`src/businessEndpoints.ts` and `src/businessEndpointHandlers/` are this specific project** — together the only place real-estate domain logic (charges, leases, subsidies, payments, ledgers) should live: `businessEndpoints.ts` holds the `endpoints` record passed into `05_Api`'s `Api` class, and `businessEndpointHandlers/` holds the domain classes it dispatches to. Everything here is built on top of the framework layers below it.
 
 Keep that boundary in mind before adding a file: "would this make sense in a completely different Sheets-backed app?" If yes, it belongs in 00–05, generically named. If no, it belongs in `businessEndpoints/`.
 
@@ -17,7 +17,7 @@ This is **not** a Node app at runtime. `src/` is TypeScript compiled by `rollup`
 
 Entry points are the top-level functions exported from `src/index.ts` (e.g. `triggerOnEdit`, `generateSheetConfigFile`). Apps Script calls into these by name — via installed triggers, `clasp run <functionName>`, or (once wired up) spreadsheet menu items.
 
-## ⚠️ Before running deploy or generation commands
+## ⚠️ Before touching the live spreadsheet or deployment
 
 **Never run these without asking the user first** — they affect a live Apps Script deployment and/or read the user's real Google Sheet:
 
@@ -26,6 +26,14 @@ Entry points are the top-level functions exported from `src/index.ts` (e.g. `tri
 - `npm run gen:sheet-config` (runs `clasp run` under the hood — see below)
 
 `npm run tsc` (type-checking only) is always safe to run freely.
+
+### The `gsheets` MCP tools
+
+This project also has a `gsheets` MCP server available, which can read and write the user's real Google Sheet directly — separately from `clasp`/Apps Script.
+
+- **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`.
+- **Any tool that writes — `create_spreadsheet`, `create_sheet`, `update_cells`, `batch_update_cells` — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.
+- **`share_spreadsheet` needs its own, separate confirmation** — it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.
 
 ## Architecture: the numbered tiers
 
@@ -40,7 +48,7 @@ Each top-level folder under `src/` is a dependency tier. **Rule: dependencies on
 | `04_SpreadsheetNamed`   | Config-dependent, **name**-based API — the one most application code should use (`SheetNamed`, `ColumnNamed`, `DataRowNamed`, `CellNamed`, `*SchemaNamed`). Also owns `SheetConfigOperator`/`ColumnConfigOperator`, which read the real "Sheet Config"/"Column Config" sheets by name and regenerate tier 01's config files — maintaining generated data is a Named-tier job now, not Raw's.                                                                                                                                                                                                                            | `00`–`03`        |
 | `05_Api`                | Generic, config-independent-of-domain endpoint dispatch: `Api` decodes a sheet-edit event into a column's full name and calls the matching registered endpoint; `EndpointHandler`/`EndpointHandlerBase` are scaffolding for endpoints that need to report run/success status back to the sheet. Still project-agnostic — takes its endpoint map as a generic parameter, so it has no real-estate knowledge itself.                                                                                                                                                                                                      | `00`–`04`        |
 
-`src/businessEndpoints/` sits outside the numbering (like `utils/`) as the real-estate domain logic for _this_ project — the only place allowed to know about properties, leases, tenants, etc. `businessEndpoints.ts` builds the endpoint map passed into `05_Api`'s `Api` class; it may import from any tier. `src/index.ts` sits outside the numbering as the entry-point file Apps Script calls into.
+`src/businessEndpoints.ts` and `src/businessEndpointHandlers/` sit outside the numbering (like `utils/`) as the real-estate domain logic for _this_ project — the only place allowed to know about properties, leases, tenants, etc. `businessEndpoints.ts` builds the endpoint map passed into `05_Api`'s `Api` class; `businessEndpointHandlers/` holds the domain classes it dispatches to. Both may import from any tier. `src/index.ts` sits outside the numbering as the entry-point file Apps Script calls into.
 
 ## Naming vocabulary
 
@@ -80,5 +88,5 @@ There is no automated test suite (`npm run test` is a stub). **`npm run tsc` is 
 
 ## Known rough edges
 
-- **Most of `src/businessEndpoints/*.ts` is currently commented out.** `businessEndpoints.ts` itself is live (it's the endpoint map wired into `Api` via `triggerOnEdit`), but the domain classes it will eventually call — `ChargeMgmt`, `ExpenseMgmt`, `LeaseMgmt`, `LedgerMgmt`, `PaymentMgmt`, `SubsidyMgmt` — predate the 00–05 reorganization and are kept fully commented out as reference for reimplementing on the current architecture, one file at a time.
+- **Most of `src/businessEndpointHandlers/*.ts` is currently commented out.** `businessEndpoints.ts` itself is live (it's the endpoint map wired into `Api` via `triggerOnEdit`), but the domain classes it will eventually call — `ChargeMgmt`, `ExpenseMgmt`, `LeaseMgmt`, `LedgerMgmt`, `PaymentMgmt`, `SubsidyMgmt` (in `src/businessEndpointHandlers/`) — predate the 00–05 reorganization and are kept fully commented out as reference for reimplementing on the current architecture, one file at a time.
 - **`src/02_SpreadsheetRaw/toIntegrate.ts`** is a deliberate holding pen for pre-TypeScript legacy code awaiting reimplementation. It's not part of the numbered-tier system by design.
