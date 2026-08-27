@@ -29,9 +29,12 @@ function _indexMainTest() {
   const testSheetId = 2089200354;
   const testSheetName = "test";
   type TestName = keyof typeof mainTests;
-  const nameOfTestToRun: TestName = "addRowIds";
+  const nameOfTestToRun: TestName = "updateSheetConfig";
   const ss = SpreadsheetNamed.init();
   const mainTests = {
+    updateSheetConfig() {
+      SheetConfigOperator.init().fetchAndUpdateAll();
+    },
     addColumnIds() {
       const test = ss.sheet("test");
       test.uniformRow("columnId").prepFetchFull();
@@ -40,10 +43,9 @@ function _indexMainTest() {
       ss.batchUpdateGSheets();
     },
     addRowIds() {
-      // As things stand, columnConfig must be updated before row IDs can be. This is probably unnecessary, because the row ID update happens mostly at the raw level.
       const idColumn = ss.sheet("test").column("id").data;
       idColumn.prepFetchFull();
-      ss.fetchAllPrepped();
+      ss.fetchAllPrepped({});
       idColumn.emptyDataCellsToDefault();
       ss.batchUpdateGSheets();
     },

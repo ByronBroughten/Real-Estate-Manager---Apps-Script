@@ -54,6 +54,6 @@ export class RowRawBase extends SheetRawBase {
     };
   }
   remove(): void {
-    this.rowState.delete(this.rowIndex);
+    this.rowStates.delete(this.rowIndex);
   }
 }

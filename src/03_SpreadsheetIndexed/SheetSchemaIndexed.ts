@@ -33,7 +33,7 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
   }
   get nonFormulaColumnIds(): string[] {
     return [...this.columnIds].filter((columnId) => {
-      return this.column(columnId).isFormula;
+      return !this.column(columnId).isFormula;
     });
   }
   makeColumnId(): string {
