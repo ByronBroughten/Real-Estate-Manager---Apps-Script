@@ -74,13 +74,13 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const sheetTitle = col.sheetTitle.value(rowIndex);
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
-      const activeSheet = this.ss.sheetByGid(sheetGid);
-      if (sheetTitle !== activeSheet.raw.title) {
-        col.sheetTitle.cell(rowIndex).updateValue(activeSheet.raw.title);
+      const activeSheet = this.ss.raw.sheet(sheetGid);
+      if (sheetTitle !== activeSheet.title) {
+        col.sheetTitle.cell(rowIndex).updateValue(activeSheet.title);
         updatedValues++;
       }
       const hasIdCol = col.hasIdColumn.value(rowIndex);
-      const actualHasIdCol = activeSheet.raw.headerRow.hasValue("ID");
+      const actualHasIdCol = activeSheet.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
         col.hasIdColumn.cell(rowIndex).updateValue(actualHasIdCol);
         updatedValues++;
