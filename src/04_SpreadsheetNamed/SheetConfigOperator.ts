@@ -33,7 +33,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   get schema(): SpreadsheetSchemaNamed {
     return new SpreadsheetSchemaNamed();
   }
-  fetchAndUpdateAll() {
+  fetchAndUpdateAll(): this {
     this.ss.raw.fetchAllSheetProperties();
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
       this.ss.raw.sheet(sheetGid).headerRow.gatherFetchFull();
@@ -42,9 +42,11 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       "sheetGid",
       "sheetTitle",
       "hasIdColumn",
+      "idPrefix",
     );
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
     this._updateAll();
+    return this;
   }
   private _updateAll() {
     this._deleteStaleSheetConfigs();
@@ -91,18 +93,17 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
-  generateSheetConfigFileSource(): string {
-    this.fetchAndUpdateAll();
-
-    this.ss.raw.fetchAllSheetProperties();
-    const col = this.sheet.data.prepFetchColumnsFull(
+  // Pure computation from whatever is already fetched/synced in memory (via
+  // fetchAndUpdateAll) — does no fetching or live-sheet writing of its own,
+  // so it's safe to call after a shared sync/flush pass done alongside
+  // ColumnConfigOperator (see index.ts's generateConfigFiles).
+  sheetEntries(): SheetConfigsBase {
+    const col = this.sheet.data.columns(
       "sheetGid",
       "sheetTitle",
       "hasIdColumn",
       "idPrefix",
     );
-    this.ss.fetchAllPrepped({ skipFetchingProperties: true });
-    this._updateAll();
     const entries: SheetConfigsBase = {};
     this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const title = col.sheetTitle.value(rowIndex);
@@ -113,15 +114,25 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
         hasIdColumn: col.hasIdColumn.valueNotEmpty(rowIndex),
       };
     });
-    const sheetConfigsData: SheetConfigsBase = {
-      // ...baseSheetConfigs,
-      ...entries,
-    };
+    return entries;
+  }
+  // Lets ColumnConfigOperator resolve a Column Config row's sheetGid to the
+  // sheetName it'll be nested under in columnConfigs.ts, using this same
+  // (already-synced) in-memory state rather than the stale, separately
+  // deployed sheetConfigs.ts.
+  sheetNamesByGid(): Map<number, string> {
+    const map = new Map<number, string>();
+    Object.entries(this.sheetEntries()).forEach(([sheetName, config]) => {
+      map.set(config.sheetGid, sheetName);
+    });
+    return map;
+  }
+  toFileSource(): string {
     return [
-      `import { makeSheetConfigs} from "./sheetConfigBuilder";`,
+      `import { makeSheetConfigs } from "./sheetConfigBuilder";`,
       ``,
       `export const sheetConfigs = makeSheetConfigs(${JSON.stringify(
-        sheetConfigsData,
+        this.sheetEntries(),
         null,
         2,
       )});`,

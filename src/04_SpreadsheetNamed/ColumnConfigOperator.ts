@@ -1,4 +1,7 @@
+import type { TableColumnConfigs } from "../01_generatedConfigs/columnConfigBuilder";
+import type { ValueName } from "../01_generatedConfigs/valueSchemas";
 import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
+import { Str } from "../utils/Str";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
 import type { DataSheetNamed } from "./DataSheetNamed";
@@ -60,8 +63,17 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   get sheetData(): DataSheetNamed<"columnConfig"> {
     return this.sheet.data;
   }
+  // Built from this instance's own (possibly already-synced) state, rather
+  // than SheetConfigOperator.init(), so that when the same shared
+  // ColumnConfigOperator instance is used across a sync-then-generate
+  // pipeline (see index.ts's generateConfigFiles), this sees whatever
+  // Sheet Config corrections already happened — and any live-sheet writes
+  // queued here land in the same batchUpdateGSheets flush.
+  get sheetConfigOperator(): SheetConfigOperator {
+    return new SheetConfigOperator(this.spreadsheetNamedProps);
+  }
   get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
-    return new SheetConfigOperator(this.spreadsheetNamedProps).sheet.data;
+    return this.sheetConfigOperator.sheet.data;
   }
   get schema(): SchemaBase {
     return new SchemaBase();
@@ -96,10 +108,16 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
     return this;
   }
-  fetchAndUpdateColumnConfig() {
+  fetchAndUpdateColumnConfig(): this {
     // for initSheetGidsApiAccesses
     this.sheetConfigData.prepFetchColumnsFull("sheetGid", "letApiAccess");
-    this.sheetData.prepFetchColumnsFull("sheetGid", "columnId");
+    this.sheetData.prepFetchColumnsFull(
+      "sheetGid",
+      "columnId",
+      "header",
+      "isFormula",
+      "valueName",
+    );
     this.ss.fetchAllPrepped();
     this.initSheetGidsApiAccesses();
     this.gatherColumnIdsForSheetGidsApiAccesses();
@@ -160,5 +178,69 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   }
   _updateProgrammaticValues() {
     // Loop through the existing rows and update the values. You'll need sheet properties and top data rows.
+  }
+  // Pure computation from whatever is already fetched/synced in memory (via
+  // fetchAndUpdateColumnConfig) — does no fetching or live-sheet writing of
+  // its own. header/valueName are hand-maintained on the Column Config
+  // sheet, so a freshly appended row (new columnId, not yet filled in by a
+  // human) is skipped rather than emitted with garbage data.
+  toFileSource(): string {
+    const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
+    const col = this.sheetData.columns(
+      "sheetGid",
+      "columnId",
+      "header",
+      "isFormula",
+      "valueName",
+    );
+    const entries: Record<string, TableColumnConfigs> = {};
+    const skipped: string[] = [];
+    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+      const columnId = col.columnId.valueNotEmpty(rowIndex);
+      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
+      const header = col.header.value(rowIndex);
+      const valueName = col.valueName.value(rowIndex);
+      if (!header || !valueName) {
+        skipped.push(columnId);
+        return;
+      }
+      const sheetName = sheetNamesByGid.get(sheetGid);
+      if (!sheetName) {
+        skipped.push(columnId);
+        return;
+      }
+      const columnName = Str.sentenceToCamelCase(header);
+      const sheetEntries = (entries[sheetName] ??= {});
+      if (sheetEntries[columnName]) {
+        throw new Error(
+          `generateColumnConfigFileSource: duplicate column name "${columnName}" ` +
+            `derived from header "${header}" on sheet "${sheetName}".`,
+        );
+      }
+      sheetEntries[columnName] = {
+        columnId,
+        valueName: valueName as ValueName,
+        header,
+        isFormula: col.isFormula.valueNotEmpty(rowIndex),
+        emptyAllowed: false,
+        customDefaultValue: null,
+      };
+    });
+    if (skipped.length > 0) {
+      Logger.log(
+        `generateColumnConfigFileSource: skipped ${skipped.length} column(s) ` +
+          `missing header/value name or an unresolved sheet: ${skipped.join(", ")}`,
+      );
+    }
+    return [
+      `import { makeColumnConfigs } from "./columnConfigBuilder";`,
+      ``,
+      `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
+        entries,
+        null,
+        2,
+      )});`,
+      ``,
+    ].join("\n");
   }
 }

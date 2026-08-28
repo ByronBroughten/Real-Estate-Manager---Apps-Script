@@ -41,8 +41,8 @@ function makeColumnConfig<VN extends ValueName>(
 }
 export const mcc = makeColumnConfig;
 
-type TableColumnConfigs = Record<string, ColumnConfigStored>;
-type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
+export type TableColumnConfigs = Record<string, ColumnConfigStored>;
+export type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
 
 export function makeColumnConfigs<T extends ColumnConfigsBase>(
   columnConfigs: T,
