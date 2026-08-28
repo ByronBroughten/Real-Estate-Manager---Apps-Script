@@ -5,6 +5,13 @@ export interface FakeScriptProperties {
   setProperty(key: string, value: string): void;
 }
 
+/** Stubs the `Logger` global as a no-op spy, so production `Logger.log(...)` calls don't crash under Node. */
+export function stubLogger(): { log: ReturnType<typeof vi.fn> } {
+  const logger = { log: vi.fn() };
+  vi.stubGlobal("Logger", logger);
+  return logger;
+}
+
 /** Stubs the `PropertiesService` global with an in-memory script-properties store. */
 export function stubPropertiesService(
   initialProperties: Record<string, string> = {},

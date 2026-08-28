@@ -66,9 +66,17 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   // Built from this instance's own (possibly already-synced) state, rather
   // than SheetConfigOperator.init(), so that when the same shared
   // ColumnConfigOperator instance is used across a sync-then-generate
-  // pipeline (see index.ts's generateConfigFiles), this sees whatever
-  // Sheet Config corrections already happened — and any live-sheet writes
+  // pipeline (see ConfigFilesGenerator.ts), this sees whatever Sheet
+  // Config corrections already happened — and any live-sheet writes
   // queued here land in the same batchUpdateGSheets flush.
+  // Fragile invariant: cell integration overwrites local row state
+  // unconditionally (CellRaw.setValueState), so re-fetching a column
+  // already corrected in memory (via prepFetchColumnsFull, before this
+  // flushes) would silently revert that correction. Safe today only
+  // because fetchAndUpdateColumnConfig only re-fetches sheetGid/
+  // letApiAccess on this sheet, and _updateProgrammaticValues never
+  // corrects those. Don't add a correction to a column this also
+  // re-fetches without accounting for that.
   get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.spreadsheetNamedProps);
   }
@@ -184,7 +192,7 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   // its own. header/valueName are hand-maintained on the Column Config
   // sheet, so a freshly appended row (new columnId, not yet filled in by a
   // human) is skipped rather than emitted with garbage data.
-  toFileSource(): string {
+  columnEntries(): Record<string, TableColumnConfigs> {
     const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
     const col = this.sheetData.columns(
       "sheetGid",
@@ -232,11 +240,14 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
           `missing header/value name or an unresolved sheet: ${skipped.join(", ")}`,
       );
     }
+    return entries;
+  }
+  toFileSource(): string {
     return [
       `import { makeColumnConfigs } from "./columnConfigBuilder";`,
       ``,
       `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
-        entries,
+        this.columnEntries(),
         null,
         2,
       )});`,

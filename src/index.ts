@@ -1,4 +1,7 @@
-import { ColumnConfigOperator } from "./04_SpreadsheetNamed/ColumnConfigOperator.js";
+import {
+  generateConfigFilesSources,
+  syncAndFlushConfigSheets,
+} from "./04_SpreadsheetNamed/ConfigFilesGenerator.js";
 import { SheetConfigOperator } from "./04_SpreadsheetNamed/SheetConfigOperator.js";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { Api } from "./06_API/Api.js";
@@ -56,23 +59,6 @@ function _indexMainTest() {
   mainTests[nameOfTestToRun]();
 }
 
-// Syncs the live Sheet Config sheet, then (now that it's current) the live
-// Column Config sheet, sharing one ColumnConfigOperator's state so both
-// sets of queued changes — plus any column IDs written to business sheets
-// along the way — persist in a single flush. See CLAUDE.md/README for why
-// these two must be synced and regenerated together.
-function syncAndFlushConfigSheets(): {
-  sheetConfigOperator: SheetConfigOperator;
-  columnConfigOperator: ColumnConfigOperator;
-} {
-  const columnConfigOperator = ColumnConfigOperator.init();
-  const sheetConfigOperator = columnConfigOperator.sheetConfigOperator;
-  sheetConfigOperator.fetchAndUpdateAll();
-  columnConfigOperator.fetchAndUpdateColumnConfig();
-  columnConfigOperator.ss.batchUpdateGSheets();
-  return { sheetConfigOperator, columnConfigOperator };
-}
-
 // Bare manual entry point for repairing the live Sheet Config/Column
 // Config sheets without regenerating the local TS files. Not wired to an
 // npm script — run ad hoc via `clasp run syncConfigSheets` when needed.
@@ -81,12 +67,7 @@ function syncConfigSheets(): void {
 }
 
 function generateConfigFiles(): string {
-  const { sheetConfigOperator, columnConfigOperator } =
-    syncAndFlushConfigSheets();
-  return JSON.stringify({
-    sheetConfigs: sheetConfigOperator.toFileSource(),
-    columnConfigs: columnConfigOperator.toFileSource(),
-  });
+  return generateConfigFilesSources();
 }
 
 function triggerAuth(): void {
