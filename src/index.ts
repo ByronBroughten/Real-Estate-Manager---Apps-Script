@@ -33,7 +33,9 @@ function _indexMainTest() {
   const ss = SpreadsheetNamed.init();
   const mainTests = {
     updateSheetConfig() {
-      SheetConfigOperator.init().fetchAndUpdateAll();
+      const operator = SheetConfigOperator.init();
+      operator.fetchAndUpdateAll();
+      operator.ss.batchUpdateGSheets();
     },
     addColumnIds() {
       const test = ss.sheet("test");
