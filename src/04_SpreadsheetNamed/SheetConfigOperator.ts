@@ -35,6 +35,9 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   }
   fetchAndUpdateAll() {
     this.ss.raw.fetchAllSheetProperties();
+    this.ss.raw.activeSheetGids.forEach((sheetGid) => {
+      this.ss.raw.sheet(sheetGid).headerRow.gatherFetchFull();
+    });
     this.sheet.data.prepFetchColumnsFull(
       "sheetGid",
       "sheetTitle",
