@@ -86,9 +86,19 @@ Do not hand-edit (or AI-edit) the literal data inside `sheetConfigs`/`columnConf
 
 **Exception — the bootstrap subset.** A handful of entries in `sheetConfigs`/`columnConfigs`, covering the Sheet Config and Column Config sheets themselves (sheet names/headers, indexes, and possibly `columnId`s), are intentionally hardcoded rather than generated — see `baseSheetConfigs.ts`. `SheetConfigOperator`/`ColumnConfigOperator` need _some_ way to find those two sheets and their own columns before any config data exists for them — this seed data is that bootstrap, plus placeholders kept around for type safety before a full initialization step fleshes them out. Don't "fix" these entries by trying to regenerate them away; they're meant to stay hand-maintained, the same way `valueConfigs` and `spreadsheetConfig` currently are.
 
-## Validation
+## Testing
 
-There is no automated test suite (`npm run test` is a stub). **`npm run tsc` is the entire verification story right now** — run it before considering any change complete, and treat any new type error as something you introduced unless you've confirmed otherwise (check whether the same error exists on a clean checkout, or ask).
+Tests run on [Vitest](https://vitest.dev): `npm test` (single run), `npm run test:watch`, or `npm run test:coverage`. None of it touches the live spreadsheet or Apps Script — it's plain Node against fakes — so it's always safe to run freely, same as `npm run tsc`.
+
+- **Layout**: a test is co-located with what it tests — `Foo.ts` → `Foo.test.ts` in the same folder. This obeys the same downward-only tier-import rule as production code: a test only imports from its own tier and below.
+- **Mocking the GAS globals**: this is not a Node app at runtime (see "How it runs" above), so nothing defines `SpreadsheetApp`/`Sheets`/`PropertiesService`/`ScriptApp` when tests run under Node — any test exercising code that touches them needs those globals stubbed first. `src/testSupport/` holds shared fakes for that, sitting outside the numbered tiers (like `utils/`) so any tier's tests can import it:
+  - `fakeSheetsService.ts` — a `stubSheetsService()` fake for the `Sheets` Advanced Service. `Spreadsheets.get`/`getByDataFilter` are backed by a real in-memory fixture and typed against the actual `GoogleAppsScript.Sheets.Schema` types, so a fixture that drifts from the real response shape is a compile error. `batchUpdate` is currently a spy only — it records the exact requests sent but doesn't replay them onto the fixture; the Sheets request grammar (`appendCells`/`updateCells`/`insertDimension`/`sortRange`/...) is large, so extend this as tests come to need particular request kinds applied back.
+  - `fakeAppsScriptGlobals.ts` — `stubPropertiesService()` (in-memory script properties) and `stubScriptAndSpreadsheetApp()` (a fluent trigger builder covering `AppsScript.trigger`'s usage).
+- **Scope so far**: `00_base`–`03_SpreadsheetIndexed` are almost entirely GAS-independent pure TS (schema/config resolution, ID encode/decode) and need no mocking at all — that's the highest-value, easiest place to add coverage. The GAS-touching surface is narrow: `00_base/AppsScript.ts` and `02_SpreadsheetRaw/SpreadsheetRaw.ts` are the only production files that reference the ambient globals directly. `src/businessEndpointHandlers/` is out of scope until it's reimplemented (see "Known rough edges" below).
+- **Live-sheet verification**: there's no standing integration-test tier against a real spreadsheet. When Claude is asked to extend this test infrastructure, it may use the `gsheets` MCP ad hoc (per the read/write rules above) to sanity-check that a fake's behavior actually matches the real API — that stays a manual verification step, never part of `npm test`/CI.
+- **CI**: `.github/workflows/test.yml` runs `npm run tsc` and `npm run test:coverage` on push/PR to `master`. Coverage is reported, not gated — no failure threshold yet.
+
+`npm run tsc` remains the whole *type*-verification story — run it (and the tests) before considering any change complete, and treat any new type error as something you introduced unless you've confirmed otherwise (check whether the same error exists on a clean checkout, or ask).
 
 ## Known rough edges
 
