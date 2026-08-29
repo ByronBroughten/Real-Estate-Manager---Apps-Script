@@ -2,7 +2,7 @@
 
 Distilled from the user's own refactors of AI-generated code, plus a survey of the rest of `src/` for consistent, repeated patterns. Apply these on top of README.md's naming vocabulary and CLAUDE.md's architecture rules — this file is about code *shape*, not where things live.
 
-Known not-yet-representative code (still AI-shaped, not mined for any rule below): `src/02_SpreadsheetRaw/toIntegrate.ts`, `src/businessEndpointHandlers/`, `scripts/generateConfigFiles.mjs`, `src/04_SpreadsheetNamed/ColumnConfigOperator.ts`, the date-as-number functions in `utils/Dat.ts`/`utils/Tim.ts`, and `*.test.ts` files generally.
+Known not-yet-representative code (still AI-shaped, not mined for any rule below): `src/02_SpreadsheetRaw/toIntegrate.ts`, `src/businessEndpointHandlers/`, and `*.test.ts` files generally.
 
 ## Class shape
 
@@ -78,7 +78,7 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
   - `validate` — asserts an invariant, throws on failure
   - `init` — factory setup
   - `sync`/`flush` — coordinate multiple operators / send a batched write
-- **Getters are only for cheap, no-arg, side-effect-free derived values** (`get ss`, `get schema`, `get sheetConfigOperator`). Anything that takes an argument or has a side effect is a method, never a getter.
+- **Getters are only for cheap, no-arg, side-effect-free derived values that might need re-deriving from updated state** (`get ss`, `get schema`, `get sheetConfigOperator` — each rebuilds from `this.spreadsheetNamedProps`, which can reflect state mutated since construction). Anything that takes an argument or has a side effect is a method, never a getter. And a value that's genuinely fixed for the object's whole lifetime (e.g. a file path built once from `import.meta.url`) is a plain field computed once, not a getter recomputed on every read.
 - **`_` prefix means "narrow-purpose, not general API," and shows up in two shapes:**
   1. A true private helper, decomposing a public method — pair it with the `private` keyword.
   2. A method that a coordinating/encapsulating class must call as one step of a specific flow, but that isn't meant as general-purpose API on its own class. It *can't* be marked `private` (TS blocks cross-class access even from a coordinator), so the leading `_` is the only signal a future caller gets that this isn't for general use. Real example: `SheetIndexed._gatherDataPrerequisites` (`SheetIndexed.ts:58`) is called by `SpreadsheetIndexed.fetchAllPrepped` (`SpreadsheetIndexed.ts:37`) as one step sandwiched between two ordinary public methods (`gatherFetchDataPrepped`, `finalizeFetchedData`) — it's underscored precisely because it only makes sense inside that one flow.
@@ -90,6 +90,7 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
   ```ts
   private _prepFetchRowSpecifier(sheet: SheetIndexed, rowSpecifier: RowSpecifierName, columnId: string): void
   ```
+- **The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. `scripts/generateConfigFiles.mjs` groups its two output paths as `path: { sheetConfigs, columnConfigs }` rather than two separate `sheetConfigsPath`/`columnConfigsPath` members.
 
 ## Comments
 
@@ -133,3 +134,17 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
   - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions rather than a class (`Str.ts` → `Str`, `Obj.ts` → `Obj`, `Arr.ts` → `Arr`, `Dat.ts` → `Dat`, `Tim.ts` → `Tim`, `Val.ts` → `Val`). A fat bundle's internal pieces split into a same-named subfolder (`utils/Obj/merge.ts`, `utils/Obj/spread.ts`) and get re-assembled in the parent file.
   - camelCase for plain data/config or entry-point files, not type constructors (`columnConfigs.ts`, `businessEndpoints.ts`, `index.ts`).
 - **Tier subfolders**: `ClassBases/` for base classes + their prop interfaces; `Types/`/`ClassTypes/` for supporting state/shape types consumed by that tier's classes.
+
+## Tests
+
+**Draft, not settled like the rest of this file.** Every other section here was mined from a file the user actually refactored themselves; test files haven't had that pass yet (`*.test.ts` is still on the not-yet-representative list). These are proposed extensions of the same spirit above — revisit once a real test file has gone through the user's own refactor, the way `ConfigOrchestrator.ts` did for production code.
+
+Everything above still applies as-is to test code: boolean `is`/`has` prefixes, the controlled verb vocabulary, no-comments-by-default with decomposition preferred over a comment explaining what something does, guard clauses, delete-dead-scaffolding-but-ask-before-deleting-commented-out-code, top-level units as `function` declarations rather than arrow consts.
+
+Proposed test-specific extensions of that same spirit:
+
+- **A named setup/fixture-builder function over a comment explaining a seeded row.** Instead of a comment like `// Pre-existing row for the "test" sheet, with API access so its column IDs get gathered` beside a literal, pull it into a small function whose name states the scenario — `seedActiveSheetWithApiAccess()` — so the scenario is legible from the call site, not a comment.
+- **One behavior per `it()`, named as a sentence describing the behavior, not the mechanism** — e.g. `"flushes Sheet Config and Column Config changes in a single batchUpdate call"`.
+- **`describe` blocks named after the real method/class under test**, not an invented suite label — e.g. `describe("syncAndFlushConfigSheets", ...)`, `describe("ColumnConfigOperator.columnEntries / toFileSource", ...)`.
+- **Real, already-committed schema data over invented literals** where the code under test resolves identifiers through the actual schema (column IDs via `columnConfigs.sheetConfig.x.columnId`, real sheet gids) — guards against a test quietly passing against a shape that doesn't exist in production.
+- **Precise assertions over loose ones** — assert the exact resulting value/shape, not presence or truthiness.

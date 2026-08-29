@@ -5,15 +5,13 @@
 // spreadsheet's timezone (e.g. Central). Resolving that to a real
 // instant requires the actual UTC offset for that date, DST included.
 
-class TimeUtils {
-  readonly SHEET_TIMEZONE = "America/Chicago";
-  readonly SHEETS_EPOCH_UTC_MS: number = Date.UTC(1899, 11, 30);
-  readonly MS_PER_DAY: number = 86400000;
-  /**
-   * UTC offset (in minutes) of `tz` at the real-world moment `instant`
-   * represents. Positive = east of UTC. DST-aware via Intl + the IANA
-   * tz database.
-   */
+export const Tim = {
+  SHEET_TIMEZONE: "America/Chicago",
+  SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30),
+  MS_PER_DAY: 86400000,
+  // UTC offset (in minutes) of `tz` at the real-world moment `instant`
+  // represents. Positive = east of UTC. DST-aware via Intl + the IANA
+  // tz database.
   getTzOffsetMinutes(instant: Date, tz: string = this.SHEET_TIMEZONE): number {
     const fmt = new Intl.DateTimeFormat("en-US", {
       timeZone: tz,
@@ -42,30 +40,29 @@ class TimeUtils {
       Number(parts.second),
     );
     return (asIfUTC - instant.getTime()) / 60000;
-  }
-  /** Sheets serial (with fractional time) -> JS Date, resolved against `tz`. */
+  },
+  // Sheets serial (with fractional time) -> JS Date, resolved against `tz`.
   serialToDateTime(serial: number, tz: string = this.SHEET_TIMEZONE): Date {
     const naiveMs =
       this.SHEETS_EPOCH_UTC_MS + Math.round(serial * this.MS_PER_DAY);
     const offsetMin = this.getTzOffsetMinutes(new Date(naiveMs), tz);
     return new Date(naiveMs - offsetMin * 60000);
-  }
-  /** JS Date -> Sheets serial (with fractional time), resolved against `tz`. */
+  },
+  // JS Date -> Sheets serial (with fractional time), resolved against `tz`.
   dateTimeToSerial(date: Date, tz: string = this.SHEET_TIMEZONE): number {
     const offsetMin = this.getTzOffsetMinutes(date, tz);
     const localMs = date.getTime() + offsetMin * 60000;
     return (localMs - this.SHEETS_EPOCH_UTC_MS) / this.MS_PER_DAY;
-  }
-  /** Add whole days on wall-clock fields in `tz` (DST-safe). */
+  },
+  // Add whole days on wall-clock fields in `tz` (DST-safe).
   addDaysTz(date: Date, days: number, tz: string = this.SHEET_TIMEZONE): Date {
     const offsetMin = this.getTzOffsetMinutes(date, tz);
     const local = new Date(date.getTime() + offsetMin * 60000);
     local.setUTCDate(local.getUTCDate() + days);
     const newOffsetMin = this.getTzOffsetMinutes(local, tz);
     return new Date(local.getTime() - newOffsetMin * 60000);
-  }
-
-  /** Add whole months on wall-clock fields in `tz` (DST-safe). */
+  },
+  // Add whole months on wall-clock fields in `tz` (DST-safe).
   addMonthsTz(
     date: Date,
     months: number,
@@ -76,7 +73,5 @@ class TimeUtils {
     local.setUTCMonth(local.getUTCMonth() + months);
     const newOffsetMin = this.getTzOffsetMinutes(local, tz);
     return new Date(local.getTime() - newOffsetMin * 60000);
-  }
-}
-
-export const Tim = new TimeUtils();
+  },
+};

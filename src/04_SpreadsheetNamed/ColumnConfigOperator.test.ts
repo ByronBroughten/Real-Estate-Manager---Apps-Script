@@ -33,6 +33,23 @@ const columnConfigColumnIdRow = [
   cc.valueName.columnId,
 ];
 
+const freshlyAppendedRowMissingHeaderAndValueName = [
+  PROPERTY_GID,
+  "c:prp:ddd",
+  "Property",
+  "",
+  false,
+  "",
+];
+const rowReferencingUnresolvableSheet = [
+  UNRESOLVABLE_GID,
+  "c:???:eee",
+  "",
+  "Orphan Field",
+  false,
+  "string",
+];
+
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
@@ -76,10 +93,8 @@ describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
             4: [PROPERTY_GID, "c:prp:aaa", "Property", "Rent Amount", false, "number"],
             5: [PROPERTY_GID, "c:prp:bbb", "Property", "Notes", false, "string"],
             6: [NEW_SHEET_GID, "c:999002:ccc", "Brand New Sheet", "Some Field", false, "string"],
-            // Freshly appended, not yet filled in by a human.
-            7: [PROPERTY_GID, "c:prp:ddd", "Property", "", false, ""],
-            // References a sheet with no Sheet Config row at all.
-            8: [UNRESOLVABLE_GID, "c:???:eee", "", "Orphan Field", false, "string"],
+            7: freshlyAppendedRowMissingHeaderAndValueName,
+            8: rowReferencingUnresolvableSheet,
           }),
           table: { endRowIndex: 9 },
         },

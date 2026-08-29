@@ -6,30 +6,30 @@ export interface MonthYear {
 // ---------------------------------------------------------------------
 // DATE-ONLY (no time-of-day) — use these today
 // ---------------------------------------------------------------------
-class DateUtils {
-  readonly SHEETS_EPOCH_UTC_MS: number = Date.UTC(1899, 11, 30); // Dec 30, 1899, 00:00 UTC
-  readonly MS_PER_DAY: number = 86400000;
+export const Dat = {
+  SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30), // Dec 30, 1899, 00:00 UTC
+  MS_PER_DAY: 86400000,
   getDayBefore(date: Date): Date {
     const dayBefore = new Date(date.getTime());
     dayBefore.setDate(dayBefore.getDate() - 1);
     return dayBefore;
-  }
+  },
   isInMonthAndYear(date: Date, month: number, year: number): boolean {
     return date.getMonth() === month && date.getFullYear() === year;
-  }
+  },
   normalizedDate(date: Date) {
     const normalizedDate = new Date(date);
     normalizedDate.setHours(0, 0, 0, 0);
     return normalizedDate;
-  }
+  },
   isThisDateOrPassed(inputDate: Date, thisDate: Date = new Date()): boolean {
     const testDate = this.normalizedDate(thisDate);
     const normalizedInput = this.normalizedDate(inputDate);
     return normalizedInput <= testDate;
-  }
+  },
   isDateAndTodayOrPassed(inputDate: unknown): inputDate is Date {
     return inputDate instanceof Date && this.isThisDateOrPassed(inputDate);
-  }
+  },
   isDateAndThisDateOrAfter(
     inputDate: unknown,
     thisDate: Date = new Date(),
@@ -37,7 +37,7 @@ class DateUtils {
     return (
       inputDate instanceof Date && this.isDateSameOrAfter(inputDate, thisDate)
     );
-  }
+  },
   isDateSameOrAfter(
     inputDate: Date,
     thisDate: Date = new Date(),
@@ -45,7 +45,7 @@ class DateUtils {
     const testDate = this.normalizedDate(thisDate);
     const normalizedInput = this.normalizedDate(inputDate);
     return normalizedInput >= testDate;
-  }
+  },
   isDateSameOrBefore(
     inputDate: Date,
     thisDate: Date = new Date(),
@@ -53,7 +53,7 @@ class DateUtils {
     const testDate = this.normalizedDate(thisDate);
     const normalizedInput = this.normalizedDate(inputDate);
     return normalizedInput <= testDate;
-  }
+  },
   isOnOrBetween(p: { date: Date; startDate: Date; endDate: Date }) {
     if (p.startDate > p.endDate) {
       throw new Error("Start date cannot be after end date.");
@@ -62,10 +62,10 @@ class DateUtils {
       this.isDateSameOrAfter(p.date, p.startDate) ||
       this.isDateSameOrBefore(p.date, p.endDate)
     );
-  }
+  },
   monthYear(date: Date) {
     return `${date.getMonth() + 1}/${date.getFullYear()}`;
-  }
+  },
   monthYearsOnAndBetween({
     startMonthYear,
     endMonthYear,
@@ -88,7 +88,7 @@ class DateUtils {
       }
     }
     return monthYears;
-  }
+  },
   firstAndLastOfMonthNext(props: MonthYear): {
     firstOfMonth: Date;
     lastOfMonth: Date;
@@ -97,13 +97,13 @@ class DateUtils {
       firstOfMonth: this.firstDayOfMonthNext(props),
       lastOfMonth: this.lastDayOfMonthNext(props),
     };
-  }
+  },
   firstDayOfMonthNext({ month, year }: MonthYear): Date {
     return new Date(year, month - 1, 1, 12);
-  }
+  },
   lastDayOfMonthNext({ month, year }: MonthYear): Date {
     return new Date(year, month, 0, 12);
-  }
+  },
   firstAndLastDayOfMonth(date: Date = new Date()): {
     firstOfMonth: Date;
     lastOfMonth: Date;
@@ -112,18 +112,18 @@ class DateUtils {
       firstOfMonth: this.firstDayOfMonth(date),
       lastOfMonth: this.lastDateOfMonth(date),
     };
-  }
+  },
   firstDayOfMonth(date: Date = new Date()): Date {
     return new Date(date.getFullYear(), date.getMonth(), 1, 12);
-  }
+  },
   lastDateOfMonth(date: Date): Date {
     const year = date.getFullYear();
     const month = date.getMonth();
     return new Date(year, month + 1, 0, 12);
-  }
+  },
   incrementMonth(date: Date) {
     return new Date(date.getFullYear(), date.getMonth() + 1, 1, 12);
-  }
+  },
   proratedMonthlyProportion(p: {
     startDate: Date;
     endDate: Date;
@@ -139,7 +139,7 @@ class DateUtils {
     const daysInMonth = lastOfMonth.getDate();
     const daysCharged = prorateEnd.getDate() - prorateStart.getDate() + 1;
     return daysCharged / daysInMonth;
-  }
+  },
   proratedMonthlyAmount(p: {
     amount: number;
     startDate: Date;
@@ -148,7 +148,7 @@ class DateUtils {
     year: number;
   }): number {
     return this.proratedMonthlyProportion(p) * p.amount;
-  }
+  },
   prorateds(p: {
     amount: number;
     startDate: Date;
@@ -166,43 +166,29 @@ class DateUtils {
       proratedProportion,
       isProrated: proratedProportion < 1,
     };
-  }
-  /** Sheets serial (whole number) -> JS Date, anchored at UTC midnight. */
+  },
+  // Sheets serial (whole number) -> JS Date, anchored at UTC midnight.
   serialToDate(serial: number): Date {
     return new Date(
       this.SHEETS_EPOCH_UTC_MS + Math.round(serial) * this.MS_PER_DAY,
     );
-  }
-  /** JS Date -> Sheets serial (whole number of days). */
+  },
+  // JS Date -> Sheets serial (whole number of days).
   dateToSerial(date: Date): number {
     return Math.round(
       (date.getTime() - this.SHEETS_EPOCH_UTC_MS) / this.MS_PER_DAY,
     );
-  }
-
-  /** Add (or subtract, with a negative) whole days. */
+  },
+  // Add (or subtract, with a negative) whole days.
   addDays(date: Date, days: number): Date {
     const d = new Date(date);
     d.setUTCDate(d.getUTCDate() + days);
     return d;
-  }
-
-  /** Add (or subtract) whole months. JS normalizes overflow, e.g. Jan 31 + 1mo -> Mar 3. */
+  },
+  // Add (or subtract) whole months. JS normalizes overflow, e.g. Jan 31 + 1mo -> Mar 3.
   addMonths(date: Date, months: number): Date {
     const d = new Date(date);
     d.setUTCMonth(d.getUTCMonth() + months);
     return d;
-  }
-}
-
-export const Dat = new DateUtils();
-
-function _dateTest() {
-  const date = new Date();
-  const datePlusOne = new Date(date.getDate() + 1);
-  const dateMinusOne = new Date(date.getDate() - 1);
-
-  const datePlus30 = new Date(date.getDate() + 30);
-  const datePlus31 = new Date(date.getDate() + 31);
-  const datePlus29 = new Date(date.getDate() + 29);
-}
+  },
+};

@@ -16,6 +16,8 @@ const SHEET_CONFIG_GID = 210603630;
 const PROPERTY_GID = 999001;
 const NEW_SHEET_GID = 999002;
 
+const existingPropertyConfigRow = [PROPERTY_GID, "Property", false, true, "prp"];
+
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
@@ -36,8 +38,7 @@ describe("SheetConfigOperator.sheetEntries / toFileSource", () => {
               sc.letApiAccess.columnId,
               sc.idPrefix.columnId,
             ],
-            // A pre-existing, already-correct row for the Property sheet.
-            4: [PROPERTY_GID, "Property", false, true, "prp"],
+            4: existingPropertyConfigRow,
           }),
           table: { endRowIndex: 5 },
         },

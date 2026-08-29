@@ -22,6 +22,14 @@ const COLUMN_CONFIG_GID = 2034522667;
 const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
 
+const testSheetConfigRowWithApiAccess = [
+  TEST_SHEET_GID,
+  "Test",
+  true,
+  true,
+  "test",
+];
+
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
@@ -41,9 +49,7 @@ function seedFixture() {
             sc.letApiAccess.columnId,
             sc.idPrefix.columnId,
           ],
-          // Pre-existing row for the "test" sheet, with API access so its
-          // column IDs get gathered/appended rather than generated.
-          4: [TEST_SHEET_GID, "Test", true, true, "test"],
+          4: testSheetConfigRowWithApiAccess,
         }),
         table: { endRowIndex: 5 },
       },
@@ -78,7 +84,7 @@ function seedFixture() {
   });
 }
 
-describe("syncAndFlushConfigSheets", () => {
+describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
   it("flushes Sheet Config and Column Config changes in a single batchUpdate call", () => {
     const { batchUpdateCalls } = seedFixture();
 
@@ -97,7 +103,7 @@ describe("syncAndFlushConfigSheets", () => {
   });
 });
 
-describe("generateConfigFiles", () => {
+describe("ConfigOrchestrator.generateConfigFiles", () => {
   it("returns both files' source as one JSON payload, reflecting the synced state", () => {
     seedFixture();
 
