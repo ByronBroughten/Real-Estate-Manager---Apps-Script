@@ -1,5 +1,4 @@
 import type { CellValue } from "../00_base/base";
-import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetConfig } from "../01_generatedConfigs/sheetConfigBuilder";
 import {
   getSheetTraitByGid,
@@ -7,13 +6,6 @@ import {
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetSchemaCommon } from "./SheetSchemaCommon";
-
-const varbNameImmutable = ["baseId"] as const;
-type VarbNameImmutable = (typeof varbNameImmutable)[number];
-export type VarbNameMutable<TN extends SheetName> = Exclude<
-  ColumnName<TN>,
-  VarbNameImmutable
->;
 
 export class SheetSchemaIndexed extends SheetSchemaCommon {
   readonly sheetGid: number;

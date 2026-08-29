@@ -6,19 +6,11 @@ import {
 import type { SheetConfig } from "../01_generatedConfigs/sheetConfigBuilder";
 import {
   getSheetTraitByName,
-  type SheetName,
   type SheetNameSimple,
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SheetSchemaCommon } from "../03_SpreadsheetIndexed/SheetSchemaCommon";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import type { ColumnSpecifierNamed } from "./Types/NamedState";
-
-const varbNameImmutable = ["baseId"] as const;
-type VarbNameImmutable = (typeof varbNameImmutable)[number];
-export type VarbNameMutable<SN extends SheetName> = Exclude<
-  ColumnName<SN>,
-  VarbNameImmutable
->;
 
 export class SheetSchemaNamed<
   SN extends SheetNameSimple,

@@ -318,14 +318,7 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
               true,
               "string",
             ],
-            5: [
-              TEST_SHEET_GID,
-              "c:test:corr02",
-              "Test",
-              "Base ID",
-              false,
-              "string",
-            ],
+            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID", false, "string"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -334,7 +327,7 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
           title: "Test",
           rows: buildGridRows({
             0: ["c:test:corr01", "c:test:corr02"],
-            3: ["Amount", "Base ID"],
+            3: ["Amount", "ID"],
             4: [42, "xyz"],
           }),
           table: { endRowIndex: 5 },
@@ -357,9 +350,9 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
     expect(col.valueTitle.value(4)).toBe("number");
 
     // Already-correct fields stay untouched; only valueName (stale
-    // "string") gets the "Base ID" -> "id" special case applied.
+    // "string") gets the "ID" -> "id" special case applied.
     expect(col.sheetTitle.value(5)).toBe("Test");
-    expect(col.header.value(5)).toBe("Base ID");
+    expect(col.header.value(5)).toBe("ID");
     expect(col.isFormula.value(5)).toBe(false);
     expect(col.valueTitle.value(5)).toBe("id");
   });
