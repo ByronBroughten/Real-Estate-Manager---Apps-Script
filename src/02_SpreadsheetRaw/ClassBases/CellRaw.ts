@@ -6,7 +6,7 @@ import type { CellValue, CellValueName } from "../../00_base/base";
 import type { CellValueTrait } from "../../00_base/baseValueSchemas";
 import { getCellValTrait } from "../../00_base/baseValueSchemas";
 import type { ValueSchemaKey } from "../../00_base/valueSchema";
-import { valS } from "../../utils/validation";
+import { Val } from "../../utils/Val";
 import { SheetRaw } from "../SheetRaw";
 import type { UniformRowRaw } from "../UniformRowRaw";
 import { CellRawBase } from "./CellRawBase";
@@ -117,11 +117,11 @@ export class CellRaw<
       return "";
     }
     if ("stringValue" in effectiveValue) {
-      return valS.assert(effectiveValue.stringValue, "stringValue");
+      return Val.assert(effectiveValue.stringValue, "stringValue");
     } else if ("boolValue" in effectiveValue) {
-      return valS.assert(effectiveValue.boolValue, "boolValue");
+      return Val.assert(effectiveValue.boolValue, "boolValue");
     } else if ("numberValue" in effectiveValue) {
-      return valS.assert(effectiveValue.numberValue, "numberValue");
+      return Val.assert(effectiveValue.numberValue, "numberValue");
     } else {
       return "";
     }

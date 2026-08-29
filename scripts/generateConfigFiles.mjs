@@ -9,12 +9,20 @@ const COLUMN_CONFIGS_PATH = fileURLToPath(
   new URL("../src/01_generatedConfigs/columnConfigs.ts", import.meta.url),
 );
 const FUNCTION_NAME = "generateConfigFiles";
-// clasp's "default" login is used for push/deploy and needs different OAuth
-// scopes than clasp run (which needs the script's own manifest scopes, via
-// `clasp login --use-project-scopes`). The two logins overwrite each other
-// under the same credential slot, so `clasp run` uses this separate named
-// profile instead of clobbering the default one used for push/deploy.
 const CLASP_RUN_USER = "desktop-clasp-run";
+
+class ConfigFilesGenerator {
+  functionName = "generateConfigFiles";
+  claspRunUser = "desktop-clasp-run";
+  paths = {
+    sheetConfigs: fileURLToPath(
+      new URL("../src/01_generatedConfigs/sheetConfigs.ts", import.meta.url),
+    ),
+    columnConfigs: fileURLToPath(
+      new URL("../src/01_generatedConfigs/columnConfigs.ts", import.meta.url),
+    ),
+  };
+}
 
 function runClaspFunction() {
   const { stdout, stderr, status, error } = spawnSync(

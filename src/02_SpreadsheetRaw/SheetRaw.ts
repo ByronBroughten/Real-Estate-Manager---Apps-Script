@@ -1,6 +1,6 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import { Arr } from "../utils/Arr";
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnRaw } from "./ColumnRaw";
@@ -130,7 +130,7 @@ export class SheetRaw extends SheetCommonRaw {
     }
   }
   private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
-    const colsData = valS.assert(sheetData, "sheetData");
+    const colsData = Val.assert(sheetData, "sheetData");
     colsData.forEach((colData) => {
       // Payload doesn't include default values of 0
       const colIdxBase = colData.startColumn ?? 0;

@@ -1,6 +1,5 @@
 import { makeStructuredConfig } from "./00_base/base";
 import type { ColumnFullNameSimple } from "./01_generatedConfigs/columnConfigsTypes";
-import { ColumnConfigOperator } from "./04_SpreadsheetNamed/ColumnConfigOperator";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed";
 import type { FilterWithSuffix } from "./utils/Str";
 
@@ -13,9 +12,7 @@ export type ApiEndpointName = FilterWithSuffix<
 export const businessEndpoints = makeStructuredConfig(
   {} as Record<ApiEndpointName, () => void>,
   {
-    spreadsheetControls_appendSheetAndColumnConfigRowsRunAndStatus: () => {
-      const columnConfig = ColumnConfigOperator.init();
-    },
+    spreadsheetControls_appendSheetAndColumnConfigRowsRunAndStatus: () => {},
     spreadsheetControls_fillRowIdsRunAndStatus: () => {
       const spreadsheet = SpreadsheetNamed.init();
       spreadsheet.fillMissingRowIds();

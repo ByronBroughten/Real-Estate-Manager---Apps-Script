@@ -1,6 +1,6 @@
 import { nameDelimiter, type NameDelimiter } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 import type { ColumnConfig, ColumnConfigStored } from "./columnConfigBuilder";
 import { columnConfigs } from "./columnConfigs";
 import {
@@ -85,14 +85,14 @@ export function getColumnTraitByIndex<K extends keyof ColumnConfig>(
   columnId: string,
   key: K,
 ): ColumnConfig[K] {
-  const colTraits = valS.assert(
+  const colTraits = Val.assert(
     columnConfigsIndexed.get(sheetId)?.get(columnId),
     `column attributes for sheetId=${sheetId}, columnId=${columnId}`,
   );
   return colTraits[key];
 }
 export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
-  return valS
+  return Val
     .assert(
       columnConfigsIndexed.get(sheetGid),
       `column attributes for sheetId=${sheetGid}`,

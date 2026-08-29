@@ -4,8 +4,11 @@ import {
   stubLogger,
   stubPropertiesService,
 } from "../testSupport/fakeAppsScriptGlobals";
-import { buildGridRows, stubSheetsService } from "../testSupport/fakeSheetsService";
-import { syncAndFlushConfigSheets, generateConfigFilesSources } from "./ConfigFilesGenerator";
+import {
+  buildGridRows,
+  stubSheetsService,
+} from "../testSupport/fakeSheetsService";
+import { ConfigOrchestrator } from "./ConfigOrchestrator";
 
 // Real, already-committed sheet — ColumnConfigOperator's column-ID lifecycle
 // (gatherColumnIdsForSheetGidsApiAccesses/addMissingColumnids/etc.) resolves
@@ -79,13 +82,14 @@ describe("syncAndFlushConfigSheets", () => {
   it("flushes Sheet Config and Column Config changes in a single batchUpdate call", () => {
     const { batchUpdateCalls } = seedFixture();
 
-    const { sheetConfigOperator } = syncAndFlushConfigSheets();
+    const orchestrator = ConfigOrchestrator.init();
+    orchestrator.syncAndFlushConfigSheets();
 
     expect(batchUpdateCalls.length).toBe(1);
     expect(batchUpdateCalls[0]?.requests?.length).toBeGreaterThan(0);
     // The column ID gathered from the "test" sheet made it into a newly
     // appended Column Config row, which is part of what got flushed.
-    expect(sheetConfigOperator.sheetEntries().test).toEqual({
+    expect(orchestrator.sheetConfigOperator.sheetEntries().test).toEqual({
       sheetGid: TEST_SHEET_GID,
       idPrefix: "test",
       hasIdColumn: true,
@@ -93,12 +97,11 @@ describe("syncAndFlushConfigSheets", () => {
   });
 });
 
-describe("generateConfigFilesSources", () => {
+describe("generateConfigFiles", () => {
   it("returns both files' source as one JSON payload, reflecting the synced state", () => {
     seedFixture();
 
-    const parsed = JSON.parse(generateConfigFilesSources());
-
+    const parsed = JSON.parse(ConfigOrchestrator.init().generateConfigFiles());
     expect(typeof parsed.sheetConfigs).toBe("string");
     expect(typeof parsed.columnConfigs).toBe("string");
     expect(parsed.sheetConfigs).toContain('"test"');

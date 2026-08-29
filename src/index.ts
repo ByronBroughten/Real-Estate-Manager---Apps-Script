@@ -1,8 +1,4 @@
-import {
-  generateConfigFilesSources,
-  syncAndFlushConfigSheets,
-} from "./04_SpreadsheetNamed/ConfigFilesGenerator.js";
-import { SheetConfigOperator } from "./04_SpreadsheetNamed/SheetConfigOperator.js";
+import { ConfigOrchestrator } from "./04_SpreadsheetNamed/ConfigOrchestrator.js";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { Api } from "./06_API/Api.js";
 import { businessEndpoints } from "./businessEndpoints.js";
@@ -33,13 +29,11 @@ function _indexMainTest() {
   const testSheetId = 2089200354;
   const testSheetName = "test";
   type TestName = keyof typeof mainTests;
-  const nameOfTestToRun: TestName = "updateSheetConfig";
+  const nameOfTestToRun: TestName = "syncConfigSheets";
   const ss = SpreadsheetNamed.init();
   const mainTests = {
-    updateSheetConfig() {
-      const operator = SheetConfigOperator.init();
-      operator.fetchAndUpdateAll();
-      operator.ss.batchUpdateGSheets();
+    syncConfigSheets() {
+      ConfigOrchestrator.init().syncAndFlushConfigSheets();
     },
     addColumnIds() {
       const test = ss.sheet("test");
@@ -57,25 +51,6 @@ function _indexMainTest() {
     },
   } as const;
   mainTests[nameOfTestToRun]();
-}
-
-// Bare manual entry point for repairing the live Sheet Config/Column
-// Config sheets without regenerating the local TS files. Not wired to an
-// npm script — run ad hoc via `clasp run syncConfigSheets` when needed.
-function syncConfigSheets(): void {
-  syncAndFlushConfigSheets();
-}
-
-function generateConfigFiles(): string {
-  return generateConfigFilesSources();
-}
-
-function triggerAuth(): void {
-  return;
-}
-
-function triggerFirstOfMonth() {
-  // Placeholder
 }
 
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {

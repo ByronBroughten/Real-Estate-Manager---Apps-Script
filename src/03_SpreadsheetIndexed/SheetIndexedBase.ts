@@ -1,4 +1,4 @@
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 import type {
   IndexedSheetState,
   PreFetchGridRange,
@@ -34,7 +34,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
     }
   }
   protected get sheetState(): IndexedSheetState {
-    return valS.assert(
+    return Val.assert(
       this.indexedSheetsState.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );

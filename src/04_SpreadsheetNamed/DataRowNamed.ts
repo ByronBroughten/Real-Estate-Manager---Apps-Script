@@ -9,7 +9,7 @@ import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
 import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 import { CellNamed } from "./CellNamed";
 import { RowNamedBase } from "./ClassBases/RowNamedBase";
 import type { ColumnSchemaNamed } from "./ColumnSchemaNamed";
@@ -52,26 +52,26 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   }
   valueStringNotEmpty<CN extends ColumnName<SN>>(columnName: CN): string {
     const value = this.value(columnName);
-    return valS.validate.stringNotEmpty(value);
+    return Val.validate.stringNotEmpty(value);
   }
   valueNumber<CN extends ColumnName<SN>>(columnName: CN): number {
     const value = this.value(columnName);
-    return valS.validate.number(value);
+    return Val.validate.number(value);
   }
   valueDate<CN extends ColumnName<SN>>(columnName: CN): Date {
     const value = this.value(columnName);
-    return valS.validate.date(value);
+    return Val.validate.date(value);
   }
   valueDateOrEmpty<CN extends ColumnName<SN>>(columnName: CN): Date | "" {
     const value = this.value(columnName);
-    return valS.validate.dateOrEmpty(value);
+    return Val.validate.dateOrEmpty(value);
   }
   dateValueAfterOrGivenDate<CN extends ColumnName<SN>>(
     columnName: CN,
     date: Date = new Date(),
   ): Date {
     const dateValue = this.valueDateOrEmpty(columnName);
-    if (!valS.is.date(dateValue)) {
+    if (!Val.is.date(dateValue)) {
       return date;
     }
 
@@ -86,7 +86,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     date: Date = new Date(),
   ): Date {
     const dateValue = this.valueDateOrEmpty(columnName);
-    if (!valS.is.date(dateValue)) {
+    if (!Val.is.date(dateValue)) {
       return date;
     }
 
@@ -101,7 +101,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     date: Date = new Date(),
   ): Date {
     const dateValue = this.valueDateOrEmpty(columnName);
-    if (valS.is.date(dateValue)) {
+    if (Val.is.date(dateValue)) {
       return dateValue;
     } else {
       return date;

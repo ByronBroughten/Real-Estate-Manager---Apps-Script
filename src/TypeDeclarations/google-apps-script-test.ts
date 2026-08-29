@@ -1,11 +1,11 @@
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 
 export function _testCustomTableTypes(spreadsheetId: string) {
   // 1. Reading tables from a SheetNamed response
-  const sheetsService = valS.assert(Sheets, "Sheets");
+  const sheetsService = Val.assert(Sheets, "Sheets");
   const ss = sheetsService.Spreadsheets.get(spreadsheetId);
-  const sheets = valS.assert(ss.sheets, "ss.sheets");
-  const firstSheet = valS.assert(sheets[0], "sheets[0]");
+  const sheets = Val.assert(ss.sheets, "ss.sheets");
+  const firstSheet = Val.assert(sheets[0], "sheets[0]");
 
   firstSheet.properties?.title;
 
@@ -14,7 +14,7 @@ export function _testCustomTableTypes(spreadsheetId: string) {
     firstSheet.tables;
 
   if (tables && tables.length > 0) {
-    const table = valS.assert(tables[0], "tables[0]");
+    const table = Val.assert(tables[0], "tables[0]");
     console.log(`Found table: ${table.name} (ID: ${table.tableId})`);
   }
 

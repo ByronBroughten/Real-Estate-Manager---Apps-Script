@@ -1,6 +1,6 @@
 import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
 import { Obj } from "../../utils/Obj";
-import { valS } from "../../utils/validation";
+import { Val } from "../../utils/Val";
 import type { RawRowState, RawSheetState } from "../ClassTypes/RawState";
 import {
   SpreadsheetRawBase,
@@ -41,9 +41,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     const tables = sheet.tables;
     if (tables && tables.length > 0) {
-      const table = valS.assert(tables[0], "table");
+      const table = Val.assert(tables[0], "table");
       this.sheetState.activeTable = {
-        tableId: valS.assert(table.tableId, "tableId"),
+        tableId: Val.assert(table.tableId, "tableId"),
         ...Obj.validatePick(
           table.range,
           "number",
@@ -56,13 +56,13 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
   }
   protected get sheetState(): RawSheetState {
-    return valS.assert(
+    return Val.assert(
       this.rawState.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }
   getRowState(rowIndex: number): RawRowState {
-    return valS.assert(
+    return Val.assert(
       this.sheetState.rowStates.get(rowIndex),
       `rowState for row ${rowIndex}`,
     );

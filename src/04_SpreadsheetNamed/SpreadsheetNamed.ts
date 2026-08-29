@@ -4,7 +4,7 @@ import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/Shee
 import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed.js";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
-import { valS } from "../utils/validation.js";
+import { Val } from "../utils/Val.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
@@ -101,7 +101,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       return Obj.keys(sheetColumnNames).reduce((acc, sheetName) => {
         const schema = this.schema.sheet(sheetName);
         acc[sheetName] = schema.columnSpecifierToStandard(
-          valS.assert<ColumnSpecifierNamed<SN>>(
+          Val.assert<ColumnSpecifierNamed<SN>>(
             sheetColumnNames[sheetName],
             `sheetColumnNames[${sheetName}]`,
           ),
@@ -129,7 +129,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     const specifiers =
       typeof rowSpecifier === "string" ? [rowSpecifier] : rowSpecifier;
     Obj.keys(sheetColumnNames).forEach((sheetName) => {
-      const columnNames = valS.assert(
+      const columnNames = Val.assert(
         sheetColumnNames[sheetName],
         `sheetColumnNames[${sheetName}]`,
       );

@@ -1,7 +1,7 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
 import { Str, type RemoveFirstN, type TextJoin } from "./Str";
-import { valS, type PureValue, type PureValueName } from "./validation";
+import { Val, type PureValue, type PureValueName } from "./Val";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type DistributiveOmit<T, K extends keyof T> = T extends any
@@ -154,7 +154,7 @@ export const Obj = {
   ): Record<KS, PureValue<VN>> {
     return keys.reduce(
       (objNext, key) => {
-        const value = valS.validate[valueName](obj[key]) as PureValue<VN>;
+        const value = Val.validate[valueName](obj[key]) as PureValue<VN>;
         objNext[key] = value;
         return objNext;
       },

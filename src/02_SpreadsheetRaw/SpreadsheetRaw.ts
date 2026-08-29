@@ -1,5 +1,5 @@
 import type { GoogleSpreadsheet } from "../00_base/AppsScriptTypes";
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
   RowChangesToSave,
@@ -12,7 +12,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return new SpreadsheetRaw(SpreadsheetRawBase.initSpreadsheetRawProps());
   }
   private get sheetsService(): GoogleAppsScript.Sheets {
-    return valS.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
+    return Val.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
   }
   get schema() {
     return this.baseSchema;
@@ -80,9 +80,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     };
   }
   private _addDataToState(gss: GoogleSpreadsheet) {
-    valS.assert(gss.sheets, "gss.sheets").forEach((gSheet) => {
-      const properties = valS.assert(gSheet.properties, "gSheet.properties");
-      const sheetGid = valS.assert(properties.sheetId, "sheetId");
+    Val.assert(gss.sheets, "gss.sheets").forEach((gSheet) => {
+      const properties = Val.assert(gSheet.properties, "gSheet.properties");
+      const sheetGid = Val.assert(properties.sheetId, "sheetId");
       const sheet = this.sheet(sheetGid);
       sheet.integrateSheetState(gSheet);
     });

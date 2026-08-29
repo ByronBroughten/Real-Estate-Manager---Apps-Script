@@ -1,6 +1,6 @@
 # Claude instructions for this repo
 
-Read `README.md` before making non-trivial changes — it explains the architecture, naming vocabulary, and generated-data boundaries this project depends on. The short version:
+Read `README.md` before making non-trivial changes — it explains the architecture, naming vocabulary, and generated-data boundaries this project depends on. Read `STYLE.md` before writing or refactoring TypeScript — code-shape rules (classes over function modules, getters over returned state bags, dead-code deletion) distilled from the user's own refactors of AI-generated code. The short version:
 
 - **`src/00_*`–`05_Api/` are a generic Sheets+Apps-Script framework; `src/businessEndpoints.ts`/`src/businessEndpointHandlers/` are the only place real-estate-specific logic belongs.** Dependencies only point downward by folder number — never import from a higher-numbered tier. `businessEndpoints.ts`/`businessEndpointHandlers/` sit outside the numbering (like `utils/`) and may import from any tier.
 - **`02_SpreadsheetRaw` is raw-index Sheets API access only** — whole rows/columns by GID + index, sheet properties, and `UniformRowRaw`. It never resolves a column by name or `columnId`; that's `03_SpreadsheetIndexed`/`04_SpreadsheetNamed`'s job, including generating/updating `01_generatedConfigs` (`SheetConfigOperator`/`ColumnConfigOperator`, tier 04) — config maintenance is no longer Raw's responsibility.

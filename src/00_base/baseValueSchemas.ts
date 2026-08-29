@@ -1,5 +1,5 @@
 import { Dat } from "../utils/Dat";
-import { valS } from "../utils/validation";
+import { Val } from "../utils/Val";
 import {
   cellValueNames,
   type CellValueName,
@@ -29,27 +29,27 @@ export const baseValueSchemas: CellValueSchemas = {
         "Attempted to make default value for an ID column from valTraits; it should be generated with a provided id prefix.",
       );
     },
-    strictValidate: valS.validate.string,
+    strictValidate: Val.validate.string,
   }),
   string: vsc({
     type: "" as string,
     makeDefault: () => "",
-    strictValidate: valS.validate.string,
+    strictValidate: Val.validate.string,
   }),
   number: vsc({
     type: 0 as number | "",
     makeDefault: () => "" as const,
-    strictValidate: valS.validate.number,
+    strictValidate: Val.validate.number,
   }),
   boolean: vsc({
     type: false as boolean | "",
     makeDefault: () => false,
-    strictValidate: valS.validate.boolean,
+    strictValidate: Val.validate.boolean,
   }),
   date: vsc({
     type: "" as number | "",
     makeDefault: () => Dat.dateToSerial(new Date()),
-    strictValidate: valS.validate.number,
+    strictValidate: Val.validate.number,
   }),
 } as const;
 

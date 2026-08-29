@@ -1,5 +1,5 @@
 import { vsc, type ValueSchemaBase } from "../00_base/valueSchema";
-import { validationError } from "../utils/validation";
+import { validationError } from "../utils/Val";
 import {
   getValueConfigValueArr,
   valueConfigNames,
