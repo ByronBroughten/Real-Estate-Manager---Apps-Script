@@ -63,7 +63,7 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this._initSheetGidsApiAccesses();
     this._gatherColumnIdsForSheetGidsApiAccesses();
     this._gatherActualColumnFactsForSheetGidsApiAccesses();
-    this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
+    this.ss.fetchAllPrepped(true);
 
     this._addMissingColumnIds();
     this._pruneColumnRows();
