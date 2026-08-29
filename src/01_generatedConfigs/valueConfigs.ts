@@ -1,10 +1,4 @@
-import { makeStructuredConfig } from "../00_base/base";
-
-export function makeValueConfigs<T extends Record<string, readonly string[]>>(
-  valueConfigs: T,
-): T {
-  return makeStructuredConfig({} as Record<string, readonly string[]>, valueConfigs);
-}
+import { makeValueConfigs } from "../00_base/baseValueSchemas";
 
 export const valueConfigs = makeValueConfigs({
   transactionDescription: [

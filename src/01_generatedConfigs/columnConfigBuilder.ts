@@ -18,8 +18,9 @@ export interface ColumnConfigStored<
 // isn't stored on the literal entry itself (it's the entry's key in
 // columnConfigs.ts) but is available as a trait via getColumnTraitByName /
 // getColumnTraitByIndex regardless of which way the record was looked up.
-export interface ColumnConfig<VN extends ValueName = ValueName>
-  extends ColumnConfigStored<VN> {
+export interface ColumnConfig<
+  VN extends ValueName = ValueName,
+> extends ColumnConfigStored<VN> {
   columnName: string;
 }
 function makeColumnConfig<VN extends ValueName>(

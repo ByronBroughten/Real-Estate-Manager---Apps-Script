@@ -25,6 +25,12 @@ export class DataColumnNamed<
   get valueArr(): ColumnValue<SN, CN>[] {
     return this.indexed.valueArr as ColumnValue<SN, CN>[];
   }
+  get valueArrNotEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+    return this.indexed.valueArrNotEmpty as StrictExclude<
+      ColumnValue<SN, CN>,
+      ""
+    >[];
+  }
   hasValue(value: ColumnValue<SN, CN>): boolean {
     return this.valueArr.includes(value);
   }

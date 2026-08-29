@@ -4,7 +4,10 @@ import {
   stubLogger,
   stubPropertiesService,
 } from "../testSupport/fakeAppsScriptGlobals";
-import { buildGridRows, stubSheetsService } from "../testSupport/fakeSheetsService";
+import {
+  buildGridRows,
+  stubSheetsService,
+} from "../testSupport/fakeSheetsService";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 
 // Real committed columnId strings, so fixtures stay honest to what the
@@ -81,8 +84,8 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
   return columnConfigOperator;
 }
 
-describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
-  it("groups columns by resolved sheet name and skips incomplete/unresolvable rows", () => {
+describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
+  it("groups columns by resolved sheet name", () => {
     stubSheetsService({
       sheets: [
         {
@@ -96,15 +99,38 @@ describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [PROPERTY_GID, "c:prp:aaa", "Property", "Rent Amount", false, "number"],
-            5: [PROPERTY_GID, "c:prp:bbb", "Property", "Notes", false, "string"],
-            6: [NEW_SHEET_GID, "c:999002:ccc", "Brand New Sheet", "Some Field", false, "string"],
-            7: freshlyAppendedRowMissingHeaderAndValueName,
-            8: rowReferencingUnresolvableSheet,
+            4: [
+              PROPERTY_GID,
+              "c:prp:aaa",
+              "Property",
+              "Rent Amount",
+              false,
+              "number",
+            ],
+            5: [
+              PROPERTY_GID,
+              "c:prp:bbb",
+              "Property",
+              "Notes",
+              false,
+              "string",
+            ],
+            6: [
+              NEW_SHEET_GID,
+              "c:999002:ccc",
+              "Brand New Sheet",
+              "Some Field",
+              false,
+              "string",
+            ],
           }),
-          table: { endRowIndex: 9 },
+          table: { endRowIndex: 7 },
         },
-        { sheetId: PROPERTY_GID, title: "Property", rows: buildGridRows({ 3: [] }) },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+        },
         {
           sheetId: NEW_SHEET_GID,
           title: "Brand New Sheet",
@@ -113,7 +139,7 @@ describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
       ],
     });
 
-    const entries = initSyncedColumnConfigOperator().columnEntries();
+    const entries = initSyncedColumnConfigOperator().newColumnConfigs();
 
     expect(entries.property).toEqual({
       rentAmount: {
@@ -143,13 +169,67 @@ describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
         customDefaultValue: null,
       },
     });
-    // The incomplete row and the unresolvable-sheet row must not surface
-    // anywhere in the output.
-    expect(Object.values(entries).flatMap(Object.values)).not.toContainEqual(
-      expect.objectContaining({ columnId: "c:prp:ddd" }),
+  });
+
+  it("throws when a row is missing its header or value name", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
+          table: { endRowIndex: 4 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: freshlyAppendedRowMissingHeaderAndValueName,
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+        },
+      ],
+    });
+
+    expect(() => initSyncedColumnConfigOperator().newColumnConfigs()).toThrow(
+      /is empty/,
     );
-    expect(Object.values(entries).flatMap(Object.values)).not.toContainEqual(
-      expect.objectContaining({ columnId: "c:???:eee" }),
+  });
+
+  it("throws when a row references a sheetGid unresolvable in Sheet Config", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
+          table: { endRowIndex: 4 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: rowReferencingUnresolvableSheet,
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+        },
+      ],
+    });
+
+    expect(() => initSyncedColumnConfigOperator().newColumnConfigs()).toThrow(
+      /no corresponding sheet name in Sheet Config/,
     );
   });
 
@@ -167,16 +247,34 @@ describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [PROPERTY_GID, "c:prp:aaa", "Property", "Rent Amount", false, "number"],
-            5: [PROPERTY_GID, "c:prp:bbb", "Property", "Rent  Amount", false, "number"],
+            4: [
+              PROPERTY_GID,
+              "c:prp:aaa",
+              "Property",
+              "Rent Amount",
+              false,
+              "number",
+            ],
+            5: [
+              PROPERTY_GID,
+              "c:prp:bbb",
+              "Property",
+              "Rent  Amount",
+              false,
+              "number",
+            ],
           }),
           table: { endRowIndex: 6 },
         },
-        { sheetId: PROPERTY_GID, title: "Property", rows: buildGridRows({ 3: [] }) },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+        },
       ],
     });
 
-    expect(() => initSyncedColumnConfigOperator().columnEntries()).toThrow(
+    expect(() => initSyncedColumnConfigOperator().newColumnConfigs()).toThrow(
       /duplicate column name "rentAmount"/,
     );
   });
@@ -212,8 +310,22 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr01", "Stale Title", "Stale Header", true, "string"],
-            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "Base ID", false, "string"],
+            4: [
+              TEST_SHEET_GID,
+              "c:test:corr01",
+              "Stale Title",
+              "Stale Header",
+              true,
+              "string",
+            ],
+            5: [
+              TEST_SHEET_GID,
+              "c:test:corr02",
+              "Test",
+              "Base ID",
+              false,
+              "string",
+            ],
           }),
           table: { endRowIndex: 6 },
         },
@@ -261,7 +373,14 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr03", "Test", "Description", false, "string"],
+            4: [
+              TEST_SHEET_GID,
+              "c:test:corr03",
+              "Test",
+              "Description",
+              false,
+              "string",
+            ],
           }),
           table: { endRowIndex: 5 },
         },
@@ -302,7 +421,14 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr04", "Test", "Move-in Date", false, "string"],
+            4: [
+              TEST_SHEET_GID,
+              "c:test:corr04",
+              "Test",
+              "Move-in Date",
+              false,
+              "string",
+            ],
           }),
           table: { endRowIndex: 5 },
         },

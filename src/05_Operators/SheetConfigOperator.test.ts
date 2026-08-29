@@ -4,7 +4,10 @@ import {
   stubLogger,
   stubPropertiesService,
 } from "../testSupport/fakeAppsScriptGlobals";
-import { buildGridRows, stubSheetsService } from "../testSupport/fakeSheetsService";
+import {
+  buildGridRows,
+  stubSheetsService,
+} from "../testSupport/fakeSheetsService";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 
 // Real committed columnId strings for the Sheet Config sheet's own columns
@@ -16,14 +19,20 @@ const SHEET_CONFIG_GID = 210603630;
 const PROPERTY_GID = 999001;
 const NEW_SHEET_GID = 999002;
 
-const existingPropertyConfigRow = [PROPERTY_GID, "Property", false, true, "prp"];
+const existingPropertyConfigRow = [
+  PROPERTY_GID,
+  "Property",
+  false,
+  true,
+  "prp",
+];
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 
-describe("SheetConfigOperator.sheetEntries / toFileSource", () => {
+describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
   it("carries forward an existing sheet and appends+corrects a brand-new one", () => {
     stubSheetsService({
       sheets: [
@@ -44,7 +53,11 @@ describe("SheetConfigOperator.sheetEntries / toFileSource", () => {
         },
         // Referenced by the existing row above; no "ID" header, so
         // hasIdColumn should stay false (a no-op correction).
-        { sheetId: PROPERTY_GID, title: "Property", rows: buildGridRows({ 3: [] }) },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+        },
         // Present in the spreadsheet but with NO existing Sheet Config
         // row — this is the exact regression scenario from the original
         // bug: a sheet new to this run must resolve correctly from this
@@ -59,14 +72,14 @@ describe("SheetConfigOperator.sheetEntries / toFileSource", () => {
 
     const operator = SheetConfigOperator.init();
     operator.fetchAndUpdateAll();
-    const entries = operator.sheetEntries();
+    const sheetConfigs = operator.newSheetConfigs();
 
-    expect(entries.property).toEqual({
+    expect(sheetConfigs.property).toEqual({
       sheetGid: PROPERTY_GID,
       idPrefix: "prp",
       hasIdColumn: false,
     });
-    expect(entries.brandNewSheet).toEqual({
+    expect(sheetConfigs.brandNewSheet).toEqual({
       sheetGid: NEW_SHEET_GID,
       idPrefix: "",
       hasIdColumn: false,
@@ -101,9 +114,7 @@ describe("SheetConfigOperator.sheetEntries / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     operator.fetchAndUpdateAll();
 
-    expect(operator.sheetNamesByGid().get(NEW_SHEET_GID)).toBe(
-      "brandNewSheet",
-    );
+    expect(operator.sheetNamesByGid().get(NEW_SHEET_GID)).toBe("brandNewSheet");
     expect(operator.toFileSource()).toContain('"brandNewSheet"');
   });
 });

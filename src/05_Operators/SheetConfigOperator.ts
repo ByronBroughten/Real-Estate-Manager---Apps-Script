@@ -1,13 +1,8 @@
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { type SheetConfigsBase } from "../01_generatedConfigs/sheetConfigBuilder";
-import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
-import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
-import type { ColumnNamed } from "./ColumnNamed";
-import type { SheetNamed } from "./SheetNamed";
-import { SpreadsheetNamed } from "./SpreadsheetNamed";
-import { SpreadsheetSchemaNamed } from "./SpreadsheetSchemaNamed";
+import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { GenericSheetOperator } from "./GenericSheetOperator";
 
-export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
+export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "sheetConfig",
@@ -18,20 +13,6 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     return new SheetConfigOperator(
       SheetConfigOperator.initSpreadsheetNamedProps(),
     );
-  }
-  get sheet(): SheetNamed<"sheetConfig"> {
-    return this.ss.sheet(this.sheetName);
-  }
-  column<CN extends ColumnName<"sheetConfig">>(
-    columnName: CN,
-  ): ColumnNamed<"sheetConfig", CN> {
-    return this.sheet.column(columnName);
-  }
-  get ss(): SpreadsheetNamed {
-    return new SpreadsheetNamed(this.spreadsheetNamedProps);
-  }
-  get schema(): SpreadsheetSchemaNamed {
-    return new SpreadsheetSchemaNamed();
   }
   fetchAndUpdateAll(): this {
     this.ss.raw.fetchAllSheetProperties();
@@ -107,24 +88,24 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
     });
     return gids;
   }
-  sheetEntries(): SheetConfigsBase {
+  newSheetConfigs(): SheetConfigsBase {
     const col = this.sheet.data.columns(
       "sheetGid",
       "sheetTitle",
       "hasIdColumn",
       "idPrefix",
     );
-    const entries: SheetConfigsBase = {};
+    const sheetConfigs: SheetConfigsBase = {};
     this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.sheetNameFromTitle(title);
-      entries[sheetName] = {
+      sheetConfigs[sheetName] = {
         sheetGid: col.sheetGid.valueNotEmpty(rowIndex),
         idPrefix: col.idPrefix.value(rowIndex),
         hasIdColumn: col.hasIdColumn.valueNotEmpty(rowIndex),
       };
     });
-    return entries;
+    return sheetConfigs;
   }
   // Lets ColumnConfigOperator resolve a Column Config row's sheetGid to the
   // sheetName it'll be nested under in columnConfigs.ts, using this same
@@ -132,7 +113,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   // deployed sheetConfigs.ts.
   sheetNamesByGid(): Map<number, string> {
     const map = new Map<number, string>();
-    Object.entries(this.sheetEntries()).forEach(([sheetName, config]) => {
+    Object.entries(this.newSheetConfigs()).forEach(([sheetName, config]) => {
       map.set(config.sheetGid, sheetName);
     });
     return map;
@@ -142,7 +123,7 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
       `import { makeSheetConfigs } from "./sheetConfigBuilder";`,
       ``,
       `export const sheetConfigs = makeSheetConfigs(${JSON.stringify(
-        this.sheetEntries(),
+        this.newSheetConfigs(),
         null,
         2,
       )});`,

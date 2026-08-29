@@ -39,6 +39,11 @@ export class DataColumnIndexed<
   get valueArr(): Value<VN>[] {
     return this.raw.valueArr as Value<VN>[];
   }
+  get valueArrNotEmpty(): Value<VN>[] {
+    return this.sheet.data.rowIndexesActive.map((rowIndex) =>
+      this.cell(rowIndex).valueNotEmpty(),
+    );
+  }
   hasValue(value: Value<VN>): boolean {
     return this.valueArr.includes(value);
   }

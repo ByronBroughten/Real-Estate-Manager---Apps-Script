@@ -4,19 +4,15 @@ import {
   type ValueConfigName,
 } from "../01_generatedConfigs/valueConfigsTypes";
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
-import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
 import type { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
 import type { DataColumnRaw } from "../02_SpreadsheetRaw/ClassBases/DataColumnRaw";
+import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { Str } from "../utils/Str";
 import { Val, type PureValueName } from "../utils/Val";
-import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
-import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
-import type { DataSheetNamed } from "./DataSheetNamed";
+import { GenericSheetOperator } from "./GenericSheetOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
-import type { SheetNamed } from "./SheetNamed";
-import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
-export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
+export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   private sheetGidsApiAccesses: Set<number>;
   constructor(props: SpreadsheetNamedProps) {
     super({
@@ -30,23 +26,11 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
       ColumnConfigOperator.initSpreadsheetNamedProps(),
     );
   }
-  get ss(): SpreadsheetNamed {
-    return new SpreadsheetNamed(this.spreadsheetNamedProps);
-  }
-  get sheet(): SheetNamed<"columnConfig"> {
-    return this.ss.sheet(this.sheetName);
-  }
-  get sheetData(): DataSheetNamed<"columnConfig"> {
-    return this.sheet.data;
-  }
   get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.spreadsheetNamedProps);
   }
   get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
     return this.sheetConfigOperator.sheet.data;
-  }
-  get schema(): SchemaBase {
-    return new SchemaBase();
   }
   fetchAndUpdateColumnConfig(): this {
     // for _initSheetGidsApiAccesses
@@ -72,74 +56,6 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this._appendColumnRows();
     this._updateProgrammaticValues();
     return this;
-  }
-  // Pure computation from whatever is already fetched/synced in memory (via
-  // fetchAndUpdateColumnConfig) — does no fetching or live-sheet writing of
-  // its own. header/valueName are normally corrected by
-  // _updateProgrammaticValues before this runs; a row still missing either
-  // (e.g. read via a partial sync that skipped that step) is skipped rather
-  // than emitted with garbage data.
-  columnEntries(): Record<string, TableColumnConfigs> {
-    const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
-    const col = this.sheetData.columns(
-      "sheetGid",
-      "columnId",
-      "header",
-      "isFormula",
-      "valueName",
-    );
-    const entries: Record<string, TableColumnConfigs> = {};
-    const skipped: string[] = [];
-    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
-      const columnId = col.columnId.valueNotEmpty(rowIndex);
-      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
-      const header = col.header.value(rowIndex);
-      const valueName = col.valueName.value(rowIndex);
-      if (!header || !valueName) {
-        skipped.push(columnId);
-        return;
-      }
-      const sheetName = sheetNamesByGid.get(sheetGid);
-      if (!sheetName) {
-        skipped.push(columnId);
-        return;
-      }
-      const columnName = Str.sentenceToCamelCase(header);
-      const sheetEntries = (entries[sheetName] ??= {});
-      if (sheetEntries[columnName]) {
-        throw new Error(
-          `generateColumnConfigFileSource: duplicate column name "${columnName}" ` +
-            `derived from header "${header}" on sheet "${sheetName}".`,
-        );
-      }
-      sheetEntries[columnName] = {
-        columnId,
-        valueName: valueName as ValueName,
-        header,
-        isFormula: col.isFormula.valueNotEmpty(rowIndex),
-        emptyAllowed: false,
-        customDefaultValue: null,
-      };
-    });
-    if (skipped.length > 0) {
-      Logger.log(
-        `generateColumnConfigFileSource: skipped ${skipped.length} column(s) ` +
-          `missing header/value name or an unresolved sheet: ${skipped.join(", ")}`,
-      );
-    }
-    return entries;
-  }
-  toFileSource(): string {
-    return [
-      `import { makeColumnConfigs } from "./columnConfigBuilder";`,
-      ``,
-      `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
-        this.columnEntries(),
-        null,
-        2,
-      )});`,
-      ``,
-    ].join("\n");
   }
   private _initSheetGidsApiAccesses(): this {
     this.sheetGidsApiAccesses = new Set(
@@ -243,26 +159,26 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this.sheetData.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       const columnId = col.columnId.valueNotEmpty(rowIndex);
-      const namedSheet = this.ss.sheetByGid(sheetGid);
-      const sheet = namedSheet.raw;
-      const colIndex = namedSheet.indexed.column(columnId).colIndex;
+      const sheetNamed = this.ss.sheetByGid(sheetGid);
+      const sheetRaw = sheetNamed.raw;
+      const colIndex = sheetNamed.indexed.column(columnId).colIndex;
 
-      const actualSheetTitle = sheet.title;
+      const actualSheetTitle = sheetRaw.title;
       if (col.sheetTitle.value(rowIndex) !== actualSheetTitle) {
         col.sheetTitle.cell(rowIndex).updateValue(actualSheetTitle);
         updatedValues++;
       }
 
-      const actualHeader = sheet.headerRow.value(colIndex);
+      const actualHeader = sheetRaw.headerRow.value(colIndex);
       if (col.header.value(rowIndex) !== actualHeader) {
         col.header.cell(rowIndex).updateValue(actualHeader);
         updatedValues++;
       }
 
-      const dataCell = sheet
-        .dataRowRaw(sheet.schema.topDataRowIdx)
+      const dataCell = sheetRaw
+        .dataRowRaw(this.baseSchema.topDataRowIdx)
         .cell(colIndex);
-      const dataColumn = sheet.column(colIndex).data;
+      const dataColumn = sheetRaw.data.column(colIndex);
       const actualIsFormula = dataColumn.activeIsFormula;
       if (col.isFormula.value(rowIndex) !== actualIsFormula) {
         col.isFormula.cell(rowIndex).updateValue(actualIsFormula);
@@ -286,7 +202,7 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     dataCell,
     dataColumn,
   }: ActualValueNameProps): ValueName {
-    if (header === "Base ID") {
+    if (header === "ID") {
       return "id";
     }
     return (
@@ -333,6 +249,68 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
       return "number";
     }
     return "string";
+  }
+  // Pure computation from whatever is already fetched/synced in memory (via
+  // fetchAndUpdateColumnConfig) — does no fetching or live-sheet writing of
+  // its own. header/valueName/sheetGid resolution are all guaranteed by a
+  // completed fetchAndUpdateColumnConfig run (_updateProgrammaticValues
+  // corrects header/valueName for every active row; Google Sheets itself
+  // never leaves a native table's header cell blank; _pruneColumnRows drops
+  // any row whose sheetGid isn't in the freshly-synced Sheet Config), so a
+  // row still failing one of these checks means the sync didn't actually
+  // complete — that's a bug to surface, not data to silently drop.
+  newColumnConfigs(): Record<string, TableColumnConfigs> {
+    const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
+    const col = this.sheetData.columns(
+      "sheetGid",
+      "columnId",
+      "header",
+      "isFormula",
+      "valueName",
+    );
+    const columnConfigs: Record<string, TableColumnConfigs> = {};
+    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+      const columnId = col.columnId.valueNotEmpty(rowIndex);
+      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
+      const header = col.header.valueNotEmpty(rowIndex);
+      const valueName = col.valueName.valueNotEmpty(rowIndex);
+      const sheetName = sheetNamesByGid.get(sheetGid);
+      if (!sheetName) {
+        throw new Error(
+          `generateColumnConfigFileSource: column "${columnId}" references sheetGid ` +
+            `${sheetGid}, which has no corresponding sheet name in Sheet Config.`,
+        );
+      }
+      const columnName = Str.sentenceToCamelCase(header);
+      const tableColumnConfigs = (columnConfigs[sheetName] ??= {});
+      if (tableColumnConfigs[columnName]) {
+        throw new Error(
+          `generateColumnConfigFileSource: duplicate column name "${columnName}" ` +
+            `derived from header "${header}" on sheet "${sheetName}".`,
+        );
+      }
+      tableColumnConfigs[columnName] = {
+        columnId,
+        valueName: valueName as ValueName,
+        header,
+        isFormula: col.isFormula.valueNotEmpty(rowIndex),
+        emptyAllowed: false,
+        customDefaultValue: null,
+      };
+    });
+    return columnConfigs;
+  }
+  toFileSource(): string {
+    return [
+      `import { makeColumnConfigs } from "./columnConfigBuilder";`,
+      ``,
+      `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
+        this.newColumnConfigs(),
+        null,
+        2,
+      )});`,
+      ``,
+    ].join("\n");
   }
 }
 

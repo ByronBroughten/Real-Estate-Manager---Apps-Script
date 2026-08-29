@@ -82,8 +82,14 @@ function seedFixture() {
         // range declared, now that
         // ColumnConfigOperator._updateProgrammaticValues reads both (for
         // the live isFormula/valueName facts, the latter via the table's
-        // column data-validation rules) for every api-access sheet.
-        rows: buildGridRows({ 0: ["c:test:xyz123"], 3: [], 4: [] }),
+        // column data-validation rules) for every api-access sheet. The
+        // header row (3) needs real text — newColumnConfigs() now throws
+        // rather than skips a column still missing one after a sync.
+        rows: buildGridRows({
+          0: ["c:test:xyz123"],
+          3: ["Some Header"],
+          4: [],
+        }),
         table: { endRowIndex: 5 },
       },
     ],
@@ -101,7 +107,7 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
     expect(batchUpdateCalls[0]?.requests?.length).toBeGreaterThan(0);
     // The column ID gathered from the "test" sheet made it into a newly
     // appended Column Config row, which is part of what got flushed.
-    expect(orchestrator.sheetConfigOperator.sheetEntries().test).toEqual({
+    expect(orchestrator.sheetConfigOperator.newSheetConfigs().test).toEqual({
       sheetGid: TEST_SHEET_GID,
       idPrefix: "test",
       hasIdColumn: true,
@@ -118,9 +124,8 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     expect(typeof parsed.columnConfigs).toBe("string");
     expect(parsed.sheetConfigs).toContain('"test"');
     // The "test" sheet's column ID was gathered and appended to Column
-    // Config as part of the sync, but toFileSource correctly leaves it out
-    // of the generated source — it has no header/valueName yet (nobody's
-    // filled those in on the sheet), so it'd be garbage data if emitted.
-    expect(parsed.columnConfigs).not.toContain("c:test:xyz123");
+    // Config as part of the sync, then given its real header/valueName by
+    // _updateProgrammaticValues before toFileSource read it back out.
+    expect(parsed.columnConfigs).toContain("c:test:xyz123");
   });
 });

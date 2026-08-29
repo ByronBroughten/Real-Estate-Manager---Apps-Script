@@ -35,6 +35,9 @@ export class SheetSchemaNamed<
   get sheetGid(): number {
     return this.trait("sheetGid");
   }
+  isColumnName(str: string): str is ColumnName<SN> {
+    return this.columnNames.includes(str as ColumnName<SN>);
+  }
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnSchemaNamed<SN, CN> {
     return new ColumnSchemaNamed(this.sheetName, columnName);
   }

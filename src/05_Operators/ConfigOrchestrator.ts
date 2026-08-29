@@ -1,7 +1,7 @@
-import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
-import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 // Syncs the live Sheet Config sheet, then (now that it's current) the live
 // Column Config sheet, sharing one ColumnConfigOperator's state so both

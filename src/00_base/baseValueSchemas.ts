@@ -2,6 +2,7 @@ import { Dat } from "../utils/Dat";
 import { Val } from "../utils/Val";
 import {
   cellValueNames,
+  makeStructuredConfig,
   type CellValueName,
   type CellValueNameToValue,
 } from "./base";
@@ -9,6 +10,9 @@ import { vsc, type ValueSchemaBase, type ValueSchemaKey } from "./valueSchema";
 
 export const baseValueNames = ["id", ...cellValueNames] as const;
 export type BaseValueName = (typeof baseValueNames)[number];
+export function isBaseValueName(x: unknown): boolean {
+  return baseValueNames.includes(x as BaseValueName);
+}
 
 interface BaseValues extends CellValueNameToValue {
   id: string;
@@ -65,4 +69,14 @@ export function getCellValTrait<
   K extends ValueSchemaKey,
 >(valueName: VN, key: K): CellValueTrait<VN, K> {
   return baseValueSchemas[valueName][key] as CellValueTrait<VN, K>;
+}
+
+export type ValueConfigsBase = Record<string, readonly string[]>;
+export function makeValueConfigs<T extends ValueConfigsBase>(
+  valueConfigs: T,
+): T {
+  return makeStructuredConfig(
+    {} as Record<string, readonly string[]>,
+    valueConfigs,
+  );
 }

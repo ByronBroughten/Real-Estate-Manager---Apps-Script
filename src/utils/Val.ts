@@ -7,16 +7,6 @@ export function validationError(
   return new ValidationError(`value "${value}" is not a ${notAWhat}`);
 }
 
-function assert<T>(
-  value: T | null | undefined,
-  whatNotFound: string = "Value",
-): T {
-  if (value === null || value === undefined) {
-    throw new Error(`${whatNotFound} not found.`);
-  }
-  return value;
-}
-
 type PureValueNamesToTypes = {
   string: string;
   number: number;
@@ -108,8 +98,29 @@ const _validateS = {
   },
 };
 
+function assert<T>(
+  value: T | null | undefined,
+  whatNotFound: string = "Value",
+): T {
+  if (value === null || value === undefined) {
+    throw new Error(`${whatNotFound} not found.`);
+  }
+  return value;
+}
+
+function assertStringNotEmpty<T extends string>(
+  value: T | null | undefined,
+  whatNotFound: string = "Value",
+): T {
+  if (value === null || value === undefined || value === "") {
+    throw new Error(`${whatNotFound} not found or empty.`);
+  }
+  return value;
+}
+
 export const Val = {
   is: _isS,
   validate: _validateS,
   assert,
+  assertStringNotEmpty,
 };
