@@ -39,7 +39,7 @@ const columnConfigColumnIdRow = [
   cc.sheetTitle.columnId,
   cc.header.columnId,
   cc.isFormula.columnId,
-  cc.valueName.columnId,
+  cc.valueTitle.columnId,
 ];
 
 const freshlyAppendedRowMissingHeaderAndValueName = [
@@ -78,7 +78,7 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
     "columnId",
     "header",
     "isFormula",
-    "valueName",
+    "valueTitle",
   );
   columnConfigOperator.ss.fetchAllPrepped();
   return columnConfigOperator;
@@ -348,20 +348,20 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
       "sheetTitle",
       "header",
       "isFormula",
-      "valueName",
+      "valueTitle",
     );
 
     expect(col.sheetTitle.value(4)).toBe("Test");
     expect(col.header.value(4)).toBe("Amount");
     expect(col.isFormula.value(4)).toBe(false);
-    expect(col.valueName.value(4)).toBe("number");
+    expect(col.valueTitle.value(4)).toBe("number");
 
     // Already-correct fields stay untouched; only valueName (stale
     // "string") gets the "Base ID" -> "id" special case applied.
     expect(col.sheetTitle.value(5)).toBe("Test");
     expect(col.header.value(5)).toBe("Base ID");
     expect(col.isFormula.value(5)).toBe(false);
-    expect(col.valueName.value(5)).toBe("id");
+    expect(col.valueTitle.value(5)).toBe("id");
   });
 
   it("detects a named valueConfig from the column's live data-validation formula", () => {
@@ -404,9 +404,13 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
 
     const operator = ColumnConfigOperator.init();
     operator.fetchAndUpdateColumnConfig();
-    const col = operator.sheetData.columns("sheetTitle", "header", "valueName");
+    const col = operator.sheetData.columns(
+      "sheetTitle",
+      "header",
+      "valueTitle",
+    );
 
-    expect(col.valueName.value(4)).toBe("transactionDescription");
+    expect(col.valueTitle.value(4)).toBe("transactionDescription");
     // Already-correct fields are left alone.
     expect(col.sheetTitle.value(4)).toBe("Test");
     expect(col.header.value(4)).toBe("Description");
@@ -447,9 +451,9 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
 
     const operator = ColumnConfigOperator.init();
     operator.fetchAndUpdateColumnConfig();
-    const col = operator.sheetData.columns("isFormula", "valueName");
+    const col = operator.sheetData.columns("isFormula", "valueTitle");
 
     expect(col.isFormula.value(4)).toBe(true);
-    expect(col.valueName.value(4)).toBe("date");
+    expect(col.valueTitle.value(4)).toBe("date");
   });
 });

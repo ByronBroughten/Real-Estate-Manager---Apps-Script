@@ -67,7 +67,7 @@ function seedFixture() {
             cc.sheetTitle.columnId,
             cc.header.columnId,
             cc.isFormula.columnId,
-            cc.valueName.columnId,
+            cc.valueTitle.columnId,
             cc.isActionControl.columnId,
             cc.emptyAllowed.columnId,
             cc.customDefaultValue.columnId,
