@@ -49,12 +49,28 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
 
 Callers reach into `orchestrator.sheetConfigOperator` directly instead of destructuring a method's return value.
 
+### Push a domain query onto the object that owns it
+
+When a coordinating class composes several calls on a collaborator to answer one domain question, that composition belongs on the collaborator as its own named method — not re-inlined at every call site. `ColumnConfigOperator` used to reach through `sheet.uniformRow("columnId").activeValueArr` and `.hasValue(columnId)` directly; that logic moved onto `SheetNamed` itself as `get activeColumnIds()` and `isActiveColumnId(columnId)` (`SheetNamed.ts:44,49`), and `ColumnConfigOperator`'s own private helper now just delegates:
+
+```ts
+private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
+  return this.ss.sheetByGid(sheetGid).isActiveColumnId(columnId);
+}
+```
+
+Destructure a collaborator's getter directly when only one property is needed: `const { activeColumnIds } = this.ss.sheetByGid(sheetGid);`.
+
+### Model state at the granularity the concept actually has
+
+When a fact is conceptually about a whole column/row/sheet but can only be *observed* by sampling one representative row/cell, store and expose it at that higher granularity — not on the low-level object that happens to carry the raw sample. `isFormula`/`numberFormatType` are column-wide traits (matching `ColumnSchemaCommon`'s schema-based `isFormula`, `ColumnSchemaCommon.ts:27`), even though they're only ever read off the column's top data-row cell — so they live as `activeIsFormula`/`activeNumberFormatType` on `DataColumnRaw` (`DataColumnRaw.ts:37,40`), populated once per column by `SheetRaw._integrateSheetData` (`SheetRaw.ts:132`), not as per-row/per-cell state on `CellRaw`/`RowRawBase` just because the API happens to deliver the data cell-by-cell. The wire format's granularity isn't the domain's granularity.
+
 ### Class member order
 
 1. `static init()`
 2. Plain getters for derived collaborators/state (`ss`, `schema`, `sheetConfigOperator`, ...)
 3. Public behavior methods
-4. Private helpers, `_`-prefixed
+4. Private helpers, `_`-prefixed — ordered so a helper used by only one caller sits immediately after that caller (detail follows the step that needs it); a helper reused by several later methods comes first, in the order of its first use. (`_initSheetGidsApiAccesses`/`_isSheetGidApiAccesses`, each used by multiple methods, sit first in `ColumnConfigOperator`; `_isActiveColumnId`, called only by `_pruneColumnRows`, sits directly after it.)
 
 ### Delete dead scaffolding you touch — with one exception
 
@@ -69,6 +85,8 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
 ## Naming
 
 - **Booleans are always prefixed `is`/`has`, never a bare adjective** — `isActive`, `isFormula`, `hasValue`, `hasIdColumn`.
+- **Prefix a getter `active` when it reads live/fetched sheet state that has a same-named counterpart sourced from schema/generated-config data** — disambiguates the live read from the committed one. `DataColumnRaw.activeIsFormula` (this run's live sheet data, `DataColumnRaw.ts:37`) vs. `ColumnSchemaCommon.isFormula` (the committed `columnConfigs.ts` trait, `ColumnSchemaCommon.ts:27`) — same underlying concept, two different sources of truth. Matches the existing `active` vocabulary for "what's actually in the fetched state right now": `activeTable`, `activeColumnIds`, `activeSheetGids`, `activeRowIndexes`.
+- **`column` abbreviates to `col` by default — it's referenced constantly, so shortening it earns its keep (`colIndex`) — except when it's paired with an already-short suffix, where spelling it out keeps the identifier legible** (`columnId`, not `colId`: `Id` alone is too short to pair with `col` without the result reading as a cryptic blob). Whichever form fits, use it consistently within one scope: `activeColIds` next to `existingColumnIds` in the same method reads as a typo, not a style choice; it became `activeColumnIds` to match.
 - **Method names draw from one controlled verb vocabulary**, each with a distinct meaning — don't invent a new verb for a meaning already on this list:
   - `fetch` — actually hits the live Sheets API
   - `prep`/`gather` — queue state locally before a fetch (`prepFetchX` queues only; `gatherFetchX` queues *and* fetches)

@@ -41,6 +41,14 @@ export class SheetNamed<
       columnName,
     });
   }
+  get activeColumnIds(): string[] {
+    return this.uniformRow("columnId").activeValueArr.filter(
+      (columnId) => columnId !== "",
+    );
+  }
+  isActiveColumnId(columnId: string): boolean {
+    return this.uniformRow("columnId").hasValue(columnId);
+  }
   addMissingColumnIds(): number {
     return this.indexed.addMissingColumnIds();
   }

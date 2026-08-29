@@ -29,14 +29,31 @@ export interface RawSheetState {
     endRowIndex: number; // lastRowIndex + 1
     startColumnIndex: number;
     endColumnIndex: number; // lastColumnIndex + 1
+    columnValidationValues: RawColumnValidationValues;
   } | null;
   rowIndexesAreValid: boolean;
   firstStaleColIndex: number | null;
   rowStates: RawRowStates;
+  columnCellFacts: RawColumnCellFacts;
 }
 
 export type RawRowStates = Map<RowIndex, RawRowState>;
 export type RawRowState = Map<ColIndex, CellValue>;
+
+// Facts about a column's live data, sampled from its top data row cell —
+// e.g. isFormula/numberFormatType are traits of the whole column (like
+// ColumnSchemaCommon's schema-based `isFormula`), not of any one row, so
+// this is keyed by column only, with no row dimension.
+export type RawColumnCellFacts = Map<ColIndex, RawCellFacts>;
+export interface RawCellFacts {
+  isFormula: boolean;
+  numberFormatType: string | undefined;
+}
+
+// A column's live data-validation condition values (e.g. `=valueConfig[X]`),
+// keyed by absolute column index, from the sheet's active Table metadata.
+export type RawColumnValidationValues = Map<ColIndex, string[]>;
+
 type SheetId = number;
 type RowIndex = number;
 type ColIndex = number;

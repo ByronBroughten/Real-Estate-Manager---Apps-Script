@@ -97,6 +97,16 @@ export class SheetConfigOperator extends SheetNamedBase<"sheetConfig"> {
   // fetchAndUpdateAll) — does no fetching or live-sheet writing of its own,
   // so it's safe to call after a shared sync/flush pass done alongside
   // ColumnConfigOperator (see index.ts's generateConfigFiles).
+  sheetGidsApiAccesses(): number[] {
+    const col = this.sheet.data.columns("sheetGid", "letApiAccess");
+    const gids: number[] = [];
+    this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
+      if (col.letApiAccess.value(rowIndex)) {
+        gids.push(col.sheetGid.valueNotEmpty(rowIndex));
+      }
+    });
+    return gids;
+  }
   sheetEntries(): SheetConfigsBase {
     const col = this.sheet.data.columns(
       "sheetGid",

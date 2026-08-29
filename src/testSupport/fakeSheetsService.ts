@@ -10,6 +10,20 @@ type GoogleCellData = GoogleAppsScript.Sheets.Schema.CellData;
  * `null` (or a short row) represents an empty cell. */
 export type FakeCellValue = string | number | boolean | null;
 
+/**
+ * A cell's value plus the live facts `ColumnConfigOperator
+ * .fetchAndUpdateColumnConfig` reads off it (`CellRaw.isFormula`/
+ * `numberFormatType`) — use this richer form instead of a bare
+ * `FakeCellValue` wherever a test needs to mark a cell as a live formula or
+ * give it a number format (e.g. `DATE`) distinguishable from a plain number.
+ */
+export interface FakeRichCellValue {
+  value: FakeCellValue;
+  isFormula?: boolean;
+  numberFormatType?: string;
+}
+export type FakeCell = FakeCellValue | FakeRichCellValue;
+
 export interface FakeSheetProperties {
   sheetId: number;
   title: string;
@@ -22,7 +36,7 @@ export interface FakeSheetProperties {
    * doesn't matter to the test (sheet-properties-only fixtures still work
    * as before).
    */
-  rows?: readonly (readonly FakeCellValue[])[];
+  rows?: readonly (readonly FakeCell[])[];
   /**
    * The sheet's Table range. Required for any test that reads/appends
    * *data* rows on this sheet (`DataSheetRaw`'s `rowIndexesActive`/
@@ -32,7 +46,17 @@ export interface FakeSheetProperties {
    * bound of existing data rows; appending a row increments it in place,
    * matching production (`DataRowRaw.append`).
    */
-  table?: { endRowIndex: number };
+  table?: {
+    endRowIndex: number;
+    /**
+     * A column's live data-validation condition values (e.g.
+     * `["=valueConfig[Transaction Description]"]`), keyed by absolute
+     * column index — read by `ColumnConfigOperator`'s valueName detection
+     * (`SheetRaw.columnValidationValues`). Omit for a table with no
+     * validated columns.
+     */
+    columnValidationValues?: Record<number, string[]>;
+  };
 }
 
 export interface FakeSheetsServiceOptions {
@@ -51,8 +75,8 @@ export interface FakeSheetsService {
  * the first data row, per `spreadsheetConfig` — see `rows`' own doc).
  */
 export function buildGridRows(
-  rowsByIndex: Record<number, readonly FakeCellValue[]>,
-): FakeCellValue[][] {
+  rowsByIndex: Record<number, readonly FakeCell[]>,
+): FakeCell[][] {
   const maxRowIndex = Math.max(0, ...Object.keys(rowsByIndex).map(Number));
   return Array.from(
     { length: maxRowIndex + 1 },
@@ -60,17 +84,38 @@ export function buildGridRows(
   );
 }
 
-function fakeCellToGoogleCellData(value: FakeCellValue): GoogleCellData {
-  if (value === null) {
+function fakeCellToGoogleCellData(cell: FakeCell): GoogleCellData {
+  if (cell === null) {
     return {};
   }
+  const rich: FakeRichCellValue = typeof cell === "object" ? cell : { value: cell };
+  const data: GoogleCellData = {
+    effectiveValue: fakeValueToExtendedValue(rich.value),
+  };
+  if (rich.isFormula) {
+    data.userEnteredValue = { formulaValue: "=FAKE_FORMULA()" };
+  }
+  if (rich.numberFormatType) {
+    data.effectiveFormat = {
+      numberFormat: { type: rich.numberFormatType },
+    };
+  }
+  return data;
+}
+
+function fakeValueToExtendedValue(
+  value: FakeCellValue,
+): GoogleAppsScript.Sheets.Schema.ExtendedValue | undefined {
+  if (value === null) {
+    return undefined;
+  }
   if (typeof value === "string") {
-    return { effectiveValue: { stringValue: value } };
+    return { stringValue: value };
   }
   if (typeof value === "number") {
-    return { effectiveValue: { numberValue: value } };
+    return { numberValue: value };
   }
-  return { effectiveValue: { boolValue: value } };
+  return { boolValue: value };
 }
 
 function fakeRowsToGoogleSheetData(
@@ -133,6 +178,20 @@ export function stubSheetsService(
                     startColumnIndex: 0,
                     endColumnIndex: 0,
                   },
+                  columnProperties: s.table.columnValidationValues
+                    ? Object.entries(s.table.columnValidationValues).map(
+                        ([colIndex, values]) => ({
+                          colIndex: Number(colIndex),
+                          dataValidationRule: {
+                            condition: {
+                              values: values.map((userEnteredValue) => ({
+                                userEnteredValue,
+                              })),
+                            },
+                          },
+                        }),
+                      )
+                    : undefined,
                 },
               ]
             : undefined,

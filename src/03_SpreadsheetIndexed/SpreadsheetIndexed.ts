@@ -31,16 +31,19 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
       .map((sheetGid) => this.sheet(sheetGid))
       .filter((sheet) => sheet.isPreppedToFetch);
   }
-  fetchAllPrepped(props: GatherDataPrerequisitesProps = {}) {
+  fetchAllPrepped({
+    includeProgrammaticFacts = false,
+    ...props
+  }: GatherDataPrerequisitesProps = {}) {
     const sheetsPreppedForFetch = this.sheetsPreppedForFetch;
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet._gatherDataPrerequisites(props);
     });
-    this.raw.fetchAllGathered();
+    this.raw.fetchAllGathered(includeProgrammaticFacts);
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet.gatherFetchDataPrepped();
     });
-    this.raw.fetchAllGathered();
+    this.raw.fetchAllGathered(includeProgrammaticFacts);
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet.finalizeFetchedData();
     });

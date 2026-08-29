@@ -1,7 +1,12 @@
 import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
-import type { RawRowState, RawSheetState } from "../ClassTypes/RawState";
+import type {
+  RawColumnCellFacts,
+  RawColumnValidationValues,
+  RawRowState,
+  RawSheetState,
+} from "../ClassTypes/RawState";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
@@ -32,6 +37,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         rowIndexesAreValid: true,
         firstStaleColIndex: null,
         rowStates: new Map(),
+        columnCellFacts: new Map(),
       });
     }
   }
@@ -42,18 +48,38 @@ export class SheetRawBase extends SpreadsheetRawBase {
     const tables = sheet.tables;
     if (tables && tables.length > 0) {
       const table = Val.assert(tables[0], "table");
+      const range = Obj.validatePick(
+        table.range,
+        "number",
+        "startRowIndex",
+        "endRowIndex",
+        "startColumnIndex",
+        "endColumnIndex",
+      );
       this.sheetState.activeTable = {
         tableId: Val.assert(table.tableId, "tableId"),
-        ...Obj.validatePick(
-          table.range,
-          "number",
-          "startRowIndex",
-          "endRowIndex",
-          "startColumnIndex",
-          "endColumnIndex",
+        ...range,
+        columnValidationValues: this._parseColumnValidationValues(
+          table.columnProperties,
+          range.startColumnIndex,
         ),
       };
     }
+  }
+  private _parseColumnValidationValues(
+    columnProperties: GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined,
+    startColumnIndex: number,
+  ): RawColumnValidationValues {
+    const map: RawColumnValidationValues = new Map();
+    (columnProperties ?? []).forEach((colProps, offset) => {
+      const values = (colProps.dataValidationRule?.condition?.values ?? [])
+        .map((conditionValue) => conditionValue.userEnteredValue)
+        .filter((value): value is string => value !== undefined);
+      if (values.length > 0) {
+        map.set(colProps.colIndex ?? startColumnIndex + offset, values);
+      }
+    });
+    return map;
   }
   protected get sheetState(): RawSheetState {
     return Val.assert(
@@ -66,6 +92,12 @@ export class SheetRawBase extends SpreadsheetRawBase {
       this.sheetState.rowStates.get(rowIndex),
       `rowState for row ${rowIndex}`,
     );
+  }
+  get columnCellFacts(): RawColumnCellFacts {
+    return this.sheetState.columnCellFacts;
+  }
+  columnValidationValues(colIndex: number): string[] {
+    return this.activeTable.columnValidationValues.get(colIndex) ?? [];
   }
   get activeTable(): NonNullable<RawSheetState["activeTable"]> {
     const activeTable = this.sheetState.activeTable;

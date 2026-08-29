@@ -10,6 +10,7 @@ import { UniformRowIndexed } from "./UniformRowIndexed";
 
 export interface GatherDataPrerequisitesProps {
   skipFetchingProperties?: boolean;
+  includeProgrammaticFacts?: boolean;
 }
 
 export class SheetIndexed extends SheetCommon {

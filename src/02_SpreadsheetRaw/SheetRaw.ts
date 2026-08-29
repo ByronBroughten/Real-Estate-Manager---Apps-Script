@@ -126,10 +126,10 @@ export class SheetRaw extends SheetCommonRaw {
   integrateSheetState(sheet: GoogleSheet): void {
     this._initSheetState(sheet);
     if (sheet.data) {
-      this._integrateSheetRowStates(sheet.data);
+      this._integrateSheetData(sheet.data);
     }
   }
-  private _integrateSheetRowStates(sheetData: GoogleSheetData): void {
+  private _integrateSheetData(sheetData: GoogleSheetData): void {
     const colsData = Val.assert(sheetData, "sheetData");
     colsData.forEach((colData) => {
       // Payload doesn't include default values of 0
@@ -146,6 +146,11 @@ export class SheetRaw extends SheetCommonRaw {
             | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
           row.cell(colIndex).integrateGState(cellData);
+          // The data column's live isFormula/numberFormatType facts are
+          // sampled from this one representative row, not tracked per row.
+          if (rowIndex === this.schema.topDataRowIdx) {
+            this.column(colIndex).data.integrateActiveFacts(cellData);
+          }
         });
       });
     });

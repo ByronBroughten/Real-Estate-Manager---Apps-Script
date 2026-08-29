@@ -65,8 +65,5 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": [
-    "src/02_SpreadsheetRaw/toIntegrate.ts",
-    "src/testingGoogleApiFunctions.ts"
-  ]
+  "exclude": ["src/toIntegrate.ts", "src/testingGoogleApiFunctions.ts"]
 }

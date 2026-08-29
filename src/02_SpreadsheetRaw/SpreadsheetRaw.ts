@@ -52,22 +52,34 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this.rawState.allSheetPropertiesAreFetched = true;
     return { activeSheetGids: this.activeSheetGids };
   }
-  fetchAllGathered(): void {
-    const data = this._fetchByDataFilter();
+  fetchAllGathered(includeProgrammaticFacts = false): void {
+    const data = this._fetchByDataFilter(includeProgrammaticFacts);
     this._addDataToState(data);
     this.rawState.fetcherGridRanges = [];
   }
-  private _fetchByDataFilter(): GoogleSpreadsheet {
+  // isFormula/numberFormatType (from rowData.values.userEnteredValue/
+  // effectiveFormat) and columnValidationValues (from tables.columnProperties
+  // .dataValidationRule) are read only by ColumnConfigOperator's programmatic
+  // value correction — every other caller only ever needs effectiveValue, so
+  // those fields are left out of the default fetch to avoid fetching them
+  // (and, for dataValidationRule, an unbounded list of validation values)
+  // wastefully on every ordinary read.
+  private _fetchByDataFilter(includeProgrammaticFacts: boolean): GoogleSpreadsheet {
     return this.sheetsService.Spreadsheets.getByDataFilter(
       this._makeFetchResource(),
       this.spreadsheetId,
       {
-        fields:
-          "sheets(" +
-          "properties(sheetId,title)," +
-          "tables(tableId,range)," +
-          "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
-          ")",
+        fields: includeProgrammaticFacts
+          ? "sheets(" +
+            "properties(sheetId,title)," +
+            "tables(tableId,range,columnProperties(colIndex,dataValidationRule(condition(values(userEnteredValue)))))," +
+            "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)))))" +
+            ")"
+          : "sheets(" +
+            "properties(sheetId,title)," +
+            "tables(tableId,range)," +
+            "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
+            ")",
       },
     );
   }

@@ -16,6 +16,12 @@ const COLUMN_CONFIG_GID = 2034522667;
 const PROPERTY_GID = 999001;
 const NEW_SHEET_GID = 999002;
 const UNRESOLVABLE_GID = 424242;
+// Real, already-committed sheet gid — _updateProgrammaticValues (like the
+// rest of ColumnConfigOperator's lifecycle) resolves sheets by gid through
+// the deployed sheetConfigs.ts (SpreadsheetSchemaNamed.sheetByGid), so it
+// can't be exercised against a fictional sheet gid, only a real one (see
+// ConfigOrchestrator.test.ts's seedFixture for the same constraint).
+const TEST_SHEET_GID = 2089200354;
 
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
@@ -173,5 +179,151 @@ describe("ColumnConfigOperator.columnEntries / toFileSource", () => {
     expect(() => initSyncedColumnConfigOperator().columnEntries()).toThrow(
       /duplicate column name "rentAmount"/,
     );
+  });
+});
+
+describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammaticValues", () => {
+  const testSheetConfigRowWithApiAccess = [
+    TEST_SHEET_GID,
+    "Test",
+    true,
+    true,
+    "test",
+  ];
+
+  function seedSheetConfigFixture() {
+    return {
+      sheetId: SHEET_CONFIG_GID,
+      title: "Sheet Config",
+      rows: buildGridRows({
+        0: sheetConfigColumnIdRow,
+        4: testSheetConfigRowWithApiAccess,
+      }),
+      table: { endRowIndex: 5 },
+    };
+  }
+
+  it("corrects sheetTitle/header/isFormula and infers a primitive or Base-ID valueName", () => {
+    stubSheetsService({
+      sheets: [
+        seedSheetConfigFixture(),
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: [TEST_SHEET_GID, "c:test:corr01", "Stale Title", "Stale Header", true, "string"],
+            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "Base ID", false, "string"],
+          }),
+          table: { endRowIndex: 6 },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({
+            0: ["c:test:corr01", "c:test:corr02"],
+            3: ["Amount", "Base ID"],
+            4: [42, "xyz"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+    operator.fetchAndUpdateColumnConfig();
+    const col = operator.sheetData.columns(
+      "sheetTitle",
+      "header",
+      "isFormula",
+      "valueName",
+    );
+
+    expect(col.sheetTitle.value(4)).toBe("Test");
+    expect(col.header.value(4)).toBe("Amount");
+    expect(col.isFormula.value(4)).toBe(false);
+    expect(col.valueName.value(4)).toBe("number");
+
+    // Already-correct fields stay untouched; only valueName (stale
+    // "string") gets the "Base ID" -> "id" special case applied.
+    expect(col.sheetTitle.value(5)).toBe("Test");
+    expect(col.header.value(5)).toBe("Base ID");
+    expect(col.isFormula.value(5)).toBe(false);
+    expect(col.valueName.value(5)).toBe("id");
+  });
+
+  it("detects a named valueConfig from the column's live data-validation formula", () => {
+    stubSheetsService({
+      sheets: [
+        seedSheetConfigFixture(),
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: [TEST_SHEET_GID, "c:test:corr03", "Test", "Description", false, "string"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({
+            0: ["c:test:corr03"],
+            3: ["Description"],
+            4: ["Rent (base)"],
+          }),
+          table: {
+            endRowIndex: 5,
+            columnValidationValues: {
+              0: ["=valueConfig[Transaction Description]"],
+            },
+          },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+    operator.fetchAndUpdateColumnConfig();
+    const col = operator.sheetData.columns("sheetTitle", "header", "valueName");
+
+    expect(col.valueName.value(4)).toBe("transactionDescription");
+    // Already-correct fields are left alone.
+    expect(col.sheetTitle.value(4)).toBe("Test");
+    expect(col.header.value(4)).toBe("Description");
+  });
+
+  it("detects a live formula and a date-formatted number", () => {
+    stubSheetsService({
+      sheets: [
+        seedSheetConfigFixture(),
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: [TEST_SHEET_GID, "c:test:corr04", "Test", "Move-in Date", false, "string"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({
+            0: ["c:test:corr04"],
+            3: ["Move-in Date"],
+            4: [{ value: 45000, isFormula: true, numberFormatType: "DATE" }],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+    operator.fetchAndUpdateColumnConfig();
+    const col = operator.sheetData.columns("isFormula", "valueName");
+
+    expect(col.isFormula.value(4)).toBe(true);
+    expect(col.valueName.value(4)).toBe("date");
   });
 });

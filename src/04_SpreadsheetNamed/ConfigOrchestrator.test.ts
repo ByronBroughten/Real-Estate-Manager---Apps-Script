@@ -78,7 +78,13 @@ function seedFixture() {
       {
         sheetId: TEST_SHEET_GID,
         title: "Test",
-        rows: buildGridRows({ 0: ["c:test:xyz123"], 3: [] }),
+        // Row 4 (the top data row) must be present, even blank, and a table
+        // range declared, now that
+        // ColumnConfigOperator._updateProgrammaticValues reads both (for
+        // the live isFormula/valueName facts, the latter via the table's
+        // column data-validation rules) for every api-access sheet.
+        rows: buildGridRows({ 0: ["c:test:xyz123"], 3: [], 4: [] }),
+        table: { endRowIndex: 5 },
       },
     ],
   });

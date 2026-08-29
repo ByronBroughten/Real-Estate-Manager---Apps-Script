@@ -1,7 +1,14 @@
 import type { TableColumnConfigs } from "../01_generatedConfigs/columnConfigBuilder";
+import {
+  valueConfigNames,
+  type ValueConfigName,
+} from "../01_generatedConfigs/valueConfigsTypes";
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
 import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
+import type { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
+import type { DataColumnRaw } from "../02_SpreadsheetRaw/ClassBases/DataColumnRaw";
 import { Str } from "../utils/Str";
+import { Val, type PureValueName } from "../utils/Val";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
 import type { DataSheetNamed } from "./DataSheetNamed";
@@ -47,6 +54,7 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this.sheetData.prepFetchColumnsFull(
       "sheetGid",
       "columnId",
+      "sheetTitle",
       "header",
       "isFormula",
       "valueName",
@@ -54,7 +62,8 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this.ss.fetchAllPrepped();
     this._initSheetGidsApiAccesses();
     this._gatherColumnIdsForSheetGidsApiAccesses();
-    this.ss.fetchAllPrepped();
+    this._gatherActualColumnFactsForSheetGidsApiAccesses();
+    this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
 
     this._addMissingColumnIds();
     this._pruneColumnRows();
@@ -64,9 +73,10 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
   }
   // Pure computation from whatever is already fetched/synced in memory (via
   // fetchAndUpdateColumnConfig) — does no fetching or live-sheet writing of
-  // its own. header/valueName are hand-maintained on the Column Config
-  // sheet, so a freshly appended row (new columnId, not yet filled in by a
-  // human) is skipped rather than emitted with garbage data.
+  // its own. header/valueName are normally corrected by
+  // _updateProgrammaticValues before this runs; a row still missing either
+  // (e.g. read via a partial sync that skipped that step) is skipped rather
+  // than emitted with garbage data.
   columnEntries(): Record<string, TableColumnConfigs> {
     const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
     const col = this.sheetData.columns(
@@ -130,12 +140,9 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     ].join("\n");
   }
   private _initSheetGidsApiAccesses(): this {
-    const col = this.sheetConfigData.columns("sheetGid", "letApiAccess");
-    this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
-      if (col.letApiAccess.value(rowIndex)) {
-        this.sheetGidsApiAccesses.add(col.sheetGid.valueNotEmpty(rowIndex));
-      }
-    });
+    this.sheetGidsApiAccesses = new Set(
+      this.sheetConfigOperator.sheetGidsApiAccesses(),
+    );
     return this;
   }
   private _isSheetGidApiAccesses(sheetGid: number): boolean {
@@ -145,6 +152,17 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
       const sheet = this.ss.sheetByGid(sheetGid);
       sheet.uniformRow("columnId").raw.gatherFetchFull();
+    });
+  }
+  // For _updateProgrammaticValues: the header row (actual header text) and
+  // the top data row (actual isFormula/valueName facts) aren't fetched by
+  // anything above.
+  private _gatherActualColumnFactsForSheetGidsApiAccesses() {
+    this.sheetGidsApiAccesses.forEach((sheetGid) => {
+      const sheet = this.ss.sheetByGid(sheetGid);
+      sheet.uniformRow("header").raw.gatherFetchFull();
+      const rawSheet = sheet.raw;
+      rawSheet.dataRowRaw(rawSheet.schema.topDataRowIdx).gatherFetchFull();
     });
   }
   private _addMissingColumnIds(): this {
@@ -164,10 +182,6 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
       `ensureColumnIds: prepared to add ${idsAdded} missing column ID(s)`,
     );
     return this;
-  }
-  private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
-    const sheet = this.ss.sheetByGid(sheetGid);
-    return sheet.uniformRow("columnId").hasValue(columnId);
   }
   private _pruneColumnRows(): this {
     const col = this.sheetData.columns("sheetGid", "columnId");
@@ -189,15 +203,17 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     );
     return this;
   }
+  private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
+    return this.ss.sheetByGid(sheetGid).isActiveColumnId(columnId);
+  }
   private _appendColumnRows(): this {
     const col = this.sheetData.columns("sheetGid", "columnId");
     const existingColumnIds = col.columnId.valueArr;
 
     let appendedCount = 0;
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
-      const sheet = this.ss.sheetByGid(sheetGid);
-      const activeColIds = sheet.uniformRow("columnId").activeValueArr;
-      activeColIds.forEach((columnId) => {
+      const { activeColumnIds } = this.ss.sheetByGid(sheetGid);
+      activeColumnIds.forEach((columnId) => {
         if (!existingColumnIds.includes(columnId)) {
           this.sheetData.appendRowWithVals({
             sheetGid: sheetGid,
@@ -213,6 +229,113 @@ export class ColumnConfigOperator extends SheetNamedBase<"columnConfig"> {
     return this;
   }
   private _updateProgrammaticValues() {
-    // Loop through the existing rows and update the values. You'll need sheet properties and top data rows.
+    const col = this.sheetData.columns(
+      "sheetGid",
+      "columnId",
+      "sheetTitle",
+      "header",
+      "isFormula",
+      "valueName",
+    );
+    let updatedValues = 0;
+    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
+      const columnId = col.columnId.valueNotEmpty(rowIndex);
+      const namedSheet = this.ss.sheetByGid(sheetGid);
+      const sheet = namedSheet.raw;
+      const colIndex = namedSheet.indexed.column(columnId).colIndex;
+
+      const actualSheetTitle = sheet.title;
+      if (col.sheetTitle.value(rowIndex) !== actualSheetTitle) {
+        col.sheetTitle.cell(rowIndex).updateValue(actualSheetTitle);
+        updatedValues++;
+      }
+
+      const actualHeader = sheet.headerRow.value(colIndex);
+      if (col.header.value(rowIndex) !== actualHeader) {
+        col.header.cell(rowIndex).updateValue(actualHeader);
+        updatedValues++;
+      }
+
+      const dataCell = sheet
+        .dataRowRaw(sheet.schema.topDataRowIdx)
+        .cell(colIndex);
+      const dataColumn = sheet.column(colIndex).data;
+      const actualIsFormula = dataColumn.activeIsFormula;
+      if (col.isFormula.value(rowIndex) !== actualIsFormula) {
+        col.isFormula.cell(rowIndex).updateValue(actualIsFormula);
+        updatedValues++;
+      }
+
+      const actualValueName = this._actualValueName({
+        header: actualHeader,
+        dataCell,
+        dataColumn,
+      });
+      if (col.valueName.value(rowIndex) !== actualValueName) {
+        col.valueName.cell(rowIndex).updateValue(actualValueName);
+        updatedValues++;
+      }
+    });
+    Logger.log(`Corrected ${updatedValues} inaccurate Column Config cell(s).`);
   }
+  private _actualValueName({
+    header,
+    dataCell,
+    dataColumn,
+  }: ActualValueNameProps): ValueName {
+    if (header === "Base ID") {
+      return "id";
+    }
+    return (
+      this._actualValidationValueName(dataColumn) ??
+      this._actualPrimitiveValueName(dataCell, dataColumn)
+    );
+  }
+  // A column's live data-validation formula, e.g. `=valueConfig[Charge Description]`
+  // (still the current convention), names one of the enums in valueConfigs.ts.
+  private _actualValidationValueName(
+    dataColumn: DataColumnRaw,
+  ): ValueConfigName | null {
+    for (const rawValue of dataColumn.sheet.columnValidationValues(
+      dataColumn.colIndex,
+    )) {
+      const match = rawValue.match(/^=valueConfig\[(.+)\]$/);
+      if (!match) continue;
+      const candidate = Str.sentenceToCamelCase(
+        Val.assert(match[1], "valueConfig name match"),
+      ) as ValueConfigName;
+      if (valueConfigNames.includes(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
+  }
+  private _actualPrimitiveValueName(
+    dataCell: CellRaw,
+    dataColumn: DataColumnRaw,
+  ): PureValueName {
+    const value = dataCell.value();
+    if (typeof value === "boolean") {
+      return "boolean";
+    }
+    if (typeof value === "number") {
+      const formatType = dataColumn.activeNumberFormatType;
+      if (
+        formatType === "DATE" ||
+        formatType === "DATE_TIME" ||
+        formatType === "TIME"
+      ) {
+        return "date";
+      }
+      return "number";
+    }
+    return "string";
+  }
+}
+
+interface ActualValueNameProps {
+  header: string;
+  dataCell: CellRaw;
+  dataColumn: DataColumnRaw;
 }
