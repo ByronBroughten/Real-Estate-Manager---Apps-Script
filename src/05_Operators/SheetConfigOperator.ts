@@ -98,7 +98,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     const sheetConfigs: SheetConfigsBase = {};
     this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
       const title = col.sheetTitle.value(rowIndex);
-      const sheetName = this.schema.sheetNameFromTitle(title);
+      const sheetName = this.schema.titleToName(title);
       sheetConfigs[sheetName] = {
         sheetGid: col.sheetGid.valueNotEmpty(rowIndex),
         idPrefix: col.idPrefix.value(rowIndex),

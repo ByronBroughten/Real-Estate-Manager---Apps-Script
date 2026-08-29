@@ -52,7 +52,7 @@ export class SchemaBase {
   config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
     return configGet(key);
   }
-  sheetNameFromTitle(sheetTitle: string): string {
+  titleToName(sheetTitle: string): string {
     return Str.sentenceToCamelCase(sheetTitle);
   }
   uniformValueName<UN extends UniformRowName>(

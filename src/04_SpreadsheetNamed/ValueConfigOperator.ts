@@ -23,8 +23,9 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   }
   get activeConfigValueNames(): string[] {
     return this.columnConfigOperator.sheetData
-      .column("valueName")
-      .valueArrNotEmpty.filter((valueName) => !isBaseValueName(valueName));
+      .column("valueTitle")
+      .valueArrNotEmpty.filter((valueName) => !isBaseValueName(valueName))
+      .map((title) => this.schema.titleToName(title));
   }
   newValueConfigs(): ValueConfigsBase {
     return this.activeConfigValueNames.reduce(
@@ -49,7 +50,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
     return [
       `import { makeValueConfigs } from "../00_base/baseValueSchemas";`,
       ``,
-      `export const columnConfigs = makeValueConfigs(${JSON.stringify(
+      `export const valueConfigs = makeValueConfigs(${JSON.stringify(
         this.newValueConfigs(),
         null,
         2,

@@ -3,10 +3,11 @@ import {
   valueConfigNames,
   type ValueConfigName,
 } from "../01_generatedConfigs/valueConfigsTypes";
-import type { ValueName } from "../01_generatedConfigs/valueSchemas";
+import { type ValueName } from "../01_generatedConfigs/valueSchemas";
 import type { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
 import type { DataColumnRaw } from "../02_SpreadsheetRaw/ClassBases/DataColumnRaw";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { ValueConfigOperator } from "../04_SpreadsheetNamed/ValueConfigOperator";
 import { Str } from "../utils/Str";
 import { Val, type PureValueName } from "../utils/Val";
 import { GenericSheetOperator } from "./GenericSheetOperator";
@@ -29,6 +30,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.spreadsheetNamedProps);
   }
+  get valueConfigOperator(): ValueConfigOperator {
+    return new ValueConfigOperator(this.spreadsheetNamedProps);
+  }
   get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
     return this.sheetConfigOperator.sheet.data;
   }
@@ -41,7 +45,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "sheetTitle",
       "header",
       "isFormula",
-      "valueName",
+      "valueTitle",
     );
     this.ss.fetchAllPrepped();
     this._initSheetGidsApiAccesses();
@@ -153,7 +157,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "sheetTitle",
       "header",
       "isFormula",
-      "valueName",
+      "valueTitle",
     );
     let updatedValues = 0;
     this.sheetData.rowIndexesActive.forEach((rowIndex) => {
@@ -185,19 +189,19 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
-      const actualValueName = this._actualValueName({
+      const actualValueTitle = this._actualValueTitle({
         header: actualHeader,
         dataCell,
         dataColumn,
       });
-      if (col.valueName.value(rowIndex) !== actualValueName) {
-        col.valueName.cell(rowIndex).updateValue(actualValueName);
+      if (col.valueTitle.value(rowIndex) !== actualValueTitle) {
+        col.valueTitle.cell(rowIndex).updateValue(actualValueTitle);
         updatedValues++;
       }
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Column Config cell(s).`);
   }
-  private _actualValueName({
+  private _actualValueTitle({
     header,
     dataCell,
     dataColumn,
@@ -220,8 +224,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     )) {
       const match = rawValue.match(/^=valueConfig\[(.+)\]$/);
       if (!match) continue;
-      const candidate = Str.sentenceToCamelCase(
-        Val.assert(match[1], "valueConfig name match"),
+      const candidate = Val.assert(
+        match[1],
+        "valueConfig name match",
       ) as ValueConfigName;
       if (valueConfigNames.includes(candidate)) {
         return candidate;
@@ -266,14 +271,14 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "columnId",
       "header",
       "isFormula",
-      "valueName",
+      "valueTitle",
     );
     const columnConfigs: Record<string, TableColumnConfigs> = {};
     this.sheetData.rowIndexesActive.forEach((rowIndex) => {
       const columnId = col.columnId.valueNotEmpty(rowIndex);
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       const header = col.header.valueNotEmpty(rowIndex);
-      const valueName = col.valueName.valueNotEmpty(rowIndex);
+      const valueTitle = col.valueTitle.valueNotEmpty(rowIndex);
       const sheetName = sheetNamesByGid.get(sheetGid);
       if (!sheetName) {
         throw new Error(
@@ -291,8 +296,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       }
       tableColumnConfigs[columnName] = {
         columnId,
-        valueName: valueName as ValueName,
         header,
+        valueName: this.schema.titleToName(valueTitle) as ValueName,
         isFormula: col.isFormula.valueNotEmpty(rowIndex),
         emptyAllowed: false,
         customDefaultValue: null,

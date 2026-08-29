@@ -155,7 +155,7 @@ export const columnConfigs = makeColumnConfigs({
     sheetTitle: mcc("c:ccf:949GjdB", "string", "Sheet title", false),
     header: mcc("c:ccf:kqA31oK", "string", "Header", false),
     isFormula: mcc("c:ccf:-99iXjo", "boolean", "Is formula", false),
-    valueName: mcc("c:ccf:0mh_HUU", "string", "Value name", false),
+    valueTitle: mcc("c:ccf:0mh_HUU", "string", "Value title", false),
     isActionControl: mcc(
       "c:ccf:AUffOV9",
       "boolean",
