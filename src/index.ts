@@ -29,7 +29,7 @@ function _indexMainTest() {
   const testSheetId = 2089200354;
   const testSheetName = "test";
   type TestName = keyof typeof mainTests;
-  const nameOfTestToRun: TestName = "syncConfigSheets";
+  const nameOfTestToRun: TestName = "addColumnIds";
   const ss = SpreadsheetNamed.init();
   const mainTests = {
     syncConfigSheets() {

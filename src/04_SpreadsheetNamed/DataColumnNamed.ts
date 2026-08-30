@@ -25,6 +25,15 @@ export class DataColumnNamed<
   get valueArr(): ColumnValue<SN, CN>[] {
     return this.indexed.valueArr as ColumnValue<SN, CN>[];
   }
+  get valueArrFilterEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+    return this.indexed.valueArrFilterEmpty as StrictExclude<
+      ColumnValue<SN, CN>,
+      ""
+    >[];
+  }
+  get valueValidationStrings(): string[] {
+    return this.indexed.valueValidationStrings;
+  }
   get valueArrNotEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
     return this.indexed.valueArrNotEmpty as StrictExclude<
       ColumnValue<SN, CN>,

@@ -1,7 +1,7 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
 import { Str, type RemoveFirstN, type TextJoin } from "./Str";
-import { Val, type PureValue, type PureValueName } from "./Val";
+import { Val, type PrimitiveValueName, type PureValue } from "./Val";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type DistributiveOmit<T, K extends keyof T> = T extends any
@@ -88,10 +88,13 @@ function toKeyedMap<
 
   for (const outerKey of Object.keys(obj) as (keyof T)[]) {
     const entry = obj[outerKey] as Record<PropertyKey, unknown>;
-    map.set(entry[idField as PropertyKey] as any, {
-      ...entry,
-      [nameField]: outerKey,
-    } as any);
+    map.set(
+      entry[idField as PropertyKey] as any,
+      {
+        ...entry,
+        [nameField]: outerKey,
+      } as any,
+    );
   }
 
   return map;
@@ -147,11 +150,11 @@ export const Obj = {
       {} as Pick<O, KS>,
     );
   },
-  validatePick<O extends object, VN extends PureValueName, KS extends keyof O>(
-    obj: O,
-    valueName: VN,
-    ...keys: KS[]
-  ): Record<KS, PureValue<VN>> {
+  validatePick<
+    O extends object,
+    VN extends PrimitiveValueName,
+    KS extends keyof O,
+  >(obj: O, valueName: VN, ...keys: KS[]): Record<KS, PureValue<VN>> {
     return keys.reduce(
       (objNext, key) => {
         const value = Val.validate[valueName](obj[key]) as PureValue<VN>;

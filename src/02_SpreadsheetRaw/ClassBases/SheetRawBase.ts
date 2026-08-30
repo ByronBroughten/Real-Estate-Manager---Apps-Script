@@ -67,7 +67,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
   }
   private _parseColumnValidationValues(
-    columnProperties: GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined,
+    columnProperties:
+      | GoogleAppsScript.Sheets.Schema.TableColumnProperties[]
+      | undefined,
     startColumnIndex: number,
   ): RawColumnValidationValues {
     const map: RawColumnValidationValues = new Map();
@@ -95,9 +97,6 @@ export class SheetRawBase extends SpreadsheetRawBase {
   }
   get columnCellFacts(): RawColumnCellFacts {
     return this.sheetState.columnCellFacts;
-  }
-  columnValidationValues(colIndex: number): string[] {
-    return this.activeTable.columnValidationValues.get(colIndex) ?? [];
   }
   get activeTable(): NonNullable<RawSheetState["activeTable"]> {
     const activeTable = this.sheetState.activeTable;

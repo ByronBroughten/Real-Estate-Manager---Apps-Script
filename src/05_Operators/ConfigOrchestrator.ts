@@ -2,6 +2,7 @@ import { SpreadsheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/Spreadsh
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
+import { ValueConfigOperator } from "./ValueConfigOperator";
 
 // Syncs the live Sheet Config sheet, then (now that it's current) the live
 // Column Config sheet, sharing one ColumnConfigOperator's state so both
@@ -24,6 +25,9 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   get sheetConfigOperator() {
     return new SheetConfigOperator(this.spreadsheetNamedProps);
   }
+  get valueConfigOperator() {
+    return new ValueConfigOperator(this.spreadsheetNamedProps);
+  }
   syncAndFlushConfigSheets() {
     this.sheetConfigOperator.fetchAndUpdateAll();
     this.columnConfigOperator.fetchAndUpdateColumnConfig();
@@ -34,6 +38,7 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
     return JSON.stringify({
       sheetConfigs: this.sheetConfigOperator.toFileSource(),
       columnConfigs: this.columnConfigOperator.toFileSource(),
+      valueConfigs: this.valueConfigOperator.toFileSource(),
     });
   }
 }

@@ -2,9 +2,9 @@ import {
   isBaseValueName,
   type ValueConfigsBase,
 } from "../00_base/baseValueSchemas";
-import { ColumnConfigOperator } from "../05_Operators/ColumnConfigOperator";
-import { GenericSheetOperator } from "../05_Operators/GenericSheetOperator";
-import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
+import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { ColumnConfigOperator } from "./ColumnConfigOperator";
+import { GenericSheetOperator } from "./GenericSheetOperator";
 
 export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   constructor(props: SpreadsheetNamedProps) {
@@ -21,26 +21,20 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   get columnConfigOperator(): ColumnConfigOperator {
     return new ColumnConfigOperator(this.spreadsheetNamedProps);
   }
-  get activeConfigValueNames(): string[] {
-    return this.columnConfigOperator.sheetData
-      .column("valueTitle")
-      .valueArrNotEmpty.filter((valueName) => !isBaseValueName(valueName))
-      .map((title) => this.schema.titleToName(title));
+  get activeHeaders(): string[] {
+    return this.columnConfigOperator.activeValueTitles.filter(
+      (valueName) => !isBaseValueName(valueName),
+    );
   }
   newValueConfigs(): ValueConfigsBase {
-    return this.activeConfigValueNames.reduce(
-      (acc, valueName) => {
-        if (this.sheet.schema.isColumnName(valueName)) {
-          acc[valueName] = this.sheet.data
-            .column(valueName)
-            .valueArr.filter(
-              (value) => typeof value === "string" && value !== "",
-            ) as string[];
-        } else {
-          throw new Error(
-            `valueName "${valueName}" is not a columnName of valueConfigs`,
-          );
-        }
+    return this.activeHeaders.reduce(
+      (acc, header) => {
+        const valueNameDataCol = this.sheet.raw.columnByHeader(
+          header,
+          "string",
+        ).data;
+        const valueName = this.schema.titleToName(header);
+        acc[valueName] = valueNameDataCol.valueArrFilterEmpty;
         return acc;
       },
       {} as Record<string, string[]>,

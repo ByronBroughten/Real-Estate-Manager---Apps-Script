@@ -1,17 +1,10 @@
 import type { TableColumnConfigs } from "../01_generatedConfigs/columnConfigBuilder";
-import {
-  valueConfigNames,
-  type ValueConfigName,
-} from "../01_generatedConfigs/valueConfigsTypes";
 import { type ValueName } from "../01_generatedConfigs/valueSchemas";
-import type { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
-import type { DataColumnRaw } from "../02_SpreadsheetRaw/ClassBases/DataColumnRaw";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import { ValueConfigOperator } from "../04_SpreadsheetNamed/ValueConfigOperator";
 import { Str } from "../utils/Str";
-import { Val, type PureValueName } from "../utils/Val";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
+import { ValueConfigOperator } from "./ValueConfigOperator";
 
 export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   private sheetGidsApiAccesses: Set<number>;
@@ -36,8 +29,10 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
     return this.sheetConfigOperator.sheet.data;
   }
+  get activeValueTitles(): string[] {
+    return this.sheetData.column("valueTitle").valueArrNotEmpty;
+  }
   fetchAndUpdateColumnConfig(): this {
-    // for _initSheetGidsApiAccesses
     this.sheetConfigData.prepFetchColumnsFull("sheetGid", "letApiAccess");
     this.sheetData.prepFetchColumnsFull(
       "sheetGid",
@@ -173,27 +168,20 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
-      const actualHeader = sheetRaw.headerRow.value(colIndex);
+      const columnRaw = sheetRaw.column(colIndex);
+      const actualHeader = columnRaw.activeHeader;
       if (col.header.value(rowIndex) !== actualHeader) {
         col.header.cell(rowIndex).updateValue(actualHeader);
         updatedValues++;
       }
 
-      const dataCell = sheetRaw
-        .dataRowRaw(this.baseSchema.topDataRowIdx)
-        .cell(colIndex);
-      const dataColumn = sheetRaw.data.column(colIndex);
-      const actualIsFormula = dataColumn.activeIsFormula;
+      const actualIsFormula = columnRaw.data.activeIsFormula;
       if (col.isFormula.value(rowIndex) !== actualIsFormula) {
         col.isFormula.cell(rowIndex).updateValue(actualIsFormula);
         updatedValues++;
       }
 
-      const actualValueTitle = this._actualValueTitle({
-        header: actualHeader,
-        dataCell,
-        dataColumn,
-      });
+      const actualValueTitle = columnRaw.activeValueTitle();
       if (col.valueTitle.value(rowIndex) !== actualValueTitle) {
         col.valueTitle.cell(rowIndex).updateValue(actualValueTitle);
         updatedValues++;
@@ -201,69 +189,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Column Config cell(s).`);
   }
-  private _actualValueTitle({
-    header,
-    dataCell,
-    dataColumn,
-  }: ActualValueNameProps): ValueName {
-    if (header === "ID") {
-      return "id";
-    }
-    return (
-      this._actualValidationValueName(dataColumn) ??
-      this._actualPrimitiveValueName(dataCell, dataColumn)
-    );
-  }
-  // A column's live data-validation formula, e.g. `=valueConfig[Charge Description]`
-  // (still the current convention), names one of the enums in valueConfigs.ts.
-  private _actualValidationValueName(
-    dataColumn: DataColumnRaw,
-  ): ValueConfigName | null {
-    for (const rawValue of dataColumn.sheet.columnValidationValues(
-      dataColumn.colIndex,
-    )) {
-      const match = rawValue.match(/^=valueConfig\[(.+)\]$/);
-      if (!match) continue;
-      const candidate = Val.assert(
-        match[1],
-        "valueConfig name match",
-      ) as ValueConfigName;
-      if (valueConfigNames.includes(candidate)) {
-        return candidate;
-      }
-    }
-    return null;
-  }
-  private _actualPrimitiveValueName(
-    dataCell: CellRaw,
-    dataColumn: DataColumnRaw,
-  ): PureValueName {
-    const value = dataCell.value();
-    if (typeof value === "boolean") {
-      return "boolean";
-    }
-    if (typeof value === "number") {
-      const formatType = dataColumn.activeNumberFormatType;
-      if (
-        formatType === "DATE" ||
-        formatType === "DATE_TIME" ||
-        formatType === "TIME"
-      ) {
-        return "date";
-      }
-      return "number";
-    }
-    return "string";
-  }
-  // Pure computation from whatever is already fetched/synced in memory (via
-  // fetchAndUpdateColumnConfig) — does no fetching or live-sheet writing of
-  // its own. header/valueName/sheetGid resolution are all guaranteed by a
-  // completed fetchAndUpdateColumnConfig run (_updateProgrammaticValues
-  // corrects header/valueName for every active row; Google Sheets itself
-  // never leaves a native table's header cell blank; _pruneColumnRows drops
-  // any row whose sheetGid isn't in the freshly-synced Sheet Config), so a
-  // row still failing one of these checks means the sync didn't actually
-  // complete — that's a bug to surface, not data to silently drop.
   newColumnConfigs(): Record<string, TableColumnConfigs> {
     const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
     const col = this.sheetData.columns(
@@ -317,10 +242,4 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       ``,
     ].join("\n");
   }
-}
-
-interface ActualValueNameProps {
-  header: string;
-  dataCell: CellRaw;
-  dataColumn: DataColumnRaw;
 }

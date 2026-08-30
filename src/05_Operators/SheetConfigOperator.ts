@@ -74,10 +74,6 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
-  // Pure computation from whatever is already fetched/synced in memory (via
-  // fetchAndUpdateAll) — does no fetching or live-sheet writing of its own,
-  // so it's safe to call after a shared sync/flush pass done alongside
-  // ColumnConfigOperator (see index.ts's generateConfigFiles).
   sheetGidsApiAccesses(): number[] {
     const col = this.sheet.data.columns("sheetGid", "letApiAccess");
     const gids: number[] = [];
@@ -94,9 +90,11 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       "sheetTitle",
       "hasIdColumn",
       "idPrefix",
+      "letApiAccess",
     );
     const sheetConfigs: SheetConfigsBase = {};
     this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
+      if (!col.letApiAccess.value(rowIndex)) return;
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.titleToName(title);
       sheetConfigs[sheetName] = {
@@ -107,10 +105,6 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     return sheetConfigs;
   }
-  // Lets ColumnConfigOperator resolve a Column Config row's sheetGid to the
-  // sheetName it'll be nested under in columnConfigs.ts, using this same
-  // (already-synced) in-memory state rather than the stale, separately
-  // deployed sheetConfigs.ts.
   sheetNamesByGid(): Map<number, string> {
     const map = new Map<number, string>();
     Object.entries(this.newSheetConfigs()).forEach(([sheetName, config]) => {

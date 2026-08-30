@@ -3,6 +3,7 @@ import type { CellValue, CellValueName } from "../../00_base/base";
 import { Val } from "../../utils/Val";
 import type { RawCellFacts } from "../ClassTypes/RawState";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
+import type { CellRaw } from "./CellRaw";
 import { ColumnCommonRaw } from "./ColumnCommonRaw";
 
 export class DataColumnRaw<
@@ -16,8 +17,25 @@ export class DataColumnRaw<
       this.value(rowIndex),
     );
   }
+  get valueArrFilterEmpty(): CellValue<VN>[] {
+    return this.valueArr.filter((value) => value !== "");
+  }
   value(rowIndex: number): CellValue<VN> {
     return this.cell(rowIndex).value();
+  }
+  get valueValidationStrings(): string[] {
+    return this.activeTable.columnValidationValues.get(this.colIndex) ?? [];
+  }
+  get topCell(): CellRaw<VN> {
+    return this.cell(this.baseSchema.topDataRowIdx);
+  }
+  activeValidationValueTitle(): string | null {
+    for (const rawValue of this.valueValidationStrings) {
+      const match = rawValue.match(/^=valueConfig\[(.+)\]$/);
+      if (!match) continue;
+      return Val.assert(match[1], "value title match");
+    }
+    return null;
   }
   updateValue(rowIndex: number, newValue: CellValue<VN>): this {
     this.cell(rowIndex).updateValue(newValue);

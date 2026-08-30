@@ -6,18 +6,20 @@ class ConfigFilesGenerator {
   functionName = "generateConfigFiles";
   claspRunUser = "desktop-clasp-run";
   path = {
-    sheetConfigs: fileURLToPath(
-      new URL("../src/01_generatedConfigs/sheetConfigs.ts", import.meta.url),
-    ),
-    columnConfigs: fileURLToPath(
-      new URL("../src/01_generatedConfigs/columnConfigs.ts", import.meta.url),
-    ),
+    sheetConfigs: this.makeConfigsPath("sheetConfigs"),
+    columnConfigs: this.makeConfigsPath("columnConfigs"),
+    valueConfigs: this.makeConfigsPath("valueConfigs"),
   };
+  makeConfigsPath(base) {
+    return fileURLToPath(
+      new URL(`../src/01_generatedConfigs/${base}.ts`, import.meta.url),
+    );
+  }
   static init() {
     return new ConfigFilesGenerator();
   }
   run() {
-    const { sheetConfigs, columnConfigs } = this._parseSources(
+    const { sheetConfigs, columnConfigs, valueConfigs } = this._parseSources(
       this._runClaspFunction(),
     );
 
@@ -26,8 +28,10 @@ class ConfigFilesGenerator {
     // each other.
     writeFileSync(this.path.sheetConfigs, sheetConfigs);
     writeFileSync(this.path.columnConfigs, columnConfigs);
+    writeFileSync(this.path.valueConfigs, valueConfigs);
     console.log(`Wrote ${this.path.sheetConfigs}`);
     console.log(`Wrote ${this.path.columnConfigs}`);
+    console.log(`Wrote ${this.path.valueConfigs}`);
 
     console.log("Running npm run tsc to check the regenerated files...");
     if (!this._runTsc()) {
