@@ -8,6 +8,7 @@ import { ValueConfigOperator } from "./ValueConfigOperator";
 
 export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   private sheetGidsApiAccesses: Set<number>;
+  private syncedToSpreadsheet: boolean = false;
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "columnConfig",
@@ -19,6 +20,13 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return new ColumnConfigOperator(
       ColumnConfigOperator.initSpreadsheetNamedProps(),
     );
+  }
+  assertSyncedToSpreadsheet() {
+    if (!this.syncedToSpreadsheet) {
+      throw new Error(
+        "ColumnConfigOperator has not yet synced to the spreadsheet.",
+      );
+    }
   }
   get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.spreadsheetNamedProps);
@@ -32,8 +40,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   get activeValueTitles(): string[] {
     return this.sheetData.column("valueTitle").valueArrNotEmpty;
   }
-  fetchAndUpdateColumnConfig(): this {
-    this.sheetConfigData.prepFetchColumnsFull("sheetGid", "letApiAccess");
+  prepFetchWithSheetConfig() {
+    this.sheetConfigOperator.assertPrepFetchIsComplete();
+    this.sheetConfigData.prepFetchColumnsFull("letApiAccess");
     this.sheetData.prepFetchColumnsFull(
       "sheetGid",
       "columnId",
@@ -42,28 +51,19 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "isFormula",
       "valueTitle",
     );
-    this.ss.fetchAllPrepped();
-    this._initSheetGidsApiAccesses();
-    this._gatherColumnIdsForSheetGidsApiAccesses();
-    this._gatherActualColumnFactsForSheetGidsApiAccesses();
-    this.ss.fetchAllPrepped({
-      includeProgrammaticFacts: true,
-    });
-
-    this._addMissingColumnIds();
-    this._pruneColumnRows();
-    this._appendColumnRows();
-    this._updateProgrammaticValues();
-    return this;
   }
-  private _initSheetGidsApiAccesses(): this {
+  fetchAfterSheetConfigSynced(): this {
+    this.sheetConfigOperator.assertSyncedToSpreadsheet();
     this.sheetGidsApiAccesses = new Set(
       this.sheetConfigOperator.sheetGidsApiAccesses(),
     );
+    this._gatherColumnIdsForSheetGidsApiAccesses();
+    this._gatherActualColumnFactsForSheetGidsApiAccesses();
+    this.ss.fetchAllPrepped({
+      skipFetchingProperties: true,
+      includeProgrammaticFacts: true,
+    });
     return this;
-  }
-  private _isSheetGidApiAccesses(sheetGid: number): boolean {
-    return this.sheetGidsApiAccesses.has(sheetGid);
   }
   private _gatherColumnIdsForSheetGidsApiAccesses() {
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
@@ -71,16 +71,22 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       sheet.uniformRow("columnId").raw.gatherFetchFull();
     });
   }
-  // For _updateProgrammaticValues: the header row (actual header text) and
-  // the top data row (actual isFormula/valueName facts) aren't fetched by
-  // anything above.
   private _gatherActualColumnFactsForSheetGidsApiAccesses() {
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
-      const sheet = this.ss.sheetByGid(sheetGid);
-      sheet.uniformRow("header").raw.gatherFetchFull();
-      const rawSheet = sheet.raw;
+      const rawSheet = this.ss.sheetByGid(sheetGid).raw;
       rawSheet.dataRowRaw(rawSheet.schema.topDataRowIdx).gatherFetchFull();
     });
+  }
+  syncToSpreadsheet() {
+    this._addMissingColumnIds();
+    this._pruneColumnRows();
+    this._appendColumnRows();
+    this._updateProgrammaticValues();
+    this.syncedToSpreadsheet = true;
+    return this;
+  }
+  private _isSheetGidApiAccesses(sheetGid: number): boolean {
+    return this.sheetGidsApiAccesses.has(sheetGid);
   }
   private _addMissingColumnIds(): this {
     const col = this.sheetConfigData.columns(

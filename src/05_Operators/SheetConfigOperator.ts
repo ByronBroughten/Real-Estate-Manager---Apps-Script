@@ -3,19 +3,34 @@ import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/Sp
 import { GenericSheetOperator } from "./GenericSheetOperator";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
+  private prepFetchIsComplete = false;
+  private syncedToSpreadsheet = false;
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "sheetConfig",
       ...props,
     });
   }
+  assertPrepFetchIsComplete() {
+    if (!this.prepFetchIsComplete) {
+      throw new Error(
+        "SheetConfigOperator has not yet completed its prepFetch operation.",
+      );
+    }
+  }
+  assertSyncedToSpreadsheet() {
+    if (!this.syncToSpreadsheet) {
+      throw new Error(
+        "SheetConfigOperator has not yet synced to the spreadsheet.",
+      );
+    }
+  }
   static init(): SheetConfigOperator {
     return new SheetConfigOperator(
       SheetConfigOperator.initSpreadsheetNamedProps(),
     );
   }
-  fetchAndUpdateAll(): this {
-    this.ss.raw.fetchAllSheetProperties();
+  prepFetchForSync() {
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
       this.ss.raw.sheet(sheetGid).headerRow.gatherFetchFull();
     });
@@ -25,14 +40,13 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       "hasIdColumn",
       "idPrefix",
     );
-    this.ss.fetchAllPrepped({ skipFetchingProperties: true });
-    this._updateAll();
-    return this;
+    this.prepFetchIsComplete = true;
   }
-  private _updateAll() {
+  syncToSpreadsheet() {
     this._deleteStaleSheetConfigs();
     this._appendMissingSheetConfigs();
     this._updateProgrammaticValues();
+    this.syncedToSpreadsheet = true;
   }
   private _deleteStaleSheetConfigs() {
     this.sheet.data.rows.forEach((row) => {

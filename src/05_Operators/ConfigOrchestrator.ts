@@ -29,12 +29,20 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
     return new ValueConfigOperator(this.spreadsheetNamedProps);
   }
   syncAndFlushConfigSheets() {
-    this.sheetConfigOperator.fetchAndUpdateAll();
-    this.columnConfigOperator.fetchAndUpdateColumnConfig();
+    this.ss.fetchAllSheetProperties();
+    this.sheetConfigOperator.prepFetchForSync();
+    this.columnConfigOperator.prepFetchWithSheetConfig();
+    this.ss.fetchAllPrepped({ skipFetchingProperties: true });
+    this.sheetConfigOperator.syncToSpreadsheet();
+
+    this.columnConfigOperator.fetchAfterSheetConfigSynced();
+    this.columnConfigOperator.syncToSpreadsheet();
+
     this.ss.batchUpdateGSheets();
   }
   generateConfigFiles(): string {
     this.syncAndFlushConfigSheets();
+    this.valueConfigOperator.fetchAfterColumnConfigSynced();
     return JSON.stringify({
       sheetConfigs: this.sheetConfigOperator.toFileSource(),
       columnConfigs: this.columnConfigOperator.toFileSource(),
