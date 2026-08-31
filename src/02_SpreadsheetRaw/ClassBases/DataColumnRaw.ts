@@ -41,8 +41,8 @@ export class DataColumnRaw<
     this.cell(rowIndex).updateValue(newValue);
     return this;
   }
-  // isFormula/numberFormatType are column-wide live facts, sampled from the
-  // top data row cell (see SheetRaw._integrateSheetData) — matching
+  // isFormula/numberFormatType/topValue are column-wide live facts, sampled
+  // from the top data row cell (see SheetRaw._integrateSheetData) — matching
   // ColumnSchemaCommon's schema-based `isFormula`, they're traits of the
   // whole data column, not of any one row. "active" distinguishes these
   // live-sheet reads from that schema-based (generated-config) isFormula.
@@ -50,6 +50,7 @@ export class DataColumnRaw<
     this.columnCellFacts.set(this.colIndex, {
       isFormula: cellValue?.userEnteredValue?.formulaValue !== undefined,
       numberFormatType: cellValue?.effectiveFormat?.numberFormat?.type,
+      topValue: this.topCell.value(), // sampled now; the row can be pruned later
     });
   }
   get activeIsFormula(): boolean {
@@ -57,6 +58,9 @@ export class DataColumnRaw<
   }
   get activeNumberFormatType(): string | undefined {
     return this._activeFacts.numberFormatType;
+  }
+  get activeTopValue(): CellValue {
+    return this._activeFacts.topValue;
   }
   private get _activeFacts(): RawCellFacts {
     return Val.assert(

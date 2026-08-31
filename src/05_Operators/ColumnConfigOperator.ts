@@ -139,8 +139,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
             sheetGid: sheetGid,
             columnId: columnId,
           });
+          appendedCount++;
         }
-        appendedCount++;
       });
     });
     Logger.log(

@@ -559,3 +559,70 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
     expect(colIdRow.value(0)).not.toBe("");
   });
 });
+
+describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
+  const columnConfigHeaderRow = [
+    "Sheet GID",
+    "Column ID",
+    "Sheet title",
+    "Header",
+    "Is formula",
+    "Value title",
+    "Is action control",
+    "Empty allowed",
+    "Custom default value",
+  ];
+
+  function seedColumnConfigDescribingItselfBelowABlankTopDataRow() {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [COLUMN_CONFIG_GID, "Column Config", false, true, "ccf"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
+            4: [],
+            5: [
+              COLUMN_CONFIG_GID,
+              cc.sheetGid.columnId,
+              "Stale Title",
+              "Stale Header",
+              true,
+              "number",
+            ],
+          }),
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+  }
+
+  it("still resolves programmatic values for a sheet whose own top data row it pruned", () => {
+    seedColumnConfigDescribingItselfBelowABlankTopDataRow();
+
+    const operator = ColumnConfigOperator.init();
+    syncColumnConfigOperator(operator);
+    const col = operator.sheetData.columns(
+      "sheetTitle",
+      "header",
+      "isFormula",
+      "valueTitle",
+    );
+
+    expect(operator.sheetData.rowIndexesActive).not.toContain(4);
+    expect(col.sheetTitle.value(5)).toBe("Column Config");
+    expect(col.header.value(5)).toBe("Sheet GID");
+    expect(col.isFormula.value(5)).toBe(false);
+    expect(col.valueTitle.value(5)).toBe("string");
+  });
+});

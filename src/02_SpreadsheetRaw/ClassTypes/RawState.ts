@@ -46,6 +46,7 @@ export type RawColumnCellFacts = Map<ColIndex, RawCellFacts>;
 export interface RawCellFacts {
   isFormula: boolean;
   numberFormatType: string | undefined;
+  topValue: CellValue;
 }
 
 export type RawColumnValidationValues = Map<ColIndex, string[]>;

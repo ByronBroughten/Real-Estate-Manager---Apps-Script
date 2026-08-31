@@ -57,7 +57,7 @@ export class ColumnRaw<
     );
   }
   private _actualPrimitiveValueName(): PrimitiveValueName {
-    const value = this.data.topCell.value();
+    const value = this.data.activeTopValue;
     if (typeof value === "boolean") {
       return "boolean";
     }

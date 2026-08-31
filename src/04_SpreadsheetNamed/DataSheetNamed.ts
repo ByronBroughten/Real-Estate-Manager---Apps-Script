@@ -1,6 +1,5 @@
 import type {
   ColumnName,
-  ColumnValue,
   SheetDataValues,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
@@ -42,9 +41,6 @@ export class DataSheetNamed<
   }
   get topRow(): DataRowNamed<SN> {
     return this.row(this.schema.topDataRowIdx);
-  }
-  topRowValue<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
-    return this.topRow.value(columnName);
   }
   column<CN extends ColumnName<SN>>(columnName: CN): DataColumnNamed<SN, CN> {
     return new DataColumnNamed({
