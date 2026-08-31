@@ -94,7 +94,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
   getRowState(rowIndex: number): RawRowState {
     return Val.assert(
       this.sheetState.rowStates.get(rowIndex),
-      `rowState for row ${rowIndex}`,
+      `rowState for row ${rowIndex} on sheetGid ${this.sheetGid}`,
     );
   }
   get columnCellFacts(): RawColumnCellFacts {

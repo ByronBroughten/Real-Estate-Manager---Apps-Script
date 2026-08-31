@@ -43,4 +43,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   get isPreppedToFetch(): boolean {
     return this.preFetchGridRanges.length > 0;
   }
+  clearPreFetchGridRanges(): void {
+    this.sheetState.preFetchGridRanges = [];
+  }
 }

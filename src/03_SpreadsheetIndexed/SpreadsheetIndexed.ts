@@ -44,5 +44,8 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
       sheet.gatherFetchDataPrepped();
     });
     this.raw.fetchAllGathered(includeProgrammaticFacts);
+    sheetsPreppedForFetch.forEach((sheet) => {
+      sheet.clearPreFetchGridRanges();
+    });
   }
 }
