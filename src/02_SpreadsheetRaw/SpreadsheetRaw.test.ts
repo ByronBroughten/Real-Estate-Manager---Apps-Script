@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
-import { stubSheetsService } from "../testSupport/fakeSheetsService";
+import { buildGridRows, stubSheetsService } from "../testSupport/fakeSheetsService";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 beforeEach(() => {
@@ -18,6 +18,43 @@ describe("SpreadsheetRaw.fetchAllSheetProperties", () => {
 
     expect(raw.activeSheetGids).toEqual([111]);
     expect(raw.sheet(111).title).toBe("Leases");
+  });
+});
+
+describe("SpreadsheetRaw.fetchAllGathered", () => {
+  it("throws one aggregate error naming every sheet queued for a full fetch that has no Table", () => {
+    stubSheetsService({
+      sheets: [
+        { sheetId: 111, title: "Task Generic" },
+        { sheetId: 222, title: "Task Material" },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).headerRow.gatherFetchFull();
+    raw.sheet(222).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).toThrowError(
+      /"Task Generic" \(gid 111\).*"Task Material" \(gid 222\)/,
+    );
+  });
+
+  it("does not throw for a sheet with a Table", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({ 0: ["ID"] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).not.toThrow();
   });
 });
 

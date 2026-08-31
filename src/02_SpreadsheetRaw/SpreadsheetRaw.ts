@@ -62,11 +62,16 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // Sheets response that omits empty cells (or whole blank rows) never
   // leaves them looking merely "not yet fetched" to callers.
   private _finalizeGatheredFetches(): void {
+    const missingTables: { sheetGid: number; title: string | null }[] = [];
     this.rawState.sheets.forEach((state, sheetGid) => {
       if (
         state.rowIndexesToFinalize.size === 0 &&
         state.colIndexesToFinalize.size === 0
       ) {
+        return;
+      }
+      if (state.activeTable === null) {
+        missingTables.push({ sheetGid, title: state.title });
         return;
       }
       const sheet = this.sheet(sheetGid);
@@ -79,6 +84,14 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       state.rowIndexesToFinalize.clear();
       state.colIndexesToFinalize.clear();
     });
+    if (missingTables.length > 0) {
+      const names = missingTables
+        .map(({ sheetGid, title }) => `"${title ?? "(untitled)"}" (gid ${sheetGid})`)
+        .join(", ");
+      throw new Error(
+        `${missingTables.length} sheet(s) need a full row/column fetch but have no Table object — apply Insert > Table over their data range in Sheets: ${names}`,
+      );
+    }
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
   // effectiveFormat) and columnValidationValues (from tables.columnProperties
