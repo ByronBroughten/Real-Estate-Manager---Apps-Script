@@ -56,6 +56,25 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
+
+  it("sends no request when no ranges were gathered, since empty dataFilters would fetch the whole spreadsheet", () => {
+    const { getByDataFilterCalls } = stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({ 0: ["ID"] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllGathered();
+
+    expect(getByDataFilterCalls).toEqual([]);
+    expect(raw.activeSheetGids).toEqual([]);
+  });
 });
 
 describe("SpreadsheetRaw.batchUpdateGSheets", () => {

@@ -12,6 +12,7 @@ export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
 export type SpreadsheetNamedState = {
   sheetConfigSync: { prepFetchIsComplete: boolean; syncedToSpreadsheet: boolean };
   columnConfigSync: { syncedToSpreadsheet: boolean };
+  valueConfigSync: { activeHeaders: Set<string> };
 };
 
 type SheetColumnNames<SN extends SheetName> = {

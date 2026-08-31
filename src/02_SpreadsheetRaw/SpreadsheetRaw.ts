@@ -56,6 +56,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return { activeSheetGids: this.activeSheetGids };
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
+    // An empty dataFilters list would fetch the whole spreadsheet's grid data.
+    if (this.fetcherGridRanges.length === 0) return;
     const data = this._fetchByDataFilter(includeProgrammaticFacts);
     this._addDataToState(data);
     this._finalizeGatheredFetches();

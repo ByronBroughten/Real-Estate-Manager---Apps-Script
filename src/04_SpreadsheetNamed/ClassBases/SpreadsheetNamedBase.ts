@@ -26,6 +26,7 @@ export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
       namedState: {
         sheetConfigSync: { prepFetchIsComplete: false, syncedToSpreadsheet: false },
         columnConfigSync: { syncedToSpreadsheet: false },
+        valueConfigSync: { activeHeaders: new Set() },
       },
     };
   }

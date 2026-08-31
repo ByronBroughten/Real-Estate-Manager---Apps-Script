@@ -76,6 +76,8 @@ export interface FakeSheetsServiceOptions {
 export interface FakeSheetsService {
   /** Every request object passed to `Sheets.Spreadsheets.batchUpdate`, in call order. */
   batchUpdateCalls: BatchUpdateRequest[];
+  /** Every resource object passed to `Sheets.Spreadsheets.getByDataFilter`, in call order. */
+  getByDataFilterCalls: object[];
 }
 
 /**
@@ -196,6 +198,7 @@ export function stubSheetsService(
 ): FakeSheetsService {
   const sheets = options.sheets ?? [];
   const batchUpdateCalls: BatchUpdateRequest[] = [];
+  const getByDataFilterCalls: object[] = [];
 
   function sheetsResponse(): GoogleAppsScript.Sheets.Schema.Spreadsheet {
     return {
@@ -242,10 +245,13 @@ export function stubSheetsService(
     Spreadsheets: {
       get: (_spreadsheetId: string, _params?: object) => sheetsResponse(),
       getByDataFilter: (
-        _resource: object,
+        resource: object,
         _spreadsheetId: string,
         _params?: object,
-      ) => sheetsResponse(),
+      ) => {
+        getByDataFilterCalls.push(resource);
+        return sheetsResponse();
+      },
       batchUpdate: (
         resource: BatchUpdateRequest,
         _spreadsheetId: string,
@@ -258,5 +264,5 @@ export function stubSheetsService(
 
   vi.stubGlobal("Sheets", service);
 
-  return { batchUpdateCalls };
+  return { batchUpdateCalls, getByDataFilterCalls };
 }

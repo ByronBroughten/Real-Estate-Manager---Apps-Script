@@ -53,6 +53,10 @@ function _indexMainTest() {
   mainTests[nameOfTestToRun]();
 }
 
+function syncAndFlushConfigSheets() {
+  ConfigOrchestrator.init().syncAndFlushConfigSheets();
+}
+
 function generateConfigFiles() {
   // needed for npm run gen:configs
   return ConfigOrchestrator.init().generateConfigFiles();

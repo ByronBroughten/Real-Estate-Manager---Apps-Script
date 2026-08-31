@@ -67,10 +67,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       sheet.uniformRow("columnId").gatherFetchFull();
       sheet.data.topRow.gatherFetchFull();
     });
-    this.ss.fetchAllPrepped({
-      skipFetchingProperties: true,
-      includeProgrammaticFacts: true,
-    });
+    this.ss.raw.fetchAllGathered(true);
     return this;
   }
   syncToSpreadsheet() {

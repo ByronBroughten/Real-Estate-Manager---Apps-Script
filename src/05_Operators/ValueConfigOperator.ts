@@ -4,17 +4,22 @@ import {
   type ValueConfigsBase,
 } from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 
 export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
-  private activeHeaders: Set<string>;
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "valueConfig",
       ...props,
     });
-    this.activeHeaders = new Set();
+  }
+  get valueConfigSync(): SpreadsheetNamedState["valueConfigSync"] {
+    return this.namedState.valueConfigSync;
+  }
+  get activeHeaders(): Set<string> {
+    return this.valueConfigSync.activeHeaders;
   }
   static init(): ValueConfigOperator {
     return new ValueConfigOperator(
@@ -26,7 +31,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   }
   fetchAfterColumnConfigSynced() {
     this.columnConfigOperator.assertSyncedToSpreadsheet();
-    this.activeHeaders = new Set(
+    this.valueConfigSync.activeHeaders = new Set(
       this.columnConfigOperator.activeValueTitles.filter(
         (valueName) => !isBaseValueName(valueName),
       ),
