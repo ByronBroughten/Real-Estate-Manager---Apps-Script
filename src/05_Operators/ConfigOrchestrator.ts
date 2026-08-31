@@ -30,15 +30,23 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   }
   syncAndFlushConfigSheets() {
     this.ss.fetchAllSheetProperties();
+    Logger.log("All sheet properties fetched.");
     this.sheetConfigOperator.prepFetchForSync();
     this.columnConfigOperator.prepFetchWithSheetConfig();
+    Logger.log("All prepFetches complete.");
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
+    Logger.log("First fetchAllPrepped complete.");
     this.sheetConfigOperator.syncToSpreadsheet();
+    Logger.log("sheetConfigOperator.syncToSpreadsheet complete.");
 
     this.columnConfigOperator.fetchAfterSheetConfigSynced();
+    Logger.log("columnConfigOperator.fetchAfterSheetConfigSynced complete.");
     this.columnConfigOperator.syncToSpreadsheet();
+    Logger.log("columnConfigOperator.syncToSpreadsheet complete.");
 
+    Logger.log("Starting batchUpdateGSheets.");
     this.ss.batchUpdateGSheets();
+    Logger.log("batchUpdateGSheets complete.");
   }
   generateConfigFiles(): string {
     this.syncAndFlushConfigSheets();
