@@ -6,7 +6,13 @@ import type { SheetNamed } from "../SheetNamed";
 
 export type RowIdsToIndexes = Record<string, number>;
 export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
-export type SpreadsheetNamedState = Record<string, never>;
+
+// Lives here, not as an instance field, so it survives a coordinator's
+// per-access getter rebuilds.
+export type SpreadsheetNamedState = {
+  sheetConfigSync: { prepFetchIsComplete: boolean; syncedToSpreadsheet: boolean };
+  columnConfigSync: { syncedToSpreadsheet: boolean };
+};
 
 type SheetColumnNames<SN extends SheetName> = {
   [S in SN]?: ColumnSpecifierNamed<SN>;

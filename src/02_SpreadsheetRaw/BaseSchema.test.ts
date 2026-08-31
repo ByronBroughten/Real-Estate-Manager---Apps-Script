@@ -114,7 +114,7 @@ describe("SchemaBase", () => {
 
   describe("config", () => {
     it("exposes the hand-authored spreadsheet layout constants", () => {
-      expect(schema.config("idDelimiter")).toBe(":");
+      expect(schema.idDelimiter).toBe(":");
       expect(schema.startTableColIndex).toBe(0);
       expect(schema.colIdRowIndex).toBe(0);
       expect(schema.actionRowIndex).toBe(2);

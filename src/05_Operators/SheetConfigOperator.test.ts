@@ -32,8 +32,19 @@ beforeEach(() => {
   stubLogger();
 });
 
+// newSheetConfigs()/sheetNamesByGid()/toFileSource() all read letApiAccess,
+// which prepFetchForSync doesn't prep on its own — production code only
+// preps it via ColumnConfigOperator.prepFetchWithSheetConfig, so a
+// standalone SheetConfigOperator test has to prep it itself.
+function syncSheetConfigOperator(operator: SheetConfigOperator): void {
+  operator.sheet.data.prepFetchColumnsFull("letApiAccess");
+  operator.prepFetchForSync();
+  operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
+  operator.syncToSpreadsheet();
+}
+
 describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
-  it("carries forward an existing sheet and appends+corrects a brand-new one", () => {
+  it("carries forward an existing sheet and appends a brand-new one, excluded until manually enabled", () => {
     stubSheetsService({
       sheets: [
         {
@@ -58,10 +69,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Property",
           rows: buildGridRows({ 3: [] }),
         },
-        // Present in the spreadsheet but with NO existing Sheet Config
-        // row — this is the exact regression scenario from the original
-        // bug: a sheet new to this run must resolve correctly from this
-        // run's own sync, not a stale deployed sheetConfigs.ts.
+        // Present in the spreadsheet but with NO existing Sheet Config row.
         {
           sheetId: NEW_SHEET_GID,
           title: "Brand New Sheet",
@@ -71,7 +79,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     });
 
     const operator = SheetConfigOperator.init();
-    operator.fetchAndUpdateAll();
+    syncSheetConfigOperator(operator);
     const sheetConfigs = operator.newSheetConfigs();
 
     expect(sheetConfigs.property).toEqual({
@@ -79,11 +87,12 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       idPrefix: "prp",
       hasIdColumn: false,
     });
-    expect(sheetConfigs.brandNewSheet).toEqual({
-      sheetGid: NEW_SHEET_GID,
-      idPrefix: "",
-      hasIdColumn: false,
-    });
+    // A newly-discovered sheet gets a Sheet Config row appended, but stays
+    // excluded from the generated file until a human sets letApiAccess.
+    expect(sheetConfigs.brandNewSheet).toBeUndefined();
+    expect(
+      operator.sheet.data.column("sheetGid").hasValue(NEW_SHEET_GID),
+    ).toBe(true);
   });
 
   it("resolves sheetGid -> sheetName for a sheet not yet in any deployed config", () => {
@@ -100,8 +109,12 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
               sc.letApiAccess.columnId,
               sc.idPrefix.columnId,
             ],
+            // A human already turned on API access for this sheet, but no
+            // deploy has run since — this run's own live sync is the only
+            // place the mapping exists.
+            4: [NEW_SHEET_GID, "Brand New Sheet", false, true, ""],
           }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
         {
           sheetId: NEW_SHEET_GID,
@@ -112,7 +125,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     });
 
     const operator = SheetConfigOperator.init();
-    operator.fetchAndUpdateAll();
+    syncSheetConfigOperator(operator);
 
     expect(operator.sheetNamesByGid().get(NEW_SHEET_GID)).toBe("brandNewSheet");
     expect(operator.toFileSource()).toContain('"brandNewSheet"');

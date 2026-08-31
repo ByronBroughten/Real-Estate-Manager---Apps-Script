@@ -1,4 +1,4 @@
-import { makeSheetConfigs, msc } from "./sheetConfigBuilder";
+import { makeSheetConfigs, msc } from "./makeConfigs";
 
 export const sheetConfigs = makeSheetConfigs({
   spreadsheetControls: msc(1971630928, "sct"),

@@ -48,18 +48,14 @@ export class ColumnRaw<
     this.uniformCell(rowName).updateValue(newValue);
     return this;
   }
-  // Called by ColumnConfigOperator._updateProgrammaticValues as one step of
-  // its column-config sync flow; not general-purpose API on its own.
   activeValueTitle(): string {
-    if (this.activeHeader === "ID") {
+    if (this.activeHeader === this.baseSchema.idHeader) {
       return "id";
     }
     return (
       this.data.activeValidationValueTitle() ?? this._actualPrimitiveValueName()
     );
   }
-  // A column's live data-validation formula, e.g. `=valueConfig[Charge Description]`
-  // (still the current convention), names one of the enums in valueConfigs.ts.
   private _actualPrimitiveValueName(): PrimitiveValueName {
     const value = this.data.topCell.value();
     if (typeof value === "boolean") {

@@ -1,12 +1,4 @@
-import { makeColumnConfigs, mcc } from "./columnConfigBuilder";
-
-// spreadsheetControls: msc(1971630928, "sct"),
-// valueConfig: msc(2119236084, "vcf"),
-// sheetConfig: msc(210603630, "scf"),
-// columnConfig: msc(2034522667, "ccf"),
-// spreadsheetConfig: msc(1967106628, "sscf"),
-
-// c:sct:
+import { makeColumnConfigs, mcc } from "./makeConfigs";
 
 export const columnConfigs = makeColumnConfigs({
   spreadsheetControls: {

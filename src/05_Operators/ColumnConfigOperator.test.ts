@@ -72,7 +72,8 @@ beforeEach(() => {
 function initSyncedColumnConfigOperator(): ColumnConfigOperator {
   const columnConfigOperator = ColumnConfigOperator.init();
   const sheetConfigOperator = columnConfigOperator.sheetConfigOperator;
-  sheetConfigOperator.fetchAndUpdateAll();
+  sheetConfigOperator.sheet.data.prepFetchColumnsFull("letApiAccess");
+  sheetConfigOperator.prepFetchForSync();
   columnConfigOperator.sheetData.prepFetchColumnsFull(
     "sheetGid",
     "columnId",
@@ -81,6 +82,7 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
     "valueTitle",
   );
   columnConfigOperator.ss.fetchAllPrepped();
+  sheetConfigOperator.syncToSpreadsheet();
   return columnConfigOperator;
 }
 
@@ -91,8 +93,12 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         {
           sheetId: SHEET_CONFIG_GID,
           title: "Sheet Config",
-          rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
-          table: { endRowIndex: 4 },
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", false, true, ""],
+            5: [NEW_SHEET_GID, "Brand New Sheet", false, true, ""],
+          }),
+          table: { endRowIndex: 6 },
         },
         {
           sheetId: COLUMN_CONFIG_GID,
@@ -239,8 +245,11 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         {
           sheetId: SHEET_CONFIG_GID,
           title: "Sheet Config",
-          rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
-          table: { endRowIndex: 4 },
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", false, true, ""],
+          }),
+          table: { endRowIndex: 5 },
         },
         {
           sheetId: COLUMN_CONFIG_GID,
@@ -280,7 +289,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
   });
 });
 
-describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammaticValues", () => {
+describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", () => {
   const testSheetConfigRowWithApiAccess = [
     TEST_SHEET_GID,
     "Test",
@@ -299,6 +308,21 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
       }),
       table: { endRowIndex: 5 },
     };
+  }
+
+  // Mirrors ConfigOrchestrator.syncAndFlushConfigSheets's own sequence (see
+  // CLAUDE.md/README on why Sheet Config and Column Config sync together),
+  // stopping short of the final batchUpdateGSheets flush these tests don't
+  // need.
+  function syncColumnConfigOperator(operator: ColumnConfigOperator): void {
+    operator.ss.fetchAllSheetProperties();
+    const sheetConfigOperator = operator.sheetConfigOperator;
+    sheetConfigOperator.prepFetchForSync();
+    operator.prepFetchWithSheetConfig();
+    operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
+    sheetConfigOperator.syncToSpreadsheet();
+    operator.fetchAfterSheetConfigSynced();
+    operator.syncToSpreadsheet();
   }
 
   it("corrects sheetTitle/header/isFormula and infers a primitive or Base-ID valueName", () => {
@@ -336,7 +360,7 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
     });
 
     const operator = ColumnConfigOperator.init();
-    operator.fetchAndUpdateColumnConfig();
+    syncColumnConfigOperator(operator);
     const col = operator.sheetData.columns(
       "sheetTitle",
       "header",
@@ -396,14 +420,14 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
     });
 
     const operator = ColumnConfigOperator.init();
-    operator.fetchAndUpdateColumnConfig();
+    syncColumnConfigOperator(operator);
     const col = operator.sheetData.columns(
       "sheetTitle",
       "header",
       "valueTitle",
     );
 
-    expect(col.valueTitle.value(4)).toBe("transactionDescription");
+    expect(col.valueTitle.value(4)).toBe("Transaction Description");
     // Already-correct fields are left alone.
     expect(col.sheetTitle.value(4)).toBe("Test");
     expect(col.header.value(4)).toBe("Description");
@@ -443,7 +467,7 @@ describe("ColumnConfigOperator.fetchAndUpdateColumnConfig -> _updateProgrammatic
     });
 
     const operator = ColumnConfigOperator.init();
-    operator.fetchAndUpdateColumnConfig();
+    syncColumnConfigOperator(operator);
     const col = operator.sheetData.columns("isFormula", "valueTitle");
 
     expect(col.isFormula.value(4)).toBe(true);

@@ -122,6 +122,7 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
 - **Prefer decomposing into small, descriptively-named methods over a large comment.** When a chunk of code would otherwise need a comment explaining what it does (as opposed to a comment explaining a non-obvious *why*), that's usually a sign it should be pulled into its own small private method whose name says what the block does — see `SheetConfigOperator._updateAll` → `_deleteStaleSheetConfigs`/`_appendMissingSheetConfigs`/`_updateProgrammaticValues`. The method name replaces the comment.
 - **Default to no comments.** Most files in this codebase have zero — code and types carry the meaning.
 - **When one does appear, it's one line, trailing the line it explains (or immediately above), and it explains a "why not the obvious thing"** — never restating what the line already says. E.g. `action: "boolean", // Should perhaps be "boolean" | "string"`; `// intentionally not cell named, because named cells only work for data...`.
+- **Never a multi-line comment block.** If the "why" doesn't fit on one short line, cut it rather than expand it — a multi-sentence comment is a sign the explanation belongs in a commit message or PR description, not the file.
 - **Trim method names to what the return type doesn't already say** — a method returning a string of file source doesn't also need "Sources" in its name on top of "Files": `generateConfigFilesSources` → `generateConfigFiles`.
 
 ## Error handling & validation

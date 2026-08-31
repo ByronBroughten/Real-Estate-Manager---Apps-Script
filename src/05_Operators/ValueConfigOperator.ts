@@ -1,7 +1,8 @@
+import { isBaseValueName } from "../00_base/baseValueSchemas";
 import {
-  isBaseValueName,
+  makeConfigsDirRelativeToConfigs,
   type ValueConfigsBase,
-} from "../00_base/baseValueSchemas";
+} from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
@@ -51,7 +52,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   }
   toFileSource(): string {
     return [
-      `import { makeValueConfigs } from "../00_base/baseValueSchemas";`,
+      `import { makeValueConfigs } from ${makeConfigsDirRelativeToConfigs};`,
       ``,
       `export const valueConfigs = makeValueConfigs(${JSON.stringify(
         this.newValueConfigs(),

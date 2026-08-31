@@ -1,32 +1,29 @@
-import type { TableColumnConfigs } from "../01_generatedConfigs/columnConfigBuilder";
+import {
+  makeConfigsDirRelativeToConfigs,
+  type ColumnConfigsGeneric,
+} from "../01_generatedConfigs/makeConfigs";
 import { type ValueName } from "../01_generatedConfigs/valueSchemas";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
 import { Str } from "../utils/Str";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
 export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
-  private sheetGidsApiAccesses: Set<number>;
-  private syncedToSpreadsheet: boolean = false;
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "columnConfig",
       ...props,
     });
-    this.sheetGidsApiAccesses = new Set();
   }
   static init() {
     return new ColumnConfigOperator(
       ColumnConfigOperator.initSpreadsheetNamedProps(),
     );
   }
-  assertSyncedToSpreadsheet() {
-    if (!this.syncedToSpreadsheet) {
-      throw new Error(
-        "ColumnConfigOperator has not yet synced to the spreadsheet.",
-      );
-    }
+  get columnConfigSync(): SpreadsheetNamedState["columnConfigSync"] {
+    return this.namedState.columnConfigSync;
   }
   get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.spreadsheetNamedProps);
@@ -39,6 +36,18 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   get activeValueTitles(): string[] {
     return this.sheetData.column("valueTitle").valueArrNotEmpty;
+  }
+  // Derived fresh each call, not cached — a stored field goes stale across
+  // this coordinator's per-access getter rebuilds.
+  private get sheetGidsApiAccesses(): Set<number> {
+    return new Set(this.sheetConfigOperator.sheetGidsApiAccesses());
+  }
+  assertSyncedToSpreadsheet() {
+    if (!this.columnConfigSync.syncedToSpreadsheet) {
+      throw new Error(
+        "ColumnConfigOperator has not yet synced to the spreadsheet.",
+      );
+    }
   }
   prepFetchWithSheetConfig() {
     this.sheetConfigOperator.assertPrepFetchIsComplete();
@@ -54,9 +63,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   fetchAfterSheetConfigSynced(): this {
     this.sheetConfigOperator.assertSyncedToSpreadsheet();
-    this.sheetGidsApiAccesses = new Set(
-      this.sheetConfigOperator.sheetGidsApiAccesses(),
-    );
     this._gatherColumnIdsForSheetGidsApiAccesses();
     this._gatherActualColumnFactsForSheetGidsApiAccesses();
     this.ss.fetchAllPrepped({
@@ -82,7 +88,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     this._pruneColumnRows();
     this._appendColumnRows();
     this._updateProgrammaticValues();
-    this.syncedToSpreadsheet = true;
+    this.columnConfigSync.syncedToSpreadsheet = true;
     return this;
   }
   private _isSheetGidApiAccesses(sheetGid: number): boolean {
@@ -195,7 +201,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Column Config cell(s).`);
   }
-  newColumnConfigs(): Record<string, TableColumnConfigs> {
+  newColumnConfigs(): ColumnConfigsGeneric {
     const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
     const col = this.sheetData.columns(
       "sheetGid",
@@ -204,7 +210,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "isFormula",
       "valueTitle",
     );
-    const columnConfigs: Record<string, TableColumnConfigs> = {};
+    const columnConfigs: ColumnConfigsGeneric = {};
     this.sheetData.rowIndexesActive.forEach((rowIndex) => {
       const columnId = col.columnId.valueNotEmpty(rowIndex);
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
@@ -238,7 +244,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   toFileSource(): string {
     return [
-      `import { makeColumnConfigs } from "./columnConfigBuilder";`,
+      `import { makeColumnConfigs } from ${makeConfigsDirRelativeToConfigs};`,
       ``,
       `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
         this.newColumnConfigs(),

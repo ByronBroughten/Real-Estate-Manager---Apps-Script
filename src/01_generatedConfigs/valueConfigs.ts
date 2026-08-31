@@ -1,4 +1,4 @@
-import { makeValueConfigs } from "../00_base/baseValueSchemas";
+import { makeValueConfigs } from "./makeConfigs";
 
 export const valueConfigs = makeValueConfigs({
   transactionDescription: [

@@ -1,5 +1,5 @@
 import type { ValueSchemaKey } from "../00_base/valueSchema";
-import type { ColumnConfigLiteral } from "../01_generatedConfigs/columnConfigBuilder";
+import type { ColumnConfigLiteral } from "../01_generatedConfigs/makeConfigs";
 import {
   getValTrait,
   type Value,

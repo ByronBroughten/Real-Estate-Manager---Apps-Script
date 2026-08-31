@@ -1,5 +1,5 @@
-import { makeStructuredConfig } from "./00_base/base";
 import type { ColumnFullNameSimple } from "./01_generatedConfigs/columnConfigsTypes";
+import { makeStructuredConfig } from "./01_generatedConfigs/makeConfigs";
 import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed";
 import type { FilterWithSuffix } from "./utils/Str";
 

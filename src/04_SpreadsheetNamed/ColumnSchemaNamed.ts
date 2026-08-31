@@ -1,12 +1,12 @@
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { ColumnConfig } from "../01_generatedConfigs/columnConfigBuilder";
 import {
   getColumnTraitByName,
+  type ColumnConfig,
   type ColumnConfigAt,
   type ColumnFullName,
   type ColumnName,
   type ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
 import { ColumnSchemaCommon } from "../03_SpreadsheetIndexed/ColumnSchemaCommon";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";

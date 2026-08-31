@@ -23,7 +23,10 @@ export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
   static initSpreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
       ...SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
-      namedState: {},
+      namedState: {
+        sheetConfigSync: { prepFetchIsComplete: false, syncedToSpreadsheet: false },
+        columnConfigSync: { syncedToSpreadsheet: false },
+      },
     };
   }
 }

@@ -1,7 +1,8 @@
 import type { CellValue } from "../00_base/base";
-import type { SheetConfig } from "../01_generatedConfigs/sheetConfigBuilder";
+
 import {
   getSheetTraitByGid,
+  type SheetConfig,
   type SheetName,
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";

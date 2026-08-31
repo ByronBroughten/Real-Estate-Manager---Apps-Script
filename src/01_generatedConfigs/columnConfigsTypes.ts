@@ -1,8 +1,8 @@
 import { nameDelimiter, type NameDelimiter } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
-import type { ColumnConfig, ColumnConfigStored } from "./columnConfigBuilder";
 import { columnConfigs } from "./columnConfigs";
+import type { ColumnConfigStored } from "./makeConfigs";
 import {
   configSheetNames,
   getSheetTraitByName,
@@ -20,6 +20,11 @@ export type ColumnValueName<
   CN extends ColumnName<SN>,
 > = ColumnConfigs[SN][CN]["valueName" & keyof ColumnConfigs[SN][CN]];
 
+export interface ColumnConfig<
+  VN extends ValueName = ValueName,
+> extends ColumnConfigStored<VN> {
+  columnName: string;
+}
 export type ColumnConfigAt<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
@@ -92,12 +97,10 @@ export function getColumnTraitByIndex<K extends keyof ColumnConfig>(
   return colTraits[key];
 }
 export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
-  return Val
-    .assert(
-      columnConfigsIndexed.get(sheetGid),
-      `column attributes for sheetId=${sheetGid}`,
-    )
-    .keys();
+  return Val.assert(
+    columnConfigsIndexed.get(sheetGid),
+    `column attributes for sheetId=${sheetGid}`,
+  ).keys();
 }
 
 const columnConfigsFlat = Obj.flattenTwoLevels(columnConfigs, nameDelimiter);

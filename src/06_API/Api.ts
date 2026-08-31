@@ -1,6 +1,6 @@
-import { configGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
+import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetNamedBase,
@@ -64,7 +64,7 @@ export class Api<
     if (
       e.value === "TRUE" &&
       Api.eventIndexToBase0(e.range.getRow()) ===
-        configGet("actionRowIndexBase0")
+        ssConfigGet("actionRowIndexBase0")
     ) {
       return true;
     } else {

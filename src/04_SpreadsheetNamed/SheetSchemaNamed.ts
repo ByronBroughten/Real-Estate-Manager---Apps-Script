@@ -3,9 +3,9 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetConfig } from "../01_generatedConfigs/sheetConfigBuilder";
 import {
   getSheetTraitByName,
+  type SheetConfig,
   type SheetNameSimple,
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SheetSchemaCommon } from "../03_SpreadsheetIndexed/SheetSchemaCommon";

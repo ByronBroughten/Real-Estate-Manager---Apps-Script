@@ -1,5 +1,5 @@
 import { Obj } from "../utils/Obj";
-import type { SheetConfig, SheetConfigStored } from "./sheetConfigBuilder";
+import type { SheetConfigStored } from "./makeConfigs";
 import { sheetConfigs } from "./sheetConfigs";
 
 // Post-sheetConfigs
@@ -7,6 +7,11 @@ export type SheetConfigs = typeof sheetConfigs;
 export const configSheetNames = Obj.keys(sheetConfigs);
 export type SheetNameSimple = (typeof configSheetNames)[number];
 export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
+export interface SheetConfig<
+  H extends boolean = boolean,
+> extends SheetConfigStored<H> {
+  sheetName: string;
+}
 
 export function getSheetTraitByName<
   TN extends SheetNameSimple,

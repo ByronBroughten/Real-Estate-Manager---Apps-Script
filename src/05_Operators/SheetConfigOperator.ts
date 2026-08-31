@@ -1,34 +1,39 @@
-import { type SheetConfigsBase } from "../01_generatedConfigs/sheetConfigBuilder";
+import {
+  makeConfigsDirRelativeToConfigs,
+  type SheetConfigsBase,
+} from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
-  private prepFetchIsComplete = false;
-  private syncedToSpreadsheet = false;
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "sheetConfig",
       ...props,
     });
   }
+  static init(): SheetConfigOperator {
+    return new SheetConfigOperator(
+      SheetConfigOperator.initSpreadsheetNamedProps(),
+    );
+  }
+  get sheetConfigSync(): SpreadsheetNamedState["sheetConfigSync"] {
+    return this.namedState.sheetConfigSync;
+  }
   assertPrepFetchIsComplete() {
-    if (!this.prepFetchIsComplete) {
+    if (!this.sheetConfigSync.prepFetchIsComplete) {
       throw new Error(
         "SheetConfigOperator has not yet completed its prepFetch operation.",
       );
     }
   }
   assertSyncedToSpreadsheet() {
-    if (!this.syncToSpreadsheet) {
+    if (!this.sheetConfigSync.syncedToSpreadsheet) {
       throw new Error(
         "SheetConfigOperator has not yet synced to the spreadsheet.",
       );
     }
-  }
-  static init(): SheetConfigOperator {
-    return new SheetConfigOperator(
-      SheetConfigOperator.initSpreadsheetNamedProps(),
-    );
   }
   prepFetchForSync() {
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
@@ -40,13 +45,13 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       "hasIdColumn",
       "idPrefix",
     );
-    this.prepFetchIsComplete = true;
+    this.sheetConfigSync.prepFetchIsComplete = true;
   }
   syncToSpreadsheet() {
     this._deleteStaleSheetConfigs();
     this._appendMissingSheetConfigs();
     this._updateProgrammaticValues();
-    this.syncedToSpreadsheet = true;
+    this.sheetConfigSync.syncedToSpreadsheet = true;
   }
   private _deleteStaleSheetConfigs() {
     this.sheet.data.rows.forEach((row) => {
@@ -108,6 +113,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     );
     const sheetConfigs: SheetConfigsBase = {};
     this.sheet.data.rowIndexesActive.forEach((rowIndex) => {
+      // Defaults false on a freshly-appended row — excluded until a human sets it true in the sheet.
       if (!col.letApiAccess.value(rowIndex)) return;
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.titleToName(title);
@@ -128,7 +134,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   }
   toFileSource(): string {
     return [
-      `import { makeSheetConfigs } from "./sheetConfigBuilder";`,
+      `import { makeSheetConfigs } from ${makeConfigsDirRelativeToConfigs};`,
       ``,
       `export const sheetConfigs = makeSheetConfigs(${JSON.stringify(
         this.newSheetConfigs(),

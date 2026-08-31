@@ -7,7 +7,7 @@ import {
 } from "../00_base/base";
 import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
 import {
-  configGet,
+  ssConfigGet,
   type SpreadsheetConfig,
 } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { Obj } from "../utils/Obj";
@@ -20,10 +20,10 @@ export function getHeaderNameByRowIndex(
 }
 
 const uniformRowIndexes = {
-  columnId: configGet("columnIdRowIdxBase0"),
-  colGroupName: configGet("columnGroupRowIdxBase0"),
-  action: configGet("actionRowIndexBase0"),
-  header: configGet("headerRowIndexBase0"),
+  columnId: ssConfigGet("columnIdRowIdxBase0"),
+  colGroupName: ssConfigGet("columnGroupRowIdxBase0"),
+  action: ssConfigGet("actionRowIndexBase0"),
+  header: ssConfigGet("headerRowIndexBase0"),
 };
 export function getUniformRowIndex(name: UniformRowName): number {
   return uniformRowIndexes[name];
@@ -49,8 +49,13 @@ export class SchemaBase {
   isInSheetGids(sheetGid: number): boolean {
     return configSheetGids.includes(sheetGid);
   }
-  config<K extends keyof SpreadsheetConfig>(key: K): SpreadsheetConfig[K] {
-    return configGet(key);
+  private ssConfig<K extends keyof SpreadsheetConfig>(
+    key: K,
+  ): SpreadsheetConfig[K] {
+    return ssConfigGet(key);
+  }
+  get idHeader(): SpreadsheetConfig["idHeader"] {
+    return this.ssConfig("idHeader");
   }
   titleToName(sheetTitle: string): string {
     return Str.sentenceToCamelCase(sheetTitle);
@@ -95,7 +100,7 @@ export class SchemaBase {
     return rowIndex >= this.topDataRowIdx;
   }
   get startTableColIndex(): number {
-    return this.config("startTableColIndex");
+    return this.ssConfig("startTableColIndexBase0");
   }
   get colIdRowIndex(): number {
     return uniformRowIndexes.columnId;
@@ -107,10 +112,10 @@ export class SchemaBase {
     return uniformRowIndexes.action;
   }
   get topDataRowIdx(): number {
-    return this.config("topDataRowIdxBase0");
+    return this.ssConfig("topDataRowIdxBase0");
   }
   get idDelimiter(): string {
-    return this.config("idDelimiter");
+    return this.ssConfig("idDelimiter");
   }
   makeColIdFromPrefix(idPrefix: string): string {
     return this.makeId("c", this._makeSheetDimensionId(idPrefix));
@@ -125,17 +130,17 @@ export class SchemaBase {
     return this.makeUniqueId(idPrefix);
   }
   makeId(prefix: unknown, suffix: unknown): string {
-    return `${prefix}${this.config("idDelimiter")}${suffix}`;
+    return `${prefix}${this.ssConfig("idDelimiter")}${suffix}`;
   }
   makeUniqueId(prefix: unknown): string {
     const uniqueIdBase = this._makeUniqueIdBase();
     return this.makeId(prefix, uniqueIdBase);
   }
   splitId(id: string): { prefix: string; suffix: string } {
-    const arr = id.split(this.config("idDelimiter"));
+    const arr = id.split(this.ssConfig("idDelimiter"));
     if (arr.length !== 2) {
       throw new Error(
-        `Invalid id: ${id}. Must be in the format "prefix${this.config(
+        `Invalid id: ${id}. Must be in the format "prefix${this.ssConfig(
           "idDelimiter",
         )}suffix"`,
       );
@@ -143,7 +148,7 @@ export class SchemaBase {
     const [prefix, suffix] = arr;
     if (!prefix || !suffix) {
       throw new Error(
-        `Invalid id: ${id}. Must be in the format "prefix${this.config(
+        `Invalid id: ${id}. Must be in the format "prefix${this.ssConfig(
           "idDelimiter",
         )}suffix"`,
       );
