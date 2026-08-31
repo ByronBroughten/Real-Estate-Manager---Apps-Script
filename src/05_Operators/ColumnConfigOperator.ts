@@ -109,10 +109,11 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     const col = this.sheetData.columns("sheetGid", "columnId");
     let staleCount = 0;
     this.sheetData.rowIndexesActive.forEach((rowIndex) => {
-      const columnId = col.columnId.valueNotEmpty(rowIndex);
-      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
-
+      const sheetGid = col.sheetGid.value(rowIndex);
+      const columnId = col.columnId.value(rowIndex);
       if (
+        !sheetGid ||
+        !columnId ||
         !this._isSheetGidApiAccesses(sheetGid) ||
         !this._isActiveColumnId(sheetGid, columnId)
       ) {
