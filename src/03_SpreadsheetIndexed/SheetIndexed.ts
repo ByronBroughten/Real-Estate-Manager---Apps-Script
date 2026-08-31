@@ -54,12 +54,9 @@ export class SheetIndexed extends SheetCommon {
       return this.data.row(rowIndex);
     }
   }
-  fetchOnlyProperties(): this {
-    this.raw.gatherFetchProperties();
-    this.raw.ss.fetchAllGathered();
-    return this;
-  }
   fetchOnlyColumnIds(): this {
+    // The columnId row sits above the table, so its filter alone returns no table metadata.
+    this.raw.gatherFetchProperties();
     this.raw.gatherFetchColumnIds();
     this.raw.ss.fetchAllGathered();
     return this;

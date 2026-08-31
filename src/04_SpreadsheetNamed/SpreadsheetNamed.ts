@@ -194,7 +194,18 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     return this;
   }
   fillMissingRowIds() {
-    const idSheets = this.sheetsOfSchema.filter((sheet) => {
+    // could potentially be reconfigured to not rely on the schema.
+    const idSheets = this._sheetsWithRowIds();
+    idSheets.forEach((sheet) => {
+      sheet.column("id").data.prepFetchFull();
+    });
+    this.fetchAllPrepped();
+    idSheets.forEach((sheet) => {
+      sheet.column("id").data.emptyDataCellsToDefault();
+    });
+  }
+  private _sheetsWithRowIds(): SheetNamed<SheetNameByGroup<"hasIdColumn">>[] {
+    return this.sheetsOfSchema.filter((sheet) => {
       const hasIdCol = sheet.schema.trait("hasIdColumn");
       const idPrefix = sheet.schema.trait("idPrefix");
       if (hasIdCol) {
@@ -204,17 +215,8 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
           );
         }
         return true;
-      } else {
-        return false;
       }
+      return false;
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
-    idSheets.forEach((sheet) => {
-      sheet.column("id").data.prepFetchFull();
-      // column.prepFetchUniformCell("header")
-    });
-    this.fetchAllPrepped();
-    idSheets.forEach((sheet) => {
-      sheet.column("id").data.emptyDataCellsToDefault();
-    });
   }
 }

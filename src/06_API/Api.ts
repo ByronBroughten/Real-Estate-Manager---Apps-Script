@@ -1,61 +1,34 @@
 import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
-import { Obj } from "../utils/Obj";
 
 export type EventOrigin = {
   colIndex: number;
   sheetGid: number;
 };
 
-type EndpointsBase<CNF extends ColumnFullNameSimple> = Partial<
-  Record<CNF, () => void>
->;
-interface ApiProps<
-  EP extends EndpointsBase<ColumnFullNameSimple>,
-> extends SpreadsheetNamedProps {
-  endpoints: EP;
+type Endpoints = Partial<Record<ColumnFullNameSimple, () => void>>;
+interface ApiProps extends SpreadsheetNamedProps {
+  endpoints: Endpoints;
 }
-type EndpointName<EP extends EndpointsBase<ColumnFullNameSimple>> = keyof EP &
-  ColumnFullNameSimple;
-export class Api<
-  EP extends EndpointsBase<ColumnFullNameSimple>,
-> extends SpreadsheetNamedBase {
-  readonly endpoints: EP;
-  constructor({ endpoints, ...rest }: ApiProps<EP>) {
+export class Api extends SpreadsheetNamedBase {
+  readonly endpoints: Endpoints;
+  constructor({ endpoints, ...rest }: ApiProps) {
     super(rest);
     this.endpoints = endpoints;
   }
-  static init<EP extends EndpointsBase<ColumnFullNameSimple>>(
-    endpoints: EP,
-  ): Api<EP> {
+  static init(endpoints: Endpoints): Api {
     return new Api({
       endpoints,
       ...SpreadsheetNamedBase.initSpreadsheetNamedProps(),
     });
   }
-  get endpointNames(): EndpointName<EP>[] {
-    return Obj.keys(this.endpoints) as EndpointName<EP>[];
-  }
-  isApiEndpointName(
-    columnFullName: ColumnFullNameSimple,
-  ): columnFullName is EndpointName<EP> {
-    return this.endpointNames.includes(columnFullName as EndpointName<EP>);
-  }
-  get ssr(): SpreadsheetRaw {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
-  }
   get ssi(): SpreadsheetIndexed {
     return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
-  }
-  get ssn(): SpreadsheetNamed {
-    return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   static eventIndexToBase0(eventIndex: number): number {
     return eventIndex - 1;
@@ -88,11 +61,6 @@ export class Api<
       return;
     }
     const { fullName } = sheet.schema.column(columnId);
-    if (this.isApiEndpointName(fullName)) {
-      const endpoint = this.endpoints[fullName];
-      if (endpoint) {
-        endpoint();
-      }
-    }
+    this.endpoints[fullName]?.();
   }
 }
