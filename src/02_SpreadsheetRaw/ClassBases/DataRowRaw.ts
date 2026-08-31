@@ -26,7 +26,7 @@ export class DataRowRaw extends RowCommonRaw {
   delete(): void {
     this.remove();
     this.addRowChangeToSave({ action: "delete" });
-    this.activeTable.endRowIndex--;
+    // this.activeTable.endRowIndex--;
     // TODO: technically, there should should be activeTable and workingTable; active table gets updated only at the update flush. workingTable gets updated immediately.
   }
   append(): this {
@@ -36,8 +36,8 @@ export class DataRowRaw extends RowCommonRaw {
       );
     }
     this.sheetState.rowStates.set(this.rowIndex, new Map());
-    this.activeTable.endRowIndex++;
     this.addRowChangeToSave({ action: "append" });
+    this.activeTable.endRowIndex++;
     return this;
   }
 }

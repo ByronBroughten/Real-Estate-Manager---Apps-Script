@@ -90,4 +90,33 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
     expect(batchUpdateCalls).toEqual([]);
   });
+
+  it("sends same-sheet row deletions in descending startIndex order so an earlier deletion can't shift a later one out from under it", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).delete();
+    raw.sheet(111).data.row(10).delete();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([
+      {
+        requests: [
+          {
+            deleteDimension: {
+              range: { sheetId: 111, dimension: "ROWS", startIndex: 10, endIndex: 11 },
+            },
+          },
+          {
+            deleteDimension: {
+              range: { sheetId: 111, dimension: "ROWS", startIndex: 5, endIndex: 6 },
+            },
+          },
+        ],
+      },
+    ]);
+  });
 });

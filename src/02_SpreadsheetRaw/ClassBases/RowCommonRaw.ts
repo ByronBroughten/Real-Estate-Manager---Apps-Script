@@ -51,7 +51,6 @@ export abstract class RowCommonRaw extends RowRawBase {
     this.cell(colIndex).updateValue(value);
     return this;
   }
-
   get sheetRowId(): string {
     return this.schema.makeId(this.sheetGid, this.rowIndex);
   }

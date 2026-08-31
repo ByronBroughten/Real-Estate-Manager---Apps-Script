@@ -1,4 +1,7 @@
-import type { GoogleSpreadsheet } from "../00_base/AppsScriptTypes";
+import type {
+  GoogleSpreadsheet,
+  GoogleUpdateRequest,
+} from "../00_base/AppsScriptTypes";
 import { Val } from "../utils/Val";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
@@ -191,7 +194,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ...surs.append,
       ...surs.insertColumn,
       ...surs.update,
-      ...surs.delete,
+      ...this._deleteRequestsDescending(),
       ...surs.sort,
     ];
     if (requests.length > 0) {
@@ -201,5 +204,19 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       );
     }
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+  }
+  // Deletes within one batchUpdate apply sequentially and each shifts the
+  // row indices below it, so same-sheet deletes must go highest-index-first
+  // or a later request's pre-computed startIndex lands on the wrong row.
+  private _deleteRequestsDescending(): GoogleUpdateRequest[] {
+    return [...this.rawState.updateRequests.delete].sort(
+      (a, b) => this._deleteRequestStartIndex(b) - this._deleteRequestStartIndex(a),
+    );
+  }
+  private _deleteRequestStartIndex(request: GoogleUpdateRequest): number {
+    return Val.assert(
+      request.deleteDimension?.range?.startIndex,
+      "deleteDimension.range.startIndex",
+    );
   }
 }
