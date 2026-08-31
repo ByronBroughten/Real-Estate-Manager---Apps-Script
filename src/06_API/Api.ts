@@ -1,18 +1,16 @@
-import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import { baseEndpoints } from "./baseEndpoints";
+import { baseEndpoints, type Endpoints } from "./baseEndpoints";
 
 export type EventOrigin = {
   colIndex: number;
   sheetGid: number;
 };
 
-type Endpoints = Partial<Record<ColumnFullNameSimple, () => void>>;
 interface ApiProps extends SpreadsheetNamedProps {
   endpoints: Endpoints;
 }

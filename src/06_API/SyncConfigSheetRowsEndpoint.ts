@@ -20,9 +20,9 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
   get configOrchestrator() {
     return new ConfigOrchestrator(this.spreadsheetNamedProps);
   }
-  syncSheetConfigRows() {
-    this.onRunSetup();
+  syncConfigSheetRows() {
     try {
+      this.onRunSetup();
       this.configOrchestrator.syncConfigSheetRows();
       this.onRunSuccess();
     } catch (error) {
@@ -34,34 +34,40 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
   onRunSetup() {
     this.sheet.uniformRow("columnId").prepFetchFull();
     this.ss.fetchAllPrepped();
-    this.sheet.column("fillRowIdsTimeLastRan").actionRowToDefault();
+    this.sheet.column("syncConfigSheetRowsTimeLastRan").actionRowToDefault();
     this.sheet
-      .column("fillRowIdsTimeLastRan")
+      .column("syncConfigSheetRowsTimeLastRan")
       .data.topCell()
       .updateValue("Processing...");
-    this.sheet.column("fillRowIdsErrorMessage").data.topCell().updateValue("");
+    this.sheet
+      .column("syncConfigSheetRowsErrorMessage")
+      .data.topCell()
+      .updateValue("");
     this.ss.batchUpdateGSheets();
   }
   onRunSuccess() {
     this.sheet
-      .column("fillRowIdsLastRanSucceeded")
+      .column("syncConfigSheetRowsLastRanSucceeded")
       .data.topCell()
       .updateValue(true);
-    this.sheet.column("fillRowIdsErrorMessage").data.topCell().updateValue("");
+    this.sheet
+      .column("syncConfigSheetRowsErrorMessage")
+      .data.topCell()
+      .updateValue("");
   }
   onRunError(error: unknown) {
     this.sheet
-      .column("fillRowIdsLastRanSucceeded")
+      .column("syncConfigSheetRowsLastRanSucceeded")
       .data.topCell()
       .updateValue(false);
     this.sheet
-      .column("fillRowIdsErrorMessage")
+      .column("syncConfigSheetRowsErrorMessage")
       .data.topCell()
       .updateValue(String(error));
   }
   onRunEnd() {
     this.sheet
-      .column("fillRowIdsTimeLastRan")
+      .column("syncConfigSheetRowsTimeLastRan")
       .data.topCell()
       .updateValue(Tim.nowTimestamp());
     this.ss.batchUpdateGSheets();
