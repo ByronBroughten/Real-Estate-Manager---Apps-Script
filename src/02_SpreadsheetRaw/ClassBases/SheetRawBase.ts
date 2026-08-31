@@ -103,7 +103,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get activeTable(): NonNullable<RawSheetState["activeTable"]> {
     if (!this.sheetState.rowIndexesAreValid) {
       throw new Error(
-        `Row indexes are not valid for sheetGid ${this.sheetGid}. Ensure that the sheet state has been properly initialized.`,
+        `Row indexes are not valid for sheetGid ${this.sheetGid}.`,
       );
     }
     const activeTable = this.sheetState.activeTable;
