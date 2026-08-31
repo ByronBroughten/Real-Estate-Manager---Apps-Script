@@ -236,7 +236,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   toFileSource(): string {
     return [
-      `import { makeColumnConfigs } from ${makeConfigsDirRelativeToConfigs};`,
+      `import { makeColumnConfigs } from "${makeConfigsDirRelativeToConfigs}";`,
       ``,
       `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
         this.newColumnConfigs(),

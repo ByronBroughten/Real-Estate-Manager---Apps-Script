@@ -1,16 +1,14 @@
 import { makeValueConfigs } from "./makeConfigs";
 
 export const valueConfigs = makeValueConfigs({
-  transactionDescription: [
-    "Rent (base)",
-    "Rent (utilities)",
-    "Pet fee (recurring)",
-    "Caretaker rent reduction",
+  yesOrNo: ["Yes", "No"],
+  chargeOnetimeDescription: [
     "Security deposit",
     "Late fee",
     "Damage, waste, or service",
     "Forgiveness",
   ],
+  rentPortionName: ["Household", "Subsidy program"],
   chargeDescription: [
     "Rent (base)",
     "Rent (utilities)",
@@ -21,23 +19,7 @@ export const valueConfigs = makeValueConfigs({
     "Damage, waste, or service",
     "Forgiveness",
   ],
-  chargeRecurringDescription: [
-    "Rent (base)",
-    "Rent (utilities)",
-    "Pet fee (recurring)",
-    "Caretaker rent reduction",
-  ],
-  chargeOnetimeDescription: [
-    "Security deposit",
-    "Late fee",
-    "Damage, waste, or service",
-    "Forgiveness",
-  ],
-  chargeReduceDescription: ["Forgiveness", "Security deposit"],
-  rentPortionName: ["Household", "Subsidy program"],
-  paymentType: ["Currency", "Caretaking"],
   payerCategory: ["Household", "Non-resident"],
-  paymentAllocateWhat: ["Full payment", "Full charge", "Lesser amount"],
   expenseCategory: [
     "Repair",
     "Supplies",
@@ -54,29 +36,6 @@ export const valueConfigs = makeValueConfigs({
     "Commissions",
     "Other interest",
     "Other",
-    "Principal",
-  ],
-  expenseCategoryTaxable: [
-    "Repair",
-    "Supplies",
-    "Cleaning & maintenance",
-    "Depreciation expense or depletion",
-    "Utilities",
-    "Insurance",
-    "Taxes",
-    "Mortgage interest paid to banks",
-    "Legal & professional",
-    "Advertising",
-    "Auto and travel",
-    "Mgmt fees",
-    "Commissions",
-    "Other interest",
-    "Other",
-  ],
-  expenseCategoryBank: [
-    "Insurance",
-    "Taxes",
-    "Mortgage interest paid to banks",
     "Principal",
   ],
   residenceTaxAdjust: [
@@ -96,17 +55,7 @@ export const valueConfigs = makeValueConfigs({
     "Venmo",
     "Unknown",
   ],
-  yesOrNo: ["Yes", "No"],
-  oneOccupancyOrAll: ["One occupancy", "All"],
-  buildingType: [
-    "Small multifamily",
-    "Single family home",
-    "Apartment building",
-  ],
-  buildingTypeAndAny: [
-    "Small multifamily",
-    "Single family home",
-    "Apartment building",
-    "Any",
-  ],
-} as const);
+  chargeReduceDescription: ["Forgiveness", "Security deposit"],
+  paymentType: ["Currency", "Caretaking"],
+  paymentAllocateWhat: ["Full payment", "Full charge", "Lesser amount"],
+});

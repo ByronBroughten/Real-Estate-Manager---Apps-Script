@@ -17,9 +17,9 @@ const sheetNameGroups = {
   ) as SheetNameWithIdColumn[],
   aggregateApi: Arr.extractStrict(
     configSheetNames,
-    "addOccChargeOnetime",
-    "addHhPaymentOnetime",
-    "addExpenses",
+    "addOccChargesOnetime",
+    "addOccPaymentsOnetime",
+    "addPropertyExpenses",
   ),
   ledgerInputs: Arr.extractStrict(
     configSheetNames,
