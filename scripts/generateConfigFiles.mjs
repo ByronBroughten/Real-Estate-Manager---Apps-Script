@@ -81,13 +81,17 @@ class ConfigFilesGenerator {
         `generateConfigFiles's response wasn't valid JSON: ${err.message}`,
       );
     }
-    const { sheetConfigs, columnConfigs } = parsed;
-    if (typeof sheetConfigs !== "string" || typeof columnConfigs !== "string") {
+    const { sheetConfigs, columnConfigs, valueConfigs } = parsed;
+    if (
+      typeof sheetConfigs !== "string" ||
+      typeof columnConfigs !== "string" ||
+      typeof valueConfigs !== "string"
+    ) {
       throw new Error(
-        `generateConfigFiles's response is missing sheetConfigs/columnConfigs source strings: ${responseJson}`,
+        `generateConfigFiles's response is missing sheetConfigs/columnConfigs/valueConfigs source strings: ${responseJson}`,
       );
     }
-    return { sheetConfigs, columnConfigs };
+    return { sheetConfigs, columnConfigs, valueConfigs };
   }
 
   _runTsc() {

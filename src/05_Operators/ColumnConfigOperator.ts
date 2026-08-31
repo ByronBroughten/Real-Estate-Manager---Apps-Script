@@ -224,7 +224,10 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         );
       }
       const columnName = Str.sentenceToCamelCase(header);
-      const tableColumnConfigs = (columnConfigs[sheetName] ??= {});
+      if (!columnConfigs[sheetName]) {
+        columnConfigs[sheetName] = {};
+      }
+      const tableColumnConfigs = columnConfigs[sheetName];
       if (tableColumnConfigs[columnName]) {
         throw new Error(
           `generateColumnConfigFileSource: duplicate column name "${columnName}" ` +

@@ -64,22 +64,28 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // those fields are left out of the default fetch to avoid fetching them
   // (and, for dataValidationRule, an unbounded list of validation values)
   // wastefully on every ordinary read.
-  private _fetchByDataFilter(includeProgrammaticFacts: boolean): GoogleSpreadsheet {
+  private _fetchByDataFilter(
+    includeProgrammaticFacts: boolean,
+  ): GoogleSpreadsheet {
+    const withProgrammaticFacts =
+      "sheets(" +
+      "properties(sheetId,title)," +
+      "tables(tableId,range,columnProperties(colIndex,dataValidationRule(condition(values(userEnteredValue)))))," +
+      "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)))))" +
+      ")";
+    const withoutProgrammaticFacts =
+      "sheets(" +
+      "properties(sheetId,title)," +
+      "tables(tableId,range)," +
+      "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
+      ")";
     return this.sheetsService.Spreadsheets.getByDataFilter(
       this._makeFetchResource(),
       this.spreadsheetId,
       {
         fields: includeProgrammaticFacts
-          ? "sheets(" +
-            "properties(sheetId,title)," +
-            "tables(tableId,range,columnProperties(colIndex,dataValidationRule(condition(values(userEnteredValue)))))," +
-            "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)))))" +
-            ")"
-          : "sheets(" +
-            "properties(sheetId,title)," +
-            "tables(tableId,range)," +
-            "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
-            ")",
+          ? withProgrammaticFacts
+          : withoutProgrammaticFacts,
       },
     );
   }

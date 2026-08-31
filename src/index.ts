@@ -53,6 +53,11 @@ function _indexMainTest() {
   mainTests[nameOfTestToRun]();
 }
 
+function generateConfigFiles() {
+  // needed for npm run gen:configs
+  return ConfigOrchestrator.init().generateConfigFiles();
+}
+
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (Api.isSuspectedApiCall(e)) {
     Api.init(businessEndpoints).handleSheetOnEditEvent(e);
