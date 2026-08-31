@@ -94,6 +94,9 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
   }
+  isSheetGidApiAccess(sheetGid: number): boolean {
+    return this.sheetGidsApiAccesses().includes(sheetGid);
+  }
   sheetGidsApiAccesses(): number[] {
     const col = this.sheet.data.columns("sheetGid", "letApiAccess");
     const gids: number[] = [];

@@ -91,10 +91,11 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "idPrefix",
     );
     let idsAdded = 0;
+
     this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
-      const idPrefix = col.idPrefix.valueNotEmpty(rowIndex);
       if (this._isSheetGidApiAccesses(sheetGid)) {
+        const idPrefix = col.idPrefix.valueNotEmpty(rowIndex);
         const sheet = this.ss.raw.sheet(sheetGid);
         idsAdded += sheet.addMissingColumnIds(idPrefix);
       }
