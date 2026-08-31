@@ -51,7 +51,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   prepFetchWithSheetConfig() {
     this.sheetConfigOperator.assertPrepFetchIsComplete();
-    this.sheetConfigData.prepFetchColumnsFull("letApiAccess");
     this.sheetData.prepFetchColumnsFull(
       "sheetGid",
       "columnId",
@@ -63,25 +62,16 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   fetchAfterSheetConfigSynced(): this {
     this.sheetConfigOperator.assertSyncedToSpreadsheet();
-    this._gatherColumnIdsForSheetGidsApiAccesses();
-    this._gatherActualColumnFactsForSheetGidsApiAccesses();
+    this.sheetGidsApiAccesses.forEach((sheetGid) => {
+      const sheet = this.ss.sheetByGid(sheetGid);
+      sheet.uniformRow("columnId").prepFetchFull();
+      sheet.data.topRow.prepFetchFull();
+    });
     this.ss.fetchAllPrepped({
       skipFetchingProperties: true,
       includeProgrammaticFacts: true,
     });
     return this;
-  }
-  private _gatherColumnIdsForSheetGidsApiAccesses() {
-    this.sheetGidsApiAccesses.forEach((sheetGid) => {
-      const sheet = this.ss.sheetByGid(sheetGid);
-      sheet.uniformRow("columnId").raw.gatherFetchFull();
-    });
-  }
-  private _gatherActualColumnFactsForSheetGidsApiAccesses() {
-    this.sheetGidsApiAccesses.forEach((sheetGid) => {
-      const rawSheet = this.ss.sheetByGid(sheetGid).raw;
-      rawSheet.dataRowRaw(rawSheet.schema.topDataRowIdx).gatherFetchFull();
-    });
   }
   syncToSpreadsheet() {
     this._addMissingColumnIds();
@@ -98,8 +88,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     const col = this.sheetConfigData.columns("sheetGid", "letApiAccess");
     let idsAdded = 0;
     this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
-      const sheetGid = col.sheetGid.value(rowIndex);
-      if (sheetGid !== "" && this._isSheetGidApiAccesses(sheetGid)) {
+      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
+      if (this._isSheetGidApiAccesses(sheetGid)) {
         const sheet = this.ss.sheetByGid(sheetGid);
         idsAdded += sheet.addMissingColumnIds();
       }

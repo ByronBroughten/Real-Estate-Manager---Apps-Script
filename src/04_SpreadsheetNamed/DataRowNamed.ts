@@ -1,11 +1,11 @@
-import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
 } from "../01_generatedConfigs/columnConfigsTypes";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
+import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
 import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
@@ -137,7 +137,9 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     );
   }
   updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {
-    columnNames.forEach((columnName) => this.cell(columnName).updateToDefault());
+    columnNames.forEach((columnName) =>
+      this.cell(columnName).updateToDefault(),
+    );
     return this;
   }
   updateCellToDefault(columnName: ColumnName<SN>): DataRowNamed<SN> {
@@ -166,6 +168,10 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     for (const [columnName, value] of Obj.entries(sectionValues)) {
       this.updateValue(columnName, value as ColumnValue<SN, typeof columnName>);
     }
+    return this;
+  }
+  prepFetchFull(): this {
+    this.indexed.prepFetchFull();
     return this;
   }
 }

@@ -523,4 +523,46 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
     const colIdRow = operator.ss.sheetByGid(TEST_SHEET_GID).raw.colIdRow;
     expect(colIdRow.value(0)).not.toBe("");
   });
+
+  it("adds a missing column ID when the columnId row has never had any grid data set", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [TEST_SHEET_GID, "Test", true, true, "tst"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({ 0: columnConfigColumnIdRow }),
+          table: { endRowIndex: 4 },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({
+            3: ["Amount"],
+            4: [42],
+          }),
+          // Row 0 has never had a column ID written, so Google's real API
+          // omits it entirely from the fetch response rather than
+          // returning empty cells for it.
+          rowsWithNoGridData: [0],
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+
+    expect(() => syncColumnConfigOperator(operator)).not.toThrow();
+
+    const colIdRow = operator.ss.sheetByGid(TEST_SHEET_GID).raw.colIdRow;
+    expect(colIdRow.value(0)).not.toBe("");
+  });
 });

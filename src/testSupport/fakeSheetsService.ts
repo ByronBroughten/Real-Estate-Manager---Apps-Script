@@ -57,6 +57,16 @@ export interface FakeSheetProperties {
      */
     columnValidationValues?: Record<number, string[]>;
   };
+  /**
+   * Row indices that come back with no grid data at all, simulating
+   * Google's real omission of a row that's never had any value or
+   * formatting set — as opposed to a row present in `rows` with empty
+   * cells, which (unlike a truly absent row) IS reported and so marks
+   * those cells active with an empty value. Use this to reproduce bugs
+   * where code assumes a row it explicitly fetched came back in the
+   * response.
+   */
+  rowsWithNoGridData?: readonly number[];
 }
 
 export interface FakeSheetsServiceOptions {
@@ -120,25 +130,50 @@ function fakeValueToExtendedValue(
 
 function fakeRowsToGoogleSheetData(
   rows: FakeSheetProperties["rows"],
+  rowsWithNoGridData: readonly number[] = [],
 ): GoogleAppsScript.Sheets.Schema.Sheet["data"] | undefined {
   if (!rows) {
     return undefined;
   }
   const columnCount = Math.max(0, ...rows.map((row) => row.length));
-  return [
-    {
-      startColumn: 0,
-      startRow: 0,
-      columnMetadata: Array.from({ length: columnCount }, () => ({})),
-      rowData: rows.map((row) => ({
-        values: Array.from(
-          { length: columnCount },
-          (_, colIndex): GoogleCellData =>
-            fakeCellToGoogleCellData(row[colIndex] ?? null),
-        ),
-      })),
-    },
-  ];
+  const noGridDataRows = new Set(rowsWithNoGridData);
+
+  // Real rowData blocks run contiguously from a real startRow — a wholly
+  // absent row (no value or formatting ever set) splits the grid into
+  // separate blocks rather than appearing as a padded-empty entry.
+  const blocks: NonNullable<
+    GoogleAppsScript.Sheets.Schema.Sheet["data"]
+  > = [];
+  let currentBlockRows: GoogleAppsScript.Sheets.Schema.RowData[] = [];
+  let currentBlockStart: number | null = null;
+  const flushCurrentBlock = () => {
+    if (currentBlockStart !== null) {
+      blocks.push({
+        startColumn: 0,
+        startRow: currentBlockStart,
+        columnMetadata: Array.from({ length: columnCount }, () => ({})),
+        rowData: currentBlockRows,
+      });
+    }
+    currentBlockRows = [];
+    currentBlockStart = null;
+  };
+  rows.forEach((row, rowIndex) => {
+    if (noGridDataRows.has(rowIndex)) {
+      flushCurrentBlock();
+      return;
+    }
+    currentBlockStart ??= rowIndex;
+    currentBlockRows.push({
+      values: Array.from(
+        { length: columnCount },
+        (_, colIndex): GoogleCellData =>
+          fakeCellToGoogleCellData(row[colIndex] ?? null),
+      ),
+    });
+  });
+  flushCurrentBlock();
+  return blocks;
 }
 
 /**
@@ -167,7 +202,7 @@ export function stubSheetsService(
       sheets: sheets.map(
         (s): GoogleAppsScript.Sheets.Schema.Sheet => ({
           properties: { sheetId: s.sheetId, title: s.title },
-          data: fakeRowsToGoogleSheetData(s.rows),
+          data: fakeRowsToGoogleSheetData(s.rows, s.rowsWithNoGridData),
           tables: s.table
             ? [
                 {
