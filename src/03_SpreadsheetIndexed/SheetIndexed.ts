@@ -54,6 +54,11 @@ export class SheetIndexed extends SheetCommon {
       return this.data.row(rowIndex);
     }
   }
+  fetchOnlyProperties(): this {
+    this.raw.gatherFetchProperties();
+    this.raw.ss.fetchAllGathered();
+    return this;
+  }
   fetchOnlyColumnIds(): this {
     this.raw.gatherFetchColumnIds();
     this.raw.ss.fetchAllGathered();
@@ -71,11 +76,13 @@ export class SheetIndexed extends SheetCommon {
     }
   }
   gatherFetchDataPrepped() {
+    // This is so that table dimensions and columnIndexes can be guaranteed
+    // before their fetch requests are generated.
     this.preFetchGridRanges.forEach((pf) => {
       if (isPreFetchType(pf, "fullRow")) {
         this.raw.row(pf.row).gatherFetchFull();
       } else if (isPreFetchType(pf, "fullDataColumn")) {
-        this.column(pf.column).raw.data.gatherFetchAll();
+        this.column(pf.column).raw.data.gatherFetchFull();
       } else if (isPreFetchType(pf, "singleCell")) {
         const colIndex = this.column(pf.column).colIndex;
         this.raw.row(pf.row).cell(colIndex).gatherFetchRange();

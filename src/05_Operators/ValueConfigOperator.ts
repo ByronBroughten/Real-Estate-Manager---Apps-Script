@@ -37,7 +37,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
       ),
     );
     this.activeHeaders.forEach((header) => {
-      this.sheet.raw.columnByHeader(header).data.gatherFetchAll();
+      this.sheet.raw.columnByHeader(header).data.gatherFetchFull();
     });
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
   }

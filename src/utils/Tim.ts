@@ -9,11 +9,12 @@ export const Tim = {
   SHEET_TIMEZONE: "America/Chicago",
   SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30),
   MS_PER_DAY: 86400000,
-  // UTC offset (in minutes) of `tz` at the real-world moment `instant`
-  // represents. Positive = east of UTC. DST-aware via Intl + the IANA
-  // tz database.
-  getTzOffsetMinutes(instant: Date, tz: string = this.SHEET_TIMEZONE): number {
-    const fmt = new Intl.DateTimeFormat("en-US", {
+  // Wall-clock date and time fields of `instant` as seen in `tz`.
+  wallClockParts(
+    instant: Date,
+    tz: string = this.SHEET_TIMEZONE,
+  ): Record<string, string> {
+    return new Intl.DateTimeFormat("en-US", {
       timeZone: tz,
       hourCycle: "h23",
       year: "numeric",
@@ -22,15 +23,23 @@ export const Tim = {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-    });
-
-    const parts = fmt
+    })
       .formatToParts(instant)
       .reduce<Record<string, string>>((acc, part) => {
         acc[part.type] = part.value;
         return acc;
       }, {});
-
+  },
+  // Local wall-clock timestamp, e.g. "2026-08-31 17:14:10".
+  nowTimestamp(tz: string = this.SHEET_TIMEZONE): string {
+    const p = this.wallClockParts(new Date(), tz);
+    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
+  },
+  // UTC offset (in minutes) of `tz` at the real-world moment `instant`
+  // represents. Positive = east of UTC. DST-aware via Intl + the IANA
+  // tz database.
+  getTzOffsetMinutes(instant: Date, tz: string = this.SHEET_TIMEZONE): number {
+    const parts = this.wallClockParts(instant, tz);
     const asIfUTC = Date.UTC(
       Number(parts.year),
       Number(parts.month) - 1,

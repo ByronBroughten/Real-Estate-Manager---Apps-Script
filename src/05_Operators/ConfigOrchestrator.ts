@@ -28,28 +28,22 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   get valueConfigOperator() {
     return new ValueConfigOperator(this.spreadsheetNamedProps);
   }
-  syncAndFlushConfigSheets() {
+  syncConfigSheetRows() {
     this.ss.fetchAllSheetProperties();
-    Logger.log("All sheet properties fetched.");
     this.sheetConfigOperator.prepFetchForSync();
     this.columnConfigOperator.prepFetchWithSheetConfig();
-    Logger.log("All prepFetches complete.");
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
-    Logger.log("First fetchAllPrepped complete.");
     this.sheetConfigOperator.syncToSpreadsheet();
-    Logger.log("sheetConfigOperator.syncToSpreadsheet complete.");
-
     this.columnConfigOperator.fetchAfterSheetConfigSynced();
-    Logger.log("columnConfigOperator.fetchAfterSheetConfigSynced complete.");
     this.columnConfigOperator.syncToSpreadsheet();
-    Logger.log("columnConfigOperator.syncToSpreadsheet complete.");
-
-    Logger.log("Starting batchUpdateGSheets.");
+  }
+  syncAndFlushConfigSheets() {
+    this.syncConfigSheetRows();
     this.ss.batchUpdateGSheets();
-    Logger.log("batchUpdateGSheets complete.");
   }
   generateConfigFiles(): string {
-    this.syncAndFlushConfigSheets();
+    this.syncConfigSheetRows();
+    this.ss.batchUpdateGSheets();
     this.valueConfigOperator.fetchAfterColumnConfigSynced();
     return JSON.stringify({
       sheetConfigs: this.sheetConfigOperator.toFileSource(),

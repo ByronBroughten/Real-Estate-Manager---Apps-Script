@@ -1,22 +1,13 @@
 // TODO
 
-import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { EndpointHandlerBase } from "./EndpointHandlerBase";
 
 export class EndpointHandler<
   SN extends SheetNameSimple,
-  EN extends ColumnName<SN>,
-  LRN extends ColumnName<SN>,
-  LSN extends ColumnName<SN>,
-  SLN extends ColumnName<SN>,
-> extends EndpointHandlerBase<SN, EN, LRN, LSN, SLN> {
-  get ssr() {
-    return new SpreadsheetRaw(this.spreadsheetRawProps);
-  }
-  get ssn() {
+> extends EndpointHandlerBase<SN> {
+  get ss() {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   protected runEndpoint(endpoint: () => void): void {
@@ -31,7 +22,7 @@ export class EndpointHandler<
       // selectedIndexes = selectedRowIndexes ? selectedRowIndexes : [0]
     } finally {
       // Set whether last ran was a success
-      this.ssr.batchUpdateGSheets();
+      this.ss.batchUpdateGSheets();
     }
   }
 }

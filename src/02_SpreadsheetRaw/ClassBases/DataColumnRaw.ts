@@ -68,7 +68,7 @@ export class DataColumnRaw<
       `active facts for sheetGid ${this.sheetGid} col ${this.colIndex}`,
     );
   }
-  gatherFetchAll(): this {
+  gatherFetchFull(): this {
     this.sheet.gatherFetchRange({
       startRowIndex: this.schema.topDataRowIdx,
       startColumnIndex: this.colIndex,

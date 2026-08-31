@@ -1,47 +1,32 @@
-import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 
-// SheetName with ColumnNames, not full column names
+export interface EndpointColumnNames<SN extends SheetNameSimple> {
+  endpointName: ColumnName<SN>; // boolean action row
+  lastRanName?: ColumnName<SN>; // date
+  lastRunSucceededName?: ColumnName<SN>; // boolean
+  selectorName?: ColumnName<SN>; // boolean
+}
+
 interface EndpointHandlerProps<
   SN extends SheetNameSimple,
-  EN extends ColumnName<SN>, // string (boolean action row)
-  LRN extends ColumnName<SN>, // date
-  LSN extends ColumnName<SN>, // boolean
-  SLN extends ColumnName<SN>, // boolean
 > extends SpreadsheetNamedProps {
   sheetName: SN;
-  endpointName: EN;
-  lastRanName?: LRN;
-  lastRunSucceededName?: LSN;
-  selectorName?: SLN;
+  columnNames: EndpointColumnNames<SN>;
 }
 
 export class EndpointHandlerBase<
   SN extends SheetNameSimple,
-  EN extends ColumnName<SN>,
-  LRN extends ColumnName<SN>,
-  LSN extends ColumnName<SN>,
-  SLN extends ColumnName<SN>,
 > extends SpreadsheetNamedBase {
-  readonly endpointName: EN;
-  readonly lastRanName?: LRN;
-  readonly lastRunSucceededName?: LSN;
-  readonly selectorName?: SLN;
-  constructor({
-    endpointName,
-    lastRanName,
-    lastRunSucceededName,
-    selectorName,
-    ...props
-  }: EndpointHandlerProps<SN, EN, LRN, LSN, SLN>) {
+  readonly sheetName: SN;
+  readonly columnNames: EndpointColumnNames<SN>;
+  constructor({ sheetName, columnNames, ...props }: EndpointHandlerProps<SN>) {
     super(props);
-    this.endpointName = endpointName;
-    this.lastRanName = lastRanName;
-    this.lastRunSucceededName = lastRunSucceededName;
-    this.selectorName = selectorName;
+    this.sheetName = sheetName;
+    this.columnNames = columnNames;
   }
 }

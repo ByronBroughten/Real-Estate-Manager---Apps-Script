@@ -54,7 +54,7 @@ export class DataSheetRaw extends SheetCommonRaw {
   ): Record<HD, DataColumnRaw> {
     return headers.reduce(
       (acc, header) => {
-        acc[header] = this.sheet.columnByHeader(header).data.gatherFetchAll();
+        acc[header] = this.sheet.columnByHeader(header).data.gatherFetchFull();
         return acc;
       },
       {} as Record<HD, DataColumnRaw>,

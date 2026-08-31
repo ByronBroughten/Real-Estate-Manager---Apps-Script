@@ -49,6 +49,9 @@ export class DataColumnNamed<
       ""
     >;
   }
+  topCell(): CellNamed<SN, CN> {
+    return this.cell(this.baseSchema.topDataRowIdx);
+  }
   value(rowIndex: number): ColumnValue<SN, CN> {
     return this.cell(rowIndex).value();
   }
