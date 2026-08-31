@@ -4,6 +4,7 @@ import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface RawState {
   allSheetPropertiesAreFetched: boolean;
+  spreadsheetId: string | null;
   changesToSave: ChangesToSave;
   fetcherGridRanges: GridRangeProps[];
   updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;

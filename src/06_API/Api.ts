@@ -5,6 +5,7 @@ import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { baseEndpoints } from "./baseEndpoints";
 
 export type EventOrigin = {
   colIndex: number;
@@ -19,7 +20,10 @@ export class Api extends SpreadsheetNamedBase {
   readonly endpoints: Endpoints;
   constructor({ endpoints, ...rest }: ApiProps) {
     super(rest);
-    this.endpoints = endpoints;
+    this.endpoints = {
+      ...endpoints,
+      ...baseEndpoints,
+    };
   }
   static init(endpoints: Endpoints): Api {
     return new Api({

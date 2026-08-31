@@ -32,6 +32,8 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
     }
   }
   onRunSetup() {
+    this.sheet.uniformRow("columnId").prepFetchFull();
+    this.ss.fetchAllPrepped();
     this.sheet.column("fillRowIdsTimeLastRan").actionRowToDefault();
     this.sheet
       .column("fillRowIdsTimeLastRan")

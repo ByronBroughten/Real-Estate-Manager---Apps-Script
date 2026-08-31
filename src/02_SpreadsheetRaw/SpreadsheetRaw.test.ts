@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import { buildGridRows, stubSheetsService } from "../testSupport/fakeSheetsService";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
@@ -159,5 +159,28 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
         ],
       },
     ]);
+  });
+});
+
+describe("SpreadsheetRaw.spreadsheetId", () => {
+  it("reads the script property once and reuses it across instances sharing the state", () => {
+    const properties = stubPropertiesService({
+      realEstateSpreadsheetId: "test-spreadsheet-id",
+    });
+    const getProperty = vi.spyOn(properties, "getProperty");
+
+    const raw = SpreadsheetRaw.init();
+    expect(raw.spreadsheetId).toBe("test-spreadsheet-id");
+    expect(raw.spreadsheetId).toBe("test-spreadsheet-id");
+    expect(raw.sheet(111).spreadsheetId).toBe("test-spreadsheet-id");
+
+    expect(getProperty).toHaveBeenCalledTimes(1);
+  });
+  it("throws every time when the property is missing", () => {
+    stubPropertiesService({});
+
+    const raw = SpreadsheetRaw.init();
+    expect(() => raw.spreadsheetId).toThrowError(/Spreadsheet ID not found/);
+    expect(() => raw.spreadsheetId).toThrowError(/Spreadsheet ID not found/);
   });
 });

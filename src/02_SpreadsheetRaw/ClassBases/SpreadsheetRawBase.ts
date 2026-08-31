@@ -23,12 +23,15 @@ export class SpreadsheetRawBase {
     return new SchemaBase();
   }
   get spreadsheetId(): string {
+    const cached = this.rawState.spreadsheetId;
+    if (cached !== null) return cached;
     const ssId = AppsScript.projectProperties("realEstateSpreadsheetId");
     if (!ssId) {
       throw new Error(
         "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
       );
     }
+    this.rawState.spreadsheetId = ssId;
     return ssId;
   }
   get fetcherGridRanges(): GridRangeProps[] {
@@ -49,6 +52,7 @@ export class SpreadsheetRawBase {
     return {
       rawState: {
         allSheetPropertiesAreFetched: false,
+        spreadsheetId: null,
         fetcherGridRanges: [],
         changesToSave: new Map(),
         updateRequests: this.initSortedUpdateRequests(),
