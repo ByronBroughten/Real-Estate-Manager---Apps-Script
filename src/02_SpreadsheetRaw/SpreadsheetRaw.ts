@@ -148,7 +148,22 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   batchUpdateGSheets() {
     this._gatherUpdateRequests();
+    const sheetGidsWithRowDeletes = this._sheetGidsWithRowDeletes();
     this._sendUpdateRequests();
+    // Row indexes only actually shift once the deletes have been sent.
+    sheetGidsWithRowDeletes.forEach((sheetGid) =>
+      this.sheet(sheetGid).invalidateRowIndexes(),
+    );
+  }
+  private _sheetGidsWithRowDeletes(): Set<number> {
+    return new Set(
+      this.updateRequests.delete.map((request) =>
+        Val.assert(
+          request.deleteDimension?.range?.sheetId,
+          "deleteDimension.range.sheetId",
+        ),
+      ),
+    );
   }
   private _gatherUpdateRequests() {
     const changes = this.allChangesToSave;
@@ -170,8 +185,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       return;
     } else if (change.delete) {
       this.updateRequests.delete.push(change.delete);
-      const { sheetGid } = this.schema.idsFromSheetRowId(sheetRowId);
-      this.sheet(sheetGid).invalidateRowIndexes();
     } else {
       const row = this.rowBySheetRowId(sheetRowId);
       if (change.append) {

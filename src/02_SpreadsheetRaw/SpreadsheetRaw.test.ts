@@ -110,6 +110,28 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(batchUpdateCalls).toEqual([]);
   });
 
+  it("still gathers an append queued after a deletion on the same sheet, since row indexes only shift once the deletes are sent", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).delete();
+    raw.sheet(111).data.appendDataRow();
+
+    expect(() => raw.batchUpdateGSheets()).not.toThrow();
+    expect(batchUpdateCalls[0]?.requests?.[0]).toEqual({
+      appendCells: {
+        sheetId: 111,
+        tableId: "fake-table-111",
+        rows: [{}],
+        fields: "userEnteredValue",
+      },
+    });
+    expect(raw.sheet(111).rowIndexesAreValid).toBe(false);
+  });
+
   it("sends same-sheet row deletions in descending startIndex order so an earlier deletion can't shift a later one out from under it", () => {
     const { batchUpdateCalls } = stubSheetsService({
       sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
