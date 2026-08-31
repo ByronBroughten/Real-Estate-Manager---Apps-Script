@@ -54,6 +54,15 @@ export class SheetIndexed extends SheetCommon {
       return this.data.row(rowIndex);
     }
   }
+  fetchOnlyColumnId(colIndex: number): this {
+    const colIdRow = this.raw.uniformRow("columnId");
+    colIdRow.cell(colIndex).gatherFetchRange();
+    this.raw.ss.fetchAllGathered();
+    // A blank cell can come back with no rowData, leaving nothing to read.
+    colIdRow.ensureStateExists();
+    colIdRow.cell(colIndex).ensureActive();
+    return this;
+  }
   fetchOnlyColumnIds(): this {
     // The columnId row sits above the table, so its filter alone returns no table metadata.
     this.raw.gatherFetchProperties();

@@ -1,21 +1,15 @@
-import { makeValueConfigs } from ./makeConfigs;
+import { makeValueConfigs } from "./makeConfigs";
 
 export const valueConfigs = makeValueConfigs({
-  "yesOrNo": [
-    "Yes",
-    "No"
-  ],
-  "chargeOnetimeDescription": [
+  yesOrNo: ["Yes", "No"],
+  chargeOnetimeDescription: [
     "Security deposit",
     "Late fee",
     "Damage, waste, or service",
-    "Forgiveness"
+    "Forgiveness",
   ],
-  "rentPortionName": [
-    "Household",
-    "Subsidy program"
-  ],
-  "chargeDescription": [
+  rentPortionName: ["Household", "Subsidy program"],
+  chargeDescription: [
     "Rent (base)",
     "Rent (utilities)",
     "Pet fee (recurring)",
@@ -23,13 +17,10 @@ export const valueConfigs = makeValueConfigs({
     "Security deposit",
     "Late fee",
     "Damage, waste, or service",
-    "Forgiveness"
+    "Forgiveness",
   ],
-  "payerCategory": [
-    "Household",
-    "Non-resident"
-  ],
-  "expenseCategory": [
+  payerCategory: ["Household", "Non-resident"],
+  expenseCategory: [
     "Repair",
     "Supplies",
     "Cleaning & maintenance",
@@ -45,15 +36,15 @@ export const valueConfigs = makeValueConfigs({
     "Commissions",
     "Other interest",
     "Other",
-    "Principal"
+    "Principal",
   ],
-  "residenceTaxAdjust": [
+  residenceTaxAdjust: [
     "Minus primary space",
     "Primary residence",
     "Half primary residence",
-    "Minus primary time space"
+    "Minus primary time space",
   ],
-  "receiptFormat": [
+  receiptFormat: [
     "Electronic",
     "Physical",
     "Cash ledger",
@@ -62,19 +53,9 @@ export const valueConfigs = makeValueConfigs({
     "Email",
     "Cash App",
     "Venmo",
-    "Unknown"
+    "Unknown",
   ],
-  "chargeReduceDescription": [
-    "Forgiveness",
-    "Security deposit"
-  ],
-  "paymentType": [
-    "Currency",
-    "Caretaking"
-  ],
-  "paymentAllocateWhat": [
-    "Full payment",
-    "Full charge",
-    "Lesser amount"
-  ]
+  chargeReduceDescription: ["Forgiveness", "Security deposit"],
+  paymentType: ["Currency", "Caretaking"],
+  paymentAllocateWhat: ["Full payment", "Full charge", "Lesser amount"],
 });

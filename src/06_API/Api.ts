@@ -55,7 +55,7 @@ export class Api extends SpreadsheetNamedBase {
     if (!this.baseSchema.isInSheetGids(sheetGid)) {
       return;
     }
-    const sheet = this.ssi.sheet(sheetGid).fetchOnlyColumnIds();
+    const sheet = this.ssi.sheet(sheetGid).fetchOnlyColumnId(colIndex);
     const columnId = sheet.columnIdByIndex(colIndex);
     if (columnId === "") {
       return;
