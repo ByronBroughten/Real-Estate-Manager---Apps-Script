@@ -70,6 +70,16 @@ export class DataColumnRaw<
       startColumnIndex: this.colIndex,
       endColumnIndex: this.colIndex + 1,
     });
+    this.sheetState.colIndexesToFinalize.add(this.colIndex);
     return this;
+  }
+  // A full-column fetch can hit rows that are entirely blank across every
+  // column, which Sheets omits from the response outright — ensureStateExists
+  // backfills those before ensureActive tries to touch a cell in them.
+  ensureFullActiveDataCells(): void {
+    this.sheet.data.fullDataRowIndexes.forEach((rowIndex) => {
+      this.sheet.data.row(rowIndex).ensureStateExists();
+      this.cell(rowIndex).ensureActive();
+    });
   }
 }

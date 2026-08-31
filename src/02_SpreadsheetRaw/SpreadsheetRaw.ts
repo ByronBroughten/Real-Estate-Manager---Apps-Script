@@ -55,7 +55,27 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   fetchAllGathered(includeProgrammaticFacts = false): void {
     const data = this._fetchByDataFilter(includeProgrammaticFacts);
     this._addDataToState(data);
+    this._finalizeGatheredFetches();
     this.rawState.fetcherGridRanges = [];
+  }
+  // Backfills cells for every full row/column fetched this cycle so a
+  // Sheets response that omits empty cells (or whole blank rows) never
+  // leaves them looking merely "not yet fetched" to callers.
+  private _finalizeGatheredFetches(): void {
+    this.rawState.sheets.forEach((state, sheetGid) => {
+      if (state.rowIndexesToFinalize.size === 0 && state.colIndexesToFinalize.size === 0) {
+        return;
+      }
+      const sheet = this.sheet(sheetGid);
+      state.rowIndexesToFinalize.forEach((rowIndex) => {
+        sheet.row(rowIndex).ensureFullActiveDataCells();
+      });
+      state.colIndexesToFinalize.forEach((colIndex) => {
+        sheet.data.column(colIndex).ensureFullActiveDataCells();
+      });
+      state.rowIndexesToFinalize.clear();
+      state.colIndexesToFinalize.clear();
+    });
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
   // effectiveFormat) and columnValidationValues (from tables.columnProperties

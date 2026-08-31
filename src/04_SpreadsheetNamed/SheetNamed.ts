@@ -42,12 +42,10 @@ export class SheetNamed<
     });
   }
   get activeColumnIds(): string[] {
-    return this.uniformRow("columnId").activeValueArr.filter(
-      (columnId) => columnId !== "",
-    );
+    return this.raw.activeColumnIds;
   }
   isActiveColumnId(columnId: string): boolean {
-    return this.uniformRow("columnId").hasValue(columnId);
+    return this.indexed.isActiveColumnId(columnId);
   }
   addMissingColumnIds(): number {
     return this.indexed.addMissingColumnIds();

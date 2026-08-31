@@ -19,11 +19,7 @@ const COLUMN_CONFIG_GID = 2034522667;
 const PROPERTY_GID = 999001;
 const NEW_SHEET_GID = 999002;
 const UNRESOLVABLE_GID = 424242;
-// Real, already-committed sheet gid — _updateProgrammaticValues (like the
-// rest of ColumnConfigOperator's lifecycle) resolves sheets by gid through
-// the deployed sheetConfigs.ts (SpreadsheetSchemaNamed.sheetByGid), so it
-// can't be exercised against a fictional sheet gid, only a real one (see
-// ConfigOrchestrator.test.ts's seedFixture for the same constraint).
+
 const TEST_SHEET_GID = 2089200354;
 
 const sheetConfigColumnIdRow = [
@@ -489,10 +485,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
             0: sheetConfigColumnIdRow,
             // Api-access sheet: gets a missing column ID filled in.
             4: [TEST_SHEET_GID, "Test", true, true, "tst"],
-            // Not yet opted into API access — must be skipped outright.
-            // UNRESOLVABLE_GID has no corresponding sheet in this fixture
-            // at all, so touching it (fetching or resolving via sheetByGid)
-            // would throw; the fix is proven by this test not throwing.
+
             5: [UNRESOLVABLE_GID, "Ghost", true, false, "gho"],
           }),
           table: { endRowIndex: 6 },
@@ -520,7 +513,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
 
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
 
-    const colIdRow = operator.ss.sheetByGid(TEST_SHEET_GID).raw.colIdRow;
+    const colIdRow = operator.ss.raw.sheet(TEST_SHEET_GID).colIdRow;
     expect(colIdRow.value(0)).not.toBe("");
   });
 
@@ -562,7 +555,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
 
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
 
-    const colIdRow = operator.ss.sheetByGid(TEST_SHEET_GID).raw.colIdRow;
+    const colIdRow = operator.ss.raw.sheet(TEST_SHEET_GID).colIdRow;
     expect(colIdRow.value(0)).not.toBe("");
   });
 });

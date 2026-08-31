@@ -28,11 +28,7 @@ export class DataColumnIndexed<
   get activeCellIndexes(): number[] {
     return this.raw.sheet.data.rowIndexesActive;
   }
-  get fullCellIndexes(): number[] {
-    return this.sheet.data.fullDataRowIndexes;
-  }
   prepFetchFull(): this {
-    this.sheetState.idsOfFullDataColsToFetch.add(this.columnId);
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
     return this;
   }
@@ -71,11 +67,6 @@ export class DataColumnIndexed<
   cellsToDefault() {
     this.activeDataCells.forEach((cell) => {
       cell.updateToDefault();
-    });
-  }
-  ensureFullActiveDataCells() {
-    this.fullCellIndexes.forEach((rowIndex) => {
-      this.cell(rowIndex).raw.ensureActive();
     });
   }
   emptyDataCellsToDefault() {

@@ -91,8 +91,8 @@ export class DataSheetRaw extends SheetCommonRaw {
     // I'd want to insert rather than append.
     // Can I append at the not last row? Probably not.
     // Is there a way for me to verify that rows or values are fetched?
-    const lastRowIdx = this.sheet.lastRowIdx;
-    const lastRow = this.row(lastRowIdx);
+    const lastActiveRowIndex = this.sheet.lastActiveRowIndex;
+    const lastRow = this.row(lastActiveRowIndex);
     const newRow = this.appendDataRow();
     this.sheet.fullTableColIndexes.forEach((colIndex) => {
       const value = lastRow.value(colIndex);

@@ -32,6 +32,9 @@ export class SheetIndexed extends SheetCommon {
       columnId,
     });
   }
+  isActiveColumnId(columnId: string): boolean {
+    return this.raw.isActiveColumnId(columnId);
+  }
   columnIdByIndex(colIndex: number): string {
     return this.raw.colIdRow.value(colIndex);
   }
@@ -63,9 +66,7 @@ export class SheetIndexed extends SheetCommon {
       this.raw.gatherFetchProperties();
     }
     // Skip if a prior prepFetchFull() on the columnId row already covers this identical fetch.
-    if (
-      !this.sheetState.indexesOfFullRowsToFetch.has(this.baseSchema.colIdRowIndex)
-    ) {
+    if (!this.raw.hasQueuedFullRowFetch(this.baseSchema.colIdRowIndex)) {
       this.raw.gatherFetchColumnIds();
     }
   }
@@ -82,23 +83,6 @@ export class SheetIndexed extends SheetCommon {
         throw new Error(`Unknown pre-fetch type: ${pf}`);
       }
     });
-  }
-  finalizeFetchedData() {
-    this._finalizeFetchedFullRows();
-    this._finalizeFetchedFullDataColumns();
-  }
-  private _finalizeFetchedFullRows(): void {
-    this.sheetState.indexesOfFullRowsToFetch.forEach((rowIndex) => {
-      this.raw.row(rowIndex).ensureFullActiveDataCells();
-    });
-    this.sheetState.indexesOfFullRowsToFetch.clear();
-  }
-  private _finalizeFetchedFullDataColumns(): void {
-    this.raw.data.dataRowsFull.forEach((row) => row.ensureStateExists());
-    this.sheetState.idsOfFullDataColsToFetch.forEach((columnId) => {
-      this.column(columnId).data.ensureFullActiveDataCells();
-    });
-    this.sheetState.idsOfFullDataColsToFetch.clear();
   }
   addMissingColumnIds(): number {
     return this.raw.addMissingColumnIds(this.schema.idPrefix);

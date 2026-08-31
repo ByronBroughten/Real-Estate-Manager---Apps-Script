@@ -6,13 +6,9 @@ export type IndexedSheetsState = Map<SheetId, IndexedSheetState>;
 
 export interface IndexedSheetState {
   preFetchGridRanges: PreFetchGridRange[];
-  indexesOfFullRowsToFetch: Set<RowIndex>;
-  idsOfFullDataColsToFetch: Set<ColumnId>;
 }
 
 type SheetId = number;
-type RowIndex = number;
-type ColumnId = string;
 
 interface FullRowPreFetch {
   row: number;

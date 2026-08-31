@@ -37,7 +37,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   }
   prepFetchForSync() {
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
-      this.ss.sheetByGid(sheetGid).uniformRow("header").prepFetchFull();
+      this.ss.raw.sheet(sheetGid).headerRow.gatherFetchFull();
     });
     this.sheet.data.prepFetchColumnsFull(
       "sheetGid",

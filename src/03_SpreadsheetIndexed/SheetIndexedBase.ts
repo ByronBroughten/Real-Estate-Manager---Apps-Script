@@ -28,8 +28,6 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
     if (!this.indexedSheetsState.has(this.sheetGid)) {
       this.indexedSheetsState.set(this.sheetGid, {
         preFetchGridRanges: [],
-        indexesOfFullRowsToFetch: new Set(),
-        idsOfFullDataColsToFetch: new Set(),
       });
     }
   }

@@ -30,10 +30,6 @@ export class SpreadsheetSchemaNamed extends SchemaBase {
   sheet<TN extends SheetNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
     return new SheetSchemaNamed(sheetName);
   }
-  sheetByGid(sheetGid: number): SheetSchemaNamed<SheetName> {
-    const { sheetName } = this.indexed.sheet(sheetGid);
-    return new SheetSchemaNamed(sheetName);
-  }
   column<TN extends SheetName, CN extends ColumnName<TN>>(
     sheetName: TN,
     columnName: CN,

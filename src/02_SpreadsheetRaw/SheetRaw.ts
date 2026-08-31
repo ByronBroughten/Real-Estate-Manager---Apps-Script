@@ -155,6 +155,14 @@ export class SheetRaw extends SheetCommonRaw {
       });
     });
   }
+  get activeColumnIds(): string[] {
+    return this.uniformRow("columnId").activeValueArr.filter(
+      (columnId) => columnId !== "",
+    );
+  }
+  isActiveColumnId(columnId: string): boolean {
+    return this.uniformRow("columnId").hasValue(columnId);
+  }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
     this.fullTableColIndexes.forEach((colIndex) => {
@@ -176,15 +184,22 @@ export class SheetRaw extends SheetCommonRaw {
     props.forEach((props) => this.gatherFetchRange(props));
     return this;
   }
+  get lastActiveRowIndex(): number {
+    return Math.max(...this.rowStates.keys());
+  }
+  columnByActiveId<VN extends CellValueName = CellValueName>(
+    columnId: string,
+    valueName?: VN,
+  ): ColumnRaw<VN> {
+    const colIndex = this.uniformRow("columnId").colIndexOfValue(columnId);
+    return this.column(colIndex, valueName);
+  }
   columnByHeader<VN extends CellValueName = CellValueName>(
     header: string,
     valueName?: VN,
   ): ColumnRaw<VN> {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
-  }
-  get lastRowIdx(): number {
-    return Math.max(...this.rowStates.keys());
   }
   removeRowsExcept(...rowIdxesToKeep: number[]): void {
     const allRowIdxs = Array.from(this.rowStates.keys());
@@ -247,6 +262,9 @@ export class SheetRaw extends SheetCommonRaw {
   gatherFetchColumnIds(): SheetRaw {
     this.uniformRow("columnId").gatherFetchFull();
     return this;
+  }
+  hasQueuedFullRowFetch(rowIndex: number): boolean {
+    return this.sheetState.rowIndexesToFinalize.has(rowIndex);
   }
   gatherFetchProperties(): SheetRaw {
     // getByDataFilter only returns a sheet's `tables` metadata for filters whose

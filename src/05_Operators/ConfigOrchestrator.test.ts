@@ -10,11 +10,6 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { ConfigOrchestrator } from "./ConfigOrchestrator";
 
-// Real, already-committed sheet — ColumnConfigOperator's column-ID lifecycle
-// (gatherColumnIdsForSheetGidsApiAccesses/addMissingColumnids/etc.) resolves
-// sheets by gid through the deployed sheetConfigs.ts (SpreadsheetSchemaNamed
-// .sheetByGid), so unlike SheetConfigOperator's own sync, this lifecycle
-// can't be exercised against a fictional/brand-new sheet — only real ones.
 const TEST_SHEET_GID = 2089200354;
 const SHEET_CONFIG_GID = 210603630;
 const COLUMN_CONFIG_GID = 2034522667;

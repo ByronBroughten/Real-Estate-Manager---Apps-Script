@@ -55,11 +55,11 @@ When a coordinating class composes several calls on a collaborator to answer one
 
 ```ts
 private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
-  return this.ss.sheetByGid(sheetGid).isActiveColumnId(columnId);
+  return this.ss.raw.sheet(sheetGid).isActiveColumnId(columnId);
 }
 ```
 
-Destructure a collaborator's getter directly when only one property is needed: `const { activeColumnIds } = this.ss.sheetByGid(sheetGid);`.
+Destructure a collaborator's getter directly when only one property is needed: `const { activeColumnIds } = this.ss.raw.sheet(sheetGid);`.
 
 A container method that takes an index/id as a parameter, but is only ever called by code that already has that exact value as its own instance state, is a sign the query belongs on the instance instead — drop the parameter along with the method. `SheetRawBase.columnValidationValues(colIndex: number)` was deleted; its one caller always already had its own `colIndex`, so the query moved to `DataColumnRaw` as `get valueValidationStrings()`, reading `this.activeTable.columnValidationValues.get(this.colIndex)` (`DataColumnRaw.ts`). The parameter disappearing is what turns it into a getter (see the getter rule below).
 

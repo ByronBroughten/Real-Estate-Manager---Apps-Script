@@ -38,6 +38,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
         firstStaleColIndex: null,
         rowStates: new Map(),
         columnCellFacts: new Map(),
+        rowIndexesToFinalize: new Set(),
+        colIndexesToFinalize: new Set(),
       });
     }
   }

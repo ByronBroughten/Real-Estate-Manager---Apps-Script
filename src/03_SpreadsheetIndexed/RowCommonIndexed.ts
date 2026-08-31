@@ -11,7 +11,6 @@ export abstract class RowCommonIndexed extends RowIndexedBase {
     return this.activeValueArr.includes(value as CellValue);
   }
   prepFetchFull(): void {
-    this.sheetState.indexesOfFullRowsToFetch.add(this.rowIndex);
     this.preFetchGridRanges.push({
       row: this.rowIndex,
       column: "allDataColumns",

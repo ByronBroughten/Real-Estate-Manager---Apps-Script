@@ -36,7 +36,14 @@ beforeEach(() => {
 // which prepFetchForSync doesn't prep on its own — production code only
 // preps it via ColumnConfigOperator.prepFetchWithSheetConfig, so a
 // standalone SheetConfigOperator test has to prep it itself.
+//
+// fetchAllSheetProperties() has to run first, matching
+// ConfigOrchestrator.syncAndFlushConfigSheets's order — it's what populates
+// ss.raw.activeSheetGids (prepFetchForSync's own loop, and hence
+// skipFetchingProperties below) with every live sheet, including ones with
+// no Sheet Config row yet.
 function syncSheetConfigOperator(operator: SheetConfigOperator): void {
+  operator.ss.raw.fetchAllSheetProperties();
   operator.sheet.data.prepFetchColumnsFull("letApiAccess");
   operator.prepFetchForSync();
   operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
@@ -68,12 +75,14 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: PROPERTY_GID,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 4 },
         },
         // Present in the spreadsheet but with NO existing Sheet Config row.
         {
           sheetId: NEW_SHEET_GID,
           title: "Brand New Sheet",
           rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 4 },
         },
       ],
     });
@@ -120,6 +129,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: NEW_SHEET_GID,
           title: "Brand New Sheet",
           rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 4 },
         },
       ],
     });

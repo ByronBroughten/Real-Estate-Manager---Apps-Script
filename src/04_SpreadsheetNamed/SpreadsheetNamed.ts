@@ -38,13 +38,6 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       ...this.spreadsheetNamedProps,
     });
   }
-  sheetByGid(sheetGid: number): SheetNamed {
-    const { sheetName } = this.schema.sheetByGid(sheetGid);
-    return new SheetNamed({
-      sheetName,
-      ...this.spreadsheetNamedProps,
-    });
-  }
   sheets<TN extends SheetName>(...sheetNames: TN[]): NamedSheets<TN> {
     return sheetNames.reduce((acc, sheetName) => {
       acc[sheetName] = this.sheet(sheetName);

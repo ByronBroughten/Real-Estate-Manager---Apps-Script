@@ -1,6 +1,5 @@
 import type { CellValue } from "../00_base/base";
 import { DataSheetRaw } from "../02_SpreadsheetRaw/DataSheetRaw";
-import { Arr } from "../utils/Arr";
 import { DataColumnIndexed } from "./DataColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
 import { SheetCommon } from "./SheetCommon";
@@ -36,12 +35,6 @@ export class DataSheetIndexed extends SheetCommon {
   }
   get dataRowCount(): number {
     return this.raw.dataRowCount;
-  }
-  get fullDataRowIndexes(): number[] {
-    return Arr.indexesFromUntil(
-      this.ssSchema.topDataRowIdx,
-      this.raw.activeTable.endRowIndex,
-    );
   }
   appendRowDefault(): DataRowIndexed {
     const defaultValues = this.schema.nonFormulaColumnIds.reduce(

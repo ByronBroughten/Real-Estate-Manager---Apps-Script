@@ -18,6 +18,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     return new SheetRaw(this.sheetRawProps);
   }
   ensureFullActiveDataCells() {
+    this.ensureStateExists();
     this.sheet.fullTableColIndexes.forEach((colIndex) => {
       this.cell(colIndex).ensureActive();
     });
@@ -57,6 +58,7 @@ export abstract class RowCommonRaw extends RowRawBase {
       endRowIndex: this.rowIndex + 1,
       startColumnIndex: this.schema.startTableColIndex,
     });
+    this.sheetState.rowIndexesToFinalize.add(this.rowIndex);
     return this;
   }
   get changesToSave(): RowChangesToSave {
