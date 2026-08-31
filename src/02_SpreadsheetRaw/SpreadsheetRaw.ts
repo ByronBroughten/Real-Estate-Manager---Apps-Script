@@ -45,10 +45,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     }
   }
   fetchAllSheetProperties() {
-    const response = this.sheetsService.Spreadsheets.get(this.spreadsheetId, {
+    const data = this.sheetsService.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(tableId,range))",
     });
-    this._addDataToState(response);
+    this._addDataToState(data);
     this.rawState.allSheetPropertiesAreFetched = true;
     return { activeSheetGids: this.activeSheetGids };
   }
@@ -63,7 +63,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // leaves them looking merely "not yet fetched" to callers.
   private _finalizeGatheredFetches(): void {
     this.rawState.sheets.forEach((state, sheetGid) => {
-      if (state.rowIndexesToFinalize.size === 0 && state.colIndexesToFinalize.size === 0) {
+      if (
+        state.rowIndexesToFinalize.size === 0 &&
+        state.colIndexesToFinalize.size === 0
+      ) {
         return;
       }
       const sheet = this.sheet(sheetGid);
