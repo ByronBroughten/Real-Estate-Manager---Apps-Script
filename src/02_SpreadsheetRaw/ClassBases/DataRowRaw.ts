@@ -26,6 +26,8 @@ export class DataRowRaw extends RowCommonRaw {
   delete(): void {
     this.remove();
     this.addRowChangeToSave({ action: "delete" });
+    this.activeTable.endRowIndex--;
+    // TODO: technically, there should should be activeTable and workingTable; active table gets updated only at the update flush. workingTable gets updated immediately.
   }
   append(): this {
     if (this.rowIsActive()) {

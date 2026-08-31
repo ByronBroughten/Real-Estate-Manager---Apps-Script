@@ -44,6 +44,9 @@ export abstract class RowCommonRaw extends RowRawBase {
   returnMissingValues<V extends CellValue>(...values: V[]): V[] {
     return values.filter((value) => !this.activeValueArr.includes(value));
   }
+  remove(): void {
+    this.rowStates.delete(this.rowIndex);
+  }
   updateValue(colIndex: number, value: CellValue): this {
     this.cell(colIndex).updateValue(value);
     return this;

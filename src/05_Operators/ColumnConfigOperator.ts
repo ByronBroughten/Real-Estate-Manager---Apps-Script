@@ -112,8 +112,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       const sheetGid = col.sheetGid.value(rowIndex);
       const columnId = col.columnId.value(rowIndex);
       if (
-        !sheetGid ||
-        !columnId ||
+        sheetGid === "" ||
+        columnId === "" ||
         !this._isSheetGidApiAccesses(sheetGid) ||
         !this._isActiveColumnId(sheetGid, columnId)
       ) {
