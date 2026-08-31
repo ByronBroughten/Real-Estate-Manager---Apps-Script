@@ -70,7 +70,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const withProgrammaticFacts =
       "sheets(" +
       "properties(sheetId,title)," +
-      "tables(tableId,range,columnProperties(colIndex,dataValidationRule(condition(values(userEnteredValue)))))," +
+      "tables(tableId,range,columnProperties(columnIndex,dataValidationRule(condition(values(userEnteredValue)))))," +
       "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)))))" +
       ")";
     const withoutProgrammaticFacts =

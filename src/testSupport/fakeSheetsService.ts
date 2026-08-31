@@ -181,7 +181,7 @@ export function stubSheetsService(
                   columnProperties: s.table.columnValidationValues
                     ? Object.entries(s.table.columnValidationValues).map(
                         ([colIndex, values]) => ({
-                          colIndex: Number(colIndex),
+                          columnIndex: Number(colIndex),
                           dataValidationRule: {
                             condition: {
                               values: values.map((userEnteredValue) => ({

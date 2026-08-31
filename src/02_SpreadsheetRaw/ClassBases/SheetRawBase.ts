@@ -78,7 +78,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         .map((conditionValue) => conditionValue.userEnteredValue)
         .filter((value): value is string => value !== undefined);
       if (values.length > 0) {
-        map.set(colProps.colIndex ?? startColumnIndex + offset, values);
+        map.set(colProps.columnIndex ?? startColumnIndex + offset, values);
       }
     });
     return map;
