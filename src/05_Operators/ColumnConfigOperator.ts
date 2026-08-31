@@ -95,14 +95,11 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this.sheetGidsApiAccesses.has(sheetGid);
   }
   private _addMissingColumnIds(): this {
-    const col = this.sheetConfigData.columns(
-      "sheetGid",
-      "letApiAccess", // for _initSheetGidsApiAccesses
-    );
+    const col = this.sheetConfigData.columns("sheetGid", "letApiAccess");
     let idsAdded = 0;
     this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
-      if (sheetGid !== "" && !this._isSheetGidApiAccesses(sheetGid)) {
+      if (sheetGid !== "" && this._isSheetGidApiAccesses(sheetGid)) {
         const sheet = this.ss.sheetByGid(sheetGid);
         idsAdded += sheet.addMissingColumnIds();
       }

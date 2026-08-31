@@ -176,7 +176,10 @@ export function stubSheetsService(
                     startRowIndex: 0,
                     endRowIndex: s.table.endRowIndex,
                     startColumnIndex: 0,
-                    endColumnIndex: 0,
+                    endColumnIndex: Math.max(
+                      0,
+                      ...(s.rows ?? []).map((row) => row.length),
+                    ),
                   },
                   columnProperties: s.table.columnValidationValues
                     ? Object.entries(s.table.columnValidationValues).map(

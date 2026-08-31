@@ -40,6 +40,9 @@ const columnConfigColumnIdRow = [
   cc.header.columnId,
   cc.isFormula.columnId,
   cc.valueTitle.columnId,
+  cc.isActionControl.columnId,
+  cc.emptyAllowed.columnId,
+  cc.customDefaultValue.columnId,
 ];
 
 const freshlyAppendedRowMissingHeaderAndValueName = [
@@ -84,6 +87,21 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
   columnConfigOperator.ss.fetchAllPrepped();
   sheetConfigOperator.syncToSpreadsheet();
   return columnConfigOperator;
+}
+
+// Mirrors ConfigOrchestrator.syncAndFlushConfigSheets's own sequence (see
+// CLAUDE.md/README on why Sheet Config and Column Config sync together),
+// stopping short of the final batchUpdateGSheets flush these tests don't
+// need.
+function syncColumnConfigOperator(operator: ColumnConfigOperator): void {
+  operator.ss.fetchAllSheetProperties();
+  const sheetConfigOperator = operator.sheetConfigOperator;
+  sheetConfigOperator.prepFetchForSync();
+  operator.prepFetchWithSheetConfig();
+  operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
+  sheetConfigOperator.syncToSpreadsheet();
+  operator.fetchAfterSheetConfigSynced();
+  operator.syncToSpreadsheet();
 }
 
 describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
@@ -310,21 +328,6 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     };
   }
 
-  // Mirrors ConfigOrchestrator.syncAndFlushConfigSheets's own sequence (see
-  // CLAUDE.md/README on why Sheet Config and Column Config sync together),
-  // stopping short of the final batchUpdateGSheets flush these tests don't
-  // need.
-  function syncColumnConfigOperator(operator: ColumnConfigOperator): void {
-    operator.ss.fetchAllSheetProperties();
-    const sheetConfigOperator = operator.sheetConfigOperator;
-    sheetConfigOperator.prepFetchForSync();
-    operator.prepFetchWithSheetConfig();
-    operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
-    sheetConfigOperator.syncToSpreadsheet();
-    operator.fetchAfterSheetConfigSynced();
-    operator.syncToSpreadsheet();
-  }
-
   it("corrects sheetTitle/header/isFormula and infers a primitive or Base-ID valueName", () => {
     stubSheetsService({
       sheets: [
@@ -472,5 +475,52 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
     expect(col.isFormula.value(4)).toBe(true);
     expect(col.valueTitle.value(4)).toBe("date");
+  });
+});
+
+describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () => {
+  it("adds a missing column ID only for the letApiAccess=true sheet, skipping the letApiAccess=false one without fetching it", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            // Api-access sheet: gets a missing column ID filled in.
+            4: [TEST_SHEET_GID, "Test", true, true, "tst"],
+            // Not yet opted into API access — must be skipped outright.
+            // UNRESOLVABLE_GID has no corresponding sheet in this fixture
+            // at all, so touching it (fetching or resolving via sheetByGid)
+            // would throw; the fix is proven by this test not throwing.
+            5: [UNRESOLVABLE_GID, "Ghost", true, false, "gho"],
+          }),
+          table: { endRowIndex: 6 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({ 0: columnConfigColumnIdRow }),
+          table: { endRowIndex: 4 },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({
+            0: [""],
+            3: ["Amount"],
+            4: [42],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+
+    expect(() => syncColumnConfigOperator(operator)).not.toThrow();
+
+    const colIdRow = operator.ss.sheetByGid(TEST_SHEET_GID).raw.colIdRow;
+    expect(colIdRow.value(0)).not.toBe("");
   });
 });
