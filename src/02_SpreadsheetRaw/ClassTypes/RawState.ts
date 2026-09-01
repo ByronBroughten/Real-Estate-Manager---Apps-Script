@@ -17,6 +17,7 @@ const updateRequestNames = [
   "delete",
   "sort",
   "insertColumn",
+  "fillColumn",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
 
@@ -78,7 +79,13 @@ export type SheetChangesToSave = {
   level: "sheet";
   sort: null | SortParameters;
   insertColumn: null | ColIndex;
+  fillColumns: Map<ColIndex, ColumnFill>;
 };
+export interface ColumnFill {
+  value: CellValue;
+  // Snapshotted when queued, so a fill never reaches a row appended after it.
+  endRowIndex: number;
+}
 
 export interface SheetChangeSortProps extends SortParameters {
   action: "sort";
@@ -90,6 +97,7 @@ export type SheetChangePropsObj = {
     action: "insertColumn";
     startColumnIndex: number;
   };
+  fillColumn: { action: "fillColumn"; colIndex: ColIndex } & ColumnFill;
 };
 export type SheetChangeProps = SheetChangePropsObj[keyof SheetChangePropsObj];
 

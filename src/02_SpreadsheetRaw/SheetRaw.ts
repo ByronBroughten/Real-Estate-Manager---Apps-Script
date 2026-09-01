@@ -1,6 +1,7 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import { Arr } from "../utils/Arr";
 import { Val } from "../utils/Val";
+import { cellValueToUserEntered } from "./ClassBases/CellRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnRaw } from "./ColumnRaw";
@@ -14,6 +15,7 @@ import type {
 } from "../00_base/AppsScriptTypes";
 import type { SheetGridRangeProps } from "./ClassTypes/AccessorsRaw";
 import {
+  type ColumnFill,
   type SheetChangeProps,
   type SheetChangesToSave,
   type SortParameters,
@@ -216,10 +218,10 @@ export class SheetRaw extends SheetCommonRaw {
     });
   }
   get changesToSave(): SheetChangesToSave {
-    this._ensureChnagesToSaveExists();
+    this._ensureChangesToSaveExists();
     return this.allChangesToSave.get(this.sheetGid) as SheetChangesToSave;
   }
-  private _ensureChnagesToSaveExists(): void {
+  private _ensureChangesToSaveExists(): void {
     const sheetChangesToSave = this.rawState.changesToSave;
     const sheetGid = this.sheetGid;
     if (!sheetChangesToSave.has(sheetGid)) {
@@ -227,6 +229,7 @@ export class SheetRaw extends SheetCommonRaw {
         level: "sheet",
         sort: null,
         insertColumn: null,
+        fillColumns: new Map(),
       });
     }
   }
@@ -249,9 +252,15 @@ export class SheetRaw extends SheetCommonRaw {
       case "insertColumn":
         changes.insertColumn = props.startColumnIndex;
         break;
+      case "fillColumn":
+        changes.fillColumns.set(props.colIndex, {
+          value: props.value,
+          endRowIndex: props.endRowIndex,
+        });
+        break;
       default:
         throw new Error(
-          `Invalid action: ${(props as SheetChangeProps).action}. Must be one of "sort" or "insertColumn".`,
+          `Invalid action: ${(props as SheetChangeProps).action}. Must be one of "sort", "insertColumn" or "fillColumn".`,
         );
     }
     return this;
@@ -278,6 +287,26 @@ export class SheetRaw extends SheetCommonRaw {
     // so pre-activate it and request one of its cells to reliably pull properties.
     this.uniformRow("header").firstTableCell().gatherFetchRange();
     return this;
+  }
+  // One repeatCell for the whole column, so a fill costs one request, not one per row.
+  gatherFillColumnRequest(
+    colIndex: number,
+    { value, endRowIndex }: ColumnFill,
+  ): void {
+    this.updateRequests.fillColumn.push({
+      repeatCell: {
+        range: {
+          sheetId: this.sheetGid,
+          startRowIndex: this.schema.topDataRowIdx,
+          endRowIndex,
+          startColumnIndex: colIndex,
+          endColumnIndex: colIndex + 1,
+        },
+        cell: { userEnteredValue: cellValueToUserEntered(value) },
+        // Anything the mask covers but `cell` omits gets cleared, so keep it narrow.
+        fields: "userEnteredValue",
+      },
+    });
   }
   gatherInsertColumnRequest(startColumnIndex: number): void {
     this.updateRequests.insertColumn.push({

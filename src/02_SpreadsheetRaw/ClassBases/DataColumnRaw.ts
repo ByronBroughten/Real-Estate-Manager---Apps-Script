@@ -54,6 +54,25 @@ export class DataColumnRaw<
     this.cell(rowIndex).updateValue(newValue);
     return this;
   }
+  // State is still mirrored row by row; only the queued request collapses.
+  updateAllValues(value: CellValue<VN>): this {
+    this.validateIndexNotStale();
+    const { endRowIndex } = this.activeTable;
+    this.sheet.rowIndexesFull.forEach((rowIndex) => {
+      const row = this.sheet.row(rowIndex);
+      row.validateIsWritable();
+      if (row.rowIsActive()) {
+        this.cell(rowIndex).setValueState(value);
+      }
+    });
+    this.fullSheet.addSheetChangeToSave({
+      action: "fillColumn",
+      colIndex: this.colIndex,
+      value,
+      endRowIndex,
+    });
+    return this;
+  }
   integrateActiveFacts(cellValue: GoogleCellValue | undefined): void {
     this.columnCellFacts.set(this.colIndex, {
       isFormula: cellValue?.userEnteredValue?.formulaValue !== undefined,

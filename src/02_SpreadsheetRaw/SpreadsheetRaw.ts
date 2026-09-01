@@ -211,12 +211,17 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (change.sort !== null) {
       this.sheet(sheetRowId).gatherSortRequest(change.sort);
     }
+    change.fillColumns.forEach((fill, colIndex) => {
+      this.sheet(sheetRowId).gatherFillColumnRequest(colIndex, fill);
+    });
   }
   private _sendUpdateRequests() {
     const surs = this.rawState.updateRequests;
     const requests = [
       ...surs.append,
       ...surs.insertColumn,
+      // Fills go before updates, so a per-cell write on a filled column wins.
+      ...surs.fillColumn,
       ...surs.update,
       ...this._deleteRequestsDescending(),
       ...surs.sort,

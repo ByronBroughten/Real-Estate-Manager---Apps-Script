@@ -67,6 +67,7 @@ export class SpreadsheetRawBase {
       delete: [],
       sort: [],
       insertColumn: [],
+      fillColumn: [],
     };
   }
 }

@@ -46,7 +46,7 @@ export class CellRaw<
         range: this.gridRange,
         rows: [
           {
-            values: [{ userEnteredValue: this._valueForSheet(value) }],
+            values: [{ userEnteredValue: cellValueToUserEntered(value) }],
           },
         ],
         fields: "userEnteredValue",
@@ -131,17 +131,18 @@ export class CellRaw<
       return "";
     }
   }
-  _valueForSheet(value: CellValue): UserEnteredValue {
-    if (typeof value === "string") {
-      return { stringValue: value };
-    } else if (typeof value === "number") {
-      return { numberValue: value };
-    } else if (typeof value === "boolean") {
-      return { boolValue: value };
-    } else {
-      throw new Error(
-        `Cannot make user entered value for unsupported type "${typeof value}".`,
-      );
-    }
+}
+
+export function cellValueToUserEntered(value: CellValue): UserEnteredValue {
+  if (typeof value === "string") {
+    return { stringValue: value };
+  } else if (typeof value === "number") {
+    return { numberValue: value };
+  } else if (typeof value === "boolean") {
+    return { boolValue: value };
+  } else {
+    throw new Error(
+      `Cannot make user entered value for unsupported type "${typeof value}".`,
+    );
   }
 }

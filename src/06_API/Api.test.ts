@@ -55,18 +55,19 @@ function actionRowEdit(colIndex: number, value: string) {
   } as unknown as GoogleAppsScript.Events.SheetsOnEdit;
 }
 
-function selectValuesWritten(
+function selectorFills(
   batchUpdateCalls: GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest[],
 ) {
   return batchUpdateCalls
     .flatMap((call) => call.requests ?? [])
     .filter(
       (request) =>
-        request.updateCells?.range?.startColumnIndex === SELECTOR_COL_INDEX,
+        request.repeatCell?.range?.startColumnIndex === SELECTOR_COL_INDEX,
     )
     .map((request) => ({
-      rowIndex: request.updateCells?.range?.startRowIndex,
-      value: request.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue,
+      startRowIndex: request.repeatCell?.range?.startRowIndex,
+      endRowIndex: request.repeatCell?.range?.endRowIndex,
+      value: request.repeatCell?.cell?.userEnteredValue,
     }));
 }
 
@@ -128,7 +129,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch by column-name suffix", 
 });
 
 describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", () => {
-  it("selects every data row from one fetch and one batch update", () => {
+  it("selects every data row with one fetch, one batch update, one request", () => {
     const { getByDataFilterCalls, batchUpdateCalls } = stubOccupancySheet();
 
     Api.init(businessEndpoints).handleSheetOnEditEvent(
@@ -137,10 +138,9 @@ describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", 
 
     expect(getByDataFilterCalls).toHaveLength(1);
     expect(batchUpdateCalls).toHaveLength(1);
-    expect(selectValuesWritten(batchUpdateCalls)).toEqual([
-      { rowIndex: 4, value: { boolValue: true } },
-      { rowIndex: 5, value: { boolValue: true } },
-      { rowIndex: 6, value: { boolValue: true } },
+    expect(batchUpdateCalls[0]?.requests).toHaveLength(1);
+    expect(selectorFills(batchUpdateCalls)).toEqual([
+      { startRowIndex: 4, endRowIndex: END_ROW_INDEX, value: { boolValue: true } },
     ]);
   });
 
@@ -151,10 +151,8 @@ describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", 
       actionRowEdit(SELECTOR_COL_INDEX, "FALSE"),
     );
 
-    expect(selectValuesWritten(batchUpdateCalls)).toEqual([
-      { rowIndex: 4, value: { boolValue: false } },
-      { rowIndex: 5, value: { boolValue: false } },
-      { rowIndex: 6, value: { boolValue: false } },
+    expect(selectorFills(batchUpdateCalls)).toEqual([
+      { startRowIndex: 4, endRowIndex: END_ROW_INDEX, value: { boolValue: false } },
     ]);
   });
 });

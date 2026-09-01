@@ -1,3 +1,4 @@
+import type { CellValue } from "../00_base/base";
 import type {
   Value,
   ValueName,
@@ -81,9 +82,8 @@ export class DataColumnIndexed<
     });
   }
   allCellsToValue(value: Value<VN>): this {
-    this.cellsFull.forEach((cell) => {
-      cell.updateValue(value);
-    });
+    this.column.schema.validateDataNotFormula();
+    this.raw.updateAllValues(value as CellValue<VnToCvn<VN>>);
     return this;
   }
   emptyActiveCellsToDefualt(): this {

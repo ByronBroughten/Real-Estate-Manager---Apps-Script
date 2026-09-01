@@ -301,3 +301,91 @@ describe("SpreadsheetRaw.spreadsheetId", () => {
     expect(() => raw.spreadsheetId).toThrowError(/Spreadsheet ID not found/);
   });
 });
+
+describe("DataColumnRaw.updateAllValues", () => {
+  function stubFilledSheet() {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            4: ["r:lse:1", "old"],
+            5: ["r:lse:2", "old"],
+            6: ["r:lse:3", "old"],
+          }),
+          table: { endRowIndex: 7 },
+        },
+      ],
+    });
+  }
+  function fetchedColumn() {
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).data.column(1).gatherFetchFull();
+    raw.fetchAllGathered();
+    return raw;
+  }
+
+  it("sends one repeatCell for the whole column instead of one write per row", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.sheet(111).data.column(1).updateAllValues("new");
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        repeatCell: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 7,
+            startColumnIndex: 1,
+            endColumnIndex: 2,
+          },
+          cell: { userEnteredValue: { stringValue: "new" } },
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("mirrors the fill into row state, so a read before the flush sees it", () => {
+    stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.sheet(111).data.column(1).updateAllValues("new");
+
+    expect(raw.sheet(111).data.column(1).valueArr).toEqual(["new", "new", "new"]);
+  });
+
+  it("orders a per-cell write after the fill, so the cell wins", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.sheet(111).data.column(1).updateAllValues("filled");
+    raw.sheet(111).data.row(5).cell(1).updateValue("overridden");
+    raw.batchUpdateGSheets();
+
+    const requests = batchUpdateCalls[0]?.requests ?? [];
+    expect(requests[0]?.repeatCell?.cell?.userEnteredValue).toEqual({
+      stringValue: "filled",
+    });
+    expect(requests[1]?.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue).toEqual({
+      stringValue: "overridden",
+    });
+  });
+
+  it("leaves a row appended after the fill alone, since the fill's bound is snapshotted", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.sheet(111).data.column(1).updateAllValues("filled");
+    raw.sheet(111).data.appendDataRow();
+    raw.batchUpdateGSheets();
+
+    const fill = (batchUpdateCalls[0]?.requests ?? []).find((r) => r.repeatCell);
+    expect(fill?.repeatCell?.range?.endRowIndex).toBe(7);
+  });
+});
