@@ -33,8 +33,8 @@ export class DataSheetIndexed extends SheetCommon {
   get topRow(): DataRowIndexed {
     return this.row(this.schema.topDataRowIdx);
   }
-  get dataRowCount(): number {
-    return this.raw.dataRowCount;
+  get rowCount(): number {
+    return this.raw.rowCount;
   }
   appendRowDefault(): DataRowIndexed {
     const defaultValues = this.schema.nonFormulaColumnIds.reduce(

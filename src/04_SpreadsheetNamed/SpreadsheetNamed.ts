@@ -205,7 +205,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     });
     this.fetchAllPrepped();
     idSheets.forEach((sheet) => {
-      sheet.column("id").data.emptyDataCellsToDefault();
+      sheet.column("id").data.emptyActiveCellsToDefualt();
     });
   }
   private _sheetsWithRowIds(): SheetNamed<SheetNameByGroup<"hasIdColumn">>[] {

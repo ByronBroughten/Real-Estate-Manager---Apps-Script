@@ -75,10 +75,10 @@ export class DataSheetNamed<
     });
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
-    if (this.indexed.dataRowCount > 0) {
+    if (this.indexed.rowCount > 0) {
       this.topRow.updateToDefault(...this.schema.columnNames);
     }
-    if (this.indexed.dataRowCount > 1) {
+    if (this.indexed.rowCount > 1) {
       this.DELETE_DATA_ROWS_AFTER_TOP();
     }
   }

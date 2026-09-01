@@ -27,7 +27,7 @@ function _indexMainTest() {
       const idColumn = ss.sheet("test").column("id").data;
       idColumn.prepFetchFull();
       ss.fetchAllPrepped({});
-      idColumn.emptyDataCellsToDefault();
+      idColumn.emptyActiveCellsToDefualt();
       ss.batchUpdateGSheets();
     },
   } as const;

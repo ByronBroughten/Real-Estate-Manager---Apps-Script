@@ -2,20 +2,33 @@ import type { GoogleCellValue } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import { Val } from "../../utils/Val";
 import type { RawCellFacts } from "../ClassTypes/RawState";
+import { DataSheetRaw } from "../DataSheetRaw";
+import { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
-import type { CellRaw } from "./CellRaw";
-import { ColumnCommonRaw } from "./ColumnCommonRaw";
+import { CellRaw } from "./CellRaw";
+import { ColumnRawBase } from "./ColumnRawBase";
 
 export class DataColumnRaw<
   VN extends CellValueName = CellValueName,
-> extends ColumnCommonRaw<VN> {
+> extends ColumnRawBase<VN> {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
+  get sheet(): DataSheetRaw {
+    return new DataSheetRaw(this.sheetRawProps);
+  }
+  get fullSheet(): SheetRaw {
+    return new SheetRaw(this.sheetRawProps);
+  }
+  cell(rowIndex: number): CellRaw<VN> {
+    return new CellRaw({
+      ...this.columnRawProps,
+      rowIndex,
+      valueName: this.valueName,
+    });
+  }
   get valueArr(): CellValue<VN>[] {
-    return this.sheet.data.rowIndexesActive.map((rowIndex) =>
-      this.value(rowIndex),
-    );
+    return this.sheet.rowIndexesActive.map((rowIndex) => this.value(rowIndex));
   }
   get valueArrFilterEmpty(): CellValue<VN>[] {
     return this.valueArr.filter((value) => value !== "");
@@ -41,17 +54,18 @@ export class DataColumnRaw<
     this.cell(rowIndex).updateValue(newValue);
     return this;
   }
-  // isFormula/numberFormatType/topValue are column-wide live facts, sampled
-  // from the top data row cell (see SheetRaw._integrateSheetData) — matching
-  // ColumnSchemaCommon's schema-based `isFormula`, they're traits of the
-  // whole data column, not of any one row. "active" distinguishes these
-  // live-sheet reads from that schema-based (generated-config) isFormula.
   integrateActiveFacts(cellValue: GoogleCellValue | undefined): void {
     this.columnCellFacts.set(this.colIndex, {
       isFormula: cellValue?.userEnteredValue?.formulaValue !== undefined,
       numberFormatType: cellValue?.effectiveFormat?.numberFormat?.type,
       topValue: this.topCell.value(), // sampled now; the row can be pruned later
     });
+  }
+  get cellIndexesActive(): number[] {
+    return this.sheet.rowIndexesActive;
+  }
+  get cellIndexesFull(): number[] {
+    return this.sheet.rowIndexesFull;
   }
   get activeIsFormula(): boolean {
     return this._activeFacts.isFormula;
@@ -69,8 +83,8 @@ export class DataColumnRaw<
     );
   }
   gatherFetchFull(): this {
-    this.sheet.gatherFetchRange({
-      startRowIndex: this.schema.topDataRowIdx,
+    this.fullSheet.gatherFetchRange({
+      startRowIndex: this.baseSchema.topDataRowIdx,
       startColumnIndex: this.colIndex,
       endColumnIndex: this.colIndex + 1,
     });
@@ -78,11 +92,11 @@ export class DataColumnRaw<
     return this;
   }
   // A full-column fetch can hit rows that are entirely blank across every
-  // column, which Sheets omits from the response outright — ensureStateExists
+  // column, which Sheets omits from the response — ensureStateExists
   // backfills those before ensureActive tries to touch a cell in them.
   ensureFullActiveDataCells(): void {
-    this.sheet.data.fullDataRowIndexes.forEach((rowIndex) => {
-      this.sheet.data.row(rowIndex).ensureStateExists();
+    this.sheet.rowIndexesFull.forEach((rowIndex) => {
+      this.sheet.row(rowIndex).ensureStateExists();
       this.cell(rowIndex).ensureActive();
     });
   }

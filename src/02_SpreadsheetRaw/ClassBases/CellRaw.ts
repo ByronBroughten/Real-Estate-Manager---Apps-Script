@@ -40,13 +40,13 @@ export class CellRaw<
     this.sheet.gatherFetchRange(this.gridRange);
     return this;
   }
-  gatherUpdateRequest(): void {
+  gatherUpdateRequest(value: CellValue): void {
     this.updateRequests.update.push({
       updateCells: {
         range: this.gridRange,
         rows: [
           {
-            values: [{ userEnteredValue: this._valueForSheet() }],
+            values: [{ userEnteredValue: this._valueForSheet(value) }],
           },
         ],
         fields: "userEnteredValue",
@@ -71,7 +71,7 @@ export class CellRaw<
     return value === "";
   }
   get isActive(): boolean {
-    return this.rowState.has(this.colIndex);
+    return this.row.rowIsActive() && this.rowState.has(this.colIndex);
   }
   ensureActive() {
     if (!this.isActive) {
@@ -95,10 +95,15 @@ export class CellRaw<
   }
   updateValue(value: CellValue<VN>): this {
     this.validateIndexNotStale();
-    this.setValueState(value);
+    this.row.validateIsWritable();
+    // A row that was never fetched has no state to mirror the write into.
+    if (this.row.rowIsActive()) {
+      this.setValueState(value);
+    }
     this.row.addRowChangeToSave({
       action: "update",
-      colIdxes: [this.colIndex],
+      colIndex: this.colIndex,
+      value,
     });
     return this;
   }
@@ -126,8 +131,7 @@ export class CellRaw<
       return "";
     }
   }
-  _valueForSheet(): UserEnteredValue {
-    const value = this.value();
+  _valueForSheet(value: CellValue): UserEnteredValue {
     if (typeof value === "string") {
       return { stringValue: value };
     } else if (typeof value === "number") {

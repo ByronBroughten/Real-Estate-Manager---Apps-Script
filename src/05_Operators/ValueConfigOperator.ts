@@ -1,6 +1,6 @@
 import { isBaseValueName } from "../00_base/baseValueSchemas";
 import {
-  importMakeSheetConfigsLine,
+  makeImportLine,
   type ValueConfigsBase,
 } from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
@@ -57,7 +57,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   }
   toFileSource(): string {
     return [
-      `${importMakeSheetConfigsLine}`,
+      `${makeImportLine("makeValueConfigs")}`,
       ``,
       `export const valueConfigs = makeValueConfigs(${JSON.stringify(
         this.newValueConfigs(),

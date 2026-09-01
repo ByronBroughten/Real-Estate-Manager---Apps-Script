@@ -30,6 +30,21 @@ export class RowRawBase extends SheetRawBase {
   rowIsActive(): boolean {
     return this.sheetState.rowStates.has(this.rowIndex);
   }
+  // A data row past the table's last row doesn't exist yet — append it instead.
+  validateIsWritable(): void {
+    if (!this.isDataRow || this.rowIsActive()) return;
+    const activeTable = this.sheetState.activeTable;
+    if (activeTable === null) {
+      throw new Error(
+        `Cannot write to row ${this.rowIndex} of sheetGid ${this.sheetGid} before its sheet properties have been fetched.`,
+      );
+    }
+    if (this.rowIndex >= activeTable.endRowIndex) {
+      throw new Error(
+        `Cannot write to row ${this.rowIndex} because it is past the last row of sheetGid ${this.sheetGid}'s table. Append the row first.`,
+      );
+    }
+  }
   validateIsActive(): void {
     if (!this.rowIsActive()) {
       throw new Error(

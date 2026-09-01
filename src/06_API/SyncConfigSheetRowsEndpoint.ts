@@ -33,7 +33,6 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
   }
   onRunSetup() {
     this.sheet.uniformRow("columnId").prepFetchFull();
-    this.sheet.data.topRow.prepFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.column("syncConfigSheetRowsTimeLastRan").actionRowToDefault();
     this.sheet

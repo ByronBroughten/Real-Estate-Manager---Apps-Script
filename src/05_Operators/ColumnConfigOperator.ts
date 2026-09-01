@@ -1,5 +1,5 @@
 import {
-  importMakeSheetConfigsLine,
+  makeImportLine,
   type ColumnConfigsGeneric,
 } from "../01_generatedConfigs/makeConfigs";
 import { type ValueName } from "../01_generatedConfigs/valueSchemas";
@@ -236,7 +236,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   toFileSource(): string {
     return [
-      `${importMakeSheetConfigsLine}`,
+      `${makeImportLine("makeColumnConfigs")}`,
       ``,
       `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
         this.newColumnConfigs(),

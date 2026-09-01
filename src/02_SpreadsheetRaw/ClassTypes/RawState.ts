@@ -70,7 +70,8 @@ export type RowChangesToSave = {
   level: "row";
   append: boolean;
   delete: null | GoogleAppsScript.Sheets.Schema.Request;
-  update: Set<ColIndex>;
+  // Values, not indexes, so a queued write never depends on fetched row state.
+  update: Map<ColIndex, CellValue>;
 };
 export type SheetChangesToSave = {
   level: "sheet";
@@ -91,7 +92,11 @@ export type SheetChangePropsObj = {
 };
 export type SheetChangeProps = SheetChangePropsObj[keyof SheetChangePropsObj];
 
-export type RowChangeUpdateProps = { action: "update"; colIdxes: number[] };
+export type RowChangeUpdateProps = {
+  action: "update";
+  colIndex: ColIndex;
+  value: CellValue;
+};
 export type RowChangeProps =
   | { action: "append" | "delete" }
   | RowChangeUpdateProps;

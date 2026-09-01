@@ -8,13 +8,13 @@ import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import { DataSheetIndexed } from "./DataSheetIndexed";
 
 export class DataColumnIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnCommonIndexed<VN> {
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
+  get sheet(): DataSheetIndexed {
+    return new DataSheetIndexed(this.sheetIndexedProps);
   }
   get column(): ColumnIndexed<VN> {
     return new ColumnIndexed(this.columnIndexedProps);
@@ -25,8 +25,14 @@ export class DataColumnIndexed<
       colIndex: this.colIndex,
     });
   }
-  get activeCellIndexes(): number[] {
-    return this.raw.sheet.data.rowIndexesActive;
+  get cellIndexesActive(): number[] {
+    return this.raw.cellIndexesActive;
+  }
+  get cellIndexesFull(): number[] {
+    return this.raw.cellIndexesFull;
+  }
+  get cellsFull(): CellIndexed<VN>[] {
+    return this.cellIndexesFull.map((rowIndex) => this.cell(rowIndex));
   }
   prepFetchFull(): this {
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
@@ -42,7 +48,7 @@ export class DataColumnIndexed<
     return this.raw.valueValidationStrings;
   }
   get valueArrNotEmpty(): Value<VN>[] {
-    return this.sheet.data.rowIndexesActive.map((rowIndex) =>
+    return this.sheet.rowIndexesActive.map((rowIndex) =>
       this.cell(rowIndex).valueNotEmpty(),
     );
   }
@@ -61,20 +67,31 @@ export class DataColumnIndexed<
       rowIndex,
     });
   }
-  get activeDataCells(): CellIndexed<VN>[] {
-    return this.activeCellIndexes.map((rowIndex) => this.cell(rowIndex));
+  get cellsActive(): CellIndexed<VN>[] {
+    return this.cellIndexesActive.map((rowIndex) => this.cell(rowIndex));
   }
-  cellsToDefault() {
-    this.activeDataCells.forEach((cell) => {
+  activeCellsToDefault() {
+    this.cellsActive.forEach((cell) => {
       cell.updateToDefault();
     });
   }
-  emptyDataCellsToDefault() {
-    this.activeCellIndexes.forEach((rowIndex) => {
-      const cell = this.cell(rowIndex);
+  allCellsToDefault() {
+    this.cellsFull.forEach((cell) => {
+      cell.updateToDefault();
+    });
+  }
+  allCellsToValue(value: Value<VN>): this {
+    this.cellsFull.forEach((cell) => {
+      cell.updateValue(value);
+    });
+    return this;
+  }
+  emptyActiveCellsToDefualt(): this {
+    this.cellsActive.forEach((cell) => {
       if (cell.raw.isEmpty) {
         cell.updateToDefault();
       }
     });
+    return this;
   }
 }

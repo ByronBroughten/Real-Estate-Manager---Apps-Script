@@ -6,20 +6,24 @@ import type {
 } from "../00_base/base";
 import type { PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./ClassBases/CellRaw";
-import { ColumnCommonRaw } from "./ClassBases/ColumnCommonRaw";
+import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
 import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
+import { SheetRaw } from "./SheetRaw";
 
 export class ColumnRaw<
   VN extends CellValueName = CellValueName,
-> extends ColumnCommonRaw<VN> {
+> extends ColumnRawBase<VN> {
+  get sheet(): SheetRaw {
+    return new SheetRaw(this.sheetRawProps);
+  }
   get data(): DataColumnRaw<VN> {
     return new DataColumnRaw<VN>(this.columnRawProps);
   }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
   ): CellRaw<UniformRowValueName<UN>> {
-    const rowIndex = this.schema.uniformRowIndex(rowName);
-    const valueName = this.schema.uniformValueName(rowName);
+    const rowIndex = this.baseSchema.uniformRowIndex(rowName);
+    const valueName = this.baseSchema.uniformValueName(rowName);
     return new CellRaw<UniformRowValueName<UN>>({
       ...this.columnRawProps,
       rowIndex,

@@ -75,7 +75,7 @@ export abstract class RowCommonRaw extends RowRawBase {
         level: "row",
         append: false,
         delete: null,
-        update: new Set(),
+        update: new Map(),
       });
     }
   }
@@ -86,9 +86,8 @@ export abstract class RowCommonRaw extends RowRawBase {
       append: (_: RowChangeProps) => (changes.append = true),
       delete: (_: RowChangeProps) => (changes.delete = this.deleteRequest),
       update: (props: RowChangeProps) => {
-        for (const colIndex of (props as RowChangeUpdateProps).colIdxes) {
-          changes.update.add(colIndex);
-        }
+        const { colIndex, value } = props as RowChangeUpdateProps;
+        changes.update.set(colIndex, value);
       },
     };
     actions[props.action](props);

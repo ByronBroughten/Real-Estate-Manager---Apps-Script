@@ -1,5 +1,5 @@
 import {
-  importMakeSheetConfigsLine,
+  makeImportLine,
   type SheetConfigsBase,
 } from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
@@ -138,7 +138,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   }
   toFileSource(): string {
     return [
-      `${importMakeSheetConfigsLine}`,
+      `${makeImportLine("makeSheetConfigs")}`,
       ``,
       `export const sheetConfigs = makeSheetConfigs(${JSON.stringify(
         this.newSheetConfigs(),

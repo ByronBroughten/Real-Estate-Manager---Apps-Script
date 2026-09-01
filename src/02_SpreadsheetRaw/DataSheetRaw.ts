@@ -15,16 +15,16 @@ export class DataSheetRaw extends SheetCommonRaw {
       this.schema.isDataRowIndex(rowIndex),
     );
   }
-  get fullDataRowIndexes(): number[] {
+  get rowIndexesFull(): number[] {
     return Arr.indexesFromUntil(
       this.schema.topDataRowIdx,
       this.activeTable.endRowIndex,
     );
   }
-  get dataRowsFull(): DataRowRaw[] {
-    return this.fullDataRowIndexes.map((rowIndex) => this.row(rowIndex));
+  get rowsFull(): DataRowRaw[] {
+    return this.rowIndexesFull.map((rowIndex) => this.row(rowIndex));
   }
-  get dataRowCount(): number {
+  get rowCount(): number {
     return this.sheet.rowCount - this.schema.topDataRowIdx;
   }
   row(rowIndex: number): DataRowRaw {

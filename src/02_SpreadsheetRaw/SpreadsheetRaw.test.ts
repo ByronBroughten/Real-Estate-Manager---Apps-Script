@@ -162,6 +162,82 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
   });
 });
 
+describe("CellRaw.updateValue", () => {
+  it("sends a write to a row that was never fetched, since a write needs no fetched state", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).cell(2).updateValue("Processing...");
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        updateCells: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 5,
+            endRowIndex: 6,
+            startColumnIndex: 2,
+            endColumnIndex: 3,
+          },
+          rows: [{ values: [{ userEnteredValue: { stringValue: "Processing..." } }] }],
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("leaves an unfetched row unreadable, so a forgotten fetch still fails loudly on read", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const cell = raw.sheet(111).data.row(5).cell(2);
+    cell.updateValue("Processing...");
+
+    expect(() => cell.value()).toThrowError(/does not have a value set/);
+  });
+
+  it("throws for a data row past the table's last row rather than writing off the grid", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+
+    expect(() => raw.sheet(111).data.row(11).cell(2).updateValue("x")).toThrowError(
+      /past the last row/,
+    );
+  });
+
+  it("reflects the write in row state when the row was fetched, so a later read sees it", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({ 0: ["c:lse:aaa", "c:lse:bbb"], 4: ["r:lse:1", "old"] }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).data.row(4).gatherFetchFull();
+    raw.fetchAllGathered();
+    const cell = raw.sheet(111).data.row(4).cell(1);
+    cell.updateValue("new");
+
+    expect(cell.value()).toBe("new");
+  });
+});
+
 describe("SpreadsheetRaw.discardQueuedChanges", () => {
   it("sends nothing for changes queued before the discard", () => {
     const { batchUpdateCalls } = stubSheetsService({

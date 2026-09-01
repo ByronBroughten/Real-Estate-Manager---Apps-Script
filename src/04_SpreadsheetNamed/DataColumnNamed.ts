@@ -65,12 +65,12 @@ export class DataColumnNamed<
     this.indexed.prepFetchFull();
     return this;
   }
-  cellsToDefault(): this {
-    this.indexed.cellsToDefault();
+  activeCellsToDefault(): this {
+    this.indexed.activeCellsToDefault();
     return this;
   }
-  emptyDataCellsToDefault(): this {
-    this.indexed.emptyDataCellsToDefault();
+  emptyActiveCellsToDefualt(): this {
+    this.indexed.emptyActiveCellsToDefualt();
     return this;
   }
 }

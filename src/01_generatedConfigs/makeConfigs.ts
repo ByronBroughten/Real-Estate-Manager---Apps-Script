@@ -1,7 +1,14 @@
 import type { SheetNameSimple } from "./sheetConfigsTypes";
 import type { Value, ValueName } from "./valueSchemas";
 
-export const importMakeSheetConfigsLine = `import { makeSheetConfigs } from "./makeConfigs";`;
+export function makeImportLine(
+  configMagerName:
+    | "makeSheetConfigs"
+    | "makeColumnConfigs"
+    | "makeValueConfigs",
+) {
+  return `import { ${configMagerName} } from "./makeConfigs";`;
+}
 
 export function makeStructuredConfig<const S extends unknown, T extends S>(
   _structure: S,
