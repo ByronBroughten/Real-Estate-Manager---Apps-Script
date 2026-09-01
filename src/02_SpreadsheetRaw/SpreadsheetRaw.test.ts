@@ -162,6 +162,47 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
   });
 });
 
+describe("SpreadsheetRaw.discardQueuedChanges", () => {
+  it("sends nothing for changes queued before the discard", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).delete();
+    raw.discardQueuedChanges();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+  });
+
+  it("still sends changes queued after the discard, so a failure handler can report status", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).delete();
+    raw.discardQueuedChanges();
+    raw.sheet(111).data.appendDataRow();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        appendCells: {
+          sheetId: 111,
+          tableId: "fake-table-111",
+          rows: [{}],
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+});
+
 describe("SpreadsheetRaw.spreadsheetId", () => {
   it("reads the script property once and reuses it across instances sharing the state", () => {
     const properties = stubPropertiesService({

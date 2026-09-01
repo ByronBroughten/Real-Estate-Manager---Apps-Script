@@ -28,7 +28,9 @@ export class FillRowIdsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
     }
   }
   onRunSetup() {
+    Logger.log("Setting up.");
     this.sheet.uniformRow("columnId").prepFetchFull();
+    this.sheet.data.topRow.prepFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.column("fillRowIdsTimeLastRan").actionRowToDefault();
     this.sheet
@@ -39,6 +41,7 @@ export class FillRowIdsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
     this.ss.batchUpdateGSheets();
   }
   onRunSuccess() {
+    Logger.log("Succeeding.");
     this.sheet
       .column("fillRowIdsLastRanSucceeded")
       .data.topCell()
@@ -46,6 +49,8 @@ export class FillRowIdsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
     this.sheet.column("fillRowIdsErrorMessage").data.topCell().updateValue("");
   }
   onRunError(error: unknown) {
+    Logger.log("Error occurred.");
+    this.ss.discardQueuedChanges();
     this.sheet
       .column("fillRowIdsLastRanSucceeded")
       .data.topCell()
@@ -56,10 +61,12 @@ export class FillRowIdsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
       .updateValue(String(error));
   }
   onRunEnd() {
+    Logger.log("Closing out run.");
     this.sheet
       .column("fillRowIdsTimeLastRan")
       .data.topCell()
       .updateValue(Tim.nowTimestamp());
     this.ss.batchUpdateGSheets();
+    Logger.log("Run ended.");
   }
 }

@@ -185,6 +185,10 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   batchUpdateGSheets(): void {
     this.raw.batchUpdateGSheets();
   }
+  discardQueuedChanges(): this {
+    this.raw.discardQueuedChanges();
+    return this;
+  }
   fetchAllSheetProperties(): this {
     this.raw.fetchAllSheetProperties();
     return this;

@@ -155,6 +155,12 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.sheet(sheetGid).invalidateRowIndexes(),
     );
   }
+  // Abandons queued writes while local state still reflects them — terminal step only.
+  discardQueuedChanges(): this {
+    this.rawState.changesToSave = new Map();
+    this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+    return this;
+  }
   private _sheetGidsWithRowDeletes(): Set<number> {
     return new Set(
       this.updateRequests.delete.map((request) =>

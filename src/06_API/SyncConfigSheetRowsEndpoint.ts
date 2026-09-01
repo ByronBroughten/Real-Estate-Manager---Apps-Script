@@ -33,6 +33,7 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
   }
   onRunSetup() {
     this.sheet.uniformRow("columnId").prepFetchFull();
+    this.sheet.data.topRow.prepFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.column("syncConfigSheetRowsTimeLastRan").actionRowToDefault();
     this.sheet
@@ -56,6 +57,7 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
       .updateValue("");
   }
   onRunError(error: unknown) {
+    this.ss.discardQueuedChanges();
     this.sheet
       .column("syncConfigSheetRowsLastRanSucceeded")
       .data.topCell()

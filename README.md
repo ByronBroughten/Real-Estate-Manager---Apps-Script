@@ -51,6 +51,12 @@ Each top-level folder under `src/` is a dependency tier. **Rule: dependencies on
 
 `src/businessEndpoints.ts` and `src/businessEndpointHandlers/` sit outside the numbering (like `utils/`) as the real-estate domain logic for _this_ project — the only place allowed to know about properties, leases, tenants, etc. `businessEndpoints.ts` builds the endpoint map passed into `06_API`'s `Api` class; `businessEndpointHandlers/` holds the domain classes it dispatches to. Both may import from any tier. `src/index.ts` sits outside the numbering as the entry-point file Apps Script calls into.
 
+### Queued writes and shared state
+
+`update`/`append`/`delete` don't hit the API — they mutate local cell state and register the coordinate in `rawState.changesToSave`. Nothing reaches the spreadsheet until `batchUpdateGSheets()` gathers those into one `batchUpdate` call.
+
+That `rawState` is threaded **by reference** through `spreadsheetNamedProps` into every collaborator getter, so an endpoint, its `ConfigOrchestrator`, and every operator beneath it all share one queue. A flush therefore commits everything queued anywhere in the run, not just what the calling object queued — which is why a failure path must `discardQueuedChanges()` before writing status, or the `finally` flush ships a half-finished sync. Discarding leaves local state reflecting writes that never happened, so it's a terminal step only.
+
 ## Naming vocabulary
 
 These words are used precisely and consistently — don't use them loosely:
