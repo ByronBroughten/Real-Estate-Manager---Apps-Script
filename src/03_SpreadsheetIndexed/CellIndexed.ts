@@ -5,6 +5,7 @@ import type {
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
 import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
+import type { CellRawProps } from "../02_SpreadsheetRaw/ClassBases/CellRawBase";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexedBase } from "./CellIndexedBase";
 import { ColumnIndexed } from "./ColumnIndexed";
@@ -23,7 +24,13 @@ export class CellIndexed<
     return new ColumnIndexed(this.cellIndexedProps);
   }
   get raw(): CellRaw<VnToCvn<VN>> {
-    return this.column.raw.cell(this.rowIndex);
+    // TODO: I need to actually convert the valueName to the corresponding CellValueName for the raw cell.
+    // This should also be done in ColumnIndexed.
+    return new CellRaw({
+      ...this.cellIndexedProps,
+      rowIndex: this.rowIndex,
+      colIndex: this.column.colIndex,
+    } as CellRawProps<VnToCvn<VN>>);
   }
   get isActive(): boolean {
     return this.raw.isActive;

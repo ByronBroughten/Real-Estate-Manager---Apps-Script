@@ -9,10 +9,10 @@ export const baseEndpoints = makeStructuredConfig(
   {} as Endpoints,
   {
     spreadsheetControls_syncConfigSheetRowsTimeLastRan: () => {
-      SyncConfigSheetRowsEndpoint.init().syncConfigSheetRows();
+      SyncConfigSheetRowsEndpoint.init().execute();
     },
     spreadsheetControls_fillRowIdsTimeLastRan: () => {
-      FillRowIdsEndpoint.init().fillMissingRowIds();
+      FillRowIdsEndpoint.init().execute();
     },
   } as const,
 );

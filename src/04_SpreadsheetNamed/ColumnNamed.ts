@@ -36,9 +36,10 @@ export class ColumnNamed<
     // intentionally not cell named, because named cells only work for data
     return this.indexed.uniformCell(rowName);
   }
-  prepFetchUniformCell(rowName: UniformRowName): ColumnNamed<SN, CN> {
-    this.uniformCell(rowName).prepFetch();
-    return this;
+  prepFetchUniformCell<UN extends UniformRowName>(
+    rowName: UN,
+  ): CellIndexed<UniformRowValueName<UN>> {
+    return this.uniformCell(rowName).prepFetch();
   }
   actionRowToDefault(): ColumnNamed<SN, CN> {
     this.uniformCell("action").updateValue(false);

@@ -20,7 +20,7 @@ export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetCont
   get configOrchestrator() {
     return new ConfigOrchestrator(this.spreadsheetNamedProps);
   }
-  syncConfigSheetRows() {
+  execute() {
     try {
       this.onRunSetup();
       this.configOrchestrator.syncConfigSheetRows();

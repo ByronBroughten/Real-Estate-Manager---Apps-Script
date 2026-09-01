@@ -16,7 +16,7 @@ export class FillRowIdsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
   get sheet(): SheetNamed<"spreadsheetControls"> {
     return this.ss.sheet(this.sheetName);
   }
-  fillMissingRowIds() {
+  execute() {
     try {
       this.onRunSetup();
       this.ss.fillMissingRowIds();

@@ -1,7 +1,7 @@
 import type { CellValueName } from "../../00_base/base";
 import type { RawRowState } from "../ClassTypes/RawState";
 import { ColumnRawBase, type ColumnRawProps } from "./ColumnRawBase";
-interface CellRawProps<
+export interface CellRawProps<
   VN extends CellValueName = CellValueName,
 > extends ColumnRawProps<VN> {
   rowIndex: number;
