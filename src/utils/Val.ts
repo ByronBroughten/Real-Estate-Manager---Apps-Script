@@ -1,5 +1,7 @@
 class ValidationError extends Error {}
 
+function _emptyTest(): void {}
+
 export function validationError(
   value: unknown,
   notAWhat: string,

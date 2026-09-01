@@ -5,11 +5,15 @@ import { CellIndexed } from "./CellIndexed";
 import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
+import { SheetIndexed } from "./SheetIndexed";
 
 export class DataRowIndexed extends RowCommonIndexed {
   constructor(props: RowIndexedProps) {
     super(props);
     void this.raw;
+  }
+  get sheet(): SheetIndexed {
+    return new SheetIndexed(this.sheetIndexedProps);
   }
   get raw(): DataRowRaw {
     return new DataRowRaw(this.rowIndexedProps);

@@ -2,7 +2,7 @@ import type { Merge } from "./merge";
 
 export type Spread<A extends readonly [...any]> = A extends [
   infer L,
-  ...infer R
+  ...infer R,
 ]
   ? Merge<L, Spread<R>>
   : unknown;
@@ -24,9 +24,8 @@ type Sample3 = {
 };
 type Test3 = Spread<[Test1, Sample3]>;
 
-function _test<T extends Test3>(_t: T): void {}
-
-_test({
+function _spreadTest<T extends Test3>(_t: T): void {}
+_spreadTest({
   b: 2,
   c: 3,
   a: 3,
