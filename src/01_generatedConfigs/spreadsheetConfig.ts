@@ -3,6 +3,8 @@ import { makeSpreadsheetConfig } from "./makeConfigs";
 export const spreadsheetConfig = makeSpreadsheetConfig({
   idDelimiter: ":",
   idHeader: "ID",
+  selectorEndpointSuffix: "Select",
+  runnerEndpointSuffix: "TimeLastRan",
   columnIdRowIdxBase0: 0,
   columnGroupRowIdxBase0: 1,
   actionRowIndexBase0: 2,

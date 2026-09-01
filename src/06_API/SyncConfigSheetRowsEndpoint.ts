@@ -1,14 +1,15 @@
 import { SheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
+import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ConfigOrchestrator } from "../05_Operators/ConfigOrchestrator";
 import { Tim } from "../utils/Tim";
 
 export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
-  static init() {
+  static init(props: SpreadsheetNamedProps) {
     return new SyncConfigSheetRowsEndpoint({
       sheetName: "spreadsheetControls",
-      ...SyncConfigSheetRowsEndpoint.initSpreadsheetNamedProps(),
+      ...props,
     });
   }
   get ss() {

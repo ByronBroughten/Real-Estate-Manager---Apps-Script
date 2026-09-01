@@ -80,6 +80,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         return;
       }
       const sheet = this.sheet(sheetGid);
+      if (state.rowIndexesToFinalize.has(this.baseSchema.colIdRowIndex)) {
+        state.hasFetchedColumnIds = true;
+      }
       state.rowIndexesToFinalize.forEach((rowIndex) => {
         sheet.row(rowIndex).ensureFullActiveDataCells();
       });

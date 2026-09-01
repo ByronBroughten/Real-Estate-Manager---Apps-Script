@@ -54,30 +54,26 @@ export class SheetIndexed extends SheetCommon {
       return this.data.row(rowIndex);
     }
   }
-  fetchOnlyColumnId(colIndex: number): this {
-    const colIdRow = this.raw.uniformRow("columnId");
-    colIdRow.cell(colIndex).gatherFetchRange();
-    this.raw.ss.fetchAllGathered();
-    // A blank cell can come back with no rowData, leaving nothing to read.
-    colIdRow.ensureStateExists();
-    colIdRow.cell(colIndex).ensureActive();
-    return this;
+  isTableColIndex(colIndex: number): boolean {
+    return this.raw.fullTableColIndexes.includes(colIndex);
   }
-  fetchOnlyColumnIds(): this {
-    // The columnId row sits above the table, so its filter alone returns no table metadata.
-    this.raw.gatherFetchProperties();
-    this.raw.gatherFetchColumnIds();
+  ensureColumnIdsAreFetched(): this {
+    this._gatherDataPrerequisites();
     this.raw.ss.fetchAllGathered();
     return this;
   }
+  // The columnId row sits above the table, so its filter alone returns no table metadata.
   _gatherDataPrerequisites({
     skipFetchingProperties,
   }: GatherDataPrerequisitesProps = {}): void {
-    if (!skipFetchingProperties) {
+    if (!skipFetchingProperties && !this.raw.hasFetchedProperties) {
       this.raw.gatherFetchProperties();
     }
     // Skip if a prior prepFetchFull() on the columnId row already covers this identical fetch.
-    if (!this.raw.hasQueuedFullRowFetch(this.baseSchema.colIdRowIndex)) {
+    if (
+      !this.raw.hasFetchedColumnIds &&
+      !this.raw.hasQueuedFullRowFetch(this.baseSchema.colIdRowIndex)
+    ) {
       this.raw.gatherFetchColumnIds();
     }
   }

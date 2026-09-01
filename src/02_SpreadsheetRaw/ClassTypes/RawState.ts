@@ -33,6 +33,7 @@ export interface RawSheetState {
     columnValidationValues: RawColumnValidationValues;
   } | null;
   rowIndexesAreValid: boolean;
+  hasFetchedColumnIds: boolean;
   firstStaleColIndex: number | null;
   rowStates: RawRowStates;
   columnCellFacts: RawColumnCellFacts;

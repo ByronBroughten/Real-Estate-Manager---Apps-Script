@@ -33,6 +33,12 @@ export class SheetRaw extends SheetCommonRaw {
   get rowIndexesAreValid(): boolean {
     return this.sheetState.rowIndexesAreValid;
   }
+  get hasFetchedProperties(): boolean {
+    return this.sheetState.activeTable !== null;
+  }
+  get hasFetchedColumnIds(): boolean {
+    return this.sheetState.hasFetchedColumnIds;
+  }
   invalidateRowIndexes(): void {
     this.sheetState.rowIndexesAreValid = false;
   }

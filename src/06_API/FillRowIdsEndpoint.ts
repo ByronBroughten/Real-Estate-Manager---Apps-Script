@@ -1,13 +1,14 @@
 import { SheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
+import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { Tim } from "../utils/Tim";
 
 export class FillRowIdsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
-  static init() {
+  static init(props: SpreadsheetNamedProps) {
     return new FillRowIdsEndpoint({
       sheetName: "spreadsheetControls",
-      ...FillRowIdsEndpoint.initSpreadsheetNamedProps(),
+      ...props,
     });
   }
   get ss() {

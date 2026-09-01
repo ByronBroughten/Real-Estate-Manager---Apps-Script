@@ -48,7 +48,9 @@ describe("FillRowIdsEndpoint.onRunSetup", () => {
       ],
     });
 
-    FillRowIdsEndpoint.init().onRunSetup();
+    FillRowIdsEndpoint.init(
+      FillRowIdsEndpoint.initSpreadsheetNamedProps(),
+    ).onRunSetup();
 
     const requests = batchUpdateCalls.flatMap((call) => call.requests ?? []);
     const updatedRowIndexes = new Set(

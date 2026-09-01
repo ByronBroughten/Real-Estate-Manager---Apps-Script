@@ -1,3 +1,4 @@
+import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { ColumnNamedBase } from "../04_SpreadsheetNamed/ColumnNamedBase";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -6,11 +7,11 @@ export class OccupancyUpdateTermsSelect extends ColumnNamedBase<
   "occupancy",
   "updateTermsSelect"
 > {
-  static init() {
+  static init(props: SpreadsheetNamedProps) {
     return new OccupancyUpdateTermsSelect({
       sheetName: "occupancy",
       columnName: "updateTermsSelect",
-      ...OccupancyUpdateTermsSelect.initSpreadsheetNamedProps(),
+      ...props,
     });
   }
   get ss() {
@@ -19,20 +20,17 @@ export class OccupancyUpdateTermsSelect extends ColumnNamedBase<
   get sheet(): SheetNamed<"occupancy"> {
     return this.ss.sheet(this.sheetName);
   }
-  execute() {
+  execute(isSelected: boolean) {
     try {
-      this.doBulkSelect();
+      this.doBulkSelect(isSelected);
     } catch (error) {
       this._onRunError(error);
     }
   }
-  doBulkSelect() {
-    const selectAllCell = this.sheet
-      .column("updateTermsSelect")
-      .prepFetchUniformCell("action");
-    this.ss.fetchAllPrepped();
+  doBulkSelect(isSelected: boolean) {
+    this.sheet.indexed.ensureColumnIdsAreFetched();
     const selectDataColumn = this.sheet.column("updateTermsSelect").data;
-    selectDataColumn.indexed.allCellsToValue(selectAllCell.value());
+    selectDataColumn.indexed.allCellsToValue(isSelected);
     this.ss.batchUpdateGSheets();
   }
   private _onRunError(error: unknown) {
