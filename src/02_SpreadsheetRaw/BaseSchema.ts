@@ -43,9 +43,6 @@ export class SchemaBase {
   ): `${S1}${NameDelimiter}${S2}` {
     return `${name1}${this.nameDelimiter}${name2}`;
   }
-  sheetGids(): number[] {
-    return configSheetGids;
-  }
   isInSheetGids(sheetGid: number): boolean {
     return configSheetGids.includes(sheetGid);
   }

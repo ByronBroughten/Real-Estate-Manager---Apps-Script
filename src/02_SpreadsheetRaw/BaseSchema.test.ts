@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SchemaBase } from "./BaseSchema";
 
 describe("SchemaBase", () => {
@@ -103,9 +104,9 @@ describe("SchemaBase", () => {
     });
   });
 
-  describe("sheetGids / isInSheetGids", () => {
-    it("agrees with its own sheetGids list", () => {
-      const [firstGid] = schema.sheetGids();
+  describe("isInSheetGids", () => {
+    it("agrees with the generated sheet gid list", () => {
+      const [firstGid] = configSheetGids;
       expect(firstGid).toBeDefined();
       expect(schema.isInSheetGids(firstGid as number)).toBe(true);
       expect(schema.isInSheetGids(Number.MAX_SAFE_INTEGER)).toBe(false);

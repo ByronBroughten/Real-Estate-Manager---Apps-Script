@@ -1,5 +1,3 @@
-import type { CellValue } from "../00_base/base";
-
 import {
   getSheetTraitByGid,
   type SheetConfig,
@@ -29,22 +27,7 @@ export class SheetSchemaIndexed extends SheetSchemaCommon {
       return !this.column(columnId).isFormula;
     });
   }
-  makeColumnId(): string {
-    return this.makeColIdFromPrefix(this.trait("idPrefix"));
-  }
   get sheetName(): SheetName {
     return this.trait("sheetName") as SheetName;
-  }
-  allDefaultValues(): Map<string, CellValue> {
-    return this.defaultValues(...this.columnIds);
-  }
-  defaultValues(...columnIds: string[]): Map<string, CellValue> {
-    return columnIds.reduce(
-      (acc, columnId) => {
-        acc.set(columnId, this.column(columnId).makeDefaultDataValue());
-        return acc;
-      },
-      new Map() as Map<string, CellValue>,
-    );
   }
 }
