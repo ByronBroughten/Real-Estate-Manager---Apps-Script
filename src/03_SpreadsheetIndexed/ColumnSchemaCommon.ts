@@ -6,13 +6,13 @@ import {
   type ValueName,
   type ValueSchema,
 } from "../01_generatedConfigs/valueSchemas";
-import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 
 type ColumnTraitLiteral = Omit<ColumnConfigLiteral, "columnId">;
 
 export abstract class ColumnSchemaCommon<
   VN extends ValueName = ValueName,
-> extends SchemaBase {
+> extends SpreadsheetSchema {
   abstract columnName: PropertyKey;
   abstract columnId: string;
   abstract valueName: VN;

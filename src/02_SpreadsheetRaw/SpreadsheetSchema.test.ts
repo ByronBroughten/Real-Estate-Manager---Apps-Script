@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SchemaBase } from "./BaseSchema";
+import { SpreadsheetSchema } from "./SpreadsheetSchema";
 
-describe("SchemaBase", () => {
-  const schema = new SchemaBase();
+describe("SpreadsheetSchema", () => {
+  const schema = new SpreadsheetSchema();
 
   describe("combineNames", () => {
     it("joins two names with the name delimiter", () => {

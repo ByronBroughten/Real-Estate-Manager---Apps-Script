@@ -3,7 +3,7 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../00_base/base";
-import { getUniformRowIndex } from "../02_SpreadsheetRaw/BaseSchema";
+import { getUniformRowIndex } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
 import { RowCommonIndexed } from "./RowCommonIndexed";

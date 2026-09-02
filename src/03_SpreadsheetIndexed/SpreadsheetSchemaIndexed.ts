@@ -1,7 +1,7 @@
-import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
-export class SpreadsheetSchemaIndexed extends SchemaBase {
+export class SpreadsheetSchemaIndexed extends SpreadsheetSchema {
   sheet(sheetGid: number): SheetSchemaIndexed {
     return new SheetSchemaIndexed(sheetGid);
   }

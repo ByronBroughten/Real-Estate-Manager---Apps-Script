@@ -1,5 +1,5 @@
 import { AppsScript } from "../../00_base/AppsScript";
-import { SchemaBase } from "../BaseSchema";
+import { SpreadsheetSchema } from "../SpreadsheetSchema";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   type ChangesToSave,
@@ -19,8 +19,8 @@ export class SpreadsheetRawBase {
   protected get rawSheetsState(): RawSheetsState {
     return this.rawState.sheets;
   }
-  get schema(): SchemaBase {
-    return new SchemaBase();
+  get schema(): SpreadsheetSchema {
+    return new SpreadsheetSchema();
   }
   get spreadsheetId(): string {
     const cached = this.rawState.spreadsheetId;

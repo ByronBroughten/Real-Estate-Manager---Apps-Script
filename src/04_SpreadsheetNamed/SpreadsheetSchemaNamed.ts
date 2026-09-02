@@ -5,12 +5,12 @@ import {
 } from "../01_generatedConfigs/sheetConfigsTypes";
 
 import { type ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
-import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 import { SheetSchemaNamed } from "./SheetSchemaNamed";
 import type { SheetColumnNamesStandard } from "./Types/NamedState";
 
-export class SpreadsheetSchemaNamed extends SchemaBase {
+export class SpreadsheetSchemaNamed extends SpreadsheetSchema {
   sheet<TN extends SheetNameSimple>(sheetName: TN): SheetSchemaNamed<TN> {
     return new SheetSchemaNamed(sheetName);
   }

@@ -3,14 +3,14 @@ import {
   configSheetGids,
   type SheetName,
 } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SchemaBase } from "../02_SpreadsheetRaw/BaseSchema";
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 
 interface SheetTraitCommon {
   idPrefix: string;
   hasIdColumn: boolean;
 }
 
-export abstract class SheetSchemaCommon extends SchemaBase {
+export abstract class SheetSchemaCommon extends SpreadsheetSchema {
   abstract sheetGid: number;
   abstract sheetName: SheetName;
   abstract trait<K extends keyof SheetTraitCommon>(key: K): SheetTraitCommon[K];

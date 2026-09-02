@@ -33,7 +33,7 @@ const rowIndexToUniformName = new Map(
   Obj.keys(uniformRowIndexes).map((name) => [uniformRowIndexes[name], name]),
 ) as Map<number, UniformRowName>;
 
-export class SchemaBase {
+export class SpreadsheetSchema {
   get nameDelimiter(): NameDelimiter {
     return nameDelimiter;
   }
