@@ -21,9 +21,6 @@ export class ColumnNamed<
   get colIndex() {
     return this.indexed.colIndex;
   }
-  get schema() {
-    return this.sheet.schema.column(this.columnName);
-  }
   get fullName(): ColumnFullName<SN, CN> {
     return this.schema.fullName;
   }

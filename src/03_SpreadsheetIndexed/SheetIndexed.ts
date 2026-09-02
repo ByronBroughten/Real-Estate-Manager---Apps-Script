@@ -72,7 +72,7 @@ export class SheetIndexed extends SheetCommon {
     // Skip if a prior prepFetchFull() on the columnId row already covers this identical fetch.
     if (
       !this.raw.hasFetchedColumnIds &&
-      !this.raw.hasQueuedFullRowFetch(this.baseSchema.colIdRowIndex)
+      !this.raw.hasQueuedFullRowFetch(this.schema.colIdRowIndex)
     ) {
       this.raw.gatherFetchColumnIds();
     }

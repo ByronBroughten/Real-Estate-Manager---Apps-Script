@@ -1,4 +1,5 @@
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
+import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
 export interface RowIndexedProps extends SheetIndexedProps {
   rowIndex: number;
@@ -9,6 +10,9 @@ export class RowIndexedBase extends SheetIndexedBase {
   constructor({ rowIndex, ...rest }: RowIndexedProps) {
     super(rest);
     this.rowIndex = rowIndex;
+  }
+  get schema(): SheetSchemaIndexed {
+    return new SheetSchemaIndexed(this.sheetGid);
   }
   get rowIndexedProps(): RowIndexedProps {
     return {

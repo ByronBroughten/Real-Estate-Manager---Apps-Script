@@ -1,6 +1,5 @@
 import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
-import { SchemaBase } from "../BaseSchema";
 import type {
   RowChangeProps,
   RowChangesToSave,
@@ -11,9 +10,6 @@ import { CellRaw } from "./CellRaw";
 import { RowRawBase } from "./RowRawBase";
 
 export abstract class RowCommonRaw extends RowRawBase {
-  get schema() {
-    return new SchemaBase();
-  }
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }

@@ -37,11 +37,11 @@ export class ColumnSchemaNamed<
   get valueName(): ColumnValueName<SN, CN> & ValueName {
     return this.trait("valueName");
   }
-  get sheetSchema(): SheetSchemaNamed<SN> {
+  get sheet(): SheetSchemaNamed<SN> {
     return new SheetSchemaNamed(this.sheetName);
   }
   makeRowId(): string {
-    return this.sheetSchema.makeRowId();
+    return this.sheet.makeRowId();
   }
   get fullName(): ColumnFullName<SN, CN> {
     return `${this.sheetName}${this.nameDelimiter}${this.columnName as string}` as ColumnFullName<

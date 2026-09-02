@@ -40,7 +40,7 @@ export class DataColumnRaw<
     return this.activeTable.columnValidationValues.get(this.colIndex) ?? [];
   }
   get topCell(): CellRaw<VN> {
-    return this.cell(this.baseSchema.topDataRowIdx);
+    return this.cell(this.schema.topDataRowIdx);
   }
   activeValidationValueTitle(): string | null {
     for (const rawValue of this.valueValidationStrings) {
@@ -103,7 +103,7 @@ export class DataColumnRaw<
   }
   gatherFetchFull(): this {
     this.fullSheet.gatherFetchRange({
-      startRowIndex: this.baseSchema.topDataRowIdx,
+      startRowIndex: this.schema.topDataRowIdx,
       startColumnIndex: this.colIndex,
       endColumnIndex: this.colIndex + 1,
     });

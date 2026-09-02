@@ -17,9 +17,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   private get sheetsService(): GoogleAppsScript.Sheets {
     return Val.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
   }
-  get schema() {
-    return this.baseSchema;
-  }
   gidIsActive(sheetGid: number): boolean {
     return this.activeSheetGids.includes(sheetGid);
   }
@@ -80,7 +77,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         return;
       }
       const sheet = this.sheet(sheetGid);
-      if (state.rowIndexesToFinalize.has(this.baseSchema.colIdRowIndex)) {
+      if (state.rowIndexesToFinalize.has(this.schema.colIdRowIndex)) {
         state.hasFetchedColumnIds = true;
       }
       state.rowIndexesToFinalize.forEach((rowIndex) => {

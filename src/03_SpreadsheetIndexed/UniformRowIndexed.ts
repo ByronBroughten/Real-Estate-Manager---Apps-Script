@@ -26,7 +26,7 @@ export class UniformRowIndexed<
       rowIndex: getUniformRowIndex(uniformRowName),
     });
     this.uniformRowName = uniformRowName;
-    this.baseSchema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
+    this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
   get sheet(): SheetIndexed {
     return new SheetIndexed(this.sheetIndexedProps);
@@ -38,7 +38,7 @@ export class UniformRowIndexed<
     });
   }
   get valueName(): UniformRowValueName<UN> {
-    return this.baseSchema.uniformValueName(this.uniformRowName);
+    return this.schema.uniformValueName(this.uniformRowName);
   }
   value(columnId: string): UniformRowValue<UN> {
     return this.raw.value(this.sheet.column(columnId).colIndex);

@@ -29,7 +29,7 @@ export class UniformRowRawBase<
     this.validateUniformState();
   }
   get valueName(): VN {
-    return this.baseSchema.uniformValueName(this.uniformRowName) as VN;
+    return this.schema.uniformValueName(this.uniformRowName) as VN;
   }
   get activeValueArr(): UniformRowValue<UN>[] {
     return [...this.rowState.values()] as UniformRowValue<UN>[];
@@ -39,6 +39,6 @@ export class UniformRowRawBase<
     this.ensureStateExists();
   }
   private validateUniformRowIndex() {
-    this.baseSchema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
+    this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
 }

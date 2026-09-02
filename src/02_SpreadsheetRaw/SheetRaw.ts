@@ -3,7 +3,7 @@ import { Arr } from "../utils/Arr";
 import { Val } from "../utils/Val";
 import { cellValueToUserEntered } from "./ClassBases/CellRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
-import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
+import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
 import { DataSheetRaw } from "./DataSheetRaw";
 
@@ -25,7 +25,7 @@ import { UniformRowRaw } from "./UniformRowRaw";
 
 export type SheetRawRow = DataRowRaw | UniformRowRaw;
 
-export class SheetRaw extends SheetCommonRaw {
+export class SheetRaw extends SheetRawBase {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }

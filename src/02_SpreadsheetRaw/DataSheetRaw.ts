@@ -3,10 +3,10 @@ import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
 import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
-import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
+import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { SheetRaw } from "./SheetRaw";
 
-export class DataSheetRaw extends SheetCommonRaw {
+export class DataSheetRaw extends SheetRawBase {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }

@@ -56,7 +56,7 @@ export class Api extends SpreadsheetNamedBase {
   }
   handleSheetOnEditEvent(e: GoogleAppsScript.Events.SheetsOnEdit): void {
     const { colIndex, sheetGid } = this.getEventOrigin(e);
-    if (!this.baseSchema.isInSheetGids(sheetGid)) {
+    if (!this.schema.isInSheetGids(sheetGid)) {
       return;
     }
     const sheet = this.ssi.sheet(sheetGid).ensureColumnIdsAreFetched();

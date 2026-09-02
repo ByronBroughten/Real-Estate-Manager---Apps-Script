@@ -19,7 +19,7 @@ export class SpreadsheetRawBase {
   protected get rawSheetsState(): RawSheetsState {
     return this.rawState.sheets;
   }
-  get baseSchema(): SchemaBase {
+  get schema(): SchemaBase {
     return new SchemaBase();
   }
   get spreadsheetId(): string {

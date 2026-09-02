@@ -1,5 +1,4 @@
 import type { CellValue } from "../../00_base/base";
-import { SchemaBase } from "../BaseSchema";
 import type { RawRowState } from "../ClassTypes/RawState";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
@@ -13,16 +12,13 @@ export class RowRawBase extends SheetRawBase {
     super(rest);
     this.rowIndex = rowIndex;
   }
-  get schemaBase() {
-    return new SchemaBase();
-  }
   ensureStateExists() {
     if (!this.rowIsActive()) {
       this.rowStates.set(this.rowIndex, new Map());
     }
   }
   get isDataRow(): boolean {
-    return this.rowIndex >= this.schemaBase.topDataRowIdx;
+    return this.rowIndex >= this.schema.topDataRowIdx;
   }
   get rowState(): RawRowState {
     return this.getRowState(this.rowIndex);

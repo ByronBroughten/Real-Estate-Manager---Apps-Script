@@ -12,20 +12,10 @@ import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { CellNamed } from "./CellNamed";
 import { RowNamedBase } from "./ClassBases/RowNamedBase";
-import type { ColumnSchemaNamed } from "./ColumnSchemaNamed";
-import type { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 import { SheetNamed } from "./SheetNamed";
 
 export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
-  get sheetSchema(): SheetSchemaNamed<SN> {
-    return this.sheet.schema;
-  }
-  columnSchema<CN extends ColumnName<SN>>(
-    columnName: CN,
-  ): ColumnSchemaNamed<SN, CN> {
-    return this.sheetSchema.column(columnName);
-  }
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
@@ -127,13 +117,13 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   ): SheetDataValues<SN, CN> {
     const values = this.values(...columnNames);
     for (const [columnName, value] of Obj.entries(values)) {
-      this.columnSchema(columnName).validate(value);
+      this.schema.column(columnName).validate(value);
     }
     return values;
   }
   get activeCellNames(): ColumnName<SN>[] {
     return this.indexed.activeColumnIds.map((columnId) =>
-      this.sheetSchema.colNameByColumnId(columnId),
+      this.schema.colNameByColumnId(columnId),
     );
   }
   updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {

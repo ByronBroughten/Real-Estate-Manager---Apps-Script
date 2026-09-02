@@ -22,8 +22,8 @@ export class ColumnRaw<
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
   ): CellRaw<UniformRowValueName<UN>> {
-    const rowIndex = this.baseSchema.uniformRowIndex(rowName);
-    const valueName = this.baseSchema.uniformValueName(rowName);
+    const rowIndex = this.schema.uniformRowIndex(rowName);
+    const valueName = this.schema.uniformValueName(rowName);
     return new CellRaw<UniformRowValueName<UN>>({
       ...this.columnRawProps,
       rowIndex,
@@ -53,7 +53,7 @@ export class ColumnRaw<
     return this;
   }
   activeValueTitle(): string {
-    if (this.activeHeader === this.baseSchema.idHeader) {
+    if (this.activeHeader === this.schema.idHeader) {
       return "id";
     }
     return (

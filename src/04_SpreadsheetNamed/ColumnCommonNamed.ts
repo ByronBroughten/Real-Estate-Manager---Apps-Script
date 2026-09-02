@@ -8,7 +8,7 @@ export abstract class ColumnCommonNamed<
   CN extends ColumnName<SN>,
 > extends ColumnNamedBase<SN, CN> {
   get columnId(): string {
-    return this.sheet.schema.column(this.columnName).columnId;
+    return this.schema.columnId;
   }
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);

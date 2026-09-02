@@ -82,7 +82,7 @@ export class DataColumnIndexed<
     });
   }
   allCellsToValue(value: Value<VN>): this {
-    this.column.schema.validateDataNotFormula();
+    this.schema.validateDataNotFormula();
     this.raw.updateAllValues(value as CellValue<VnToCvn<VN>>);
     return this;
   }

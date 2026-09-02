@@ -9,17 +9,10 @@ import type { CellRawProps } from "../02_SpreadsheetRaw/ClassBases/CellRawBase";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexedBase } from "./CellIndexedBase";
 import { ColumnIndexed } from "./ColumnIndexed";
-import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 
 export class CellIndexed<
   VN extends ValueName = ValueName,
 > extends CellIndexedBase<VN> {
-  get columnSchema(): ColumnSchemaIndexed<VN> {
-    return new ColumnSchemaIndexed({
-      sheetGid: this.sheetGid,
-      columnId: this.columnId,
-    });
-  }
   get column(): ColumnIndexed<VN> {
     return new ColumnIndexed(this.cellIndexedProps);
   }
@@ -53,13 +46,13 @@ export class CellIndexed<
     }
   }
   updateValue(value: Value<VN>): this {
-    this.columnSchema.validateDataNotFormula();
+    this.schema.validateDataNotFormula();
     this.raw.updateValue(value as CellValue<VnToCvn<VN>>);
     return this;
   }
   updateToDefault(): this {
-    if (!this.columnSchema.isFormula) {
-      const defaultValue = this.columnSchema.makeDefaultDataValue();
+    if (!this.schema.isFormula) {
+      const defaultValue = this.schema.makeDefaultDataValue();
       this.updateValue(defaultValue);
     }
     return this;

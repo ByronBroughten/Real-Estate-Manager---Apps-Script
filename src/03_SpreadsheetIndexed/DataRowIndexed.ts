@@ -2,7 +2,6 @@ import type { CellValue } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
 import { CellIndexed } from "./CellIndexed";
-import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
 import { SheetIndexed } from "./SheetIndexed";
@@ -20,12 +19,6 @@ export class DataRowIndexed extends RowCommonIndexed {
   }
   get activeValueArr(): CellValue[] {
     return this.raw.activeValueArr;
-  }
-  columnSchema(columnId: string): ColumnSchemaIndexed {
-    return new ColumnSchemaIndexed({
-      sheetGid: this.sheetGid,
-      columnId,
-    });
   }
   updateValue(columnId: string, value: Value): this {
     this.cell(columnId).updateValue(value);

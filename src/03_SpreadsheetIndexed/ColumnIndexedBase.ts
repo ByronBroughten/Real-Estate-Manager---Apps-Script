@@ -1,4 +1,5 @@
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
+import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
 
 export interface ColumnIndexedProps<
@@ -17,6 +18,12 @@ export class ColumnIndexedBase<
     super(props);
     this.columnId = columnId;
     this.valueName = valueName;
+  }
+  get schema(): ColumnSchemaIndexed<VN> {
+    return new ColumnSchemaIndexed({
+      sheetGid: this.sheetGid,
+      columnId: this.columnId,
+    });
   }
   get columnIndexedProps(): ColumnIndexedProps<VN> {
     return {

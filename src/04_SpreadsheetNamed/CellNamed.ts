@@ -12,7 +12,6 @@ import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
 import { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { CellNamedBase } from "./ClassBases/CellNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
-import type { ColumnSchemaNamed } from "./ColumnSchemaNamed";
 
 export class CellNamed<
   SN extends SheetName,
@@ -20,9 +19,6 @@ export class CellNamed<
 > extends CellNamedBase<SN, CN> {
   get column(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
-  }
-  get schema(): ColumnSchemaNamed<SN, CN> {
-    return this.column.schema;
   }
   get indexed(): CellIndexed {
     return this.column.indexed.data.cell(this.rowIndex);

@@ -3,15 +3,11 @@ import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
-import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
 import { DataColumnIndexed } from "./DataColumnIndexed";
 
 export class ColumnIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnCommonIndexed<VN> {
-  get schema(): ColumnSchemaIndexed {
-    return new ColumnSchemaIndexed(this.columnIndexedProps);
-  }
   get raw(): ColumnRaw<VnToCvn<VN>> {
     return new ColumnRaw({
       ...this.sheetIndexedProps,
