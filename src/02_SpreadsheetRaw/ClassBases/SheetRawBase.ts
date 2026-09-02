@@ -71,8 +71,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
   }
   private _parseColumnValidationValues(
     columnProperties:
-      | GoogleAppsScript.Sheets.Schema.TableColumnProperties[]
-      | undefined,
+      GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined,
     startColumnIndex: number,
   ): RawColumnValidationValues {
     const map: RawColumnValidationValues = new Map();

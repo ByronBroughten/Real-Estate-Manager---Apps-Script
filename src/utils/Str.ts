@@ -60,10 +60,12 @@ type LowerAlpha =
   | "z";
 type AlphaNumericChar = Digit | LowerAlpha;
 
-type RemoveChar<S extends string, C extends string> =
-  S extends `${infer Before}${C}${infer After}`
-    ? RemoveChar<`${Before}${After}`, C>
-    : S;
+type RemoveChar<
+  S extends string,
+  C extends string,
+> = S extends `${infer Before}${C}${infer After}`
+  ? RemoveChar<`${Before}${After}`, C>
+  : S;
 
 type RemoveApostrophes<S extends string> = RemoveChar<RemoveChar<S, "'">, "’">;
 

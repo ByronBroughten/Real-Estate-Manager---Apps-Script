@@ -8,9 +8,8 @@ type PickType<T, K extends AllKeys<T>> = T extends { [k in K]?: any }
   ? T[K]
   : undefined;
 
-type PickTypeOf<T, K extends string | number | symbol> = K extends AllKeys<T>
-  ? PickType<T, K>
-  : never;
+type PickTypeOf<T, K extends string | number | symbol> =
+  K extends AllKeys<T> ? PickType<T, K> : never;
 
 export type MergeUnion<T extends object> = Merge<
   { [k in CommonKeys<T>]: PickTypeOf<T, k> },

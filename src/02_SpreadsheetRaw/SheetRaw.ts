@@ -150,8 +150,7 @@ export class SheetRaw extends SheetRawBase {
         columns.forEach((_, colIdxOffset) => {
           const colIndex = colIdxBase + colIdxOffset;
           const cellData = colCell?.values?.[colIdxOffset] as
-            | GoogleCellValue
-            | undefined;
+            GoogleCellValue | undefined;
           // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
           row.cell(colIndex).integrateGState(cellData);
           // The data column's live isFormula/numberFormatType facts are

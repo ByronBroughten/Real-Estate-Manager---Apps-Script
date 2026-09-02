@@ -91,7 +91,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
     if (missingTables.length > 0) {
       const names = missingTables
-        .map(({ sheetGid, title }) => `"${title ?? "(untitled)"}" (gid ${sheetGid})`)
+        .map(
+          ({ sheetGid, title }) =>
+            `"${title ?? "(untitled)"}" (gid ${sheetGid})`,
+        )
         .join(", ");
       throw new Error(
         `${missingTables.length} sheet(s) need a full row/column fetch but have no Table object — apply Insert > Table over their data range in Sheets: ${names}`,
@@ -236,7 +239,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // or a later request's pre-computed startIndex lands on the wrong row.
   private _deleteRequestsDescending(): GoogleUpdateRequest[] {
     return [...this.rawState.updateRequests.delete].sort(
-      (a, b) => this._deleteRequestStartIndex(b) - this._deleteRequestStartIndex(a),
+      (a, b) =>
+        this._deleteRequestStartIndex(b) - this._deleteRequestStartIndex(a),
     );
   }
   private _deleteRequestStartIndex(request: GoogleUpdateRequest): number {

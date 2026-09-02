@@ -10,7 +10,10 @@ export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
 // Lives here, not as an instance field, so it survives a coordinator's
 // per-access getter rebuilds.
 export type SpreadsheetNamedState = {
-  sheetConfigSync: { prepFetchIsComplete: boolean; syncedToSpreadsheet: boolean };
+  sheetConfigSync: {
+    prepFetchIsComplete: boolean;
+    syncedToSpreadsheet: boolean;
+  };
   columnConfigSync: { syncedToSpreadsheet: boolean };
   valueConfigSync: { activeHeaders: Set<string> };
 };
@@ -95,9 +98,7 @@ export function isRowSpecifierBySchemaName(
 }
 
 export type ColumnSpecifierNamed<TN extends SheetName> =
-  | ColumnName<TN>
-  | ColumnName<TN>[]
-  | "allColumns";
+  ColumnName<TN> | ColumnName<TN>[] | "allColumns";
 
 export type NamedSheets<TN extends SheetName> = {
   [T in TN]: SheetNamed<T>;

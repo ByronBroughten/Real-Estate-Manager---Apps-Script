@@ -90,17 +90,17 @@ export function buildGridRows(
   rowsByIndex: Record<number, readonly FakeCell[]>,
 ): FakeCell[][] {
   const maxRowIndex = Math.max(0, ...Object.keys(rowsByIndex).map(Number));
-  return Array.from(
-    { length: maxRowIndex + 1 },
-    (_, rowIndex) => [...(rowsByIndex[rowIndex] ?? [])],
-  );
+  return Array.from({ length: maxRowIndex + 1 }, (_, rowIndex) => [
+    ...(rowsByIndex[rowIndex] ?? []),
+  ]);
 }
 
 function fakeCellToGoogleCellData(cell: FakeCell): GoogleCellData {
   if (cell === null) {
     return {};
   }
-  const rich: FakeRichCellValue = typeof cell === "object" ? cell : { value: cell };
+  const rich: FakeRichCellValue =
+    typeof cell === "object" ? cell : { value: cell };
   const data: GoogleCellData = {
     effectiveValue: fakeValueToExtendedValue(rich.value),
   };
@@ -143,9 +143,7 @@ function fakeRowsToGoogleSheetData(
   // Real rowData blocks run contiguously from a real startRow — a wholly
   // absent row (no value or formatting ever set) splits the grid into
   // separate blocks rather than appearing as a padded-empty entry.
-  const blocks: NonNullable<
-    GoogleAppsScript.Sheets.Schema.Sheet["data"]
-  > = [];
+  const blocks: NonNullable<GoogleAppsScript.Sheets.Schema.Sheet["data"]> = [];
   let currentBlockRows: GoogleAppsScript.Sheets.Schema.RowData[] = [];
   let currentBlockStart: number | null = null;
   const flushCurrentBlock = () => {
@@ -202,42 +200,40 @@ export function stubSheetsService(
 
   function sheetsResponse(): GoogleAppsScript.Sheets.Schema.Spreadsheet {
     return {
-      sheets: sheets.map(
-        (s): GoogleAppsScript.Sheets.Schema.Sheet => ({
-          properties: { sheetId: s.sheetId, title: s.title },
-          data: fakeRowsToGoogleSheetData(s.rows, s.rowsWithNoGridData),
-          tables: s.table
-            ? [
-                {
-                  tableId: `fake-table-${s.sheetId}`,
-                  range: {
-                    startRowIndex: 0,
-                    endRowIndex: s.table.endRowIndex,
-                    startColumnIndex: 0,
-                    endColumnIndex: Math.max(
-                      0,
-                      ...(s.rows ?? []).map((row) => row.length),
-                    ),
-                  },
-                  columnProperties: s.table.columnValidationValues
-                    ? Object.entries(s.table.columnValidationValues).map(
-                        ([colIndex, values]) => ({
-                          columnIndex: Number(colIndex),
-                          dataValidationRule: {
-                            condition: {
-                              values: values.map((userEnteredValue) => ({
-                                userEnteredValue,
-                              })),
-                            },
-                          },
-                        }),
-                      )
-                    : undefined,
+      sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
+        properties: { sheetId: s.sheetId, title: s.title },
+        data: fakeRowsToGoogleSheetData(s.rows, s.rowsWithNoGridData),
+        tables: s.table
+          ? [
+              {
+                tableId: `fake-table-${s.sheetId}`,
+                range: {
+                  startRowIndex: 0,
+                  endRowIndex: s.table.endRowIndex,
+                  startColumnIndex: 0,
+                  endColumnIndex: Math.max(
+                    0,
+                    ...(s.rows ?? []).map((row) => row.length),
+                  ),
                 },
-              ]
-            : undefined,
-        }),
-      ),
+                columnProperties: s.table.columnValidationValues
+                  ? Object.entries(s.table.columnValidationValues).map(
+                      ([colIndex, values]) => ({
+                        columnIndex: Number(colIndex),
+                        dataValidationRule: {
+                          condition: {
+                            values: values.map((userEnteredValue) => ({
+                              userEnteredValue,
+                            })),
+                          },
+                        },
+                      }),
+                    )
+                  : undefined,
+              },
+            ]
+          : undefined,
+      })),
     };
   }
 

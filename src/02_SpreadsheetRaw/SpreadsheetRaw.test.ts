@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
-import { buildGridRows, stubSheetsService } from "../testSupport/fakeSheetsService";
+import {
+  buildGridRows,
+  stubSheetsService,
+} from "../testSupport/fakeSheetsService";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 beforeEach(() => {
@@ -148,12 +151,22 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
         requests: [
           {
             deleteDimension: {
-              range: { sheetId: 111, dimension: "ROWS", startIndex: 10, endIndex: 11 },
+              range: {
+                sheetId: 111,
+                dimension: "ROWS",
+                startIndex: 10,
+                endIndex: 11,
+              },
             },
           },
           {
             deleteDimension: {
-              range: { sheetId: 111, dimension: "ROWS", startIndex: 5, endIndex: 6 },
+              range: {
+                sheetId: 111,
+                dimension: "ROWS",
+                startIndex: 5,
+                endIndex: 6,
+              },
             },
           },
         ],
@@ -183,7 +196,11 @@ describe("CellRaw.updateValue", () => {
             startColumnIndex: 2,
             endColumnIndex: 3,
           },
-          rows: [{ values: [{ userEnteredValue: { stringValue: "Processing..." } }] }],
+          rows: [
+            {
+              values: [{ userEnteredValue: { stringValue: "Processing..." } }],
+            },
+          ],
           fields: "userEnteredValue",
         },
       },
@@ -211,9 +228,9 @@ describe("CellRaw.updateValue", () => {
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
 
-    expect(() => raw.sheet(111).data.row(11).cell(2).updateValue("x")).toThrowError(
-      /past the last row/,
-    );
+    expect(() =>
+      raw.sheet(111).data.row(11).cell(2).updateValue("x"),
+    ).toThrowError(/past the last row/);
   });
 
   it("reflects the write in row state when the row was fetched, so a later read sees it", () => {
@@ -222,7 +239,10 @@ describe("CellRaw.updateValue", () => {
         {
           sheetId: 111,
           title: "Leases",
-          rows: buildGridRows({ 0: ["c:lse:aaa", "c:lse:bbb"], 4: ["r:lse:1", "old"] }),
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            4: ["r:lse:1", "old"],
+          }),
           table: { endRowIndex: 5 },
         },
       ],
@@ -357,7 +377,11 @@ describe("DataColumnRaw.updateAllValues", () => {
     const raw = fetchedColumn();
     raw.sheet(111).data.column(1).updateAllValues("new");
 
-    expect(raw.sheet(111).data.column(1).valueArr).toEqual(["new", "new", "new"]);
+    expect(raw.sheet(111).data.column(1).valueArr).toEqual([
+      "new",
+      "new",
+      "new",
+    ]);
   });
 
   it("orders a per-cell write after the fill, so the cell wins", () => {
@@ -372,7 +396,9 @@ describe("DataColumnRaw.updateAllValues", () => {
     expect(requests[0]?.repeatCell?.cell?.userEnteredValue).toEqual({
       stringValue: "filled",
     });
-    expect(requests[1]?.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue).toEqual({
+    expect(
+      requests[1]?.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue,
+    ).toEqual({
       stringValue: "overridden",
     });
   });
@@ -385,7 +411,9 @@ describe("DataColumnRaw.updateAllValues", () => {
     raw.sheet(111).data.appendDataRow();
     raw.batchUpdateGSheets();
 
-    const fill = (batchUpdateCalls[0]?.requests ?? []).find((r) => r.repeatCell);
+    const fill = (batchUpdateCalls[0]?.requests ?? []).find(
+      (r) => r.repeatCell,
+    );
     expect(fill?.repeatCell?.range?.endRowIndex).toBe(7);
   });
 });

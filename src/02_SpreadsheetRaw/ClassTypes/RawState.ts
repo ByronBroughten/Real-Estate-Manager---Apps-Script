@@ -107,8 +107,7 @@ export type RowChangeUpdateProps = {
   value: CellValue;
 };
 export type RowChangeProps =
-  | { action: "append" | "delete" }
-  | RowChangeUpdateProps;
+  { action: "append" | "delete" } | RowChangeUpdateProps;
 
 export type ColumnSpecifierRaw = ColIndex[] | "allColumns";
 export type ColumnCount = number | "allFromStart";

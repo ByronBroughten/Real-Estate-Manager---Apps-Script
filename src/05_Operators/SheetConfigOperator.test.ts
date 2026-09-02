@@ -99,9 +99,9 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     // A newly-discovered sheet gets a Sheet Config row appended, but stays
     // excluded from the generated file until a human sets letApiAccess.
     expect(sheetConfigs.brandNewSheet).toBeUndefined();
-    expect(
-      operator.sheet.data.column("sheetGid").hasValue(NEW_SHEET_GID),
-    ).toBe(true);
+    expect(operator.sheet.data.column("sheetGid").hasValue(NEW_SHEET_GID)).toBe(
+      true,
+    );
   });
 
   it("resolves sheetGid -> sheetName for a sheet not yet in any deployed config", () => {

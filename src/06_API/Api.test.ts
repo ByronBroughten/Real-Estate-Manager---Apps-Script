@@ -140,7 +140,11 @@ describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", 
     expect(batchUpdateCalls).toHaveLength(1);
     expect(batchUpdateCalls[0]?.requests).toHaveLength(1);
     expect(selectorFills(batchUpdateCalls)).toEqual([
-      { startRowIndex: 4, endRowIndex: END_ROW_INDEX, value: { boolValue: true } },
+      {
+        startRowIndex: 4,
+        endRowIndex: END_ROW_INDEX,
+        value: { boolValue: true },
+      },
     ]);
   });
 
@@ -152,7 +156,11 @@ describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", 
     );
 
     expect(selectorFills(batchUpdateCalls)).toEqual([
-      { startRowIndex: 4, endRowIndex: END_ROW_INDEX, value: { boolValue: false } },
+      {
+        startRowIndex: 4,
+        endRowIndex: END_ROW_INDEX,
+        value: { boolValue: false },
+      },
     ]);
   });
 });

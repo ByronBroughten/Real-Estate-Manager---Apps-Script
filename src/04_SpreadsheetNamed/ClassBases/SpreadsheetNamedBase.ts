@@ -24,7 +24,10 @@ export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
     return {
       ...SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
       namedState: {
-        sheetConfigSync: { prepFetchIsComplete: false, syncedToSpreadsheet: false },
+        sheetConfigSync: {
+          prepFetchIsComplete: false,
+          syncedToSpreadsheet: false,
+        },
         columnConfigSync: { syncedToSpreadsheet: false },
         valueConfigSync: { activeHeaders: new Set() },
       },
