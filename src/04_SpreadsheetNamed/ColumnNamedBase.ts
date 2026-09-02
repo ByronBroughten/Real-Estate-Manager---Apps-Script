@@ -1,7 +1,10 @@
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SheetNamedBase, type SheetNamedProps } from "./ClassBases/SheetNamedBase";
-import { ColumnSchemaNamed } from "./ColumnSchemaNamed";
+import { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
+import {
+  SheetNamedBase,
+  type SheetNamedProps,
+} from "./ClassBases/SheetNamedBase";
 
 export interface ColumnNamedProps<
   TN extends SheetName,
@@ -19,8 +22,8 @@ export class ColumnNamedBase<
     super(props);
     this.columnName = props.columnName;
   }
-  get schema(): ColumnSchemaNamed<TN, CN> {
-    return new ColumnSchemaNamed(this.sheetName, this.columnName);
+  get schema(): ColumnSchema<TN, CN> {
+    return ColumnSchema.fromColumnName(this.sheetName, this.columnName);
   }
   get columnNamedProps(): ColumnNamedProps<TN, CN> {
     return {

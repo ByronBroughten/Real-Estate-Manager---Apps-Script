@@ -15,10 +15,15 @@ export type ColumnConfigs = typeof columnConfigs;
 export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
   SN extends SheetNameSimple ? keyof ColumnConfigs[SN] : never;
 
+// Distributes over SN; indexing a union of sheets by a union of column names collapses to never.
 export type ColumnValueName<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
-> = ColumnConfigs[SN][CN]["valueName" & keyof ColumnConfigs[SN][CN]];
+> = SN extends SheetNameSimple
+  ? CN extends keyof ColumnConfigs[SN]
+    ? ColumnConfigs[SN][CN]["valueName" & keyof ColumnConfigs[SN][CN]]
+    : never
+  : never;
 
 export interface ColumnConfig<
   VN extends ValueName = ValueName,

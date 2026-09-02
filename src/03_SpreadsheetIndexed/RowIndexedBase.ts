@@ -1,5 +1,5 @@
+import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
-import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
 export interface RowIndexedProps extends SheetIndexedProps {
   rowIndex: number;
@@ -11,8 +11,8 @@ export class RowIndexedBase extends SheetIndexedBase {
     super(rest);
     this.rowIndex = rowIndex;
   }
-  get schema(): SheetSchemaIndexed {
-    return new SheetSchemaIndexed(this.sheetGid);
+  get schema(): SheetSchema {
+    return SheetSchema.fromSheetGid(this.sheetGid);
   }
   get rowIndexedProps(): RowIndexedProps {
     return {

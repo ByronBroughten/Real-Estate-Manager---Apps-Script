@@ -1,8 +1,8 @@
+import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetIndexedBase } from "./SheetIndexedBase";
-import { SheetSchemaIndexed } from "./SheetSchemaIndexed";
 
 export abstract class SheetCommon extends SheetIndexedBase {
-  get schema(): SheetSchemaIndexed {
-    return new SheetSchemaIndexed(this.sheetGid);
+  get schema(): SheetSchema {
+    return SheetSchema.fromSheetGid(this.sheetGid);
   }
 }

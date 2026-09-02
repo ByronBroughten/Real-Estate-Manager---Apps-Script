@@ -5,12 +5,8 @@ import {
   type GatherDataPrerequisitesProps,
 } from "./SheetIndexed";
 import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";
-import { SpreadsheetSchemaIndexed } from "./SpreadsheetSchemaIndexed";
 
 export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
-  get schema(): SpreadsheetSchemaIndexed {
-    return new SpreadsheetSchemaIndexed();
-  }
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }

@@ -67,7 +67,7 @@ export class Api extends SpreadsheetNamedBase {
     if (columnId === "") {
       return;
     }
-    const { fullName } = sheet.schema.column(columnId);
+    const { fullName } = sheet.schema.columnById(columnId);
     this._runEndpoint(fullName, e.value === "TRUE");
   }
   // A selector's checkbox is its input, not a button, so unchecking runs it too.

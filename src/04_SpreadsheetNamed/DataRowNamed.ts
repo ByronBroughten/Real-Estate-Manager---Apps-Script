@@ -117,7 +117,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   ): SheetDataValues<SN, CN> {
     const values = this.values(...columnNames);
     for (const [columnName, value] of Obj.entries(values)) {
-      this.schema.column(columnName).validate(value);
+      this.schema.columnByName(columnName).validate(value);
     }
     return values;
   }

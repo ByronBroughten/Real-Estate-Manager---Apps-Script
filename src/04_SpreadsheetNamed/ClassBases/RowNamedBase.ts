@@ -1,6 +1,6 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetDataValues } from "../../01_generatedConfigs/columnConfigsTypes";
-import { SheetSchemaNamed } from "../SheetSchemaNamed";
+import { SheetSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
 
 export type RowState<TN extends SheetName> = SheetDataValues<TN>;
@@ -17,8 +17,8 @@ export class RowNamedBase<TN extends SheetName> extends SheetNamedBase<TN> {
     super(props);
     this.rowIndex = rowIndex;
   }
-  get schema(): SheetSchemaNamed<TN> {
-    return new SheetSchemaNamed(this.sheetName);
+  get schema(): SheetSchema<TN> {
+    return SheetSchema.fromSheetName(this.sheetName);
   }
   get rowNamedProps(): RowNamedProps<TN> {
     return {

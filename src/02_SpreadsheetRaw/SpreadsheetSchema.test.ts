@@ -1,6 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SpreadsheetSchema } from "./SpreadsheetSchema";
+import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import type {
+  ColumnFullNameSimple,
+  ColumnName,
+} from "../01_generatedConfigs/columnConfigsTypes";
+import {
+  configSheetGids,
+  getSheetTraitByName,
+  type SheetName,
+} from "../01_generatedConfigs/sheetConfigsTypes";
+import type { ValueName } from "../01_generatedConfigs/valueSchemas";
+import {
+  ColumnSchema,
+  SheetSchema,
+  SpreadsheetSchema,
+} from "./SpreadsheetSchema";
 
 describe("SpreadsheetSchema", () => {
   const schema = new SpreadsheetSchema();
@@ -66,9 +80,9 @@ describe("SpreadsheetSchema", () => {
   describe("uniform row indexes", () => {
     it("recognizes known uniform row indexes", () => {
       expect(schema.isUniformRowIndex(schema.colIdRowIndex)).toBe(true);
-      expect(
-        schema.isUniformRowIndex(schema.colIdRowIndex, "columnId"),
-      ).toBe(true);
+      expect(schema.isUniformRowIndex(schema.colIdRowIndex, "columnId")).toBe(
+        true,
+      );
       expect(schema.isUniformRowIndex(schema.colIdRowIndex, "header")).toBe(
         false,
       );
@@ -122,5 +136,66 @@ describe("SpreadsheetSchema", () => {
       expect(schema.headerRowIndex).toBe(3);
       expect(schema.topDataRowIdx).toBe(4);
     });
+  });
+});
+
+// The type checker passing does not prove precision survived: a value type that
+// widens to a union, or collapses to never, still compiles. These pin both ends.
+type IsExactly<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
+    ? true
+    : false;
+function assertType<T extends true>(assertion: T): T {
+  return assertion;
+}
+
+describe("type-level precision", () => {
+  it("resolves a name-addressed column to its exact literal types", () => {
+    const column = ColumnSchema.fromColumnName("sheetConfig", "sheetGid");
+    assertType<IsExactly<typeof column.valueName, "number">>(true);
+    assertType<IsExactly<typeof column.columnName, "sheetGid">>(true);
+    assertType<IsExactly<typeof column.sheetName, "sheetConfig">>(true);
+    assertType<IsExactly<typeof column.fullName, "sheetConfig_sheetGid">>(true);
+    assertType<
+      IsExactly<ReturnType<typeof column.makeDefaultDataValue>, number | "">
+    >(true);
+    expect(column.valueName).toBe("number");
+    expect(column.fullName).toBe("sheetConfig_sheetGid");
+  });
+
+  it("resolves a gid-addressed column to the usable widened types, never `never`", () => {
+    const sheetGid = getSheetTraitByName("sheetConfig", "sheetGid");
+    const column = ColumnSchema.fromColumnId(
+      sheetGid,
+      columnConfigs.sheetConfig.sheetGid.columnId,
+    );
+    assertType<IsExactly<typeof column.valueName, ValueName>>(true);
+    assertType<IsExactly<typeof column.columnName, ColumnName<SheetName>>>(
+      true,
+    );
+    assertType<IsExactly<typeof column.fullName, ColumnFullNameSimple>>(true);
+    expect(column.valueName).toBe("number");
+    expect(column.columnName).toBe("sheetGid");
+  });
+
+  it("keeps the sheet trait accessor's shape at both instantiations", () => {
+    const byName = SheetSchema.fromSheetName("sheetConfig");
+    const byGid = SheetSchema.fromSheetGid(byName.sheetGid);
+    assertType<IsExactly<typeof byName.sheetName, "sheetConfig">>(true);
+    assertType<IsExactly<typeof byGid.sheetName, SheetName>>(true);
+    assertType<
+      IsExactly<ReturnType<typeof byName.trait<"hasIdColumn">>, boolean>
+    >(true);
+    assertType<
+      IsExactly<typeof byName.columnNames, ColumnName<"sheetConfig">[]>
+    >(true);
+    expect(byGid.sheetName).toBe("sheetConfig");
+    expect(byName.columnNames).toContain("sheetGid");
+  });
+
+  it("navigates from a column schema back to its own sheet", () => {
+    const sheet = ColumnSchema.fromColumnName("sheetConfig", "sheetGid").sheet;
+    assertType<IsExactly<typeof sheet, SheetSchema<"sheetConfig">>>(true);
+    expect(sheet.sheetName).toBe("sheetConfig");
   });
 });

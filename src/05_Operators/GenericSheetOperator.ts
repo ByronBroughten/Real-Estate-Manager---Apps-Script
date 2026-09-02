@@ -5,7 +5,7 @@ import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { DataSheetNamed } from "../04_SpreadsheetNamed/DataSheetNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
-import { SheetSchemaNamed } from "../04_SpreadsheetNamed/SheetSchemaNamed";
+import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 
 export class GenericSheetOperator<
   SN extends SheetNameSimple,
@@ -22,7 +22,7 @@ export class GenericSheetOperator<
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return this.sheet.column(columnName);
   }
-  get schema(): SheetSchemaNamed<SN> {
-    return new SheetSchemaNamed(this.sheetName);
+  get schema(): SheetSchema<SN> {
+    return SheetSchema.fromSheetName(this.sheetName);
   }
 }

@@ -52,8 +52,7 @@ export class CellIndexed<
   }
   updateToDefault(): this {
     if (!this.schema.isFormula) {
-      const defaultValue = this.schema.makeDefaultDataValue();
-      this.updateValue(defaultValue);
+      this.updateValue(this.schema.makeDefaultDataValue() as Value<VN>);
     }
     return this;
   }

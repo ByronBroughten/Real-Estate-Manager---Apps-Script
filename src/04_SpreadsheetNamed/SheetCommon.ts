@@ -1,11 +1,11 @@
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetNamedBase } from "./ClassBases/SheetNamedBase";
-import { SheetSchemaNamed } from "./SheetSchemaNamed";
 
 export abstract class SheetCommon<
   SN extends SheetName,
 > extends SheetNamedBase<SN> {
-  get schema(): SheetSchemaNamed<SN> {
-    return new SheetSchemaNamed(this.sheetName);
+  get schema(): SheetSchema<SN> {
+    return SheetSchema.fromSheetName(this.sheetName);
   }
 }

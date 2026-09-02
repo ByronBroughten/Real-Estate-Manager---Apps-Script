@@ -8,7 +8,6 @@ import { Val } from "../utils/Val.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
 import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
-import { SpreadsheetSchemaNamed } from "./SpreadsheetSchemaNamed.js";
 import {
   type ColumnSpecifierNamed,
   type FetchColumnSpecifierNamed,
@@ -28,9 +27,6 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   }
   get indexed(): SpreadsheetIndexed {
     return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
-  }
-  get schema(): SpreadsheetSchemaNamed {
-    return new SpreadsheetSchemaNamed();
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
@@ -80,19 +76,18 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     columnSpecifier: FetchColumnSpecifierNamed<SN>,
   ): SheetColumnNamesStandard<SN> {
     if (columnSpecifier.sheetColumnMode === "all") {
-      return this.schema.specifyAllSheetsAndColumns();
+      return this._allColumnNamesOf(
+        this.schema.sheetNames,
+      ) as SheetColumnNamesStandard<SN>;
     } else if (columnSpecifier.sheetColumnMode === "allColumns") {
       const sheetNames = Array.isArray(columnSpecifier.sheetNames)
         ? columnSpecifier.sheetNames
         : [columnSpecifier.sheetNames];
-      return sheetNames.reduce((acc, sheetName) => {
-        acc[sheetName] = this.schema.sheet(sheetName).columnNames;
-        return acc;
-      }, {} as SheetColumnNamesStandard<SN>);
+      return this._allColumnNamesOf(sheetNames);
     } else if (columnSpecifier.sheetColumnMode === "specific") {
       const sheetColumnNames = columnSpecifier.sheetColumnNames;
       return Obj.keys(sheetColumnNames).reduce((acc, sheetName) => {
-        const schema = this.schema.sheet(sheetName);
+        const schema = this.schema.sheetByName(sheetName);
         acc[sheetName] = schema.columnSpecifierToStandard(
           Val.assert<ColumnSpecifierNamed<SN>>(
             sheetColumnNames[sheetName],
@@ -110,6 +105,14 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     }
   }
 
+  private _allColumnNamesOf<SN extends SheetName>(
+    sheetNames: readonly SN[],
+  ): SheetColumnNamesStandard<SN> {
+    return sheetNames.reduce((acc, sheetName) => {
+      acc[sheetName] = this.schema.sheetByName(sheetName).columnNames;
+      return acc;
+    }, {} as SheetColumnNamesStandard<SN>);
+  }
   private _prepFetchStandardizedProps(
     propsArr: FetchPropsStandardNamed<SheetName>[],
   ): void {
@@ -129,7 +132,7 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
       const namedSheet = this.sheet(sheetName);
       const indexedSheet = namedSheet.indexed;
       columnNames.forEach((columnName) => {
-        const columnId = namedSheet.schema.column(columnName).columnId;
+        const columnId = namedSheet.schema.columnByName(columnName).columnId;
         specifiers.forEach((specifier) => {
           this._prepFetchRowSpecifier(indexedSheet, specifier, columnId);
         });

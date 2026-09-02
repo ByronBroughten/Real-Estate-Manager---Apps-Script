@@ -5,7 +5,31 @@ import {
   type UniformRowName,
   type UniformRowValueName,
 } from "../00_base/base";
-import { configSheetGids } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { ValueSchemaKey } from "../00_base/valueSchema";
+import {
+  getColumnTraitByIndex,
+  getColumnTraitByName,
+  getSheetColumnIds,
+  getSheetColumnNames,
+  type ColumnConfig,
+  type ColumnConfigAt,
+  type ColumnFullName,
+  type ColumnFullNameSimple,
+  type ColumnName,
+  type ColumnValue,
+} from "../01_generatedConfigs/columnConfigsTypes";
+import {
+  configSheetGids,
+  configSheetNames,
+  getSheetTraitByGid,
+  getSheetTraitByName,
+  type SheetConfig,
+  type SheetName,
+} from "../01_generatedConfigs/sheetConfigsTypes";
+import {
+  getValTrait,
+  type ValueSchema,
+} from "../01_generatedConfigs/valueSchemas";
 import {
   ssConfigGet,
   type SpreadsheetConfig,
@@ -45,6 +69,15 @@ export class SpreadsheetSchema {
   }
   isInSheetGids(sheetGid: number): boolean {
     return configSheetGids.includes(sheetGid);
+  }
+  get sheetNames() {
+    return configSheetNames;
+  }
+  sheetByName<SN extends SheetName>(sheetName: SN): SheetSchema<SN> {
+    return SheetSchema.fromSheetName(sheetName);
+  }
+  sheetByGid(sheetGid: number): SheetSchema {
+    return SheetSchema.fromSheetGid(sheetGid);
   }
   private ssConfig<K extends keyof SpreadsheetConfig>(
     key: K,
@@ -189,5 +222,196 @@ export class SpreadsheetSchema {
       result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
     }
     return result;
+  }
+}
+
+function sheetNameFromGid(sheetGid: number): SheetName {
+  if (!configSheetGids.includes(sheetGid)) {
+    throw new Error(
+      `Invalid sheetGid: ${sheetGid}. Must be one of: ${configSheetGids.join(", ")}`,
+    );
+  }
+  return getSheetTraitByGid(sheetGid, "sheetName") as SheetName;
+}
+
+interface SheetSchemaProps<SN extends SheetName> {
+  sheetGid: number;
+  sheetName: SN;
+}
+
+export class SheetSchema<
+  SN extends SheetName = SheetName,
+> extends SpreadsheetSchema {
+  readonly sheetGid: number;
+  readonly sheetName: SN;
+  constructor({ sheetGid, sheetName }: SheetSchemaProps<SN>) {
+    super();
+    this.sheetGid = sheetGid;
+    this.sheetName = sheetName;
+  }
+  static fromSheetName<SN extends SheetName>(sheetName: SN): SheetSchema<SN> {
+    return new SheetSchema({
+      sheetName,
+      sheetGid: getSheetTraitByName(sheetName, "sheetGid"),
+    });
+  }
+  static fromSheetGid(sheetGid: number): SheetSchema {
+    return new SheetSchema({
+      sheetGid,
+      sheetName: sheetNameFromGid(sheetGid),
+    });
+  }
+  trait<K extends keyof SheetConfig>(key: K): SheetConfig[K] {
+    return getSheetTraitByGid(this.sheetGid, key);
+  }
+  get idPrefix(): string {
+    return this.trait("idPrefix");
+  }
+  makeRowId(): string {
+    return this.makeRowIdFromPrefix(this.idPrefix);
+  }
+  get columnIds(): MapIterator<string> {
+    return getSheetColumnIds(this.sheetGid);
+  }
+  get columnNames(): ColumnName<SN>[] {
+    return getSheetColumnNames(this.sheetName);
+  }
+  get nonFormulaColumnIds(): string[] {
+    return [...this.columnIds].filter((columnId) => {
+      return !getColumnTraitByIndex(this.sheetGid, columnId, "isFormula");
+    });
+  }
+  colNameByColumnId(columnId: string): ColumnName<SN> {
+    return getColumnTraitByIndex(
+      this.sheetGid,
+      columnId,
+      "columnName",
+    ) as ColumnName<SN>;
+  }
+  columnByName<CN extends ColumnName<SN>>(
+    columnName: CN,
+  ): ColumnSchema<SN, CN> {
+    return new ColumnSchema({
+      ...this.sheetSchemaProps,
+      columnName,
+      columnId: getColumnTraitByName(this.sheetName, columnName, "columnId"),
+    });
+  }
+  columnById(columnId: string): ColumnSchema<SN, ColumnName<SN>> {
+    return new ColumnSchema({
+      ...this.sheetSchemaProps,
+      columnId,
+      columnName: this.colNameByColumnId(columnId),
+    });
+  }
+  columnSpecifierToStandard(
+    columnSpecifier: ColumnName<SN> | ColumnName<SN>[] | "allColumns",
+  ): ColumnName<SN>[] {
+    if (columnSpecifier === "allColumns") {
+      return this.columnNames;
+    } else if (Array.isArray(columnSpecifier)) {
+      return columnSpecifier;
+    } else {
+      return [columnSpecifier];
+    }
+  }
+  private get sheetSchemaProps(): SheetSchemaProps<SN> {
+    return { sheetGid: this.sheetGid, sheetName: this.sheetName };
+  }
+}
+
+interface ColumnSchemaProps<
+  SN extends SheetName,
+  CN extends ColumnName<SN>,
+> extends SheetSchemaProps<SN> {
+  columnId: string;
+  columnName: CN;
+}
+
+export class ColumnSchema<
+  SN extends SheetName = SheetName,
+  CN extends ColumnName<SN> = ColumnName<SN>,
+> extends SpreadsheetSchema {
+  readonly sheetGid: number;
+  readonly sheetName: SN;
+  readonly columnId: string;
+  readonly columnName: CN;
+  constructor({
+    sheetGid,
+    sheetName,
+    columnId,
+    columnName,
+  }: ColumnSchemaProps<SN, CN>) {
+    super();
+    this.sheetGid = sheetGid;
+    this.sheetName = sheetName;
+    this.columnId = columnId;
+    this.columnName = columnName;
+  }
+  static fromColumnName<SN extends SheetName, CN extends ColumnName<SN>>(
+    sheetName: SN,
+    columnName: CN,
+  ): ColumnSchema<SN, CN> {
+    return SheetSchema.fromSheetName(sheetName).columnByName(columnName);
+  }
+  static fromColumnId(sheetGid: number, columnId: string): ColumnSchema {
+    return SheetSchema.fromSheetGid(sheetGid).columnById(columnId);
+  }
+  get sheet(): SheetSchema<SN> {
+    return new SheetSchema({
+      sheetGid: this.sheetGid,
+      sheetName: this.sheetName,
+    });
+  }
+  trait<K extends keyof ColumnConfig>(
+    key: K,
+  ): ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>] {
+    return getColumnTraitByIndex(
+      this.sheetGid,
+      this.columnId,
+      key,
+    ) as ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>];
+  }
+  get valueName(): ColumnConfigAt<SN, CN>["valueName"] {
+    return this.trait("valueName");
+  }
+  valTrait<K extends ValueSchemaKey>(
+    key: K,
+  ): ValueSchema<ColumnConfigAt<SN, CN>["valueName"]>[K] {
+    return getValTrait(this.valueName, key);
+  }
+  get isFormula(): boolean {
+    return this.trait("isFormula");
+  }
+  get fullName(): ColumnFullName<SN, CN> & ColumnFullNameSimple {
+    return this.combineNames(
+      this.sheetName,
+      this.columnName as string,
+    ) as ColumnFullName<SN, CN> & ColumnFullNameSimple;
+  }
+  makeRowId(): string {
+    return this.sheet.makeRowId();
+  }
+  makeDefaultDataValue(): ColumnValue<SN, CN> {
+    if ((this.columnName as string) === "id") {
+      return this.makeRowId() as ColumnValue<SN, CN>;
+    } else {
+      return this.valTrait("makeDefault")() as ColumnValue<SN, CN>;
+    }
+  }
+  validate(value: unknown) {
+    const emptyAllowed = this.trait("emptyAllowed");
+    if (emptyAllowed && value === "") {
+      return value;
+    } else {
+      return this.valTrait("strictValidate")(value);
+    }
+  }
+  validateDataNotFormula(): void {
+    if (this.isFormula) {
+      throw new Error(
+        `Column with id "${this.columnId}" is a formula column and cannot be used for this operation.`,
+      );
+    }
   }
 }

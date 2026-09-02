@@ -40,7 +40,7 @@ export class DataSheetIndexed extends SheetCommon {
     const defaultValues = this.schema.nonFormulaColumnIds.reduce(
       (acc, columnId) => {
         const colIndex = this.column(columnId).colIndex;
-        const colSchema = this.schema.column(columnId);
+        const colSchema = this.schema.columnById(columnId);
         const defaultValue = colSchema.makeDefaultDataValue();
         acc.set(colIndex, defaultValue);
         return acc;

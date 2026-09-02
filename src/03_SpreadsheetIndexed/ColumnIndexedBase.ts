@@ -1,5 +1,5 @@
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
-import { ColumnSchemaIndexed } from "./ColumnSchemaIndexed";
+import { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
 
 export interface ColumnIndexedProps<
@@ -19,11 +19,8 @@ export class ColumnIndexedBase<
     this.columnId = columnId;
     this.valueName = valueName;
   }
-  get schema(): ColumnSchemaIndexed<VN> {
-    return new ColumnSchemaIndexed({
-      sheetGid: this.sheetGid,
-      columnId: this.columnId,
-    });
+  get schema(): ColumnSchema {
+    return ColumnSchema.fromColumnId(this.sheetGid, this.columnId);
   }
   get columnIndexedProps(): ColumnIndexedProps<VN> {
     return {
