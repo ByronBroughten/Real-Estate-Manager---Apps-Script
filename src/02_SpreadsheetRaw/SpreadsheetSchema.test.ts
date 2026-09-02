@@ -3,6 +3,7 @@ import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import type {
   ColumnFullNameSimple,
   ColumnName,
+  ColumnValue,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   configSheetGids,
@@ -139,8 +140,7 @@ describe("SpreadsheetSchema", () => {
   });
 });
 
-// The type checker passing does not prove precision survived: a value type that
-// widens to a union, or collapses to never, still compiles. These pin both ends.
+// tsc passing doesn't prove precision: a type that widens, or collapses to never, still compiles.
 type IsExactly<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
     ? true
@@ -159,6 +159,9 @@ describe("type-level precision", () => {
     assertType<
       IsExactly<ReturnType<typeof column.makeDefaultDataValue>, number | "">
     >(true);
+    assertType<IsExactly<ColumnValue<"sheetConfig", "sheetGid">, number | "">>(
+      true,
+    );
     expect(column.valueName).toBe("number");
     expect(column.fullName).toBe("sheetConfig_sheetGid");
   });
@@ -191,6 +194,15 @@ describe("type-level precision", () => {
     >(true);
     expect(byGid.sheetName).toBe("sheetConfig");
     expect(byName.columnNames).toContain("sheetGid");
+  });
+
+  it("reaches a sheet from the spreadsheet schema by either address", () => {
+    const ss = new SpreadsheetSchema();
+    const byName = ss.sheetByName("sheetConfig");
+    const byGid = ss.sheetByGid(byName.sheetGid);
+    assertType<IsExactly<typeof byName, SheetSchema<"sheetConfig">>>(true);
+    assertType<IsExactly<typeof byGid, SheetSchema>>(true);
+    expect(byGid.sheetGid).toBe(byName.sheetGid);
   });
 
   it("navigates from a column schema back to its own sheet", () => {

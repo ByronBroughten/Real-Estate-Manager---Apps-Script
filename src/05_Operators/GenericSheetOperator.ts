@@ -1,11 +1,11 @@
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
+import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { DataSheetNamed } from "../04_SpreadsheetNamed/DataSheetNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
-import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 
 export class GenericSheetOperator<
   SN extends SheetNameSimple,

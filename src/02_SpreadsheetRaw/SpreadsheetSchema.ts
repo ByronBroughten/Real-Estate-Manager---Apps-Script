@@ -27,21 +27,15 @@ import {
   type SheetName,
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import {
-  getValTrait,
-  type ValueSchema,
-} from "../01_generatedConfigs/valueSchemas";
-import {
   ssConfigGet,
   type SpreadsheetConfig,
 } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import {
+  getValTrait,
+  type ValueSchema,
+} from "../01_generatedConfigs/valueSchemas";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
-
-export function getHeaderNameByRowIndex(
-  rowIndex: number,
-): UniformRowName | undefined {
-  return rowIndexToUniformName.get(rowIndex);
-}
 
 const uniformRowIndexes = {
   columnId: ssConfigGet("columnIdRowIdxBase0"),
@@ -281,6 +275,7 @@ export class SheetSchema<
       return !getColumnTraitByIndex(this.sheetGid, columnId, "isFormula");
     });
   }
+  // Goes by gid, the only O(1) columnId -> columnName index; by name would scan the sheet.
   colNameByColumnId(columnId: string): ColumnName<SN> {
     return getColumnTraitByIndex(
       this.sheetGid,
