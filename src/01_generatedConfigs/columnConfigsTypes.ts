@@ -1,5 +1,6 @@
 import { nameDelimiter, type NameDelimiter } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
+import type { StemWithSuffix } from "../utils/Str";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./columnConfigs";
 import type { ColumnConfigStored } from "./makeConfigs";
@@ -8,6 +9,7 @@ import {
   getSheetTraitByName,
   type SheetNameSimple,
 } from "./sheetConfigsTypes";
+import type { SpreadsheetConfig } from "./spreadsheetConfigTypes";
 import { type Value, type ValueName, type ValueSchema } from "./valueSchemas";
 
 export type ColumnConfigs = typeof columnConfigs;
@@ -25,6 +27,30 @@ export type ColumnValueName<
     : never
   : never;
 
+export type ColumnIsFormula<
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> = SN extends SheetNameSimple
+  ? CN extends keyof ColumnConfigs[SN]
+    ? ColumnConfigs[SN][CN]["isFormula" & keyof ColumnConfigs[SN][CN]]
+    : never
+  : never;
+
+export type ColumnNameFiltered<
+  SN extends SheetNameSimple,
+  VN extends ValueName = ValueName,
+  IF extends boolean = boolean,
+> = SN extends SheetNameSimple
+  ? {
+      [CN in ColumnName<SN>]: ColumnValueName<SN, CN> extends VN
+        ? ColumnIsFormula<SN, CN> extends IF
+          ? CN
+          : never
+        : never;
+    }[ColumnName<SN>] &
+      ColumnName<SN>
+  : never;
+
 export interface ColumnConfig<
   VN extends ValueName = ValueName,
 > extends ColumnConfigStored<VN> {
@@ -33,17 +59,17 @@ export interface ColumnConfig<
 export type ColumnConfigAt<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
-> = ColumnConfig<ColumnValueName<SN, CN> & ValueName>;
+> = ColumnConfig<ColumnValueName<SN, CN>>;
 
 export type ColumnValueSchema<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
-> = ValueSchema<ColumnValueName<SN, CN> & ValueName>;
+> = ValueSchema<ColumnValueName<SN, CN>>;
 
 export type ColumnValue<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
-> = Value<ColumnValueName<SN, CN> & ValueName>;
+> = Value<ColumnValueName<SN, CN>>;
 
 export type SheetDataValues<
   SN extends SheetNameSimple,
@@ -108,11 +134,50 @@ export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
   ).keys();
 }
 
-const columnConfigsFlat = Obj.flattenTwoLevels(columnConfigs, nameDelimiter);
-type ColumnConfigsFlat = typeof columnConfigsFlat;
-export type ColumnFullNameSimple = keyof ColumnConfigsFlat;
-
-export type ColumnFullName<
+export type MakeColumnFullName<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
 > = `${SN}${NameDelimiter}${CN & string}`;
+
+const columnConfigsFlat = Obj.flattenTwoLevels(columnConfigs, {
+  keyDelimiter: nameDelimiter,
+  outerKeyName: "sheetName",
+  innerKeyName: "columnName",
+});
+type ColumnConfigsFlat = typeof columnConfigsFlat;
+type ColumnFullNameAll = keyof ColumnConfigsFlat & string;
+
+// Absolute addressing: one correlated key, so a filtered subset of columns is expressible.
+export type ColumnFullName<
+  VN extends ValueName = ValueName,
+  IF extends boolean = boolean,
+> = {
+  [FN in ColumnFullNameAll]: ColumnConfigsFlat[FN]["valueName"] extends VN
+    ? ColumnConfigsFlat[FN]["isFormula"] extends IF
+      ? FN
+      : never
+    : never;
+}[ColumnFullNameAll];
+
+export type SheetNameOf<FN extends ColumnFullName> =
+  ColumnConfigsFlat[FN]["sheetName"];
+export type ColumnNameOf<FN extends ColumnFullName> =
+  ColumnConfigsFlat[FN]["columnName"] & ColumnName<SheetNameOf<FN>>;
+export type ValueNameOf<FN extends ColumnFullName> =
+  ColumnConfigsFlat[FN]["valueName"];
+export type ValueOf<FN extends ColumnFullName> = Value<ValueNameOf<FN>>;
+
+// A stem counts only when all three status columns exist, so a handler can't be
+// assembled from two unrelated endpoints' columns.
+type SheetStemsWithSuffix<
+  SN extends SheetNameSimple,
+  Suffix extends string,
+> = StemWithSuffix<ColumnName<SN> & string, Suffix>;
+
+export type RunnerStem<SN extends SheetNameSimple> = Extract<
+  Extract<
+    SheetStemsWithSuffix<SN, SpreadsheetConfig["runnerEndpointSuffix"]>,
+    SheetStemsWithSuffix<SN, SpreadsheetConfig["runSucceededEndpointSuffix"]>
+  >,
+  SheetStemsWithSuffix<SN, SpreadsheetConfig["errorMessageEndpointSuffix"]>
+>;

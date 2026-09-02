@@ -1,77 +1,24 @@
-import { SheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
-import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ConfigOrchestrator } from "../05_Operators/ConfigOrchestrator";
-import { Tim } from "../utils/Tim";
+import { RunnerEndpointHandler } from "./RunnerEndpointHandler";
 
-export class SyncConfigSheetRowsEndpoint extends SheetNamedBase<"spreadsheetControls"> {
-  static init(props: SpreadsheetNamedProps) {
+export class SyncConfigSheetRowsEndpoint extends RunnerEndpointHandler<
+  "spreadsheetControls",
+  "syncConfigSheetRows"
+> {
+  static init(props: SpreadsheetNamedProps): SyncConfigSheetRowsEndpoint {
     return new SyncConfigSheetRowsEndpoint({
       sheetName: "spreadsheetControls",
+      stem: "syncConfigSheetRows",
       ...props,
     });
   }
-  get ss() {
-    return new SpreadsheetNamed(this.spreadsheetNamedProps);
-  }
-  get sheet(): SheetNamed<"spreadsheetControls"> {
-    return this.ss.sheet(this.sheetName);
-  }
-  get configOrchestrator() {
+  get configOrchestrator(): ConfigOrchestrator {
     return new ConfigOrchestrator(this.spreadsheetNamedProps);
   }
-  execute() {
-    try {
-      this.onRunSetup();
+  execute(): void {
+    this.runEndpoint(() => {
       this.configOrchestrator.syncConfigSheetRows();
-      this.onRunSuccess();
-    } catch (error) {
-      this.onRunError(error);
-    } finally {
-      this.onRunEnd();
-    }
-  }
-  onRunSetup() {
-    this.sheet.uniformRow("columnId").prepFetchFull();
-    this.ss.fetchAllPrepped();
-    this.sheet.column("syncConfigSheetRowsTimeLastRan").actionRowToDefault();
-    this.sheet
-      .column("syncConfigSheetRowsTimeLastRan")
-      .data.topCell()
-      .updateValue("Processing...");
-    this.sheet
-      .column("syncConfigSheetRowsErrorMessage")
-      .data.topCell()
-      .updateValue("");
-    this.ss.batchUpdateGSheets();
-  }
-  onRunSuccess() {
-    this.sheet
-      .column("syncConfigSheetRowsLastRanSucceeded")
-      .data.topCell()
-      .updateValue(true);
-    this.sheet
-      .column("syncConfigSheetRowsErrorMessage")
-      .data.topCell()
-      .updateValue("");
-  }
-  onRunError(error: unknown) {
-    this.ss.discardQueuedChanges();
-    this.sheet
-      .column("syncConfigSheetRowsLastRanSucceeded")
-      .data.topCell()
-      .updateValue(false);
-    this.sheet
-      .column("syncConfigSheetRowsErrorMessage")
-      .data.topCell()
-      .updateValue(String(error));
-  }
-  onRunEnd() {
-    this.sheet
-      .column("syncConfigSheetRowsTimeLastRan")
-      .data.topCell()
-      .updateValue(Tim.nowTimestamp());
-    this.ss.batchUpdateGSheets();
+    });
   }
 }

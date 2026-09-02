@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import type {
-  ColumnFullNameSimple,
+  ColumnFullName,
   ColumnName,
+  ColumnNameFiltered,
+  ColumnNameOf,
   ColumnValue,
+  ColumnValueName,
+  MakeColumnFullName,
+  RunnerStem,
+  SheetNameOf,
+  ValueNameOf,
+  ValueOf,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   configSheetGids,
@@ -11,6 +19,7 @@ import {
   type SheetName,
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { ValueName } from "../01_generatedConfigs/valueSchemas";
+import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import {
   ColumnSchema,
   SheetSchema,
@@ -140,15 +149,6 @@ describe("SpreadsheetSchema", () => {
   });
 });
 
-// tsc passing doesn't prove precision: a type that widens, or collapses to never, still compiles.
-type IsExactly<A, B> =
-  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2
-    ? true
-    : false;
-function assertType<T extends true>(assertion: T): T {
-  return assertion;
-}
-
 describe("type-level precision", () => {
   it("resolves a name-addressed column to its exact literal types", () => {
     const column = ColumnSchema.fromColumnName("sheetConfig", "sheetGid");
@@ -176,7 +176,7 @@ describe("type-level precision", () => {
     assertType<IsExactly<typeof column.columnName, ColumnName<SheetName>>>(
       true,
     );
-    assertType<IsExactly<typeof column.fullName, ColumnFullNameSimple>>(true);
+    assertType<IsExactly<typeof column.fullName, ColumnFullName>>(true);
     expect(column.valueName).toBe("number");
     expect(column.columnName).toBe("sheetGid");
   });
@@ -209,5 +209,113 @@ describe("type-level precision", () => {
     const sheet = ColumnSchema.fromColumnName("sheetConfig", "sheetGid").sheet;
     assertType<IsExactly<typeof sheet, SheetSchema<"sheetConfig">>>(true);
     expect(sheet.sheetName).toBe("sheetConfig");
+  });
+});
+
+function columnConfigOf(fullName: ColumnFullName) {
+  const column = ColumnSchema.fromColumnName(
+    ...(fullName.split("_") as [SheetName, never]),
+  );
+  return column;
+}
+function columnFullNameIsBoolean(fullName: ColumnFullName): boolean {
+  return columnConfigOf(fullName).valueName === "boolean";
+}
+function columnFullNameIsFormula(fullName: ColumnFullName): boolean {
+  return columnConfigOf(fullName).isFormula;
+}
+
+describe("ColumnFullName, absolute column addressing", () => {
+  it("narrows to a proper subset of columns when filtered by value name", () => {
+    const checkbox: ColumnFullName<"boolean"> = "occupancy_updateTermsSelect";
+    // @ts-expect-error a number column is not a boolean column
+    const numeric: ColumnFullName<"boolean"> = "sheetConfig_sheetGid";
+    // @ts-expect-error a string column is not a boolean column
+    const text: ColumnFullName<"boolean"> =
+      "spreadsheetControls_fillRowIdsTimeLastRan";
+    expect(columnFullNameIsBoolean(checkbox)).toBe(true);
+    expect(columnFullNameIsBoolean(numeric)).toBe(false);
+    expect(columnFullNameIsBoolean(text)).toBe(false);
+  });
+
+  it("denotes every column, formula ones included, when unfiltered", () => {
+    // Derived through the relative family, so this is an independent check
+    // that collapsing the old "simple" union lost nothing.
+    type EveryColumnFullName = {
+      [SN in SheetName]: MakeColumnFullName<SN, ColumnName<SN>>;
+    }[SheetName];
+    assertType<IsExactly<ColumnFullName, EveryColumnFullName>>(true);
+  });
+
+  it("narrows further on the formula axis, which defaults to not caring", () => {
+    const writable: ColumnFullName<"boolean", false> =
+      "occupancy_updateTermsSelect";
+    // @ts-expect-error a formula column can't be written to
+    const derived: ColumnFullName<"boolean", false> =
+      "sheetConfig_idPrefixIsUniqueOrEmpty";
+    const eitherWay: ColumnFullName<"boolean"> =
+      "sheetConfig_idPrefixIsUniqueOrEmpty";
+    expect(columnFullNameIsFormula(writable)).toBe(false);
+    expect(columnFullNameIsFormula(derived)).toBe(true);
+    expect(eitherWay).toBe(derived);
+  });
+
+  it("resolves a full name's sheet, column, value name and value type exactly", () => {
+    type FN = "spreadsheetControls_fillRowIdsLastRanSucceeded";
+    assertType<IsExactly<SheetNameOf<FN>, "spreadsheetControls">>(true);
+    assertType<IsExactly<ColumnNameOf<FN>, "fillRowIdsLastRanSucceeded">>(true);
+    assertType<IsExactly<ValueNameOf<FN>, "boolean">>(true);
+    assertType<IsExactly<ValueOf<FN>, boolean | "">>(true);
+  });
+
+  it("agrees with relative addressing on sampled columns", () => {
+    assertType<
+      IsExactly<
+        ValueNameOf<"occupancy_updateTermsSelect">,
+        ColumnValueName<"occupancy", "updateTermsSelect">
+      >
+    >(true);
+    assertType<
+      IsExactly<
+        ValueOf<"sheetConfig_sheetGid">,
+        ColumnValue<"sheetConfig", "sheetGid">
+      >
+    >(true);
+    assertType<
+      IsExactly<
+        ColumnNameOf<"valueConfig_transactionDescription">,
+        "transactionDescription"
+      >
+    >(true);
+  });
+
+  it("filters a column name within a sheet on the same two axes", () => {
+    assertType<
+      IsExactly<
+        ColumnNameFiltered<"spreadsheetControls", "boolean", false>,
+        "syncConfigSheetRowsLastRanSucceeded" | "fillRowIdsLastRanSucceeded"
+      >
+    >(true);
+    assertType<
+      IsExactly<
+        ColumnNameFiltered<"spreadsheetControls">,
+        ColumnName<"spreadsheetControls">
+      >
+    >(true);
+  });
+});
+
+describe("RunnerStem", () => {
+  it("resolves to the stems whose three status columns all exist", () => {
+    assertType<
+      IsExactly<
+        RunnerStem<"spreadsheetControls">,
+        "fillRowIds" | "syncConfigSheetRows"
+      >
+    >(true);
+  });
+
+  it("is never for a sheet whose stems are incomplete", () => {
+    assertType<IsExactly<RunnerStem<"occupancy">, never>>(true);
   });
 });

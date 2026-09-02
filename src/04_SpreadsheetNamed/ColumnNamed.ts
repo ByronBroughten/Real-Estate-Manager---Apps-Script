@@ -2,9 +2,12 @@ import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type {
   ColumnFullName,
   ColumnName,
+  ColumnValueName,
+  MakeColumnFullName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
+import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";
 import { DataColumnNamed } from "./DataColumnNamed";
 
@@ -15,13 +18,16 @@ export class ColumnNamed<
   get raw() {
     return this.sheet.raw.column(this.indexed.colIndex);
   }
-  get indexed() {
-    return this.sheet.indexed.column(this.columnId);
+  get indexed(): ColumnIndexed<ColumnValueName<SN, CN>> {
+    return new ColumnIndexed<ColumnValueName<SN, CN>>({
+      ...this.sheet.indexed.sheetIndexedProps,
+      columnId: this.columnId,
+    });
   }
   get colIndex() {
     return this.indexed.colIndex;
   }
-  get fullName(): ColumnFullName<SN, CN> {
+  get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
     return this.schema.fullName;
   }
   get data(): DataColumnNamed<SN, CN> {

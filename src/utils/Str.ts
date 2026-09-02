@@ -30,6 +30,15 @@ export type FilterWithSuffix<U extends string, Suffix extends string> = Extract<
   `${string}${Suffix}`
 >;
 
+export type StemWithSuffix<
+  S extends string,
+  Suffix extends string,
+> = S extends `${infer Stem}${Suffix}`
+  ? Stem extends ""
+    ? never
+    : Stem
+  : never;
+
 type Digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
 type LowerAlpha =
   | "a"
@@ -107,6 +116,16 @@ export const Str = {
     str2: S2,
   ): CombineStrings<S1, S2> => {
     return `${str1}${str2}` as CombineStrings<S1, S2>;
+  },
+  stemWithSuffix<S extends string, Suffix extends string>(
+    str: S,
+    suffix: Suffix,
+  ): StemWithSuffix<S, Suffix> | null {
+    if (!str.endsWith(suffix) || str.length === suffix.length) return null;
+    return str.slice(0, str.length - suffix.length) as StemWithSuffix<
+      S,
+      Suffix
+    >;
   },
   removeFirstN<T extends string, N extends number>(
     str: T,

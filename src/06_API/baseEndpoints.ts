@@ -1,16 +1,18 @@
-import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
+import type { ColumnFullName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { FilterWithSuffix } from "../utils/Str";
 import { FillRowIdsEndpoint } from "./FillRowIdsEndpoint";
 import { SyncConfigSheetRowsEndpoint } from "./SyncConfigSheetRowsEndpoint";
 
+// Intersected with the value filter, so a wrongly-typed action column is a
+// compile error rather than a silent runtime no-op.
 export type SelectorEndpointName = FilterWithSuffix<
-  ColumnFullNameSimple,
+  ColumnFullName<"boolean", false>,
   SpreadsheetConfig["selectorEndpointSuffix"]
 >;
 export type RunnerEndpointName = FilterWithSuffix<
-  ColumnFullNameSimple,
+  ColumnFullName<"string", false>,
   SpreadsheetConfig["runnerEndpointSuffix"]
 >;
 

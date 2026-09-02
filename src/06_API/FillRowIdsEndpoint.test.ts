@@ -8,6 +8,7 @@ import {
   buildGridRows,
   stubSheetsService,
 } from "../testSupport/fakeSheetsService";
+import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import { FillRowIdsEndpoint } from "./FillRowIdsEndpoint";
 
 const CONTROLS_GID = 1971630928;
@@ -57,5 +58,34 @@ describe("FillRowIdsEndpoint.onRunSetup", () => {
       requests.map((request) => request.updateCells?.range?.startRowIndex),
     );
     expect(updatedRowIndexes).toContain(4);
+  });
+});
+
+describe("FillRowIdsEndpoint, status column names derived from its stem", () => {
+  it("resolves all three to their exact column names", () => {
+    const endpoint = FillRowIdsEndpoint.init(
+      FillRowIdsEndpoint.initSpreadsheetNamedProps(),
+    );
+    assertType<
+      IsExactly<typeof endpoint.timeLastRanName, "fillRowIdsTimeLastRan">
+    >(true);
+    assertType<
+      IsExactly<
+        typeof endpoint.lastRanSucceededName,
+        "fillRowIdsLastRanSucceeded"
+      >
+    >(true);
+    assertType<
+      IsExactly<typeof endpoint.errorMessageName, "fillRowIdsErrorMessage">
+    >(true);
+    expect([
+      endpoint.timeLastRanName,
+      endpoint.lastRanSucceededName,
+      endpoint.errorMessageName,
+    ]).toEqual([
+      "fillRowIdsTimeLastRan",
+      "fillRowIdsLastRanSucceeded",
+      "fillRowIdsErrorMessage",
+    ]);
   });
 });

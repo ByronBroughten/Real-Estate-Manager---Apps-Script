@@ -1,5 +1,5 @@
 import type { Endpoints } from "./06_API/baseEndpoints";
-import { OccupancyUpdateTermsSelect } from "./06_API/SelectorEndpoint";
+import { OccupancyUpdateTermsSelect } from "./06_API/SelectorEndpointHandler";
 
 export const businessEndpoints: Endpoints = {
   occupancy_buildLedgerTimeLastRan: () => {

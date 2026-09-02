@@ -14,9 +14,9 @@ import {
   type ColumnConfig,
   type ColumnConfigAt,
   type ColumnFullName,
-  type ColumnFullNameSimple,
   type ColumnName,
   type ColumnValue,
+  type MakeColumnFullName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   configSheetGids,
@@ -378,11 +378,11 @@ export class ColumnSchema<
   get isFormula(): boolean {
     return this.trait("isFormula");
   }
-  get fullName(): ColumnFullName<SN, CN> & ColumnFullNameSimple {
+  get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
     return this.combineNames(
       this.sheetName,
       this.columnName as string,
-    ) as ColumnFullName<SN, CN> & ColumnFullNameSimple;
+    ) as MakeColumnFullName<SN, CN> & ColumnFullName;
   }
   makeRowId(): string {
     return this.sheet.makeRowId();

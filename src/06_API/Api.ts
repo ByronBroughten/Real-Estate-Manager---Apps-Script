@@ -1,4 +1,4 @@
-import type { ColumnFullNameSimple } from "../01_generatedConfigs/columnConfigsTypes";
+import type { ColumnFullName } from "../01_generatedConfigs/columnConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
@@ -71,10 +71,7 @@ export class Api extends SpreadsheetNamedBase {
     this._runEndpoint(fullName, e.value === "TRUE");
   }
   // A selector's checkbox is its input, not a button, so unchecking runs it too.
-  private _runEndpoint(
-    fullName: ColumnFullNameSimple,
-    isChecked: boolean,
-  ): void {
+  private _runEndpoint(fullName: ColumnFullName, isChecked: boolean): void {
     if (this._isSelectorEndpointName(fullName)) {
       this.endpoints[fullName]?.({
         ...this.spreadsheetNamedProps,
@@ -85,12 +82,12 @@ export class Api extends SpreadsheetNamedBase {
     }
   }
   private _isSelectorEndpointName(
-    fullName: ColumnFullNameSimple,
+    fullName: ColumnFullName,
   ): fullName is SelectorEndpointName {
     return fullName.endsWith(ssConfigGet("selectorEndpointSuffix"));
   }
   private _isRunnerEndpointName(
-    fullName: ColumnFullNameSimple,
+    fullName: ColumnFullName,
   ): fullName is RunnerEndpointName {
     return fullName.endsWith(ssConfigGet("runnerEndpointSuffix"));
   }

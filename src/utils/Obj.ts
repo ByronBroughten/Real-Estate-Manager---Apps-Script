@@ -21,30 +21,58 @@ type UnionToIntersection<U> = (
   ? I
   : never;
 
-// Computes the flattened type: for each outer key, remap its inner keys to "outer.inner"
+// Each entry carries its own outer/inner key, so indexing the flat map by a
+// generic key resolves them without a side lookup that would degrade to `any`.
 type FlattenTwoLevels<
-  T extends Record<string, Record<string, unknown>>,
+  T extends Record<string, Record<string, object>>,
   D extends string,
+  ON extends PropertyKey,
+  IN extends PropertyKey,
 > = UnionToIntersection<
   {
     [K1 in keyof T]: {
-      [K2 in keyof T[K1] as TextJoin<K1 & string, K2 & string, D>]: T[K1][K2];
+      [K2 in keyof T[K1] as TextJoin<K1 & string, K2 & string, D>]: {
+        [P in keyof T[K1][K2] | ON | IN]: P extends ON
+          ? K1
+          : P extends IN
+            ? K2
+            : T[K1][K2][P & keyof T[K1][K2]];
+      };
     };
   }[keyof T]
 >;
 
-function flattenTwoLevels<
-  T extends Record<string, Record<string, unknown>>,
+export interface FlattenKeys<
   D extends string,
->(obj: T, keyDelimiter: D): FlattenTwoLevels<T, D> {
+  ON extends PropertyKey,
+  IN extends PropertyKey,
+> {
+  keyDelimiter: D;
+  outerKeyName: ON;
+  innerKeyName: IN;
+}
+
+function flattenTwoLevels<
+  T extends Record<string, Record<string, object>>,
+  D extends string,
+  ON extends PropertyKey,
+  IN extends PropertyKey,
+>(
+  obj: T,
+  { keyDelimiter, outerKeyName, innerKeyName }: FlattenKeys<D, ON, IN>,
+): FlattenTwoLevels<T, D, ON, IN> {
   const result: Record<string, unknown> = {};
   for (const outerKey in obj) {
     const inner = obj[outerKey];
     for (const innerKey in inner) {
-      result[`${outerKey}${keyDelimiter}${innerKey}`] = inner[innerKey];
+      result[`${outerKey}${keyDelimiter}${innerKey}`] = {
+        ...inner[innerKey],
+        [outerKeyName]: outerKey,
+        [innerKeyName]: innerKey,
+      };
     }
   }
-  return result as FlattenTwoLevels<T, D>;
+  return result as FlattenTwoLevels<T, D, ON, IN>;
 }
 export type InvertObj<O extends Record<string | number, string | number>> = {
   [K in O[keyof O]]: keyof O;

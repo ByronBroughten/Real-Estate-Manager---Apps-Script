@@ -42,13 +42,15 @@ export class DataColumnIndexed<
   get valueArr(): Value<VN>[] {
     return this.raw.valueArr as Value<VN>[];
   }
-  get valueArrFilterEmpty(): Value<VN>[] {
-    return this.raw.valueArrFilterEmpty as Value<VN>[];
+  get valueArrFilterEmpty(): StrictExclude<Value<VN>, "">[] {
+    return this.valueArr.filter(
+      (value): value is StrictExclude<Value<VN>, ""> => value !== "",
+    );
   }
   get valueValidationStrings(): string[] {
     return this.raw.valueValidationStrings;
   }
-  get valueArrNotEmpty(): Value<VN>[] {
+  get valueArrNotEmpty(): StrictExclude<Value<VN>, "">[] {
     return this.sheet.rowIndexesActive.map((rowIndex) =>
       this.cell(rowIndex).valueNotEmpty(),
     );

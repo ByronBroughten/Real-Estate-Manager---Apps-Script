@@ -1,6 +1,7 @@
 import type {
   ColumnName,
   ColumnValue,
+  ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type {
@@ -8,8 +9,8 @@ import type {
   ValueName,
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
-import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
-import { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
+import type { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
+import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { CellNamedBase } from "./ClassBases/CellNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
 
@@ -20,20 +21,20 @@ export class CellNamed<
   get column(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
   }
-  get indexed(): CellIndexed {
+  get indexed(): CellIndexed<ColumnValueName<SN, CN>> {
     return this.column.indexed.data.cell(this.rowIndex);
   }
-  get raw(): CellRaw<VnToCvn<ValueName>> {
+  get raw(): CellRaw<VnToCvn<ColumnValueName<SN, CN>>> {
     return this.indexed.raw;
   }
   get isActive(): boolean {
     return this.indexed.isActive;
   }
   value(): ColumnValue<SN, CN> {
-    return this.indexed.value() as ColumnValue<SN, CN>;
+    return this.indexed.value();
   }
   updateValue(value: ColumnValue<SN, CN>): this {
-    this.indexed.updateValue(value as Value<ValueName>);
+    this.indexed.updateValue(value);
     return this;
   }
   updateToDefault(): this {
