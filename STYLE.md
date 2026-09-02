@@ -49,6 +49,12 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
 
 Callers reach into `orchestrator.sheetConfigOperator` directly instead of destructuring a method's return value.
 
+### An Operator extends a `*NamedBase` and reaches its subject through a getter
+
+Whatever an Operator operates on — a sheet, a column — it extends that thing's `*NamedBase` class and adds methods suited to that data structure. It does **not** extend the concrete class it works through, and it doesn't take one as a constructor argument: the subject is a lazy collaborator getter built from the props already on `this`, named for what it is (`ss`, `sheet`, `sheetData`, `column`). `GenericSheetOperator extends SheetNamedBase<SN>` with `ss`/`sheet`/`sheetData`/`schema` getters is the reference shape; a column-scoped operator extends `ColumnNamedBase<SN, CN>` and exposes a `column` getter the same way.
+
+Inheriting the concrete class instead would put its whole surface on the operator, which is the opposite of what the operator is for — it exists to offer a *narrower*, more specific set of methods than the general class does.
+
 ### Push a domain query onto the object that owns it
 
 When a coordinating class composes several calls on a collaborator to answer one domain question, that composition belongs on the collaborator as its own named method — not re-inlined at every call site. `ColumnConfigOperator` used to reach through `sheet.uniformRow("columnId").activeValueArr` and `.hasValue(columnId)` directly; that logic moved onto `SheetNamed` itself as `get activeColumnIds()` and `isActiveColumnId(columnId)`, and `ColumnConfigOperator`'s own private helper now just delegates:
@@ -138,7 +144,11 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
 ## Type modeling
 
 - **`interface` for object shapes that get constructed or extended; `type` for everything computed from other types.** Constructor/props/state bags that chain via `extends` (`SpreadsheetNamedProps extends SpreadsheetIndexedProps`) are `interface`s. Unions, `keyof`, mapped/utility types (`CellValueName = keyof CellValueNameToValue`) are `type`s.
-- **Generic params get short domain abbreviations with a constraint, not bare letters** — `SN` (SheetName), `VN` (ValueName), `CN` (ColumnName), `UN` (UniformRowName), `TN`, each usually `extends <DomainType>`. Bare `T`/`K`/`V`/`O` are reserved for domain-free structural utilities (`utils/Obj.ts`, `utils/Arr.ts`) that have no domain concept to abbreviate.
+- **Generic params get short domain abbreviations with a constraint, not bare letters** — `SN` (SheetName), `VN` (ValueName), `CN` (ColumnName), `UN` (UniformRowName), `IF` (IsFormula), `TN`, each usually `extends <DomainType>`. Two letters, not one, even where one would be unambiguous: a lone `F` or `I` reads as a bare letter rather than an abbreviation. Bare `T`/`K`/`V`/`O` are reserved for domain-free structural utilities (`utils/Obj.ts`, `utils/Arr.ts`) that have no domain concept to abbreviate.
+- **Verify a type-level claim with an identity check, never an assignment.** `const x: Expected = valueOfNewType` proves nothing about a mapped or conditional type: it passes against `any` and against `never`. Use the identity-based `IsExactly`/`assertType` pair already in `SpreadsheetSchema.test.ts`. Two corollaries, both learned the hard way:
+  - **A probe that needed an `any` to compile has proved nothing.** Intersecting to satisfy an indexer (`(T & Record<K, any>)[K]`) resolves to `any`, so every assertion downstream of it passes vacuously. If a type won't index without that workaround, fix the type — carry the data inside the entry so the key is provably present — rather than casting past it.
+  - **Measure before adopting a mapped type over the config unions**, with `npx tsc --noEmit --extendedDiagnostics`. See README's "Type-check cost" for the baseline and the one known cliff.
+- **Prefer improving type specificity over branded-string fallbacks.** When a filtered type can come out empty, narrow the domain so the empty case can't arise — don't encode the explanation into a fallback string literal to get a friendlier error. A branded fallback also silently stops working in constraint position, where the intersection that satisfies the parent's constraint collapses it back to `never`.
 - **`as` casts are for type-level narrowing on data that's already runtime-safe, never a substitute for validation.** Two accepted idioms in production code:
   - Seed a fully-typed empty accumulator up front, then fill it: `{} as SheetColumnNamesStandard<SN>`, not a cast at the point of use.
   - `as any` / `as unknown as X` as an escape hatch, but only inside low-level structural utilities (`utils/Obj.ts`, `utils/Arr.ts` and similar) doing generic structural-typing gymnastics — not general license elsewhere.

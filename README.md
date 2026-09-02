@@ -81,6 +81,14 @@ Measured against the live spreadsheet (Sept 2026): a round trip costs **~250–4
 
 **`SpreadsheetApp` is not a cheaper alternative, despite the intuition that a trigger already has the sheet open.** Measured the same day: `getLastRow()` + `getLastColumn()` + `getRange().getValues()` cost ~494ms against ~350ms for the single `getByDataFilter` they would have replaced. Each `SpreadsheetApp` call is its own round trip. This was tested and rejected — don't re-propose it without new measurements.
 
+### Type-check cost
+
+The generated config describes ~574 columns across ~28 sheets, and a lot of this codebase's typing is mapped/conditional types over those unions. That work is cheap until it isn't, so measure rather than guess: `npx tsc --noEmit --extendedDiagnostics` is always safe to run and reports instantiations and check time.
+
+Baseline (Sept 2026): **~286k instantiations, ~1.2s check time.** A mapped filter over the flat column map (`{ [K in ColumnFullNameSimple]: … }`) costs **~48k instantiations per distinct instantiation** — cheap, and cheaper *lazily* than precomputed: eagerly grouping every value name up front cost ~390k, while filtering per use costs ~48k each and only for the value names actually used.
+
+**The known cliff is a widened template literal over both names.** Building `` `${SN}${NameDelimiter}${CN}` `` when both are unions enumerates the full ~28 × ~574 cross product before any intersection can prune it, which produces `TS2590: Expression produces a union type that is too complex to represent` and takes check time to **~7s**. Going the other way — from a full name to its parts, by indexed access on the flat map — costs nothing. That asymmetry is why there is no type-level bridge from `<SN, CN>` to a column full name.
+
 ### The schema classes
 
 `src/02_SpreadsheetRaw/SpreadsheetSchema.ts` holds all three, in one module because they form an import cycle — `extends` is evaluated at module init, so under the bundler a split would risk a "cannot access before initialization" crash in Apps Script that neither `tsc` nor the tests would catch.
@@ -106,7 +114,20 @@ Measured against the live spreadsheet (Sept 2026): a round trip costs **~250–4
 
 The statics are named distinctly per class because static members are inherited, so same-named helpers of different arities would collide. Navigation avoids the bare name `sheet` for the same reason it's reserved on `ColumnSchema`: `SpreadsheetSchema.sheetByName`/`.sheetByGid`, `SheetSchema.columnByName`/`.columnById`.
 
-**The widened instantiation must never collapse to `never`.** `ColumnValueName` (in `columnConfigsTypes.ts`) is written to distribute over the sheet name; indexing a union of sheets by a union of column names requires the column name to key *every* sheet, which yields `never`. Type assertions in `SpreadsheetSchema.test.ts` pin both ends — exact literal on the named path, full union and specifically not `never` on the widened one — and fail `npm run tsc` if either degrades. `tsc` passing is not by itself evidence that precision survived, which is why those assertions are not optional.
+### The column class chain is not shaped like the others
+
+Sheets, rows and cells each get a `ClassBases/` base class in their tier. **Columns don't** — `ColumnNamedBase` sits directly in the tier folder and *is* the base, with an abstract `ColumnCommonNamed` between it and the two concrete classes:
+
+```
+ColumnNamedBase<SN, CN>          // the base: columnName, schema, columnNamedProps
+  └─ ColumnCommonNamed<SN, CN>   // abstract; adds columnId, sheet
+       ├─ ColumnNamed<SN, CN>
+       └─ DataColumnNamed<SN, CN>
+```
+
+There is no `DataColumnNamedBase`. A class that wants to sit beside `DataColumnNamed` rather than under it extends `ColumnNamedBase` and reaches the data column through a getter — which is what `GenericSheetOperator` does one level up (`extends SheetNamedBase`), and what the column-scoped endpoint classes in `06_API` already do.
+
+**The widened instantiation must never collapse to `never` — and today it doesn't.** The hazard is real but guarded: indexing a union of sheets by a union of column names naively requires the column name to key *every* sheet, which would yield `never`, so `ColumnValueName` (in `columnConfigsTypes.ts`) is deliberately written to distribute over the sheet name instead. That is why it looks the way it does; it is not a description of a current defect. Type assertions in `SpreadsheetSchema.test.ts` pin both ends — exact literal on the named path, full union and specifically not `never` on the widened one — and fail `npm run tsc` if either degrades. `tsc` passing is not by itself evidence that precision survived, which is why those assertions are not optional. Neither is an assignment — see STYLE.md's "Verify a type-level claim with an identity check."
 
 ## Naming vocabulary
 
@@ -122,7 +143,7 @@ These words are used precisely and consistently — don't use them loosely:
   - **trait** — one property picked out of a single config record (e.g. a sheet's `sheetGid`), via accessors like `getSheetTraitByGid`/`getColumnTraitByIndex`. The same word is reused one layer up for picking a single property out of a `ValueSchema` (`getValTrait`) — "trait" always means "one property of a multi-field record," never a collection.
   - `spreadsheetConfig` is the one exception to the plural/singular split: there's only one spreadsheet, so it's a single record with no separate `spreadsheetConfigs` collection.
   - `sheetConfigs`/`columnConfigs`'s own entries for the four config-describing sheets — `sheetConfig`, `columnConfig`, `spreadsheetConfig`, and `valueConfig` — are guaranteed to always come out the same on regeneration, forming a fixed floor underneath the generation process itself (it needs a fixed way to find those sheets and their own columns before it can generate anything else). Treat that floor as guaranteed, not as data to "fix" by trying to regenerate it away.
-- **Schema** — type/validation logic layered on top of Config data. Two unrelated families share the word: the spreadsheet schema (`SpreadsheetSchema`/`SheetSchema`/`ColumnSchema`, see "The schema classes") and the value schema (`ValueSchema`, for validating a single cell's value).
+- **Schema** — type/validation logic layered on top of Config data. Two unrelated families share the word: the spreadsheet schema (`SpreadsheetSchema`/`SheetSchema`/`ColumnSchema`, see "The schema classes") and the value schema (`ValueSchema`, for validating a single cell's value). **Every cell is tri-state: `Value<VN>` always includes `""`** — a `boolean` column reads `boolean | ""`, a `number` column `number | ""` — because an untouched cell is empty, not defaulted. Code that branches on a column's value has to say what empty means rather than assuming the base type.
 
 If you're renaming or relocating something and unsure which word applies, ask rather than guess — these distinctions were deliberately hashed out and folder placement depends on them.
 
@@ -133,7 +154,7 @@ If you're renaming or relocating something and unsure which word applies, ask ra
 All four are (or are meant to be) mechanically generated from the real spreadsheet, not hand-authored:
 
 - **`sheetConfigs`** (`01_generatedConfigs/sheetConfigs.ts`) — generated by `SheetConfigOperator` (`05_Operators`), reading the real "Sheet Config" sheet by name.
-- **`columnConfigs`** (`01_generatedConfigs/columnConfigs.ts`) — generated by `ColumnConfigOperator` (`05_Operators`) from the "Column Config" sheet. No longer stores a column's index (`colIndex`) — `03_SpreadsheetIndexed` resolves that live from `columnId` instead, since a stored index would go stale as columns are added/removed/reordered. Per column, only `columnId`/`valueName`/`header`/`isFormula` are generated; `emptyAllowed`/`customDefaultValue` are always emitted at their defaults for now, and `isActionControl` isn't part of the generated shape at all.
+- **`columnConfigs`** (`01_generatedConfigs/columnConfigs.ts`) — generated by `ColumnConfigOperator` (`05_Operators`) from the "Column Config" sheet. No longer stores a column's index (`colIndex`) — `03_SpreadsheetIndexed` resolves that live from `columnId` instead, since a stored index would go stale as columns are added/removed/reordered. Per column, only `columnId`/`valueName`/`header`/`isFormula` are generated; `emptyAllowed`/`customDefaultValue` are always emitted at their defaults for now, and `isActionControl` isn't part of the generated shape at all. **`isFormula` is *sampled* — read off the column's top data-row cell during generation, not declared** — so it can flip between regenerations if someone edits that cell. Fine as data; treat it with care as a *type* axis, since a routine `gen:configs` run can then change which columns satisfy a constraint, and the resulting error surfaces far from the spreadsheet edit that caused it.
 - **`valueConfigs`** (`01_generatedConfigs/valueConfigs.ts`) — generated by `ValueConfigOperator` (`05_Operators`) from the live "Value Config" sheet, once `columnConfigs` is already synced (it reads each active column's header data across business sheets to build the value-name → allowed-values map).
 - **`spreadsheetConfig`** (`01_generatedConfigs/spreadsheetConfig.ts`) — the constraints every sheet in the spreadsheet must be written to satisfy: uniform-row indexes, the ID delimiter, the Config sheets' own GIDs, and the endpoint-name suffixes (`selectorEndpointSuffix`/`runnerEndpointSuffix`). The test for what belongs here is *scope, not kind* — a constant governing how any sheet must be authored belongs here even if only one tier reads it; a constant governing one tier's internal behavior does not. Still genuinely hand-authored; no generator exists yet.
 
