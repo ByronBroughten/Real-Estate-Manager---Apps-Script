@@ -17,6 +17,7 @@ export type GoogleGridRange = GoogleAppsScript.Sheets.Schema.GridRange;
 export type GoogleColCell = GoogleAppsScript.Sheets.Schema.RowData;
 export type GoogleEffectiveValue = GoogleAppsScript.Sheets.Schema.ExtendedValue;
 export type GoogleCellValue = GoogleAppsScript.Sheets.Schema.CellData;
+export type GoogleColor = GoogleAppsScript.Sheets.Schema.Color;
 
 export type UpdateCellsRequest =
   GoogleAppsScript.Sheets.Schema.UpdateCellsRequest;

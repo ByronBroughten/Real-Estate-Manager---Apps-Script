@@ -1,3 +1,4 @@
+import type { GoogleColor } from "../00_base/AppsScriptTypes";
 import type {
   ColumnName,
   ColumnValue,
@@ -35,6 +36,10 @@ export class CellNamed<
   }
   updateValue(value: ColumnValue<SN, CN>): this {
     this.indexed.updateValue(value);
+    return this;
+  }
+  updateBackgroundColor(backgroundColor: GoogleColor): this {
+    this.indexed.updateBackgroundColor(backgroundColor);
     return this;
   }
   updateToDefault(): this {

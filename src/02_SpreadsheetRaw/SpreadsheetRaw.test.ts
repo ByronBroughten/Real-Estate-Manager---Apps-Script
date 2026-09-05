@@ -6,6 +6,8 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
+const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
+
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
 });
@@ -415,5 +417,105 @@ describe("DataColumnRaw.updateAllValues", () => {
       (r) => r.repeatCell,
     );
     expect(fill?.repeatCell?.range?.endRowIndex).toBe(7);
+  });
+});
+
+describe("CellRaw.updateBackgroundColor", () => {
+  it("sends one updateCells request masking only the background colour, with no value", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        updateCells: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 5,
+            endRowIndex: 6,
+            startColumnIndex: 2,
+            endColumnIndex: 3,
+          },
+          rows: [
+            {
+              values: [{ userEnteredFormat: { backgroundColor: LIGHT_GREEN } }],
+            },
+          ],
+          fields: "userEnteredFormat.backgroundColor",
+        },
+      },
+    ]);
+  });
+
+  it("collapses a value and a colour on one cell into a single request masking both", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).cell(2).updateValue("2026-09-05 10:00:00");
+    raw.sheet(111).data.row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        updateCells: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 5,
+            endRowIndex: 6,
+            startColumnIndex: 2,
+            endColumnIndex: 3,
+          },
+          rows: [
+            {
+              values: [
+                {
+                  userEnteredValue: { stringValue: "2026-09-05 10:00:00" },
+                  userEnteredFormat: { backgroundColor: LIGHT_GREEN },
+                },
+              ],
+            },
+          ],
+          fields: "userEnteredValue,userEnteredFormat.backgroundColor",
+        },
+      },
+    ]);
+  });
+
+  it("leaves a value queued for the cell intact when the colour is queued after it", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).data.row(5).cell(2).updateValue("kept");
+    raw.sheet(111).data.row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
+    raw.batchUpdateGSheets();
+
+    const values =
+      batchUpdateCalls[0]?.requests?.[0]?.updateCells?.rows?.[0]?.values;
+    expect(values?.[0]?.userEnteredValue).toEqual({ stringValue: "kept" });
+  });
+
+  it("leaves the cell unreadable, since the read path never fetches colour", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const cell = raw.sheet(111).data.row(5).cell(2);
+    cell.updateBackgroundColor(LIGHT_GREEN);
+
+    expect(cell.isActive).toBe(false);
+    expect(() => cell.value()).toThrowError(/does not have a value set/);
   });
 });

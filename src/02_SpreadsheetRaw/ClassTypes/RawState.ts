@@ -1,4 +1,7 @@
-import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
+import type {
+  GoogleColor,
+  GoogleUpdateRequest,
+} from "../../00_base/AppsScriptTypes";
 import type { CellValue } from "../../00_base/base";
 import type { GridRangeProps } from "./AccessorsRaw";
 
@@ -73,8 +76,13 @@ export type RowChangesToSave = {
   append: boolean;
   delete: null | GoogleAppsScript.Sheets.Schema.Request;
   // Values, not indexes, so a queued write never depends on fetched row state.
-  update: Map<ColIndex, CellValue>;
+  update: Map<ColIndex, RowCellChange>;
 };
+// One entry per cell, merged across writes, so a colour never cancels a value.
+export interface RowCellChange {
+  value?: CellValue;
+  backgroundColor?: GoogleColor;
+}
 export type SheetChangesToSave = {
   level: "sheet";
   sort: null | SortParameters;
@@ -104,8 +112,7 @@ export type SheetChangeProps = SheetChangePropsObj[keyof SheetChangePropsObj];
 export type RowChangeUpdateProps = {
   action: "update";
   colIndex: ColIndex;
-  value: CellValue;
-};
+} & ({ value: CellValue } | { backgroundColor: GoogleColor });
 export type RowChangeProps =
   { action: "append" | "delete" } | RowChangeUpdateProps;
 

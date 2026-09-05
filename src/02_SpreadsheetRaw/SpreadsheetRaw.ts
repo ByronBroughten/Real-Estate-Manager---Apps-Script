@@ -199,8 +199,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       if (change.append) {
         row.gatherAppendRequest();
       }
-      for (const [colIndex, value] of change.update) {
-        row.cell(colIndex).gatherUpdateRequest(value);
+      for (const [colIndex, cellChange] of change.update) {
+        row.cell(colIndex).gatherUpdateRequest(cellChange);
       }
     }
   }

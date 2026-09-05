@@ -1,12 +1,15 @@
 import type {
   GoogleCellValue,
+  GoogleColor,
   UserEnteredValue,
 } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import type { CellValueTrait } from "../../00_base/baseValueSchemas";
 import { getCellValTrait } from "../../00_base/baseValueSchemas";
 import type { ValueSchemaKey } from "../../00_base/valueSchema";
+import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
+import type { RowCellChange } from "../ClassTypes/RawState";
 import { SheetRaw } from "../SheetRaw";
 import type { UniformRowRaw } from "../UniformRowRaw";
 import { CellRawBase } from "./CellRawBase";
@@ -40,16 +43,12 @@ export class CellRaw<
     this.sheet.gatherFetchRange(this.gridRange);
     return this;
   }
-  gatherUpdateRequest(value: CellValue): void {
+  gatherUpdateRequest(change: RowCellChange): void {
     this.updateRequests.update.push({
       updateCells: {
         range: this.gridRange,
-        rows: [
-          {
-            values: [{ userEnteredValue: cellValueToUserEntered(value) }],
-          },
-        ],
-        fields: "userEnteredValue",
+        rows: [{ values: [cellChangeToCellData(change)] }],
+        fields: cellChangeFieldMask(change),
       },
     });
   }
@@ -107,6 +106,17 @@ export class CellRaw<
     });
     return this;
   }
+  // No state mirror: the read path never fetches colour, so there's none to mirror.
+  updateBackgroundColor(backgroundColor: GoogleColor): this {
+    this.validateIndexNotStale();
+    this.row.validateIsWritable();
+    this.row.addRowChangeToSave({
+      action: "update",
+      colIndex: this.colIndex,
+      backgroundColor,
+    });
+    return this;
+  }
   integrateGState(cellValue: GoogleCellValue | undefined): void {
     const value = this._extractFromSheetValue(cellValue);
     this.setValueState(value);
@@ -145,4 +155,28 @@ export function cellValueToUserEntered(value: CellValue): UserEnteredValue {
       `Cannot make user entered value for unsupported type "${typeof value}".`,
     );
   }
+}
+
+// Assembled from what was queued, so a colour-only write can't blank the value.
+const cellChangeFields = {
+  value: "userEnteredValue",
+  backgroundColor: "userEnteredFormat.backgroundColor",
+} as const satisfies Record<keyof RowCellChange, string>;
+
+function cellChangeFieldMask(change: RowCellChange): string {
+  return Obj.keys(cellChangeFields)
+    .filter((key) => change[key] !== undefined)
+    .map((key) => cellChangeFields[key])
+    .join(",");
+}
+
+function cellChangeToCellData(change: RowCellChange): GoogleCellValue {
+  const data: GoogleCellValue = {};
+  if (change.value !== undefined) {
+    data.userEnteredValue = cellValueToUserEntered(change.value);
+  }
+  if (change.backgroundColor !== undefined) {
+    data.userEnteredFormat = { backgroundColor: change.backgroundColor };
+  }
+  return data;
 }

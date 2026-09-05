@@ -1,3 +1,4 @@
+import type { GoogleColor } from "../00_base/AppsScriptTypes";
 import type { CellValue } from "../00_base/base";
 import type {
   Value,
@@ -48,6 +49,10 @@ export class CellIndexed<
   updateValue(value: Value<VN>): this {
     this.schema.validateDataNotFormula();
     this.raw.updateValue(value as CellValue<VnToCvn<VN>>);
+    return this;
+  }
+  updateBackgroundColor(backgroundColor: GoogleColor): this {
+    this.raw.updateBackgroundColor(backgroundColor);
     return this;
   }
   updateToDefault(): this {

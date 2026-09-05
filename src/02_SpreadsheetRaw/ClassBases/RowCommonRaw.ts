@@ -1,5 +1,6 @@
 import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
+import { Obj } from "../../utils/Obj";
 import type {
   RowChangeProps,
   RowChangesToSave,
@@ -82,8 +83,11 @@ export abstract class RowCommonRaw extends RowRawBase {
       append: (_: RowChangeProps) => (changes.append = true),
       delete: (_: RowChangeProps) => (changes.delete = this.deleteRequest),
       update: (props: RowChangeProps) => {
-        const { colIndex, value } = props as RowChangeUpdateProps;
-        changes.update.set(colIndex, value);
+        const { colIndex, ...rest } = props as RowChangeUpdateProps;
+        changes.update.set(colIndex, {
+          ...changes.update.get(colIndex),
+          ...Obj.strictOmit(rest, "action"),
+        });
       },
     };
     actions[props.action](props);
