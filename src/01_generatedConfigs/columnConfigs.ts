@@ -2,9 +2,9 @@ import { makeColumnConfigs } from "./makeConfigs";
 
 export const columnConfigs = makeColumnConfigs({
   "spreadsheetControls": {
-    "fillRowIdsErrorMessage": {
+    "fillRowIdsRunStatus": {
       "columnId": "c:sct:ry4RjGc",
-      "header": "Fill row IDs, error message",
+      "header": "Fill row IDs, run status",
       "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
@@ -18,17 +18,9 @@ export const columnConfigs = makeColumnConfigs({
       "emptyAllowed": false,
       "customDefaultValue": null
     },
-    "syncConfigSheetRowsLastRanSucceeded": {
-      "columnId": "c:sct:W7W53RR",
-      "header": "Sync config sheet rows, last ran succeeded",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "syncConfigSheetRowsErrorMessage": {
+    "syncConfigSheetRowsRunStatus": {
       "columnId": "c:sct:M2bLafa",
-      "header": "Sync config sheet rows, error message",
+      "header": "Sync config sheet rows, run status",
       "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
@@ -46,14 +38,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:sct:9C6CjOp",
       "header": "Fill row IDs, time last ran",
       "valueName": "string",
-      "isFormula": false,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "fillRowIdsLastRanSucceeded": {
-      "columnId": "c:sct:vRSSQqW",
-      "header": "Fill row IDs, last ran succeeded",
-      "valueName": "boolean",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -2674,9 +2658,9 @@ export const columnConfigs = makeColumnConfigs({
       "emptyAllowed": false,
       "customDefaultValue": null
     },
-    "buildLedgerRunAndStatus": {
+    "buildLedgerRunStatus": {
       "columnId": "c:occ:UpuGA83",
-      "header": "Build ledger, run and status",
+      "header": "Build ledger, run status",
       "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
@@ -2698,9 +2682,9 @@ export const columnConfigs = makeColumnConfigs({
       "emptyAllowed": false,
       "customDefaultValue": null
     },
-    "updateTermsStartDate": {
+    "nextTermsStartDate": {
       "columnId": "c:occ:QBzak06",
-      "header": "Update terms, start date",
+      "header": "Next terms start date",
       "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
@@ -2714,17 +2698,9 @@ export const columnConfigs = makeColumnConfigs({
       "emptyAllowed": false,
       "customDefaultValue": null
     },
-    "updateTermsLastRanSucceeded": {
-      "columnId": "c:occ:ydFMb-I",
-      "header": "Update terms, last ran succeeded",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "updateTermsRunAndStatus": {
+    "updateTermsRunStatus": {
       "columnId": "c:occ:bE5oQRM",
-      "header": "Update terms, run and status",
+      "header": "Update terms, run status",
       "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,

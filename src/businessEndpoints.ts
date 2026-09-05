@@ -1,11 +1,11 @@
 import type { Endpoints } from "./06_API/baseEndpoints";
-import { OccupancyUpdateTermsSelect } from "./06_API/SelectorEndpointHandler";
 
 export const businessEndpoints: Endpoints = {
   occupancy_buildLedgerTimeLastRan: () => {
-    // TO DO: implement this endpoint
+    // TODO: implement this endpoint
   },
-  occupancy_updateTermsSelect: ({ isSelected, ...props }) => {
-    OccupancyUpdateTermsSelect.init(props).execute(isSelected);
-  },
+  // TODO: selector endpoint functionality may be removed in the future, as the speed floor doesn't let them feel good, and their functionality may not be needed.
+  // occupancy_updateTermsSelect: ({ isSelected, ...props }) => {
+  //   OccupancyUpdateTermsSelect.init(props).execute(isSelected);
+  // },
 };
