@@ -7,13 +7,14 @@ import {
 
 describe("SheetNameWithRunnerColumns", () => {
   it("is exactly the sheets carrying a complete runner stem", () => {
-    assertType<IsExactly<SheetNameWithRunnerColumns, "spreadsheetControls">>(
-      true,
-    );
+    assertType<
+      IsExactly<SheetNameWithRunnerColumns, "spreadsheetControls" | "occupancy">
+    >(true);
   });
 
   it("agrees at runtime with the type it is derived from", () => {
     expect(isInTnGroup("hasRunnerColumns", "spreadsheetControls")).toBe(true);
-    expect(isInTnGroup("hasRunnerColumns", "occupancy")).toBe(false);
+    expect(isInTnGroup("hasRunnerColumns", "occupancy")).toBe(true);
+    expect(isInTnGroup("hasRunnerColumns", "sheetConfig")).toBe(false);
   });
 });

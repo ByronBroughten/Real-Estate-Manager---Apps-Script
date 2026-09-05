@@ -167,7 +167,7 @@ export type ValueNameOf<FN extends ColumnFullName> =
   ColumnConfigsFlat[FN]["valueName"];
 export type ValueOf<FN extends ColumnFullName> = Value<ValueNameOf<FN>>;
 
-// A stem counts only when all three status columns exist, so a handler can't be
+// A stem counts only when both of its columns exist, so a handler can't be
 // assembled from two unrelated endpoints' columns.
 type SheetStemsWithSuffix<
   SN extends SheetNameSimple,
@@ -175,9 +175,6 @@ type SheetStemsWithSuffix<
 > = StemWithSuffix<ColumnName<SN> & string, Suffix>;
 
 export type RunnerStem<SN extends SheetNameSimple> = Extract<
-  Extract<
-    SheetStemsWithSuffix<SN, SpreadsheetConfig["runnerEndpointSuffix"]>,
-    SheetStemsWithSuffix<SN, SpreadsheetConfig["runSucceededEndpointSuffix"]>
-  >,
-  SheetStemsWithSuffix<SN, SpreadsheetConfig["errorMessageEndpointSuffix"]>
+  SheetStemsWithSuffix<SN, SpreadsheetConfig["runnerEndpointSuffix"]>,
+  SheetStemsWithSuffix<SN, SpreadsheetConfig["runStatusEndpointSuffix"]>
 >;

@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
 import { spreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfig";
-import { businessEndpoints } from "../businessEndpoints";
 import {
   stubLogger,
   stubPropertiesService,
@@ -13,6 +12,7 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { Api } from "./Api";
 import type { Endpoints } from "./baseEndpoints";
+import { OccupancyUpdateTermsSelect } from "./SelectorEndpointHandler";
 
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const c = columnConfigs.occupancy;
@@ -129,10 +129,18 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch by column-name suffix", 
 });
 
 describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", () => {
+  // Wired here rather than read off businessEndpoints, whose registration of
+  // this selector is currently commented out.
+  const selectEndpoints: Endpoints = {
+    occupancy_updateTermsSelect: ({ isSelected, ...props }) => {
+      OccupancyUpdateTermsSelect.init(props).execute(isSelected);
+    },
+  };
+
   it("selects every data row with one fetch, one batch update, one request", () => {
     const { getByDataFilterCalls, batchUpdateCalls } = stubOccupancySheet();
 
-    Api.init(businessEndpoints).handleSheetOnEditEvent(
+    Api.init(selectEndpoints).handleSheetOnEditEvent(
       actionRowEdit(SELECTOR_COL_INDEX, "TRUE"),
     );
 
@@ -151,7 +159,7 @@ describe("Api.handleSheetOnEditEvent, dispatching occupancy_updateTermsSelect", 
   it("deselects every data row when the checkbox is unchecked", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    Api.init(businessEndpoints).handleSheetOnEditEvent(
+    Api.init(selectEndpoints).handleSheetOnEditEvent(
       actionRowEdit(SELECTOR_COL_INDEX, "FALSE"),
     );
 

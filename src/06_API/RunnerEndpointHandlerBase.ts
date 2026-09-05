@@ -19,16 +19,10 @@ export type TimeLastRanName<
 > = `${ST}${SpreadsheetConfig["runnerEndpointSuffix"]}` &
   ColumnNameFiltered<SN, "string", false>;
 
-export type LastRanSucceededName<
+export type RunStatusName<
   SN extends SheetNameWithRunnerColumns,
   ST extends RunnerStem<SN>,
-> = `${ST}${SpreadsheetConfig["runSucceededEndpointSuffix"]}` &
-  ColumnNameFiltered<SN, "boolean", false>;
-
-export type ErrorMessageName<
-  SN extends SheetNameWithRunnerColumns,
-  ST extends RunnerStem<SN>,
-> = `${ST}${SpreadsheetConfig["errorMessageEndpointSuffix"]}` &
+> = `${ST}${SpreadsheetConfig["runStatusEndpointSuffix"]}` &
   ColumnNameFiltered<SN, "string", false>;
 
 export interface RunnerEndpointHandlerProps<
@@ -59,14 +53,9 @@ export class RunnerEndpointHandlerBase<
       ST
     >;
   }
-  get lastRanSucceededName(): LastRanSucceededName<SN, ST> {
+  get runStatusName(): RunStatusName<SN, ST> {
     return `${this.stem}${ssConfigGet(
-      "runSucceededEndpointSuffix",
-    )}` as LastRanSucceededName<SN, ST>;
-  }
-  get errorMessageName(): ErrorMessageName<SN, ST> {
-    return `${this.stem}${ssConfigGet(
-      "errorMessageEndpointSuffix",
-    )}` as ErrorMessageName<SN, ST>;
+      "runStatusEndpointSuffix",
+    )}` as RunStatusName<SN, ST>;
   }
 }

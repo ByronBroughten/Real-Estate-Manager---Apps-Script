@@ -261,9 +261,9 @@ describe("ColumnFullName, absolute column addressing", () => {
   });
 
   it("resolves a full name's sheet, column, value name and value type exactly", () => {
-    type FN = "spreadsheetControls_fillRowIdsLastRanSucceeded";
-    assertType<IsExactly<SheetNameOf<FN>, "spreadsheetControls">>(true);
-    assertType<IsExactly<ColumnNameOf<FN>, "fillRowIdsLastRanSucceeded">>(true);
+    type FN = "occupancy_updateTermsSelect";
+    assertType<IsExactly<SheetNameOf<FN>, "occupancy">>(true);
+    assertType<IsExactly<ColumnNameOf<FN>, "updateTermsSelect">>(true);
     assertType<IsExactly<ValueNameOf<FN>, "boolean">>(true);
     assertType<IsExactly<ValueOf<FN>, boolean | "">>(true);
   });
@@ -292,30 +292,30 @@ describe("ColumnFullName, absolute column addressing", () => {
   it("filters a column name within a sheet on the same two axes", () => {
     assertType<
       IsExactly<
-        ColumnNameFiltered<"spreadsheetControls", "boolean", false>,
-        "syncConfigSheetRowsLastRanSucceeded" | "fillRowIdsLastRanSucceeded"
+        ColumnNameFiltered<"occupancy", "boolean", false>,
+        "buildLedgerSelect" | "updateTermsSelect"
       >
     >(true);
     assertType<
-      IsExactly<
-        ColumnNameFiltered<"spreadsheetControls">,
-        ColumnName<"spreadsheetControls">
-      >
+      IsExactly<ColumnNameFiltered<"occupancy">, ColumnName<"occupancy">>
     >(true);
   });
 });
 
 describe("RunnerStem", () => {
-  it("resolves to the stems whose three status columns all exist", () => {
+  it("resolves to the stems whose two runner columns both exist", () => {
     assertType<
       IsExactly<
         RunnerStem<"spreadsheetControls">,
         "fillRowIds" | "syncConfigSheetRows"
       >
     >(true);
+    assertType<
+      IsExactly<RunnerStem<"occupancy">, "buildLedger" | "updateTerms">
+    >(true);
   });
 
-  it("is never for a sheet whose stems are incomplete", () => {
-    assertType<IsExactly<RunnerStem<"occupancy">, never>>(true);
+  it("is never for a sheet carrying no runner columns", () => {
+    assertType<IsExactly<RunnerStem<"sheetConfig">, never>>(true);
   });
 });

@@ -1,3 +1,4 @@
+import type { GoogleColor } from "../00_base/AppsScriptTypes";
 import type { RunnerStem } from "../01_generatedConfigs/columnConfigsTypes";
 import type { CellNamed } from "../04_SpreadsheetNamed/CellNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
@@ -6,10 +7,32 @@ import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { Tim } from "../utils/Tim";
 import {
   RunnerEndpointHandlerBase,
-  type ErrorMessageName,
-  type LastRanSucceededName,
+  type RunStatusName,
   type TimeLastRanName,
 } from "./RunnerEndpointHandlerBase";
+
+interface RunState {
+  message: string;
+  backgroundColor: GoogleColor;
+}
+
+// Paired here so no path can show one state's colour beside another's message.
+const runStates = {
+  running: {
+    message: "Running…",
+    backgroundColor: { red: 1, green: 0.949, blue: 0.8 },
+  },
+  succeeded: {
+    message: "Succeeded",
+    backgroundColor: { red: 0.851, green: 0.918, blue: 0.827 },
+  },
+  failed: {
+    message: "Failed",
+    backgroundColor: { red: 0.957, green: 0.8, blue: 0.8 },
+  },
+} as const satisfies Record<string, RunState>;
+
+type RunStateName = keyof typeof runStates;
 
 export class RunnerEndpointHandler<
   SN extends SheetNameWithRunnerColumns,
@@ -24,55 +47,51 @@ export class RunnerEndpointHandler<
   get timeLastRanCell(): CellNamed<SN, TimeLastRanName<SN, ST>> {
     return this.sheet.column(this.timeLastRanName).data.topCell();
   }
-  get lastRanSucceededCell(): CellNamed<SN, LastRanSucceededName<SN, ST>> {
-    return this.sheet.column(this.lastRanSucceededName).data.topCell();
-  }
-  get errorMessageCell(): CellNamed<SN, ErrorMessageName<SN, ST>> {
-    return this.sheet.column(this.errorMessageName).data.topCell();
+  get runStatusCell(): CellNamed<SN, RunStatusName<SN, ST>> {
+    return this.sheet.column(this.runStatusName).data.topCell();
   }
   protected runEndpoint(endpoint: () => void): void {
     try {
-      // Depending on average speed, maybe set time last ran and "...processing" at outset. Also set time last ran as ""
-      // If runs are fast, though, then don't do any of that.
       this.onRunSetup();
       endpoint();
-      // success: set last successful run to true, clear any error message (if not done already)
       this.onRunSuccess();
     } catch (error) {
-      // potentially write the error to the top body row of run and status
       // you could also write the error to each row that was being processed
       // selectedIndexes = selectedRowIndexes ? selectedRowIndexes : [0]
       this.onRunError(error);
     } finally {
-      // Set whether last ran was a success
       this.onRunEnd();
     }
   }
+  // The flush is what puts the running state on the sheet before the work runs.
   onRunSetup(): void {
     Logger.log("Setting up.");
     this.sheet.uniformRow("columnId").prepFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.column(this.timeLastRanName).actionRowToDefault();
-    this.timeLastRanCell.updateValue("Processing...");
-    this.errorMessageCell.updateValue("");
+    this.timeLastRanCell.updateValue(Tim.nowTimestamp());
+    this._applyRunState("running");
     this.ss.batchUpdateGSheets();
   }
   onRunSuccess(): void {
     Logger.log("Succeeding.");
-    this.lastRanSucceededCell.updateValue(true);
-    this.errorMessageCell.updateValue("");
+    this._applyRunState("succeeded");
   }
   // Queued changes are shared by reference, so a half-finished run must be dropped before status is written.
   onRunError(error: unknown): void {
     Logger.log("Error occurred.");
     this.ss.discardQueuedChanges();
-    this.lastRanSucceededCell.updateValue(false);
-    this.errorMessageCell.updateValue(String(error));
+    this._applyRunState("failed", String(error));
   }
   onRunEnd(): void {
     Logger.log("Closing out run.");
-    this.timeLastRanCell.updateValue(Tim.nowTimestamp());
     this.ss.batchUpdateGSheets();
     Logger.log("Run ended.");
+  }
+  // The timestamp is written once at setup; a state change only recolours it.
+  private _applyRunState(stateName: RunStateName, message?: string): void {
+    const state = runStates[stateName];
+    this.runStatusCell.updateValue(message ?? state.message);
+    this.timeLastRanCell.updateBackgroundColor(state.backgroundColor);
   }
 }

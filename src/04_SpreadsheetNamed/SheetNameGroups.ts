@@ -31,12 +31,7 @@ function hasRunnerColumns(sheetName: SheetNameSimple): boolean {
     );
     return (
       stem !== null &&
-      columnNames.includes(
-        `${stem}${ssConfigGet("runSucceededEndpointSuffix")}`,
-      ) &&
-      columnNames.includes(
-        `${stem}${ssConfigGet("errorMessageEndpointSuffix")}`,
-      )
+      columnNames.includes(`${stem}${ssConfigGet("runStatusEndpointSuffix")}`)
     );
   });
 }

@@ -145,8 +145,8 @@ describe("CheckboxColumnOperator, column constraint", () => {
   it("names exactly the non-formula boolean columns of a sheet", () => {
     assertType<
       IsExactly<
-        CheckboxColumnName<"spreadsheetControls">,
-        "syncConfigSheetRowsLastRanSucceeded" | "fillRowIdsLastRanSucceeded"
+        CheckboxColumnName<"occupancy">,
+        "buildLedgerSelect" | "updateTermsSelect"
       >
     >(true);
   });
