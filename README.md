@@ -27,6 +27,12 @@ Entry points are the top-level functions exported from `src/index.ts` (e.g. `tri
 
 `npm run tsc` (type-checking only) is always safe to run freely.
 
+### When `gen:configs` fails to authenticate
+
+`npm run gen:configs` calls `clasp run` as the named credential `desktop-clasp-run`. If it fails with an auth error, the token needs re-minting — run `scripts/setup-clasp-run-auth.sh`, which walks through it. The consent screen for GCP project `real-estate-manager-sheets` is deliberately published to production; left in "Testing" it would issue refresh tokens that expire every 7 days. Publishing alone doesn't fix an existing token, since one minted under "Testing" keeps its expiry — the re-authorization is the part that matters.
+
+Google no longer lets you view or download a client secret after creating it, but you don't need to: clasp stores `client_id` and `client_secret` in `~/.clasprc.json`, and `--creds` reads only those two plus a localhost `redirect_uris` entry, so the file is always rebuildable. The script does that for you. Keep `~/.clasprc.json` at `chmod 600` — the refresh token in it no longer self-expires.
+
 ### The `gsheets` MCP tools
 
 This project also has a `gsheets` MCP server available, which can read and write the user's real Google Sheet directly — separately from `clasp`/Apps Script.
