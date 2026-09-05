@@ -85,7 +85,7 @@ Two things to know:
 
 ### Round trips are the cost
 
-Every call to the Sheets API funnels through exactly two methods — `SpreadsheetRaw.fetchAllGathered` (reads) and `SpreadsheetRaw._sendUpdateRequests` (writes). Instrument those two and you have measured everything.
+Every call to the Sheets API funnels through exactly two methods — `SpreadsheetRaw.fetchAllGathered` (reads) and `SpreadsheetRaw._sendUpdateRequests` (writes). Instrument those two and you have measured everything. Why the cost is deliberately funnelled that way: DESIGN.md, "Funnel the expensive thing through one place".
 
 Measured against the live spreadsheet (Sept 2026): a round trip costs **~250–450ms**, while the framework's own CPU for a whole trigger is **~20–60ms**. Making the code faster does not move the number; removing a round trip is the only thing that does. The `triggerOnEdit` path is down to two — one read for the column indexes and table bounds, one write — which is the floor, since neither can be derived without asking the API.
 
@@ -118,7 +118,7 @@ A column can be named **relatively** — a `<SN, CN>` pair, sheet name plus colu
 
 Both parameters of `ColumnFullName<VN, IF>` default to "don't care," so the bare form still denotes every column. `IF` deliberately does **not** default to `false`: that would silently shrink the union endpoint dispatch is keyed on. From a full name, `SheetNameOf`/`ColumnNameOf`/`ValueNameOf`/`ValueOf` recover the parts as plain indexed lookups — which works only because the flattening helper injects each column's sheet name and column name *into* its own entry rather than merely encoding them in the key. Reaching them through a side map instead needs an intersection that quietly degrades every result to `any`, so the assertions in `SpreadsheetSchema.test.ts` are identity-based, not assignability-based.
 
-**There is no type-level bridge from the relative pair to the absolute key**, and that is deliberate rather than missing — see "Type-check cost" above for the measurement that rules it out. The two families meet only at runtime, where `ColumnSchema.fullName` builds a full name from a sheet and column name it already holds.
+**There is no type-level bridge from the relative pair to the absolute key**, and that is deliberate rather than missing — see "Type-check cost" above for the measurement that rules it out, and DESIGN.md's "Record a deliberate absence as deliberate" for why it's written down instead of left to look like an oversight. The two families meet only at runtime, where `ColumnSchema.fullName` builds a full name from a sheet and column name it already holds.
 
 ### The schema classes
 
