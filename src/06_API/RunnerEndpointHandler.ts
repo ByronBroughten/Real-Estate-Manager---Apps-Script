@@ -33,6 +33,7 @@ const runStates = {
 } as const satisfies Record<string, RunState>;
 
 type RunStateName = keyof typeof runStates;
+export type Endpoint = (selectedRowIndexes?: number) => string | undefined;
 
 export class RunnerEndpointHandler<
   SN extends SheetNameWithRunnerColumns,
@@ -50,7 +51,7 @@ export class RunnerEndpointHandler<
   get runStatusCell(): CellNamed<SN, RunStatusName<SN, ST>> {
     return this.sheet.column(this.runStatusName).data.topCell();
   }
-  protected runEndpoint(endpoint: () => void): void {
+  protected runEndpoint(endpoint: Endpoint): void {
     try {
       this.onRunSetup();
       endpoint();
@@ -65,7 +66,6 @@ export class RunnerEndpointHandler<
   }
   // The flush is what puts the running state on the sheet before the work runs.
   onRunSetup(): void {
-    Logger.log("Setting up.");
     this.sheet.uniformRow("columnId").prepFetchFull();
     this.ss.fetchAllPrepped();
     this.sheet.column(this.timeLastRanName).actionRowToDefault();
@@ -74,17 +74,14 @@ export class RunnerEndpointHandler<
     this.ss.batchUpdateGSheets();
   }
   onRunSuccess(): void {
-    Logger.log("Succeeding.");
     this._applyRunState("succeeded");
   }
   // Queued changes are shared by reference, so a half-finished run must be dropped before status is written.
   onRunError(error: unknown): void {
-    Logger.log("Error occurred.");
     this.ss.discardQueuedChanges();
     this._applyRunState("failed", String(error));
   }
   onRunEnd(): void {
-    Logger.log("Closing out run.");
     this.ss.batchUpdateGSheets();
     Logger.log("Run ended.");
   }

@@ -3,6 +3,7 @@ dist/
 coverage/
 tsconfig.tsbuildinfo
 .claude/settings.local.json
+.DS_Store
 
 # OAuth client secrets live outside the repo; this is belt-and-braces.
 client_secret*.json
