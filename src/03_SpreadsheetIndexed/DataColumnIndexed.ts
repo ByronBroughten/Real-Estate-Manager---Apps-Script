@@ -37,11 +37,14 @@ export class DataColumnIndexed<
   get cellsFull(): CellIndexed<VN>[] {
     return this.cellIndexesFull.map((rowIndex) => this.cell(rowIndex));
   }
-  prepFetchActive(): this {
-    this.cellIndexesActive.forEach((rowIndex) => {
+  prepFetchSpecific(rowIndexes: number[]): this {
+    rowIndexes.forEach((rowIndex) => {
       this.cell(rowIndex).prepFetch();
     });
     return this;
+  }
+  prepFetchActive(): this {
+    return this.prepFetchSpecific(this.cellIndexesActive);
   }
   prepFetchFull(): this {
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });

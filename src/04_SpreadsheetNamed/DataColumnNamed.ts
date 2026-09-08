@@ -65,6 +65,10 @@ export class DataColumnNamed<
     this.indexed.updateActiveCells(change);
     return this;
   }
+  prepFetchSpecific(rowIndexes: number[]): this {
+    this.indexed.prepFetchSpecific(rowIndexes);
+    return this;
+  }
   prepFetchActive(): this {
     this.indexed.prepFetchActive();
     return this;

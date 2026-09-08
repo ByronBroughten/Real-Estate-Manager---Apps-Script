@@ -66,14 +66,20 @@ export class DataSheetNamed<
     });
     return columns;
   }
-  prepFetchColumnsActive<CNs extends readonly ColumnName<SN>[]>(
+  prepFetchColumnsSpecific<CNs extends readonly ColumnName<SN>[]>(
+    rowIndexes: number[],
     ...columnNames: CNs
   ): { [K in CNs[number]]: DataColumnNamed<SN, K> } {
     const columns = {} as { [K in CNs[number]]: DataColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
-      columns[columnName] = this.column(columnName).prepFetchActive();
+      columns[columnName] = this.column(columnName).prepFetchSpecific(rowIndexes);
     });
     return columns;
+  }
+  prepFetchColumnsActive<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: DataColumnNamed<SN, K> } {
+    return this.prepFetchColumnsSpecific(this.rowIndexesActive, ...columnNames);
   }
   sortRowsbyColumnName(
     rows: DataRowNamed<SN>[],
