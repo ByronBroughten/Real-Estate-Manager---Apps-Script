@@ -2,6 +2,7 @@ import { SpreadsheetNamed } from "./04_SpreadsheetNamed/SpreadsheetNamed.js";
 import { ConfigOrchestrator } from "./05_Operators/ConfigOrchestrator.js";
 import { Api } from "./06_API/Api.js";
 import { businessEndpoints } from "./businessEndpoints.js";
+// ONE-TIME MIGRATION — delete with src/oneTimeRowIdPrefix.ts after the run.
 
 // Also the named level, perhaps check that table start rows are where you expect them all to be.
 // sheet.validateSchemaIndexes()

@@ -538,15 +538,7 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:aoco:jnyfXyA",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:aoco:xM00dQi",
-      "header": "Base ID",
-      "valueName": "number",
-      "isFormula": true,
+      "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
     },
@@ -620,15 +612,7 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:aopo:WcdWvGP",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:aopo:guaYx8a",
-      "header": "Base ID",
-      "valueName": "number",
-      "isFormula": true,
+      "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
     },
@@ -870,15 +854,7 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:ape:IAqu90A",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:ape:tSKwCvZ",
-      "header": "Base ID",
-      "valueName": "number",
-      "isFormula": true,
+      "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
     },
@@ -1910,30 +1886,6 @@ export const columnConfigs = makeColumnConfigs({
       "emptyAllowed": false,
       "customDefaultValue": null
     },
-    "noticeGivenForRentIncrease": {
-      "columnId": "c:unt:IBZmCQB",
-      "header": "Notice given for rent increase",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentUpdateEnter": {
-      "columnId": "c:unt:Q3VCU3I",
-      "header": "Rent update enter",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentUpdateStatus": {
-      "columnId": "c:unt:mDDRGVj",
-      "header": "Rent update status",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
     "replaceToilet": {
       "columnId": "c:unt:_3Go0g3",
       "header": "Replace toilet",
@@ -1988,14 +1940,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:hsh:H7tT_DN",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:hsh:MzpVigM",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -2922,14 +2866,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:och:jf5MJp0",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:och:cXRkMFx",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3004,14 +2940,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:ocr:_WLZPu9",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:ocr:hZivQ4n",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3086,14 +3014,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:opy:NV1sUR-",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:opy:5bZ5Zpk",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3240,14 +3160,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:opa:vm_RNVw",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:opa:n5tvB6e",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3458,14 +3370,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:swr:x2vFg9I",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:swr:VOvX9OB",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3540,14 +3444,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:spr:gLnTyIn",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:spr:8khYJlX",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3606,14 +3502,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:sag:tIWV4dy",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:sag:mdiKagM",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3765,7 +3653,7 @@ export const columnConfigs = makeColumnConfigs({
     "totalPayments": {
       "columnId": "c:sag:FrOty3H",
       "header": "Total payments",
-      "valueName": "number",
+      "valueName": "string",
       "isFormula": true,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3773,7 +3661,7 @@ export const columnConfigs = makeColumnConfigs({
     "balance": {
       "columnId": "c:sag:UUFNn1O",
       "header": "Balance",
-      "valueName": "number",
+      "valueName": "string",
       "isFormula": true,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3792,14 +3680,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:str:Jqh2XHY",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:str:MLNx_D6",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -3994,14 +3874,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:sch:h3V4ebn",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:sch:43XbHhM",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -4068,7 +3940,7 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:spy:BZy8MwJ",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
+      "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
     },
@@ -4077,14 +3949,6 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Allocation name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:spy:d59jwNk",
-      "header": "Base ID",
-      "valueName": "string",
-      "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
     },
@@ -4166,14 +4030,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:spa:m3PZSvz",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:spa:R_ZC7k1",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -4320,14 +4176,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:pex:jnoYPQx",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:pex:WRqtFQ1",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -4458,14 +4306,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:oyr:1OxlfHc",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:oyr:0__8Y3-",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
