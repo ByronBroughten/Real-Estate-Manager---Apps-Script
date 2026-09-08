@@ -22,6 +22,10 @@ _Avoid_: toggle, switch
 A column of checkboxes an endpoint may declare, naming the rows one run is about. Ticking rows picks them out; the run then acts on those rows and reports into those rows, and leaves every other row alone.
 _Avoid_: toggle, filter
 
+**Feedback column**:
+A column an endpoint declares for the framework to write into on its behalf, rather than one the endpoint's own work fills: the start-time column and the run-status column. Each is optional; an endpoint that declares neither reports nothing.
+_Avoid_: output column, status column
+
 **Run status**:
 The sentence an endpoint writes for the operator to read: that it is running, that it succeeded — in its own words if it has any — or what went wrong. It is written into the run-status cell of every row the run is about.
 _Avoid_: error message, log, result

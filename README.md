@@ -96,7 +96,7 @@ export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };
 1. preps the selector column's fetch, if one is declared, into the cycle `fetchAllPrepped` is already running — so a selection costs no round trip of its own, and an endpoint without one costs no read at all here;
 2. collects the checked row indexes, or — with no selector — every table data row index from the table bounds;
 3. resets the entry column's action cell, unless `runsOnUncheck` makes the checkbox an input rather than a button;
-4. **prunes**: every unselected data row is removed from local state, so every later read of active rows means the selection without a call site being rewritten. `SheetRaw.removeRowsExcept` keeps the uniform rows (dropping the columnId row would break column resolution), and marks the sheet, so a whole-column fill on it throws;
+4. **prunes**, when a selector is declared: every unselected data row is removed from local state, so every later read of active rows means the selection without a call site being rewritten. `SheetRaw.removeRowsExcept` keeps the uniform rows (dropping the columnId row would break column resolution), and marks the sheet, so a whole-column fill on it throws;
 5. stamps the running state and flushes — that first flush is what puts "Running…" and yellow on the sheet *before* the work starts, which is the whole basis for a killed run staying distinguishable from one that never began;
 6. runs the action inside `try`/`catch`/`finally`, writes the outcome (the action's returned string, or `Succeeded`), and flushes again. A failure `discardQueuedChanges()` first, or the `finally` ships a half-finished run alongside its own error report.
 

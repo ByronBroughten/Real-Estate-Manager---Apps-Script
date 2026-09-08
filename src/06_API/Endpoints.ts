@@ -34,6 +34,4 @@ export interface Endpoint<SN extends SheetNameSimple> {
 }
 
 // Each key carries its own sheet, so a column from another sheet is unnameable.
-// Annotate a map with this rather than passing it through makeStructuredConfig,
-// which lets an unknown key through whenever a valid key sits beside it.
 export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };

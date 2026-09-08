@@ -143,9 +143,8 @@ export class EndpointRun<
     change: CellChange<"string">,
   ): void {
     if (!columnName) return;
-    // By id: re-deriving the value type here composes two mapped filters, at ~43k instantiations.
-    const { columnId } = this.sheet.schema.columnByName(columnName);
-    const column = this.sheet.indexed.column(columnId).data;
+    // Re-deriving the value type here would compose two mapped filters, at ~43k instantiations.
+    const column = this.sheet.dataColumnIndexed(columnName);
     if (this.endpoint.selector) {
       column.updateActiveCells(change);
     } else {

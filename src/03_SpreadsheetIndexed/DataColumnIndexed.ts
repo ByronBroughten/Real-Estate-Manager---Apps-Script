@@ -1,3 +1,4 @@
+import type { CellValue } from "../00_base/base";
 import type {
   Value,
   ValueName,
@@ -93,11 +94,13 @@ export class DataColumnIndexed<
     return this;
   }
   // A colour-only write is legitimate on a formula column; a value is not.
-  private _rawChange(change: CellChange<VN>): RowCellChange<VnToCvn<VN>> {
-    if (change.value !== undefined) {
-      this.schema.validateDataNotFormula();
-    }
-    return change as RowCellChange<VnToCvn<VN>>;
+  private _rawChange({
+    value,
+    ...rest
+  }: CellChange<VN>): RowCellChange<VnToCvn<VN>> {
+    if (value === undefined) return rest;
+    this.schema.validateDataNotFormula();
+    return { ...rest, value: value as CellValue<VnToCvn<VN>> };
   }
   emptyActiveCellsToDefualt(): this {
     this.cellsActive.forEach((cell) => {
