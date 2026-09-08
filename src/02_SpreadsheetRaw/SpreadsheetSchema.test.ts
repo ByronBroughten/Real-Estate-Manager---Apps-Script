@@ -8,7 +8,6 @@ import type {
   ColumnValue,
   ColumnValueName,
   MakeColumnFullName,
-  RunnerStem,
   SheetNameOf,
   ValueNameOf,
   ValueOf,
@@ -299,23 +298,5 @@ describe("ColumnFullName, absolute column addressing", () => {
     assertType<
       IsExactly<ColumnNameFiltered<"occupancy">, ColumnName<"occupancy">>
     >(true);
-  });
-});
-
-describe("RunnerStem", () => {
-  it("resolves to the stems whose two runner columns both exist", () => {
-    assertType<
-      IsExactly<
-        RunnerStem<"spreadsheetControls">,
-        "fillRowIds" | "syncConfigSheetRows"
-      >
-    >(true);
-    assertType<
-      IsExactly<RunnerStem<"occupancy">, "buildLedger" | "updateTerms">
-    >(true);
-  });
-
-  it("is never for a sheet carrying no runner columns", () => {
-    assertType<IsExactly<RunnerStem<"sheetConfig">, never>>(true);
   });
 });

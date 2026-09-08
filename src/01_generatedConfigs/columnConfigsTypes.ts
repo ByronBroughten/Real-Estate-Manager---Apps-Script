@@ -1,6 +1,5 @@
 import { nameDelimiter, type NameDelimiter } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
-import type { StemWithSuffix } from "../utils/Str";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./columnConfigs";
 import type { ColumnConfigStored } from "./makeConfigs";
@@ -9,7 +8,6 @@ import {
   getSheetTraitByName,
   type SheetNameSimple,
 } from "./sheetConfigsTypes";
-import type { SpreadsheetConfig } from "./spreadsheetConfigTypes";
 import { type Value, type ValueName, type ValueSchema } from "./valueSchemas";
 
 export type ColumnConfigs = typeof columnConfigs;
@@ -166,15 +164,3 @@ export type ColumnNameOf<FN extends ColumnFullName> =
 export type ValueNameOf<FN extends ColumnFullName> =
   ColumnConfigsFlat[FN]["valueName"];
 export type ValueOf<FN extends ColumnFullName> = Value<ValueNameOf<FN>>;
-
-// A stem counts only when both of its columns exist, so a handler can't be
-// assembled from two unrelated endpoints' columns.
-type SheetStemsWithSuffix<
-  SN extends SheetNameSimple,
-  Suffix extends string,
-> = StemWithSuffix<ColumnName<SN> & string, Suffix>;
-
-export type RunnerStem<SN extends SheetNameSimple> = Extract<
-  SheetStemsWithSuffix<SN, SpreadsheetConfig["runnerEndpointSuffix"]>,
-  SheetStemsWithSuffix<SN, SpreadsheetConfig["runStatusEndpointSuffix"]>
->;

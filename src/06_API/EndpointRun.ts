@@ -1,0 +1,161 @@
+import type { GoogleColor } from "../00_base/AppsScriptTypes";
+import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
+import {
+  SheetNamedBase,
+  type SheetNamedProps,
+} from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
+import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
+import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
+import {
+  CheckboxColumnOperator,
+  type CheckboxColumnName,
+} from "../05_Operators/CheckboxColumnOperator";
+import { Tim } from "../utils/Tim";
+import type { Endpoint, FeedbackColumnName } from "./Endpoints";
+
+interface RunState {
+  message: string;
+  backgroundColor: GoogleColor;
+}
+
+// Paired here so no path can show one state's colour beside another's message.
+const runStates = {
+  running: {
+    message: "Running…",
+    backgroundColor: { red: 1, green: 0.949, blue: 0.8 },
+  },
+  succeeded: {
+    message: "Succeeded",
+    backgroundColor: { red: 0.851, green: 0.918, blue: 0.827 },
+  },
+  failed: {
+    message: "Failed",
+    backgroundColor: { red: 0.957, green: 0.8, blue: 0.8 },
+  },
+} as const satisfies Record<string, RunState>;
+
+type RunStateName = keyof typeof runStates;
+
+interface RunStateProps {
+  startTime?: string;
+  message?: string | void;
+}
+
+export interface EndpointRunProps<
+  SN extends SheetNameSimple,
+> extends SheetNamedProps<SN> {
+  entryColumnName: ColumnName<SN>;
+  endpoint: Endpoint<SN>;
+}
+
+export class EndpointRun<
+  SN extends SheetNameSimple = SheetNameSimple,
+> extends SheetNamedBase<SN> {
+  readonly entryColumnName: ColumnName<SN>;
+  readonly endpoint: Endpoint<SN>;
+  constructor({ entryColumnName, endpoint, ...props }: EndpointRunProps<SN>) {
+    super(props);
+    this.entryColumnName = entryColumnName;
+    this.endpoint = endpoint;
+  }
+  get ss(): SpreadsheetNamed {
+    return new SpreadsheetNamed(this.spreadsheetNamedProps);
+  }
+  get sheet(): SheetNamed<SN> {
+    return this.ss.sheet(this.sheetName);
+  }
+  run(isChecked: boolean): void {
+    this._prepSelectorFetch();
+    this.ss.fetchAllPrepped();
+    const selectedRowIndexes = this._selectedRowIndexes();
+    this._resetEntryCheckbox();
+    if (this.endpoint.selector && selectedRowIndexes.length === 0) {
+      this.ss.batchUpdateGSheets();
+      Logger.log("No rows are selected, so the endpoint did not run.");
+      return;
+    }
+    this._pruneToSelection(selectedRowIndexes);
+    this._onRunSetup();
+    try {
+      const message = this.endpoint.action(this.ss, {
+        selectedRowIndexes,
+        isChecked,
+      });
+      this._applyRunState("succeeded", { message });
+    } catch (error) {
+      this._onRunError(error);
+    } finally {
+      this.ss.batchUpdateGSheets();
+    }
+  }
+  private _checkboxColumn(
+    columnName: CheckboxColumnName<SN>,
+  ): CheckboxColumnOperator<SN, CheckboxColumnName<SN>> {
+    return new CheckboxColumnOperator({
+      ...this.sheetNamedProps,
+      columnName,
+    });
+  }
+  // Prepped rather than fetched, so the selection rides the cycle already running.
+  private _prepSelectorFetch(): void {
+    const { selector } = this.endpoint;
+    if (!selector) return;
+    this._checkboxColumn(selector).column.prepFetchFull();
+  }
+  // No selector means the run is about every data row, none of which is active.
+  private _selectedRowIndexes(): number[] {
+    const { selector } = this.endpoint;
+    if (!selector) return this.sheet.data.raw.rowIndexesFull;
+    return this._checkboxColumn(selector).rowIndexesChecked;
+  }
+  // The entry cell is a button unless the endpoint also runs on unticking.
+  private _resetEntryCheckbox(): void {
+    if (this.endpoint.runsOnUncheck) return;
+    this.sheet.column(this.entryColumnName).actionRowToDefault();
+  }
+  // Unselected rows go inactive, so every later read of active rows is the selection.
+  private _pruneToSelection(selectedRowIndexes: number[]): void {
+    if (!this.endpoint.selector) return;
+    this.sheet.raw.removeRowsExcept(...selectedRowIndexes);
+  }
+  // The flush is what puts the running state on the sheet before the work runs.
+  private _onRunSetup(): void {
+    this._applyRunState("running", { startTime: Tim.nowTimestamp() });
+    this.ss.batchUpdateGSheets();
+  }
+  // The timestamp is written once at setup; a state change only recolours it.
+  private _applyRunState(
+    stateName: RunStateName,
+    { startTime, message }: RunStateProps = {},
+  ): void {
+    const state = runStates[stateName];
+    const { timeLastRan, runStatus } = this.endpoint;
+    this._updateFeedbackCells(timeLastRan, {
+      value: startTime,
+      backgroundColor: state.backgroundColor,
+    });
+    this._updateFeedbackCells(runStatus, { value: message ?? state.message });
+  }
+  private _updateFeedbackCells(
+    columnName: FeedbackColumnName<SN> | undefined,
+    change: CellChange<"string">,
+  ): void {
+    if (!columnName) return;
+    // By id: re-deriving the value type here composes two mapped filters, at ~43k instantiations.
+    const { columnId } = this.sheet.schema.columnByName(columnName);
+    const column = this.sheet.indexed.column(columnId).data;
+    if (this.endpoint.selector) {
+      column.updateActiveCells(change);
+    } else {
+      column.updateAllCells(change);
+    }
+  }
+  // Queued changes are shared by reference, so a half-finished run must be dropped before status is written.
+  private _onRunError(error: unknown): void {
+    this.ss.discardQueuedChanges();
+    this._applyRunState("failed", { message: String(error) });
+    Logger.log(`Endpoint run failed: ${String(error)}`);
+  }
+}

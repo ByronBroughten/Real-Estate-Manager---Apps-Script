@@ -1,16 +1,13 @@
-import type { ColumnFullName } from "../01_generatedConfigs/columnConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import type { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetNamedBase,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import {
-  baseEndpoints,
-  type Endpoints,
-  type RunnerEndpointName,
-  type SelectorEndpointName,
-} from "./baseEndpoints";
+import { baseEndpoints } from "./baseEndpoints";
+import { EndpointRun } from "./EndpointRun";
+import type { Endpoints } from "./Endpoints";
 
 export type EventOrigin = {
   colIndex: number;
@@ -67,28 +64,23 @@ export class Api extends SpreadsheetNamedBase {
     if (columnId === "") {
       return;
     }
-    const { fullName } = sheet.schema.columnById(columnId);
-    this._runEndpoint(fullName, e.value === "TRUE");
+    this._runEndpoint(sheet.schema.columnById(columnId), e.value === "TRUE");
   }
-  // A selector's checkbox is its input, not a button, so unchecking runs it too.
-  private _runEndpoint(fullName: ColumnFullName, isChecked: boolean): void {
-    if (this._isSelectorEndpointName(fullName)) {
-      this.endpoints[fullName]?.({
-        ...this.spreadsheetNamedProps,
-        isSelected: isChecked,
-      });
-    } else if (isChecked && this._isRunnerEndpointName(fullName)) {
-      this.endpoints[fullName]?.(this.spreadsheetNamedProps);
+  // An entry that doesn't run on uncheck is a button, so only ticking fires it.
+  private _runEndpoint(entryColumn: ColumnSchema, isChecked: boolean): void {
+    const endpoint = this.endpoints[entryColumn.fullName];
+    if (!endpoint) {
+      return;
     }
-  }
-  private _isSelectorEndpointName(
-    fullName: ColumnFullName,
-  ): fullName is SelectorEndpointName {
-    return fullName.endsWith(ssConfigGet("selectorEndpointSuffix"));
-  }
-  private _isRunnerEndpointName(
-    fullName: ColumnFullName,
-  ): fullName is RunnerEndpointName {
-    return fullName.endsWith(ssConfigGet("runnerEndpointSuffix"));
+    if (!isChecked && !endpoint.runsOnUncheck) {
+      return;
+    }
+    // The full name is only known at runtime, so the run widens to every sheet.
+    new EndpointRun({
+      ...this.spreadsheetNamedProps,
+      sheetName: entryColumn.sheetName,
+      entryColumnName: entryColumn.columnName,
+      endpoint,
+    }).run(isChecked);
   }
 }

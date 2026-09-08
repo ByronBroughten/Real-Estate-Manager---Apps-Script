@@ -16,7 +16,7 @@ When two pieces of state can contradict each other, the fix is a shape where the
 
 This is the most-repeated argument in the codebase, and it's what most often distinguishes the design that was kept from the one that was rejected.
 
-*Instances:* a runner is parameterized by its **stem**, so its columns are derived from one string rather than hand-written — "a mismatched trio is unforgeable rather than merely validated" (`0324b9a`). A runner's **run state** pairs its message and its colour in one record, so no path can show one state's colour beside another's message (#4, `ac7a795`). The endpoint map takes a plain `: Endpoints` annotation rather than `makeStructuredConfig`, which infers the literal and silently accepts an unknown key whenever a valid key sits beside it — that hole is how a nonexistent column reached the endpoint map and still type-checked (STYLE.md, "Type modeling"). Every class exposes its schema under the single name `schema`, so two accessors can't disagree about which schema a class has (`ab75c09`).
+*Instances:* an endpoint entry is keyed by a **column full name that carries its own sheet**, so `SheetNameOf<FN>` narrows the three columns it may declare to that sheet's, each filtered to the value type it needs — a cross-sheet or wrongly-typed column is unrepresentable rather than checked for (#5). An endpoint's **run state** pairs its message and its colour in one record, so no path can show one state's colour beside another's message (#4, `ac7a795`). The endpoint map takes a plain `: Endpoints` annotation rather than `makeStructuredConfig`, which infers the literal and silently accepts an unknown key whenever a valid key sits beside it — that hole is how a nonexistent column reached the endpoint map and still type-checked (STYLE.md, "Type modeling"). Every class exposes its schema under the single name `schema`, so two accessors can't disagree about which schema a class has (`ab75c09`).
 
 *Corollary:* prefer narrowing a type until the bad case is unrepresentable over encoding an explanation into a fallback value. A branded-string fallback reads as friendlier but collapses back to `never` in constraint position, so it buys nothing where it matters.
 
@@ -24,7 +24,7 @@ This is the most-repeated argument in the codebase, and it's what most often dis
 
 Store and expose a fact at the level it's *about*, not the level it happens to arrive at. The wire format's granularity is not the domain's granularity, and neither is the storage medium's.
 
-*Instances:* `isFormula` and `numberFormatType` are column-wide traits that live on the column, even though they can only be observed by sampling the top data cell — the API delivers them cell-by-cell, but they aren't cell facts (STYLE.md keeps that one as a worked example, since it turns on where a member is declared). A runner is one concept, so it's addressed by one stem rather than three column names (`0324b9a`). A run's outcome is one fact, so it lives in one cell's background colour rather than a separate boolean column that could fall out of step with the timestamp beside it (#4, `ac7a795`).
+*Instances:* `isFormula` and `numberFormatType` are column-wide traits that live on the column, even though they can only be observed by sampling the top data cell — the API delivers them cell-by-cell, but they aren't cell facts (STYLE.md keeps that one as a worked example, since it turns on where a member is declared). An endpoint is one concept, so it's addressed by one key — the column whose checkbox fires it is the same fact as the column that identifies it, rather than a name plus a separate registration (#5). A run's outcome is one fact, so it lives in one cell's background colour rather than a separate boolean column that could fall out of step with the timestamp beside it (#4, `ac7a795`).
 
 *Corollary:* when a container method takes an index or id that every caller already holds as its own state, the query belongs on the instance. The parameter disappearing is what turns it into a getter.
 
@@ -32,7 +32,7 @@ Store and expose a fact at the level it's *about*, not the level it happens to a
 
 A state model that can't express a real condition doesn't omit it — it *misreports* it as one of the states it does have. Before settling a model, ask which real-world conditions have nowhere to go.
 
-*Instances:* a runner killed mid-flight — an Apps Script timeout, a quota kill — runs no `finally`. Under the old boolean, it displayed the *previous* run's `TRUE`: a state with no representation became a confident lie. The colour model leaves that run yellow, which says "started, never reported back" (#4, `ac7a795`). Every cell's value type includes `""`, because an untouched cell is empty rather than defaulted — a `boolean` column reads `boolean | ""`, and code that branches on it has to say what empty means instead of assuming the base type (README.md, "Naming vocabulary").
+*Instances:* a run killed mid-flight — an Apps Script timeout, a quota kill — runs no `finally`. Under the old boolean, it displayed the *previous* run's `TRUE`: a state with no representation became a confident lie. The colour model leaves that run yellow, which says "started, never reported back" (#4, `ac7a795`). Every cell's value type includes `""`, because an untouched cell is empty rather than defaulted — a `boolean` column reads `boolean | ""`, and code that branches on it has to say what empty means instead of assuming the base type (README.md, "Naming vocabulary").
 
 ### Funnel the expensive thing through one place
 
@@ -64,5 +64,5 @@ The riskiest gap in an AI-assisted codebase is the one that looks like an oversi
 
 Candidates with one citation. Leave them here until a second decision makes the same argument; delete them if the first one gets reversed.
 
-- **A human-facing signal need not be machine-readable.** A runner's outcome is a cell background colour, which the read path never fetches — so no code can ever read a run's outcome back. That was acceptable because nothing did, and because the audience is a person looking at a sheet. *Cited by:* #4, `ac7a795`.
+- **A human-facing signal need not be machine-readable.** A run's outcome is a cell background colour, which the read path never fetches — so no code can ever read a run's outcome back. That was acceptable because nothing did, and because the audience is a person looking at a sheet. *Cited by:* #4, `ac7a795`.
 - **Prefer the cheaper thing lazily over the complete thing eagerly**, when the complete version's cost scales with a union you don't control. *Cited by:* the lazy mapped-filter measurement in README.md's "Type-check cost".
