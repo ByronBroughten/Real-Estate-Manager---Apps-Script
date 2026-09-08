@@ -2,8 +2,25 @@ import type { Endpoints } from "./06_API/Endpoints";
 
 export const businessEndpoints: Endpoints = {
   occupancy_updateTermsTimeLastRan: {
-    action: () => {
-      // TODO: implement this endpoint
+    action: (ss, { selectedRowIndexes }) => {
+      ss.sheet("occupancy")
+      ss.sheet("occupancyTerms").data.prepFetchColumnsFull("startDate", "endDate");
+      // Those are the only two I need, yeah?
+
+      const occupancy = ss.sheet("occupancy");
+      const occCol = occupancy.data.columns(
+        "nextTermsStartDate",
+        "nextBaseRentChargeMonthly",
+      );
+      
+
+      const occupancyTerms = ss.sheet("occupancyTerms");
+      for (const rowIndex of selectedRowIndexes) {
+        occCol.nextBaseRentChargeMonthly.value(rowIndex);
+        occCol.nextTermsStartDate.value(rowIndex);
+        
+      }
+      return "Occupancy terms updated";
     },
     timeLastRan: "updateTermsTimeLastRan",
     runStatus: "updateTermsRunStatus",

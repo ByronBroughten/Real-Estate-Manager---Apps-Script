@@ -66,6 +66,15 @@ export class DataSheetNamed<
     });
     return columns;
   }
+  prepFetchColumnsActive<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: DataColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: DataColumnNamed<SN, K> };
+    columnNames.forEach((columnName) => {
+      columns[columnName] = this.column(columnName).prepFetchActive();
+    });
+    return columns;
+  }
   sortRowsbyColumnName(
     rows: DataRowNamed<SN>[],
     columnName: ColumnName<SN>,

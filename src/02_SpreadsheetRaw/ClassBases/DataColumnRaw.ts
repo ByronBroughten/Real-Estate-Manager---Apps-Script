@@ -125,6 +125,12 @@ export class DataColumnRaw<
       `active facts for sheetGid ${this.sheetGid} col ${this.colIndex}`,
     );
   }
+  gatherFetchActive(): this {
+    this.cellIndexesActive.forEach((rowIndex) => {
+      this.cell(rowIndex).gatherFetchRange();
+    });
+    return this;
+  }
   gatherFetchFull(): this {
     this.fullSheet.gatherFetchRange({
       startRowIndex: this.schema.topDataRowIdx,

@@ -37,6 +37,12 @@ export class DataColumnIndexed<
   get cellsFull(): CellIndexed<VN>[] {
     return this.cellIndexesFull.map((rowIndex) => this.cell(rowIndex));
   }
+  prepFetchActive(): this {
+    this.cellIndexesActive.forEach((rowIndex) => {
+      this.cell(rowIndex).prepFetch();
+    });
+    return this;
+  }
   prepFetchFull(): this {
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
     return this;
