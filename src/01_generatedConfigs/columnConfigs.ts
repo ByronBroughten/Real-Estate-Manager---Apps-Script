@@ -928,14 +928,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:prp:wEsY1-C",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:prp:xkOGKXD",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -1667,6 +1659,14 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
+    },
+    "lockboxCode": {
+      "columnId": "c:prp:BxZaWcU",
+      "header": "Lockbox code",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyAllowed": false,
+      "customDefaultValue": null
     }
   },
   "unit": {
@@ -1682,14 +1682,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:unt:iun2_3m",
       "header": "ID",
       "valueName": "id",
-      "isFormula": true,
-      "emptyAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:unt:RMUx19d",
-      "header": "Base ID",
-      "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,
       "customDefaultValue": null
@@ -1937,6 +1929,46 @@ export const columnConfigs = makeColumnConfigs({
     "rentUpdateStatus": {
       "columnId": "c:unt:mDDRGVj",
       "header": "Rent update status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyAllowed": false,
+      "customDefaultValue": null
+    },
+    "replaceToilet": {
+      "columnId": "c:unt:_3Go0g3",
+      "header": "Replace toilet",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyAllowed": false,
+      "customDefaultValue": null
+    },
+    "replaceToiletInternals": {
+      "columnId": "c:unt:CdUTq4v",
+      "header": "Replace toilet internals",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyAllowed": false,
+      "customDefaultValue": null
+    },
+    "paintBathroomWalls": {
+      "columnId": "c:unt:v4b_Aks",
+      "header": "Paint bathroom walls",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyAllowed": false,
+      "customDefaultValue": null
+    },
+    "paintBathroomWallsNotes": {
+      "columnId": "c:unt:vmVQXLW",
+      "header": "Paint bathroom walls notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyAllowed": false,
+      "customDefaultValue": null
+    },
+    "replaceOven": {
+      "columnId": "c:unt:sFpyx2x",
+      "header": "Replace oven",
       "valueName": "string",
       "isFormula": false,
       "emptyAllowed": false,

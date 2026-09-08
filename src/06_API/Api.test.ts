@@ -12,7 +12,7 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { Api } from "./Api";
 import type { Endpoints } from "./baseEndpoints";
-import { OccupancyUpdateTermsSelect } from "./SelectorEndpointHandler";
+import { OccupancyUpdateTermsSelect } from "./OccupancyUpdateTermsSelect";
 
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const c = columnConfigs.occupancy;
