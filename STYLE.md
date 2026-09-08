@@ -122,6 +122,7 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
   ```ts
   private _prepFetchRowSpecifier(sheet: SheetIndexed, rowSpecifier: RowSpecifierName, columnId: string): void
   ```
+- **The one argument every implementation will use is hoisted out of the bag and passed first, positionally.** The grouping rule above is about params that travel together; it doesn't apply to a collaborator that essentially every implementation of a signature needs. An endpoint's action takes the spreadsheet first and its remaining inputs as a second destructured object, because every action needs the spreadsheet and only some need the rest — burying it in the bag would make every implementation destructure to reach the thing it always wants.
 - **The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. `scripts/generateConfigFiles.mjs` groups its two output paths as `path: { sheetConfigs, columnConfigs }` rather than two separate `sheetConfigsPath`/`columnConfigsPath` members.
 
 ## Comments

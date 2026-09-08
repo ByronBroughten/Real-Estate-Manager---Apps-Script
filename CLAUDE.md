@@ -30,4 +30,8 @@ The five canonical triage roles, used verbatim as label strings. See `docs/agent
 
 ### Domain docs
 
-Single-context: `CONTEXT.md` and `docs/adr/` at the repo root, both created lazily by `/domain-modeling` when they're actually needed. See `docs/agents/domain.md`.
+Single-context: `CONTEXT.md` at the repo root, created lazily by `/domain-modeling`. **There is no `docs/adr/` tree, and none should be created** — DESIGN.md rules it out: specs are published as GitHub issues, and a second filing system would only drift from them. An architectural argument goes into DESIGN.md's principle list, cited by issue or commit. See `docs/agents/domain.md`.
+
+### Hidden skills
+
+A skill marked `disable-model-invocation: true` is absent from the agent's skill listing entirely — 21 of the 36 in `.claude/skills/` are, including `grill-with-docs`, `to-spec`, `to-docs`, `to-tickets`, `implement`, `triage` and `wayfinder`. A slash command only expands when it starts the message, so a skill named mid-sentence or without its slash arrives as plain text naming a skill the agent can't see. **When the user names a skill you can't find in your listing, read `.claude/skills/<name>/SKILL.md` and follow it — never substitute a similarly-named visible skill.** `grill-with-docs` is `grilling` + `domain-modeling`; running only the first silently drops the glossary work. `.claude/skills/` is the copy Claude Code reads; `.agents/skills/` is a parallel copy for other harnesses and has already drifted from it.
