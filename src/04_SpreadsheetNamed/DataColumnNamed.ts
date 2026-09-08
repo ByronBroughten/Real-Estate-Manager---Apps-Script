@@ -4,6 +4,7 @@ import type {
   ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
 import type { DataColumnIndexed } from "../03_SpreadsheetIndexed/DataColumnIndexed";
 import type { StrictExclude } from "../utils/Arr";
 import { CellNamed } from "./CellNamed";
@@ -56,8 +57,12 @@ export class DataColumnNamed<
       rowIndex,
     });
   }
-  allCellsToValue(value: ColumnValue<SN, CN>): this {
-    this.indexed.allCellsToValue(value);
+  updateAllCells(change: CellChange<ColumnValueName<SN, CN>>): this {
+    this.indexed.updateAllCells(change);
+    return this;
+  }
+  updateActiveCells(change: CellChange<ColumnValueName<SN, CN>>): this {
+    this.indexed.updateActiveCells(change);
     return this;
   }
   prepFetchFull(): this {

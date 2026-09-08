@@ -1,3 +1,12 @@
+import type { GoogleColor } from "../../00_base/AppsScriptTypes";
+import type { Value, ValueName } from "../../01_generatedConfigs/valueSchemas";
+
+// Mirrors the raw queued entry's optional pair, so a run can write either or both.
+export interface CellChange<VN extends ValueName = ValueName> {
+  value?: Value<VN>;
+  backgroundColor?: GoogleColor;
+}
+
 export interface IndexedState {
   sheets: IndexedSheetsState;
 }

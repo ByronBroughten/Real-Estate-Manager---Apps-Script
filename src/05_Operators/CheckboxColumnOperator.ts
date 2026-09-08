@@ -31,7 +31,7 @@ export class CheckboxColumnOperator<
   }
   // One queued column fill, so a bulk select still costs a single request.
   setAll(isChecked: boolean): this {
-    this.column.allCellsToValue(isChecked);
+    this.column.updateAllCells({ value: isChecked });
     return this;
   }
   uncheckAll(): this {

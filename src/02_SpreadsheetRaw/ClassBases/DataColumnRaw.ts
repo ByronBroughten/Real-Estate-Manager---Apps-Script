@@ -1,7 +1,8 @@
 import type { GoogleCellValue } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
+import { Arr } from "../../utils/Arr";
 import { Val } from "../../utils/Val";
-import type { RawCellFacts } from "../ClassTypes/RawState";
+import type { RawCellFacts, RowCellChange } from "../ClassTypes/RawState";
 import { DataSheetRaw } from "../DataSheetRaw";
 import { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
@@ -55,21 +56,44 @@ export class DataColumnRaw<
     return this;
   }
   // State is still mirrored row by row; only the queued request collapses.
-  updateAllValues(value: CellValue<VN>): this {
+  updateAllCells(change: RowCellChange<VN>): this {
     this.validateIndexNotStale();
+    this.fullSheet.validateNotPrunedToSelection();
     const { endRowIndex } = this.activeTable;
+    const { value } = change;
     this.sheet.rowIndexesFull.forEach((rowIndex) => {
       const row = this.sheet.row(rowIndex);
       row.validateIsWritable();
-      if (row.rowIsActive()) {
+      if (value !== undefined && row.rowIsActive()) {
         this.cell(rowIndex).setValueState(value);
       }
     });
     this.fullSheet.addSheetChangeToSave({
-      action: "fillColumn",
+      action: "fill",
       colIndex: this.colIndex,
-      value,
+      startRowIndex: this.schema.topDataRowIdx,
       endRowIndex,
+      ...change,
+    });
+    return this;
+  }
+  updateActiveCells(change: RowCellChange<VN>): this {
+    this.validateIndexNotStale();
+    const rowIndexes = this.cellIndexesActive;
+    const { value } = change;
+    if (value !== undefined) {
+      rowIndexes.forEach((rowIndex) => {
+        this.cell(rowIndex).setValueState(value);
+      });
+    }
+    Arr.contiguousRanges(rowIndexes).forEach(({ startIndex, endIndex }) => {
+      this.fullSheet.addSheetChangeToSave({
+        action: "fill",
+        colIndex: this.colIndex,
+        startRowIndex: startIndex,
+        endRowIndex: endIndex,
+        ...change,
+      });
     });
     return this;
   }

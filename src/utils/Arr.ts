@@ -1,6 +1,11 @@
 export type StrictExtract<T, K extends T> = Extract<T, K>;
 export type StrictExclude<T, K extends T> = Exclude<T, K>;
 
+export interface IndexRange {
+  startIndex: number;
+  endIndex: number;
+}
+
 export const Arr = {
   indexesFromUntil(from: number, until: number): number[] {
     const indexes: number[] = [];
@@ -8,6 +13,20 @@ export const Arr = {
       indexes.push(i);
     }
     return indexes;
+  },
+  // Ascending indexes collapsed into half-open ranges, so a run costs one request.
+  contiguousRanges(indexes: number[]): IndexRange[] {
+    return [...indexes]
+      .sort((a, b) => a - b)
+      .reduce((ranges: IndexRange[], index) => {
+        const last = ranges[ranges.length - 1];
+        if (last && last.endIndex === index) {
+          last.endIndex = index + 1;
+        } else {
+          ranges.push({ startIndex: index, endIndex: index + 1 });
+        }
+        return ranges;
+      }, []);
   },
   hasDuplicates(arr: unknown[]): boolean {
     return new Set(arr).size !== arr.length;

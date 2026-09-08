@@ -1,12 +1,13 @@
-import type { CellValue } from "../00_base/base";
 import type {
   Value,
   ValueName,
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
 import { DataColumnRaw } from "../02_SpreadsheetRaw/ClassBases/DataColumnRaw";
+import type { RowCellChange } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
+import type { CellChange } from "./ClassTypes/IndexedState";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataSheetIndexed } from "./DataSheetIndexed";
@@ -83,10 +84,20 @@ export class DataColumnIndexed<
       cell.updateToDefault();
     });
   }
-  allCellsToValue(value: Value<VN>): this {
-    this.schema.validateDataNotFormula();
-    this.raw.updateAllValues(value as CellValue<VnToCvn<VN>>);
+  updateAllCells(change: CellChange<VN>): this {
+    this.raw.updateAllCells(this._rawChange(change));
     return this;
+  }
+  updateActiveCells(change: CellChange<VN>): this {
+    this.raw.updateActiveCells(this._rawChange(change));
+    return this;
+  }
+  // A colour-only write is legitimate on a formula column; a value is not.
+  private _rawChange(change: CellChange<VN>): RowCellChange<VnToCvn<VN>> {
+    if (change.value !== undefined) {
+      this.schema.validateDataNotFormula();
+    }
+    return change as RowCellChange<VnToCvn<VN>>;
   }
   emptyActiveCellsToDefualt(): this {
     this.cellsActive.forEach((cell) => {

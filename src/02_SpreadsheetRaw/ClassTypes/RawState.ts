@@ -2,7 +2,7 @@ import type {
   GoogleColor,
   GoogleUpdateRequest,
 } from "../../00_base/AppsScriptTypes";
-import type { CellValue } from "../../00_base/base";
+import type { CellValue, CellValueName } from "../../00_base/base";
 import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface RawState {
@@ -20,7 +20,7 @@ const updateRequestNames = [
   "delete",
   "sort",
   "insertColumn",
-  "fillColumn",
+  "fill",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
 
@@ -38,6 +38,7 @@ export interface RawSheetState {
   } | null;
   rowIndexesAreValid: boolean;
   hasFetchedColumnIds: boolean;
+  isPrunedToSelection: boolean;
   firstStaleColIndex: number | null;
   rowStates: RawRowStates;
   columnCellFacts: RawColumnCellFacts;
@@ -79,18 +80,20 @@ export type RowChangesToSave = {
   update: Map<ColIndex, RowCellChange>;
 };
 // One entry per cell, merged across writes, so a colour never cancels a value.
-export interface RowCellChange {
-  value?: CellValue;
+export interface RowCellChange<VN extends CellValueName = CellValueName> {
+  value?: CellValue<VN>;
   backgroundColor?: GoogleColor;
 }
 export type SheetChangesToSave = {
   level: "sheet";
   sort: null | SortParameters;
   insertColumn: null | ColIndex;
-  fillColumns: Map<ColIndex, ColumnFill>;
+  fills: ColumnFill[];
 };
-export interface ColumnFill {
-  value: CellValue;
+// One contiguous run of a column's cells, flushed as a single repeatCell.
+export interface ColumnFill extends RowCellChange {
+  colIndex: ColIndex;
+  startRowIndex: number;
   // Snapshotted when queued, so a fill never reaches a row appended after it.
   endRowIndex: number;
 }
@@ -105,7 +108,7 @@ export type SheetChangePropsObj = {
     action: "insertColumn";
     startColumnIndex: number;
   };
-  fillColumn: { action: "fillColumn"; colIndex: ColIndex } & ColumnFill;
+  fill: { action: "fill" } & ColumnFill;
 };
 export type SheetChangeProps = SheetChangePropsObj[keyof SheetChangePropsObj];
 

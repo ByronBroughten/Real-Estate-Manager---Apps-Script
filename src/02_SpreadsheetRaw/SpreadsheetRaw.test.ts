@@ -324,7 +324,7 @@ describe("SpreadsheetRaw.spreadsheetId", () => {
   });
 });
 
-describe("DataColumnRaw.updateAllValues", () => {
+describe("DataColumnRaw.updateAllCells", () => {
   function stubFilledSheet() {
     return stubSheetsService({
       sheets: [
@@ -353,7 +353,7 @@ describe("DataColumnRaw.updateAllValues", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllValues("new");
+    raw.sheet(111).data.column(1).updateAllCells({ value: "new" });
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -377,7 +377,7 @@ describe("DataColumnRaw.updateAllValues", () => {
     stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllValues("new");
+    raw.sheet(111).data.column(1).updateAllCells({ value: "new" });
 
     expect(raw.sheet(111).data.column(1).valueArr).toEqual([
       "new",
@@ -390,7 +390,7 @@ describe("DataColumnRaw.updateAllValues", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllValues("filled");
+    raw.sheet(111).data.column(1).updateAllCells({ value: "filled" });
     raw.sheet(111).data.row(5).cell(1).updateValue("overridden");
     raw.batchUpdateGSheets();
 
@@ -405,11 +405,41 @@ describe("DataColumnRaw.updateAllValues", () => {
     });
   });
 
+  it("carries a background colour alongside the value in the one fill request", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw
+      .sheet(111)
+      .data.column(1)
+      .updateAllCells({ value: "new", backgroundColor: LIGHT_GREEN });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        repeatCell: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 7,
+            startColumnIndex: 1,
+            endColumnIndex: 2,
+          },
+          cell: {
+            userEnteredValue: { stringValue: "new" },
+            userEnteredFormat: { backgroundColor: LIGHT_GREEN },
+          },
+          fields: "userEnteredValue,userEnteredFormat.backgroundColor",
+        },
+      },
+    ]);
+  });
+
   it("leaves a row appended after the fill alone, since the fill's bound is snapshotted", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllValues("filled");
+    raw.sheet(111).data.column(1).updateAllCells({ value: "filled" });
     raw.sheet(111).data.appendDataRow();
     raw.batchUpdateGSheets();
 
@@ -417,6 +447,197 @@ describe("DataColumnRaw.updateAllValues", () => {
       (r) => r.repeatCell,
     );
     expect(fill?.repeatCell?.range?.endRowIndex).toBe(7);
+  });
+});
+
+describe("DataColumnRaw.updateActiveCells", () => {
+  function stubSelectionSheet() {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            4: ["r:lse:1", "old"],
+            5: ["r:lse:2", "old"],
+            6: ["r:lse:3", "old"],
+            7: ["r:lse:4", "old"],
+            8: ["r:lse:5", "old"],
+          }),
+          table: { endRowIndex: 9 },
+        },
+      ],
+    });
+  }
+  function fetchedSelectionSheet() {
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).colIdRow.gatherFetchFull();
+    raw.sheet(111).data.column(1).gatherFetchFull();
+    raw.fetchAllGathered();
+    return raw;
+  }
+  function fillRanges(
+    calls: GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest[],
+  ) {
+    return calls
+      .flatMap((call) => call.requests ?? [])
+      .filter((request) => request.repeatCell)
+      .map((request) => ({
+        startRowIndex: request.repeatCell?.range?.startRowIndex,
+        endRowIndex: request.repeatCell?.range?.endRowIndex,
+      }));
+  }
+
+  it("sends one request for a column whose active rows are all contiguous", () => {
+    const { batchUpdateCalls } = stubSelectionSheet();
+
+    const raw = fetchedSelectionSheet();
+    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.batchUpdateGSheets();
+
+    expect(fillRanges(batchUpdateCalls)).toEqual([
+      { startRowIndex: 4, endRowIndex: 9 },
+    ]);
+  });
+
+  it("sends one request per contiguous run rather than one per row", () => {
+    const { batchUpdateCalls } = stubSelectionSheet();
+
+    const raw = fetchedSelectionSheet();
+    raw.sheet(111).removeRowsExcept(4, 5, 8);
+    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.batchUpdateGSheets();
+
+    expect(fillRanges(batchUpdateCalls)).toEqual([
+      { startRowIndex: 4, endRowIndex: 6 },
+      { startRowIndex: 8, endRowIndex: 9 },
+    ]);
+  });
+
+  it("carries value and background colour together under a mask naming both", () => {
+    const { batchUpdateCalls } = stubSelectionSheet();
+
+    const raw = fetchedSelectionSheet();
+    raw.sheet(111).removeRowsExcept(4);
+    raw
+      .sheet(111)
+      .data.column(1)
+      .updateActiveCells({ value: "new", backgroundColor: LIGHT_GREEN });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        repeatCell: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 5,
+            startColumnIndex: 1,
+            endColumnIndex: 2,
+          },
+          cell: {
+            userEnteredValue: { stringValue: "new" },
+            userEnteredFormat: { backgroundColor: LIGHT_GREEN },
+          },
+          fields: "userEnteredValue,userEnteredFormat.backgroundColor",
+        },
+      },
+    ]);
+  });
+
+  it("leaves values alone when only a background colour is written", () => {
+    const { batchUpdateCalls } = stubSelectionSheet();
+
+    const raw = fetchedSelectionSheet();
+    raw.sheet(111).removeRowsExcept(4);
+    raw
+      .sheet(111)
+      .data.column(1)
+      .updateActiveCells({ backgroundColor: LIGHT_GREEN });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests?.[0]?.repeatCell?.cell).toEqual({
+      userEnteredFormat: { backgroundColor: LIGHT_GREEN },
+    });
+    expect(raw.sheet(111).data.column(1).valueArr).toEqual(["old"]);
+  });
+
+  it("writes nothing when no row is active", () => {
+    const { batchUpdateCalls } = stubSelectionSheet();
+
+    const raw = fetchedSelectionSheet();
+    raw.sheet(111).removeRowsExcept();
+    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+  });
+
+  it("mirrors the write into row state, so a read before the flush sees it", () => {
+    stubSelectionSheet();
+
+    const raw = fetchedSelectionSheet();
+    raw.sheet(111).removeRowsExcept(4, 8);
+    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+
+    expect(raw.sheet(111).data.column(1).valueArr).toEqual(["new", "new"]);
+  });
+});
+
+describe("SheetRaw.removeRowsExcept", () => {
+  function stubPrunableSheet() {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            4: ["r:lse:1", "old"],
+            5: ["r:lse:2", "old"],
+            6: ["r:lse:3", "old"],
+          }),
+          table: { endRowIndex: 7 },
+        },
+      ],
+    });
+  }
+  function fetchedPrunableSheet() {
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).colIdRow.gatherFetchFull();
+    raw.sheet(111).data.column(1).gatherFetchFull();
+    raw.fetchAllGathered();
+    return raw;
+  }
+
+  it("drops every data row that was not kept", () => {
+    stubPrunableSheet();
+
+    const raw = fetchedPrunableSheet();
+    raw.sheet(111).removeRowsExcept(5);
+
+    expect(raw.sheet(111).data.rowIndexesActive).toEqual([5]);
+  });
+
+  it("keeps the uniform rows, so a column still resolves by its id afterwards", () => {
+    stubPrunableSheet();
+
+    const raw = fetchedPrunableSheet();
+    raw.sheet(111).removeRowsExcept(5);
+
+    expect(raw.sheet(111).columnByActiveId("c:lse:bbb").colIndex).toBe(1);
+  });
+
+  it("makes a whole-column fill throw, so it can't overwrite the excluded rows", () => {
+    stubPrunableSheet();
+
+    const raw = fetchedPrunableSheet();
+    raw.sheet(111).removeRowsExcept(5);
+
+    expect(() =>
+      raw.sheet(111).data.column(1).updateAllCells({ value: "new" }),
+    ).toThrowError(/pruned to a selection/);
   });
 });
 

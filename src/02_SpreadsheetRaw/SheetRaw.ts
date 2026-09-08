@@ -1,7 +1,11 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
 import { Arr } from "../utils/Arr";
+import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
-import { cellValueToUserEntered } from "./ClassBases/CellRaw";
+import {
+  cellChangeFieldMask,
+  cellChangeToCellData,
+} from "./ClassBases/CellRaw";
 import { DataRowRaw } from "./ClassBases/DataRowRaw";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
@@ -208,13 +212,24 @@ export class SheetRaw extends SheetRawBase {
     const colIndex = this.headerRow.colIndexOfValue(header);
     return this.column(colIndex, valueName);
   }
+  // The uniform rows survive, or every later column-index resolution breaks.
   removeRowsExcept(...rowIdxesToKeep: number[]): void {
     const allRowIdxs = Array.from(this.rowStates.keys());
     allRowIdxs.forEach((rowIndex) => {
+      if (this.schema.isUniformRowIndex(rowIndex)) return;
       if (!rowIdxesToKeep.includes(rowIndex)) {
         this.row(rowIndex).remove();
       }
     });
+    this.sheetState.isPrunedToSelection = true;
+  }
+  // A whole-column fill ignores active rows, so it would rewrite what a prune excluded.
+  validateNotPrunedToSelection(): void {
+    if (this.sheetState.isPrunedToSelection) {
+      throw new Error(
+        `Sheet ${this.sheetGid} has been pruned to a selection. A whole-column write would reach the rows the prune excluded.`,
+      );
+    }
   }
   get changesToSave(): SheetChangesToSave {
     this._ensureChangesToSaveExists();
@@ -228,7 +243,7 @@ export class SheetRaw extends SheetRawBase {
         level: "sheet",
         sort: null,
         insertColumn: null,
-        fillColumns: new Map(),
+        fills: [],
       });
     }
   }
@@ -251,15 +266,12 @@ export class SheetRaw extends SheetRawBase {
       case "insertColumn":
         changes.insertColumn = props.startColumnIndex;
         break;
-      case "fillColumn":
-        changes.fillColumns.set(props.colIndex, {
-          value: props.value,
-          endRowIndex: props.endRowIndex,
-        });
+      case "fill":
+        changes.fills.push(Obj.strictOmit(props, "action"));
         break;
       default:
         throw new Error(
-          `Invalid action: ${(props as SheetChangeProps).action}. Must be one of "sort", "insertColumn" or "fillColumn".`,
+          `Invalid action: ${(props as SheetChangeProps).action}. Must be one of "sort", "insertColumn" or "fill".`,
         );
     }
     return this;
@@ -287,23 +299,25 @@ export class SheetRaw extends SheetRawBase {
     this.uniformRow("header").firstTableCell().gatherFetchRange();
     return this;
   }
-  // One repeatCell for the whole column, so a fill costs one request, not one per row.
-  gatherFillColumnRequest(
-    colIndex: number,
-    { value, endRowIndex }: ColumnFill,
-  ): void {
-    this.updateRequests.fillColumn.push({
+  // One repeatCell per contiguous run, so a fill costs one request, not one per row.
+  gatherFillRequest({
+    colIndex,
+    startRowIndex,
+    endRowIndex,
+    ...change
+  }: ColumnFill): void {
+    this.updateRequests.fill.push({
       repeatCell: {
         range: {
           sheetId: this.sheetGid,
-          startRowIndex: this.schema.topDataRowIdx,
+          startRowIndex,
           endRowIndex,
           startColumnIndex: colIndex,
           endColumnIndex: colIndex + 1,
         },
-        cell: { userEnteredValue: cellValueToUserEntered(value) },
+        cell: cellChangeToCellData(change),
         // Anything the mask covers but `cell` omits gets cleared, so keep it narrow.
-        fields: "userEnteredValue",
+        fields: cellChangeFieldMask(change),
       },
     });
   }

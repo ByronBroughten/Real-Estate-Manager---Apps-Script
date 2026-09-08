@@ -163,14 +163,14 @@ const cellChangeFields = {
   backgroundColor: "userEnteredFormat.backgroundColor",
 } as const satisfies Record<keyof RowCellChange, string>;
 
-function cellChangeFieldMask(change: RowCellChange): string {
+export function cellChangeFieldMask(change: RowCellChange): string {
   return Obj.keys(cellChangeFields)
     .filter((key) => change[key] !== undefined)
     .map((key) => cellChangeFields[key])
     .join(",");
 }
 
-function cellChangeToCellData(change: RowCellChange): GoogleCellValue {
+export function cellChangeToCellData(change: RowCellChange): GoogleCellValue {
   const data: GoogleCellValue = {};
   if (change.value !== undefined) {
     data.userEnteredValue = cellValueToUserEntered(change.value);
