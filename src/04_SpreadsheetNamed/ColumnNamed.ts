@@ -5,7 +5,7 @@ import type {
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
-import type { ColumnIndexed as ColumnIndexedClass } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import type { StrictExclude } from "../utils/Arr";
 import { CellNamed } from "./CellNamed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";
@@ -22,8 +22,11 @@ export class ColumnNamed<
   get meta(): ColumnMetaNamed<SN, CN> {
     return new ColumnMetaNamed(this.columnNamedProps);
   }
-  get indexed(): ColumnIndexedClass<ColumnValueName<SN, CN>> {
-    return this.meta.indexed.primary;
+  get indexed(): ColumnIndexed<ColumnValueName<SN, CN>> {
+    return new ColumnIndexed<ColumnValueName<SN, CN>>({
+      ...this.sheet.indexed.sheetIndexedProps,
+      columnId: this.columnId,
+    });
   }
   get raw() {
     return this.indexed.raw;

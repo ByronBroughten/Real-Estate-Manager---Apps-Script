@@ -8,7 +8,7 @@ import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
-import { SheetMetaIndexed } from "./SheetMetaIndexed";
+import { SheetIndexed } from "./SheetIndexed";
 
 export interface UniformRowIndexedProps<
   UN extends UniformRowName,
@@ -28,8 +28,8 @@ export class UniformRowIndexed<
     this.uniformRowName = uniformRowName;
     this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
-  get sheet(): SheetMetaIndexed {
-    return new SheetMetaIndexed(this.sheetIndexedProps);
+  get sheet(): SheetIndexed {
+    return new SheetIndexed(this.sheetIndexedProps);
   }
   get raw(): UniformRowRaw<UN> {
     return new UniformRowRaw({

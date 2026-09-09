@@ -8,11 +8,9 @@ import type {
 import type { SpreadsheetRaw } from "../SpreadsheetRaw";
 import { SheetRawBase } from "./SheetRawBase";
 
-// The row and column base classes hang off SheetRawBase, so sheet-level
-// members both sheet views need live here rather than one level down.
+// Not on SheetRawBase: the row and column base classes hang off that.
 export abstract class SheetCommonRaw extends SheetRawBase {
-  // Abstract, not implemented here: importing SpreadsheetRaw as a value would
-  // close an init-time cycle through the two subclasses' extends clauses.
+  // Abstract: importing SpreadsheetRaw here would close an init-time cycle.
   abstract get ss(): SpreadsheetRaw;
   get fullTableColIndexes(): number[] {
     return Arr.indexesFromUntil(

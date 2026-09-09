@@ -7,9 +7,8 @@ import { SheetMetaNamed } from "./SheetMetaNamed";
 import { SheetNamed } from "./SheetNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
-// An accessor typed for one view but wired to the other's constructor
-// type-checks; only an identity assertion plus an instance check catch it.
-describe("Named navigation graph", () => {
+// A mis-wired accessor still type-checks; the instance checks catch it.
+describe("SpreadsheetNamed navigation", () => {
   it("gives each accessor the class its return type names", () => {
     const ss = SpreadsheetNamed.init();
     const sheet = ss.sheet("occupancy");

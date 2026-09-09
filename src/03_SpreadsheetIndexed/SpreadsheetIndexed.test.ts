@@ -13,9 +13,8 @@ import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
 
-// An accessor typed for one view but wired to the other's constructor
-// type-checks; only an identity assertion plus an instance check catch it.
-describe("Indexed navigation graph", () => {
+// A mis-wired accessor still type-checks; the instance checks catch it.
+describe("SpreadsheetIndexed navigation", () => {
   it("gives each accessor the class its return type names", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),

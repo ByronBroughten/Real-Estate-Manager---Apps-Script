@@ -4,8 +4,8 @@ import type {
   ValueName,
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
-import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import type { RowCellChange } from "../02_SpreadsheetRaw/ClassTypes/RawState";
+import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import type { CellChange } from "./ClassTypes/IndexedState";

@@ -188,7 +188,7 @@ ColumnNamedBase<SN, CN>          // the base: columnName, schema, columnNamedPro
        └─ ColumnMetaNamed<SN, CN>
 ```
 
-**Columns are the one chain whose base does not sit in `ClassBases/`** — `ColumnNamedBase` sits directly in the tier folder and *is* the base. There is no `ColumnNamedBase` for the primary column alone: a class that wants to sit beside `ColumnNamed` rather than under it extends `ColumnNamedBase` and reaches the column through a getter — which is what `GenericSheetOperator` does one level up (`extends SheetNamedBase`), and what the column-scoped endpoint classes in `06_API` already do.
+**Columns are the one chain whose base does not sit in `ClassBases/`** — `ColumnNamedBase` sits directly in the tier folder and *is* the base. There is no base class for the primary column alone: a class that wants to sit beside `ColumnNamed` rather than under it extends `ColumnNamedBase` and reaches the column through a getter — which is what `GenericSheetOperator` does one level up (`extends SheetNamedBase`), and what the column-scoped endpoint classes in `06_API` already do.
 
 The Raw tier needs **two** sheet-level classes above its concrete pair, and both earn their place:
 

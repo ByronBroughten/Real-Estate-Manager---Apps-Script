@@ -745,9 +745,8 @@ describe("CellRaw.updateBackgroundColor", () => {
   });
 });
 
-// An accessor typed for one view but wired to the other's constructor
-// type-checks; only an identity assertion plus an instance check catch it.
-describe("Raw navigation graph", () => {
+// A mis-wired accessor still type-checks; the instance checks catch it.
+describe("SpreadsheetRaw navigation", () => {
   it("gives each accessor the class its return type names", () => {
     const raw = SpreadsheetRaw.init();
     const sheet = raw.sheet(111);
