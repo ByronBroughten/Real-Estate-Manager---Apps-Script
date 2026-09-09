@@ -41,7 +41,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this.sheetConfigOperator.sheet;
   }
   get activeValueTitles(): string[] {
-    return this.sheet.column("valueTitle").valueArr;
+    return this.sheet.column("valueTitle").valueArrFilterEmpty;
   }
   // Derived fresh each call, not cached — a stored field goes stale across
   // this coordinator's per-access getter rebuilds.
@@ -113,7 +113,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     );
     let idsAdded = 0;
 
-    this.sheetConfigSheet.rowIndexesActive.forEach((rowIndex) => {
+    this.sheetConfigSheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
       if (this._isSheetGidApiAccesses(sheetGid)) {
         const idPrefix = col.idPrefix.value(rowIndex);
@@ -142,9 +142,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         staleCount++;
       }
     });
-    Logger.log(
-      `pruneColTraits: queued ${staleCount} stale row(s) for deletion.`,
-    );
+    Logger.log(`_pruneColumnRows: pruned ${staleCount} stale row(s).`);
     return this;
   }
   private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
@@ -152,7 +150,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   private _appendColumnRows(): this {
     const col = this.sheet.columns("sheetGid", "columnId");
-    const existingColumnIds = col.columnId.valueArr;
+    const existingColumnIds = col.columnId.valueArrFilterEmpty;
 
     let appendedCount = 0;
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
@@ -167,9 +165,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         }
       });
     });
-    Logger.log(
-      `appendColumnRows: queued ${appendedCount} new row(s) for append.`,
-    );
+    Logger.log(`_appendColumnRows: added ${appendedCount} new row(s).`);
     return this;
   }
   private _updateProgrammaticValues() {
@@ -183,7 +179,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     );
     let updatedValues = 0;
     this.untypedHeadersBySheetTitle.clear();
-    this.sheet.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
       const columnId = col.columnId.value(rowIndex);
       const sheetRaw = this.ss.raw.sheet(sheetGid);
@@ -241,7 +237,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "valueTitle",
     );
     const columnConfigs: ColumnConfigsGeneric = {};
-    this.sheet.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       const columnId = col.columnId.value(rowIndex);
       const sheetGid = col.sheetGid.value(rowIndex);
       const header = col.header.value(rowIndex);

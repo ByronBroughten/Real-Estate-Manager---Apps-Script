@@ -39,6 +39,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         isPrunedToSelection: false,
         firstStaleColIndex: null,
         rowStates: new Map(),
+        reservedRowIndexes: new Set(),
         columnCellFacts: new Map(),
         rowIndexesToFinalize: new Set(),
         colIndexesToFinalize: new Set(),

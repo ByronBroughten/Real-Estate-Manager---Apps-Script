@@ -24,6 +24,7 @@ export class RowRaw extends RowCommonRaw {
     }
   }
   delete(): void {
+    this.validateSheetKeepsADataRow();
     this.remove();
     this.addRowChangeToSave({ action: "delete" });
     // this.activeTable.endRowIndex--;
@@ -39,5 +40,12 @@ export class RowRaw extends RowCommonRaw {
     this.addRowChangeToSave({ action: "append" });
     this.activeTable.endRowIndex++;
     return this;
+  }
+  // A new row copies its formulas from the rows already there, so one must survive.
+  private validateSheetKeepsADataRow(): void {
+    if (!this.sheet.isDownToLastDataRow) return;
+    throw new Error(
+      `Cannot delete row ${this.rowIndex} of sheetGid ${this.sheetGid}: it is the sheet's last data row, and a sheet may never be left with none. Clear the row instead.`,
+    );
   }
 }

@@ -31,6 +31,12 @@ export class SheetNamed<
   get rowIndexesActive(): number[] {
     return this.indexed.rowIndexesActive;
   }
+  get rowIndexesActiveWithData(): number[] {
+    return this.indexed.rowIndexesActiveWithData;
+  }
+  get rowIndexesFullWithData(): number[] {
+    return this.indexed.rowIndexesFullWithData;
+  }
   get rows(): RowNamed<SN>[] {
     return this.indexed.rows.map((row) => this.row(row.rowIndex));
   }
@@ -99,16 +105,8 @@ export class SheetNamed<
       );
     });
   }
-  RESET_TOP_DATA_ROW_DELETE_REST() {
-    if (this.indexed.rowCount > 0) {
-      this.topRow.updateToDefault(...this.schema.columnNames);
-    }
-    if (this.indexed.rowCount > 1) {
-      this.DELETE_DATA_ROWS_AFTER_TOP();
-    }
-  }
-  private DELETE_DATA_ROWS_AFTER_TOP() {
-    this.raw.DELETE_ACTIVE_DATA_ROWS(this.schema.topDataRowIdx + 1);
+  DELETE_ALL_DATA_ROWS(): void {
+    this.indexed.DELETE_ALL_DATA_ROWS();
   }
   rowsFiltered(values: Partial<SheetDataValues<SN>>): RowNamed<SN>[] {
     return this.rows.filter((row) => {

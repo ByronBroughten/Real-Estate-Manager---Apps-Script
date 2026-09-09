@@ -1,10 +1,17 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
+import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
+import {
+  blankSheetConfigRow,
+  filledSheetConfigRow,
+  stubSheetConfigSheet,
+} from "../testSupport/fakeSheetConfigSheet";
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
@@ -59,6 +66,7 @@ describe("SpreadsheetNamed navigation", () => {
   });
 });
 
+const TOP_DATA_ROW_INDEX = ssConfigGet("topDataRowIdxBase0");
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
 const SELECT_COLUMN_ID = columnConfigs.occupancy.updateTermsSelect.columnId;
@@ -179,5 +187,154 @@ describe("Named value accessors", () => {
       BLANK_ROW_INDEX,
       FILLED_ROW_INDEX,
     ]);
+  });
+});
+
+function fetchedSheetConfig(): SpreadsheetNamed {
+  const ss = SpreadsheetNamed.init();
+  ss.sheet("sheetConfig").prepFetchColumnsFull(
+    "sheetGid",
+    "sheetTitle",
+    "hasIdColumn",
+    "letApiAccess",
+    "idPrefix",
+  );
+  ss.fetchAllPrepped();
+  return ss;
+}
+
+function deleteRequestIndexes(
+  calls: GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest[],
+): (number | undefined)[] {
+  return calls
+    .flatMap((call) => call.requests ?? [])
+    .filter((request) => request.deleteDimension)
+    .map((request) => request.deleteDimension?.range?.startIndex);
+}
+
+function appendRequestCount(
+  calls: GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest[],
+): number {
+  return calls
+    .flatMap((call) => call.requests ?? [])
+    .filter((request) => request.appendCells).length;
+}
+
+describe("SheetNamed.DELETE_ALL_DATA_ROWS", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("deletes every data row but the top one, and leaves that one blank", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: filledSheetConfigRow,
+      5: filledSheetConfigRow,
+      6: filledSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    ss.sheet("sheetConfig").DELETE_ALL_DATA_ROWS();
+    ss.batchUpdateGSheets();
+
+    expect(deleteRequestIndexes(batchUpdateCalls)).toEqual([6, 5]);
+    expect(ss.sheet("sheetConfig").topRow.isBlank).toBe(true);
+  });
+
+  it("writes nothing at all for a sheet already down to its blank row", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: blankSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    ss.sheet("sheetConfig").DELETE_ALL_DATA_ROWS();
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+  });
+});
+
+describe("SheetNamed.appendRowWithVals", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("reuses the blank row of an emptied sheet rather than appending beneath it", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: blankSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    const row = ss.sheet("sheetConfig").appendRowWithVals({ idPrefix: "prp" });
+    ss.batchUpdateGSheets();
+
+    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(appendRequestCount(batchUpdateCalls)).toBe(0);
+    expect(row.value("idPrefix")).toBe("prp");
+  });
+
+  it("appends beneath a one-row sheet that still holds data", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: filledSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    const row = ss.sheet("sheetConfig").appendRowWithVals({ idPrefix: "unt" });
+    ss.batchUpdateGSheets();
+
+    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX + 1);
+    expect(appendRequestCount(batchUpdateCalls)).toBe(1);
+  });
+
+  it("reuses the blank row once and appends for the second row", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: blankSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    const sheet = ss.sheet("sheetConfig");
+    const first = sheet.appendRowWithVals({ idPrefix: "one" });
+    const second = sheet.appendRowWithVals({ idPrefix: "two" });
+    ss.batchUpdateGSheets();
+
+    expect([first.rowIndex, second.rowIndex]).toEqual([
+      TOP_DATA_ROW_INDEX,
+      TOP_DATA_ROW_INDEX + 1,
+    ]);
+    expect(appendRequestCount(batchUpdateCalls)).toBe(1);
+  });
+
+  // The wipe has to lift the reservation the first append took, or the second strands a row.
+  it("hands the same row to a second append once a wipe has released it", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: blankSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    const sheet = ss.sheet("sheetConfig");
+    sheet.appendRowWithVals({ idPrefix: "one" });
+    sheet.DELETE_ALL_DATA_ROWS();
+    const rebuilt = sheet.appendRowWithVals({ idPrefix: "two" });
+    ss.batchUpdateGSheets();
+
+    expect(rebuilt.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(appendRequestCount(batchUpdateCalls)).toBe(0);
+    expect(rebuilt.value("idPrefix")).toBe("two");
+  });
+
+  it("reuses the row a wipe just cleared, so the wipe and rebuild leave only rebuilt rows", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: filledSheetConfigRow,
+      5: filledSheetConfigRow,
+    });
+
+    const ss = fetchedSheetConfig();
+    const sheet = ss.sheet("sheetConfig");
+    sheet.DELETE_ALL_DATA_ROWS();
+    const row = sheet.appendRowWithVals({ idPrefix: "new" });
+    ss.batchUpdateGSheets();
+
+    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(appendRequestCount(batchUpdateCalls)).toBe(0);
+    expect(deleteRequestIndexes(batchUpdateCalls)).toEqual([5]);
   });
 });

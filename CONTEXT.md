@@ -18,6 +18,10 @@ _Avoid_: title row, top row, row 1
 The row of checkboxes above the header row. Ticking a checkbox there is what asks the spreadsheet to do something, one endpoint per column.
 _Avoid_: control row, button row, trigger row
 
+**Blank row**:
+A data row with nothing in any of the columns you fill in yourself. It is what the app leaves when it deletes everything on a sheet: emptying the sheet completely would take the formulas, number formats, validation and colours with it, since a new row copies those from the rows already there. The formula cells still show whatever their formulas make of an empty row, so the row reads as a live row rather than a gap. The next row the app adds to that sheet goes into the blank row rather than beneath it, so it never sits stranded above your data.
+_Avoid_: empty row, placeholder row, spare row
+
 ### Endpoints
 
 **Endpoint**:

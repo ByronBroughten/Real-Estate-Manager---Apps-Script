@@ -60,6 +60,10 @@ export abstract class RowCommonRaw extends RowRawBase {
     this.sheetState.rowIndexesToFinalize.add(this.rowIndex);
     return this;
   }
+  get isQueuedForDelete(): boolean {
+    const changes = this.allChangesToSave.get(this.sheetRowId);
+    return changes?.level === "row" && changes.delete !== null;
+  }
   get changesToSave(): RowChangesToSave {
     this._ensureChangesToSaveExists();
     return this.allChangesToSave.get(this.sheetRowId) as RowChangesToSave;

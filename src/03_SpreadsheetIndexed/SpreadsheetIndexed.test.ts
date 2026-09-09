@@ -3,8 +3,15 @@ import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
+  blankSheetConfigRow,
+  filledSheetConfigRow,
+  SHEET_CONFIG_GID,
+  stubSheetConfigSheet,
+} from "../testSupport/fakeSheetConfigSheet";
+import {
   buildGridRows,
   stubSheetsService,
+  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import { ColumnIndexed } from "./ColumnIndexed";
@@ -149,3 +156,148 @@ describe("Indexed value accessors", () => {
     expect(column.valueArrFilterEmpty).toEqual(["r:occ:row4"]);
   });
 });
+
+// Google omits a row nothing was ever written to, which is what "never read" looks like.
+function stubSheetConfigWithUnreadTopRow() {
+  return stubSheetConfigSheet({ 4: blankSheetConfigRow }, [4]);
+}
+
+function fetchedSheetConfig(): SheetIndexed {
+  const ssi = new SpreadsheetIndexed(
+    SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+  );
+  const sheet = ssi.sheet(SHEET_CONFIG_GID);
+  sheet.topRow.prepFetchFull();
+  ssi.fetchAllPrepped();
+  return sheet;
+}
+
+function unfetchedSheetConfig(): SheetIndexed {
+  const ssi = new SpreadsheetIndexed(
+    SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+  );
+  ssi.sheetMeta(SHEET_CONFIG_GID).ensureColumnIdsAreFetched();
+  return ssi.sheet(SHEET_CONFIG_GID);
+}
+
+describe("RowIndexed.isBlank / isReusable", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("calls a row whose every non-formula cell is empty blank", () => {
+    stubSheetConfigSheet({ 4: blankSheetConfigRow });
+
+    expect(fetchedSheetConfig().topRow.isBlank).toBe(true);
+  });
+
+  it("calls a row holding any non-formula value not blank", () => {
+    stubSheetConfigSheet({ 4: filledSheetConfigRow });
+
+    expect(fetchedSheetConfig().topRow.isBlank).toBe(false);
+  });
+
+  it("calls a row nothing fetched not blank, since nothing read it", () => {
+    stubSheetConfigWithUnreadTopRow();
+
+    expect(unfetchedSheetConfig().topRow.isBlank).toBe(false);
+  });
+
+  it("makes a blank row reusable until an append reserves it", () => {
+    stubSheetConfigSheet({ 4: blankSheetConfigRow });
+
+    const sheet = fetchedSheetConfig();
+    expect(sheet.topRow.isReusable).toBe(true);
+
+    sheet.appendRowDefault();
+    expect(sheet.topRow.isReusable).toBe(false);
+  });
+});
+
+describe("SheetIndexed.hasNoData", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("is true for a sheet whose one row is blank", () => {
+    stubSheetConfigSheet({ 4: blankSheetConfigRow });
+
+    expect(fetchedSheetConfig().hasNoData).toBe(true);
+  });
+
+  it("is false while any row still holds data", () => {
+    stubSheetConfigSheet({ 4: blankSheetConfigRow, 5: filledSheetConfigRow });
+
+    expect(fetchedSheetConfig().hasNoData).toBe(false);
+  });
+});
+
+describe("RowIndexed.clearValues", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("empties every non-formula cell and touches no formula cell", () => {
+    const { batchUpdateCalls } = stubSheetConfigSheet({
+      4: filledSheetConfigRow,
+    });
+
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    const sheet = ssi.sheet(SHEET_CONFIG_GID);
+    sheet.topRow.prepFetchFull();
+    ssi.fetchAllPrepped();
+    sheet.topRow.clearValues();
+    ssi.raw.batchUpdateGSheets();
+
+    expect(writtenValuesByColIndex(batchUpdateCalls)).toEqual([
+      [0, ""],
+      [1, ""],
+      [2, ""],
+      [3, ""],
+      [4, ""],
+    ]);
+    expect(sheet.topRow.isBlank).toBe(true);
+  });
+
+  it("leaves an untouched checkbox reading empty rather than false", () => {
+    stubSheetConfigSheet({ 4: filledSheetConfigRow });
+
+    const sheet = fetchedSheetConfig();
+    sheet.topRow.clearValues();
+
+    expect(
+      sheet.topRow.valueOrEmpty(
+        columnConfigs.sheetConfig.letApiAccess.columnId,
+      ),
+    ).toBe("");
+  });
+});
+
+describe("SheetIndexed.appendRowDefault", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("throws when the sheet's one data row was never fetched, naming the prefetch owed", () => {
+    stubSheetConfigWithUnreadTopRow();
+
+    expect(() => unfetchedSheetConfig().appendRowDefault()).toThrowError(
+      /never fetched.*Prefetch that row first/,
+    );
+  });
+});
+
+function writtenValuesByColIndex(
+  calls: GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest[],
+): [number | undefined, unknown][] {
+  return calls
+    .flatMap((call) => call.requests ?? [])
+    .filter((request) => request.updateCells)
+    .map((request) => [
+      request.updateCells?.range?.startColumnIndex,
+      request.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue
+        ?.stringValue,
+    ]);
+}

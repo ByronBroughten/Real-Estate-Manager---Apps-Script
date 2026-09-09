@@ -46,7 +46,51 @@ export class RowIndexed extends RowCommonIndexed {
       this.sheet.meta.columnIdByIndex(colIndex),
     );
   }
+  get isActive(): boolean {
+    return this.raw.rowIsActive();
+  }
+  get isQueuedForDelete(): boolean {
+    return this.raw.isQueuedForDelete;
+  }
+  // Nothing fetched can be called empty, so an unread row counts as holding data.
+  get isBlank(): boolean {
+    if (!this.isActive) return false;
+    return this._nonFormulaCellsActive.every(
+      (cell) => cell.valueOrEmpty() === "",
+    );
+  }
+  get isReusable(): boolean {
+    return this.isBlank && !this.raw.isReserved;
+  }
+  reserve(): void {
+    this.raw.reserve();
+  }
+  // A blank row needs no writes, but its reservation must lift either way.
+  clearValues(): this {
+    if (!this.isBlank) {
+      this._nonFormulaColumnIdsOnSheet.forEach((columnId) => {
+        this.updateValue(columnId, "");
+      });
+    }
+    this.raw.release();
+    return this;
+  }
   delete(): void {
-    this.raw.delete();
+    if (this.sheet.raw.isDownToLastDataRow) {
+      this.clearValues();
+    } else {
+      this.raw.delete();
+    }
+  }
+  private get _nonFormulaCellsActive(): CellIndexed[] {
+    return this._nonFormulaColumnIdsOnSheet
+      .map((columnId) => this.cell(columnId))
+      .filter((cell) => cell.isActive);
+  }
+  // A configured column the sheet doesn't have holds nothing to read or clear.
+  private get _nonFormulaColumnIdsOnSheet(): string[] {
+    return this.schema.nonFormulaColumnIds.filter((columnId) =>
+      this.sheet.meta.isActiveColumnId(columnId),
+    );
   }
 }

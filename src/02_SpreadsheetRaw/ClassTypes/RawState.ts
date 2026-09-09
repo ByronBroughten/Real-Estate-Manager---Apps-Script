@@ -42,6 +42,8 @@ export interface RawSheetState {
   isPrunedToSelection: boolean;
   firstStaleColIndex: number | null;
   rowStates: RawRowStates;
+  // A row an append has handed out, so a second append can't reuse it.
+  reservedRowIndexes: Set<RowIndex>;
   columnCellFacts: RawColumnCellFacts;
   rowIndexesToFinalize: Set<RowIndex>;
   colIndexesToFinalize: Set<ColIndex>;

@@ -166,6 +166,30 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     expect(operator.sheetGidsApiAccesses()).toEqual([]);
   });
 
+  // Every seeded row names a sheet that no longer exists, so the prune reaches the last one.
+  it("clears the last stale row rather than deleting it, and syncs past it without throwing", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: existingPropertyConfigRow,
+            5: [NEW_SHEET_GID, "Gone", false, true, "gon"],
+          }),
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+
+    expect(() => syncSheetConfigOperator(operator)).not.toThrow();
+    expect(operator.sheet.row(5).isBlank).toBe(true);
+    expect(operator.newSheetConfigs()).toEqual({});
+  });
+
   it("generates a config for an API-access sheet whose id prefix has never been filled in", () => {
     stubSheetsService({
       sheets: [

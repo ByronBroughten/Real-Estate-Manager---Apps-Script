@@ -70,6 +70,31 @@ export class SheetRaw extends SheetCommonRaw {
   get rowCount(): number {
     return this.activeRowCount - this.schema.topDataRowIdx;
   }
+  // The one place the invariant's threshold is written, so no tier can drift from it.
+  get isDownToLastDataRow(): boolean {
+    return this.dataRowCountAfterFlush <= 1;
+  }
+  // Local row state holds only fetched rows, so the table's extent is the source.
+  get dataRowCountAfterFlush(): number {
+    const { endRowIndex } = this.activeTable;
+    return (
+      endRowIndex - this.schema.topDataRowIdx - this._queuedRowDeleteCount()
+    );
+  }
+  private _queuedRowDeleteCount(): number {
+    let count = 0;
+    this.allChangesToSave.forEach((change, sheetRowId) => {
+      if (change.level !== "row" || typeof sheetRowId !== "string") return;
+      if (change.delete === null) return;
+      if (
+        this.schema.idsFromSheetRowId(sheetRowId).sheetGid !== this.sheetGid
+      ) {
+        return;
+      }
+      count++;
+    });
+    return count;
+  }
   invalidateRowIndexes(): void {
     this.sheetState.rowIndexesAreValid = false;
   }
@@ -253,33 +278,5 @@ export class SheetRaw extends SheetCommonRaw {
       row.updateValue(colIndex, value);
     }
     return row;
-  }
-  DELETE_ACTIVE_DATA_ROWS(
-    startRowIdx: number,
-    numRows: number = this.activeRowCount - startRowIdx,
-  ): SheetRaw {
-    this.rowStates
-      .entries()
-      .filter(
-        ([rowIndex]) =>
-          rowIndex >= startRowIdx && rowIndex < startRowIdx + numRows,
-      )
-      .forEach(([rowIndex]) => {
-        const row = this.row(rowIndex);
-        row.delete();
-      });
-    return this;
-  }
-  copyAndDeleteLastActiveDataRow() {
-    // I'd want to insert rather than append.
-    // Can I append at the not last row? Probably not.
-    // Is there a way for me to verify that rows or values are fetched?
-    const lastRow = this.row(this.lastActiveRowIndex);
-    const newRow = this.appendDataRow();
-    this.fullTableColIndexes.forEach((colIndex) => {
-      const value = lastRow.valueOrEmpty(colIndex);
-      newRow.updateValue(colIndex, value);
-    });
-    lastRow.delete();
   }
 }

@@ -882,6 +882,45 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     });
   }
 
+  // No sheet has API access, so every Column Config row is stale and nothing is appended.
+  function seedColumnConfigWhoseEveryRowIsStale() {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [COLUMN_CONFIG_GID, "Column Config", false, false, "ccf"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
+            4: [COLUMN_CONFIG_GID, cc.sheetGid.columnId, "Column Config"],
+            5: [COLUMN_CONFIG_GID, cc.header.columnId, "Column Config"],
+          }),
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+  }
+
+  it("leaves one blank row rather than none when it prunes every row", () => {
+    seedColumnConfigWhoseEveryRowIsStale();
+
+    const operator = ColumnConfigOperator.init();
+
+    expect(() => syncColumnConfigOperator(operator)).not.toThrow();
+    expect(operator.sheet.rowIndexesActive).toEqual([5]);
+    expect(operator.sheet.row(5).isBlank).toBe(true);
+    expect(operator.newColumnConfigs()).toEqual({});
+  });
+
   it("still resolves programmatic values for a sheet whose own top data row it pruned", () => {
     seedColumnConfigDescribingItselfBelowABlankTopDataRow();
 

@@ -124,6 +124,13 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     this.cell(columnName).updateValue(value);
     return this;
   }
+  get isBlank(): boolean {
+    return this.indexed.isBlank;
+  }
+  clearValues(): RowNamed<SN> {
+    this.indexed.clearValues();
+    return this;
+  }
   delete(): void {
     this.indexed.delete();
   }

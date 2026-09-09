@@ -104,10 +104,10 @@ export class EndpointRun<
     if (!selector) return;
     this._checkboxColumn(selector).column.prepFetchFull();
   }
-  // No selector means the run is about every data row, none of which is active.
+  // No selector means every data row that holds data; a blank row is no record.
   private _selectedRowIndexes(): number[] {
     const { selector } = this.endpoint;
-    if (!selector) return this.sheet.raw.rowIndexesFull;
+    if (!selector) return this.sheet.rowIndexesFullWithData;
     return this._checkboxColumn(selector).rowIndexesChecked;
   }
   // The entry cell is a button unless the endpoint also runs on unticking.

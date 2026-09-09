@@ -23,6 +23,7 @@ const PROPERTY_GID = getSheetTraitByName("property", "sheetGid");
 const UNIT_GID = getSheetTraitByName("unit", "sheetGid");
 const HEADER_ROW_INDEX = ssConfigGet("headerRowIndexBase0");
 const START_TABLE_COL_INDEX = ssConfigGet("startTableColIndexBase0");
+const TOP_DATA_ROW_INDEX = ssConfigGet("topDataRowIdxBase0");
 const SCRATCH_GID = 999999;
 const TABLE_END_ROW_INDEX = HEADER_ROW_INDEX + 3;
 
@@ -344,6 +345,76 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
         ],
       },
     ]);
+  });
+});
+
+describe("RowRaw.delete", () => {
+  function stubSheetWithDataRows(dataRowCount: number) {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          table: { endRowIndex: TOP_DATA_ROW_INDEX + dataRowCount },
+        },
+      ],
+    });
+  }
+
+  it("refuses to delete the only data row, since a new row copies its formulas from the rows already there", () => {
+    stubSheetWithDataRows(1);
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+
+    expect(() => raw.sheet(111).topRow.delete()).toThrowError(
+      /last data row.*may never be left with none/,
+    );
+  });
+
+  it("refuses the delete that would take the last of several to zero", () => {
+    stubSheetWithDataRows(3);
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(4).delete();
+    raw.sheet(111).row(5).delete();
+
+    expect(() => raw.sheet(111).row(6).delete()).toThrowError(
+      /last data row.*may never be left with none/,
+    );
+  });
+
+  it("still emits a row deletion when other data rows survive it", () => {
+    const { batchUpdateCalls } = stubSheetWithDataRows(2);
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).delete();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        deleteDimension: {
+          range: {
+            sheetId: 111,
+            dimension: "ROWS",
+            startIndex: 5,
+            endIndex: 6,
+          },
+        },
+      },
+    ]);
+  });
+
+  it("counts a row appended and then deleted as neither, since the two cancel before the flush", () => {
+    stubSheetWithDataRows(1);
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).appendDataRow().delete();
+
+    expect(() => raw.sheet(111).topRow.delete()).toThrowError(/last data row/);
   });
 });
 

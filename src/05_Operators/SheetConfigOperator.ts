@@ -73,7 +73,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   private _updateProgrammaticValues(): void {
     const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
     let updatedValues = 0;
-    this.sheet.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       const sheetTitle = col.sheetTitle.valueOrEmpty(rowIndex);
       const sheetGid = col.sheetGid.value(rowIndex);
       const activeSheet = this.ss.raw.sheet(sheetGid);
@@ -96,7 +96,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   sheetGidsApiAccesses(): number[] {
     const col = this.sheet.columns("sheetGid", "letApiAccess");
     const gids: number[] = [];
-    this.sheet.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       if (col.letApiAccess.valueOrEmpty(rowIndex)) {
         gids.push(col.sheetGid.value(rowIndex));
       }
@@ -112,7 +112,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       "letApiAccess",
     );
     const sheetConfigs: SheetConfigsBase = {};
-    this.sheet.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       // Defaults false on a freshly-appended row — excluded until a human sets it true in the sheet.
       if (!col.letApiAccess.valueOrEmpty(rowIndex)) return;
       const title = col.sheetTitle.value(rowIndex);

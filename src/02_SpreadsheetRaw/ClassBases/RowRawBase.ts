@@ -26,6 +26,15 @@ export class RowRawBase extends SheetRawBase {
   rowIsActive(): boolean {
     return this.sheetState.rowStates.has(this.rowIndex);
   }
+  get isReserved(): boolean {
+    return this.sheetState.reservedRowIndexes.has(this.rowIndex);
+  }
+  reserve(): void {
+    this.sheetState.reservedRowIndexes.add(this.rowIndex);
+  }
+  release(): void {
+    this.sheetState.reservedRowIndexes.delete(this.rowIndex);
+  }
   // A data row past the table's last row doesn't exist yet — append it instead.
   validateIsWritable(): void {
     if (!this.isDataRow || this.rowIsActive()) return;

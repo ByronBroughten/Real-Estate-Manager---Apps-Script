@@ -24,6 +24,12 @@ const columnIds = [
   c.buildLedgerTimeLastRan.columnId,
   c.buildLedgerRunStatus.columnId,
 ];
+const headers = [
+  "ID",
+  "Build ledger, select",
+  "Build ledger, time last ran",
+  "Build ledger, run status",
+];
 const SELECTOR_COL_INDEX = 1;
 const TIME_LAST_RAN_COL_INDEX = 2;
 const RUN_STATUS_COL_INDEX = 3;
@@ -51,15 +57,33 @@ function stubOccupancySheet(checkedRowIndexes: number[] = [4, 6]) {
         title: "Occupancy",
         rows: buildGridRows({
           0: columnIds,
-          3: [
-            "ID",
-            "Build ledger, select",
-            "Build ledger, time last ran",
-            "Build ledger, run status",
-          ],
+          3: headers,
           4: dataRow(4),
           5: dataRow(5),
           6: dataRow(6),
+          7: dataRow(7),
+          8: dataRow(8),
+        }),
+        table: { endRowIndex: END_ROW_INDEX },
+      },
+    ],
+  });
+}
+
+// Row 6 is the blank row an emptied-then-refilled sheet would be left with.
+function stubOccupancySheetWithBlankRow() {
+  const dataRow = (rowIndex: number) => [`r:occ:row${rowIndex}`, false, "", ""];
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: OCCUPANCY_GID,
+        title: "Occupancy",
+        rows: buildGridRows({
+          0: columnIds,
+          3: headers,
+          4: dataRow(4),
+          5: dataRow(5),
+          6: [null, null, null, null],
           7: dataRow(7),
           8: dataRow(8),
         }),
@@ -268,6 +292,32 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
     runEndpoint(reportingEndpoint(noOp));
 
     expect(getByDataFilterCalls).toHaveLength(1);
+  });
+
+  it("keeps a blank row out of the rows it hands the action", () => {
+    stubOccupancySheetWithBlankRow();
+    let received: number[] = [];
+
+    runEndpoint(
+      reportingEndpoint((_ss, { selectedRowIndexes }) => {
+        received = selectedRowIndexes;
+      }),
+    );
+
+    expect(received).toEqual([4, 5, 7, 8]);
+  });
+
+  it("still stamps its status across the blank row, so an emptied sheet reports somewhere", () => {
+    const { batchUpdateCalls } = stubOccupancySheetWithBlankRow();
+
+    runEndpoint(reportingEndpoint(noOp));
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)[0]).toEqual({
+      startRowIndex: TOP_DATA_ROW_INDEX,
+      endRowIndex: END_ROW_INDEX,
+      value: "Running…",
+      backgroundColor: undefined,
+    });
   });
 });
 
