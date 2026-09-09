@@ -12,6 +12,7 @@ import type {
 } from "../01_generatedConfigs/valueSchemas";
 import type { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
+import type { StrictExclude } from "../utils/Arr";
 import { CellNamedBase } from "./ClassBases/CellNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
 
@@ -30,6 +31,9 @@ export class CellNamed<
   }
   get isActive(): boolean {
     return this.indexed.isActive;
+  }
+  valueNotEmpty(): StrictExclude<ColumnValue<SN, CN>, ""> {
+    return this.indexed.valueNotEmpty();
   }
   value(): ColumnValue<SN, CN> {
     return this.indexed.value();
