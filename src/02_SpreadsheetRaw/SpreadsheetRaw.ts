@@ -12,6 +12,15 @@ import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 
+interface TablePlacementSheet {
+  sheetGid: number;
+  title: string | null;
+}
+interface MisplacedTable extends TablePlacementSheet {
+  startRowIndex: number;
+  startColumnIndex: number;
+}
+
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
     return new SpreadsheetRaw(SpreadsheetRawBase.initSpreadsheetRawProps());
@@ -72,8 +81,15 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // Sheets response that omits empty cells (or whole blank rows) never
   // leaves them looking merely "not yet fetched" to callers.
   private _finalizeGatheredFetches(): void {
-    const missingTables: { sheetGid: number; title: string | null }[] = [];
+    const misplacedTables: MisplacedTable[] = [];
+    const absentTables: TablePlacementSheet[] = [];
     this.rawState.sheets.forEach((state, sheetGid) => {
+      // Above the early return, so a range that arrived incidentally is still judged.
+      const misplacedTable = this._misplacedTable(sheetGid);
+      if (misplacedTable !== null) {
+        misplacedTables.push(misplacedTable);
+        return;
+      }
       if (
         state.rowIndexesToFinalize.size === 0 &&
         state.colIndexesToFinalize.size === 0
@@ -81,7 +97,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         return;
       }
       if (state.activeTable === null) {
-        missingTables.push({ sheetGid, title: state.title });
+        absentTables.push({ sheetGid, title: state.title });
         return;
       }
       const sheet = this.sheet(sheetGid);
@@ -97,17 +113,84 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       state.rowIndexesToFinalize.clear();
       state.colIndexesToFinalize.clear();
     });
-    if (missingTables.length > 0) {
-      const names = missingTables
-        .map(
-          ({ sheetGid, title }) =>
-            `"${title ?? "(untitled)"}" (gid ${sheetGid})`,
-        )
-        .join(", ");
-      throw new Error(
-        `${missingTables.length} sheet(s) need a full row/column fetch but have no Table object — apply Insert > Table over their data range in Sheets: ${names}`,
-      );
+    this._reportTablePlacement(misplacedTables, absentTables);
+  }
+  // A sheet outside the config never promised to follow the layout.
+  private _misplacedTable(sheetGid: number): MisplacedTable | null {
+    const state = this.rawState.sheets.get(sheetGid);
+    const table = state?.activeTable;
+    if (!state || !table || !this.schema.isInSheetGids(sheetGid)) {
+      return null;
     }
+    const { startRowIndex, startColumnIndex } = table;
+    if (this.schema.isTableStart(startRowIndex, startColumnIndex)) {
+      return null;
+    }
+    return {
+      sheetGid,
+      title: state.title,
+      startRowIndex,
+      startColumnIndex,
+    };
+  }
+  private _reportTablePlacement(
+    misplacedTables: MisplacedTable[],
+    absentTables: TablePlacementSheet[],
+  ): void {
+    if (misplacedTables.length === 0 && absentTables.length === 0) return;
+    const stillAbsent = this._reclassifyAbsentTables(
+      absentTables,
+      misplacedTables,
+    );
+    const sentences: string[] = [];
+    if (misplacedTables.length > 0) {
+      sentences.push(this._misplacedTableSentence(misplacedTables));
+    }
+    if (stillAbsent.length > 0) {
+      sentences.push(this._absentTableSentence(stillAbsent));
+    }
+    throw new Error(sentences.join(" "));
+  }
+  // The probe that delivers table metadata is built from the two constants
+  // under test, so a Table that moved down or right looks absent until a
+  // full properties read — one extra round trip, on a path already aborting.
+  private _reclassifyAbsentTables(
+    absentTables: TablePlacementSheet[],
+    misplacedTables: MisplacedTable[],
+  ): TablePlacementSheet[] {
+    if (absentTables.length === 0) return absentTables;
+    this.ensureAllSheetPropertiesAreFetched();
+    const stillAbsent: TablePlacementSheet[] = [];
+    absentTables.forEach((absentTable) => {
+      const misplacedTable = this._misplacedTable(absentTable.sheetGid);
+      if (misplacedTable === null) {
+        stillAbsent.push(absentTable);
+      } else {
+        misplacedTables.push(misplacedTable);
+      }
+    });
+    return stillAbsent;
+  }
+  private _misplacedTableSentence(misplacedTables: MisplacedTable[]): string {
+    const positions = misplacedTables
+      .map(
+        (misplacedTable) =>
+          `${this._sheetLabel(misplacedTable)} starts at ${this.schema.positionLabel(
+            misplacedTable.startRowIndex,
+            misplacedTable.startColumnIndex,
+          )} but must start at ${this.schema.tableStartLabel}`,
+      )
+      .join("; ");
+    return `${misplacedTables.length} sheet(s) have a Table that does not start where the layout requires — move each Table to where it must start, and do not rebuild it: ${positions}`;
+  }
+  private _absentTableSentence(absentTables: TablePlacementSheet[]): string {
+    const names = absentTables
+      .map((absentTable) => this._sheetLabel(absentTable))
+      .join(", ");
+    return `${absentTables.length} sheet(s) need a full row/column fetch but have no Table object — apply Insert > Table over their data range in Sheets: ${names}`;
+  }
+  private _sheetLabel({ sheetGid, title }: TablePlacementSheet): string {
+    return `"${title ?? "(untitled)"}" (gid ${sheetGid})`;
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
   // effectiveFormat) and columnValidationValues/columnDeclaredTypes (from

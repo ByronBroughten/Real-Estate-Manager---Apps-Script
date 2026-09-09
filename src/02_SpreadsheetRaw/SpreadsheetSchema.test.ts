@@ -119,6 +119,37 @@ describe("SpreadsheetSchema", () => {
     });
   });
 
+  describe("table placement", () => {
+    it("accepts only the configured header row and start column as a Table's start", () => {
+      const { headerRowIndex, startTableColIndex } = schema;
+      expect(schema.isTableStart(headerRowIndex, startTableColIndex)).toBe(
+        true,
+      );
+      expect(schema.isTableStart(headerRowIndex - 1, startTableColIndex)).toBe(
+        false,
+      );
+      expect(schema.isTableStart(headerRowIndex, startTableColIndex + 1)).toBe(
+        false,
+      );
+    });
+
+    it("validateTableStart only throws for a start the layout does not allow", () => {
+      const { headerRowIndex, startTableColIndex } = schema;
+      expect(() =>
+        schema.validateTableStart(headerRowIndex, startTableColIndex),
+      ).not.toThrow();
+      expect(() =>
+        schema.validateTableStart(headerRowIndex - 1, startTableColIndex),
+      ).toThrowError(/row 3, column A.*row 4, column A/);
+    });
+
+    it("labels a position in the numbering Sheets shows the operator", () => {
+      expect(schema.positionLabel(0, 0)).toBe("row 1, column A");
+      expect(schema.positionLabel(3, 1)).toBe("row 4, column B");
+      expect(schema.positionLabel(3, 26)).toBe("row 4, column AA");
+    });
+  });
+
   describe("isDataRowIndex", () => {
     it("is false above the header row and true at/after the top data row", () => {
       const topDataRowIdx = schema.topDataRowIdx;

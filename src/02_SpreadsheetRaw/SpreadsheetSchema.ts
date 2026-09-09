@@ -120,6 +120,37 @@ export class SpreadsheetSchema {
       );
     }
   }
+  isTableStart(startRowIndex: number, startColumnIndex: number): boolean {
+    return (
+      startRowIndex === this.headerRowIndex &&
+      startColumnIndex === this.startTableColIndex
+    );
+  }
+  validateTableStart(startRowIndex: number, startColumnIndex: number): void {
+    if (!this.isTableStart(startRowIndex, startColumnIndex)) {
+      throw new Error(
+        `A Table starting at ${this.positionLabel(
+          startRowIndex,
+          startColumnIndex,
+        )} must start at ${this.tableStartLabel}.`,
+      );
+    }
+  }
+  get tableStartLabel(): string {
+    return this.positionLabel(this.headerRowIndex, this.startTableColIndex);
+  }
+  positionLabel(rowIndex: number, colIndex: number): string {
+    return `row ${rowIndex + 1}, column ${this._columnLetter(colIndex)}`;
+  }
+  private _columnLetter(colIndex: number): string {
+    let letters = "";
+    let remaining = colIndex;
+    while (remaining >= 0) {
+      letters = String.fromCharCode(65 + (remaining % 26)) + letters;
+      remaining = Math.floor(remaining / 26) - 1;
+    }
+    return letters;
+  }
   isDataRowIndex(rowIndex: number): boolean {
     return rowIndex >= this.topDataRowIdx;
   }

@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 
 type BatchUpdateRequest =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
@@ -49,6 +50,14 @@ export interface FakeSheetProperties {
   table?: {
     endRowIndex: number;
     /**
+     * Where the Table's range starts, defaulting to the layout every sheet
+     * is required to follow (`headerRowIndexBase0`/`startTableColIndexBase0`).
+     * Override either one only to build a deliberately misplaced Table, which
+     * `SpreadsheetRaw`'s post-fetch placement check refuses.
+     */
+    startRowIndex?: number;
+    startColumnIndex?: number;
+    /**
      * A column's live data-validation condition values (e.g.
      * `["=valueConfig[Transaction Description]"]`), keyed by absolute
      * column index — read by `ColumnConfigOperator`'s valueName detection
@@ -76,6 +85,16 @@ export interface FakeSheetProperties {
    * response.
    */
   rowsWithNoGridData?: readonly number[];
+  /**
+   * Makes this sheet's Table come back from `Spreadsheets.get` but not from
+   * `getByDataFilter`, reproducing the real API's rule that a sheet's
+   * `tables` metadata is returned only for a filter whose range overlaps the
+   * table — the blind spot a Table that moved down or right falls into. A
+   * deliberate escape hatch, not filter awareness: teaching the fake real
+   * range arithmetic would put a second, subtly wrong model of the Sheets
+   * API into test support.
+   */
+  isTableHiddenFromFilteredFetch?: boolean;
 }
 
 export interface FakeSheetsServiceOptions {
@@ -219,6 +238,36 @@ function fakeTableColumnProperties(
   });
 }
 
+function fakeSheetTables(
+  sheet: FakeSheetProperties,
+  includeHiddenTables: boolean,
+): GoogleAppsScript.Sheets.Schema.Table[] | undefined {
+  const { table } = sheet;
+  if (!table) {
+    return undefined;
+  }
+  if (sheet.isTableHiddenFromFilteredFetch && !includeHiddenTables) {
+    return undefined;
+  }
+  return [
+    {
+      tableId: `fake-table-${sheet.sheetId}`,
+      range: {
+        startRowIndex:
+          table.startRowIndex ?? ssConfigGet("headerRowIndexBase0"),
+        endRowIndex: table.endRowIndex,
+        startColumnIndex:
+          table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),
+        endColumnIndex: Math.max(
+          0,
+          ...(sheet.rows ?? []).map((row) => row.length),
+        ),
+      },
+      columnProperties: fakeTableColumnProperties(table),
+    },
+  ];
+}
+
 /**
  * Stubs the `Sheets` Advanced Service global.
  *
@@ -241,42 +290,28 @@ export function stubSheetsService(
   const batchUpdateCalls: BatchUpdateRequest[] = [];
   const getByDataFilterCalls: object[] = [];
 
-  function sheetsResponse(): GoogleAppsScript.Sheets.Schema.Spreadsheet {
+  function sheetsResponse(
+    includeHiddenTables: boolean,
+  ): GoogleAppsScript.Sheets.Schema.Spreadsheet {
     return {
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
         data: fakeRowsToGoogleSheetData(s.rows, s.rowsWithNoGridData),
-        tables: s.table
-          ? [
-              {
-                tableId: `fake-table-${s.sheetId}`,
-                range: {
-                  startRowIndex: 0,
-                  endRowIndex: s.table.endRowIndex,
-                  startColumnIndex: 0,
-                  endColumnIndex: Math.max(
-                    0,
-                    ...(s.rows ?? []).map((row) => row.length),
-                  ),
-                },
-                columnProperties: fakeTableColumnProperties(s.table),
-              },
-            ]
-          : undefined,
+        tables: fakeSheetTables(s, includeHiddenTables),
       })),
     };
   }
 
   const service = {
     Spreadsheets: {
-      get: (_spreadsheetId: string, _params?: object) => sheetsResponse(),
+      get: (_spreadsheetId: string, _params?: object) => sheetsResponse(true),
       getByDataFilter: (
         resource: object,
         _spreadsheetId: string,
         _params?: object,
       ) => {
         getByDataFilterCalls.push(resource);
-        return sheetsResponse();
+        return sheetsResponse(false);
       },
       batchUpdate: (
         resource: BatchUpdateRequest,

@@ -1,8 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
+import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
@@ -15,6 +18,51 @@ import { SpreadsheetRaw } from "./SpreadsheetRaw";
 import { UniformRowRaw } from "./UniformRowRaw";
 
 const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
+
+const PROPERTY_GID = getSheetTraitByName("property", "sheetGid");
+const UNIT_GID = getSheetTraitByName("unit", "sheetGid");
+const HEADER_ROW_INDEX = ssConfigGet("headerRowIndexBase0");
+const START_TABLE_COL_INDEX = ssConfigGet("startTableColIndexBase0");
+
+function placedTableSheet(sheet: {
+  sheetId: number;
+  title: string;
+}): FakeSheetProperties {
+  return {
+    ...sheet,
+    rows: buildGridRows({ [HEADER_ROW_INDEX]: ["ID"] }),
+    table: { endRowIndex: HEADER_ROW_INDEX + 3 },
+  };
+}
+
+function misplacedTableSheet({
+  startRowIndex = HEADER_ROW_INDEX,
+  startColumnIndex = START_TABLE_COL_INDEX,
+  ...sheet
+}: {
+  sheetId: number;
+  title: string;
+  startRowIndex?: number;
+  startColumnIndex?: number;
+}): FakeSheetProperties {
+  return {
+    ...placedTableSheet(sheet),
+    table: {
+      endRowIndex: HEADER_ROW_INDEX + 3,
+      startRowIndex,
+      startColumnIndex,
+    },
+  };
+}
+
+function thrownMessage(fn: () => void): string {
+  try {
+    fn();
+  } catch (error) {
+    return (error as Error).message;
+  }
+  throw new Error("Expected the call to throw, but it did not.");
+}
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
@@ -68,6 +116,118 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     raw.sheetMeta(111).headerRow.gatherFetchFull();
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
+  });
+
+  it("does not throw for a config-known sheet whose Table starts where the layout requires", () => {
+    stubSheetsService({
+      sheets: [placedTableSheet({ sheetId: PROPERTY_GID, title: "Property" })],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).not.toThrow();
+  });
+
+  it("names both the found and the required position for a Table one row too high", () => {
+    stubSheetsService({
+      sheets: [
+        misplacedTableSheet({
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          startRowIndex: HEADER_ROW_INDEX - 1,
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).toThrowError(
+      /"Property".*starts at row 3, column A.*must start at row 4, column A/,
+    );
+  });
+
+  it("names both positions for a Table one column to the right of the layout", () => {
+    stubSheetsService({
+      sheets: [
+        misplacedTableSheet({
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          startColumnIndex: START_TABLE_COL_INDEX + 1,
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).toThrowError(
+      /"Property".*starts at row 4, column B.*must start at row 4, column A/,
+    );
+  });
+
+  it("leaves a sheet the config does not know alone, however its Table is placed", () => {
+    stubSheetsService({
+      sheets: [
+        misplacedTableSheet({
+          sheetId: 999999,
+          title: "Byron's Scratch Sheet",
+          startRowIndex: HEADER_ROW_INDEX - 1,
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(999999).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).not.toThrow();
+  });
+
+  it("names every misplaced sheet in one error, including one nothing was queued for", () => {
+    stubSheetsService({
+      sheets: [
+        misplacedTableSheet({
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          startRowIndex: HEADER_ROW_INDEX - 1,
+        }),
+        misplacedTableSheet({
+          sheetId: UNIT_GID,
+          title: "Unit",
+          startColumnIndex: START_TABLE_COL_INDEX + 1,
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+
+    expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
+  });
+
+  it("reports a Table the filtered fetch could not see as misplaced rather than absent", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          ...misplacedTableSheet({
+            sheetId: PROPERTY_GID,
+            title: "Property",
+            startRowIndex: HEADER_ROW_INDEX + 2,
+          }),
+          isTableHiddenFromFilteredFetch: true,
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+
+    const message = thrownMessage(() => raw.fetchAllGathered());
+    expect(message).toMatch(
+      /"Property".*starts at row 6, column A.*must start at row 4, column A/,
+    );
+    expect(message).not.toMatch(/Insert > Table/);
   });
 
   it("sends no request when no ranges were gathered, since empty dataFilters would fetch the whole spreadsheet", () => {

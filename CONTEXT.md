@@ -4,6 +4,20 @@ A Google Sheets spreadsheet that a person operates directly, with an Apps Script
 
 ## Language
 
+### Sheet layout
+
+**Table**:
+The Google Table (Insert > Table) laid over a sheet's data. Every sheet the app knows about must have one, and it must start on the header row, in the first column. Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. It never moves the Table back for you, because a Table that moved usually means you restructured the sheet on purpose.
+_Avoid_: range, data range, grid
+
+**Header row**:
+The row of column titles you read across the top of a sheet's data, directly above the first data row, and the row the Table starts on. Three bookkeeping rows sit above it that you never edit by hand.
+_Avoid_: title row, top row, row 1
+
+**Action row**:
+The row of checkboxes above the header row. Ticking a checkbox there is what asks the spreadsheet to do something, one endpoint per column.
+_Avoid_: control row, button row, trigger row
+
 ### Endpoints
 
 **Endpoint**:
