@@ -10,7 +10,7 @@ import type {
   ValueName,
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
-import type { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
+import type { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { CellNamedBase } from "./ClassBases/CellNamedBase";
 import { ColumnNamed } from "./ColumnNamed";

@@ -1,13 +1,13 @@
-import type { GoogleCellValue } from "../../00_base/AppsScriptTypes";
-import type { CellValue, CellValueName } from "../../00_base/base";
-import { Arr } from "../../utils/Arr";
-import { Val } from "../../utils/Val";
-import type { RawCellFacts, RowCellChange } from "../ClassTypes/RawState";
-import { DataSheetRaw } from "../DataSheetRaw";
-import { SheetRaw } from "../SheetRaw";
-import { SpreadsheetRaw } from "../SpreadsheetRaw";
+import type { GoogleCellValue } from "../00_base/AppsScriptTypes";
+import type { CellValue, CellValueName } from "../00_base/base";
+import { Arr } from "../utils/Arr";
+import { Val } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
-import { ColumnRawBase } from "./ColumnRawBase";
+import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
+import type { RawCellFacts, RowCellChange } from "./ClassTypes/RawState";
+import { DataSheetRaw } from "./DataSheetRaw";
+import { SheetRaw } from "./SheetRaw";
+import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 export class DataColumnRaw<
   VN extends CellValueName = CellValueName,

@@ -2,18 +2,18 @@ import type {
   GoogleCellValue,
   GoogleColor,
   UserEnteredValue,
-} from "../../00_base/AppsScriptTypes";
-import type { CellValue, CellValueName } from "../../00_base/base";
-import type { CellValueTrait } from "../../00_base/baseValueSchemas";
-import { getCellValTrait } from "../../00_base/baseValueSchemas";
-import type { ValueSchemaKey } from "../../00_base/valueSchema";
-import { Obj } from "../../utils/Obj";
-import { Val } from "../../utils/Val";
-import type { RowCellChange } from "../ClassTypes/RawState";
-import { SheetRaw } from "../SheetRaw";
-import type { UniformRowRaw } from "../UniformRowRaw";
-import { CellRawBase } from "./CellRawBase";
+} from "../00_base/AppsScriptTypes";
+import type { CellValue, CellValueName } from "../00_base/base";
+import type { CellValueTrait } from "../00_base/baseValueSchemas";
+import { getCellValTrait } from "../00_base/baseValueSchemas";
+import type { ValueSchemaKey } from "../00_base/valueSchema";
+import { Obj } from "../utils/Obj";
+import { Val } from "../utils/Val";
+import { CellRawBase } from "./ClassBases/CellRawBase";
+import type { RowCellChange } from "./ClassTypes/RawState";
 import type { DataRowRaw } from "./DataRowRaw";
+import { SheetRaw } from "./SheetRaw";
+import type { UniformRowRaw } from "./UniformRowRaw";
 
 export class CellRaw<
   VN extends CellValueName = CellValueName,

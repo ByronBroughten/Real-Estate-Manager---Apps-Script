@@ -6,8 +6,8 @@ import type {
   RowChangesToSave,
   RowChangeUpdateProps,
 } from "../ClassTypes/RawState";
+import { CellRaw } from "../CellRaw";
 import { SheetRaw } from "../SheetRaw";
-import { CellRaw } from "./CellRaw";
 import { RowRawBase } from "./RowRawBase";
 
 export abstract class RowCommonRaw extends RowRawBase {

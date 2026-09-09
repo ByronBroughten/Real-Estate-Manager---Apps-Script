@@ -5,8 +5,8 @@ import { Val } from "../utils/Val";
 import {
   cellChangeFieldMask,
   cellChangeToCellData,
-} from "./ClassBases/CellRaw";
-import { DataRowRaw } from "./ClassBases/DataRowRaw";
+} from "./CellRaw";
+import { DataRowRaw } from "./DataRowRaw";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { ColumnRaw } from "./ColumnRaw";
 import { DataSheetRaw } from "./DataSheetRaw";

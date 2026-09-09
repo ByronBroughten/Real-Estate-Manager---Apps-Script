@@ -1,6 +1,6 @@
-import type { CellValue, CellValueName } from "../../00_base/base";
-import { RowCommonRaw } from "./RowCommonRaw";
-import type { RowRawProps } from "./RowRawBase";
+import type { CellValue, CellValueName } from "../00_base/base";
+import { RowCommonRaw } from "./ClassBases/RowCommonRaw";
+import type { RowRawProps } from "./ClassBases/RowRawBase";
 
 export class DataRowRaw extends RowCommonRaw {
   constructor(props: RowRawProps) {

@@ -5,9 +5,9 @@ import type {
   UniformRowValueName,
 } from "../00_base/base";
 import type { PrimitiveValueName } from "../utils/Val";
-import { CellRaw } from "./ClassBases/CellRaw";
+import { CellRaw } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
+import { DataColumnRaw } from "./DataColumnRaw";
 import { SheetRaw } from "./SheetRaw";
 
 export class ColumnRaw<

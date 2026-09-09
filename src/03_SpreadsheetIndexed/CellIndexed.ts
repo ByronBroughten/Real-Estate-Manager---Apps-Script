@@ -5,7 +5,7 @@ import type {
   ValueName,
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
-import { CellRaw } from "../02_SpreadsheetRaw/ClassBases/CellRaw";
+import { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import type { CellRawProps } from "../02_SpreadsheetRaw/ClassBases/CellRawBase";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexedBase } from "./CellIndexedBase";

@@ -1,8 +1,8 @@
 import type { CellValueName } from "../00_base/base";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
-import { DataColumnRaw } from "./ClassBases/DataColumnRaw";
-import { DataRowRaw } from "./ClassBases/DataRowRaw";
+import { DataColumnRaw } from "./DataColumnRaw";
+import { DataRowRaw } from "./DataRowRaw";
 import { SheetRawBase } from "./ClassBases/SheetRawBase";
 import { SheetRaw } from "./SheetRaw";
 

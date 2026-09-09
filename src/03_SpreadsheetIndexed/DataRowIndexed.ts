@@ -1,6 +1,6 @@
 import type { CellValue } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
-import { DataRowRaw } from "../02_SpreadsheetRaw/ClassBases/DataRowRaw";
+import { DataRowRaw } from "../02_SpreadsheetRaw/DataRowRaw";
 import { CellIndexed } from "./CellIndexed";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
