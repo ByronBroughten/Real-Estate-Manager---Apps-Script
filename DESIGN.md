@@ -20,6 +20,8 @@ This is the most-repeated argument in the codebase, and it's what most often dis
 
 *Corollary:* prefer narrowing a type until the bad case is unrepresentable over encoding an explanation into a fallback value. A branded-string fallback reads as friendlier but collapses back to `never` in constraint position, so it buys nothing where it matters.
 
+*Corollary:* this is about states that cannot be **represented**, not names that are ambiguous to a reader. Two accessors sharing a name and returning different, fully-checked types are not an instance of it — nothing is unrepresentable and the type-checker catches a mis-wiring either way, which is why `sheet.column(cn)` and `sheetMeta.column(cn)` are allowed to share a name (#6). The `makeStructuredConfig` case above is a hole in *checking*, which is a different failure. Citing this principle against a shared name is over-application; reach for it when a bad state can exist, not when a reader might be confused.
+
 ### Model state at the granularity the concept actually has
 
 Store and expose a fact at the level it's *about*, not the level it happens to arrive at. The wire format's granularity is not the domain's granularity, and neither is the storage medium's.

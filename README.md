@@ -156,6 +156,8 @@ Both parameters of `ColumnFullName<VN, IF>` default to "don't care," so the bare
 
 `src/02_SpreadsheetRaw/SpreadsheetSchema.ts` holds all three, in one module because they form an import cycle — `extends` is evaluated at module init, so under the bundler a split would risk a "cannot access before initialization" crash in Apps Script that neither `tsc` nor the tests would catch.
 
+The converse is worth knowing, because it looks like the same hazard and isn't: **two sibling classes may import each other as values and instantiate each other in getter bodies.** `SheetRaw`/`SheetMetaRaw` and `ColumnRaw`/`ColumnMetaRaw` already do, in both directions. Only `extends` runs at module init, so a cycle whose imports are used exclusively inside method and getter bodies is safe. Reach for a single shared module — or for an `abstract` member implemented on each subclass, as `SheetCommonRaw` does with `ss` — only when the cycle would close through an `extends` clause.
+
 | Class                 | Answers                                                             | Reached from                               |
 | --------------------- | ------------------------------------------------------------------- | ------------------------------------------ |
 | `SpreadsheetSchema`   | Uniform-row indexes, ID encode/decode, layout constants, sheet list | Spreadsheet-level and every Raw-tier class |

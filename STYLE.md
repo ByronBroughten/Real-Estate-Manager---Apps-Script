@@ -88,6 +88,8 @@ Editing a file is the moment to remove, not preserve, a stub nothing calls, a pl
 
 **Exception: commented-out code.** Flag it and ask before deleting — don't remove it as part of a cleanup pass. It might be an intentional breadcrumb rather than leftover cruft.
 
+**Zero callers is not proof of dead.** Some members are parked for planned work and carry no marker distinguishing them from cruft — `SheetRaw.validateRowIndexes` and `SheetRaw.requestSortGSheet` are both intentional. A grep-derived list of uncalled members is a set of candidates, not a verdict: name what you found and ask, rather than deleting on the count. A member whose only caller is a test is a third case again — deleting it deletes coverage.
+
 ### Keep "why" comments across a refactor
 
 A comment explaining a non-obvious invariant (e.g. why two sheets must sync in one flush) carries over verbatim across a restructure — it documents the invariant, not the code shape around it.
