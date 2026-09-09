@@ -240,13 +240,13 @@ function fakeTableColumnProperties(
 
 function fakeSheetTables(
   sheet: FakeSheetProperties,
-  includeHiddenTables: boolean,
+  isFilteredFetch: boolean,
 ): GoogleAppsScript.Sheets.Schema.Table[] | undefined {
   const { table } = sheet;
   if (!table) {
     return undefined;
   }
-  if (sheet.isTableHiddenFromFilteredFetch && !includeHiddenTables) {
+  if (sheet.isTableHiddenFromFilteredFetch && isFilteredFetch) {
     return undefined;
   }
   return [
@@ -291,27 +291,27 @@ export function stubSheetsService(
   const getByDataFilterCalls: object[] = [];
 
   function sheetsResponse(
-    includeHiddenTables: boolean,
+    isFilteredFetch: boolean,
   ): GoogleAppsScript.Sheets.Schema.Spreadsheet {
     return {
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
         data: fakeRowsToGoogleSheetData(s.rows, s.rowsWithNoGridData),
-        tables: fakeSheetTables(s, includeHiddenTables),
+        tables: fakeSheetTables(s, isFilteredFetch),
       })),
     };
   }
 
   const service = {
     Spreadsheets: {
-      get: (_spreadsheetId: string, _params?: object) => sheetsResponse(true),
+      get: (_spreadsheetId: string, _params?: object) => sheetsResponse(false),
       getByDataFilter: (
         resource: object,
         _spreadsheetId: string,
         _params?: object,
       ) => {
         getByDataFilterCalls.push(resource);
-        return sheetsResponse(false);
+        return sheetsResponse(true);
       },
       batchUpdate: (
         resource: BatchUpdateRequest,

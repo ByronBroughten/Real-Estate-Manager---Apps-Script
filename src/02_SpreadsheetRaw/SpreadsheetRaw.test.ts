@@ -23,6 +23,8 @@ const PROPERTY_GID = getSheetTraitByName("property", "sheetGid");
 const UNIT_GID = getSheetTraitByName("unit", "sheetGid");
 const HEADER_ROW_INDEX = ssConfigGet("headerRowIndexBase0");
 const START_TABLE_COL_INDEX = ssConfigGet("startTableColIndexBase0");
+const SCRATCH_GID = 999999;
+const TABLE_END_ROW_INDEX = HEADER_ROW_INDEX + 3;
 
 function placedTableSheet(sheet: {
   sheetId: number;
@@ -31,7 +33,7 @@ function placedTableSheet(sheet: {
   return {
     ...sheet,
     rows: buildGridRows({ [HEADER_ROW_INDEX]: ["ID"] }),
-    table: { endRowIndex: HEADER_ROW_INDEX + 3 },
+    table: { endRowIndex: TABLE_END_ROW_INDEX },
   };
 }
 
@@ -48,7 +50,7 @@ function misplacedTableSheet({
   return {
     ...placedTableSheet(sheet),
     table: {
-      endRowIndex: HEADER_ROW_INDEX + 3,
+      endRowIndex: TABLE_END_ROW_INDEX,
       startRowIndex,
       startColumnIndex,
     },
@@ -171,7 +173,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     stubSheetsService({
       sheets: [
         misplacedTableSheet({
-          sheetId: 999999,
+          sheetId: SCRATCH_GID,
           title: "Byron's Scratch Sheet",
           startRowIndex: HEADER_ROW_INDEX - 1,
         }),
@@ -179,7 +181,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(999999).headerRow.gatherFetchFull();
+    raw.sheetMeta(SCRATCH_GID).headerRow.gatherFetchFull();
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });

@@ -12,11 +12,11 @@ import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 
-interface TablePlacementSheet {
+interface SheetIdentity {
   sheetGid: number;
   title: string | null;
 }
-interface MisplacedTable extends TablePlacementSheet {
+interface MisplacedTable extends SheetIdentity {
   startRowIndex: number;
   startColumnIndex: number;
 }
@@ -82,7 +82,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // leaves them looking merely "not yet fetched" to callers.
   private _finalizeGatheredFetches(): void {
     const misplacedTables: MisplacedTable[] = [];
-    const absentTables: TablePlacementSheet[] = [];
+    const absentTables: SheetIdentity[] = [];
     this.rawState.sheets.forEach((state, sheetGid) => {
       // Above the early return, so a range that arrived incidentally is still judged.
       const misplacedTable = this._misplacedTable(sheetGid);
@@ -135,41 +135,31 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _reportTablePlacement(
     misplacedTables: MisplacedTable[],
-    absentTables: TablePlacementSheet[],
+    absentTables: SheetIdentity[],
   ): void {
     if (misplacedTables.length === 0 && absentTables.length === 0) return;
-    const stillAbsent = this._reclassifyAbsentTables(
-      absentTables,
-      misplacedTables,
-    );
+    if (absentTables.length > 0) {
+      // The probe is built from the constants under test, so a moved Table looks absent.
+      this.ensureAllSheetPropertiesAreFetched();
+    }
+    const allMisplaced = [...misplacedTables];
+    const stillAbsent: SheetIdentity[] = [];
+    absentTables.forEach((absentTable) => {
+      const movedTable = this._misplacedTable(absentTable.sheetGid);
+      if (movedTable === null) {
+        stillAbsent.push(absentTable);
+      } else {
+        allMisplaced.push(movedTable);
+      }
+    });
     const sentences: string[] = [];
-    if (misplacedTables.length > 0) {
-      sentences.push(this._misplacedTableSentence(misplacedTables));
+    if (allMisplaced.length > 0) {
+      sentences.push(this._misplacedTableSentence(allMisplaced));
     }
     if (stillAbsent.length > 0) {
       sentences.push(this._absentTableSentence(stillAbsent));
     }
     throw new Error(sentences.join(" "));
-  }
-  // The probe that delivers table metadata is built from the two constants
-  // under test, so a Table that moved down or right looks absent until a
-  // full properties read — one extra round trip, on a path already aborting.
-  private _reclassifyAbsentTables(
-    absentTables: TablePlacementSheet[],
-    misplacedTables: MisplacedTable[],
-  ): TablePlacementSheet[] {
-    if (absentTables.length === 0) return absentTables;
-    this.ensureAllSheetPropertiesAreFetched();
-    const stillAbsent: TablePlacementSheet[] = [];
-    absentTables.forEach((absentTable) => {
-      const misplacedTable = this._misplacedTable(absentTable.sheetGid);
-      if (misplacedTable === null) {
-        stillAbsent.push(absentTable);
-      } else {
-        misplacedTables.push(misplacedTable);
-      }
-    });
-    return stillAbsent;
   }
   private _misplacedTableSentence(misplacedTables: MisplacedTable[]): string {
     const positions = misplacedTables
@@ -183,13 +173,13 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       .join("; ");
     return `${misplacedTables.length} sheet(s) have a Table that does not start where the layout requires — move each Table to where it must start, and do not rebuild it: ${positions}`;
   }
-  private _absentTableSentence(absentTables: TablePlacementSheet[]): string {
+  private _absentTableSentence(absentTables: SheetIdentity[]): string {
     const names = absentTables
       .map((absentTable) => this._sheetLabel(absentTable))
       .join(", ");
     return `${absentTables.length} sheet(s) need a full row/column fetch but have no Table object — apply Insert > Table over their data range in Sheets: ${names}`;
   }
-  private _sheetLabel({ sheetGid, title }: TablePlacementSheet): string {
+  private _sheetLabel({ sheetGid, title }: SheetIdentity): string {
     return `"${title ?? "(untitled)"}" (gid ${sheetGid})`;
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
