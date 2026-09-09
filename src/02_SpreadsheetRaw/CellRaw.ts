@@ -76,7 +76,7 @@ export class CellRaw<
       this.setValueState("");
     }
   }
-  value(): CellValue<VN> {
+  valueOrEmpty(): CellValue<VN> {
     if (!this.isActive) {
       throw new Error(
         `Row ${this.rowIndex} does not have a value set for column index ${this.colIndex}.`,

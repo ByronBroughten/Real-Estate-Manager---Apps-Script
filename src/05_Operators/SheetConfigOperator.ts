@@ -56,7 +56,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   }
   private _deleteStaleSheetConfigs() {
     this.sheet.rows.forEach((row) => {
-      const configGid = row.value("sheetGid");
+      const configGid = row.valueOrEmpty("sheetGid");
       if (configGid === "" || !this.ss.raw.gidIsActive(configGid)) {
         row.delete();
       }
@@ -74,14 +74,14 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
     let updatedValues = 0;
     this.sheet.rowIndexesActive.forEach((rowIndex) => {
-      const sheetTitle = col.sheetTitle.value(rowIndex);
-      const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
+      const sheetTitle = col.sheetTitle.valueOrEmpty(rowIndex);
+      const sheetGid = col.sheetGid.value(rowIndex);
       const activeSheet = this.ss.raw.sheet(sheetGid);
       if (sheetTitle !== activeSheet.title) {
         col.sheetTitle.cell(rowIndex).updateValue(activeSheet.title);
         updatedValues++;
       }
-      const hasIdCol = col.hasIdColumn.value(rowIndex);
+      const hasIdCol = col.hasIdColumn.valueOrEmpty(rowIndex);
       const actualHasIdCol = activeSheet.meta.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
         col.hasIdColumn.cell(rowIndex).updateValue(actualHasIdCol);
@@ -97,8 +97,8 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     const col = this.sheet.columns("sheetGid", "letApiAccess");
     const gids: number[] = [];
     this.sheet.rowIndexesActive.forEach((rowIndex) => {
-      if (col.letApiAccess.value(rowIndex)) {
-        gids.push(col.sheetGid.valueNotEmpty(rowIndex));
+      if (col.letApiAccess.valueOrEmpty(rowIndex)) {
+        gids.push(col.sheetGid.value(rowIndex));
       }
     });
     return gids;
@@ -114,13 +114,13 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     const sheetConfigs: SheetConfigsBase = {};
     this.sheet.rowIndexesActive.forEach((rowIndex) => {
       // Defaults false on a freshly-appended row — excluded until a human sets it true in the sheet.
-      if (!col.letApiAccess.value(rowIndex)) return;
+      if (!col.letApiAccess.valueOrEmpty(rowIndex)) return;
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.titleToName(title);
       sheetConfigs[sheetName] = {
-        sheetGid: col.sheetGid.valueNotEmpty(rowIndex),
-        idPrefix: col.idPrefix.value(rowIndex),
-        hasIdColumn: col.hasIdColumn.valueNotEmpty(rowIndex),
+        sheetGid: col.sheetGid.value(rowIndex),
+        idPrefix: col.idPrefix.valueOrEmpty(rowIndex),
+        hasIdColumn: col.hasIdColumn.value(rowIndex),
       };
     });
     return sheetConfigs;

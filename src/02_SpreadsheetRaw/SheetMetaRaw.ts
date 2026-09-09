@@ -59,7 +59,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
     this.fullTableColIndexes.forEach((colIndex) => {
-      const colIdValue = this.colIdRow.value(colIndex);
+      const colIdValue = this.colIdRow.valueOrEmpty(colIndex);
       if (!colIdValue) {
         this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
         addedCount++;

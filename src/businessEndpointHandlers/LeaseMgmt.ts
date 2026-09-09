@@ -55,8 +55,8 @@
 //       const dateNext = hh.value("rentChangeDateNext");
 //       if (Dat.isDateAndTodayOrPassed(dateNext)) {
 //         const householdId = hh.id;
-//         const rentChargeNext = hh.valueNumber("rentChargeMonthlyNext");
-//         const utilityChargeNext = hh.valueNumber("utilityChargeMonthlyNext");
+//         const rentChargeNext = hh.value("rentChargeMonthlyNext");
+//         const utilityChargeNext = hh.value("utilityChargeMonthlyNext");
 //         this.addLease({
 //           householdId,
 //           occupancyId: hh.value("occupancyId"),
@@ -106,7 +106,7 @@
 //       const descending = priorUnendedLeases.sort((a, b) =>
 //         Arr.compareForSort(b.value("startDate"), a.value("startDate")),
 //       );
-//       return descending[0].values(leaseAmountValueNames);
+//       return descending[0].valuesOrEmpty(leaseAmountValueNames);
 //     }
 
 //     const priorEndedLeases = this.leaseSheet.rowsFiltered({ householdId });
@@ -114,7 +114,7 @@
 //       const descending = priorEndedLeases.sort((a, b) =>
 //         Arr.compareForSort(b.value("endDate"), a.value("endDate")),
 //       );
-//       return descending[0].values(leaseAmountValueNames);
+//       return descending[0].valuesOrEmpty(leaseAmountValueNames);
 //     }
 //     return {};
 //   }

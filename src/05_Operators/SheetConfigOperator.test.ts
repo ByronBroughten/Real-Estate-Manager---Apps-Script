@@ -19,6 +19,14 @@ const SHEET_CONFIG_GID = 210603630;
 const PROPERTY_GID = 999001;
 const NEW_SHEET_GID = 999002;
 
+const sheetConfigColumnIdRow = [
+  sc.sheetGid.columnId,
+  sc.sheetTitle.columnId,
+  sc.hasIdColumn.columnId,
+  sc.letApiAccess.columnId,
+  sc.idPrefix.columnId,
+];
+
 const existingPropertyConfigRow = [
   PROPERTY_GID,
   "Property",
@@ -58,13 +66,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: SHEET_CONFIG_GID,
           title: "Sheet Config",
           rows: buildGridRows({
-            0: [
-              sc.sheetGid.columnId,
-              sc.sheetTitle.columnId,
-              sc.hasIdColumn.columnId,
-              sc.letApiAccess.columnId,
-              sc.idPrefix.columnId,
-            ],
+            0: sheetConfigColumnIdRow,
             4: existingPropertyConfigRow,
           }),
           table: { endRowIndex: 5 },
@@ -111,13 +113,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: SHEET_CONFIG_GID,
           title: "Sheet Config",
           rows: buildGridRows({
-            0: [
-              sc.sheetGid.columnId,
-              sc.sheetTitle.columnId,
-              sc.hasIdColumn.columnId,
-              sc.letApiAccess.columnId,
-              sc.idPrefix.columnId,
-            ],
+            0: sheetConfigColumnIdRow,
             // A human already turned on API access for this sheet, but no
             // deploy has run since — this run's own live sync is the only
             // place the mapping exists.
@@ -139,5 +135,65 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(operator.sheetNamesByGid().get(NEW_SHEET_GID)).toBe("brandNewSheet");
     expect(operator.toFileSource()).toContain('"brandNewSheet"');
+  });
+
+  // A checkbox nobody has ever touched reads blank, not false.
+  it("excludes a sheet whose API-access checkbox has never been ticked", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", null, null, "prp"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+    syncSheetConfigOperator(operator);
+
+    expect(operator.newSheetConfigs().property).toBeUndefined();
+    expect(operator.sheetGidsApiAccesses()).toEqual([]);
+  });
+
+  it("generates a config for an API-access sheet whose id prefix has never been filled in", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", null, true, null],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+    syncSheetConfigOperator(operator);
+
+    expect(operator.newSheetConfigs().property).toEqual({
+      sheetGid: PROPERTY_GID,
+      idPrefix: "",
+      hasIdColumn: false,
+    });
   });
 });

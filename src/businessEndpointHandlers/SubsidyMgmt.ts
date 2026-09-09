@@ -36,7 +36,7 @@
 //         this.addSubsidyContract({
 //           subsidyAgreementId: sa.id,
 //           startDate: dateNext,
-//           rentChargeBaseMonthly: sa.valueNumber("rentPortionMonthlyNext"),
+//           rentChargeBaseMonthly: sa.value("rentPortionMonthlyNext"),
 //           unitId: contractLease.value("unitId"),
 //           endPriorActiveContracts: "yes",
 //         });
@@ -53,11 +53,11 @@
 //       householdId: sa.value("householdId"),
 //     });
 //     const activeLeases = occupancyTermss.filter((lease) => {
-//       return lease.valueDate("startDate") <= dateNext;
+//       return lease.value("startDate") <= dateNext;
 //     });
 //     const ascendingLeases = activeLeases.sort(
 //       (a, b) =>
-//         a.valueDate("startDate").getTime() - b.valueDate("startDate").getTime(),
+//         a.value("startDate").getTime() - b.value("startDate").getTime(),
 //     );
 
 //     if (ascendingLeases.length === 0) {

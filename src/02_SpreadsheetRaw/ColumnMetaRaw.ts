@@ -23,7 +23,7 @@ export class ColumnMetaRaw<
     return new ColumnRaw<VN>(this.columnRawProps);
   }
   get activeHeader() {
-    return this.uniformCell("header").value();
+    return this.uniformCell("header").valueOrEmpty();
   }
   get activeIsFormula(): boolean {
     return this._activeFacts.isFormula;
@@ -80,7 +80,7 @@ export class ColumnMetaRaw<
     this.columnCellFacts.set(this.colIndex, {
       isFormula: cellValue?.userEnteredValue?.formulaValue !== undefined,
       numberFormatType: cellValue?.effectiveFormat?.numberFormat?.type,
-      topValue: this.primary.topCell.value(), // sampled now; the row can be pruned later
+      topValue: this.primary.topCell.valueOrEmpty(), // sampled now; the row can be pruned later
     });
   }
   activeValueTitle(): string {

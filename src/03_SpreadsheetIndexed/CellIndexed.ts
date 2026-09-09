@@ -33,11 +33,11 @@ export class CellIndexed<
     this.preFetchGridRanges.push({ row: this.rowIndex, column: this.columnId });
     return this;
   }
-  value(): Value<VN> {
-    return this.raw.value() as Value<VN>;
+  valueOrEmpty(): Value<VN> {
+    return this.raw.valueOrEmpty() as Value<VN>;
   }
-  valueNotEmpty(): StrictExclude<Value<VN>, ""> {
-    const value = this.value();
+  value(): StrictExclude<Value<VN>, ""> {
+    const value = this.valueOrEmpty();
     if (value === "") {
       throw new Error(
         `Value for column "${this.columnId}" in row ${this.rowIndex} is empty.`,

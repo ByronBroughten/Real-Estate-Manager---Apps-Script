@@ -104,31 +104,31 @@
 
 //     if (occCharges.length > 0) {
 //       occCharges.sort((a, b) =>
-//         Arr.compareForSort(a.valueDate("date"), b.valueDate("date")),
+//         Arr.compareForSort(a.value("date"), b.value("date")),
 //       );
-//       firstDate = occCharges[0].valueDate("date");
-//       lastDate = Arr.lastOrThrow(occCharges).valueDate("date");
+//       firstDate = occCharges[0].value("date");
+//       lastDate = Arr.lastOrThrow(occCharges).value("date");
 //     }
 
 //     if (occupancyTermss.length > 0) {
 //       occupancyTermss.sort((a, b) =>
-//         Arr.compareForSort(a.valueDate("startDate"), b.valueDate("startDate")),
+//         Arr.compareForSort(a.value("startDate"), b.value("startDate")),
 //       )[0];
-//       const earliestStart = occupancyTermss[0].valueDate("startDate");
+//       const earliestStart = occupancyTermss[0].value("startDate");
 //       if (earliestStart < firstDate) {
 //         firstDate = earliestStart;
 //       }
 
 //       const latestStart =
-//         Arr.lastOrThrow(occupancyTermss).valueDate("startDate");
+//         Arr.lastOrThrow(occupancyTermss).value("startDate");
 //       if (latestStart > lastDate) {
 //         lastDate = latestStart;
 //       }
 
 //       occupancyTermss.sort((a, b) =>
-//         Arr.compareForSort(a.valueDate("endDate"), b.valueDate("endDate")),
+//         Arr.compareForSort(a.value("endDate"), b.value("endDate")),
 //       );
-//       const latestEnd = Arr.lastOrThrow(occupancyTermss).valueDate("endDate");
+//       const latestEnd = Arr.lastOrThrow(occupancyTermss).value("endDate");
 //       if (latestEnd > lastDate) {
 //         lastDate = latestEnd;
 //       }
@@ -160,7 +160,7 @@
 //   }): DataRowNamed<"occCharge">[] {
 //     const occCharge = this.sheet("occCharge");
 //     return occCharge.dataRows.filter((row) => {
-//       const date = row.valueDate("date");
+//       const date = row.value("date");
 //       return (
 //         row.value("householdId") === householdId &&
 //         utils.date.isInMonthAndYear(date, month, year) &&
@@ -210,7 +210,7 @@
 //     const firstOfMonth = utils.date.firstDayOfMonthNext({ month, year });
 //     const lastOfMonth = utils.date.lastDayOfMonthNext({ month, year });
 //     return sheet.dataRows.filter((row) => {
-//       const startDate = row.valueDate("startDate");
+//       const startDate = row.value("startDate");
 //       const endDate = row.dateValueOrGivenDate("endDate", lastOfMonth);
 //       if (startDate > endDate) {
 //         throw new Error("Start date cannot be after end date.");
@@ -246,11 +246,11 @@
 //     });
 
 //     for (const lease of activeoccupancyTermss) {
-//       const startDate = lease.valueDate("startDate");
+//       const startDate = lease.value("startDate");
 //       const endDate = lease.dateValueOrGivenDate("endDate", lastOfMonth);
 
 //       for (const columnName of leaseChargeVarbNames) {
-//         const fullAmount = lease.valueNumber(columnName);
+//         const fullAmount = lease.value(columnName);
 //         if (fullAmount === 0) {
 //           continue; // skip lease charges of $0.
 //         }
@@ -333,13 +333,13 @@
 
 //     let proratedSubsidyTotal = 0;
 //     for (const scContract of activeScCharges) {
-//       const fullAmount = scContract.valueNumber("rentChargeBaseMonthly");
+//       const fullAmount = scContract.value("rentChargeBaseMonthly");
 //       if (fullAmount === 0) {
 //         continue;
 //       }
 //       const prorated = utils.date.proratedMonthlyAmount({
 //         amount: fullAmount,
-//         startDate: scContract.valueDate("startDate"),
+//         startDate: scContract.value("startDate"),
 //         endDate: scContract.dateValueOrGivenDate("endDate", lastDayOfMonth),
 //         month,
 //         year,

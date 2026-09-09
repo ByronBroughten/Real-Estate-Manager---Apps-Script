@@ -34,22 +34,23 @@ export class ColumnNamed<
   get rowIndexesActive(): number[] {
     return this.indexed.cellIndexesActive;
   }
-  get valueArr(): ColumnValue<SN, CN>[] {
-    return this.indexed.valueArr;
+  get valueArrOrEmpty(): ColumnValue<SN, CN>[] {
+    return this.indexed.valueArrOrEmpty;
   }
   get valueArrFilterEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
     return this.indexed.valueArrFilterEmpty;
   }
-  get valueArrNotEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
-    return this.indexed.valueArrNotEmpty;
+  // Not delegated to Indexed, so a blank throws with the Named message.
+  get valueArr(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+    return this.rowIndexesActive.map((rowIndex) => this.value(rowIndex));
   }
   hasValue(value: ColumnValue<SN, CN>): boolean {
-    return this.valueArr.includes(value);
+    return this.valueArrOrEmpty.includes(value);
   }
-  valueNotEmpty(rowIndex: number): StrictExclude<ColumnValue<SN, CN>, ""> {
-    return this.indexed.valueNotEmpty(rowIndex);
+  valueOrEmpty(rowIndex: number): ColumnValue<SN, CN> {
+    return this.cell(rowIndex).valueOrEmpty();
   }
-  value(rowIndex: number): ColumnValue<SN, CN> {
+  value(rowIndex: number): StrictExclude<ColumnValue<SN, CN>, ""> {
     return this.cell(rowIndex).value();
   }
   cell(rowIndex: number): CellNamed<SN, CN> {

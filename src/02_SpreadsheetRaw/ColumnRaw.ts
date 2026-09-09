@@ -19,11 +19,13 @@ export class ColumnRaw<
   get meta(): ColumnMetaRaw<VN> {
     return new ColumnMetaRaw<VN>(this.columnRawProps);
   }
-  get valueArr(): CellValue<VN>[] {
-    return this.sheet.rowIndexesActive.map((rowIndex) => this.value(rowIndex));
+  get valueArrOrEmpty(): CellValue<VN>[] {
+    return this.sheet.rowIndexesActive.map((rowIndex) =>
+      this.valueOrEmpty(rowIndex),
+    );
   }
   get valueArrFilterEmpty(): CellValue<VN>[] {
-    return this.valueArr.filter((value) => value !== "");
+    return this.valueArrOrEmpty.filter((value) => value !== "");
   }
   get topCell(): CellRaw<VN> {
     return this.cell(this.schema.topDataRowIdx);
@@ -41,8 +43,8 @@ export class ColumnRaw<
       valueName: this.valueName,
     });
   }
-  value(rowIndex: number): CellValue<VN> {
-    return this.cell(rowIndex).value();
+  valueOrEmpty(rowIndex: number): CellValue<VN> {
+    return this.cell(rowIndex).valueOrEmpty();
   }
   updateValue(rowIndex: number, newValue: CellValue<VN>): this {
     this.cell(rowIndex).updateValue(newValue);

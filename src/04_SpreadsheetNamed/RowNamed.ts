@@ -38,33 +38,19 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
     return this.cell(columnName).isActive;
   }
-  valueNotEmpty<CN extends ColumnName<SN>>(columnName: CN): StrictExclude<ColumnValue<SN, CN>, ""> {
-    return this.cell(columnName).valueNotEmpty();
+  valueOrEmpty<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
+    return this.cell(columnName).valueOrEmpty();
   }
-  value<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
+  value<CN extends ColumnName<SN>>(
+    columnName: CN,
+  ): StrictExclude<ColumnValue<SN, CN>, ""> {
     return this.cell(columnName).value();
-  }
-  valueStringNotEmpty<CN extends ColumnName<SN>>(columnName: CN): string {
-    const value = this.value(columnName);
-    return Val.validate.stringNotEmpty(value);
-  }
-  valueNumber<CN extends ColumnName<SN>>(columnName: CN): number {
-    const value = this.value(columnName);
-    return Val.validate.number(value);
-  }
-  valueDate<CN extends ColumnName<SN>>(columnName: CN): Date {
-    const value = this.value(columnName);
-    return Val.validate.date(value);
-  }
-  valueDateOrEmpty<CN extends ColumnName<SN>>(columnName: CN): Date | "" {
-    const value = this.value(columnName);
-    return Val.validate.dateOrEmpty(value);
   }
   dateValueAfterOrGivenDate<CN extends ColumnName<SN>>(
     columnName: CN,
     date: Date = new Date(),
   ): Date {
-    const dateValue = this.valueDateOrEmpty(columnName);
+    const dateValue = this.valueOrEmpty(columnName);
     if (!Val.is.date(dateValue)) {
       return date;
     }
@@ -79,7 +65,7 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     columnName: CN,
     date: Date = new Date(),
   ): Date {
-    const dateValue = this.valueDateOrEmpty(columnName);
+    const dateValue = this.valueOrEmpty(columnName);
     if (!Val.is.date(dateValue)) {
       return date;
     }
@@ -94,36 +80,27 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     columnName: CN,
     date: Date = new Date(),
   ): Date {
-    const dateValue = this.valueDateOrEmpty(columnName);
+    const dateValue = this.valueOrEmpty(columnName);
     if (Val.is.date(dateValue)) {
       return dateValue;
     } else {
       return date;
     }
   }
-  values<CN extends ColumnName<SN> = ColumnName<SN>>(
+  valuesOrEmpty<CN extends ColumnName<SN> = ColumnName<SN>>(
     ...columnNames: readonly CN[]
   ): SheetDataValues<SN, CN> {
     const keys =
       columnNames.length > 0 ? columnNames : (this.activeCellNames as CN[]);
     return keys.reduce(
       (values, columnName) => {
-        (values[columnName] as SheetDataValues<SN, CN>[CN]) = this.value(
+        (values[columnName] as SheetDataValues<SN, CN>[CN]) = this.valueOrEmpty(
           columnName,
         ) as SheetDataValues<SN, CN>[CN];
         return values;
       },
       {} as SheetDataValues<SN, CN>,
     );
-  }
-  validateValues<CN extends ColumnName<SN> = ColumnName<SN>>(
-    ...columnNames: CN[]
-  ): SheetDataValues<SN, CN> {
-    const values = this.values(...columnNames);
-    for (const [columnName, value] of Obj.entries(values)) {
-      this.schema.columnByName(columnName).validate(value);
-    }
-    return values;
   }
   get activeCellNames(): ColumnName<SN>[] {
     return this.indexed.activeColumnIds.map((columnId) =>

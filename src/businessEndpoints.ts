@@ -3,27 +3,30 @@ import type { Endpoints } from "./06_API/Endpoints";
 export const businessEndpoints: Endpoints = {
   occupancy_updateTermsTimeLastRan: {
     action: (ss, { selectedRowIndexes }) => {
-      ss.sheet("occupancyTerms").prepFetchColumnsFull("occupancyId", "startDate", "endDate");
+      ss.sheet("occupancyTerms").prepFetchColumnsFull(
+        "occupancyId",
+        "startDate",
+        "endDate",
+      );
       ss.sheet("occupancy").prepFetchColumnsSpecific(
         selectedRowIndexes,
         "id",
         "nextBaseRentChargeMonthly",
-        "nextTermsStartDate"
+        "nextTermsStartDate",
       );
       ss.fetchAllPrepped();
       const occupancy = ss.sheet("occupancy");
       const occupancyTerms = ss.sheet("occupancyTerms");
       for (const rowIndex of selectedRowIndexes) {
         const occRow = occupancy.row(rowIndex);
-        const nextStartDate = occRow.valueNotEmpty("nextTermsStartDate");
+        const nextStartDate = occRow.value("nextTermsStartDate");
         const lastActiveTerms = occupancyTerms.rows.filter((otRow) => {
-          otRow.value("occupancyId") === occRow.valueNotEmpty("id") &&
-          otRow.value("endDate") === "" &&
-          otRow.valueNotEmpty("startDate") <  nextStartDate 
-        })
-        
-        lastActiveTerms.forEach((otRow) => {
+          otRow.valueOrEmpty("occupancyId") === occRow.value("id") &&
+            otRow.valueOrEmpty("endDate") === "" &&
+            otRow.value("startDate") < nextStartDate;
         });
+
+        lastActiveTerms.forEach((otRow) => {});
 
         if (lastActiveTerms.length === 0) {
           throw new Error("For now this relies on there being active terms.");
@@ -31,7 +34,7 @@ export const businessEndpoints: Endpoints = {
 
         // occupancyTerms.appendRowWithVals()
 
-        occRow.valueNotEmpty("nextBaseRentChargeMonthly");
+        occRow.value("nextBaseRentChargeMonthly");
       }
       return "Occupancy terms updated";
     },

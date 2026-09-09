@@ -26,7 +26,7 @@ export class CheckboxColumnOperator<
   }
   get rowIndexesChecked(): number[] {
     return this.column.rowIndexesActive.filter(
-      (rowIndex) => this.column.value(rowIndex) === true,
+      (rowIndex) => this.column.valueOrEmpty(rowIndex) === true,
     );
   }
   // One queued column fill, so a bulk select still costs a single request.

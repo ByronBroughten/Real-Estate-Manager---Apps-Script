@@ -1,6 +1,7 @@
 import type { CellValue } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
+import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
@@ -19,6 +20,12 @@ export class RowIndexed extends RowCommonIndexed {
   }
   get activeValueArr(): CellValue[] {
     return this.raw.activeValueArr;
+  }
+  valueOrEmpty(columnId: string): Value {
+    return this.cell(columnId).valueOrEmpty();
+  }
+  value(columnId: string): StrictExclude<Value, ""> {
+    return this.cell(columnId).value();
   }
   updateValue(columnId: string, value: Value): this {
     this.cell(columnId).updateValue(value);

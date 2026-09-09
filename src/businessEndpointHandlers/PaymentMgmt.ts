@@ -117,7 +117,7 @@
 
 //         let amount = 0;
 //         for (const charge of charges) {
-//           amount += charge.valueNumber("amount");
+//           amount += charge.value("amount");
 //           Obj.pushByKey(paymentIdToCharges, paymentId, charge);
 //         }
 //         payment.row(paymentId).updateValue("amount", amount);
@@ -141,7 +141,7 @@
 //         paymentGroup: () => {
 //           const pg = paymentGroup.row(groupId);
 //           addPayment(
-//             pg.values(
+//             pg.valuesOrEmpty(
 //               "householdId",
 //               "payerCategory",
 //               "subsidyProgramId",
@@ -162,7 +162,7 @@
 //         allocation.appendRowWithVals({
 //           paymentId,
 //           description: "Normal payment",
-//           ...charge.values(
+//           ...charge.valuesOrEmpty(
 //             "amount",
 //             "portion",
 //             "householdId",

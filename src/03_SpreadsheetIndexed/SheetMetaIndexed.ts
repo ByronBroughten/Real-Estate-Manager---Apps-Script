@@ -28,7 +28,7 @@ export class SheetMetaIndexed extends SheetCommon {
     return this.raw.isActiveColumnId(columnId);
   }
   columnIdByIndex(colIndex: number): string {
-    return this.raw.colIdRow.value(colIndex);
+    return this.raw.colIdRow.valueOrEmpty(colIndex);
   }
   uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIndexed<UN> {
     return new UniformRowIndexed({

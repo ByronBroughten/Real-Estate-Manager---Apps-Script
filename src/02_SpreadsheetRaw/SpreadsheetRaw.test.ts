@@ -227,7 +227,7 @@ describe("CellRaw.updateValue", () => {
     const cell = raw.sheet(111).row(5).cell(2);
     cell.updateValue("Processing...");
 
-    expect(() => cell.value()).toThrowError(/does not have a value set/);
+    expect(() => cell.valueOrEmpty()).toThrowError(/does not have a value set/);
   });
 
   it("throws for a data row past the table's last row rather than writing off the grid", () => {
@@ -264,7 +264,7 @@ describe("CellRaw.updateValue", () => {
     const cell = raw.sheet(111).row(4).cell(1);
     cell.updateValue("new");
 
-    expect(cell.value()).toBe("new");
+    expect(cell.valueOrEmpty()).toBe("new");
   });
 });
 
@@ -387,7 +387,11 @@ describe("ColumnRaw.updateAllCells", () => {
     const raw = fetchedColumn();
     raw.sheet(111).column(1).updateAllCells({ value: "new" });
 
-    expect(raw.sheet(111).column(1).valueArr).toEqual(["new", "new", "new"]);
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
+      "new",
+      "new",
+      "new",
+    ]);
   });
 
   it("orders a per-cell write after the fill, so the cell wins", () => {
@@ -564,7 +568,7 @@ describe("ColumnRaw.updateActiveCells", () => {
     expect(batchUpdateCalls[0]?.requests?.[0]?.repeatCell?.cell).toEqual({
       userEnteredFormat: { backgroundColor: LIGHT_GREEN },
     });
-    expect(raw.sheet(111).column(1).valueArr).toEqual(["old"]);
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual(["old"]);
   });
 
   it("writes nothing when no row is active", () => {
@@ -585,7 +589,7 @@ describe("ColumnRaw.updateActiveCells", () => {
     raw.sheet(111).removeRowsExcept(4, 8);
     raw.sheet(111).column(1).updateActiveCells({ value: "new" });
 
-    expect(raw.sheet(111).column(1).valueArr).toEqual(["new", "new"]);
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual(["new", "new"]);
   });
 });
 
@@ -741,7 +745,7 @@ describe("CellRaw.updateBackgroundColor", () => {
     cell.updateBackgroundColor(LIGHT_GREEN);
 
     expect(cell.isActive).toBe(false);
-    expect(() => cell.value()).toThrowError(/does not have a value set/);
+    expect(() => cell.valueOrEmpty()).toThrowError(/does not have a value set/);
   });
 });
 

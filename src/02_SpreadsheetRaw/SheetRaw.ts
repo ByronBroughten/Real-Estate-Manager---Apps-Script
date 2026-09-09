@@ -277,7 +277,7 @@ export class SheetRaw extends SheetCommonRaw {
     const lastRow = this.row(this.lastActiveRowIndex);
     const newRow = this.appendDataRow();
     this.fullTableColIndexes.forEach((colIndex) => {
-      const value = lastRow.value(colIndex);
+      const value = lastRow.valueOrEmpty(colIndex);
       newRow.updateValue(colIndex, value);
     });
     lastRow.delete();

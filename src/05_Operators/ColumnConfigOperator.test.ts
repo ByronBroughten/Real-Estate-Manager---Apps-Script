@@ -381,6 +381,47 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     expect(col.valueTitle.value(5)).toBe("id");
   });
 
+  it("fills in a row whose every programmatic cell has never been filled in", () => {
+    stubSheetsService({
+      sheets: [
+        seedSheetConfigFixture(),
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: [TEST_SHEET_GID, "c:test:corr05", null, null, null, null],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({
+            0: ["c:test:corr05"],
+            3: ["Amount"],
+            4: [42],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+    syncColumnConfigOperator(operator);
+    const col = operator.sheet.columns(
+      "sheetTitle",
+      "header",
+      "isFormula",
+      "valueTitle",
+    );
+
+    expect(col.sheetTitle.value(4)).toBe("Test");
+    expect(col.header.value(4)).toBe("Amount");
+    expect(col.isFormula.value(4)).toBe(false);
+    expect(col.valueTitle.value(4)).toBe("number");
+  });
+
   it("detects a named valueConfig from the column's live data-validation formula", () => {
     stubSheetsService({
       sheets: [
@@ -748,7 +789,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
 
     const colIdRow = operator.ss.raw.sheetMeta(TEST_SHEET_GID).colIdRow;
-    expect(colIdRow.value(0)).not.toBe("");
+    expect(colIdRow.valueOrEmpty(0)).not.toBe("");
   });
 
   it("adds a missing column ID when the columnId row has never had any grid data set", () => {
@@ -790,7 +831,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
 
     const colIdRow = operator.ss.raw.sheetMeta(TEST_SHEET_GID).colIdRow;
-    expect(colIdRow.value(0)).not.toBe("");
+    expect(colIdRow.valueOrEmpty(0)).not.toBe("");
   });
 });
 

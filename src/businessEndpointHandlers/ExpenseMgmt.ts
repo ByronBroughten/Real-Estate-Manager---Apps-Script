@@ -7,7 +7,7 @@
 //     const expense = this.ss.sheet("expense");
 
 //     for (const row of addPropertyExpenses.dataRows) {
-//       const { expenseNotes, ...expenseVals } = row.values(
+//       const { expenseNotes, ...expenseVals } = row.valuesOrEmpty(
 //         "date",
 //         "propertyId",
 //         "unitId",

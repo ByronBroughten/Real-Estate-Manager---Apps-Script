@@ -25,7 +25,7 @@
 // }: RowsOfIdAndPortionProps<TN>): DataRowNamed<TN>[] {
 //   const rows = sheet.dataRows;
 //   return rows.filter((row) => {
-//     const vals = row.values("portion", "householdId", "subsidyAgreementId");
+//     const vals = row.valuesOrEmpty("portion", "householdId", "subsidyAgreementId");
 //     if (householdId === vals.householdId && portion === vals.portion) {
 //       if (portion === "Subsidy program") {
 //         return subsidyAgreementId === vals.subsidyAgreementId;
@@ -64,7 +64,7 @@
 //     });
 
 //     for (const row of filteredCharges) {
-//       const { amount, ...rest } = row.values(
+//       const { amount, ...rest } = row.valuesOrEmpty(
 //         "amount",
 //         "date",
 //         "description",
@@ -92,7 +92,7 @@
 //       if (row.value("processed") === "No") {
 //         continue;
 //       }
-//       const { amount, payer, ...rest } = row.values(
+//       const { amount, payer, ...rest } = row.valuesOrEmpty(
 //         "amount",
 //         "payer",
 //         "date",

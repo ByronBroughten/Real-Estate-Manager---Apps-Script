@@ -50,27 +50,27 @@ export class ColumnIndexed<
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
     return this;
   }
-  get valueArr(): Value<VN>[] {
-    return this.raw.valueArr as Value<VN>[];
+  get valueArrOrEmpty(): Value<VN>[] {
+    return this.raw.valueArrOrEmpty as Value<VN>[];
   }
   get valueArrFilterEmpty(): StrictExclude<Value<VN>, "">[] {
-    return this.valueArr.filter(
+    return this.valueArrOrEmpty.filter(
       (value): value is StrictExclude<Value<VN>, ""> => value !== "",
     );
   }
-  get valueArrNotEmpty(): StrictExclude<Value<VN>, "">[] {
+  get valueArr(): StrictExclude<Value<VN>, "">[] {
     return this.sheet.rowIndexesActive.map((rowIndex) =>
-      this.cell(rowIndex).valueNotEmpty(),
+      this.cell(rowIndex).value(),
     );
   }
   hasValue(value: Value<VN>): boolean {
-    return this.valueArr.includes(value);
+    return this.valueArrOrEmpty.includes(value);
   }
-  value(rowIndex: number): Value<VN> {
+  valueOrEmpty(rowIndex: number): Value<VN> {
+    return this.cell(rowIndex).valueOrEmpty();
+  }
+  value(rowIndex: number): StrictExclude<Value<VN>, ""> {
     return this.cell(rowIndex).value();
-  }
-  valueNotEmpty(rowIndex: number): StrictExclude<Value<VN>, ""> {
-    return this.cell(rowIndex).valueNotEmpty();
   }
   cell(rowIndex: number): CellIndexed<VN> {
     return new CellIndexed({

@@ -32,11 +32,19 @@ export class CellNamed<
   get isActive(): boolean {
     return this.indexed.isActive;
   }
-  valueNotEmpty(): StrictExclude<ColumnValue<SN, CN>, ""> {
-    return this.indexed.valueNotEmpty();
+  valueOrEmpty(): ColumnValue<SN, CN> {
+    return this.indexed.valueOrEmpty();
   }
-  value(): ColumnValue<SN, CN> {
-    return this.indexed.value();
+  // Checked here, not delegated, so the message names the column the caller wrote.
+  value(): StrictExclude<ColumnValue<SN, CN>, ""> {
+    const value = this.valueOrEmpty();
+    if (value === "") {
+      throw new Error(
+        `Column "${this.columnName}" of sheet "${this.sheetName}" is empty in row ${this.rowIndex}.`,
+      );
+    } else {
+      return value as StrictExclude<ColumnValue<SN, CN>, "">;
+    }
   }
   updateValue(value: ColumnValue<SN, CN>): this {
     this.indexed.updateValue(value);

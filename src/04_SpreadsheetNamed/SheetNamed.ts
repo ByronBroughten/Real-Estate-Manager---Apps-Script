@@ -93,7 +93,10 @@ export class SheetNamed<
     columnName: ColumnName<SN>,
   ): RowNamed<SN>[] {
     return rows.sort((a, b) => {
-      return Arr.compareForSort(a.value(columnName), b.value(columnName));
+      return Arr.compareForSort(
+        a.valueOrEmpty(columnName),
+        b.valueOrEmpty(columnName),
+      );
     });
   }
   RESET_TOP_DATA_ROW_DELETE_REST() {
@@ -110,7 +113,7 @@ export class SheetNamed<
   rowsFiltered(values: Partial<SheetDataValues<SN>>): RowNamed<SN>[] {
     return this.rows.filter((row) => {
       for (const columnName of Obj.keys(values)) {
-        if (row.value(columnName) !== values[columnName]) {
+        if (row.valueOrEmpty(columnName) !== values[columnName]) {
           return false;
         }
       }

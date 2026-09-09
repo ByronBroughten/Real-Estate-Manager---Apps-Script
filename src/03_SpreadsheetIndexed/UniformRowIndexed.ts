@@ -40,8 +40,8 @@ export class UniformRowIndexed<
   get valueName(): UniformRowValueName<UN> {
     return this.schema.uniformValueName(this.uniformRowName);
   }
-  value(columnId: string): UniformRowValue<UN> {
-    return this.raw.value(this.sheet.column(columnId).colIndex);
+  valueOrEmpty(columnId: string): UniformRowValue<UN> {
+    return this.raw.valueOrEmpty(this.sheet.column(columnId).colIndex);
   }
   get activeValueArr(): UniformRowValue<UN>[] {
     return this.raw.activeValueArr;

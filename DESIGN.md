@@ -54,6 +54,16 @@ Intuition about cost and intuition about types are both unreliable here, and bot
 
 *Corollary:* record the measurement next to the conclusion. "`SpreadsheetApp` is slower" is re-proposable; "measured ~494ms against ~350ms on this date" is not.
 
+### Give the common case the unmarked name
+
+The name a reader reaches for by reflex should be the one they want most of the time. Make the common case free and let the rare case cost exactly one word — and decide which case is common by counting call sites rather than by guessing.
+
+*Instances:* a census showed roughly twice as many call sites reaching for a sheet's or column's data view as for its metadata view, yet the metadata view held the unmarked name and every data chain paid a `.data` hop; swapping primacy made the common case free and the rare case one word (#6). Nearly every cell read is one where a blank means the endpoint cannot do its job, yet `value` handed back `""` typed into the union and the safe read was the longer `valueNotEmpty` — inverting that made the reflexive read the correct one and left `valueOrEmpty` for the caller who has decided what blank means (#8).
+
+*Corollary:* the marked name is a record of intent, not merely a longer spelling. `valueOrEmpty` at a call site says blank was thought about, which is a fact a later reader cannot recover from the surrounding logic.
+
+*Corollary:* a tier that shouldn't offer the common case declines the unmarked word rather than reusing it for something else. Raw exposes only `valueOrEmpty`, so `value` means one thing everywhere it exists and moving a call between tiers can't silently change its failure mode.
+
 ### Record a deliberate absence as deliberate
 
 The riskiest gap in an AI-assisted codebase is the one that looks like an oversight. An unexplained absence reads as a to-do and gets helpfully filled in; a *documented* absence carries its reason and survives.
@@ -68,4 +78,3 @@ Candidates with one citation. Leave them here until a second decision makes the 
 
 - **A human-facing signal need not be machine-readable.** A run's outcome is a cell background colour, which the read path never fetches — so no code can ever read a run's outcome back. That was acceptable because nothing did, and because the audience is a person looking at a sheet. *Cited by:* #4, `ac7a795`.
 - **Prefer the cheaper thing lazily over the complete thing eagerly**, when the complete version's cost scales with a union you don't control. *Cited by:* the lazy mapped-filter measurement in README.md's "Type-check cost".
-- **Give the common case the unmarked name.** A census of call sites showed roughly twice as many reaching for a sheet's or column's data view as for its metadata view, yet the metadata view held the unmarked name and every data chain paid a `.data` hop. Swapping primacy made the common case free and the rare case one word. *Cited by:* #6.
