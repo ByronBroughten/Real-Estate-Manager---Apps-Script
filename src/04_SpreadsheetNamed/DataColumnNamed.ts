@@ -5,7 +5,7 @@ import type {
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
-import type { DataColumnIndexed } from "../03_SpreadsheetIndexed/DataColumnIndexed";
+import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import type { StrictExclude } from "../utils/Arr";
 import { CellNamed } from "./CellNamed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";
@@ -18,8 +18,8 @@ export class DataColumnNamed<
   get column(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
   }
-  get indexed(): DataColumnIndexed<ColumnValueName<SN, CN>> {
-    return this.column.indexed.data;
+  get indexed(): ColumnIndexed<ColumnValueName<SN, CN>> {
+    return this.column.indexed.primary;
   }
   get raw() {
     return this.indexed.raw;

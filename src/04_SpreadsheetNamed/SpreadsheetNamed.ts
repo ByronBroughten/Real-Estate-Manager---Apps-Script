@@ -1,7 +1,9 @@
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes.js";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
-import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/SheetIndexed";
-import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed.js";
+import type {
+  GatherDataPrerequisitesProps,
+  SheetMetaIndexed,
+} from "../03_SpreadsheetIndexed/SheetMetaIndexed";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
 import { Val } from "../utils/Val.js";
@@ -140,12 +142,12 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     });
   }
   private _prepFetchRowSpecifier(
-    sheet: SheetIndexed,
+    sheet: SheetMetaIndexed,
     rowSpecifier: RowSpecifierName,
     columnId: string,
   ): void {
     const schema = sheet.schema;
-    const column = sheet.column(columnId).data;
+    const column = sheet.column(columnId).primary;
     switch (rowSpecifier) {
       case "activeRows":
       case "data":

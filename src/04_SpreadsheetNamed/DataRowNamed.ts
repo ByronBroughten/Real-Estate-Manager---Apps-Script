@@ -6,7 +6,7 @@ import type {
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
-import { DataRowIndexed } from "../03_SpreadsheetIndexed/DataRowIndexed";
+import { RowIndexed } from "../03_SpreadsheetIndexed/RowIndexed";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
@@ -19,8 +19,8 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
-  get indexed(): DataRowIndexed {
-    return new DataRowIndexed({
+  get indexed(): RowIndexed {
+    return new RowIndexed({
       ...this.rowNamedProps,
       sheetGid: this.sheet.sheetGid,
     });

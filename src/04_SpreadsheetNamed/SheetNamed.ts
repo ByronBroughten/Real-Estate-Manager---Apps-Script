@@ -2,8 +2,8 @@ import type { UniformRowName } from "../00_base/base";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
-import type { DataColumnIndexed } from "../03_SpreadsheetIndexed/DataColumnIndexed";
-import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
+import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import { SheetMetaIndexed } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
 import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";
 import { ColumnNamed } from "./ColumnNamed";
 import { DataSheetNamed } from "./DataSheetNamed";
@@ -22,8 +22,8 @@ export class SheetNamed<
   get sheetGid(): number {
     return this.schema.sheetGid;
   }
-  get indexed(): SheetIndexed {
-    return new SheetIndexed({
+  get indexed(): SheetMetaIndexed {
+    return new SheetMetaIndexed({
       ...this.sheetNamedProps,
       sheetGid: this.schema.sheetGid,
     });
@@ -52,9 +52,9 @@ export class SheetNamed<
     return this.indexed.addMissingColumnIds();
   }
   // By id, so the column name's value type isn't composed into the result.
-  dataColumnIndexed(columnName: ColumnName<SN>): DataColumnIndexed {
+  dataColumnIndexed(columnName: ColumnName<SN>): ColumnIndexed {
     const { columnId } = this.schema.columnByName(columnName);
-    return this.indexed.column(columnId).data;
+    return this.indexed.column(columnId).primary;
   }
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return new ColumnNamed({

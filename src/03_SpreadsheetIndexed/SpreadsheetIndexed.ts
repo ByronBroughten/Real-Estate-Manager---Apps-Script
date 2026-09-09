@@ -1,9 +1,10 @@
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { type ColumnIndexed } from "./ColumnIndexed";
+import { SheetIndexed } from "./SheetIndexed";
 import {
-  SheetIndexed,
+  SheetMetaIndexed,
   type GatherDataPrerequisitesProps,
-} from "./SheetIndexed";
+} from "./SheetMetaIndexed";
 import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";
 
 export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
@@ -16,15 +17,21 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
       sheetGid,
     });
   }
+  sheetMeta(sheetGid: number): SheetMetaIndexed {
+    return new SheetMetaIndexed({
+      ...this.spreadsheetIndexedProps,
+      sheetGid,
+    });
+  }
   column(sheetGid: number, columnId: string): ColumnIndexed {
     return this.sheet(sheetGid).column(columnId);
   }
   get activeSheets(): SheetIndexed[] {
     return this.raw.activeSheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
-  get sheetsPreppedForFetch() {
+  get sheetsPreppedForFetch(): SheetMetaIndexed[] {
     return Array.from(this.indexedSheetsState.keys())
-      .map((sheetGid) => this.sheet(sheetGid))
+      .map((sheetGid) => this.sheetMeta(sheetGid))
       .filter((sheet) => sheet.isPreppedToFetch);
   }
   fetchAllPrepped({

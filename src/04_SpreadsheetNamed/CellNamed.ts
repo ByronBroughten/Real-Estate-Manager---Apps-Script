@@ -23,7 +23,7 @@ export class CellNamed<
     return new ColumnNamed(this.columnNamedProps);
   }
   get indexed(): CellIndexed<ColumnValueName<SN, CN>> {
-    return this.column.indexed.data.cell(this.rowIndex);
+    return this.column.indexed.primary.cell(this.rowIndex);
   }
   get raw(): CellRaw<VnToCvn<ColumnValueName<SN, CN>>> {
     return this.indexed.raw;

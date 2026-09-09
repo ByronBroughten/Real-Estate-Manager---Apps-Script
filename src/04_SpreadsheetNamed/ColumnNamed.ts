@@ -7,7 +7,7 @@ import type {
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
-import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import { ColumnMetaIndexed } from "../03_SpreadsheetIndexed/ColumnMetaIndexed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";
 import { DataColumnNamed } from "./DataColumnNamed";
 
@@ -18,8 +18,8 @@ export class ColumnNamed<
   get raw() {
     return this.sheet.raw.column(this.indexed.colIndex);
   }
-  get indexed(): ColumnIndexed<ColumnValueName<SN, CN>> {
-    return new ColumnIndexed<ColumnValueName<SN, CN>>({
+  get indexed(): ColumnMetaIndexed<ColumnValueName<SN, CN>> {
+    return new ColumnMetaIndexed<ColumnValueName<SN, CN>>({
       ...this.sheet.indexed.sheetIndexedProps,
       columnId: this.columnId,
     });

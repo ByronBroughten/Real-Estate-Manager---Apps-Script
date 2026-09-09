@@ -6,7 +6,7 @@ import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
 import { SheetIndexed } from "./SheetIndexed";
 
-export class DataRowIndexed extends RowCommonIndexed {
+export class RowIndexed extends RowCommonIndexed {
   constructor(props: RowIndexedProps) {
     super(props);
     void this.raw;
@@ -30,13 +30,13 @@ export class DataRowIndexed extends RowCommonIndexed {
       columnId,
     });
   }
-  updateToDefault(...columnIds: string[]): DataRowIndexed {
+  updateToDefault(...columnIds: string[]): RowIndexed {
     columnIds.forEach((columnId) => this.cell(columnId).updateToDefault());
     return this;
   }
   get activeColumnIds(): string[] {
     return [...this.raw.rowState.keys()].map((colIndex) =>
-      this.sheet.columnIdByIndex(colIndex),
+      this.sheet.meta.columnIdByIndex(colIndex),
     );
   }
   delete(): void {
