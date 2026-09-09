@@ -76,7 +76,7 @@ function runEndpoint(endpoint: Endpoint<"occupancy">, isChecked = true) {
     entryColumnName: "buildLedgerTimeLastRan",
     endpoint,
   });
-  run.sheet.indexed.ensureColumnIdsAreFetched();
+  run.sheet.indexed.meta.ensureColumnIdsAreFetched();
   run.run(isChecked);
 }
 
@@ -322,8 +322,8 @@ describe("EndpointRun.run, an endpoint declaring no feedback columns", () => {
 describe("EndpointRun.run, a run that fails", () => {
   // Reading a row past the table's last one is a real read on real state.
   function failingAction(ss: Parameters<Endpoint<"occupancy">["action"]>[0]) {
-    ss.sheet("occupancy").data.row(4).cell("id").updateValue("r:occ:written");
-    ss.sheet("occupancy").data.row(END_ROW_INDEX).value("id");
+    ss.sheet("occupancy").row(4).cell("id").updateValue("r:occ:written");
+    ss.sheet("occupancy").row(END_ROW_INDEX).value("id");
   }
 
   it("writes the error text and red to the selected rows only", () => {

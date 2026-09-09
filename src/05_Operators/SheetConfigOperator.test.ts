@@ -44,7 +44,7 @@ beforeEach(() => {
 // no Sheet Config row yet.
 function syncSheetConfigOperator(operator: SheetConfigOperator): void {
   operator.ss.raw.fetchAllSheetProperties();
-  operator.sheet.data.prepFetchColumnsFull("letApiAccess");
+  operator.sheet.prepFetchColumnsFull("letApiAccess");
   operator.prepFetchForSync();
   operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
   operator.syncToSpreadsheet();
@@ -99,7 +99,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     // A newly-discovered sheet gets a Sheet Config row appended, but stays
     // excluded from the generated file until a human sets letApiAccess.
     expect(sheetConfigs.brandNewSheet).toBeUndefined();
-    expect(operator.sheet.data.column("sheetGid").hasValue(NEW_SHEET_GID)).toBe(
+    expect(operator.sheet.column("sheetGid").hasValue(NEW_SHEET_GID)).toBe(
       true,
     );
   });

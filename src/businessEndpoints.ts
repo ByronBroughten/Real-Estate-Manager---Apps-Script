@@ -3,8 +3,8 @@ import type { Endpoints } from "./06_API/Endpoints";
 export const businessEndpoints: Endpoints = {
   occupancy_updateTermsTimeLastRan: {
     action: (ss, { selectedRowIndexes }) => {
-      ss.sheet("occupancyTerms").data.prepFetchColumnsFull("startDate", "endDate");
-      const occCol = ss.sheet("occupancy").data.prepFetchColumnsActive(
+      ss.sheet("occupancyTerms").prepFetchColumnsFull("startDate", "endDate");
+      const occCol = ss.sheet("occupancy").prepFetchColumnsActive(
         "nextBaseRentChargeMonthly",
         "nextTermsStartDate"
       );

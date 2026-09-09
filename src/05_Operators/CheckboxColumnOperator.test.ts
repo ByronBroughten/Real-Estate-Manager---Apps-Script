@@ -96,7 +96,7 @@ describe("CheckboxColumnOperator.setAll / uncheckAll", () => {
     const { batchUpdateCalls } = seedOccupancySelectColumn([true, false, null]);
     const operator = new CheckboxColumnOperator(occupancySelectProps());
 
-    operator.sheet.indexed.ensureColumnIdsAreFetched();
+    operator.sheet.indexed.meta.ensureColumnIdsAreFetched();
     operator.setAll(true);
     operator.ss.batchUpdateGSheets();
 
@@ -109,7 +109,7 @@ describe("CheckboxColumnOperator.setAll / uncheckAll", () => {
     const { batchUpdateCalls } = seedOccupancySelectColumn([true, null, null]);
     const operator = new CheckboxColumnOperator(occupancySelectProps());
 
-    operator.sheet.indexed.ensureColumnIdsAreFetched();
+    operator.sheet.indexed.meta.ensureColumnIdsAreFetched();
     operator.uncheckAll();
     operator.ss.batchUpdateGSheets();
 

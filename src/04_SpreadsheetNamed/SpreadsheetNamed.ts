@@ -1,13 +1,12 @@
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes.js";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
-import type {
-  GatherDataPrerequisitesProps,
-  SheetMetaIndexed,
-} from "../03_SpreadsheetIndexed/SheetMetaIndexed";
+import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
+import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
 import { Val } from "../utils/Val.js";
 import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
+import { SheetMetaNamed } from "./SheetMetaNamed.js";
 import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
 import {
@@ -32,6 +31,12 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
+      sheetName,
+      ...this.spreadsheetNamedProps,
+    });
+  }
+  sheetMeta<TN extends SheetName>(sheetName: TN): SheetMetaNamed<TN> {
+    return new SheetMetaNamed({
       sheetName,
       ...this.spreadsheetNamedProps,
     });
@@ -142,12 +147,12 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     });
   }
   private _prepFetchRowSpecifier(
-    sheet: SheetMetaIndexed,
+    sheet: SheetIndexed,
     rowSpecifier: RowSpecifierName,
     columnId: string,
   ): void {
     const schema = sheet.schema;
-    const column = sheet.column(columnId).primary;
+    const column = sheet.column(columnId);
     switch (rowSpecifier) {
       case "activeRows":
       case "data":
@@ -206,11 +211,11 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
     // could potentially be reconfigured to not rely on the schema.
     const idSheets = this._sheetsWithRowIds();
     idSheets.forEach((sheet) => {
-      sheet.column("id").data.prepFetchFull();
+      sheet.column("id").prepFetchFull();
     });
     this.fetchAllPrepped();
     idSheets.forEach((sheet) => {
-      sheet.column("id").data.emptyActiveCellsToDefualt();
+      sheet.column("id").emptyActiveCellsToDefualt();
     });
   }
   private _sheetsWithRowIds(): SheetNamed<SheetNameByGroup<"hasIdColumn">>[] {

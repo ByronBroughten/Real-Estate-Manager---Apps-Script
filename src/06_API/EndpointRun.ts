@@ -107,18 +107,18 @@ export class EndpointRun<
   // No selector means the run is about every data row, none of which is active.
   private _selectedRowIndexes(): number[] {
     const { selector } = this.endpoint;
-    if (!selector) return this.sheet.data.raw.rowIndexesFull;
+    if (!selector) return this.sheet.raw.rowIndexesFull;
     return this._checkboxColumn(selector).rowIndexesChecked;
   }
   // The entry cell is a button unless the endpoint also runs on unticking.
   private _resetEntryCheckbox(): void {
     if (this.endpoint.runsOnUncheck) return;
-    this.sheet.column(this.entryColumnName).actionRowToDefault();
+    this.sheet.meta.column(this.entryColumnName).actionRowToDefault();
   }
   // Unselected rows go inactive, so every later read of active rows is the selection.
   private _pruneToSelection(selectedRowIndexes: number[]): void {
     if (!this.endpoint.selector) return;
-    this.sheet.data.raw.removeRowsExcept(...selectedRowIndexes);
+    this.sheet.raw.removeRowsExcept(...selectedRowIndexes);
   }
   // The flush is what puts the running state on the sheet before the work runs.
   private _onRunSetup(): void {
@@ -144,7 +144,7 @@ export class EndpointRun<
   ): void {
     if (!columnName) return;
     // Re-deriving the value type here would compose two mapped filters, at ~43k instantiations.
-    const column = this.sheet.dataColumnIndexed(columnName);
+    const column = this.sheet.columnIndexed(columnName);
     if (this.endpoint.selector) {
       column.updateActiveCells(change);
     } else {

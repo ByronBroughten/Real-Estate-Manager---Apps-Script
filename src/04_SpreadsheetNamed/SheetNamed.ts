@@ -1,65 +1,124 @@
-import type { UniformRowName } from "../00_base/base";
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import type {
+  ColumnName,
+  SheetDataValues,
+} from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
+import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
-import { SheetMetaIndexed } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
-import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";
+import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
+import { Arr } from "../utils/Arr";
+import { Obj } from "../utils/Obj";
 import { ColumnNamed } from "./ColumnNamed";
-import { DataSheetNamed } from "./DataSheetNamed";
+import { RowNamed } from "./RowNamed";
 import { SheetCommon } from "./SheetCommon";
-import { SpreadsheetNamed } from "./SpreadsheetNamed";
+import { SheetMetaNamed } from "./SheetMetaNamed";
 
 export class SheetNamed<
   SN extends SheetName = SheetName,
 > extends SheetCommon<SN> {
-  get spreadsheet(): SpreadsheetNamed {
-    return new SpreadsheetNamed(this.spreadsheetNamedProps);
+  get meta(): SheetMetaNamed<SN> {
+    return new SheetMetaNamed(this.sheetNamedProps);
   }
-  get raw(): SheetMetaRaw {
-    return this.spreadsheet.raw.sheetMeta(this.schema.sheetGid);
+  get raw(): SheetRaw {
+    return this.indexed.raw;
   }
-  get sheetGid(): number {
-    return this.schema.sheetGid;
-  }
-  get indexed(): SheetMetaIndexed {
-    return new SheetMetaIndexed({
+  get indexed(): SheetIndexed {
+    return new SheetIndexed({
       ...this.sheetNamedProps,
-      sheetGid: this.schema.sheetGid,
+      sheetGid: this.sheetGid,
     });
   }
-  get data(): DataSheetNamed<SN> {
-    return new DataSheetNamed(this.sheetNamedProps);
+  get rowIndexesActive(): number[] {
+    return this.indexed.rowIndexesActive;
   }
-  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIndexed<UN> {
-    return this.indexed.uniformRow(rowName);
+  get rows(): RowNamed<SN>[] {
+    return this.indexed.rows.map((row) => this.row(row.rowIndex));
   }
-  columnByIndex(colIndex: number): ColumnNamed<SN> {
-    const columnId = this.indexed.columnIdByIndex(colIndex);
-    const columnName = this.schema.colNameByColumnId(columnId);
-    return new ColumnNamed({
+  get topRow(): RowNamed<SN> {
+    return this.row(this.schema.topDataRowIdx);
+  }
+  row(rowIndex: number): RowNamed<SN> {
+    return new RowNamed({
       ...this.sheetNamedProps,
-      columnName,
+      rowIndex,
     });
-  }
-  get activeColumnIds(): string[] {
-    return this.raw.activeColumnIds;
-  }
-  isActiveColumnId(columnId: string): boolean {
-    return this.indexed.isActiveColumnId(columnId);
-  }
-  addMissingColumnIds(): number {
-    return this.indexed.addMissingColumnIds();
-  }
-  // By id, so the column name's value type isn't composed into the result.
-  dataColumnIndexed(columnName: ColumnName<SN>): ColumnIndexed {
-    const { columnId } = this.schema.columnByName(columnName);
-    return this.indexed.column(columnId).primary;
   }
   column<CN extends ColumnName<SN>>(columnName: CN): ColumnNamed<SN, CN> {
     return new ColumnNamed({
       ...this.sheetNamedProps,
       columnName,
     });
+  }
+  // By id, so the column name's value type isn't composed into the result.
+  columnIndexed(columnName: ColumnName<SN>): ColumnIndexed {
+    const { columnId } = this.schema.columnByName(columnName);
+    return this.indexed.column(columnId);
+  }
+  columns<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+    columnNames.forEach((columnName) => {
+      columns[columnName] = this.column(columnName);
+    });
+    return columns;
+  }
+  prepFetchColumnsFull<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+    columnNames.forEach((columnName) => {
+      columns[columnName] = this.column(columnName).prepFetchFull();
+    });
+    return columns;
+  }
+  prepFetchColumnsSpecific<CNs extends readonly ColumnName<SN>[]>(
+    rowIndexes: number[],
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+    columnNames.forEach((columnName) => {
+      columns[columnName] =
+        this.column(columnName).prepFetchSpecific(rowIndexes);
+    });
+    return columns;
+  }
+  prepFetchColumnsActive<CNs extends readonly ColumnName<SN>[]>(
+    ...columnNames: CNs
+  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+    return this.prepFetchColumnsSpecific(this.rowIndexesActive, ...columnNames);
+  }
+  sortRowsbyColumnName(
+    rows: RowNamed<SN>[],
+    columnName: ColumnName<SN>,
+  ): RowNamed<SN>[] {
+    return rows.sort((a, b) => {
+      return Arr.compareForSort(a.value(columnName), b.value(columnName));
+    });
+  }
+  RESET_TOP_DATA_ROW_DELETE_REST() {
+    if (this.indexed.rowCount > 0) {
+      this.topRow.updateToDefault(...this.schema.columnNames);
+    }
+    if (this.indexed.rowCount > 1) {
+      this.DELETE_DATA_ROWS_AFTER_TOP();
+    }
+  }
+  private DELETE_DATA_ROWS_AFTER_TOP() {
+    this.raw.DELETE_ACTIVE_DATA_ROWS(this.schema.topDataRowIdx + 1);
+  }
+  rowsFiltered(values: Partial<SheetDataValues<SN>>): RowNamed<SN>[] {
+    return this.rows.filter((row) => {
+      for (const columnName of Obj.keys(values)) {
+        if (row.value(columnName) !== values[columnName]) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }
+  appendRowWithVals(values: Partial<SheetDataValues<SN>>): RowNamed<SN> {
+    const { rowIndex } = this.indexed.appendRowDefault();
+    return this.row(rowIndex).updateValues(values);
   }
 }

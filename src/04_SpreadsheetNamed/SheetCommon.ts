@@ -8,4 +8,7 @@ export abstract class SheetCommon<
   get schema(): SheetSchema<SN> {
     return SheetSchema.fromSheetName(this.sheetName);
   }
+  get sheetGid(): number {
+    return this.schema.sheetGid;
+  }
 }

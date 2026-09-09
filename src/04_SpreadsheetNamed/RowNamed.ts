@@ -15,7 +15,7 @@ import { RowNamedBase } from "./ClassBases/RowNamedBase";
 
 import { SheetNamed } from "./SheetNamed";
 
-export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
+export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
@@ -32,7 +32,7 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     });
   }
   cell<CN extends ColumnName<SN>>(columnName: CN): CellNamed<SN, CN> {
-    return this.sheet.column(columnName).data.cell(this.rowIndex);
+    return this.sheet.column(columnName).cell(this.rowIndex);
   }
   cellIsActive<CN extends ColumnName<SN>>(columnName: CN): boolean {
     return this.cell(columnName).isActive;
@@ -126,20 +126,20 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
       this.schema.colNameByColumnId(columnId),
     );
   }
-  updateToDefault(...columnNames: ColumnName<SN>[]): DataRowNamed<SN> {
+  updateToDefault(...columnNames: ColumnName<SN>[]): RowNamed<SN> {
     columnNames.forEach((columnName) =>
       this.cell(columnName).updateToDefault(),
     );
     return this;
   }
-  updateCellToDefault(columnName: ColumnName<SN>): DataRowNamed<SN> {
+  updateCellToDefault(columnName: ColumnName<SN>): RowNamed<SN> {
     this.cell(columnName).updateToDefault();
     return this;
   }
   updateValue<CN extends ColumnName<SN>>(
     columnName: CN,
     value: ColumnValue<SN, CN>,
-  ): DataRowNamed<SN> {
+  ): RowNamed<SN> {
     this.cell(columnName).updateValue(value);
     return this;
   }
@@ -150,11 +150,11 @@ export class DataRowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     columnName: CN,
     valueName: ValueName,
     value: Value,
-  ): DataRowNamed<SN> {
+  ): RowNamed<SN> {
     this.cell(columnName).setValueType(valueName, value);
     return this;
   }
-  updateValues(sectionValues: Partial<SheetDataValues<SN>>): DataRowNamed<SN> {
+  updateValues(sectionValues: Partial<SheetDataValues<SN>>): RowNamed<SN> {
     for (const [columnName, value] of Obj.entries(sectionValues)) {
       this.updateValue(columnName, value as ColumnValue<SN, typeof columnName>);
     }

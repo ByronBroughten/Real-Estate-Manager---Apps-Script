@@ -71,9 +71,9 @@ beforeEach(() => {
 function initSyncedColumnConfigOperator(): ColumnConfigOperator {
   const columnConfigOperator = ColumnConfigOperator.init();
   const sheetConfigOperator = columnConfigOperator.sheetConfigOperator;
-  sheetConfigOperator.sheet.data.prepFetchColumnsFull("letApiAccess");
+  sheetConfigOperator.sheet.prepFetchColumnsFull("letApiAccess");
   sheetConfigOperator.prepFetchForSync();
-  columnConfigOperator.sheetData.prepFetchColumnsFull(
+  columnConfigOperator.sheet.prepFetchColumnsFull(
     "sheetGid",
     "columnId",
     "header",
@@ -360,7 +360,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
     const operator = ColumnConfigOperator.init();
     syncColumnConfigOperator(operator);
-    const col = operator.sheetData.columns(
+    const col = operator.sheet.columns(
       "sheetTitle",
       "header",
       "isFormula",
@@ -420,11 +420,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
     const operator = ColumnConfigOperator.init();
     syncColumnConfigOperator(operator);
-    const col = operator.sheetData.columns(
-      "sheetTitle",
-      "header",
-      "valueTitle",
-    );
+    const col = operator.sheet.columns("sheetTitle", "header", "valueTitle");
 
     expect(col.valueTitle.value(4)).toBe("Transaction Description");
     // Already-correct fields are left alone.
@@ -467,7 +463,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
     const operator = ColumnConfigOperator.init();
     syncColumnConfigOperator(operator);
-    const col = operator.sheetData.columns("isFormula", "valueTitle");
+    const col = operator.sheet.columns("isFormula", "valueTitle");
 
     expect(col.isFormula.value(4)).toBe(true);
     expect(col.valueTitle.value(4)).toBe("date");
@@ -612,14 +608,14 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
 
     const operator = ColumnConfigOperator.init();
     syncColumnConfigOperator(operator);
-    const col = operator.sheetData.columns(
+    const col = operator.sheet.columns(
       "sheetTitle",
       "header",
       "isFormula",
       "valueTitle",
     );
 
-    expect(operator.sheetData.rowIndexesActive).not.toContain(4);
+    expect(operator.sheet.rowIndexesActive).not.toContain(4);
     expect(col.sheetTitle.value(5)).toBe("Column Config");
     expect(col.header.value(5)).toBe("Sheet GID");
     expect(col.isFormula.value(5)).toBe(false);

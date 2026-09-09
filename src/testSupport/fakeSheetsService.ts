@@ -39,12 +39,12 @@ export interface FakeSheetProperties {
   rows?: readonly (readonly FakeCell[])[];
   /**
    * The sheet's Table range. Required for any test that reads/appends
-   * *data* rows on this sheet (`DataSheetRaw`'s `rowIndexesActive`/
+   * *data* rows on this sheet (`SheetRaw`'s `rowIndexesActive`/
    * `appendDataRow` etc. read `activeTable`, which throws if no table was
    * ever integrated) — not needed for sheets only read via a uniform row
    * (e.g. a business sheet's header row). `endRowIndex` is the exclusive
    * bound of existing data rows; appending a row increments it in place,
-   * matching production (`DataRowRaw.append`).
+   * matching production (`RowRaw.append`).
    */
   table?: {
     endRowIndex: number;

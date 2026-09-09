@@ -31,11 +31,11 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   get valueConfigOperator(): ValueConfigOperator {
     return new ValueConfigOperator(this.spreadsheetNamedProps);
   }
-  get sheetConfigData(): SheetConfigOperator["sheet"]["data"] {
-    return this.sheetConfigOperator.sheet.data;
+  get sheetConfigSheet(): SheetConfigOperator["sheet"] {
+    return this.sheetConfigOperator.sheet;
   }
   get activeValueTitles(): string[] {
-    return this.sheetData.column("valueTitle").valueArrNotEmpty;
+    return this.sheet.column("valueTitle").valueArrNotEmpty;
   }
   // Derived fresh each call, not cached — a stored field goes stale across
   // this coordinator's per-access getter rebuilds.
@@ -51,7 +51,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   prepFetchWithSheetConfig() {
     this.sheetConfigOperator.assertPrepFetchIsComplete();
-    this.sheetData.prepFetchColumnsFull(
+    this.sheet.prepFetchColumnsFull(
       "sheetGid",
       "columnId",
       "sheetTitle",
@@ -82,14 +82,14 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this.sheetGidsApiAccesses.has(sheetGid);
   }
   private _addMissingColumnIds(): this {
-    const col = this.sheetConfigData.columns(
+    const col = this.sheetConfigSheet.columns(
       "sheetGid",
       "letApiAccess",
       "idPrefix",
     );
     let idsAdded = 0;
 
-    this.sheetConfigData.rowIndexesActive.forEach((rowIndex) => {
+    this.sheetConfigSheet.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       if (this._isSheetGidApiAccesses(sheetGid)) {
         const idPrefix = col.idPrefix.valueNotEmpty(rowIndex);
@@ -103,9 +103,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this;
   }
   private _pruneColumnRows(): this {
-    const col = this.sheetData.columns("sheetGid", "columnId");
+    const col = this.sheet.columns("sheetGid", "columnId");
     let staleCount = 0;
-    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.value(rowIndex);
       const columnId = col.columnId.value(rowIndex);
       if (
@@ -114,7 +114,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         !this._isSheetGidApiAccesses(sheetGid) ||
         !this._isActiveColumnId(sheetGid, columnId)
       ) {
-        this.sheetData.row(rowIndex).delete();
+        this.sheet.row(rowIndex).delete();
         staleCount++;
       }
     });
@@ -127,7 +127,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this.ss.raw.sheetMeta(sheetGid).isActiveColumnId(columnId);
   }
   private _appendColumnRows(): this {
-    const col = this.sheetData.columns("sheetGid", "columnId");
+    const col = this.sheet.columns("sheetGid", "columnId");
     const existingColumnIds = col.columnId.valueArr;
 
     let appendedCount = 0;
@@ -135,7 +135,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       const { activeColumnIds } = this.ss.raw.sheetMeta(sheetGid);
       activeColumnIds.forEach((columnId) => {
         if (!existingColumnIds.includes(columnId)) {
-          this.sheetData.appendRowWithVals({
+          this.sheet.appendRowWithVals({
             sheetGid: sheetGid,
             columnId: columnId,
           });
@@ -149,7 +149,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this;
   }
   private _updateProgrammaticValues() {
-    const col = this.sheetData.columns(
+    const col = this.sheet.columns(
       "sheetGid",
       "columnId",
       "sheetTitle",
@@ -158,7 +158,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "valueTitle",
     );
     let updatedValues = 0;
-    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       const columnId = col.columnId.valueNotEmpty(rowIndex);
       const sheetRaw = this.ss.raw.sheet(sheetGid);
@@ -192,7 +192,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   newColumnConfigs(): ColumnConfigsGeneric {
     const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();
-    const col = this.sheetData.columns(
+    const col = this.sheet.columns(
       "sheetGid",
       "columnId",
       "header",
@@ -200,7 +200,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "valueTitle",
     );
     const columnConfigs: ColumnConfigsGeneric = {};
-    this.sheetData.rowIndexesActive.forEach((rowIndex) => {
+    this.sheet.rowIndexesActive.forEach((rowIndex) => {
       const columnId = col.columnId.valueNotEmpty(rowIndex);
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       const header = col.header.valueNotEmpty(rowIndex);

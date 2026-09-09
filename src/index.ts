@@ -18,14 +18,14 @@ function _indexMainTest() {
       ConfigOrchestrator.init().syncAndFlushConfigSheets();
     },
     addColumnIds() {
-      const test = ss.sheet("test");
+      const test = ss.sheetMeta("test");
       test.uniformRow("columnId").prepFetchFull();
       ss.fetchAllPrepped();
-      ss.sheet("test").addMissingColumnIds();
+      ss.sheetMeta("test").addMissingColumnIds();
       ss.batchUpdateGSheets();
     },
     addRowIds() {
-      const idColumn = ss.sheet("test").column("id").data;
+      const idColumn = ss.sheet("test").column("id");
       idColumn.prepFetchFull();
       ss.fetchAllPrepped({});
       idColumn.emptyActiveCellsToDefualt();

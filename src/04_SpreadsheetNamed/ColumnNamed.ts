@@ -1,51 +1,86 @@
-import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type {
-  ColumnFullName,
   ColumnName,
+  ColumnValue,
   ColumnValueName,
-  MakeColumnFullName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
-import { ColumnMetaIndexed } from "../03_SpreadsheetIndexed/ColumnMetaIndexed";
+import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
+import type { ColumnIndexed as ColumnIndexedClass } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import type { StrictExclude } from "../utils/Arr";
+import { CellNamed } from "./CellNamed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";
-import { DataColumnNamed } from "./DataColumnNamed";
+import { ColumnMetaNamed } from "./ColumnMetaNamed";
+import { SheetNamed } from "./SheetNamed";
 
 export class ColumnNamed<
   SN extends SheetName,
   CN extends ColumnName<SN> = ColumnName<SN>,
 > extends ColumnCommonNamed<SN, CN> {
-  get raw() {
-    return this.sheet.raw.column(this.indexed.colIndex);
+  get sheet(): SheetNamed<SN> {
+    return new SheetNamed(this.sheetNamedProps);
   }
-  get indexed(): ColumnMetaIndexed<ColumnValueName<SN, CN>> {
-    return new ColumnMetaIndexed<ColumnValueName<SN, CN>>({
-      ...this.sheet.indexed.sheetIndexedProps,
-      columnId: this.columnId,
+  get meta(): ColumnMetaNamed<SN, CN> {
+    return new ColumnMetaNamed(this.columnNamedProps);
+  }
+  get indexed(): ColumnIndexedClass<ColumnValueName<SN, CN>> {
+    return this.meta.indexed.primary;
+  }
+  get raw() {
+    return this.indexed.raw;
+  }
+  get rowIndexesActive(): number[] {
+    return this.indexed.cellIndexesActive;
+  }
+  get valueArr(): ColumnValue<SN, CN>[] {
+    return this.indexed.valueArr;
+  }
+  get valueArrFilterEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+    return this.indexed.valueArrFilterEmpty;
+  }
+  get valueArrNotEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+    return this.indexed.valueArrNotEmpty;
+  }
+  hasValue(value: ColumnValue<SN, CN>): boolean {
+    return this.valueArr.includes(value);
+  }
+  valueNotEmpty(rowIndex: number): StrictExclude<ColumnValue<SN, CN>, ""> {
+    return this.indexed.valueNotEmpty(rowIndex);
+  }
+  value(rowIndex: number): ColumnValue<SN, CN> {
+    return this.cell(rowIndex).value();
+  }
+  cell(rowIndex: number): CellNamed<SN, CN> {
+    return new CellNamed({
+      ...this.columnNamedProps,
+      rowIndex,
     });
   }
-  get colIndex() {
-    return this.indexed.colIndex;
+  updateAllCells(change: CellChange<ColumnValueName<SN, CN>>): this {
+    this.indexed.updateAllCells(change);
+    return this;
   }
-  get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
-    return this.schema.fullName;
+  updateActiveCells(change: CellChange<ColumnValueName<SN, CN>>): this {
+    this.indexed.updateActiveCells(change);
+    return this;
   }
-  get data(): DataColumnNamed<SN, CN> {
-    return new DataColumnNamed(this.columnNamedProps);
+  prepFetchSpecific(rowIndexes: number[]): this {
+    this.indexed.prepFetchSpecific(rowIndexes);
+    return this;
   }
-  uniformCell<UN extends UniformRowName>(
-    rowName: UN,
-  ): CellIndexed<UniformRowValueName<UN>> {
-    // intentionally not cell named, because named cells only work for data
-    return this.indexed.uniformCell(rowName);
+  prepFetchActive(): this {
+    this.indexed.prepFetchActive();
+    return this;
   }
-  prepFetchUniformCell<UN extends UniformRowName>(
-    rowName: UN,
-  ): CellIndexed<UniformRowValueName<UN>> {
-    return this.uniformCell(rowName).prepFetch();
+  prepFetchFull(): this {
+    this.indexed.prepFetchFull();
+    return this;
   }
-  actionRowToDefault(): ColumnNamed<SN, CN> {
-    this.uniformCell("action").updateValue(false);
+  activeCellsToDefault(): this {
+    this.indexed.activeCellsToDefault();
+    return this;
+  }
+  emptyActiveCellsToDefualt(): this {
+    this.indexed.emptyActiveCellsToDefualt();
     return this;
   }
 }
