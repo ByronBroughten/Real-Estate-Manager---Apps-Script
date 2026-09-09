@@ -1,6 +1,6 @@
 import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
-import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
+import { ColumnMetaRaw } from "../02_SpreadsheetRaw/ColumnMetaRaw";
 import { CellIndexed } from "./CellIndexed";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { DataColumnIndexed } from "./DataColumnIndexed";
@@ -8,8 +8,8 @@ import { DataColumnIndexed } from "./DataColumnIndexed";
 export class ColumnIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnCommonIndexed<VN> {
-  get raw(): ColumnRaw<VnToCvn<VN>> {
-    return new ColumnRaw({
+  get raw(): ColumnMetaRaw<VnToCvn<VN>> {
+    return new ColumnMetaRaw({
       ...this.sheetIndexedProps,
       colIndex: this.colIndex,
     });

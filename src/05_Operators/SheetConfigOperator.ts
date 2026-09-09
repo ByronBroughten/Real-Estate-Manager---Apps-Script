@@ -37,7 +37,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   }
   prepFetchForSync() {
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
-      this.ss.raw.sheet(sheetGid).headerRow.gatherFetchFull();
+      this.ss.raw.sheetMeta(sheetGid).headerRow.gatherFetchFull();
     });
     this.sheet.data.prepFetchColumnsFull(
       "sheetGid",
@@ -86,7 +86,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
         updatedValues++;
       }
       const hasIdCol = col.hasIdColumn.value(rowIndex);
-      const actualHasIdCol = activeSheet.headerRow.hasValue("ID");
+      const actualHasIdCol = activeSheet.meta.headerRow.hasValue("ID");
       if (hasIdCol !== actualHasIdCol) {
         col.hasIdColumn.cell(rowIndex).updateValue(actualHasIdCol);
         updatedValues++;

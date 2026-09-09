@@ -4,7 +4,7 @@ import type {
   ValueName,
   VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
-import { DataColumnRaw } from "../02_SpreadsheetRaw/DataColumnRaw";
+import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import type { RowCellChange } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
@@ -22,8 +22,8 @@ export class DataColumnIndexed<
   get column(): ColumnIndexed<VN> {
     return new ColumnIndexed(this.columnIndexedProps);
   }
-  get raw(): DataColumnRaw<VnToCvn<VN>> {
-    return new DataColumnRaw({
+  get raw(): ColumnRaw<VnToCvn<VN>> {
+    return new ColumnRaw({
       ...this.sheetIndexedProps,
       colIndex: this.colIndex,
     });
@@ -57,9 +57,6 @@ export class DataColumnIndexed<
     return this.valueArr.filter(
       (value): value is StrictExclude<Value<VN>, ""> => value !== "",
     );
-  }
-  get valueValidationStrings(): string[] {
-    return this.raw.valueValidationStrings;
   }
   get valueArrNotEmpty(): StrictExclude<Value<VN>, "">[] {
     return this.sheet.rowIndexesActive.map((rowIndex) =>

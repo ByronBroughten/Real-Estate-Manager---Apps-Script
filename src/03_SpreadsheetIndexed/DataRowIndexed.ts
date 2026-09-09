@@ -1,6 +1,6 @@
 import type { CellValue } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
-import { DataRowRaw } from "../02_SpreadsheetRaw/DataRowRaw";
+import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { CellIndexed } from "./CellIndexed";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
@@ -14,8 +14,8 @@ export class DataRowIndexed extends RowCommonIndexed {
   get sheet(): SheetIndexed {
     return new SheetIndexed(this.sheetIndexedProps);
   }
-  get raw(): DataRowRaw {
-    return new DataRowRaw(this.rowIndexedProps);
+  get raw(): RowRaw {
+    return new RowRaw(this.rowIndexedProps);
   }
   get activeValueArr(): CellValue[] {
     return this.raw.activeValueArr;

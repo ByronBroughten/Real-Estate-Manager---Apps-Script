@@ -37,17 +37,17 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
       ),
     );
     this.activeHeaders.forEach((header) => {
-      this.sheet.raw.columnByHeader(header).data.gatherFetchFull();
+      this.sheet.data.raw.columnByHeader(header).gatherFetchFull();
     });
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });
   }
   newValueConfigs(): ValueConfigsBase {
     return [...this.activeHeaders].reduce(
       (acc, header) => {
-        const valueNameDataCol = this.sheet.raw.columnByHeader(
+        const valueNameDataCol = this.sheet.data.raw.columnByHeader(
           header,
           "string",
-        ).data;
+        );
         const valueName = this.schema.titleToName(header);
         acc[valueName] = valueNameDataCol.valueArrFilterEmpty;
         return acc;

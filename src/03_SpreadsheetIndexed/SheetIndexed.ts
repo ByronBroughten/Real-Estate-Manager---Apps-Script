@@ -1,6 +1,6 @@
 import type { UniformRowName } from "../00_base/base";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
 import { isPreFetchType } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
@@ -17,8 +17,8 @@ export class SheetIndexed extends SheetCommon {
   colSchema(columnId: string): ColumnIndexed {
     return this.column(columnId);
   }
-  get raw(): SheetRaw {
-    return new SheetRaw(this.sheetIndexedProps);
+  get raw(): SheetMetaRaw {
+    return new SheetMetaRaw(this.sheetIndexedProps);
   }
   get sheetName(): SheetName {
     return this.schema.sheetName;
@@ -66,13 +66,13 @@ export class SheetIndexed extends SheetCommon {
   _gatherDataPrerequisites({
     skipFetchingProperties,
   }: GatherDataPrerequisitesProps = {}): void {
-    if (!skipFetchingProperties && !this.raw.hasFetchedProperties) {
-      this.raw.gatherFetchProperties();
+    if (!skipFetchingProperties && !this.raw.primary.hasFetchedProperties) {
+      this.raw.primary.gatherFetchProperties();
     }
     // Skip if a prior prepFetchFull() on the columnId row already covers this identical fetch.
     if (
       !this.raw.hasFetchedColumnIds &&
-      !this.raw.hasQueuedFullRowFetch(this.schema.colIdRowIndex)
+      !this.raw.primary.hasQueuedFullRowFetch(this.schema.colIdRowIndex)
     ) {
       this.raw.gatherFetchColumnIds();
     }
@@ -82,12 +82,12 @@ export class SheetIndexed extends SheetCommon {
     // before their fetch requests are generated.
     this.preFetchGridRanges.forEach((pf) => {
       if (isPreFetchType(pf, "fullRow")) {
-        this.raw.row(pf.row).gatherFetchFull();
+        this.raw.primary.rowCommon(pf.row).gatherFetchFull();
       } else if (isPreFetchType(pf, "fullDataColumn")) {
-        this.column(pf.column).raw.data.gatherFetchFull();
+        this.column(pf.column).raw.primary.gatherFetchFull();
       } else if (isPreFetchType(pf, "singleCell")) {
         const colIndex = this.column(pf.column).colIndex;
-        this.raw.row(pf.row).cell(colIndex).gatherFetchRange();
+        this.raw.primary.rowCommon(pf.row).cell(colIndex).gatherFetchRange();
       } else {
         throw new Error(`Unknown pre-fetch type: ${pf}`);
       }

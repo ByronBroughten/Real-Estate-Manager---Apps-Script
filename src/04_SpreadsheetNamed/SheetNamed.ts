@@ -1,7 +1,7 @@
 import type { UniformRowName } from "../00_base/base";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
 import type { DataColumnIndexed } from "../03_SpreadsheetIndexed/DataColumnIndexed";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";
@@ -16,8 +16,8 @@ export class SheetNamed<
   get spreadsheet(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  get raw(): SheetRaw {
-    return this.spreadsheet.raw.sheet(this.schema.sheetGid);
+  get raw(): SheetMetaRaw {
+    return this.spreadsheet.raw.sheetMeta(this.schema.sheetGid);
   }
   get sheetGid(): number {
     return this.schema.sheetGid;

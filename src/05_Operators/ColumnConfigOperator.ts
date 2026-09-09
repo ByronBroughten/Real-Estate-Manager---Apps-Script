@@ -64,8 +64,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     this.sheetConfigOperator.assertSyncedToSpreadsheet();
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
       const sheet = this.ss.raw.sheet(sheetGid);
-      sheet.uniformRow("columnId").gatherFetchFull();
-      sheet.data.topRow.gatherFetchFull();
+      sheet.meta.colIdRow.gatherFetchFull();
+      sheet.topRow.gatherFetchFull();
     });
     this.ss.raw.fetchAllGathered(true);
     return this;
@@ -93,7 +93,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       if (this._isSheetGidApiAccesses(sheetGid)) {
         const idPrefix = col.idPrefix.valueNotEmpty(rowIndex);
-        const sheet = this.ss.raw.sheet(sheetGid);
+        const sheet = this.ss.raw.sheetMeta(sheetGid);
         idsAdded += sheet.addMissingColumnIds(idPrefix);
       }
     });
@@ -124,7 +124,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this;
   }
   private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
-    return this.ss.raw.sheet(sheetGid).isActiveColumnId(columnId);
+    return this.ss.raw.sheetMeta(sheetGid).isActiveColumnId(columnId);
   }
   private _appendColumnRows(): this {
     const col = this.sheetData.columns("sheetGid", "columnId");
@@ -132,7 +132,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
 
     let appendedCount = 0;
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
-      const { activeColumnIds } = this.ss.raw.sheet(sheetGid);
+      const { activeColumnIds } = this.ss.raw.sheetMeta(sheetGid);
       activeColumnIds.forEach((columnId) => {
         if (!existingColumnIds.includes(columnId)) {
           this.sheetData.appendRowWithVals({
@@ -169,14 +169,14 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
-      const columnRaw = sheetRaw.columnByActiveId(columnId);
+      const columnRaw = sheetRaw.meta.columnByActiveId(columnId);
       const actualHeader = columnRaw.activeHeader;
       if (col.header.value(rowIndex) !== actualHeader) {
         col.header.cell(rowIndex).updateValue(actualHeader);
         updatedValues++;
       }
 
-      const actualIsFormula = columnRaw.data.activeIsFormula;
+      const actualIsFormula = columnRaw.activeIsFormula;
       if (col.isFormula.value(rowIndex) !== actualIsFormula) {
         col.isFormula.cell(rowIndex).updateValue(actualIsFormula);
         updatedValues++;

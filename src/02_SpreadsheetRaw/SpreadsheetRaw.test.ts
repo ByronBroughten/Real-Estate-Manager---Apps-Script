@@ -4,7 +4,15 @@ import {
   buildGridRows,
   stubSheetsService,
 } from "../testSupport/fakeSheetsService";
+import { assertType, type IsExactly } from "../testSupport/typeAssertions";
+import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
+import { ColumnMetaRaw } from "./ColumnMetaRaw";
+import { ColumnRaw } from "./ColumnRaw";
+import { RowRaw } from "./RowRaw";
+import { SheetMetaRaw } from "./SheetMetaRaw";
+import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
+import { UniformRowRaw } from "./UniformRowRaw";
 
 const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
 
@@ -36,8 +44,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).headerRow.gatherFetchFull();
-    raw.sheet(222).headerRow.gatherFetchFull();
+    raw.sheetMeta(111).headerRow.gatherFetchFull();
+    raw.sheetMeta(222).headerRow.gatherFetchFull();
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Task Generic" \(gid 111\).*"Task Material" \(gid 222\)/,
@@ -57,7 +65,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).headerRow.gatherFetchFull();
+    raw.sheetMeta(111).headerRow.gatherFetchFull();
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -122,8 +130,8 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).delete();
-    raw.sheet(111).data.appendDataRow();
+    raw.sheet(111).row(5).delete();
+    raw.sheet(111).appendDataRow();
 
     expect(() => raw.batchUpdateGSheets()).not.toThrow();
     expect(batchUpdateCalls[0]?.requests?.[0]).toEqual({
@@ -144,8 +152,8 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).delete();
-    raw.sheet(111).data.row(10).delete();
+    raw.sheet(111).row(5).delete();
+    raw.sheet(111).row(10).delete();
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls).toEqual([
@@ -185,7 +193,7 @@ describe("CellRaw.updateValue", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).cell(2).updateValue("Processing...");
+    raw.sheet(111).row(5).cell(2).updateValue("Processing...");
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -216,7 +224,7 @@ describe("CellRaw.updateValue", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    const cell = raw.sheet(111).data.row(5).cell(2);
+    const cell = raw.sheet(111).row(5).cell(2);
     cell.updateValue("Processing...");
 
     expect(() => cell.value()).toThrowError(/does not have a value set/);
@@ -230,9 +238,9 @@ describe("CellRaw.updateValue", () => {
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
 
-    expect(() =>
-      raw.sheet(111).data.row(11).cell(2).updateValue("x"),
-    ).toThrowError(/past the last row/);
+    expect(() => raw.sheet(111).row(11).cell(2).updateValue("x")).toThrowError(
+      /past the last row/,
+    );
   });
 
   it("reflects the write in row state when the row was fetched, so a later read sees it", () => {
@@ -251,9 +259,9 @@ describe("CellRaw.updateValue", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).data.row(4).gatherFetchFull();
+    raw.sheet(111).row(4).gatherFetchFull();
     raw.fetchAllGathered();
-    const cell = raw.sheet(111).data.row(4).cell(1);
+    const cell = raw.sheet(111).row(4).cell(1);
     cell.updateValue("new");
 
     expect(cell.value()).toBe("new");
@@ -268,7 +276,7 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).delete();
+    raw.sheet(111).row(5).delete();
     raw.discardQueuedChanges();
     raw.batchUpdateGSheets();
 
@@ -283,9 +291,9 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).delete();
+    raw.sheet(111).row(5).delete();
     raw.discardQueuedChanges();
-    raw.sheet(111).data.appendDataRow();
+    raw.sheet(111).appendDataRow();
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -324,7 +332,7 @@ describe("SpreadsheetRaw.spreadsheetId", () => {
   });
 });
 
-describe("DataColumnRaw.updateAllCells", () => {
+describe("ColumnRaw.updateAllCells", () => {
   function stubFilledSheet() {
     return stubSheetsService({
       sheets: [
@@ -344,7 +352,7 @@ describe("DataColumnRaw.updateAllCells", () => {
   }
   function fetchedColumn() {
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).data.column(1).gatherFetchFull();
+    raw.sheet(111).column(1).gatherFetchFull();
     raw.fetchAllGathered();
     return raw;
   }
@@ -353,7 +361,7 @@ describe("DataColumnRaw.updateAllCells", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllCells({ value: "new" });
+    raw.sheet(111).column(1).updateAllCells({ value: "new" });
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -377,21 +385,17 @@ describe("DataColumnRaw.updateAllCells", () => {
     stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllCells({ value: "new" });
+    raw.sheet(111).column(1).updateAllCells({ value: "new" });
 
-    expect(raw.sheet(111).data.column(1).valueArr).toEqual([
-      "new",
-      "new",
-      "new",
-    ]);
+    expect(raw.sheet(111).column(1).valueArr).toEqual(["new", "new", "new"]);
   });
 
   it("orders a per-cell write after the fill, so the cell wins", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllCells({ value: "filled" });
-    raw.sheet(111).data.row(5).cell(1).updateValue("overridden");
+    raw.sheet(111).column(1).updateAllCells({ value: "filled" });
+    raw.sheet(111).row(5).cell(1).updateValue("overridden");
     raw.batchUpdateGSheets();
 
     const requests = batchUpdateCalls[0]?.requests ?? [];
@@ -411,7 +415,7 @@ describe("DataColumnRaw.updateAllCells", () => {
     const raw = fetchedColumn();
     raw
       .sheet(111)
-      .data.column(1)
+      .column(1)
       .updateAllCells({ value: "new", backgroundColor: LIGHT_GREEN });
     raw.batchUpdateGSheets();
 
@@ -439,8 +443,8 @@ describe("DataColumnRaw.updateAllCells", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).data.column(1).updateAllCells({ value: "filled" });
-    raw.sheet(111).data.appendDataRow();
+    raw.sheet(111).column(1).updateAllCells({ value: "filled" });
+    raw.sheet(111).appendDataRow();
     raw.batchUpdateGSheets();
 
     const fill = (batchUpdateCalls[0]?.requests ?? []).find(
@@ -450,7 +454,7 @@ describe("DataColumnRaw.updateAllCells", () => {
   });
 });
 
-describe("DataColumnRaw.updateActiveCells", () => {
+describe("ColumnRaw.updateActiveCells", () => {
   function stubSelectionSheet() {
     return stubSheetsService({
       sheets: [
@@ -472,8 +476,8 @@ describe("DataColumnRaw.updateActiveCells", () => {
   }
   function fetchedSelectionSheet() {
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).colIdRow.gatherFetchFull();
-    raw.sheet(111).data.column(1).gatherFetchFull();
+    raw.sheetMeta(111).colIdRow.gatherFetchFull();
+    raw.sheet(111).column(1).gatherFetchFull();
     raw.fetchAllGathered();
     return raw;
   }
@@ -493,7 +497,7 @@ describe("DataColumnRaw.updateActiveCells", () => {
     const { batchUpdateCalls } = stubSelectionSheet();
 
     const raw = fetchedSelectionSheet();
-    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.sheet(111).column(1).updateActiveCells({ value: "new" });
     raw.batchUpdateGSheets();
 
     expect(fillRanges(batchUpdateCalls)).toEqual([
@@ -506,7 +510,7 @@ describe("DataColumnRaw.updateActiveCells", () => {
 
     const raw = fetchedSelectionSheet();
     raw.sheet(111).removeRowsExcept(4, 5, 8);
-    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.sheet(111).column(1).updateActiveCells({ value: "new" });
     raw.batchUpdateGSheets();
 
     expect(fillRanges(batchUpdateCalls)).toEqual([
@@ -522,7 +526,7 @@ describe("DataColumnRaw.updateActiveCells", () => {
     raw.sheet(111).removeRowsExcept(4);
     raw
       .sheet(111)
-      .data.column(1)
+      .column(1)
       .updateActiveCells({ value: "new", backgroundColor: LIGHT_GREEN });
     raw.batchUpdateGSheets();
 
@@ -553,14 +557,14 @@ describe("DataColumnRaw.updateActiveCells", () => {
     raw.sheet(111).removeRowsExcept(4);
     raw
       .sheet(111)
-      .data.column(1)
+      .column(1)
       .updateActiveCells({ backgroundColor: LIGHT_GREEN });
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests?.[0]?.repeatCell?.cell).toEqual({
       userEnteredFormat: { backgroundColor: LIGHT_GREEN },
     });
-    expect(raw.sheet(111).data.column(1).valueArr).toEqual(["old"]);
+    expect(raw.sheet(111).column(1).valueArr).toEqual(["old"]);
   });
 
   it("writes nothing when no row is active", () => {
@@ -568,7 +572,7 @@ describe("DataColumnRaw.updateActiveCells", () => {
 
     const raw = fetchedSelectionSheet();
     raw.sheet(111).removeRowsExcept();
-    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.sheet(111).column(1).updateActiveCells({ value: "new" });
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls).toEqual([]);
@@ -579,9 +583,9 @@ describe("DataColumnRaw.updateActiveCells", () => {
 
     const raw = fetchedSelectionSheet();
     raw.sheet(111).removeRowsExcept(4, 8);
-    raw.sheet(111).data.column(1).updateActiveCells({ value: "new" });
+    raw.sheet(111).column(1).updateActiveCells({ value: "new" });
 
-    expect(raw.sheet(111).data.column(1).valueArr).toEqual(["new", "new"]);
+    expect(raw.sheet(111).column(1).valueArr).toEqual(["new", "new"]);
   });
 });
 
@@ -605,8 +609,8 @@ describe("SheetRaw.removeRowsExcept", () => {
   }
   function fetchedPrunableSheet() {
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).colIdRow.gatherFetchFull();
-    raw.sheet(111).data.column(1).gatherFetchFull();
+    raw.sheetMeta(111).colIdRow.gatherFetchFull();
+    raw.sheet(111).column(1).gatherFetchFull();
     raw.fetchAllGathered();
     return raw;
   }
@@ -617,7 +621,7 @@ describe("SheetRaw.removeRowsExcept", () => {
     const raw = fetchedPrunableSheet();
     raw.sheet(111).removeRowsExcept(5);
 
-    expect(raw.sheet(111).data.rowIndexesActive).toEqual([5]);
+    expect(raw.sheet(111).rowIndexesActive).toEqual([5]);
   });
 
   it("keeps the uniform rows, so a column still resolves by its id afterwards", () => {
@@ -626,7 +630,7 @@ describe("SheetRaw.removeRowsExcept", () => {
     const raw = fetchedPrunableSheet();
     raw.sheet(111).removeRowsExcept(5);
 
-    expect(raw.sheet(111).columnByActiveId("c:lse:bbb").colIndex).toBe(1);
+    expect(raw.sheetMeta(111).columnByActiveId("c:lse:bbb").colIndex).toBe(1);
   });
 
   it("makes a whole-column fill throw, so it can't overwrite the excluded rows", () => {
@@ -636,7 +640,7 @@ describe("SheetRaw.removeRowsExcept", () => {
     raw.sheet(111).removeRowsExcept(5);
 
     expect(() =>
-      raw.sheet(111).data.column(1).updateAllCells({ value: "new" }),
+      raw.sheet(111).column(1).updateAllCells({ value: "new" }),
     ).toThrowError(/pruned to a selection/);
   });
 });
@@ -649,7 +653,7 @@ describe("CellRaw.updateBackgroundColor", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
+    raw.sheet(111).row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -680,8 +684,8 @@ describe("CellRaw.updateBackgroundColor", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).cell(2).updateValue("2026-09-05 10:00:00");
-    raw.sheet(111).data.row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
+    raw.sheet(111).row(5).cell(2).updateValue("2026-09-05 10:00:00");
+    raw.sheet(111).row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -717,8 +721,8 @@ describe("CellRaw.updateBackgroundColor", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).data.row(5).cell(2).updateValue("kept");
-    raw.sheet(111).data.row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
+    raw.sheet(111).row(5).cell(2).updateValue("kept");
+    raw.sheet(111).row(5).cell(2).updateBackgroundColor(LIGHT_GREEN);
     raw.batchUpdateGSheets();
 
     const values =
@@ -733,10 +737,49 @@ describe("CellRaw.updateBackgroundColor", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    const cell = raw.sheet(111).data.row(5).cell(2);
+    const cell = raw.sheet(111).row(5).cell(2);
     cell.updateBackgroundColor(LIGHT_GREEN);
 
     expect(cell.isActive).toBe(false);
     expect(() => cell.value()).toThrowError(/does not have a value set/);
+  });
+});
+
+// An accessor typed for one view but wired to the other's constructor
+// type-checks; only an identity assertion plus an instance check catch it.
+describe("Raw navigation graph", () => {
+  it("gives each accessor the class its return type names", () => {
+    const raw = SpreadsheetRaw.init();
+    const sheet = raw.sheet(111);
+    const sheetMeta = raw.sheetMeta(111);
+    const column = sheet.column(0);
+    const columnMeta = sheetMeta.column(0);
+
+    assertType<IsExactly<typeof sheet, SheetRaw>>(true);
+    assertType<IsExactly<typeof sheetMeta, SheetMetaRaw>>(true);
+    assertType<IsExactly<typeof sheet.meta, SheetMetaRaw>>(true);
+    assertType<IsExactly<typeof sheetMeta.primary, SheetRaw>>(true);
+    assertType<IsExactly<typeof column, ColumnRaw>>(true);
+    assertType<IsExactly<typeof columnMeta, ColumnMetaRaw>>(true);
+    assertType<IsExactly<typeof column.sheet, SheetRaw>>(true);
+    assertType<IsExactly<typeof columnMeta.sheet, SheetMetaRaw>>(true);
+    assertType<IsExactly<typeof column.meta, ColumnMetaRaw>>(true);
+    assertType<IsExactly<typeof columnMeta.primary, ColumnRaw>>(true);
+    assertType<IsExactly<ReturnType<typeof sheet.row>, RowRaw>>(true);
+    assertType<IsExactly<ReturnType<typeof sheet.rowCommon>, RowCommonRaw>>(
+      true,
+    );
+
+    expect(sheet.meta).toBeInstanceOf(SheetMetaRaw);
+    expect(sheetMeta.primary).toBeInstanceOf(SheetRaw);
+    expect(column).toBeInstanceOf(ColumnRaw);
+    expect(columnMeta).toBeInstanceOf(ColumnMetaRaw);
+    expect(column.sheet).toBeInstanceOf(SheetRaw);
+    expect(columnMeta.sheet).toBeInstanceOf(SheetMetaRaw);
+    expect(column.meta).toBeInstanceOf(ColumnMetaRaw);
+    expect(columnMeta.primary).toBeInstanceOf(ColumnRaw);
+    expect(sheet.row(4)).toBeInstanceOf(RowRaw);
+    expect(sheet.rowCommon(4)).toBeInstanceOf(RowRaw);
+    expect(sheet.rowCommon(0)).toBeInstanceOf(UniformRowRaw);
   });
 });

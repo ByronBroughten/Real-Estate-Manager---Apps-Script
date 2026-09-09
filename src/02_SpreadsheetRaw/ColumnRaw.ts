@@ -1,81 +1,117 @@
-import type {
-  CellValueName,
-  UniformRowName,
-  UniformRowValue,
-  UniformRowValueName,
-} from "../00_base/base";
-import type { PrimitiveValueName } from "../utils/Val";
+import type { CellValue, CellValueName } from "../00_base/base";
+import { Arr } from "../utils/Arr";
 import { CellRaw } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import { DataColumnRaw } from "./DataColumnRaw";
+import type { RowCellChange } from "./ClassTypes/RawState";
+import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
+import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 export class ColumnRaw<
   VN extends CellValueName = CellValueName,
 > extends ColumnRawBase<VN> {
+  get ss(): SpreadsheetRaw {
+    return new SpreadsheetRaw(this.spreadsheetRawProps);
+  }
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  get data(): DataColumnRaw<VN> {
-    return new DataColumnRaw<VN>(this.columnRawProps);
+  get meta(): ColumnMetaRaw<VN> {
+    return new ColumnMetaRaw<VN>(this.columnRawProps);
   }
-  uniformCell<UN extends UniformRowName>(
-    rowName: UN,
-  ): CellRaw<UniformRowValueName<UN>> {
-    const rowIndex = this.schema.uniformRowIndex(rowName);
-    const valueName = this.schema.uniformValueName(rowName);
-    return new CellRaw<UniformRowValueName<UN>>({
+  get valueArr(): CellValue<VN>[] {
+    return this.sheet.rowIndexesActive.map((rowIndex) => this.value(rowIndex));
+  }
+  get valueArrFilterEmpty(): CellValue<VN>[] {
+    return this.valueArr.filter((value) => value !== "");
+  }
+  get topCell(): CellRaw<VN> {
+    return this.cell(this.schema.topDataRowIdx);
+  }
+  get cellIndexesActive(): number[] {
+    return this.sheet.rowIndexesActive;
+  }
+  get cellIndexesFull(): number[] {
+    return this.sheet.rowIndexesFull;
+  }
+  cell(rowIndex: number): CellRaw<VN> {
+    return new CellRaw({
       ...this.columnRawProps,
       rowIndex,
-      valueName,
+      valueName: this.valueName,
     });
   }
-  get activeHeader() {
-    return this.uniformCell("header").value();
+  value(rowIndex: number): CellValue<VN> {
+    return this.cell(rowIndex).value();
   }
-  initUniformCells({
-    idPrefix,
-    header,
-  }: {
-    idPrefix: string;
-    header: string;
-  }): this {
-    const columnId = this.sheet.makeColumnId(idPrefix);
-    this.uniformCell("columnId").updateValue(columnId);
-    this.uniformCell("header").updateValue(header);
+  updateValue(rowIndex: number, newValue: CellValue<VN>): this {
+    this.cell(rowIndex).updateValue(newValue);
     return this;
   }
-  updateUniformCell<UN extends UniformRowName>(
-    rowName: UN,
-    newValue: UniformRowValue<UN>,
-  ): this {
-    this.uniformCell(rowName).updateValue(newValue);
-    return this;
-  }
-  activeValueTitle(): string {
-    if (this.activeHeader === this.schema.idHeader) {
-      return "id";
-    }
-    return (
-      this.data.activeValidationValueTitle() ?? this._actualPrimitiveValueName()
-    );
-  }
-  private _actualPrimitiveValueName(): PrimitiveValueName {
-    const value = this.data.activeTopValue;
-    if (typeof value === "boolean") {
-      return "boolean";
-    }
-    if (typeof value === "number") {
-      const formatType = this.data.activeNumberFormatType;
-      if (
-        formatType === "DATE" ||
-        formatType === "DATE_TIME" ||
-        formatType === "TIME"
-      ) {
-        return "date";
+  // State is still mirrored row by row; only the queued request collapses.
+  updateAllCells(change: RowCellChange<VN>): this {
+    this.validateIndexNotStale();
+    this.sheet.validateNotPrunedToSelection();
+    const { endRowIndex } = this.activeTable;
+    const { value } = change;
+    this.sheet.rowIndexesFull.forEach((rowIndex) => {
+      const row = this.sheet.row(rowIndex);
+      row.validateIsWritable();
+      if (value !== undefined && row.rowIsActive()) {
+        this.cell(rowIndex).setValueState(value);
       }
-      return "number";
+    });
+    this.sheet.addSheetChangeToSave({
+      action: "fill",
+      colIndex: this.colIndex,
+      startRowIndex: this.schema.topDataRowIdx,
+      endRowIndex,
+      ...change,
+    });
+    return this;
+  }
+  updateActiveCells(change: RowCellChange<VN>): this {
+    this.validateIndexNotStale();
+    const rowIndexes = this.cellIndexesActive;
+    const { value } = change;
+    if (value !== undefined) {
+      rowIndexes.forEach((rowIndex) => {
+        this.cell(rowIndex).setValueState(value);
+      });
     }
-    return "string";
+    Arr.contiguousRanges(rowIndexes).forEach(({ startIndex, endIndex }) => {
+      this.sheet.addSheetChangeToSave({
+        action: "fill",
+        colIndex: this.colIndex,
+        startRowIndex: startIndex,
+        endRowIndex: endIndex,
+        ...change,
+      });
+    });
+    return this;
+  }
+  gatherFetchActive(): this {
+    this.cellIndexesActive.forEach((rowIndex) => {
+      this.cell(rowIndex).gatherFetchRange();
+    });
+    return this;
+  }
+  gatherFetchFull(): this {
+    this.sheet.gatherFetchRange({
+      startRowIndex: this.schema.topDataRowIdx,
+      startColumnIndex: this.colIndex,
+      endColumnIndex: this.colIndex + 1,
+    });
+    this.sheetState.colIndexesToFinalize.add(this.colIndex);
+    return this;
+  }
+  // A full-column fetch can hit rows that are entirely blank across every
+  // column, which Sheets omits from the response — ensureStateExists
+  // backfills those before ensureActive tries to touch a cell in them.
+  ensureFullActiveDataCells(): void {
+    this.sheet.rowIndexesFull.forEach((rowIndex) => {
+      this.sheet.row(rowIndex).ensureStateExists();
+      this.cell(rowIndex).ensureActive();
+    });
   }
 }

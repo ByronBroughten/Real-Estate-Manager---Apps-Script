@@ -118,7 +118,7 @@ export class EndpointRun<
   // Unselected rows go inactive, so every later read of active rows is the selection.
   private _pruneToSelection(selectedRowIndexes: number[]): void {
     if (!this.endpoint.selector) return;
-    this.sheet.raw.removeRowsExcept(...selectedRowIndexes);
+    this.sheet.data.raw.removeRowsExcept(...selectedRowIndexes);
   }
   // The flush is what puts the running state on the sheet before the work runs.
   private _onRunSetup(): void {

@@ -8,7 +8,9 @@ import type {
   RowChangesToSave,
   SheetChangesToSave,
 } from "./ClassTypes/RawState";
-import { SheetRaw, type SheetRawRow } from "./SheetRaw";
+import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
+import { SheetMetaRaw } from "./SheetMetaRaw";
+import { SheetRaw } from "./SheetRaw";
 
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
@@ -32,12 +34,18 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       sheetGid: sheetGid,
     });
   }
+  sheetMeta(sheetGid: number): SheetMetaRaw {
+    return new SheetMetaRaw({
+      rawState: this.rawState,
+      sheetGid: sheetGid,
+    });
+  }
   sheets(...sheetGids: number[]): SheetRaw[] {
     return sheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
-  rowBySheetRowId(sheetRowId: string): SheetRawRow {
+  rowBySheetRowId(sheetRowId: string): RowCommonRaw {
     const { sheetGid, rowIndex } = this.schema.idsFromSheetRowId(sheetRowId);
-    return this.sheet(sheetGid).row(rowIndex);
+    return this.sheet(sheetGid).rowCommon(rowIndex);
   }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.rawState.allSheetPropertiesAreFetched) {
@@ -81,10 +89,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         state.hasFetchedColumnIds = true;
       }
       state.rowIndexesToFinalize.forEach((rowIndex) => {
-        sheet.row(rowIndex).ensureFullActiveDataCells();
+        sheet.rowCommon(rowIndex).ensureFullActiveDataCells();
       });
       state.colIndexesToFinalize.forEach((colIndex) => {
-        sheet.data.column(colIndex).ensureFullActiveDataCells();
+        sheet.column(colIndex).ensureFullActiveDataCells();
       });
       state.rowIndexesToFinalize.clear();
       state.colIndexesToFinalize.clear();

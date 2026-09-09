@@ -10,15 +10,11 @@ import {
 } from "../00_base/baseValueSchemas";
 import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { UniformRowRawBase } from "./ClassBases/UniformRowRawBase";
-import { SheetRaw } from "./SheetRaw";
 
 export class UniformRowRaw<
   UN extends UniformRowName = UniformRowName,
   VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
 > extends UniformRowRawBase<UN> {
-  get sheet(): SheetRaw {
-    return new SheetRaw(this.sheetRawProps);
-  }
   private trait<VN extends CellValueName, K extends ValueSchemaKey>(
     valueName: VN,
     key: K,

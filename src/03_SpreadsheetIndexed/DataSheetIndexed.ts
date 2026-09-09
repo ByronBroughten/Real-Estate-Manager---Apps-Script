@@ -1,5 +1,5 @@
 import type { CellValue } from "../00_base/base";
-import { DataSheetRaw } from "../02_SpreadsheetRaw/DataSheetRaw";
+import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { DataColumnIndexed } from "./DataColumnIndexed";
 import { DataRowIndexed } from "./DataRowIndexed";
 import { SheetCommon } from "./SheetCommon";
@@ -9,8 +9,8 @@ export class DataSheetIndexed extends SheetCommon {
   get sheet(): SheetIndexed {
     return new SheetIndexed(this.sheetIndexedProps);
   }
-  get raw(): DataSheetRaw {
-    return new DataSheetRaw(this.sheetIndexedProps);
+  get raw(): SheetRaw {
+    return new SheetRaw(this.sheetIndexedProps);
   }
   column(columnId: string): DataColumnIndexed {
     return new DataColumnIndexed({

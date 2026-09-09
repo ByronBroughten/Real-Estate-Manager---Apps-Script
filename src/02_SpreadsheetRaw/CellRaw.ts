@@ -10,10 +10,9 @@ import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { CellRawBase } from "./ClassBases/CellRawBase";
+import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import type { RowCellChange } from "./ClassTypes/RawState";
-import type { DataRowRaw } from "./DataRowRaw";
 import { SheetRaw } from "./SheetRaw";
-import type { UniformRowRaw } from "./UniformRowRaw";
 
 export class CellRaw<
   VN extends CellValueName = CellValueName,
@@ -27,8 +26,8 @@ export class CellRaw<
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  get row(): DataRowRaw | UniformRowRaw {
-    return this.sheet.row(this.rowIndex);
+  get row(): RowCommonRaw {
+    return this.sheet.rowCommon(this.rowIndex);
   }
   get gridRange() {
     return {
