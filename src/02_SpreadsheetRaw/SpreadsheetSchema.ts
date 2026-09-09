@@ -426,8 +426,8 @@ export class ColumnSchema<
     }
   }
   validate(value: unknown) {
-    const emptyAllowed = this.trait("emptyAllowed");
-    if (emptyAllowed && value === "") {
+    const emptyValueAllowed = this.trait("emptyValueAllowed");
+    if (emptyValueAllowed && value === "") {
       return value;
     } else {
       return this.valTrait("strictValidate")(value);

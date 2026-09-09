@@ -38,7 +38,7 @@ const columnConfigColumnIdRow = [
   cc.isFormula.columnId,
   cc.valueTitle.columnId,
   cc.isActionControl.columnId,
-  cc.emptyAllowed.columnId,
+  cc.emptyValueAllowed.columnId,
   cc.customDefaultValue.columnId,
 ];
 
@@ -168,7 +168,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         valueName: "number",
         header: "Rent Amount",
         isFormula: false,
-        emptyAllowed: false,
+        emptyValueAllowed: false,
         customDefaultValue: null,
       },
       notes: {
@@ -176,7 +176,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         valueName: "string",
         header: "Notes",
         isFormula: false,
-        emptyAllowed: false,
+        emptyValueAllowed: false,
         customDefaultValue: null,
       },
     });
@@ -186,7 +186,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         valueName: "string",
         header: "Some Field",
         isFormula: false,
-        emptyAllowed: false,
+        emptyValueAllowed: false,
         customDefaultValue: null,
       },
     });

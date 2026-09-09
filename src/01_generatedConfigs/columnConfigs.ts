@@ -7,7 +7,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Fill row IDs, run status",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "syncConfigSheetRowsTimeLastRan": {
@@ -15,7 +15,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Sync config sheet rows, time last ran",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "syncConfigSheetRowsRunStatus": {
@@ -23,7 +23,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Sync config sheet rows, run status",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "tableControlsSpace": {
@@ -31,7 +31,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Table controls space",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "fillRowIdsTimeLastRan": {
@@ -39,7 +39,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Fill row IDs, time last ran",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -49,7 +49,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Table controls space",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "yesOrNo": {
@@ -57,7 +57,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Yes or no",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "transactionDescription": {
@@ -65,7 +65,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Transaction description",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeDescription": {
@@ -73,7 +73,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge description",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeRecurringDescription": {
@@ -81,7 +81,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge recurring description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeOnetimeDescription": {
@@ -89,7 +89,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge onetime description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeReduceDescription": {
@@ -97,7 +97,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge reduce description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentPortionName": {
@@ -105,7 +105,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent portion name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentType": {
@@ -113,7 +113,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment type",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payerCategory": {
@@ -121,7 +121,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payer category",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentAllocateWhat": {
@@ -129,7 +129,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment allocate what",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "expenseCategory": {
@@ -137,7 +137,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Expense category",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "expenseCategoryTaxable": {
@@ -145,7 +145,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Expense category taxable",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "expenseCategoryBank": {
@@ -153,7 +153,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Expense category bank",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "residenceTaxAdjust": {
@@ -161,7 +161,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Residence tax adjust",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "receiptFormat": {
@@ -169,7 +169,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Receipt format",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "firstOfEachMonthThisYear": {
@@ -177,7 +177,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First of each month this year",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "januaryQuartersThisYear": {
@@ -185,7 +185,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "January quarters this year",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "februaryQuartersThisYear": {
@@ -193,7 +193,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "February quarters this year",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "marchQuartersThisYear": {
@@ -201,7 +201,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "March quarters this year",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "oneOccupancyOrAll": {
@@ -209,7 +209,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "One occupancy or all",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "buildingType": {
@@ -217,7 +217,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Building type",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "buildingTypeAndAny": {
@@ -225,7 +225,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Building type and any",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -235,7 +235,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Sheet GID",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "sheetTitle": {
@@ -243,7 +243,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Sheet title",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "hasIdColumn": {
@@ -251,7 +251,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Has ID column",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "letApiAccess": {
@@ -259,7 +259,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Let api access",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "idPrefix": {
@@ -267,7 +267,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID prefix",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "idPrefixIsUniqueOrEmpty": {
@@ -275,7 +275,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID prefix Is unique or empty",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -285,7 +285,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Sheet GID",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "columnId": {
@@ -293,7 +293,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Column ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "sheetTitle": {
@@ -301,7 +301,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Sheet title",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "header": {
@@ -309,7 +309,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Header",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "isFormula": {
@@ -317,7 +317,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Is formula",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "valueTitle": {
@@ -325,7 +325,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Value title",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "isActionControl": {
@@ -333,7 +333,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Is action control",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "customDefaultValue": {
@@ -341,15 +341,15 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Custom default value",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "emptyAllowed": {
+    "emptyValueAllowed": {
       "columnId": "c:ccf:volkLl6",
       "header": "Empty allowed",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -359,7 +359,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID delimiter",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nameDelimiter": {
@@ -367,7 +367,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name delimiter",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "columnIdRowIndexBase0": {
@@ -375,7 +375,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Column ID row index base 0",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "actionRowIndexBase0": {
@@ -383,7 +383,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Action row index base 0",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "headerRowIndexBase0": {
@@ -391,7 +391,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Header row index base 0",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "topBodyRowIndexBase0": {
@@ -399,7 +399,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Top body row index base 0",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "idHeader": {
@@ -407,7 +407,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID header",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "selectorEndpointSuffix": {
@@ -415,7 +415,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Selector endpoint suffix",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "runnerEndpointSuffix": {
@@ -423,7 +423,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Runner endpoint suffix",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -433,7 +433,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -441,7 +441,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "number": {
@@ -449,7 +449,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Number",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "dropdown": {
@@ -457,7 +457,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Dropdown",
       "valueName": "yesOrNo",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -465,7 +465,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -475,7 +475,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdName": {
@@ -483,7 +483,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -491,7 +491,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -499,7 +499,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "chargeOnetimeDescription",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitName": {
@@ -507,7 +507,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdId": {
@@ -515,7 +515,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
@@ -523,7 +523,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -531,7 +531,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -539,7 +539,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "select": {
@@ -547,7 +547,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Select",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "statusAndEnter": {
@@ -555,7 +555,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Status and enter",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -565,7 +565,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "portion": {
@@ -573,7 +573,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Portion",
       "valueName": "rentPortionName",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -581,7 +581,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "chargeDescription",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -589,7 +589,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitName": {
@@ -597,7 +597,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit name",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyAgreementName": {
@@ -605,7 +605,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy agreement name",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -613,7 +613,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdId": {
@@ -621,7 +621,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
@@ -629,7 +629,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyAgreementId": {
@@ -637,7 +637,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy agreement ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -645,7 +645,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "detailsVerified": {
@@ -653,7 +653,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Details verified",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payerCategory": {
@@ -661,7 +661,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payer category",
       "valueName": "payerCategory",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentHhName": {
@@ -669,7 +669,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment HH name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyProgramName": {
@@ -677,7 +677,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy program name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "otherPayerName": {
@@ -685,7 +685,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Other payer name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentHhId": {
@@ -693,7 +693,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment HH ID",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyProgramId": {
@@ -701,7 +701,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy program ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "otherPayerId": {
@@ -709,7 +709,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Other payer ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -717,7 +717,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "select": {
@@ -725,7 +725,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Select",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "statusAndEnter": {
@@ -733,7 +733,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Status and enter",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -743,7 +743,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyName": {
@@ -751,7 +751,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitName": {
@@ -759,7 +759,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "billerName": {
@@ -767,7 +767,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Biller name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -775,7 +775,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -783,7 +783,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "expenseCategory": {
@@ -791,7 +791,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Expense category",
       "valueName": "expenseCategory",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "taxAdjust": {
@@ -799,7 +799,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Tax adjust",
       "valueName": "residenceTaxAdjust",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "receiptFormat": {
@@ -807,7 +807,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Receipt format",
       "valueName": "receiptFormat",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -815,7 +815,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdToCharge": {
@@ -823,7 +823,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household to charge",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdChargeLesserAmount": {
@@ -831,7 +831,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household charge lesser amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "hhChargeNotes": {
@@ -839,7 +839,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HH charge notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdId": {
@@ -847,7 +847,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -855,7 +855,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -863,7 +863,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
@@ -871,7 +871,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "select": {
@@ -879,7 +879,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Select",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "selectAndEnter": {
@@ -887,7 +887,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Select and enter",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -897,7 +897,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -905,7 +905,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "parcelNumber": {
@@ -913,7 +913,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Parcel number",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "streetAddress": {
@@ -921,7 +921,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Street address",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "zipCode": {
@@ -929,7 +929,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Zip code",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "yearBuilt": {
@@ -937,7 +937,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Year built",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "squareFeet": {
@@ -945,7 +945,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Square feet",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "pavedDrivewayCount": {
@@ -953,7 +953,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Paved driveway count",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "garageDoorCount": {
@@ -961,7 +961,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garage door count",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitLabelPrepend": {
@@ -969,7 +969,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit label prepend",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "purchasePrice": {
@@ -977,7 +977,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Purchase price",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "closingDate": {
@@ -985,7 +985,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Closing date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "buildingType": {
@@ -993,7 +993,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Building type",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitCount": {
@@ -1001,7 +1001,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "bedroomCount": {
@@ -1009,7 +1009,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Bedroom count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "furnaceCount": {
@@ -1017,7 +1017,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Furnace count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "projectedRoi": {
@@ -1025,7 +1025,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Projected ROI",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "upfrontInvestment": {
@@ -1033,7 +1033,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Upfront investment",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "averagePrincipalMonthly": {
@@ -1041,7 +1041,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Average principal monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "discretionaryIncomeAnnualAvg": {
@@ -1049,7 +1049,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Discretionary income annual avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "discretionaryIncomeMonthlyAvg": {
@@ -1057,7 +1057,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Discretionary income monthly avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "flexibleIncomeMonthlyAvg": {
@@ -1065,7 +1065,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Flexible income monthly avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "grossIncomeMonthly": {
@@ -1073,7 +1073,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gross income monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "mortgagePaymentMonthly": {
@@ -1081,7 +1081,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Mortgage payment monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "principalPaymentMonthlyAvg": {
@@ -1089,7 +1089,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Principal payment monthly avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "mortgageBalanceOriginal": {
@@ -1097,7 +1097,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Mortgage balance original",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "mortgageHolder": {
@@ -1105,7 +1105,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Mortgage holder",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "ltv": {
@@ -1113,7 +1113,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "LTV %",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "pmi": {
@@ -1121,7 +1121,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "PMI",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "mortgageBalance": {
@@ -1129,7 +1129,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Mortgage balance",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "mortgageNumber": {
@@ -1137,7 +1137,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Mortgage number",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocPaymentMonthly": {
@@ -1145,7 +1145,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Heloc payment monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocPaymentOverride": {
@@ -1153,7 +1153,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC payment override",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocInterestPayment": {
@@ -1161,7 +1161,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC interest payment",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocSpent": {
@@ -1169,7 +1169,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC spent",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocLimit": {
@@ -1177,7 +1177,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC limit",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocAvailable": {
@@ -1185,7 +1185,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC available",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocHolder": {
@@ -1193,7 +1193,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC holder",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocInterestRate": {
@@ -1201,7 +1201,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC interest rate",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocPaymentDay": {
@@ -1209,7 +1209,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC payment day",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocNumber": {
@@ -1217,7 +1217,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC number",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "helocStartDate": {
@@ -1225,7 +1225,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HELOC start date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "utilityPaymentMonthlyAvg": {
@@ -1233,7 +1233,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Utility payment monthly avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "energyPaymentMonthlyAvg": {
@@ -1241,7 +1241,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Energy payment monthly avg",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterPaymentMonthlyAvg": {
@@ -1249,7 +1249,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water payment monthly avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterBillQuarterlyAvg": {
@@ -1257,7 +1257,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water bill quarterly avg",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterAccount": {
@@ -1265,7 +1265,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water account",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterPaymentDayOfMonthEarly": {
@@ -1273,7 +1273,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water payment day of month early",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterPaymentDayOfMonthLate": {
@@ -1281,7 +1281,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water payment day of month late",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterPaymentFirstQuarter": {
@@ -1289,7 +1289,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water payment first quarter",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "garbagePaymentMonthlyAvg": {
@@ -1297,7 +1297,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garbage payment monthly avg",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "garbageBillQuarterly": {
@@ -1305,7 +1305,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garbage bill quarterly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "garbageBins": {
@@ -1313,7 +1313,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garbage bins",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "budgetsMonthly": {
@@ -1321,7 +1321,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Budgets monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "maintenanceBudgetMonthly": {
@@ -1329,7 +1329,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Maintenance budget monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "vacancyBudgetMonthly": {
@@ -1337,7 +1337,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Vacancy budget monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "groundskeepingBudgetMonthly": {
@@ -1345,7 +1345,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Groundskeeping budget monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "capexBudgetMonthly": {
@@ -1353,7 +1353,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Capex budget monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "perProperty": {
@@ -1361,7 +1361,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Per property",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "windowCountEstimate": {
@@ -1369,7 +1369,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Window count estimate",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "roof": {
@@ -1377,7 +1377,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Roof",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "siding": {
@@ -1385,7 +1385,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Siding",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "furnace": {
@@ -1393,7 +1393,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Furnace",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterHeater": {
@@ -1401,7 +1401,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water heater",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "flooring": {
@@ -1409,7 +1409,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Flooring",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gutters": {
@@ -1417,7 +1417,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gutters",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "interiorPaint": {
@@ -1425,7 +1425,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Interior paint",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "refrigerator": {
@@ -1433,7 +1433,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Refrigerator",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "range": {
@@ -1441,7 +1441,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Range",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "clothesWasher": {
@@ -1449,7 +1449,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Clothes washer",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "clothesDryer": {
@@ -1457,7 +1457,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Clothes dryer",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "dishwasher": {
@@ -1465,7 +1465,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Dishwasher",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "windows": {
@@ -1473,7 +1473,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Windows",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "cabinets": {
@@ -1481,7 +1481,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Cabinets",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "countertops": {
@@ -1489,7 +1489,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Countertops",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "landscaping": {
@@ -1497,7 +1497,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Landscaping",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "driveway": {
@@ -1505,7 +1505,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Driveway",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "garageDoor": {
@@ -1513,7 +1513,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garage door",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insuranceProvider": {
@@ -1521,7 +1521,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance provider",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insurancePolicyNumber": {
@@ -1529,7 +1529,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance policy number",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insuranceRenewalDate": {
@@ -1537,7 +1537,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance renewal date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insuranceDeductible": {
@@ -1545,7 +1545,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance deductible",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insurancePremiumYearly": {
@@ -1553,7 +1553,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance premium yearly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insurancePremiumMonthly": {
@@ -1561,7 +1561,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance premium monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "insuranceNotes": {
@@ -1569,7 +1569,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Insurance notes",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "outdoorWaterSource": {
@@ -1577,7 +1577,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Outdoor water source",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gardenBedSqFt": {
@@ -1585,7 +1585,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garden bed sq ft",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gardenYardSqFt": {
@@ -1593,7 +1593,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Garden yard sq ft",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "boulevardSqFt": {
@@ -1601,7 +1601,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Boulevard sq ft",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "kidsPlayBackYardSqFt": {
@@ -1609,7 +1609,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Kids play back yard sq ft",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "toSeed": {
@@ -1617,7 +1617,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "To Seed",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lawnMowSqft": {
@@ -1625,7 +1625,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Lawn mow sqft",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalYardSqft": {
@@ -1633,7 +1633,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total yard sqft",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lockboxCode": {
@@ -1641,7 +1641,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Lockbox code",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -1651,7 +1651,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -1659,7 +1659,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -1667,7 +1667,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitIdentifier": {
@@ -1675,7 +1675,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit identifier",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "addressLabel": {
@@ -1683,7 +1683,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Address label",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "bedroomCount": {
@@ -1691,7 +1691,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Bedroom count",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "bathroomCount": {
@@ -1699,7 +1699,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Bathroom count",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitLocation": {
@@ -1707,7 +1707,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit location",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyName": {
@@ -1715,7 +1715,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "streetAddress": {
@@ -1723,7 +1723,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Street address",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "zipCode": {
@@ -1731,7 +1731,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Zip code",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentReasonablenessCompType": {
@@ -1739,7 +1739,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent reasonableness comp type",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitStandardName": {
@@ -1747,7 +1747,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentDue": {
@@ -1755,7 +1755,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent due",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdName": {
@@ -1763,7 +1763,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalMonthlyRent": {
@@ -1771,7 +1771,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total monthly rent",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "securityDeposit": {
@@ -1779,7 +1779,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Security deposit",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentIncreaseDates": {
@@ -1787,7 +1787,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent increase dates",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "runnerRugOptimalMeasurements": {
@@ -1795,7 +1795,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Runner rug optimal measurements",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "refrigeratorSpotDimensions": {
@@ -1803,7 +1803,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Refrigerator spot dimensions",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "dishwasherDimensions": {
@@ -1811,7 +1811,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Dishwasher dimensions",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "windowUnitAirConditioner": {
@@ -1819,7 +1819,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Window unit air conditioner",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "showerRodLength": {
@@ -1827,7 +1827,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Shower rod length",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "furnaceId": {
@@ -1835,7 +1835,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Furnace ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "furnaceName": {
@@ -1843,7 +1843,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Furnace name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "needAccessForFurnaceTuneUp": {
@@ -1851,7 +1851,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Need access for furnace tune up",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "needAccessForFilterReplacement": {
@@ -1859,7 +1859,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Need access for filter replacement",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "avgGasBillMonthly": {
@@ -1867,7 +1867,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Avg gas bill monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "avgElectricBillMonthly": {
@@ -1875,7 +1875,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Avg electric bill monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "laundryDays": {
@@ -1883,7 +1883,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Laundry days",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "replaceToilet": {
@@ -1891,7 +1891,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Replace toilet",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "replaceToiletInternals": {
@@ -1899,7 +1899,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Replace toilet internals",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paintBathroomWalls": {
@@ -1907,7 +1907,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Paint bathroom walls",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paintBathroomWallsNotes": {
@@ -1915,7 +1915,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Paint bathroom walls notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "replaceOven": {
@@ -1923,7 +1923,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Replace oven",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -1933,7 +1933,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -1941,7 +1941,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "fullName": {
@@ -1949,7 +1949,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Full name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "residentCount": {
@@ -1957,7 +1957,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Resident count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "residentFullNames": {
@@ -1965,7 +1965,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Resident full names",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "residentFirstNames": {
@@ -1973,7 +1973,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Resident first names",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "isActive": {
@@ -1981,7 +1981,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Is active",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "latestOccupancyId": {
@@ -1989,7 +1989,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Latest occupancy ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
@@ -1997,7 +1997,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitName": {
@@ -2005,7 +2005,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -2013,7 +2013,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyCount": {
@@ -2021,7 +2021,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextRentNoticeDate": {
@@ -2029,7 +2029,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next rent notice date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "2MonthsFromLastNotice": {
@@ -2037,7 +2037,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "2 months from last notice",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "properNoticeBeforeNextIncrease": {
@@ -2045,7 +2045,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Proper notice before next increase",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "properNoticeAfterNextIncrease": {
@@ -2053,7 +2053,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Proper notice after next increase",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lastRentNoticeDate": {
@@ -2061,7 +2061,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Last rent notice date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextRentChangeDate": {
@@ -2069,7 +2069,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next rent change date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextRentIncreaseDateOverride": {
@@ -2077,7 +2077,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next rent increase date override",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextIncreaseDateIfNoticeNotGiven": {
@@ -2085,7 +2085,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next increase date if notice not given",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextIncreaseDateIfNoticeGiven": {
@@ -2093,7 +2093,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next increase date if notice given",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "increaseAnnualDate": {
@@ -2101,7 +2101,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Increase annual date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "currentLeaseId": {
@@ -2109,7 +2109,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Current lease ID",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lastRentChangeDate": {
@@ -2117,7 +2117,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Last rent change date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "firstRentChargeDate": {
@@ -2125,7 +2125,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First rent charge date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lastDayRented": {
@@ -2133,7 +2133,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Last day rented",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "baseRentChargeMonthly": {
@@ -2141,7 +2141,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Base rent charge monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextBaseRentChargeMonthly": {
@@ -2149,7 +2149,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next base rent charge monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "increaseBy": {
@@ -2157,7 +2157,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Increase by %",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextRentChargeOverride": {
@@ -2165,7 +2165,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next rent charge override",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "increaseByOverride": {
@@ -2173,7 +2173,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Increase by % override",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "increaseBy3PerYear": {
@@ -2181,7 +2181,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Increase by 3% per year",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextMinusLastIncreaseYears": {
@@ -2189,7 +2189,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next minus last increase years",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "daysInNextRentIncreaseYear": {
@@ -2197,7 +2197,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Days in next rent increase year",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentReasonablenessBaseRentMax": {
@@ -2205,7 +2205,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent reasonableness base rent max",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextGrossRentMonthly": {
@@ -2213,7 +2213,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next gross rent monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "grossRentMonthly": {
@@ -2221,7 +2221,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gross rent monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentReasonablenessGrossRentMax": {
@@ -2229,7 +2229,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent reasonableness gross rent max",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentCompType": {
@@ -2237,7 +2237,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent comp type",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentStandardGrossRentMax": {
@@ -2245,7 +2245,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment standard gross rent max",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentStandardUtilities": {
@@ -2253,7 +2253,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment standard utilities",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentStandardName": {
@@ -2261,7 +2261,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasHeating": {
@@ -2269,7 +2269,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricHeating": {
@@ -2277,7 +2277,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasCooking": {
@@ -2285,7 +2285,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Cooking",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricCooking": {
@@ -2293,7 +2293,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Cooking",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "otherElectric": {
@@ -2301,7 +2301,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Other Electric",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasWaterHeating": {
@@ -2309,7 +2309,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Water Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricWaterHeating": {
@@ -2317,7 +2317,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Water Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterSewer": {
@@ -2325,7 +2325,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water & Sewer",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "trashCollection": {
@@ -2333,7 +2333,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Trash Collection",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "districtEnergyHeating": {
@@ -2341,7 +2341,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "District Energy Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "districtEnergyWaterHeating": {
@@ -2349,7 +2349,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "District Energy Water Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "netChargeMonthly": {
@@ -2357,7 +2357,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Net charge monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "caretakerRentReductionMonthly": {
@@ -2365,7 +2365,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Caretaker rent reduction monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "petFeeMonthly": {
@@ -2373,7 +2373,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Pet fee monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "hhTotalPaymentMonthly": {
@@ -2381,7 +2381,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HH total payment monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "hhBaseRentPortionMonthly": {
@@ -2389,7 +2389,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "HH base rent portion monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyRentPortionMonthly": {
@@ -2397,7 +2397,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy rent portion monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "currentHhBalance": {
@@ -2405,7 +2405,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Current hh balance",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalHhCharges": {
@@ -2413,7 +2413,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total hh charges",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalHhPayments": {
@@ -2421,7 +2421,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total hh payments",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "depositCharged": {
@@ -2429,7 +2429,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Deposit charged",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "depositReceived": {
@@ -2437,7 +2437,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Deposit received",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "currentSubsidyBalance": {
@@ -2445,7 +2445,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Current subsidy balance",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalSubsidyCharges": {
@@ -2453,7 +2453,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total subsidy charges",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalSubsidyPayments": {
@@ -2461,7 +2461,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total subsidy payments",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "grandPaymentTotalForTaxes": {
@@ -2469,7 +2469,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Grand payment total for taxes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "tenantPaymentTotalForTaxes": {
@@ -2477,7 +2477,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Tenant payment total for taxes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "phaPaymentTotalForTaxes": {
@@ -2485,7 +2485,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "PHA payment total for taxes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -2495,7 +2495,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -2503,7 +2503,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdId": {
@@ -2511,7 +2511,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "residentCount": {
@@ -2519,7 +2519,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Resident count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
@@ -2527,7 +2527,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -2535,7 +2535,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitStandardName": {
@@ -2543,7 +2543,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "isActive": {
@@ -2551,7 +2551,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Is active",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "firstOccupancyTermsId": {
@@ -2559,7 +2559,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First occupancy terms ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "activeOccupancyTermsId": {
@@ -2567,7 +2567,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Active occupancy terms ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "latestOccupancyTermsId": {
@@ -2575,7 +2575,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Latest occupancy terms ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "latestEndedOccupancyTermsId": {
@@ -2583,7 +2583,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Latest ended occupancy terms ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "latestOccupancyTermsStartDate": {
@@ -2591,7 +2591,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Latest occupancy terms start date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "firstOccupancyDate": {
@@ -2599,7 +2599,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First occupancy date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "latestOccupancyDate": {
@@ -2607,7 +2607,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Latest occupancy date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyCount": {
@@ -2615,7 +2615,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "buildLedgerTimeLastRan": {
@@ -2623,7 +2623,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, time last ran",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "buildLedgerSelect": {
@@ -2631,7 +2631,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, select",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "buildLedgerRunStatus": {
@@ -2639,7 +2639,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, run status",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "updateTermsTimeLastRan": {
@@ -2647,7 +2647,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Update terms, time last ran",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "updateTermsSelect": {
@@ -2655,7 +2655,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Update terms, select",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextTermsStartDate": {
@@ -2663,7 +2663,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next terms start date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextBaseRentChargeMonthly": {
@@ -2671,7 +2671,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next base rent charge monthly",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "updateTermsRunStatus": {
@@ -2679,7 +2679,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Update terms, run status",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -2689,7 +2689,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Resident and unit name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -2697,7 +2697,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -2705,7 +2705,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "noticeDate": {
@@ -2713,7 +2713,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notice date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "startDate": {
@@ -2721,7 +2721,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Start date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "endDate": {
@@ -2729,7 +2729,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "End date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentChargeMonthly": {
@@ -2737,7 +2737,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent charge monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "caretakerRentReductionMonthly": {
@@ -2745,7 +2745,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Caretaker rent reduction monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "petFeeMonthly": {
@@ -2753,7 +2753,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Pet fee monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasHeating": {
@@ -2761,7 +2761,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricHeating": {
@@ -2769,7 +2769,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasCooking": {
@@ -2777,7 +2777,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Cooking",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricCooking": {
@@ -2785,7 +2785,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Cooking",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "otherElectric": {
@@ -2793,7 +2793,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Other Electric",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasWaterHeating": {
@@ -2801,7 +2801,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Water Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricWaterHeating": {
@@ -2809,7 +2809,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Water Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterSewer": {
@@ -2817,7 +2817,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water & Sewer",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "trashCollection": {
@@ -2825,7 +2825,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Trash Collection",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "districtEnergyHeating": {
@@ -2833,7 +2833,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "District Energy Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "districtEnergyWaterHeating": {
@@ -2841,7 +2841,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "District Energy Water Heating",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -2849,7 +2849,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -2859,7 +2859,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -2867,7 +2867,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -2875,7 +2875,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyName": {
@@ -2883,7 +2883,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -2891,7 +2891,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -2899,7 +2899,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -2907,7 +2907,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountAccounted": {
@@ -2915,7 +2915,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount accounted",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountUnaccounted": {
@@ -2923,7 +2923,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount unaccounted",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -2931,7 +2931,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -2941,7 +2941,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -2949,7 +2949,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeId": {
@@ -2957,7 +2957,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeName": {
@@ -2965,7 +2965,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -2973,7 +2973,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "chargeReduceDescription",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeAmount": {
@@ -2981,7 +2981,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -2989,7 +2989,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "reduceFullAmount": {
@@ -2997,7 +2997,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Reduce full amount",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "reduceCustomAmount": {
@@ -3005,7 +3005,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Reduce custom amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3015,7 +3015,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentName": {
@@ -3023,7 +3023,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "allocatedOccupancy": {
@@ -3031,7 +3031,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Allocated occupancy",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -3039,7 +3039,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -3047,7 +3047,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payerCategory": {
@@ -3055,7 +3055,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payer category",
       "valueName": "payerCategory",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payerName": {
@@ -3063,7 +3063,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payer name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdId": {
@@ -3071,7 +3071,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nonResidentPayerId": {
@@ -3079,7 +3079,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Non-resident payer ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "formOfPayment": {
@@ -3087,7 +3087,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Form of payment",
       "valueName": "paymentType",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "detailsVerified": {
@@ -3095,7 +3095,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Details verified",
       "valueName": "yesOrNo",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountAllocated": {
@@ -3103,7 +3103,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount allocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyCount": {
@@ -3111,7 +3111,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountUnallocated": {
@@ -3119,7 +3119,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount unallocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "processed": {
@@ -3127,7 +3127,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Processed",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -3135,7 +3135,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3145,7 +3145,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyName": {
@@ -3153,7 +3153,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3161,7 +3161,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentId": {
@@ -3169,7 +3169,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payerCategory": {
@@ -3177,7 +3177,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payer category",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payerName": {
@@ -3185,7 +3185,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payer name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "formOfPayment": {
@@ -3193,7 +3193,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Form of payment",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentAllocated": {
@@ -3201,7 +3201,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment allocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentDate": {
@@ -3209,7 +3209,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentAmount": {
@@ -3217,7 +3217,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeId": {
@@ -3225,7 +3225,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -3233,7 +3233,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy id",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -3241,7 +3241,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property id",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeDescription": {
@@ -3249,7 +3249,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge description",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargePaid": {
@@ -3257,7 +3257,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge paid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeDate": {
@@ -3265,7 +3265,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeAmount": {
@@ -3273,7 +3273,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentSummary": {
@@ -3281,7 +3281,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment summary",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeSummary": {
@@ -3289,7 +3289,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge summary",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentUnallocated": {
@@ -3297,7 +3297,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment unallocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeUnpaid": {
@@ -3305,7 +3305,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge unpaid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -3313,7 +3313,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "allocateWhat": {
@@ -3321,7 +3321,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Allocate what",
       "valueName": "paymentAllocateWhat",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lesserAmount": {
@@ -3329,7 +3329,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Lesser amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "filledOut": {
@@ -3337,7 +3337,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Filled out",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "processed": {
@@ -3345,7 +3345,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Processed",
       "valueName": "yesOrNo",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3355,7 +3355,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lastName": {
@@ -3363,7 +3363,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Last name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3371,7 +3371,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "email": {
@@ -3379,7 +3379,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Email",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "backupEmail": {
@@ -3387,7 +3387,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Backup email",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "phoneNumber": {
@@ -3395,7 +3395,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Phone number",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "organization": {
@@ -3403,7 +3403,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Organization",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "programs": {
@@ -3411,7 +3411,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Programs",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "covers": {
@@ -3419,7 +3419,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Covers",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "updateDate": {
@@ -3427,7 +3427,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Update date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3437,7 +3437,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3445,7 +3445,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nonResidentPayerId": {
@@ -3453,7 +3453,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Non-resident payer ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nonResidentPayerName": {
@@ -3461,7 +3461,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Non-resident payer name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "programStandardName": {
@@ -3469,7 +3469,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Program standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentStandardType": {
@@ -3477,7 +3477,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment standard type",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentStandardArea": {
@@ -3485,7 +3485,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment standard area",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3495,7 +3495,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3503,7 +3503,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -3511,7 +3511,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyProgramId": {
@@ -3519,7 +3519,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy program ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentGroupId": {
@@ -3527,7 +3527,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment group ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentGroupName": {
@@ -3535,7 +3535,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment group name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "agreementStandardName": {
@@ -3543,7 +3543,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Agreement standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "programStandardName": {
@@ -3551,7 +3551,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Program standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitStandardName": {
@@ -3559,7 +3559,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "annualRenewalMonth": {
@@ -3567,7 +3567,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Annual renewal month",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "annualInspectionMonth": {
@@ -3575,7 +3575,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Annual inspection month",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyContractStartDate": {
@@ -3583,7 +3583,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy contract start date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentPortionMonthly": {
@@ -3591,7 +3591,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent portion monthly",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextSubsidyContractStartDate": {
@@ -3599,7 +3599,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next subsidy contract start date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "nextRentPortionMonthly": {
@@ -3607,7 +3607,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next rent portion monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "updateSubsidyContractEnter": {
@@ -3615,7 +3615,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Update subsidy contract enter",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyWorkerId": {
@@ -3623,7 +3623,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy worker ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyWorkerFirstName": {
@@ -3631,7 +3631,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy worker first name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyWorkerEmail": {
@@ -3639,7 +3639,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy worker email",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalCharges": {
@@ -3647,7 +3647,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total charges",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalPayments": {
@@ -3655,7 +3655,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total payments",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "balance": {
@@ -3663,7 +3663,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Balance",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3673,7 +3673,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3681,7 +3681,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyAgreementId": {
@@ -3689,7 +3689,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy agreement ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -3697,7 +3697,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyProgramId": {
@@ -3705,7 +3705,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy program ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyTermsId": {
@@ -3713,7 +3713,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy terms ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "rentChargeMonthly": {
@@ -3721,7 +3721,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Rent charge monthly",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "startDate": {
@@ -3729,7 +3729,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Start date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "endDate": {
@@ -3737,7 +3737,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "End date",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "grossRent": {
@@ -3745,7 +3745,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gross rent",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "grossUtilities": {
@@ -3753,7 +3753,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gross utilities",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentStandardName": {
@@ -3761,7 +3761,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment standard name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasHeating": {
@@ -3769,7 +3769,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Heating",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricHeating": {
@@ -3777,7 +3777,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Heating",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasCooking": {
@@ -3785,7 +3785,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Cooking",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricCooking": {
@@ -3793,7 +3793,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Cooking",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "otherElectric": {
@@ -3801,7 +3801,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Other Electric",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "gasWaterHeating": {
@@ -3809,7 +3809,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Gas Water Heating",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "electricWaterHeating": {
@@ -3817,7 +3817,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Electric Water Heating",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "waterSewer": {
@@ -3825,7 +3825,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Water & Sewer",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "trashCollection": {
@@ -3833,7 +3833,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Trash Collection",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "districtEnergyHeating": {
@@ -3841,7 +3841,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "District Energy Heating",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "districtEnergyWaterHeating": {
@@ -3849,7 +3849,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "District Energy Water Heating",
       "valueName": "boolean",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "space": {
@@ -3857,7 +3857,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "_space",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3867,7 +3867,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3875,7 +3875,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyAgreementId": {
@@ -3883,7 +3883,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy agreement ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -3891,7 +3891,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -3899,7 +3899,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "chargeDescription",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -3907,7 +3907,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountPaid": {
@@ -3915,7 +3915,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount paid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountUnpaid": {
@@ -3923,7 +3923,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount unpaid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -3933,7 +3933,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -3941,7 +3941,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "allocationName": {
@@ -3949,7 +3949,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Allocation name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyProgramId": {
@@ -3957,7 +3957,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy program ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "numAllocated": {
@@ -3965,7 +3965,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Num allocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "formOfPayment": {
@@ -3973,7 +3973,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Form of payment",
       "valueName": "paymentType",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -3981,7 +3981,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "detailsVerified": {
@@ -3989,7 +3989,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Details verified",
       "valueName": "yesOrNo",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountAllocated": {
@@ -3997,7 +3997,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount allocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountUnallocated": {
@@ -4005,7 +4005,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount unallocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "processed": {
@@ -4013,7 +4013,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Processed",
       "valueName": "yesOrNo",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -4023,7 +4023,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -4031,7 +4031,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentId": {
@@ -4039,7 +4039,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentDate": {
@@ -4047,7 +4047,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "formOfPayment": {
@@ -4055,7 +4055,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Form of payment",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentAllocated": {
@@ -4063,7 +4063,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment allocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeId": {
@@ -4071,7 +4071,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeDescription": {
@@ -4079,7 +4079,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge description",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyAgreementId": {
@@ -4087,7 +4087,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy agreement ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -4095,7 +4095,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -4103,7 +4103,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "paymentUnallocated": {
@@ -4111,7 +4111,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment unallocated",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeUnpaid": {
@@ -4119,7 +4119,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge unpaid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -4127,7 +4127,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "allocateFullAmount": {
@@ -4135,7 +4135,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Allocate full amount",
       "valueName": "boolean",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lesserAmount": {
@@ -4143,7 +4143,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Lesser amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "filledOut": {
@@ -4151,7 +4151,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Filled out",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "processed": {
@@ -4159,7 +4159,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Processed",
       "valueName": "yesOrNo",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -4169,7 +4169,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Expense name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -4177,7 +4177,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyId": {
@@ -4185,7 +4185,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "date": {
@@ -4193,7 +4193,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "year": {
@@ -4201,7 +4201,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Year",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "propertyYearId": {
@@ -4209,7 +4209,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property year ID",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
@@ -4217,7 +4217,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "billerName": {
@@ -4225,7 +4225,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Biller name",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -4233,7 +4233,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "expenseCategory": {
@@ -4241,7 +4241,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Expense category",
       "valueName": "expenseCategory",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "receiptFormat": {
@@ -4249,7 +4249,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Receipt format",
       "valueName": "receiptFormat",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amount": {
@@ -4257,7 +4257,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "deductibleAmount": {
@@ -4265,7 +4265,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Deductible amount",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "taxAdjust": {
@@ -4273,7 +4273,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Tax adjust",
       "valueName": "residenceTaxAdjust",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "isUpfrontInvestment": {
@@ -4281,7 +4281,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Is upfront investment",
       "valueName": "yesOrNo",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -4289,7 +4289,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -4299,7 +4299,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Name",
       "valueName": "string",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -4307,7 +4307,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "occupancyId": {
@@ -4315,7 +4315,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "year": {
@@ -4323,7 +4323,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Year",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "residentCount": {
@@ -4331,7 +4331,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Resident count",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdRentPaidPerResident": {
@@ -4339,7 +4339,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household rent paid per resident",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "caretakerRentReducedPerResident": {
@@ -4347,7 +4347,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Caretaker rent reduced per resident",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalAttributedPerResident": {
@@ -4355,7 +4355,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total attributed per resident",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "totalAttributedToOccupancy": {
@@ -4363,7 +4363,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Total attributed to occupancy",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "caretakerRentReduced": {
@@ -4371,7 +4371,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Caretaker rent reduced",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "householdRentPaid": {
@@ -4379,7 +4379,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Household rent paid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "firstDateChargedRentInYear": {
@@ -4387,7 +4387,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First date charged rent in year",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lastDateChargedRentInYear": {
@@ -4395,7 +4395,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Last date charged rent in year",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "firstRentChargeDate": {
@@ -4403,7 +4403,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "First rent charge date",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "lastDateChargedRent": {
@@ -4411,7 +4411,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Last date charged rent",
       "valueName": "date",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "subsidyRentPaid": {
@@ -4419,7 +4419,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Subsidy rent paid",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "scrollSpace": {
@@ -4427,7 +4427,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "_scroll space",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
@@ -4437,7 +4437,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Date",
       "valueName": "date",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
@@ -4445,7 +4445,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "ID",
       "valueName": "id",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "baseId": {
@@ -4453,7 +4453,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Base ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unit": {
@@ -4461,7 +4461,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "issuer": {
@@ -4469,7 +4469,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Issuer",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "description": {
@@ -4477,7 +4477,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Description",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "charge": {
@@ -4485,7 +4485,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Charge",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "payment": {
@@ -4493,7 +4493,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Payment",
       "valueName": "number",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "amountOwed": {
@@ -4501,7 +4501,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Amount owed",
       "valueName": "number",
       "isFormula": true,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "notes": {
@@ -4509,7 +4509,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyAllowed": false,
+      "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   }

@@ -47,7 +47,7 @@ export interface ColumnConfigLiteral {
   columnId: string;
   header: string;
   isFormula: boolean;
-  emptyAllowed: boolean;
+  emptyValueAllowed: boolean;
 }
 export interface ColumnConfigStored<
   VN extends ValueName = ValueName,

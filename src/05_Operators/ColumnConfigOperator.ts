@@ -265,7 +265,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         header,
         valueName: this.schema.titleToName(valueTitle) as ValueName,
         isFormula: col.isFormula.value(rowIndex),
-        emptyAllowed: false,
+        emptyValueAllowed: false,
         customDefaultValue: null,
       };
     });

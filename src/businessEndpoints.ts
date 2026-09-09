@@ -21,16 +21,23 @@ export const businessEndpoints: Endpoints = {
         const occRow = occupancy.row(rowIndex);
         const nextStartDate = occRow.value("nextTermsStartDate");
         const lastActiveTerms = occupancyTerms.rows.filter((otRow) => {
+          const endDate = otRow.valueOrEmpty("endDate");
+
           return otRow.value("occupancyId") === occRow.value("id") &&
-            otRow.valueOrEmpty("endDate") === "" &&
+            (endDate === "") &&
             otRow.value("startDate") < nextStartDate;
         });
-
-        lastActiveTerms.forEach((otRow) => {});
-
-        if (lastActiveTerms.length === 0) {
-          throw new Error("For now this relies on there being active terms.");
+        if (lastActiveTerms.length < 1) {
+          throw new Error("For now this relies on there being active lease terms.");
         }
+        if (lastActiveTerms.length > 1) {
+          throw new Error("More than 1 term span for this occupancy has no end date. Please resolve down to 1.")
+        }
+        const lastActiveTerm = lastActiveTerms[0]!;
+        const startDate = lastActiveTerm?.value("startDate");
+        if (startDate)
+        
+        
 
         // occupancyTerms.appendRowWithVals()
 
