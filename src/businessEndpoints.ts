@@ -21,7 +21,7 @@ export const businessEndpoints: Endpoints = {
         const occRow = occupancy.row(rowIndex);
         const nextStartDate = occRow.value("nextTermsStartDate");
         const lastActiveTerms = occupancyTerms.rows.filter((otRow) => {
-          otRow.valueOrEmpty("occupancyId") === occRow.value("id") &&
+          return otRow.value("occupancyId") === occRow.value("id") &&
             otRow.valueOrEmpty("endDate") === "" &&
             otRow.value("startDate") < nextStartDate;
         });
