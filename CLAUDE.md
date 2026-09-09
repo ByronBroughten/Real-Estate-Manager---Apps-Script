@@ -20,6 +20,8 @@ Read `README.md` before making non-trivial changes — it explains the architect
 
 Four prose files, four jobs. **README.md** is the map — what exists and where — and holds the **architecture** vocabulary (**Raw / Indexed / Named / Operator / Trait / Config / Schema**) under "Naming vocabulary". **CONTEXT.md** is the glossary of **domain** words (**endpoint / runner / two-way endpoint / selector / run status / run state**). **STYLE.md** is code shape. **DESIGN.md** is why the design is the way it is — read it before arguing that something looks missing or over-engineered; several of its principles exist specifically to stop a deliberate absence being helpfully filled in. Both vocabularies are used precisely; if you're placing or renaming a file and unsure which applies, ask rather than guess. **A plan or spec for non-trivial work includes its prose-file updates in its own scope** — README/STYLE/DESIGN/CLAUDE edits are part of the work, not a follow-up pass. A change that makes one of these four files wrong isn't finished until that file is right.
 
+**During a design or grilling session, write nothing until the user invokes the skill that files it** — no code, no `CONTEXT.md` entry, no README edit. This overrides `/domain-modeling`'s instruction to capture a term the moment it settles: the GitHub issue is the system of record, and a term lands in the same pass as the spec that justifies it.
+
 ## Agent skills
 
 ### Issue tracker

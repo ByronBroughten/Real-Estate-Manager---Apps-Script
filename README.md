@@ -57,9 +57,13 @@ Each top-level folder under `src/` is a dependency tier. **Rule: dependencies on
 
 `src/businessEndpoints.ts` and `src/businessEndpointHandlers/` sit outside the numbering (like `utils/`) as the real-estate domain logic for _this_ project — the only place allowed to know about properties, leases, tenants, etc. `businessEndpoints.ts` builds the endpoint map passed into `06_API`'s `Api` class; `businessEndpointHandlers/` holds the domain classes it dispatches to. Both may import from any tier. `src/index.ts` sits outside the numbering as the entry-point file Apps Script calls into.
 
+Raw's no-`columnId` rule is a **placement** rule, not only an access rule. A behaviour that needs a column's committed trait — `isFormula`, `valueName` — can't live at Raw even when everything else about it is index-shaped; it belongs at Indexed, which resolves the id. What Raw can have is the live sampled counterpart on the Meta view (`activeIsFormula`), which costs a top-data-row fetch and can disagree with the committed config.
+
 ### Queued writes and shared state
 
 `update`/`append`/`delete` don't hit the API — they mutate local cell state and register the coordinate in `rawState.changesToSave`. Nothing reaches the spreadsheet until `batchUpdateGSheets()` gathers those into one `batchUpdate` call.
+
+Within a flush the requests go out in a fixed order: appends, column inserts, fills, per-cell updates, row deletes highest-index-first, then sorts. Appends therefore land **before** the deletes queued beside them, and same-sheet deletes go descending because each one shifts the rows beneath it.
 
 Most writes queue per cell and flush as one `updateCells` request each; a cell's queued entry holds an optional value and an optional background colour, merged across writes, so a value and a colour on one cell still cost one request and neither can cancel the other. Each request's field mask is built from what that entry actually holds, so a colour-only write can't blank the cell's value. A column write instead queues one sheet-level *fill* per contiguous run of rows, each flushing as a single `repeatCell` carrying the same optional value/colour pair: `updateAllCells` fills every table data row of a column in one request, and `updateActiveCells` fills only the column's active rows, so stamping a selection costs no more requests than the selection is wide. Both are exposed from `ColumnRaw` up through `ColumnIndexed`/`ColumnNamed` under the same names. Two consequences are invisible at the call site: fills are ordered **before** per-cell updates within a flush, so a per-cell write on a filled column wins regardless of which was queued first; and a fill's last row is snapshotted when queued, so it never reaches a row appended after it. State is still mirrored row by row — only the request collapses. `updateAllCells` throws on a sheet that `SheetRaw.removeRowsExcept` has pruned to a selection, since a whole-column fill ignores active rows and would reach exactly the rows the prune excluded.
 
@@ -68,6 +72,8 @@ That `rawState` is threaded **by reference** through `spreadsheetNamedProps` int
 **A write does not require the row to have been fetched.** `update` queues its request either way and mirrors the value into local cell state only when the row is active; `validateIsWritable` needs nothing but the sheet properties. Feedback can therefore be written to every data row of a column without reading one of them.
 
 The corollary is the trap: **"active" means "fetched into local state", not "exists on the sheet".** On the `triggerOnEdit` path only the columnId row is ever fetched, so *no data row is active* — anything working from `rowIndexesActive` writes nothing at all there. `rowIndexesFull`, derived from the table bounds, is what names every data row.
+
+**A read does require it.** `value`/`valueOrEmpty` throw when the row was never fetched, so any decision that _branches_ on a cell's current value carries a prefetch prerequisite the equivalent write doesn't. Queue the fetch in the same cycle, or decide at the call site what an unfetched row means.
 
 ### Endpoint dispatch
 
@@ -110,6 +116,8 @@ Two things to know:
 - **The dispatch boundary is where the generic widens.** There is deliberately no type-level bridge from a column full name to a sheet-and-column pair, so `Api` — holding a full name resolved at runtime — instantiates `EndpointRun` at the widened sheet name, where a column parameter is the union across sheets rather than one sheet's. That is sound and does not collapse to `never`, because `ColumnNameFiltered` distributes over the sheet name; `Endpoints.test.ts` pins both ends.
 
 The three suffix strings in `spreadsheetConfig` (`selectorEndpointSuffix`/`runnerEndpointSuffix`/`runStatusEndpointSuffix`) are **convention only** — nothing dispatches on them any more. They stay because they are still the naming convention the real sheets follow.
+
+An endpoint whose action appends into its **own** sheet is a design smell. With no selector the run stamps its feedback across that sheet's data rows, so the run reports into rows it is still creating. Initiate and report such a run from a sheet other than the one it writes into.
 
 ### Round trips are the cost
 
