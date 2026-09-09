@@ -108,6 +108,14 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
       hasIdColumn: true,
     });
   });
+
+  it("returns the untyped-column summary for the endpoint to report", () => {
+    seedFixture();
+
+    const summary = ConfigOrchestrator.init().syncAndFlushConfigSheets();
+
+    expect(summary).toContain("1 column(s) across 1 sheet(s)");
+  });
 });
 
 describe("ConfigOrchestrator.generateConfigFiles", () => {

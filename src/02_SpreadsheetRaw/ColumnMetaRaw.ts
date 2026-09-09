@@ -43,6 +43,9 @@ export class ColumnMetaRaw<
   get valueValidationStrings(): string[] {
     return this.activeTable.columnValidationValues.get(this.colIndex) ?? [];
   }
+  get activeDeclaredColumnType(): string | undefined {
+    return this.activeTable.columnDeclaredTypes.get(this.colIndex);
+  }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
   ): CellRaw<UniformRowValueName<UN>> {
@@ -81,12 +84,14 @@ export class ColumnMetaRaw<
     });
   }
   activeValueTitle(): string {
+    return this.activeDeclaredValueTitle() ?? this._actualPrimitiveValueName();
+  }
+  // Null means nothing on the sheet says what this column holds.
+  activeDeclaredValueTitle(): string | null {
     if (this.activeHeader === this.schema.idHeader) {
       return "id";
     }
-    return (
-      this.activeValidationValueTitle() ?? this._actualPrimitiveValueName()
-    );
+    return this.activeValidationValueTitle() ?? this._declaredValueName();
   }
   activeValidationValueTitle(): string | null {
     for (const rawValue of this.valueValidationStrings) {
@@ -96,22 +101,57 @@ export class ColumnMetaRaw<
     }
     return null;
   }
+  private _declaredValueName(): PrimitiveValueName | null {
+    const columnType = this.activeDeclaredColumnType;
+    if (columnType === undefined) {
+      return null;
+    }
+    return columnTypeValueNames[columnType] ?? null;
+  }
   private _actualPrimitiveValueName(): PrimitiveValueName {
     const value = this.activeTopValue;
     if (typeof value === "boolean") {
       return "boolean";
     }
     if (typeof value === "number") {
-      const formatType = this.activeNumberFormatType;
-      if (
-        formatType === "DATE" ||
-        formatType === "DATE_TIME" ||
-        formatType === "TIME"
-      ) {
-        return "date";
-      }
-      return "number";
+      return this._numberFormatValueName() === "date" ? "date" : "number";
+    }
+    if (value === "") {
+      return this._numberFormatValueName() ?? "string";
     }
     return "string";
   }
+  private _numberFormatValueName(): PrimitiveValueName | null {
+    const formatType = this.activeNumberFormatType;
+    if (formatType === undefined) {
+      return null;
+    }
+    return numberFormatValueNames[formatType] ?? null;
+  }
 }
+
+// DROPDOWN and COLUMN_TYPE_UNSPECIFIED are absent: neither says what a column holds.
+const columnTypeValueNames: Record<string, PrimitiveValueName> = {
+  DOUBLE: "number",
+  CURRENCY: "number",
+  PERCENT: "number",
+  DATE: "date",
+  TIME: "date",
+  DATE_TIME: "date",
+  TEXT: "string",
+  FILES_CHIP: "string",
+  PEOPLE_CHIP: "string",
+  FINANCE_CHIP: "string",
+  PLACE_CHIP: "string",
+  RATINGS_CHIP: "string",
+  BOOLEAN: "boolean",
+};
+
+const numberFormatValueNames: Record<string, PrimitiveValueName> = {
+  DATE: "date",
+  TIME: "date",
+  DATE_TIME: "date",
+  NUMBER: "number",
+  CURRENCY: "number",
+  PERCENT: "number",
+};

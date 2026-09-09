@@ -28,7 +28,8 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   get valueConfigOperator() {
     return new ValueConfigOperator(this.spreadsheetNamedProps);
   }
-  syncConfigSheetRows() {
+  // Returns the run status an endpoint should report, if there's one to make.
+  syncConfigSheetRows(): string | undefined {
     this.ss.fetchAllSheetProperties();
     this.sheetConfigOperator.prepFetchForSync();
     this.columnConfigOperator.prepFetchWithSheetConfig();
@@ -36,10 +37,12 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
     this.sheetConfigOperator.syncToSpreadsheet();
     this.columnConfigOperator.fetchAfterSheetConfigSynced();
     this.columnConfigOperator.syncToSpreadsheet();
+    return this.columnConfigOperator.untypedColumnsSummary();
   }
-  syncAndFlushConfigSheets() {
-    this.syncConfigSheetRows();
+  syncAndFlushConfigSheets(): string | undefined {
+    const summary = this.syncConfigSheetRows();
     this.ss.batchUpdateGSheets();
+    return summary;
   }
   generateConfigFiles(): string {
     this.syncConfigSheetRows();

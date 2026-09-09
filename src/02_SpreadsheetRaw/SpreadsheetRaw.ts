@@ -110,9 +110,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     }
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
-  // effectiveFormat) and columnValidationValues (from tables.columnProperties
-  // .dataValidationRule) are read only by ColumnConfigOperator's programmatic
-  // value correction — every other caller only ever needs effectiveValue, so
+  // effectiveFormat) and columnValidationValues/columnDeclaredTypes (from
+  // tables.columnProperties) are read only by ColumnConfigOperator's
+  // programmatic value correction — every other caller only ever needs effectiveValue, so
   // those fields are left out of the default fetch to avoid fetching them
   // (and, for dataValidationRule, an unbounded list of validation values)
   // wastefully on every ordinary read.
@@ -122,7 +122,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const withProgrammaticFacts =
       "sheets(" +
       "properties(sheetId,title)," +
-      "tables(tableId,range,columnProperties(columnIndex,dataValidationRule(condition(values(userEnteredValue)))))," +
+      "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(values(userEnteredValue)))))," +
       "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)))))" +
       ")";
     const withoutProgrammaticFacts =

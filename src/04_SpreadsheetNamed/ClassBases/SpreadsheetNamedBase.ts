@@ -28,7 +28,10 @@ export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
           prepFetchIsComplete: false,
           syncedToSpreadsheet: false,
         },
-        columnConfigSync: { syncedToSpreadsheet: false },
+        columnConfigSync: {
+          syncedToSpreadsheet: false,
+          untypedHeadersBySheetTitle: new Map(),
+        },
         valueConfigSync: { activeHeaders: new Set() },
       },
     };

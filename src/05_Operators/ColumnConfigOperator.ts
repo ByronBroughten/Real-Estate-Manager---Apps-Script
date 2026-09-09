@@ -4,7 +4,10 @@ import {
 } from "../01_generatedConfigs/makeConfigs";
 import { type ValueName } from "../01_generatedConfigs/valueSchemas";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
+import type {
+  SpreadsheetNamedState,
+  UntypedHeadersBySheetTitle,
+} from "../04_SpreadsheetNamed/Types/NamedState";
 import { Str } from "../utils/Str";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
@@ -30,6 +33,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   }
   get valueConfigOperator(): ValueConfigOperator {
     return new ValueConfigOperator(this.spreadsheetNamedProps);
+  }
+  private get untypedHeadersBySheetTitle(): UntypedHeadersBySheetTitle {
+    return this.columnConfigSync.untypedHeadersBySheetTitle;
   }
   get sheetConfigSheet(): SheetConfigOperator["sheet"] {
     return this.sheetConfigOperator.sheet;
@@ -75,8 +81,26 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     this._pruneColumnRows();
     this._appendColumnRows();
     this._updateProgrammaticValues();
+    this._logUntypedColumns();
     this.columnConfigSync.syncedToSpreadsheet = true;
     return this;
+  }
+  // Undefined, not "", so a fully typed spreadsheet still reports "Succeeded".
+  untypedColumnsSummary(): string | undefined {
+    this.assertSyncedToSpreadsheet();
+    const untypedHeaders = Array.from(this.untypedHeadersBySheetTitle.values());
+    if (untypedHeaders.length === 0) {
+      return undefined;
+    }
+    const columnCount = untypedHeaders.reduce(
+      (count, headers) => count + headers.length,
+      0,
+    );
+    return (
+      `Succeeded, but ${columnCount} column(s) across ${untypedHeaders.length} ` +
+      `sheet(s) are untyped, so their value names were guessed. See the ` +
+      `execution log for the list.`
+    );
   }
   private _isSheetGidApiAccesses(sheetGid: number): boolean {
     return this.sheetGidsApiAccesses.has(sheetGid);
@@ -158,6 +182,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "valueTitle",
     );
     let updatedValues = 0;
+    this.untypedHeadersBySheetTitle.clear();
     this.sheet.rowIndexesActive.forEach((rowIndex) => {
       const sheetGid = col.sheetGid.valueNotEmpty(rowIndex);
       const columnId = col.columnId.valueNotEmpty(rowIndex);
@@ -187,8 +212,24 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         col.valueTitle.cell(rowIndex).updateValue(actualValueTitle);
         updatedValues++;
       }
+
+      if (columnRaw.activeDeclaredValueTitle() === null) {
+        this._recordUntypedColumn(actualSheetTitle, actualHeader);
+      }
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Column Config cell(s).`);
+  }
+  private _recordUntypedColumn(sheetTitle: string, header: string): void {
+    const headers = this.untypedHeadersBySheetTitle.get(sheetTitle) ?? [];
+    headers.push(header);
+    this.untypedHeadersBySheetTitle.set(sheetTitle, headers);
+  }
+  private _logUntypedColumns(): void {
+    this.untypedHeadersBySheetTitle.forEach((headers, sheetTitle) => {
+      Logger.log(
+        `Untyped columns on "${sheetTitle}" (${headers.length}): ${headers.join(", ")}`,
+      );
+    });
   }
   newColumnConfigs(): ColumnConfigsGeneric {
     const sheetNamesByGid = this.sheetConfigOperator.sheetNamesByGid();

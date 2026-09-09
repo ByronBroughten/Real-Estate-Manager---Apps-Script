@@ -7,6 +7,7 @@ import {
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 
@@ -467,6 +468,243 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
     expect(col.isFormula.value(4)).toBe(true);
     expect(col.valueTitle.value(4)).toBe("date");
+  });
+});
+
+describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () => {
+  interface ColumnsUnderTest {
+    headers: string[];
+    topDataRow?: FakeCell[];
+    columnDeclaredTypes?: Record<number, string>;
+    columnValidationValues?: Record<number, string[]>;
+  }
+
+  function syncColumnsUnderTest({
+    headers,
+    topDataRow = [],
+    columnDeclaredTypes,
+    columnValidationValues,
+  }: ColumnsUnderTest): ColumnConfigOperator {
+    const columnIds = headers.map((_, index) => `c:test:col${index}`);
+    const columnConfigRows: Record<number, FakeCell[]> = {
+      0: columnConfigColumnIdRow,
+    };
+    columnIds.forEach((columnId, index) => {
+      columnConfigRows[4 + index] = [
+        TEST_SHEET_GID,
+        columnId,
+        "Test",
+        "",
+        false,
+        "",
+      ];
+    });
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [TEST_SHEET_GID, "Test", true, true, "test"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows(columnConfigRows),
+          table: { endRowIndex: 4 + columnIds.length },
+        },
+        {
+          sheetId: TEST_SHEET_GID,
+          title: "Test",
+          rows: buildGridRows({ 0: columnIds, 3: headers, 4: topDataRow }),
+          table: {
+            endRowIndex: 5,
+            columnDeclaredTypes,
+            columnValidationValues,
+          },
+        },
+      ],
+    });
+    const operator = ColumnConfigOperator.init();
+    syncColumnConfigOperator(operator);
+    return operator;
+  }
+
+  function valueTitles(operator: ColumnConfigOperator, count: number) {
+    const col = operator.sheet.columns("valueTitle");
+    return Array.from({ length: count }, (_, index) =>
+      col.valueTitle.value(4 + index),
+    );
+  }
+
+  it("maps every declared column type to its value name", () => {
+    const operator = syncColumnsUnderTest({
+      headers: [
+        "Amount",
+        "Count",
+        "Rate",
+        "Moved In",
+        "Start Time",
+        "Updated At",
+        "Notes",
+        "Owner",
+        "Active",
+      ],
+      columnDeclaredTypes: {
+        0: "CURRENCY",
+        1: "DOUBLE",
+        2: "PERCENT",
+        3: "DATE",
+        4: "TIME",
+        5: "DATE_TIME",
+        6: "TEXT",
+        7: "PEOPLE_CHIP",
+        8: "BOOLEAN",
+      },
+    });
+
+    expect(valueTitles(operator, 9)).toEqual([
+      "number",
+      "number",
+      "number",
+      "date",
+      "date",
+      "date",
+      "string",
+      "string",
+      "boolean",
+    ]);
+  });
+
+  it("prefers the declared type over what the top data row samples to", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Amount"],
+      topDataRow: ["not a number at all"],
+      columnDeclaredTypes: { 0: "CURRENCY" },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["number"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("prefers the declared type over an empty top data row", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Purchase Price", "Closing Date"],
+      columnDeclaredTypes: { 0: "CURRENCY", 1: "DATE" },
+    });
+
+    expect(valueTitles(operator, 2)).toEqual(["number", "date"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("keeps the ID value name for the ID column whatever type it declares", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["ID"],
+      topDataRow: ["test:abc"],
+      columnDeclaredTypes: { 0: "TEXT" },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["id"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("keeps a Value Config validation rule winning over a declared dropdown type", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Description"],
+      topDataRow: ["Rent (base)"],
+      columnDeclaredTypes: { 0: "DROPDOWN" },
+      columnValidationValues: {
+        0: ["=valueConfig[Transaction Description]"],
+      },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["Transaction Description"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("falls back to the sample for a dropdown with no Value Config rule", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Property Ref"],
+      topDataRow: ["prp:abc123"],
+      columnDeclaredTypes: { 0: "DROPDOWN" },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["string"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("falls back to the sample for a column with no declared type, and counts it", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Amount"],
+      topDataRow: [42],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["number"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("falls back to an empty top cell's number format rather than to text", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Payment", "Closing Date"],
+      topDataRow: [
+        { value: null, numberFormatType: "CURRENCY" },
+        { value: null, numberFormatType: "DATE" },
+      ],
+    });
+
+    expect(valueTitles(operator, 2)).toEqual(["number", "date"]);
+  });
+
+  it("falls back to text for an empty top cell with no number format", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Notes"],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["string"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("counts a formula column alongside the rest", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Balance"],
+      topDataRow: [{ value: 42, isFormula: true }],
+    });
+
+    expect(operator.sheet.column("isFormula").value(4)).toBe(true);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("summarises how many columns on how many sheets are still untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Amount", "Notes", "Moved In"],
+      topDataRow: [42, "a note"],
+      columnDeclaredTypes: { 2: "DATE" },
+    });
+
+    expect(operator.untypedColumnsSummary()).toBe(
+      "Succeeded, but 2 column(s) across 1 sheet(s) are untyped, so their " +
+        "value names were guessed. See the execution log for the list.",
+    );
+  });
+
+  it("summarises nothing when every column declares its type", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Amount", "Notes"],
+      columnDeclaredTypes: { 0: "CURRENCY", 1: "TEXT" },
+    });
+
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
   });
 });
 

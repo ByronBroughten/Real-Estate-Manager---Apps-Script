@@ -3,9 +3,8 @@ import type { Endpoints } from "./Endpoints";
 
 export const baseEndpoints: Endpoints = {
   spreadsheetControls_syncConfigSheetRowsTimeLastRan: {
-    action: (ss) => {
-      new ConfigOrchestrator(ss.spreadsheetNamedProps).syncConfigSheetRows();
-    },
+    action: (ss) =>
+      new ConfigOrchestrator(ss.spreadsheetNamedProps).syncConfigSheetRows(),
     timeLastRan: "syncConfigSheetRowsTimeLastRan",
     runStatus: "syncConfigSheetRowsRunStatus",
   },

@@ -56,6 +56,15 @@ export interface FakeSheetProperties {
      * validated columns.
      */
     columnValidationValues?: Record<number, string[]>;
+    /**
+     * A column's declared Sheets column type (e.g. `"CURRENCY"`, `"DATE"`,
+     * `"BOOLEAN"`), keyed by absolute column index — read by
+     * `ColumnMetaRaw.activeDeclaredColumnType`, which `ColumnConfigOperator`'s
+     * valueName derivation consults before falling back to the top-row
+     * sample. Omit a column here to leave it untyped (Automatic), which is
+     * what the real API reports for a column whose type was never set.
+     */
+    columnDeclaredTypes?: Record<number, string>;
   };
   /**
    * Row indices that come back with no grid data at all, simulating
@@ -176,6 +185,40 @@ function fakeRowsToGoogleSheetData(
   return blocks;
 }
 
+function fakeTableColumnProperties(
+  table: NonNullable<FakeSheetProperties["table"]>,
+): GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined {
+  const { columnValidationValues = {}, columnDeclaredTypes = {} } = table;
+  const colIndexes = Array.from(
+    new Set([
+      ...Object.keys(columnValidationValues),
+      ...Object.keys(columnDeclaredTypes),
+    ]),
+    Number,
+  ).sort((a, b) => a - b);
+  if (colIndexes.length === 0) {
+    return undefined;
+  }
+  return colIndexes.map((colIndex) => {
+    const colProps: GoogleAppsScript.Sheets.Schema.TableColumnProperties = {
+      columnIndex: colIndex,
+    };
+    const columnType = columnDeclaredTypes[colIndex];
+    if (columnType) {
+      colProps.columnType = columnType;
+    }
+    const values = columnValidationValues[colIndex];
+    if (values) {
+      colProps.dataValidationRule = {
+        condition: {
+          values: values.map((userEnteredValue) => ({ userEnteredValue })),
+        },
+      };
+    }
+    return colProps;
+  });
+}
+
 /**
  * Stubs the `Sheets` Advanced Service global.
  *
@@ -216,20 +259,7 @@ export function stubSheetsService(
                     ...(s.rows ?? []).map((row) => row.length),
                   ),
                 },
-                columnProperties: s.table.columnValidationValues
-                  ? Object.entries(s.table.columnValidationValues).map(
-                      ([colIndex, values]) => ({
-                        columnIndex: Number(colIndex),
-                        dataValidationRule: {
-                          condition: {
-                            values: values.map((userEnteredValue) => ({
-                              userEnteredValue,
-                            })),
-                          },
-                        },
-                      }),
-                    )
-                  : undefined,
+                columnProperties: fakeTableColumnProperties(s.table),
               },
             ]
           : undefined,

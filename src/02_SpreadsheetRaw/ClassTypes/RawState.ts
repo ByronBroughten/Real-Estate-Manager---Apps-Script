@@ -28,14 +28,15 @@ export type RawSheetsState = Map<SheetId, RawSheetState>;
 
 export interface RawSheetState {
   title: string | null;
-  activeTable: {
-    tableId: string;
-    startRowIndex: number; // headerRowIndex
-    endRowIndex: number; // lastRowIndex + 1
-    startColumnIndex: number;
-    endColumnIndex: number; // lastColumnIndex + 1
-    columnValidationValues: RawColumnValidationValues;
-  } | null;
+  activeTable:
+    | ({
+        tableId: string;
+        startRowIndex: number; // headerRowIndex
+        endRowIndex: number; // lastRowIndex + 1
+        startColumnIndex: number;
+        endColumnIndex: number; // lastColumnIndex + 1
+      } & RawColumnPropertiesState)
+    | null;
   rowIndexesAreValid: boolean;
   hasFetchedColumnIds: boolean;
   isPrunedToSelection: boolean;
@@ -56,7 +57,13 @@ export interface RawCellFacts {
   topValue: CellValue;
 }
 
+export interface RawColumnPropertiesState {
+  columnValidationValues: RawColumnValidationValues;
+  columnDeclaredTypes: RawColumnDeclaredTypes;
+}
 export type RawColumnValidationValues = Map<ColIndex, string[]>;
+// Absent for a column left on Automatic, which is what makes it "untyped".
+export type RawColumnDeclaredTypes = Map<ColIndex, string>;
 
 type SheetId = number;
 type RowIndex = number;

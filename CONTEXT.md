@@ -41,3 +41,13 @@ _Avoid_: in progress, pending, processing
 **Start time**:
 When a run began, written once into every row the run is about and never rewritten, so elapsed time stays readable while a slow run is still going.
 _Avoid_: finished at, completion time, duration
+
+### Columns
+
+**Column type**:
+What a column holds, as the operator declares it in the column's own type menu in Sheets — currency, date, checkbox, text, and the rest. The app trusts it over anything it could work out for itself from the data.
+_Avoid_: data type, format, value type
+
+**Untyped**:
+Said of a column whose type menu tells the app nothing about what it holds — left on Automatic, or a dropdown that no Value Config rule backs. The app then guesses from the column's top row, and says how many such columns are left every time the config sheets sync.
+_Avoid_: unset, automatic, missing type

@@ -3,7 +3,7 @@ import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
   RawColumnCellFacts,
-  RawColumnValidationValues,
+  RawColumnPropertiesState,
   RawRowState,
   RawSheetState,
 } from "../ClassTypes/RawState";
@@ -63,28 +63,36 @@ export class SheetRawBase extends SpreadsheetRawBase {
       this.sheetState.activeTable = {
         tableId: Val.assert(table.tableId, "tableId"),
         ...range,
-        columnValidationValues: this._parseColumnValidationValues(
+        ...this._parseColumnProperties(
           table.columnProperties,
           range.startColumnIndex,
         ),
       };
     }
   }
-  private _parseColumnValidationValues(
+  private _parseColumnProperties(
     columnProperties:
       GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined,
     startColumnIndex: number,
-  ): RawColumnValidationValues {
-    const map: RawColumnValidationValues = new Map();
+  ): RawColumnPropertiesState {
+    const state: RawColumnPropertiesState = {
+      columnValidationValues: new Map(),
+      columnDeclaredTypes: new Map(),
+    };
     (columnProperties ?? []).forEach((colProps, offset) => {
+      // The API omits columnIndex when it's zero, and states it table-relative.
+      const colIndex = colProps.columnIndex ?? startColumnIndex + offset;
       const values = (colProps.dataValidationRule?.condition?.values ?? [])
         .map((conditionValue) => conditionValue.userEnteredValue)
         .filter((value): value is string => value !== undefined);
       if (values.length > 0) {
-        map.set(colProps.columnIndex ?? startColumnIndex + offset, values);
+        state.columnValidationValues.set(colIndex, values);
+      }
+      if (colProps.columnType !== undefined) {
+        state.columnDeclaredTypes.set(colIndex, colProps.columnType);
       }
     });
-    return map;
+    return state;
   }
   protected get sheetState(): RawSheetState {
     return Val.assert(

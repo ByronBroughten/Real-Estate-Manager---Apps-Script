@@ -5,6 +5,8 @@ import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";
 
 export type RowIdsToIndexes = Record<string, number>;
+// The headers of the columns whose value name the last sync had to guess.
+export type UntypedHeadersBySheetTitle = Map<string, string[]>;
 export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
 
 // Lives here, not as an instance field, so it survives a coordinator's
@@ -14,7 +16,10 @@ export type SpreadsheetNamedState = {
     prepFetchIsComplete: boolean;
     syncedToSpreadsheet: boolean;
   };
-  columnConfigSync: { syncedToSpreadsheet: boolean };
+  columnConfigSync: {
+    syncedToSpreadsheet: boolean;
+    untypedHeadersBySheetTitle: UntypedHeadersBySheetTitle;
+  };
   valueConfigSync: { activeHeaders: Set<string> };
 };
 
