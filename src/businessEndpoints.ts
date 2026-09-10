@@ -7,16 +7,33 @@ export const businessEndpoints: Endpoints = {
     runStatus: "updateTermsRunStatus",
     selector: { column: "updateTermsSelect" },
     action: (ss, { selectedRowIndexes }) => {
+      ss.sheet("occupancy").prepFetchColumnsSpecific(
+        selectedRowIndexes,
+        "id",
+        "latestOccupancyTermsId",
+        "nextTermsNoticeSentDate",
+        "nextTermsStartDate",
+        "nextTermsEndDate",
+        "nextBaseRentChargeMonthly",
+        "nextCaretakerRentReductionMonthly",
+        "nextPetFeeMonthly",
+        "nextGasWaterHeating",
+        "nextGasHeating",
+        "nextGasCooking",
+        "nextElectricWaterHeating",
+        "nextElectricHeating",
+        "nextElectricCooking",
+        "nextOtherElectric",
+        "nextDistrictEnergyWaterHeating",
+        "nextDistrictEnergyHeating",
+        "nextWaterSewer",
+        "nextTrashCollection",
+        "nextTermsNotes",
+      );
       ss.sheet("occupancyTerms").prepFetchColumnsFull(
         "id",
         "startDate",
         "endDate",
-      );
-      ss.sheet("occupancy").prepFetchColumnsSpecific(
-        selectedRowIndexes,
-        "latestOccupancyTermsId",
-        "nextBaseRentChargeMonthly",
-        "nextTermsStartDate",
       );
       ss.fetchAllPrepped();
       const occupancy = ss.sheet("occupancy");
@@ -32,22 +49,24 @@ export const businessEndpoints: Endpoints = {
         const lastStartDate = lastActiveTerm.value("startDate");
         if (nextStartDate <= lastStartDate) {
           throw new Error(
-            "Start date next occupancy terms is before start date of latest",
+            "Start date of next occupancy terms is on or before start date of latest",
           );
         }
         const lastEndDate = lastActiveTerm.value("endDate");
-        if (lastEndDate && lastEndDate < nextStartDate) {
+        if (lastEndDate && nextStartDate <= lastEndDate) {
           throw new Error(
-            "Start date next occupancy terms is before end date of latest",
+            "Start date of next occupancy terms is on or before end date of latest",
           );
         }
         if (!lastEndDate) {
-          lastActiveTerm.updateValue("endDate", Dat.addDays(nextStartDate, -1));
+          lastActiveTerm.updateValue("endDate", Dat.dayBefore(nextStartDate));
         }
 
-        occupancyTerms.appendRowWithVals({
+        occupancyTerms.appendRowWithAllVals({
+          noticeDate: occRow.value("nextTermsNoticeSentDate"),
           startDate: nextStartDate,
           endDate: occRow.value("nextTermsEndDate"),
+          occupancyId: occRow.value("id"),
           rentChargeMonthly: occRow.value("nextBaseRentChargeMonthly"),
           caretakerRentReductionMonthly: occRow.value(
             "nextCaretakerRentReductionMonthly",
@@ -62,18 +81,29 @@ export const businessEndpoints: Endpoints = {
             "nextDistrictEnergyWaterHeating",
           ),
           districtEnergyHeating: occRow.value("nextDistrictEnergyHeating"),
+          otherElectric: occRow.value("nextOtherElectric"),
+          waterSewer: occRow.value("nextWaterSewer"),
+          trashCollection: occRow.value("nextTrashCollection"),
+          petFeeMonthly: occRow.value("nextPetFeeMonthly"),
+          notes: occRow.value("nextTermsNotes"),
         });
       }
       return "Occupancy terms updated";
     },
   },
+  addPropertyExpense_runStatus: {
+    runStatus: "addPropertyExpenseRunStatus",
+    action: (ss) => {
+      
+    }
+  },
   occupancy_buildLedgerTimeLastRan: {
-    action: () => {
-      // TODO: implement this endpoint
-    },
     timeLastRan: "buildLedgerTimeLastRan",
     runStatus: "buildLedgerRunStatus",
     selector: { column: "buildLedgerSelect" },
+    action: () => {
+      // TODO: implement this endpoint
+    },
   },
   // TODO: selector endpoint functionality may be removed in the future, as the speed floor doesn't let them feel good, and their functionality may not be needed.
   // occupancy_updateTermsSelect: {
