@@ -2,6 +2,7 @@ import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
+  SheetDataValuesAll,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
@@ -136,5 +137,9 @@ export class SheetNamed<
   appendRowWithVals(values: Partial<SheetDataValues<SN>>): RowNamed<SN> {
     const { rowIndex } = this.indexed.appendRowDefault();
     return this.row(rowIndex).updateValues(values);
+  }
+  appendRowWithAllVals(values: SheetDataValuesAll<SN>): RowNamed<SN> {
+    // A subset of the partial bag, which the checker can't see while the sheet name is generic.
+    return this.appendRowWithVals(values as Partial<SheetDataValues<SN>>);
   }
 }

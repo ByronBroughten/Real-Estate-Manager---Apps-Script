@@ -98,6 +98,12 @@ export type SheetDataValues<
   [CN in VNS]: ColumnValue<SN, CN>;
 };
 
+// Every writable column but the generated id: the bag a complete append must fill.
+export type SheetDataValuesAll<SN extends SheetNameSimple> = SheetDataValues<
+  SN,
+  Exclude<ColumnNameFiltered<SN, ValueName, false>, "id">
+>;
+
 export function getSheetColumnNames<SN extends SheetNameSimple>(
   sheetName: SN,
 ): ColumnName<SN>[] {

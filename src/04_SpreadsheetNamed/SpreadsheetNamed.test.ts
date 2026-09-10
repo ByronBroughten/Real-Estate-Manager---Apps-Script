@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
+import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -524,5 +525,167 @@ describe("SheetNamed.appendRowWithVals", () => {
     expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
     expect(deleteRequestIndexes(batchUpdateCalls)).toEqual([5]);
+  });
+});
+
+const TEST_SHEET_GID = sheetConfigs.test.sheetGid;
+const testColumnIdRow = Object.values(columnConfigs.test).map(
+  (column) => column.columnId,
+);
+
+function stubTestSheetWithBlankRow() {
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: TEST_SHEET_GID,
+        title: "Test",
+        rows: buildGridRows({
+          0: testColumnIdRow,
+          4: testColumnIdRow.map(() => null),
+        }),
+        table: { endRowIndex: 5 },
+      },
+    ],
+  });
+}
+
+function fetchedTestSpreadsheet(): SpreadsheetNamed {
+  const ss = SpreadsheetNamed.init();
+  ss.sheet("test").prepFetchColumnsFull(
+    "id",
+    "number",
+    "dropdown",
+    "sampledBoolean",
+  );
+  ss.fetchAllPrepped();
+  return ss;
+}
+
+type CompleteAppendBag<SN extends SheetName> = Parameters<
+  SheetNamed<SN>["appendRowWithAllVals"]
+>[0];
+
+const completeTestRow: CompleteAppendBag<"test"> = {
+  number: 7,
+  dropdown: "Yes",
+  sampledBoolean: true,
+};
+
+describe("SheetNamed.appendRowWithAllVals", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("mints the row ID itself, from a bag that cannot name one", () => {
+    stubTestSheetWithBlankRow();
+
+    const row = fetchedTestSpreadsheet()
+      .sheet("test")
+      .appendRowWithAllVals(completeTestRow);
+
+    expect(row.value("id")).toMatch(/^r:test:[0-9a-zA-Z_-]{7}$/);
+  });
+
+  it("writes every value the bag carries", () => {
+    stubTestSheetWithBlankRow();
+
+    const row = fetchedTestSpreadsheet()
+      .sheet("test")
+      .appendRowWithAllVals(completeTestRow);
+
+    expect([
+      row.value("number"),
+      row.value("dropdown"),
+      row.value("sampledBoolean"),
+    ]).toEqual([7, "Yes", true]);
+  });
+
+  it("reuses the blank row the way the partial append does", () => {
+    const { batchUpdateCalls } = stubTestSheetWithBlankRow();
+
+    const ss = fetchedTestSpreadsheet();
+    const row = ss.sheet("test").appendRowWithAllVals(completeTestRow);
+    ss.batchUpdateGSheets();
+
+    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(appendRequestCount(batchUpdateCalls)).toBe(0);
+  });
+
+  it("asks a sheet with an ID column for every writable column but the ID", () => {
+    assertType<
+      IsExactly<
+        keyof CompleteAppendBag<"occupancyTerms">,
+        | "occupancyId"
+        | "noticeDate"
+        | "startDate"
+        | "endDate"
+        | "rentChargeMonthly"
+        | "caretakerRentReductionMonthly"
+        | "petFeeMonthly"
+        | "gasHeating"
+        | "electricHeating"
+        | "gasCooking"
+        | "electricCooking"
+        | "otherElectric"
+        | "gasWaterHeating"
+        | "electricWaterHeating"
+        | "waterSewer"
+        | "trashCollection"
+        | "districtEnergyHeating"
+        | "districtEnergyWaterHeating"
+        | "notes"
+      >
+    >(true);
+    assertType<
+      IsExactly<
+        CompleteAppendBag<"occupancyTerms">["petFeeMonthly"],
+        number | ""
+      >
+    >(true);
+  });
+
+  it("asks a sheet with no ID column for every writable column", () => {
+    assertType<
+      IsExactly<
+        CompleteAppendBag<"sheetConfig">,
+        {
+          sheetGid: number | "";
+          sheetTitle: string;
+          hasIdColumn: boolean;
+          letApiAccess: boolean;
+          idPrefix: string;
+        }
+      >
+    >(true);
+  });
+
+  // Declared rather than appended, since writing a formula cell throws before the bag matters.
+  it("refuses a bag that names the ID or a formula column", () => {
+    const withId: CompleteAppendBag<"test"> = {
+      ...completeTestRow,
+      // @ts-expect-error the append mints the ID, so a caller cannot supply one
+      id: "r:test:abcdefg",
+    };
+    const withFormula: CompleteAppendBag<"sheetConfig"> = {
+      sheetGid: 999001,
+      sheetTitle: "Property",
+      hasIdColumn: true,
+      letApiAccess: true,
+      idPrefix: "prp",
+      // @ts-expect-error a formula column cannot be written to
+      idPrefixIsUniqueOrEmpty: true,
+    };
+
+    expect([Object.keys(withId), Object.keys(withFormula)]).toEqual([
+      ["number", "dropdown", "sampledBoolean", "id"],
+      [
+        "sheetGid",
+        "sheetTitle",
+        "hasIdColumn",
+        "letApiAccess",
+        "idPrefix",
+        "idPrefixIsUniqueOrEmpty",
+      ],
+    ]);
   });
 });
