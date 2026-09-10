@@ -64,6 +64,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "header",
       "isFormula",
       "valueTitle",
+      "emptyValueAllowed",
     );
   }
   fetchAfterSheetConfigSynced(): this {
@@ -235,6 +236,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "header",
       "isFormula",
       "valueTitle",
+      "emptyValueAllowed",
     );
     const columnConfigs: ColumnConfigsGeneric = {};
     this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
@@ -265,7 +267,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         header,
         valueName: this.schema.titleToName(valueTitle) as ValueName,
         isFormula: col.isFormula.value(rowIndex),
-        emptyValueAllowed: false,
+        emptyValueAllowed: col.emptyValueAllowed.value(rowIndex),
         customDefaultValue: null,
       };
     });

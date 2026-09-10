@@ -32,7 +32,7 @@ export const businessEndpoints: Endpoints = {
         };
 
         if (!lastEndDate) {
-          // lastActiveTerm.updateValue()
+          // lastActiveTerm.updateValue("endDate", Dat.addDays(lastStartDate, 365));
           
         }
         occupancyTerms.appendRowWithVals({

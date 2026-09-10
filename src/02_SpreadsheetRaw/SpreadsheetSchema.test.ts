@@ -257,7 +257,7 @@ function columnFullNameIsFormula(fullName: ColumnFullName): boolean {
 
 describe("ColumnFullName, absolute column addressing", () => {
   it("narrows to a proper subset of columns when filtered by value name", () => {
-    const sampled: ColumnFullName<"boolean"> = "occupancy_nextGasHeating";
+    const sampled: ColumnFullName<"boolean"> = "test_sampledBoolean";
     // @ts-expect-error a number column is not a boolean column
     const numeric: ColumnFullName<"boolean"> = "sheetConfig_sheetGid";
     // @ts-expect-error a string column is not a boolean column
@@ -274,7 +274,7 @@ describe("ColumnFullName, absolute column addressing", () => {
     // @ts-expect-error a declared checkbox column is no longer a boolean column
     const asBoolean: ColumnFullName<"boolean"> = "occupancy_updateTermsSelect";
     // @ts-expect-error a column that only samples as boolean is not a checkbox column
-    const sampled: ColumnFullName<"checkbox"> = "occupancy_nextGasHeating";
+    const sampled: ColumnFullName<"checkbox"> = "test_sampledBoolean";
     expect(valueNameOfFullName(declared)).toBe("checkbox");
     expect(valueNameOfFullName(asBoolean)).toBe("checkbox");
     expect(valueNameOfFullName(sampled)).toBe("boolean");
@@ -290,8 +290,7 @@ describe("ColumnFullName, absolute column addressing", () => {
   });
 
   it("narrows further on the formula axis, which defaults to not caring", () => {
-    const writable: ColumnFullName<"boolean", false> =
-      "occupancy_nextGasHeating";
+    const writable: ColumnFullName<"boolean", false> = "test_sampledBoolean";
     // @ts-expect-error a formula column can't be written to
     const derived: ColumnFullName<"boolean", false> =
       "sheetConfig_idPrefixIsUniqueOrEmpty";

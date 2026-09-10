@@ -2,6 +2,7 @@ import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnName,
   ColumnValue,
+  ColumnValueDeclared,
   SheetDataValues,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
@@ -41,9 +42,14 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   valueOrEmpty<CN extends ColumnName<SN>>(columnName: CN): ColumnValue<SN, CN> {
     return this.cell(columnName).valueOrEmpty();
   }
-  value<CN extends ColumnName<SN>>(
+  valueNotEmpty<CN extends ColumnName<SN>>(
     columnName: CN,
   ): NotEmpty<ColumnValue<SN, CN>> {
+    return this.cell(columnName).valueNotEmpty();
+  }
+  value<CN extends ColumnName<SN>>(
+    columnName: CN,
+  ): ColumnValueDeclared<SN, CN> {
     return this.cell(columnName).value();
   }
   dateValueAfterOrGivenDate<CN extends ColumnName<SN>>(

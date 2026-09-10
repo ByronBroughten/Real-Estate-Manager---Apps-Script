@@ -2,6 +2,7 @@ import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnName,
   ColumnValue,
+  ColumnValueDeclared,
   ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
@@ -41,7 +42,12 @@ export class ColumnNamed<
     return this.indexed.valueArrFilterEmpty;
   }
   // Not delegated to Indexed, so a blank throws with the Named message.
-  get valueArr(): NotEmpty<ColumnValue<SN, CN>>[] {
+  get valueArrNotEmpty(): NotEmpty<ColumnValue<SN, CN>>[] {
+    return this.rowIndexesActive.map((rowIndex) =>
+      this.valueNotEmpty(rowIndex),
+    );
+  }
+  get valueArr(): ColumnValueDeclared<SN, CN>[] {
     return this.rowIndexesActive.map((rowIndex) => this.value(rowIndex));
   }
   hasValue(value: ColumnValue<SN, CN>): boolean {
@@ -50,7 +56,10 @@ export class ColumnNamed<
   valueOrEmpty(rowIndex: number): ColumnValue<SN, CN> {
     return this.cell(rowIndex).valueOrEmpty();
   }
-  value(rowIndex: number): NotEmpty<ColumnValue<SN, CN>> {
+  valueNotEmpty(rowIndex: number): NotEmpty<ColumnValue<SN, CN>> {
+    return this.cell(rowIndex).valueNotEmpty();
+  }
+  value(rowIndex: number): ColumnValueDeclared<SN, CN> {
     return this.cell(rowIndex).value();
   }
   cell(rowIndex: number): CellNamed<SN, CN> {

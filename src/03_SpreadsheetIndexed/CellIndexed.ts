@@ -39,7 +39,7 @@ export class CellIndexed<
     }
     return value as Value<VN>;
   }
-  value(): NotEmpty<Value<VN>> {
+  valueNotEmpty(): NotEmpty<Value<VN>> {
     const value = this.valueOrEmpty();
     if (value === "") {
       throw new Error(

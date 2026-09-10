@@ -467,6 +467,14 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
+    },
+    "sampledBoolean": {
+      "columnId": "c:test:KLMZlb4",
+      "header": "Sampled Boolean",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
     }
   },
   "addOccChargesOnetime": {
@@ -2709,7 +2717,7 @@ export const columnConfigs = makeColumnConfigs({
     "gasHeating": {
       "columnId": "c:occ:9rHq_82",
       "header": "Gas Heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2717,7 +2725,7 @@ export const columnConfigs = makeColumnConfigs({
     "electricHeating": {
       "columnId": "c:occ:5Mi3j1C",
       "header": "Electric Heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2725,7 +2733,7 @@ export const columnConfigs = makeColumnConfigs({
     "gasCooking": {
       "columnId": "c:occ:TQxFE_r",
       "header": "Gas Cooking",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2733,7 +2741,7 @@ export const columnConfigs = makeColumnConfigs({
     "electricCooking": {
       "columnId": "c:occ:0s6D5Wj",
       "header": "Electric Cooking",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2741,7 +2749,7 @@ export const columnConfigs = makeColumnConfigs({
     "otherElectric": {
       "columnId": "c:occ:7VpBKcv",
       "header": "Other Electric",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2749,7 +2757,7 @@ export const columnConfigs = makeColumnConfigs({
     "gasWaterHeating": {
       "columnId": "c:occ:YarwO8j",
       "header": "Gas Water Heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2757,7 +2765,7 @@ export const columnConfigs = makeColumnConfigs({
     "electricWaterHeating": {
       "columnId": "c:occ:9J0o9Hw",
       "header": "Electric Water Heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2765,7 +2773,7 @@ export const columnConfigs = makeColumnConfigs({
     "waterSewer": {
       "columnId": "c:occ:pjpAsK8",
       "header": "Water & Sewer",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2773,7 +2781,7 @@ export const columnConfigs = makeColumnConfigs({
     "trashCollection": {
       "columnId": "c:occ:zHYOvut",
       "header": "Trash Collection",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2781,7 +2789,7 @@ export const columnConfigs = makeColumnConfigs({
     "districtEnergyHeating": {
       "columnId": "c:occ:leS8Yug",
       "header": "District Energy Heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2789,7 +2797,7 @@ export const columnConfigs = makeColumnConfigs({
     "districtEnergyWaterHeating": {
       "columnId": "c:occ:Uqek_yL",
       "header": "District Energy Water Heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2813,7 +2821,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextGasHeating": {
       "columnId": "c:occ:taWBpdb",
       "header": "Next gas heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2821,7 +2829,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextElectricHeating": {
       "columnId": "c:occ:yrrKHG-",
       "header": "Next electric heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2829,7 +2837,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextGasCooking": {
       "columnId": "c:occ:uQ_6tbq",
       "header": "Next gas cooking",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2837,7 +2845,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextElectricCooking": {
       "columnId": "c:occ:8qPUO9t",
       "header": "Next electric cooking",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2845,7 +2853,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextOtherElectric": {
       "columnId": "c:occ:KYfara6",
       "header": "Next other electric",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2853,7 +2861,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextGasWaterHeating": {
       "columnId": "c:occ:4BkzVZM",
       "header": "Next gas water heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2861,7 +2869,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextElectricWaterHeating": {
       "columnId": "c:occ:0p1wSPK",
       "header": "Next electric water heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2869,7 +2877,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextWaterSewer": {
       "columnId": "c:occ:_zg_IwQ",
       "header": "Next water & sewer",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2877,7 +2885,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextTrashCollection": {
       "columnId": "c:occ:YncWdva",
       "header": "Next trash collection",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2885,7 +2893,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextDistrictEnergyHeating": {
       "columnId": "c:occ:L3iBT3R",
       "header": "Next district energy heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2893,7 +2901,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextDistrictEnergyWaterHeating": {
       "columnId": "c:occ:1acd-35",
       "header": "Next district energy water heating",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2903,7 +2911,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Next terms end date",
       "valueName": "date",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     }
   },
@@ -2953,7 +2961,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "End date",
       "valueName": "date",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "rentChargeMonthly": {

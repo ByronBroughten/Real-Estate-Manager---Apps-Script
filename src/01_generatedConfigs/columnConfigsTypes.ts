@@ -1,4 +1,8 @@
-import { nameDelimiter, type NameDelimiter } from "../00_base/base";
+import {
+  nameDelimiter,
+  type NameDelimiter,
+  type NotEmpty,
+} from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./columnConfigs";
@@ -31,6 +35,15 @@ export type ColumnIsFormula<
 > = SN extends SheetNameSimple
   ? CN extends keyof ColumnConfigs[SN]
     ? ColumnConfigs[SN][CN]["isFormula" & keyof ColumnConfigs[SN][CN]]
+    : never
+  : never;
+
+export type ColumnEmptyValueAllowed<
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> = SN extends SheetNameSimple
+  ? CN extends keyof ColumnConfigs[SN]
+    ? ColumnConfigs[SN][CN]["emptyValueAllowed" & keyof ColumnConfigs[SN][CN]]
     : never
   : never;
 
@@ -68,6 +81,15 @@ export type ColumnValue<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
 > = Value<ColumnValueName<SN, CN>>;
+
+// What the column's own Empty value allowed box declares the unmarked read to mean.
+export type ColumnValueDeclared<
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+> =
+  ColumnEmptyValueAllowed<SN, CN> extends true
+    ? ColumnValue<SN, CN>
+    : NotEmpty<ColumnValue<SN, CN>>;
 
 export type SheetDataValues<
   SN extends SheetNameSimple,

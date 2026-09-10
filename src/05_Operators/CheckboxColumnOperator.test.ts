@@ -139,9 +139,9 @@ describe("CheckboxColumnOperator, column constraint", () => {
     });
     const sampled = new CheckboxColumnOperator({
       ...SpreadsheetNamed.initSpreadsheetNamedProps(),
-      sheetName: "occupancy",
+      sheetName: "test",
       // @ts-expect-error an undeclared column that merely holds a boolean is not one either
-      columnName: "nextGasHeating",
+      columnName: "sampledBoolean",
     });
     const formula = new CheckboxColumnOperator({
       ...SpreadsheetNamed.initSpreadsheetNamedProps(),

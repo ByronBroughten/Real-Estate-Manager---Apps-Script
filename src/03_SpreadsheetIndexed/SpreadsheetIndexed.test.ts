@@ -101,12 +101,12 @@ describe("Indexed value accessors", () => {
     stubOccupancyWithBlankRow();
   });
 
-  it("throws from CellIndexed.value on a blank cell, naming the column id and the row", () => {
+  it("throws from CellIndexed.valueNotEmpty on a blank cell, naming the column id and the row", () => {
     const cell = fetchedOccupancySheet()
       .column(ID_COLUMN_ID)
       .cell(BLANK_ROW_INDEX);
 
-    expect(() => cell.value()).toThrowError(
+    expect(() => cell.valueNotEmpty()).toThrowError(
       new RegExp(`${ID_COLUMN_ID}.*${BLANK_ROW_INDEX}`),
     );
   });
@@ -124,7 +124,7 @@ describe("Indexed value accessors", () => {
       .column(ID_COLUMN_ID)
       .cell(FILLED_ROW_INDEX);
 
-    expect(cell.value()).toBe("r:occ:row4");
+    expect(cell.valueNotEmpty()).toBe("r:occ:row4");
     expect(cell.valueOrEmpty()).toBe("r:occ:row4");
   });
 
@@ -136,34 +136,38 @@ describe("Indexed value accessors", () => {
     });
 
     expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe(false);
-    expect(column.value(BLANK_ROW_INDEX)).toBe(false);
-    expect(column.value(FILLED_ROW_INDEX)).toBe(true);
+    expect(column.valueNotEmpty(BLANK_ROW_INDEX)).toBe(false);
+    expect(column.valueNotEmpty(FILLED_ROW_INDEX)).toBe(true);
     expect(column.valueArrOrEmpty).toEqual([true, false]);
-    expect(column.valueArr).toEqual([true, false]);
-    assertType<IsExactly<ReturnType<typeof column.value>, boolean>>(true);
+    expect(column.valueArrNotEmpty).toEqual([true, false]);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, boolean>>(
+      true,
+    );
     assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, boolean>>(
       true,
     );
   });
 
-  it("throws from ColumnIndexed.value and returns empty from valueOrEmpty", () => {
+  it("throws from ColumnIndexed.valueNotEmpty and returns empty from valueOrEmpty", () => {
     const column = fetchedOccupancySheet().column(ID_COLUMN_ID);
 
-    expect(() => column.value(BLANK_ROW_INDEX)).toThrowError(/is empty/);
+    expect(() => column.valueNotEmpty(BLANK_ROW_INDEX)).toThrowError(
+      /is empty/,
+    );
     expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe("");
   });
 
-  it("throws from RowIndexed.value and returns empty from RowIndexed.valueOrEmpty", () => {
+  it("throws from RowIndexed.valueNotEmpty and returns empty from RowIndexed.valueOrEmpty", () => {
     const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
 
-    expect(() => row.value(ID_COLUMN_ID)).toThrowError(/is empty/);
+    expect(() => row.valueNotEmpty(ID_COLUMN_ID)).toThrowError(/is empty/);
     expect(row.valueOrEmpty(ID_COLUMN_ID)).toBe("");
   });
 
-  it("throws from valueArr when a fetched cell is blank, but not from the marked forms", () => {
+  it("throws from valueArrNotEmpty when a fetched cell is blank, but not from the blank-tolerant forms", () => {
     const column = fetchedOccupancySheet().column(ID_COLUMN_ID);
 
-    expect(() => column.valueArr).toThrowError(/is empty/);
+    expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
     expect(column.valueArrOrEmpty).toEqual(["r:occ:row4", ""]);
     expect(column.valueArrFilterEmpty).toEqual(["r:occ:row4"]);
   });

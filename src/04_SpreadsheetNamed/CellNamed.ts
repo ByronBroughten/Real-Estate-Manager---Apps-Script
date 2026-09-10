@@ -3,6 +3,7 @@ import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnName,
   ColumnValue,
+  ColumnValueDeclared,
   ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
@@ -36,7 +37,7 @@ export class CellNamed<
     return this.indexed.valueOrEmpty();
   }
   // Checked here, not delegated, so the message names the column the caller wrote.
-  value(): NotEmpty<ColumnValue<SN, CN>> {
+  valueNotEmpty(): NotEmpty<ColumnValue<SN, CN>> {
     const value = this.valueOrEmpty();
     if (value === "") {
       throw new Error(
@@ -44,6 +45,13 @@ export class CellNamed<
       );
     } else {
       return value as NotEmpty<ColumnValue<SN, CN>>;
+    }
+  }
+  value(): ColumnValueDeclared<SN, CN> {
+    if (this.schema.emptyValueAllowed) {
+      return this.valueOrEmpty() as ColumnValueDeclared<SN, CN>;
+    } else {
+      return this.valueNotEmpty() as ColumnValueDeclared<SN, CN>;
     }
   }
   updateValue(value: ColumnValue<SN, CN>): this {

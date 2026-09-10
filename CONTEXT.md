@@ -70,6 +70,10 @@ _Avoid_: data type, format, value type
 A column whose type menu says Checkbox. Every one of its rows draws a box, so a row nobody has touched counts as unchecked rather than as blank, and only such a column can be an endpoint's selector. A column that merely holds TRUE and FALSE without saying so is untyped, not a checkbox column.
 _Avoid_: boolean column, tickbox column, flag column
 
+**Empty value allowed**:
+A box you tick against a column in Column Config to say that a blank in it is a real answer rather than something missing. Leave it unticked and the app stops and names the cell whenever it reads a blank there, which is what you want on a column you consider mandatory. Tick it and the app hands the blank on to whatever asked for it, and that work has to say what a missing value means. A column nobody has ticked behaves the way every column behaved before, and a newly discovered column arrives unticked, so nothing starts accepting blanks on your behalf. Your tick survives a config sync; nothing the app works out for itself will overwrite it.
+_Avoid_: nullable, optional column, blank allowed
+
 **Untyped**:
 Said of a column whose type menu tells the app nothing about what it holds — left on Automatic, or a dropdown that no Value Config rule backs. The app then guesses from the column's top row, and says how many such columns are left every time the config sheets sync.
 _Avoid_: unset, automatic, missing type

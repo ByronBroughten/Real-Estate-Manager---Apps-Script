@@ -80,6 +80,7 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
     "header",
     "isFormula",
     "valueTitle",
+    "emptyValueAllowed",
   );
   columnConfigOperator.ss.fetchAllPrepped();
   sheetConfigOperator.syncToSpreadsheet();
@@ -190,6 +191,60 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         customDefaultValue: null,
       },
     });
+  });
+
+  it("emits the empty-value-allowed trait each column's own box declares", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", false, true, ""],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            4: [
+              PROPERTY_GID,
+              "c:prp:aaa",
+              "Property",
+              "Rent Amount",
+              false,
+              "number",
+              false,
+              true,
+            ],
+            5: [
+              PROPERTY_GID,
+              "c:prp:bbb",
+              "Property",
+              "Notes",
+              false,
+              "string",
+              false,
+              false,
+            ],
+          }),
+          table: { endRowIndex: 6 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+        },
+      ],
+    });
+
+    const entries = initSyncedColumnConfigOperator().newColumnConfigs();
+
+    expect(entries.property?.rentAmount?.emptyValueAllowed).toBe(true);
+    expect(entries.property?.notes?.emptyValueAllowed).toBe(false);
   });
 
   it("throws when a row is missing its header or value name", () => {

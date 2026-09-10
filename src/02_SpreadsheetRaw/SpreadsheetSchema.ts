@@ -409,6 +409,9 @@ export class ColumnSchema<
   get isFormula(): boolean {
     return this.trait("isFormula");
   }
+  get emptyValueAllowed(): boolean {
+    return this.trait("emptyValueAllowed");
+  }
   get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
     return this.combineNames(
       this.sheetName,
@@ -426,8 +429,7 @@ export class ColumnSchema<
     }
   }
   validate(value: unknown) {
-    const emptyValueAllowed = this.trait("emptyValueAllowed");
-    if (emptyValueAllowed && value === "") {
+    if (this.emptyValueAllowed && value === "") {
       return value;
     } else {
       return this.valTrait("strictValidate")(value);

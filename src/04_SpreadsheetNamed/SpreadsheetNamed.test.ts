@@ -70,6 +70,12 @@ const TOP_DATA_ROW_INDEX = ssConfigGet("topDataRowIdxBase0");
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
 const SELECT_COLUMN_ID = columnConfigs.occupancy.updateTermsSelect.columnId;
+const NEXT_START_DATE_COLUMN_ID =
+  columnConfigs.occupancy.nextTermsStartDate.columnId;
+const NEXT_END_DATE_COLUMN_ID =
+  columnConfigs.occupancy.nextTermsEndDate.columnId;
+const NEXT_START_DATE_SERIAL = 45000;
+const NEXT_END_DATE_SERIAL = 45365;
 const FILLED_ROW_INDEX = 4;
 const BLANK_ROW_INDEX = 5;
 
@@ -81,10 +87,20 @@ function stubOccupancyWithBlankRow() {
         sheetId: OCCUPANCY_GID,
         title: "Occupancy",
         rows: buildGridRows({
-          0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
-          3: ["ID", "Update terms, select"],
-          4: ["r:occ:row4", true],
-          5: [null, null],
+          0: [
+            ID_COLUMN_ID,
+            SELECT_COLUMN_ID,
+            NEXT_START_DATE_COLUMN_ID,
+            NEXT_END_DATE_COLUMN_ID,
+          ],
+          3: [
+            "ID",
+            "Update terms, select",
+            "Next terms start date",
+            "Next terms end date",
+          ],
+          4: ["r:occ:row4", true, NEXT_START_DATE_SERIAL, NEXT_END_DATE_SERIAL],
+          5: [null, null, null, null],
         }),
         table: { endRowIndex: 6 },
       },
@@ -94,7 +110,12 @@ function stubOccupancyWithBlankRow() {
 
 function fetchedOccupancySheet(): SheetNamed<"occupancy"> {
   const ss = SpreadsheetNamed.init();
-  ss.sheet("occupancy").prepFetchColumnsFull("id", "updateTermsSelect");
+  ss.sheet("occupancy").prepFetchColumnsFull(
+    "id",
+    "updateTermsSelect",
+    "nextTermsStartDate",
+    "nextTermsEndDate",
+  );
   ss.fetchAllPrepped();
   return ss.sheet("occupancy");
 }
@@ -176,6 +197,98 @@ describe("Named value accessors", () => {
     expect(() => column.valueArr).toThrowError(/is empty/);
     expect(column.valueArrOrEmpty).toEqual(["r:occ:row4", ""]);
     expect(column.valueArrFilterEmpty).toEqual(["r:occ:row4"]);
+  });
+
+  it("throws from CellNamed.valueNotEmpty on a blank cell, naming it the same way", () => {
+    const cell = fetchedOccupancySheet().column("id").cell(BLANK_ROW_INDEX);
+
+    expect(() => cell.valueNotEmpty()).toThrowError(
+      new RegExp(`"id".*"occupancy".*${BLANK_ROW_INDEX}`),
+    );
+  });
+
+  it("throws from both blank-excluding reads on a column whose box is unticked", () => {
+    const sheet = fetchedOccupancySheet();
+    const column = sheet.column("nextTermsStartDate");
+
+    expect(() => column.value(BLANK_ROW_INDEX)).toThrowError(
+      new RegExp(`"nextTermsStartDate".*"occupancy".*${BLANK_ROW_INDEX}`),
+    );
+    expect(() => column.valueNotEmpty(BLANK_ROW_INDEX)).toThrowError(
+      /is empty/,
+    );
+    expect(() => column.valueArr).toThrowError(/is empty/);
+    expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
+    expect(() =>
+      sheet.row(BLANK_ROW_INDEX).valueNotEmpty("nextTermsStartDate"),
+    ).toThrowError(/is empty/);
+    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe("");
+  });
+
+  it("reads a filled cell identically through all three words", () => {
+    const column = fetchedOccupancySheet().column("nextTermsStartDate");
+
+    expect(column.value(FILLED_ROW_INDEX)).toBe(NEXT_START_DATE_SERIAL);
+    expect(column.valueNotEmpty(FILLED_ROW_INDEX)).toBe(NEXT_START_DATE_SERIAL);
+    expect(column.valueOrEmpty(FILLED_ROW_INDEX)).toBe(NEXT_START_DATE_SERIAL);
+  });
+
+  it("keeps the blank out of the unmarked read's type on a column whose box is unticked", () => {
+    const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    const cell = column.cell(FILLED_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(FILLED_ROW_INDEX);
+
+    assertType<IsExactly<ReturnType<typeof cell.value>, number>>(true);
+    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, number>>(true);
+    assertType<IsExactly<ReturnType<typeof column.value>, number>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, number>>(
+      true,
+    );
+    assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, number | "">>(
+      true,
+    );
+    assertType<
+      IsExactly<ReturnType<typeof row.value<"nextTermsStartDate">>, number>
+    >(true);
+  });
+
+  it("hands back the blank rather than throwing on a column whose box is ticked", () => {
+    const sheet = fetchedOccupancySheet();
+    const column = sheet.column("nextTermsEndDate");
+
+    expect(column.value(BLANK_ROW_INDEX)).toBe("");
+    expect(sheet.row(BLANK_ROW_INDEX).value("nextTermsEndDate")).toBe("");
+    expect(column.valueArr).toEqual([NEXT_END_DATE_SERIAL, ""]);
+  });
+
+  it("still throws from the blank-excluding reads on a column whose box is ticked", () => {
+    const sheet = fetchedOccupancySheet();
+    const column = sheet.column("nextTermsEndDate");
+
+    expect(() => column.valueNotEmpty(BLANK_ROW_INDEX)).toThrowError(
+      /is empty/,
+    );
+    expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
+    expect(() =>
+      sheet.row(BLANK_ROW_INDEX).valueNotEmpty("nextTermsEndDate"),
+    ).toThrowError(/is empty/);
+  });
+
+  it("keeps the blank in the unmarked read's type on a column whose box is ticked", () => {
+    const column = fetchedOccupancySheet().column("nextTermsEndDate");
+    const cell = column.cell(BLANK_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
+
+    assertType<IsExactly<ReturnType<typeof cell.value>, number | "">>(true);
+    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, number>>(true);
+    assertType<IsExactly<ReturnType<typeof column.value>, number | "">>(true);
+    assertType<IsExactly<typeof column.valueArr, (number | "")[]>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, number>>(
+      true,
+    );
+    assertType<
+      IsExactly<ReturnType<typeof row.value<"nextTermsEndDate">>, number | "">
+    >(true);
   });
 
   it("lets rowsFiltered select the rows whose column is blank", () => {
@@ -274,10 +387,20 @@ function stubOccupancyWithDuplicateIds() {
         sheetId: OCCUPANCY_GID,
         title: "Occupancy",
         rows: buildGridRows({
-          0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
-          3: ["ID", "Update terms, select"],
-          4: ["r:occ:dup", true],
-          5: ["r:occ:dup", true],
+          0: [
+            ID_COLUMN_ID,
+            SELECT_COLUMN_ID,
+            NEXT_START_DATE_COLUMN_ID,
+            NEXT_END_DATE_COLUMN_ID,
+          ],
+          3: [
+            "ID",
+            "Update terms, select",
+            "Next terms start date",
+            "Next terms end date",
+          ],
+          4: ["r:occ:dup", true, NEXT_START_DATE_SERIAL, NEXT_END_DATE_SERIAL],
+          5: ["r:occ:dup", true, NEXT_START_DATE_SERIAL, NEXT_END_DATE_SERIAL],
         }),
         table: { endRowIndex: 6 },
       },

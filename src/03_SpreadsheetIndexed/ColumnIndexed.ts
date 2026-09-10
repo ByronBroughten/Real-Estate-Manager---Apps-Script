@@ -61,9 +61,9 @@ export class ColumnIndexed<
       (value): value is NotEmpty<Value<VN>> => value !== "",
     );
   }
-  get valueArr(): NotEmpty<Value<VN>>[] {
+  get valueArrNotEmpty(): NotEmpty<Value<VN>>[] {
     return this.sheet.rowIndexesActive.map((rowIndex) =>
-      this.cell(rowIndex).value(),
+      this.cell(rowIndex).valueNotEmpty(),
     );
   }
   hasValue(value: Value<VN>): boolean {
@@ -72,8 +72,8 @@ export class ColumnIndexed<
   valueOrEmpty(rowIndex: number): Value<VN> {
     return this.cell(rowIndex).valueOrEmpty();
   }
-  value(rowIndex: number): NotEmpty<Value<VN>> {
-    return this.cell(rowIndex).value();
+  valueNotEmpty(rowIndex: number): NotEmpty<Value<VN>> {
+    return this.cell(rowIndex).valueNotEmpty();
   }
   cell(rowIndex: number): CellIndexed<VN> {
     return new CellIndexed({

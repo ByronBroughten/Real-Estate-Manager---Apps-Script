@@ -23,8 +23,8 @@ export class RowIndexed extends RowCommonIndexed {
   valueOrEmpty(columnId: string): Value {
     return this.cell(columnId).valueOrEmpty();
   }
-  value(columnId: string): NotEmpty<Value> {
-    return this.cell(columnId).value();
+  valueNotEmpty(columnId: string): NotEmpty<Value> {
+    return this.cell(columnId).valueNotEmpty();
   }
   updateValue(columnId: string, value: Value): this {
     this.cell(columnId).updateValue(value);
