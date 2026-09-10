@@ -1,11 +1,7 @@
 import { Dat } from "../utils/Dat";
 import { Val } from "../utils/Val";
-import {
-  cellValueNames,
-  type CellValueName,
-  type CellValueNameToValue,
-} from "./base";
-import { vsc, type ValueSchemaBase, type ValueSchemaKey } from "./valueSchema";
+import { cellValueNames, type CellValueNameToValue } from "./base";
+import { vsc, type ValueSchemaBase } from "./valueSchema";
 
 export const baseValueNames = ["id", "checkbox", ...cellValueNames] as const;
 export type BaseValueName = (typeof baseValueNames)[number];
@@ -74,17 +70,3 @@ export const baseValueSchemas: CellValueSchemas = {
     blankReadsAs: null,
   }),
 } as const;
-
-export type CellValueSchema<VN extends CellValueName = CellValueName> =
-  CellValueSchemas[VN];
-export type CellValueTrait<
-  VN extends CellValueName,
-  K extends ValueSchemaKey,
-> = CellValueSchema<VN>[K];
-
-export function getCellValTrait<
-  VN extends CellValueName,
-  K extends ValueSchemaKey,
->(valueName: VN, key: K): CellValueTrait<VN, K> {
-  return baseValueSchemas[valueName][key] as CellValueTrait<VN, K>;
-}
