@@ -13,7 +13,7 @@ import {
   type CheckboxColumnName,
 } from "../05_Operators/CheckboxColumnOperator";
 import { Tim } from "../utils/Tim";
-import type { Endpoint, FeedbackColumnName } from "./Endpoints";
+import type { EndpointDispatched, FeedbackColumnName } from "./Endpoints";
 
 interface RunState {
   message: string;
@@ -47,14 +47,14 @@ export interface EndpointRunProps<
   SN extends SheetNameSimple,
 > extends SheetNamedProps<SN> {
   entryColumnName: ColumnName<SN>;
-  endpoint: Endpoint<SN>;
+  endpoint: EndpointDispatched<SN>;
 }
 
 export class EndpointRun<
   SN extends SheetNameSimple = SheetNameSimple,
 > extends SheetNamedBase<SN> {
   readonly entryColumnName: ColumnName<SN>;
-  readonly endpoint: Endpoint<SN>;
+  readonly endpoint: EndpointDispatched<SN>;
   constructor({ entryColumnName, endpoint, ...props }: EndpointRunProps<SN>) {
     super(props);
     this.entryColumnName = entryColumnName;
@@ -83,6 +83,7 @@ export class EndpointRun<
         selectedRowIndexes,
         isChecked,
       });
+      this._clearSelection();
       this._applyRunState("succeeded", { message });
     } catch (error) {
       this._onRunError(error);
@@ -102,13 +103,13 @@ export class EndpointRun<
   private _prepSelectorFetch(): void {
     const { selector } = this.endpoint;
     if (!selector) return;
-    this._checkboxColumn(selector).column.prepFetchFull();
+    this._checkboxColumn(selector.column).column.prepFetchFull();
   }
   // No selector means every data row that holds data; a blank row is no record.
   private _selectedRowIndexes(): number[] {
     const { selector } = this.endpoint;
     if (!selector) return this.sheet.rowIndexesFullWithData;
-    return this._checkboxColumn(selector).rowIndexesChecked;
+    return this._checkboxColumn(selector.column).rowIndexesChecked;
   }
   // The entry cell is a button unless the endpoint also runs on unticking.
   private _resetEntryCheckbox(): void {
@@ -124,6 +125,12 @@ export class EndpointRun<
   private _onRunSetup(): void {
     this._applyRunState("running", { startTime: Tim.nowTimestamp() });
     this.ss.batchUpdateGSheets();
+  }
+  // Inside the run's `try`, so an action that throws has its clearing discarded too.
+  private _clearSelection(): void {
+    const { selector } = this.endpoint;
+    if (!selector || selector.retainsSelection) return;
+    this._checkboxColumn(selector.column).uncheckActiveCells();
   }
   // The timestamp is written once at setup; a state change only recolours it.
   private _applyRunState(

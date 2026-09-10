@@ -7,9 +7,9 @@ import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { Endpoint, Endpoints } from "./Endpoints";
 
-type SelectorOf<SN extends SheetNameSimple> = NonNullable<
+type SelectorColumnOf<SN extends SheetNameSimple> = NonNullable<
   Endpoint<SN>["selector"]
->;
+>["column"];
 type TimeLastRanOf<SN extends SheetNameSimple> = NonNullable<
   Endpoint<SN>["timeLastRan"]
 >;
@@ -17,7 +17,7 @@ type TimeLastRanOf<SN extends SheetNameSimple> = NonNullable<
 describe("Endpoint's column parameters", () => {
   it("resolve to the entry column's own sheet", () => {
     assertType<
-      IsExactly<SelectorOf<"sheetConfig">, "hasIdColumn" | "letApiAccess">
+      IsExactly<SelectorColumnOf<"sheetConfig">, "hasIdColumn" | "letApiAccess">
     >(true);
     assertType<
       IsExactly<
@@ -34,7 +34,7 @@ describe("Endpoint's column parameters", () => {
   it("are filtered to the value type each one needs", () => {
     assertType<
       IsExactly<
-        SelectorOf<"occupancy">,
+        SelectorColumnOf<"occupancy">,
         ColumnNameFiltered<"occupancy", "boolean", false>
       >
     >(true);
@@ -51,13 +51,13 @@ describe("Endpoint at the widened sheet name the dispatch boundary uses", () => 
   it("resolves to the cross-sheet union rather than to never", () => {
     assertType<
       IsExactly<
-        SelectorOf<SheetNameSimple>,
+        SelectorColumnOf<SheetNameSimple>,
         ColumnNameFiltered<SheetNameSimple, "boolean", false>
       >
     >(true);
     assertType<
       IsExactly<
-        Extract<SelectorOf<SheetNameSimple>, "buildLedgerSelect">,
+        Extract<SelectorColumnOf<SheetNameSimple>, "buildLedgerSelect">,
         "buildLedgerSelect"
       >
     >(true);

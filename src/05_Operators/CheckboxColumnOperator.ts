@@ -29,12 +29,9 @@ export class CheckboxColumnOperator<
       (rowIndex) => this.column.valueOrEmpty(rowIndex) === true,
     );
   }
-  // One queued column fill, so a bulk select still costs a single request.
-  setAll(isChecked: boolean): this {
-    this.column.updateAllCells({ value: isChecked });
+  // The active-cells fill, so an uncheck is safe on a sheet pruned to a selection.
+  uncheckActiveCells(): this {
+    this.column.updateActiveCells({ value: false });
     return this;
-  }
-  uncheckAll(): this {
-    return this.setAll(false);
   }
 }

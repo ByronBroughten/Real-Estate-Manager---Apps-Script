@@ -37,7 +37,7 @@ An endpoint whose entry checkbox is the input rather than a button — it runs o
 _Avoid_: toggle, switch
 
 **Selector**:
-A column of checkboxes an endpoint may declare, naming the rows one run is about. Ticking rows picks them out; the run then acts on those rows and reports into those rows, and leaves every other row alone.
+A column of checkboxes an endpoint may declare, naming the rows one run is about. Ticking rows picks them out; the run then acts on those rows and reports into those rows, and leaves every other row alone. A successful run **consumes** its selection — the ticks clear themselves, the way the run button does, so an empty selector column means nothing is selected and the next run costs what it looks like it costs. A run that fails leaves the ticks alone: they are the operator's input, and the same selection can be retried once the problem is fixed. An endpoint whose selector marks a standing set of rows rather than a one-off pick declares that it **retains its selection**, and its ticks survive a successful run untouched.
 _Avoid_: toggle, filter
 
 **Feedback column**:

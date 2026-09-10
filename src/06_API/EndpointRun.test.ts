@@ -33,6 +33,7 @@ const headers = [
 const SELECTOR_COL_INDEX = 1;
 const TIME_LAST_RAN_COL_INDEX = 2;
 const RUN_STATUS_COL_INDEX = 3;
+const ACTION_ROW_INDEX = 2;
 const TOP_DATA_ROW_INDEX = 4;
 const END_ROW_INDEX = 9;
 
@@ -117,29 +118,60 @@ function reportingEndpoint(
 function selectiveEndpoint(
   action: Endpoint<"occupancy">["action"],
 ): Endpoint<"occupancy"> {
-  return { ...reportingEndpoint(action), selector: "buildLedgerSelect" };
+  return {
+    ...reportingEndpoint(action),
+    selector: { column: "buildLedgerSelect" },
+  };
+}
+
+function retainingEndpoint(
+  action: Endpoint<"occupancy">["action"],
+): Endpoint<"occupancy"> {
+  return {
+    ...reportingEndpoint(action),
+    selector: { column: "buildLedgerSelect", retainsSelection: true },
+  };
 }
 
 function noOp() {}
 
+function allRequests(calls: BatchUpdateCall[]) {
+  return calls.flatMap((call) => call.requests ?? []);
+}
+
+function fillRequestsFor(calls: BatchUpdateCall[], colIndex: number) {
+  return allRequests(calls).filter(
+    (request) => request.repeatCell?.range?.startColumnIndex === colIndex,
+  );
+}
+
 function fillsFor(calls: BatchUpdateCall[], colIndex: number) {
-  return calls
-    .flatMap((call) => call.requests ?? [])
-    .filter(
-      (request) => request.repeatCell?.range?.startColumnIndex === colIndex,
-    )
-    .map((request) => ({
-      startRowIndex: request.repeatCell?.range?.startRowIndex,
-      endRowIndex: request.repeatCell?.range?.endRowIndex,
-      value: request.repeatCell?.cell?.userEnteredValue?.stringValue,
-      backgroundColor:
-        request.repeatCell?.cell?.userEnteredFormat?.backgroundColor,
-    }));
+  return fillRequestsFor(calls, colIndex).map((request) => ({
+    startRowIndex: request.repeatCell?.range?.startRowIndex,
+    endRowIndex: request.repeatCell?.range?.endRowIndex,
+    value: request.repeatCell?.cell?.userEnteredValue?.stringValue,
+    backgroundColor:
+      request.repeatCell?.cell?.userEnteredFormat?.backgroundColor,
+  }));
+}
+
+function checkboxFillsFor(calls: BatchUpdateCall[], colIndex: number) {
+  return fillRequestsFor(calls, colIndex).map((request) => ({
+    startRowIndex: request.repeatCell?.range?.startRowIndex,
+    endRowIndex: request.repeatCell?.range?.endRowIndex,
+    value: request.repeatCell?.cell?.userEnteredValue?.boolValue,
+  }));
+}
+
+function actionRowWrites(calls: BatchUpdateCall[]) {
+  return allRequests(calls).filter((request) => {
+    const range = request.repeatCell?.range ?? request.updateCells?.range;
+    return range?.startRowIndex === ACTION_ROW_INDEX;
+  });
 }
 
 function touchedRowIndexes(calls: BatchUpdateCall[]): number[] {
-  const rowIndexes = calls
-    .flatMap((call) => call.requests ?? [])
+  const rowIndexes = allRequests(calls)
     .flatMap((request) => {
       const range = request.repeatCell?.range ?? request.updateCells?.range;
       const start = range?.startRowIndex ?? 0;
@@ -242,6 +274,57 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
     runEndpoint(selectiveEndpoint(noOp));
 
     expect(getByDataFilterCalls).toHaveLength(2);
+  });
+});
+
+describe("EndpointRun.run, the selection a successful run consumes", () => {
+  it("unticks the selected rows and no other row", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(selectiveEndpoint(noOp));
+
+    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([
+      { startRowIndex: 4, endRowIndex: 5, value: false },
+      { startRowIndex: 6, endRowIndex: 7, value: false },
+    ]);
+  });
+
+  it("leaves the ticks alone when the action throws", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      selectiveEndpoint(() => {
+        throw new Error("no good");
+      }),
+    );
+
+    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+      "Error: no good",
+    );
+  });
+
+  it("leaves the ticks alone when the endpoint retains its selection", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(retainingEndpoint(noOp));
+
+    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+      "Succeeded",
+    );
+  });
+
+  it("unticks them on an untick run too, leaving the entry checkbox alone", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint({ ...selectiveEndpoint(noOp), runsOnUncheck: true }, false);
+
+    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([
+      { startRowIndex: 4, endRowIndex: 5, value: false },
+      { startRowIndex: 6, endRowIndex: 7, value: false },
+    ]);
+    expect(actionRowWrites(batchUpdateCalls)).toEqual([]);
   });
 });
 
@@ -362,7 +445,10 @@ describe("EndpointRun.run, an endpoint declaring no feedback columns", () => {
   it("emits no stamp at all", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    runEndpoint({ action: noOp, selector: "buildLedgerSelect" });
+    runEndpoint({
+      action: noOp,
+      selector: { column: "buildLedgerSelect" },
+    });
 
     expect(fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX)).toEqual([]);
     expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([]);

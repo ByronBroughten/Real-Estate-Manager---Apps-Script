@@ -97,23 +97,23 @@ A row nothing has fetched is never called blank. "Active" means "fetched into lo
 
 **What an endpoint, a runner, a two-way endpoint, a selector, a run status and a run state *are* is defined in [`CONTEXT.md`](./CONTEXT.md)** — read that first; this section is only how the dispatch is built.
 
-An endpoint is **one entry keyed by the column whose action-row checkbox triggers it**. Any column may be that key — there is no suffix requirement and no second endpoint kind. The entry's value names an action plus, optionally, up to three columns the framework manages on the endpoint's behalf:
+An endpoint is **one entry keyed by the column whose action-row checkbox triggers it**. Any column may be that key — there is no suffix requirement and no second endpoint kind. The entry's value names an action plus, optionally, the columns the framework manages on the endpoint's behalf — two feedback columns, and a selector declared as an object so the opt-out from clearing sits inside the thing it modifies:
 
 ```ts
 export interface Endpoint<SN extends SheetNameSimple> {
   action: EndpointAction;
   timeLastRan?: FeedbackColumnName<SN>;
   runStatus?: FeedbackColumnName<SN>;
-  selector?: CheckboxColumnName<SN>;
+  selector?: { column: CheckboxColumnName<SN>; retainsSelection?: boolean };
   runsOnUncheck?: boolean;
 }
 
 export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };
 ```
 
-`action` is the only required field, so an endpoint takes exactly the machinery it wants: a bulk "select all" declares an action alone and stays at the round-trip floor; a run over a selection declares all four. Register endpoints with a plain `: Endpoints` annotation — **not** `makeStructuredConfig`, which lets an unknown key through (see STYLE.md, "Type modeling").
+`action` is the only required field, so an endpoint takes exactly the machinery it wants: a bulk "select all" declares an action alone and stays at the round-trip floor; a run over a selection declares the feedback columns and the selector too. `retainsSelection` is nameable only inside a declared selector, so an endpoint without one cannot carry the opt-out as a silent no-op. Register endpoints with a plain `: Endpoints` annotation — **not** `makeStructuredConfig`, which lets an unknown key through (see STYLE.md, "Type modeling").
 
-**Each key is correlated with its own sheet**, so `SheetNameOf<FN>` narrows the three column parameters to that sheet's columns, and each is filtered to the value type it needs. A column from another sheet, a boolean column in `runStatus`, a string column in `selector`, and a key that is not a column are each a compile error rather than a runtime no-op. It works because recovering a sheet name *from* a column full name is a plain indexed lookup on the flat column map — the cheap direction (see "Two ways to address a column"); the expensive direction is never used. Measured: the map itself costs ~200 instantiations and no measurable check time.
+**Each key is correlated with its own sheet**, so `SheetNameOf<FN>` narrows every column the entry names to that sheet's columns, and each is filtered to the value type it needs. A column from another sheet, a boolean column in `runStatus`, a string column in the selector's `column`, and a key that is not a column are each a compile error rather than a runtime no-op. It works because recovering a sheet name *from* a column full name is a plain indexed lookup on the flat column map — the cheap direction (see "Two ways to address a column"); the expensive direction is never used. Measured: the map itself costs ~200 instantiations and no measurable check time.
 
 **`EndpointRun` owns the run; `Api` only decodes and dispatches.** In order, a run:
 
@@ -122,16 +122,19 @@ export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };
 3. resets the entry column's action cell, unless `runsOnUncheck` makes the checkbox an input rather than a button;
 4. **prunes**, when a selector is declared: every unselected data row is removed from local state, so every later read of active rows means the selection without a call site being rewritten. `SheetRaw.removeRowsExcept` keeps the uniform rows (dropping the columnId row would break column resolution), and marks the sheet, so a whole-column fill on it throws;
 5. stamps the running state and flushes — that first flush is what puts "Running…" and yellow on the sheet *before* the work starts, which is the whole basis for a killed run staying distinguishable from one that never began;
-6. runs the action inside `try`/`catch`/`finally`, writes the outcome (the action's returned string, or `Succeeded`), and flushes again. A failure `discardQueuedChanges()` first, or the `finally` ships a half-finished run alongside its own error report.
+6. runs the action inside `try`/`catch`/`finally`;
+7. **clears the selection**, when one is declared and the endpoint doesn't retain it: the selected rows' selector cells are filled with an explicit `false`. It sits inside the `try`, after the action returns and before the outcome is written, so "clears on success" falls out of that placement rather than out of a flag — the error path discards the run's queued changes, which drops this fill along with everything else the action queued;
+8. writes the outcome (the action's returned string, or `Succeeded`), and flushes again. A failure `discardQueuedChanges()` first, or the `finally` ships a half-finished run alongside its own error report.
 
 An endpoint with a selector but nothing ticked prunes every data row, leaving no cell to report into: it skips the action, logs, and flushes only the checkbox reset. Running an action against an empty selection would invite domain code that reads "nothing selected" as "everything".
 
-Feedback is written with the two column fills from "Queued writes and shared state": `updateActiveCells` when there's a selector (the selected rows are active by construction), `updateAllCells` when there isn't — that branch reaches rows nothing ever fetched, which is why whole-sheet feedback costs no read.
+Feedback is written with the two column fills from "Queued writes and shared state": `updateActiveCells` when there's a selector (the selected rows are active by construction), `updateAllCells` when there isn't — that branch reaches rows nothing ever fetched, which is why whole-sheet feedback costs no read. The selection clearing uses the active-cells fill for the same reason, through `CheckboxColumnOperator.uncheckActiveCells` — the operator's only uncheck, since a whole-column one refuses to run on a pruned sheet by design and would throw in exactly the situation that wants it. Contiguous selected rows collapse into one request each, and the fill rides the flush the `finally` was already going to perform, so the clearing adds no round trip.
 
 Two things to know:
 
 - **`EndpointRun` is constructed from `Api`'s `SpreadsheetNamedProps`**, never from a no-arg `init()` that mints fresh `rawState`. `Api` has already fetched the sheet's properties and columnId row by the time it dispatches; minting fresh state re-fetches all of it.
 - **The dispatch boundary is where the generic widens.** There is deliberately no type-level bridge from a column full name to a sheet-and-column pair, so `Api` — holding a full name resolved at runtime — instantiates `EndpointRun` at the widened sheet name, where a column parameter is the union across sheets rather than one sheet's. That is sound and does not collapse to `never`, because `ColumnNameFiltered` distributes over the sheet name; `Endpoints.test.ts` pins both ends.
+- **That widening is what forces the selector's shape to be spelled inline, and the run to take `EndpointDispatched`.** Two generic references to the *same* named type are compared by that type's measured variance rather than property by property, and the column filter leaves the variance unmeasurable, so the comparison falls back to demanding identical sheet names. Nesting the selector inside a named `EndpointSelector<SN>` — interface or alias — therefore breaks `Api`'s assignment outright, and so does `Endpoint<SheetNameSimple>` as the run's prop type; an anonymous nested object plus a structural copy (`{ [K in keyof Endpoint<SN>]: Endpoint<SN>[K] }`) keeps both comparisons structural. Tidying either into a named type fails `npm run tsc` at `Api.ts`, not at the file you edited.
 
 The three suffix strings in `spreadsheetConfig` (`selectorEndpointSuffix`/`runnerEndpointSuffix`/`runStatusEndpointSuffix`) are **convention only** — nothing dispatches on them any more. They stay because they are still the naming convention the real sheets follow.
 
@@ -160,6 +163,8 @@ Baseline (Sept 2026): **~286k instantiations, ~1.2s check time.** A mapped filte
 After the endpoint entry landed (#5, Sept 2026): **~620k instantiations, ~1.54s check time**, against **583k, ~1.58s** immediately before it on the same machine — so the entry shape cost ~37k instantiations and no check time. Most of that is the two `ColumnNameFiltered` filters instantiated at the *widened* sheet name, which the dispatch boundary forces; the correlated `Endpoints` map itself measured ~200. Composing the two filters (`ColumnValueName<SN, FeedbackColumnName<SN>>`, to re-derive a feedback column's value type inside `EndpointRun`) cost a further ~43k on its own and was dropped — the entry already pins the value type, so the run resolves the column by `columnId` through the Indexed tier instead.
 
 After the absolute addressing family landed (Sept 2026): **~597k instantiations, ~1.6s check time**, against **286k, ~1.5s** re-measured on the same machine in the same session — so instantiations roughly doubled while check time barely moved. (Compare check times only within one measurement run: the 1.2s recorded above and the 1.5s here are the same baseline commit on different machines.) Most of the increase is the handful of distinct `ColumnFullName<VN, IF>` and `ColumnNameFiltered<SN, VN, IF>` instantiations the endpoint unions and the checkbox operator ask for.
+
+After the selector became an object (#11, Sept 2026): **~583k instantiations, ~1.63s check time**, against **638k, ~1.72s** immediately before it on the same machine — so bundling the retain flag into the selector cost nothing and measured ~55k *fewer* instantiations. The saving wasn't chased down; what matters for the budget is that the reshape adds none.
 
 ### Two ways to address a column
 

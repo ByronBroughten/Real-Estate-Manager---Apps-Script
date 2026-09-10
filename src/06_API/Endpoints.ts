@@ -29,9 +29,15 @@ export interface Endpoint<SN extends SheetNameSimple> {
   action: EndpointAction;
   timeLastRan?: FeedbackColumnName<SN>;
   runStatus?: FeedbackColumnName<SN>;
-  selector?: CheckboxColumnName<SN>;
+  // Inline, not a named type: a named one compares by variance, which the widened dispatch boundary rejects.
+  selector?: { column: CheckboxColumnName<SN>; retainsSelection?: boolean };
   runsOnUncheck?: boolean;
 }
+
+// The entry as the dispatch hands it over — a structural copy, for the same reason.
+export type EndpointDispatched<SN extends SheetNameSimple> = {
+  [K in keyof Endpoint<SN>]: Endpoint<SN>[K];
+};
 
 // Each key carries its own sheet, so a column from another sheet is unnameable.
 export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };

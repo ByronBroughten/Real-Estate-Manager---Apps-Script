@@ -47,7 +47,7 @@ export const businessEndpoints: Endpoints = {
     },
     timeLastRan: "updateTermsTimeLastRan",
     runStatus: "updateTermsRunStatus",
-    selector: "updateTermsSelect",
+    selector: { column: "updateTermsSelect" },
   },
   occupancy_buildLedgerTimeLastRan: {
     action: () => {
@@ -55,7 +55,7 @@ export const businessEndpoints: Endpoints = {
     },
     timeLastRan: "buildLedgerTimeLastRan",
     runStatus: "buildLedgerRunStatus",
-    selector: "buildLedgerSelect",
+    selector: { column: "buildLedgerSelect" },
   },
   // TODO: selector endpoint functionality may be removed in the future, as the speed floor doesn't let them feel good, and their functionality may not be needed.
   // occupancy_updateTermsSelect: {
