@@ -14,7 +14,12 @@ import {
   stubSheetsService,
   type FakeCell,
 } from "../testSupport/fakeSheetsService";
-import { assertType, type IsExactly } from "../testSupport/typeAssertions";
+import {
+  assertNotType,
+  assertType,
+  type IsExactly,
+} from "../testSupport/typeAssertions";
+import type { DateSerial } from "../utils/Dat";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
@@ -239,18 +244,30 @@ describe("Named value accessors", () => {
     const cell = column.cell(FILLED_ROW_INDEX);
     const row = fetchedOccupancySheet().row(FILLED_ROW_INDEX);
 
-    assertType<IsExactly<ReturnType<typeof cell.value>, number>>(true);
-    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, number>>(true);
-    assertType<IsExactly<ReturnType<typeof column.value>, number>>(true);
-    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, number>>(
+    assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial>>(true);
+    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, DateSerial>>(
       true,
     );
-    assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, number | "">>(
+    assertType<IsExactly<ReturnType<typeof column.value>, DateSerial>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, DateSerial>>(
       true,
     );
     assertType<
-      IsExactly<ReturnType<typeof row.value<"nextTermsStartDate">>, number>
+      IsExactly<ReturnType<typeof column.valueOrEmpty>, DateSerial | "">
     >(true);
+    assertType<
+      IsExactly<ReturnType<typeof row.value<"nextTermsStartDate">>, DateSerial>
+    >(true);
+  });
+
+  // A plain number would pass an assignment check against DateSerial's supertype.
+  it("gives a date column a value type no rent or count can be handed to", () => {
+    const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    const numberColumn = fetchedOccupancySheet().column("residentCount");
+
+    assertNotType<IsExactly<ReturnType<typeof column.value>, number>>(false);
+    assertNotType<IsExactly<DateSerial, number>>(false);
+    assertType<IsExactly<ReturnType<typeof numberColumn.value>, number>>(true);
   });
 
   it("hands back the blank rather than throwing on a column whose box is ticked", () => {
@@ -280,15 +297,22 @@ describe("Named value accessors", () => {
     const cell = column.cell(BLANK_ROW_INDEX);
     const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
 
-    assertType<IsExactly<ReturnType<typeof cell.value>, number | "">>(true);
-    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, number>>(true);
-    assertType<IsExactly<ReturnType<typeof column.value>, number | "">>(true);
-    assertType<IsExactly<typeof column.valueArr, (number | "")[]>>(true);
-    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, number>>(
+    assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial | "">>(true);
+    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, DateSerial>>(
+      true,
+    );
+    assertType<IsExactly<ReturnType<typeof column.value>, DateSerial | "">>(
+      true,
+    );
+    assertType<IsExactly<typeof column.valueArr, (DateSerial | "")[]>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, DateSerial>>(
       true,
     );
     assertType<
-      IsExactly<ReturnType<typeof row.value<"nextTermsEndDate">>, number | "">
+      IsExactly<
+        ReturnType<typeof row.value<"nextTermsEndDate">>,
+        DateSerial | ""
+      >
     >(true);
   });
 

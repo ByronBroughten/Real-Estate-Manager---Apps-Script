@@ -1,3 +1,5 @@
+import { Dat, type DateSerial } from "./Dat";
+
 class ValidationError extends Error {}
 
 function _emptyTest(): void {}
@@ -13,7 +15,7 @@ type PrimitiveValueNamesToTypes = {
   string: string;
   number: number;
   boolean: boolean;
-  date: Date;
+  date: DateSerial;
 };
 export type PrimitiveValueName = keyof PrimitiveValueNamesToTypes;
 export type PureValue<VN extends PrimitiveValueName> =
@@ -35,8 +37,8 @@ const _isS = {
   boolean(value: unknown): value is boolean {
     return typeof value === "boolean";
   },
-  date(value: unknown): value is Date {
-    return value instanceof Date;
+  date(value: unknown): value is DateSerial {
+    return Dat.isSerial(value);
   },
 };
 
@@ -69,7 +71,7 @@ const _validateS = {
       throw validationError(value, "boolean");
     }
   },
-  date: (value: unknown): Date => {
+  date: (value: unknown): DateSerial => {
     if (_isS.date(value)) {
       return value;
     } else {

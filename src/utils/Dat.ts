@@ -1,161 +1,194 @@
+declare const dateSerial: unique symbol;
+// A whole-day Sheets serial. Branded so a rent or a count can't be a date.
+export type DateSerial = number & { readonly [dateSerial]: true };
+
 export interface MonthYear {
   month: number; // 1-12
   year: number;
 }
 
-// ---------------------------------------------------------------------
-// DATE-ONLY (no time-of-day) — use these today
-// ---------------------------------------------------------------------
+export interface Ymd extends MonthYear {
+  day: number;
+}
+
+export interface DateRange {
+  startDate: DateSerial;
+  endDate: DateSerial;
+}
+
+export interface DateInRange extends DateRange {
+  date: DateSerial;
+}
+
+export interface MonthYearRange {
+  startMonthYear: MonthYear;
+  endMonthYear: MonthYear;
+}
+
+export interface FirstAndLastOfMonth {
+  firstOfMonth: DateSerial;
+  lastOfMonth: DateSerial;
+}
+
+interface ProrateProps extends MonthYear, DateRange {}
+
+// A guard and its throwing form, outside the bundle so `this` can't swallow the narrowing.
+function isSerial(value: unknown): value is DateSerial {
+  return typeof value === "number" && Number.isInteger(value);
+}
+
+function validate(value: unknown): DateSerial {
+  if (isSerial(value)) {
+    return value;
+  }
+  throw new Error(`value "${String(value)}" is not a whole-day date serial`);
+}
+
 export const Dat = {
+  SHEET_TIMEZONE: "America/Chicago",
   SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30), // Dec 30, 1899, 00:00 UTC
   MS_PER_DAY: 86400000,
-  getDayBefore(date: Date): Date {
-    const dayBefore = new Date(date.getTime());
-    dayBefore.setDate(dayBefore.getDate() - 1);
-    return dayBefore;
+  isSerial,
+  validate,
+  today(): DateSerial {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: this.SHEET_TIMEZONE,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    })
+      .formatToParts(new Date())
+      .reduce<Record<string, string>>((acc, part) => {
+        acc[part.type] = part.value;
+        return acc;
+      }, {});
+    return this.fromYmd({
+      year: Number(parts.year),
+      month: Number(parts.month),
+      day: Number(parts.day),
+    });
   },
-  isInMonthAndYear(date: Date, month: number, year: number): boolean {
-    return date.getMonth() === month && date.getFullYear() === year;
+  fromYmd({ year, month, day }: Ymd): DateSerial {
+    const utcMs = this._utcMsFromYmd({ year, month, day });
+    const serial = (utcMs - this.SHEETS_EPOCH_UTC_MS) / this.MS_PER_DAY;
+    if (!isSerial(serial)) {
+      throw new Error(`${year}-${month}-${day} is not a real date.`);
+    }
+    return serial;
   },
-  normalizedDate(date: Date) {
-    const normalizedDate = new Date(date);
-    normalizedDate.setHours(0, 0, 0, 0);
-    return normalizedDate;
-  },
-  isThisDateOrPassed(inputDate: Date, thisDate: Date = new Date()): boolean {
-    const testDate = this.normalizedDate(thisDate);
-    const normalizedInput = this.normalizedDate(inputDate);
-    return normalizedInput <= testDate;
-  },
-  isDateAndTodayOrPassed(inputDate: unknown): inputDate is Date {
-    return inputDate instanceof Date && this.isThisDateOrPassed(inputDate);
-  },
-  isDateAndThisDateOrAfter(
-    inputDate: unknown,
-    thisDate: Date = new Date(),
-  ): inputDate is Date {
-    return (
-      inputDate instanceof Date && this.isDateSameOrAfter(inputDate, thisDate)
+  toYmd(date: DateSerial): Ymd {
+    const utc = new Date(
+      this.SHEETS_EPOCH_UTC_MS + validate(date) * this.MS_PER_DAY,
     );
+    return {
+      year: utc.getUTCFullYear(),
+      month: utc.getUTCMonth() + 1,
+      day: utc.getUTCDate(),
+    };
   },
-  isDateSameOrAfter(
-    inputDate: Date,
-    thisDate: Date = new Date(),
-  ): inputDate is Date {
-    const testDate = this.normalizedDate(thisDate);
-    const normalizedInput = this.normalizedDate(inputDate);
-    return normalizedInput >= testDate;
+  addDays(date: DateSerial, days: number): DateSerial {
+    return validate(validate(date) + days);
   },
-  isDateSameOrBefore(
-    inputDate: Date,
-    thisDate: Date = new Date(),
-  ): inputDate is Date {
-    const testDate = this.normalizedDate(thisDate);
-    const normalizedInput = this.normalizedDate(inputDate);
-    return normalizedInput <= testDate;
+  dayBefore(date: DateSerial): DateSerial {
+    return this.addDays(date, -1);
   },
-  isOnOrBetween(p: { date: Date; startDate: Date; endDate: Date }) {
-    if (p.startDate > p.endDate) {
+  addMonths(date: DateSerial, months: number): DateSerial {
+    const { year, month, day } = this.toYmd(date);
+    const monthCount = year * 12 + (month - 1) + months;
+    const target = {
+      month: (((monthCount % 12) + 12) % 12) + 1,
+      year: Math.floor(monthCount / 12),
+    };
+    return this.fromYmd({
+      ...target,
+      day: Math.min(day, this._daysInMonthYear(target)),
+    });
+  },
+  isSameOrAfter(
+    date: DateSerial,
+    referenceDate: DateSerial = this.today(),
+  ): boolean {
+    return validate(date) >= validate(referenceDate);
+  },
+  isSameOrBefore(
+    date: DateSerial,
+    referenceDate: DateSerial = this.today(),
+  ): boolean {
+    return validate(date) <= validate(referenceDate);
+  },
+  isTodayOrPassed(date: DateSerial): boolean {
+    return this.isSameOrBefore(date);
+  },
+  isOnOrBetween({ date, startDate, endDate }: DateInRange): boolean {
+    if (validate(startDate) > validate(endDate)) {
       throw new Error("Start date cannot be after end date.");
     }
     return (
-      this.isDateSameOrAfter(p.date, p.startDate) ||
-      this.isDateSameOrBefore(p.date, p.endDate)
+      this.isSameOrAfter(date, startDate) && this.isSameOrBefore(date, endDate)
     );
   },
-  monthYear(date: Date) {
-    return `${date.getMonth() + 1}/${date.getFullYear()}`;
+  monthYear(date: DateSerial): MonthYear {
+    const { month, year } = this.toYmd(date);
+    return { month, year };
+  },
+  isInMonthAndYear(date: DateSerial, { month, year }: MonthYear): boolean {
+    const dateMonthYear = this.monthYear(date);
+    return dateMonthYear.month === month && dateMonthYear.year === year;
   },
   monthYearsOnAndBetween({
     startMonthYear,
     endMonthYear,
-  }: {
-    startMonthYear: MonthYear;
-    endMonthYear: MonthYear;
-  }) {
+  }: MonthYearRange): MonthYear[] {
     const monthYears: MonthYear[] = [];
-    let currentMonth = startMonthYear.month;
-    let currentYear = startMonthYear.year;
+    let current = startMonthYear;
     while (
-      currentYear < endMonthYear.year ||
-      (currentYear === endMonthYear.year && currentMonth <= endMonthYear.month)
+      current.year < endMonthYear.year ||
+      (current.year === endMonthYear.year &&
+        current.month <= endMonthYear.month)
     ) {
-      monthYears.push({ month: currentMonth, year: currentYear });
-      currentMonth++;
-      if (currentMonth > 12) {
-        currentMonth = 1;
-        currentYear++;
-      }
+      monthYears.push(current);
+      current = this._nextMonthYear(current);
     }
     return monthYears;
   },
-  firstAndLastOfMonthNext(props: MonthYear): {
-    firstOfMonth: Date;
-    lastOfMonth: Date;
-  } {
+  firstDayOfMonth(date: DateSerial): DateSerial {
+    return this.firstDayOfMonthYear(this.monthYear(date));
+  },
+  lastDayOfMonth(date: DateSerial): DateSerial {
+    return this.lastDayOfMonthYear(this.monthYear(date));
+  },
+  firstAndLastDayOfMonth(date: DateSerial): FirstAndLastOfMonth {
+    return this.firstAndLastDayOfMonthYear(this.monthYear(date));
+  },
+  firstDayOfNextMonth(date: DateSerial): DateSerial {
+    return this.firstDayOfMonthYear(this._nextMonthYear(this.monthYear(date)));
+  },
+  firstDayOfMonthYear({ month, year }: MonthYear): DateSerial {
+    return this.fromYmd({ month, year, day: 1 });
+  },
+  lastDayOfMonthYear(monthYear: MonthYear): DateSerial {
+    return this.dayBefore(
+      this.firstDayOfMonthYear(this._nextMonthYear(monthYear)),
+    );
+  },
+  firstAndLastDayOfMonthYear(monthYear: MonthYear): FirstAndLastOfMonth {
     return {
-      firstOfMonth: this.firstDayOfMonthNext(props),
-      lastOfMonth: this.lastDayOfMonthNext(props),
+      firstOfMonth: this.firstDayOfMonthYear(monthYear),
+      lastOfMonth: this.lastDayOfMonthYear(monthYear),
     };
   },
-  firstDayOfMonthNext({ month, year }: MonthYear): Date {
-    return new Date(year, month - 1, 1, 12);
+  proratedMonthlyProportion(p: ProrateProps): number {
+    const { firstOfMonth, lastOfMonth } = this.firstAndLastDayOfMonthYear(p);
+    const prorateStart = Math.max(validate(p.startDate), firstOfMonth);
+    const prorateEnd = Math.min(validate(p.endDate), lastOfMonth);
+    // A term that misses the month entirely charges nothing, rather than negative days.
+    const daysCharged = Math.max(prorateEnd - prorateStart + 1, 0);
+    return daysCharged / this._daysInMonthYear(p);
   },
-  lastDayOfMonthNext({ month, year }: MonthYear): Date {
-    return new Date(year, month, 0, 12);
-  },
-  firstAndLastDayOfMonth(date: Date = new Date()): {
-    firstOfMonth: Date;
-    lastOfMonth: Date;
-  } {
-    return {
-      firstOfMonth: this.firstDayOfMonth(date),
-      lastOfMonth: this.lastDateOfMonth(date),
-    };
-  },
-  firstDayOfMonth(date: Date = new Date()): Date {
-    return new Date(date.getFullYear(), date.getMonth(), 1, 12);
-  },
-  lastDateOfMonth(date: Date): Date {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    return new Date(year, month + 1, 0, 12);
-  },
-  incrementMonth(date: Date) {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 1, 12);
-  },
-  proratedMonthlyProportion(p: {
-    startDate: Date;
-    endDate: Date;
-    month: number;
-    year: number;
-  }): number {
-    const { firstOfMonth, lastOfMonth } = this.firstAndLastOfMonthNext(p);
-
-    const prorateStart =
-      p.startDate < firstOfMonth ? firstOfMonth : p.startDate;
-    const prorateEnd = p.endDate > lastOfMonth ? lastOfMonth : p.endDate;
-
-    const daysInMonth = lastOfMonth.getDate();
-    const daysCharged = prorateEnd.getDate() - prorateStart.getDate() + 1;
-    return daysCharged / daysInMonth;
-  },
-  proratedMonthlyAmount(p: {
-    amount: number;
-    startDate: Date;
-    endDate: Date;
-    month: number;
-    year: number;
-  }): number {
+  proratedMonthlyAmount(p: ProrateProps & { amount: number }): number {
     return this.proratedMonthlyProportion(p) * p.amount;
   },
-  prorateds(p: {
-    amount: number;
-    startDate: Date;
-    endDate: Date;
-    month: number;
-    year: number;
-  }): {
+  prorateds(p: ProrateProps & { amount: number }): {
     proratedAmount: number;
     proratedProportion: number;
     isProrated: boolean;
@@ -167,28 +200,32 @@ export const Dat = {
       isProrated: proratedProportion < 1,
     };
   },
-  // Sheets serial (whole number) -> JS Date, anchored at UTC midnight.
-  serialToDate(serial: number): Date {
-    return new Date(
-      this.SHEETS_EPOCH_UTC_MS + Math.round(serial) * this.MS_PER_DAY,
-    );
+  _nextMonthYear({ month, year }: MonthYear): MonthYear {
+    if (month === 12) {
+      return { month: 1, year: year + 1 };
+    }
+    return { month: month + 1, year };
   },
-  // JS Date -> Sheets serial (whole number of days).
-  dateToSerial(date: Date): number {
-    return Math.round(
-      (date.getTime() - this.SHEETS_EPOCH_UTC_MS) / this.MS_PER_DAY,
-    );
+  _daysInMonthYear(monthYear: MonthYear): number {
+    const { firstOfMonth, lastOfMonth } =
+      this.firstAndLastDayOfMonthYear(monthYear);
+    return lastOfMonth - firstOfMonth + 1;
   },
-  // Add (or subtract, with a negative) whole days.
-  addDays(date: Date, days: number): Date {
-    const d = new Date(date);
-    d.setUTCDate(d.getUTCDate() + days);
-    return d;
-  },
-  // Add (or subtract) whole months. JS normalizes overflow, e.g. Jan 31 + 1mo -> Mar 3.
-  addMonths(date: Date, months: number): Date {
-    const d = new Date(date);
-    d.setUTCMonth(d.getUTCMonth() + months);
-    return d;
+  // NaN when the calendar has no such day, so fromYmd throws instead of overflowing.
+  _utcMsFromYmd({ year, month, day }: Ymd): number {
+    if (![year, month, day].every((part) => Number.isInteger(part))) {
+      return NaN;
+    }
+    const utc = new Date(0);
+    utc.setUTCFullYear(year, month - 1, day);
+    utc.setUTCHours(0, 0, 0, 0);
+    if (
+      utc.getUTCFullYear() !== year ||
+      utc.getUTCMonth() !== month - 1 ||
+      utc.getUTCDate() !== day
+    ) {
+      return NaN;
+    }
+    return utc.getTime();
   },
 };

@@ -1,3 +1,5 @@
+import { Dat } from "./Dat";
+
 // ---------------------------------------------------------------------
 // DATE-TIME (has a time-of-day) — for later, once you have time columns
 // ---------------------------------------------------------------------
@@ -6,9 +8,9 @@
 // instant requires the actual UTC offset for that date, DST included.
 
 export const Tim = {
-  SHEET_TIMEZONE: "America/Chicago",
-  SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30),
-  MS_PER_DAY: 86400000,
+  SHEET_TIMEZONE: Dat.SHEET_TIMEZONE,
+  SHEETS_EPOCH_UTC_MS: Dat.SHEETS_EPOCH_UTC_MS,
+  MS_PER_DAY: Dat.MS_PER_DAY,
   // Wall-clock date and time fields of `instant` as seen in `tz`.
   wallClockParts(
     instant: Date,

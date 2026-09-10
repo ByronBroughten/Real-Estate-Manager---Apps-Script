@@ -9,9 +9,7 @@ import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { RowIndexed } from "../03_SpreadsheetIndexed/RowIndexed";
-import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
-import { Val } from "../utils/Val";
 import { CellNamed } from "./CellNamed";
 import { RowNamedBase } from "./ClassBases/RowNamedBase";
 
@@ -51,47 +49,6 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     columnName: CN,
   ): ColumnValueDeclared<SN, CN> {
     return this.cell(columnName).value();
-  }
-  dateValueAfterOrGivenDate<CN extends ColumnName<SN>>(
-    columnName: CN,
-    date: Date = new Date(),
-  ): Date {
-    const dateValue = this.valueOrEmpty(columnName);
-    if (!Val.is.date(dateValue)) {
-      return date;
-    }
-
-    if (Dat.isDateSameOrAfter(dateValue, date)) {
-      return dateValue;
-    } else {
-      return date;
-    }
-  }
-  dateValueBeforeOrGivenDate<CN extends ColumnName<SN>>(
-    columnName: CN,
-    date: Date = new Date(),
-  ): Date {
-    const dateValue = this.valueOrEmpty(columnName);
-    if (!Val.is.date(dateValue)) {
-      return date;
-    }
-
-    if (Dat.isDateSameOrBefore(dateValue, date)) {
-      return dateValue;
-    } else {
-      return date;
-    }
-  }
-  dateValueOrGivenDate<CN extends ColumnName<SN>>(
-    columnName: CN,
-    date: Date = new Date(),
-  ): Date {
-    const dateValue = this.valueOrEmpty(columnName);
-    if (Val.is.date(dateValue)) {
-      return dateValue;
-    } else {
-      return date;
-    }
   }
   valuesOrEmpty<CN extends ColumnName<SN> = ColumnName<SN>>(
     ...columnNames: readonly CN[]

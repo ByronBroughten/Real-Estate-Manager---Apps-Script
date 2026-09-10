@@ -134,8 +134,8 @@ const columnTypeValueNames: Record<string, BaseValueName> = {
   CURRENCY: "number",
   PERCENT: "number",
   DATE: "date",
-  TIME: "date",
-  DATE_TIME: "date",
+  TIME: "number",
+  DATE_TIME: "number",
   TEXT: "string",
   FILES_CHIP: "string",
   PEOPLE_CHIP: "string",
@@ -148,8 +148,8 @@ const columnTypeValueNames: Record<string, BaseValueName> = {
 
 const numberFormatValueNames: Record<string, PrimitiveValueName> = {
   DATE: "date",
-  TIME: "date",
-  DATE_TIME: "date",
+  TIME: "number",
+  DATE_TIME: "number",
   NUMBER: "number",
   CURRENCY: "number",
   PERCENT: "number",

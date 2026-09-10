@@ -667,8 +667,8 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
       "number",
       "number",
       "date",
-      "date",
-      "date",
+      "number",
+      "number",
       "string",
       "string",
       "checkbox",
@@ -760,14 +760,21 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
 
   it("falls back to an empty top cell's number format rather than to text", () => {
     const operator = syncColumnsUnderTest({
-      headers: ["Payment", "Closing Date"],
+      headers: ["Payment", "Closing Date", "Closing Time", "Closed At"],
       topDataRow: [
         { value: null, numberFormatType: "CURRENCY" },
         { value: null, numberFormatType: "DATE" },
+        { value: null, numberFormatType: "TIME" },
+        { value: null, numberFormatType: "DATE_TIME" },
       ],
     });
 
-    expect(valueTitles(operator, 2)).toEqual(["number", "date"]);
+    expect(valueTitles(operator, 4)).toEqual([
+      "number",
+      "date",
+      "number",
+      "number",
+    ]);
   });
 
   it("falls back to text for an empty top cell with no number format", () => {

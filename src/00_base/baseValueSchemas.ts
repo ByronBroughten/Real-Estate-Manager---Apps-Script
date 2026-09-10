@@ -1,4 +1,4 @@
-import { Dat } from "../utils/Dat";
+import { Dat, type DateSerial } from "../utils/Dat";
 import { Val } from "../utils/Val";
 import { cellValueNames, type CellValueNameToValue } from "./base";
 import { vsc, type ValueSchemaBase } from "./valueSchema";
@@ -12,6 +12,7 @@ export function isBaseValueName(x: unknown): boolean {
 export interface BaseValues extends CellValueNameToValue {
   id: string;
   checkbox: boolean;
+  date: DateSerial;
 }
 
 // A declared checkbox column draws a box in every row, so it admits no blank.
@@ -64,9 +65,9 @@ export const baseValueSchemas: CellValueSchemas = {
     blankReadsAs: null,
   }),
   date: vsc({
-    type: "" as number | "",
-    makeDefault: () => Dat.dateToSerial(new Date()),
-    strictValidate: Val.validate.number,
+    type: "" as DateSerial | "",
+    makeDefault: () => Dat.today(),
+    strictValidate: Val.validate.date,
     blankReadsAs: null,
   }),
 } as const;
