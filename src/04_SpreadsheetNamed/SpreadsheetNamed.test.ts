@@ -220,6 +220,63 @@ function appendRequestCount(
     .filter((request) => request.appendCells).length;
 }
 
+describe("SheetNamed.rowByValue", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("returns the one row whose column holds the value", () => {
+    stubOccupancyWithBlankRow();
+
+    const row = fetchedOccupancySheet().rowByValue("id", "r:occ:row4");
+
+    expect(row.rowIndex).toBe(FILLED_ROW_INDEX);
+  });
+
+  it("throws naming the sheet, the column and the value when nothing matches", () => {
+    stubOccupancyWithBlankRow();
+    const sheet = fetchedOccupancySheet();
+
+    expect(() => sheet.rowByValue("id", "r:occ:absent")).toThrowError(
+      /occupancy.*id.*r:occ:absent.*0 did/,
+    );
+  });
+
+  it("throws rather than picking one when two rows match", () => {
+    stubOccupancyWithDuplicateIds();
+    const sheet = fetchedOccupancySheet();
+
+    expect(() => sheet.rowByValue("id", "r:occ:dup")).toThrowError(/but 2 did/);
+  });
+
+  // The blank row reads "" through valueOrEmpty, so it is a match like any other.
+  it("counts the sheet's blank row as a match for an empty value", () => {
+    stubOccupancyWithBlankRow();
+
+    const row = fetchedOccupancySheet().rowByValue("id", "");
+
+    expect(row.rowIndex).toBe(BLANK_ROW_INDEX);
+  });
+});
+
+function stubOccupancyWithDuplicateIds() {
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: OCCUPANCY_GID,
+        title: "Occupancy",
+        rows: buildGridRows({
+          0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+          3: ["ID", "Update terms, select"],
+          4: ["r:occ:dup", true],
+          5: ["r:occ:dup", true],
+        }),
+        table: { endRowIndex: 6 },
+      },
+    ],
+  });
+}
+
 describe("SheetNamed.DELETE_ALL_DATA_ROWS", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });

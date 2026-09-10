@@ -1,5 +1,6 @@
 import type {
   ColumnName,
+  ColumnValue,
   SheetDataValues,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
@@ -117,6 +118,20 @@ export class SheetNamed<
       }
       return true;
     });
+  }
+  rowByValue<CN extends ColumnName<SN>>(
+    columnName: CN,
+    value: ColumnValue<SN, CN>,
+  ): RowNamed<SN> {
+    const rows = this.rows.filter(
+      (row) => row.valueOrEmpty(columnName) === value,
+    );
+    if (rows.length !== 1) {
+      throw new Error(
+        `Expected 1 row of "${this.sheetName}" to have a "${columnName}" of "${value}", but ${rows.length} did.`,
+      );
+    }
+    return rows[0]!;
   }
   appendRowWithVals(values: Partial<SheetDataValues<SN>>): RowNamed<SN> {
     const { rowIndex } = this.indexed.appendRowDefault();

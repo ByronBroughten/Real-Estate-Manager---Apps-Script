@@ -3,14 +3,10 @@ import type { Endpoints } from "./06_API/Endpoints";
 export const businessEndpoints: Endpoints = {
   occupancy_updateTermsTimeLastRan: {
     action: (ss, { selectedRowIndexes }) => {
-      ss.sheet("occupancyTerms").prepFetchColumnsFull(
-        "occupancyId",
-        "startDate",
-        "endDate",
-      );
+      ss.sheet("occupancyTerms").prepFetchColumnsFull("id", "startDate");
       ss.sheet("occupancy").prepFetchColumnsSpecific(
         selectedRowIndexes,
-        "id",
+        "latestOccupancyTermsId",
         "nextBaseRentChargeMonthly",
         "nextTermsStartDate",
       );
@@ -20,22 +16,16 @@ export const businessEndpoints: Endpoints = {
       for (const rowIndex of selectedRowIndexes) {
         const occRow = occupancy.row(rowIndex);
         const nextStartDate = occRow.value("nextTermsStartDate");
-        const lastActiveTerms = occupancyTerms.rows.filter((otRow) => {
-          const endDate = otRow.valueOrEmpty("endDate");
+        const lastActiveTerm = occupancyTerms.rowByValue(
+          "id",
+          occRow.value("latestOccupancyTermsId"),
+        );
 
-          return otRow.value("occupancyId") === occRow.value("id") &&
-            (endDate === "") &&
-            otRow.value("startDate") < nextStartDate;
-        });
-        if (lastActiveTerms.length < 1) {
-          throw new Error("For now this relies on there being active lease terms.");
+        const lastStartDate = lastActiveTerm.value("startDate");
+        const endDate = lastActiveTerm.value("endDate");
+        if (nextStartDate <= lastStartDate) {
+
         }
-        if (lastActiveTerms.length > 1) {
-          throw new Error("More than 1 term span for this occupancy has no end date. Please resolve down to 1.")
-        }
-        const lastActiveTerm = lastActiveTerms[0]!;
-        const startDate = lastActiveTerm?.value("startDate");
-        if (startDate)
         
         
 

@@ -2669,7 +2669,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextBaseRentChargeMonthly": {
       "columnId": "c:occ:N9SJ-5y",
       "header": "Next base rent charge monthly",
-      "valueName": "string",
+      "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2797,7 +2797,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextCaretakerRentReductionMonthly": {
       "columnId": "c:occ:SNX3ktK",
       "header": "Next caretaker rent reduction monthly",
-      "valueName": "string",
+      "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2805,7 +2805,7 @@ export const columnConfigs = makeColumnConfigs({
     "nextPetFeeMonthly": {
       "columnId": "c:occ:hphoFPB",
       "header": "Next pet fee monthly",
-      "valueName": "string",
+      "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2814,14 +2814,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:occ:taWBpdb",
       "header": "Next gas heating",
       "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextGasHeatingIsCurrent": {
-      "columnId": "c:occ:TOoTTE9",
-      "header": "Next gas heating is current",
-      "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2902,6 +2894,14 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:occ:1acd-35",
       "header": "Next district energy water heating",
       "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextTermsEndDate": {
+      "columnId": "c:occ:CyaqAOx",
+      "header": "Next terms end date",
+      "valueName": "date",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
