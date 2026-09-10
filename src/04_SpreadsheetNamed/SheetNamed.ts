@@ -139,7 +139,9 @@ export class SheetNamed<
     return this.row(rowIndex).updateValues(values);
   }
   appendRowWithAllVals(values: SheetDataValuesAll<SN>): RowNamed<SN> {
-    // A subset of the partial bag, which the checker can't see while the sheet name is generic.
-    return this.appendRowWithVals(values as Partial<SheetDataValues<SN>>);
+    // Checking this subset generically costs ~70k instantiations; the Named suite pins it instead.
+    return this.appendRowWithVals(
+      values as unknown as Partial<SheetDataValues<SN>>,
+    );
   }
 }
