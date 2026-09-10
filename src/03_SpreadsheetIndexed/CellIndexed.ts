@@ -17,8 +17,6 @@ export class CellIndexed<
     return new ColumnIndexed(this.cellIndexedProps);
   }
   get raw(): CellRaw<VnToCvn<VN>> {
-    // TODO: I need to actually convert the valueName to the corresponding CellValueName for the raw cell.
-    // This should also be done in ColumnIndexed.
     return new CellRaw<VnToCvn<VN>>({
       ...this.cellIndexedProps,
       rowIndex: this.rowIndex,

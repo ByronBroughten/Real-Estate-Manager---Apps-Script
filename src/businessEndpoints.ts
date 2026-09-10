@@ -1,4 +1,5 @@
 import type { Endpoints } from "./06_API/Endpoints";
+import { Dat } from "./utils/Dat";
 
 export const businessEndpoints: Endpoints = {
   occupancy_updateTermsTimeLastRan: {
@@ -22,16 +23,32 @@ export const businessEndpoints: Endpoints = {
         );
 
         const lastStartDate = lastActiveTerm.value("startDate");
-        const endDate = lastActiveTerm.value("endDate");
+        const lastEndDate = lastActiveTerm.value("endDate");
         if (nextStartDate <= lastStartDate) {
 
         }
-        
-        
+        if (lastEndDate && lastEndDate < nextStartDate) {
+          throw new Error("Start date next occupancy terms is before end date of latest")
+        };
 
-        // occupancyTerms.appendRowWithVals()
-
-        occRow.value("nextBaseRentChargeMonthly");
+        if (!lastEndDate) {
+          // lastActiveTerm.updateValue()
+          
+        }
+        occupancyTerms.appendRowWithVals({
+          startDate: nextStartDate,
+          endDate: occRow.value("nextTermsEndDate"),
+          rentChargeMonthly: occRow.value("nextBaseRentChargeMonthly"),
+          caretakerRentReductionMonthly: occRow.value("nextCaretakerRentReductionMonthly"),
+          gasWaterHeating: occRow.value("nextGasWaterHeating"),
+          gasHeating: occRow.value("nextGasHeating"),
+          gasCooking: occRow.value("nextGasCooking"),
+          electricWaterHeating: occRow.value("nextElectricWaterHeating"),
+          electricHeating: occRow.value("nextElectricHeating"),
+          electricCooking: occRow.value("nextElectricCooking"),
+          districtEnergyWaterHeating: occRow.value("nextDistrictEnergyWaterHeating"),
+          districtEnergyHeating: occRow.value("nextDistrictEnergyHeating")
+        })
       }
       return "Occupancy terms updated";
     },
