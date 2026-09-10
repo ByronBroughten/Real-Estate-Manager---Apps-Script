@@ -15,7 +15,7 @@ The row of column titles you read across the top of a sheet's data, directly abo
 _Avoid_: title row, top row, row 1
 
 **Action row**:
-The row of checkboxes above the header row. Ticking a checkbox there is what asks the spreadsheet to do something, one endpoint per column.
+The row above the header row where an endpoint is triggered. Most of its cells are empty, and a cell may hold text used as a label. Only the cells wired to an endpoint hold a checkbox, and ticking one of those is what asks the spreadsheet to do something, one endpoint per column.
 _Avoid_: control row, button row, trigger row
 
 **Blank row**:
