@@ -9,7 +9,7 @@ import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 export class ColumnRaw<
   VN extends CellValueName = CellValueName,
-> extends ColumnRawBase<VN> {
+> extends ColumnRawBase {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
@@ -19,13 +19,15 @@ export class ColumnRaw<
   get meta(): ColumnMetaRaw<VN> {
     return new ColumnMetaRaw<VN>(this.columnRawProps);
   }
-  get valueArrOrEmpty(): CellValue<VN>[] {
+  get valueArrOrEmpty(): (CellValue<VN> | "")[] {
     return this.sheet.rowIndexesActive.map((rowIndex) =>
       this.valueOrEmpty(rowIndex),
     );
   }
   get valueArrFilterEmpty(): CellValue<VN>[] {
-    return this.valueArrOrEmpty.filter((value) => value !== "");
+    return this.valueArrOrEmpty.filter(
+      (value): value is CellValue<VN> => value !== "",
+    );
   }
   get topCell(): CellRaw<VN> {
     return this.cell(this.schema.topDataRowIdx);
@@ -37,13 +39,12 @@ export class ColumnRaw<
     return this.sheet.rowIndexesFull;
   }
   cell(rowIndex: number): CellRaw<VN> {
-    return new CellRaw({
+    return new CellRaw<VN>({
       ...this.columnRawProps,
       rowIndex,
-      valueName: this.valueName,
     });
   }
-  valueOrEmpty(rowIndex: number): CellValue<VN> {
+  valueOrEmpty(rowIndex: number): CellValue<VN> | "" {
     return this.cell(rowIndex).valueOrEmpty();
   }
   updateValue(rowIndex: number, newValue: CellValue<VN>): this {

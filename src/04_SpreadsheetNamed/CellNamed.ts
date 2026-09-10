@@ -1,4 +1,5 @@
 import type { GoogleColor } from "../00_base/AppsScriptTypes";
+import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnName,
   ColumnValue,
@@ -12,7 +13,6 @@ import type {
 } from "../01_generatedConfigs/valueSchemas";
 import type { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
-import type { StrictExclude } from "../utils/Arr";
 import { CellNamedBase } from "./ClassBases/CellNamedBase";
 import { ColumnNamed } from "./ColumnNamed";
 
@@ -36,14 +36,14 @@ export class CellNamed<
     return this.indexed.valueOrEmpty();
   }
   // Checked here, not delegated, so the message names the column the caller wrote.
-  value(): StrictExclude<ColumnValue<SN, CN>, ""> {
+  value(): NotEmpty<ColumnValue<SN, CN>> {
     const value = this.valueOrEmpty();
     if (value === "") {
       throw new Error(
         `Column "${this.columnName}" of sheet "${this.sheetName}" is empty in row ${this.rowIndex}.`,
       );
     } else {
-      return value as StrictExclude<ColumnValue<SN, CN>, "">;
+      return value as NotEmpty<ColumnValue<SN, CN>>;
     }
   }
   updateValue(value: ColumnValue<SN, CN>): this {

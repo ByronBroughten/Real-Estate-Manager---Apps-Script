@@ -31,8 +31,8 @@ export class UniformRowRawBase<
   get valueName(): VN {
     return this.schema.uniformValueName(this.uniformRowName) as VN;
   }
-  get activeValueArr(): UniformRowValue<UN>[] {
-    return [...this.rowState.values()] as UniformRowValue<UN>[];
+  get activeValueArr(): (UniformRowValue<UN> | "")[] {
+    return [...this.rowState.values()] as (UniformRowValue<UN> | "")[];
   }
   validateUniformState() {
     this.validateUniformRowIndex();

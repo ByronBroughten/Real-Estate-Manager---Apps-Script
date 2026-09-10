@@ -249,7 +249,7 @@ export const columnConfigs = makeColumnConfigs({
     "hasIdColumn": {
       "columnId": "c:scf:Z3g5nmg",
       "header": "Has ID column",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -257,7 +257,7 @@ export const columnConfigs = makeColumnConfigs({
     "letApiAccess": {
       "columnId": "c:scf:GOJ0ixi",
       "header": "Let api access",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -315,7 +315,7 @@ export const columnConfigs = makeColumnConfigs({
     "isFormula": {
       "columnId": "c:ccf:-99iXjo",
       "header": "Is formula",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -331,7 +331,7 @@ export const columnConfigs = makeColumnConfigs({
     "isActionControl": {
       "columnId": "c:ccf:AUffOV9",
       "header": "Is action control",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -347,7 +347,7 @@ export const columnConfigs = makeColumnConfigs({
     "emptyValueAllowed": {
       "columnId": "c:ccf:volkLl6",
       "header": "Empty value allowed",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -545,7 +545,7 @@ export const columnConfigs = makeColumnConfigs({
     "select": {
       "columnId": "c:aoco:bDLq2t2",
       "header": "Select",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -723,7 +723,7 @@ export const columnConfigs = makeColumnConfigs({
     "select": {
       "columnId": "c:aopo:2ZvPSM2",
       "header": "Select",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -877,7 +877,7 @@ export const columnConfigs = makeColumnConfigs({
     "select": {
       "columnId": "c:ape:6_wLySa",
       "header": "Select",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2629,7 +2629,7 @@ export const columnConfigs = makeColumnConfigs({
     "buildLedgerSelect": {
       "columnId": "c:occ:rkkBN4F",
       "header": "Build ledger, select",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -2653,7 +2653,7 @@ export const columnConfigs = makeColumnConfigs({
     "updateTermsSelect": {
       "columnId": "c:occ:WdyvFsF",
       "header": "Update terms, select",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -3219,7 +3219,7 @@ export const columnConfigs = makeColumnConfigs({
     "reduceFullAmount": {
       "columnId": "c:ocr:opSishH",
       "header": "Reduce full amount",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -3837,7 +3837,7 @@ export const columnConfigs = makeColumnConfigs({
     "updateSubsidyContractEnter": {
       "columnId": "c:sag:DDtS-Mn",
       "header": "Update subsidy contract enter",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -4357,7 +4357,7 @@ export const columnConfigs = makeColumnConfigs({
     "allocateFullAmount": {
       "columnId": "c:spa:qxM6Q5V",
       "header": "Allocate full amount",
-      "valueName": "boolean",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null

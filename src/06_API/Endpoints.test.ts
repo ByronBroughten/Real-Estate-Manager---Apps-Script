@@ -35,7 +35,7 @@ describe("Endpoint's column parameters", () => {
     assertType<
       IsExactly<
         SelectorColumnOf<"occupancy">,
-        ColumnNameFiltered<"occupancy", "boolean", false>
+        ColumnNameFiltered<"occupancy", "checkbox", false>
       >
     >(true);
     assertType<
@@ -52,7 +52,7 @@ describe("Endpoint at the widened sheet name the dispatch boundary uses", () => 
     assertType<
       IsExactly<
         SelectorColumnOf<SheetNameSimple>,
-        ColumnNameFiltered<SheetNameSimple, "boolean", false>
+        ColumnNameFiltered<SheetNameSimple, "checkbox", false>
       >
     >(true);
     assertType<

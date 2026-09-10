@@ -1,12 +1,12 @@
-import type { CellValue } from "../00_base/base";
-import type {
-  Value,
-  ValueName,
-  VnToCvn,
+import type { NotEmpty } from "../00_base/base";
+import {
+  toWireValue,
+  type Value,
+  type ValueName,
+  type VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
 import type { RowCellChange } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
-import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import type { CellChange } from "./ClassTypes/IndexedState";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
@@ -50,15 +50,18 @@ export class ColumnIndexed<
     this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
     return this;
   }
+  // Through the cells, not straight to Raw, so the value name's blank is read here too.
   get valueArrOrEmpty(): Value<VN>[] {
-    return this.raw.valueArrOrEmpty as Value<VN>[];
-  }
-  get valueArrFilterEmpty(): StrictExclude<Value<VN>, "">[] {
-    return this.valueArrOrEmpty.filter(
-      (value): value is StrictExclude<Value<VN>, ""> => value !== "",
+    return this.sheet.rowIndexesActive.map((rowIndex) =>
+      this.valueOrEmpty(rowIndex),
     );
   }
-  get valueArr(): StrictExclude<Value<VN>, "">[] {
+  get valueArrFilterEmpty(): NotEmpty<Value<VN>>[] {
+    return this.valueArrOrEmpty.filter(
+      (value): value is NotEmpty<Value<VN>> => value !== "",
+    );
+  }
+  get valueArr(): NotEmpty<Value<VN>>[] {
     return this.sheet.rowIndexesActive.map((rowIndex) =>
       this.cell(rowIndex).value(),
     );
@@ -69,7 +72,7 @@ export class ColumnIndexed<
   valueOrEmpty(rowIndex: number): Value<VN> {
     return this.cell(rowIndex).valueOrEmpty();
   }
-  value(rowIndex: number): StrictExclude<Value<VN>, ""> {
+  value(rowIndex: number): NotEmpty<Value<VN>> {
     return this.cell(rowIndex).value();
   }
   cell(rowIndex: number): CellIndexed<VN> {
@@ -106,7 +109,7 @@ export class ColumnIndexed<
   }: CellChange<VN>): RowCellChange<VnToCvn<VN>> {
     if (value === undefined) return rest;
     this.schema.validateDataNotFormula();
-    return { ...rest, value: value as CellValue<VnToCvn<VN>> };
+    return { ...rest, value: toWireValue(value) };
   }
   emptyActiveCellsToDefualt(): this {
     this.cellsActive.forEach((cell) => {

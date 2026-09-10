@@ -5,9 +5,10 @@ import { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 
+// `checkbox`, not `boolean`: only a declared checkbox column is never blank.
 export type CheckboxColumnName<SN extends SheetNameSimple> = ColumnNameFiltered<
   SN,
-  "boolean",
+  "checkbox",
   false
 >;
 
@@ -26,7 +27,7 @@ export class CheckboxColumnOperator<
   }
   get rowIndexesChecked(): number[] {
     return this.column.rowIndexesActive.filter(
-      (rowIndex) => this.column.valueOrEmpty(rowIndex) === true,
+      (rowIndex) => this.column.value(rowIndex) === true,
     );
   }
   // The active-cells fill, so an uncheck is safe on a sheet pruned to a selection.

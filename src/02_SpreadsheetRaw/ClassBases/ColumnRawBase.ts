@@ -1,27 +1,18 @@
-import type { CellValueName } from "../../00_base/base";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
-export interface ColumnRawProps<
-  VN extends CellValueName = CellValueName,
-> extends SheetRawProps {
+export interface ColumnRawProps extends SheetRawProps {
   colIndex: number;
-  valueName?: VN;
 }
 
-export class ColumnRawBase<
-  VN extends CellValueName = CellValueName,
-> extends SheetRawBase {
+export class ColumnRawBase extends SheetRawBase {
   readonly colIndex: number;
-  readonly valueName?: VN;
-  constructor({ colIndex, valueName, ...rest }: ColumnRawProps<VN>) {
+  constructor({ colIndex, ...rest }: ColumnRawProps) {
     super(rest);
     this.colIndex = colIndex;
-    this.valueName = valueName;
   }
-  get columnRawProps(): ColumnRawProps<VN> {
+  get columnRawProps(): ColumnRawProps {
     return {
       colIndex: this.colIndex,
-      valueName: this.valueName,
       ...this.sheetRawProps,
     };
   }

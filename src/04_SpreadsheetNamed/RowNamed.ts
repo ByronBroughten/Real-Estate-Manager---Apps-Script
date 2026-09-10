@@ -1,3 +1,4 @@
+import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnName,
   ColumnValue,
@@ -7,7 +8,6 @@ import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { RowIndexed } from "../03_SpreadsheetIndexed/RowIndexed";
-import type { StrictExclude } from "../utils/Arr";
 import { Dat } from "../utils/Dat";
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
@@ -43,7 +43,7 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
   }
   value<CN extends ColumnName<SN>>(
     columnName: CN,
-  ): StrictExclude<ColumnValue<SN, CN>, ""> {
+  ): NotEmpty<ColumnValue<SN, CN>> {
     return this.cell(columnName).value();
   }
   dateValueAfterOrGivenDate<CN extends ColumnName<SN>>(

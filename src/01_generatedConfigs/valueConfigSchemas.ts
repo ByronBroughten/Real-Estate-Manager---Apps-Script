@@ -34,6 +34,7 @@ export function makeSchemasFromValueConfig(): ValueConfigSchemas {
       type: makeDefaultValueConfigValue(name) as ValueConfigValue<typeof name>,
       makeDefault: () => makeDefaultValueConfigValue(name),
       strictValidate: (value: unknown) => validateValueConfigValue(value, name),
+      blankReadsAs: null,
     }) as ValueSchemaBase<ValueConfigValue<typeof name>>;
     return schemas;
   }, {} as ValueConfigSchemas);

@@ -1,7 +1,6 @@
-import type { CellValue } from "../00_base/base";
+import type { CellValue, NotEmpty } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
-import type { StrictExclude } from "../utils/Arr";
 import { CellIndexed } from "./CellIndexed";
 import { RowCommonIndexed } from "./RowCommonIndexed";
 import type { RowIndexedProps } from "./RowIndexedBase";
@@ -24,7 +23,7 @@ export class RowIndexed extends RowCommonIndexed {
   valueOrEmpty(columnId: string): Value {
     return this.cell(columnId).valueOrEmpty();
   }
-  value(columnId: string): StrictExclude<Value, ""> {
+  value(columnId: string): NotEmpty<Value> {
     return this.cell(columnId).value();
   }
   updateValue(columnId: string, value: Value): this {
@@ -52,12 +51,10 @@ export class RowIndexed extends RowCommonIndexed {
   get isQueuedForDelete(): boolean {
     return this.raw.isQueuedForDelete;
   }
-  // Nothing fetched can be called empty, so an unread row counts as holding data.
+  // Raw decides, since a checkbox column's blank reads as false and an unread row isn't empty.
   get isBlank(): boolean {
     if (!this.isActive) return false;
-    return this._nonFormulaCellsActive.every(
-      (cell) => cell.valueOrEmpty() === "",
-    );
+    return this._nonFormulaCellsActive.every((cell) => cell.raw.isEmpty);
   }
   get isReusable(): boolean {
     return this.isBlank && !this.raw.isReserved;

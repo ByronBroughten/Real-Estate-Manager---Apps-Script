@@ -20,15 +20,13 @@ export abstract class RowCommonRaw extends RowRawBase {
       this.cell(colIndex).ensureActive();
     });
   }
-  cell<VN extends CellValueName>(
+  cell<VN extends CellValueName = CellValueName>(
     colIndex: number,
-    valueNameAssert?: VN,
   ): CellRaw<VN> {
     return new CellRaw<VN>({
       ...this.sheetRawProps,
       rowIndex: this.rowIndex,
       colIndex: colIndex,
-      valueName: valueNameAssert,
     });
   }
   firstTableCell(): CellRaw {

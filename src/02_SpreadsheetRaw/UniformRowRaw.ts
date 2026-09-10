@@ -1,31 +1,15 @@
 import type {
-  CellValueName,
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
 } from "../00_base/base";
-import {
-  getCellValTrait,
-  type CellValueTrait,
-} from "../00_base/baseValueSchemas";
-import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { UniformRowRawBase } from "./ClassBases/UniformRowRawBase";
 
 export class UniformRowRaw<
   UN extends UniformRowName = UniformRowName,
-  VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
 > extends UniformRowRawBase<UN> {
-  private trait<VN extends CellValueName, K extends ValueSchemaKey>(
-    valueName: VN,
-    key: K,
-  ): CellValueTrait<VN, K> {
-    return getCellValTrait(valueName, key);
-  }
-  cellTrait<K extends ValueSchemaKey>(key: K): CellValueTrait<VN, K> {
-    return this.trait(this.valueName, key) as CellValueTrait<VN, K>;
-  }
-  valueOrEmpty(colIndex: number): UniformRowValue<UN> {
-    return this.cell(colIndex, this.valueName).valueOrEmpty();
+  valueOrEmpty(colIndex: number): UniformRowValue<UN> | "" {
+    return this.cell<UniformRowValueName<UN>>(colIndex).valueOrEmpty();
   }
   updateValue(colIndex: number, value: UniformRowValue<UN>): this {
     this.cell(colIndex).updateValue(value);

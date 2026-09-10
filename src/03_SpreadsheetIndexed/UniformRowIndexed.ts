@@ -40,10 +40,10 @@ export class UniformRowIndexed<
   get valueName(): UniformRowValueName<UN> {
     return this.schema.uniformValueName(this.uniformRowName);
   }
-  valueOrEmpty(columnId: string): UniformRowValue<UN> {
+  valueOrEmpty(columnId: string): UniformRowValue<UN> | "" {
     return this.raw.valueOrEmpty(this.sheet.column(columnId).colIndex);
   }
-  get activeValueArr(): UniformRowValue<UN>[] {
+  get activeValueArr(): (UniformRowValue<UN> | "")[] {
     return this.raw.activeValueArr;
   }
   updateValue(columnId: string, value: UniformRowValue<UN>): this {

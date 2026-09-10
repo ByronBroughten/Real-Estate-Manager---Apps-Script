@@ -616,8 +616,20 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
       "date",
       "string",
       "string",
-      "boolean",
+      "checkbox",
     ]);
+  });
+
+  it("counts an undeclared column holding a boolean as a guessed boolean, not a checkbox", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Active"],
+      topDataRow: [true],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["boolean"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
   });
 
   it("prefers the declared type over what the top data row samples to", () => {

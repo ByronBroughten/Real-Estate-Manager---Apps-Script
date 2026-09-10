@@ -125,7 +125,7 @@ describe("CheckboxColumnOperator.uncheckActiveCells", () => {
 });
 
 describe("CheckboxColumnOperator, column constraint", () => {
-  it("accepts a non-formula boolean column and rejects anything else", () => {
+  it("accepts a declared non-formula checkbox column and rejects anything else", () => {
     const checkbox = new CheckboxColumnOperator({
       ...SpreadsheetNamed.initSpreadsheetNamedProps(),
       sheetName: "occupancy",
@@ -137,20 +137,28 @@ describe("CheckboxColumnOperator, column constraint", () => {
       // @ts-expect-error a string column is not a checkbox column
       columnName: "updateTermsTimeLastRan",
     });
+    const sampled = new CheckboxColumnOperator({
+      ...SpreadsheetNamed.initSpreadsheetNamedProps(),
+      sheetName: "occupancy",
+      // @ts-expect-error an undeclared column that merely holds a boolean is not one either
+      columnName: "nextGasHeating",
+    });
     const formula = new CheckboxColumnOperator({
       ...SpreadsheetNamed.initSpreadsheetNamedProps(),
       sheetName: "sheetConfig",
-      // @ts-expect-error a formula column can't be written to
+      // @ts-expect-error a formula column can't be written to, and declares nothing anyway
       columnName: "idPrefixIsUniqueOrEmpty",
     });
-    expect(checkbox.schema.valueName).toBe("boolean");
+    expect(checkbox.schema.valueName).toBe("checkbox");
     expect(checkbox.schema.isFormula).toBe(false);
     expect(text.schema.valueName).toBe("string");
+    expect(sampled.schema.valueName).toBe("boolean");
+    expect(sampled.schema.isFormula).toBe(false);
     expect(formula.schema.isFormula).toBe(true);
   });
 
   // A config-describing sheet, so regeneration can't churn the expected union.
-  it("names exactly the non-formula boolean columns of a sheet", () => {
+  it("names exactly the declared non-formula checkbox columns of a sheet", () => {
     assertType<
       IsExactly<
         CheckboxColumnName<"sheetConfig">,

@@ -4,9 +4,6 @@ import type {
   UserEnteredValue,
 } from "../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../00_base/base";
-import type { CellValueTrait } from "../00_base/baseValueSchemas";
-import { getCellValTrait } from "../00_base/baseValueSchemas";
-import type { ValueSchemaKey } from "../00_base/valueSchema";
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { CellRawBase } from "./ClassBases/CellRawBase";
@@ -16,13 +13,7 @@ import { SheetRaw } from "./SheetRaw";
 
 export class CellRaw<
   VN extends CellValueName = CellValueName,
-> extends CellRawBase<VN> {
-  private trait<V extends CellValueName, K extends ValueSchemaKey>(
-    valueName: V,
-    key: K,
-  ): CellValueTrait<V, K> {
-    return getCellValTrait(valueName, key);
-  }
+> extends CellRawBase {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
@@ -76,20 +67,14 @@ export class CellRaw<
       this.setValueState("");
     }
   }
-  valueOrEmpty(): CellValue<VN> {
+  // An untouched cell holds nothing; Raw reports that rather than judging it.
+  valueOrEmpty(): CellValue<VN> | "" {
     if (!this.isActive) {
       throw new Error(
         `Row ${this.rowIndex} does not have a value set for column index ${this.colIndex}.`,
       );
     }
-    const value = this.rowState.get(this.colIndex);
-    const valueName = this.valueName;
-    if (valueName) {
-      const test = this.trait(valueName, "strictValidate")(value);
-      return test as CellValue<VN>;
-    } else {
-      return value as CellValue<VN>;
-    }
+    return this.rowState.get(this.colIndex) as CellValue<VN> | "";
   }
   updateValue(value: CellValue<VN>): this {
     this.validateIndexNotStale();

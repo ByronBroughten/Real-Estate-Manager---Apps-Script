@@ -132,11 +132,19 @@ describe("Named value accessors", () => {
     expect(cell.valueOrEmpty()).toBe("r:occ:row4");
   });
 
-  it("reads an untouched checkbox as empty rather than false", () => {
-    const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
+  // The same read one tier up, which is what proves Indexed and Named agree.
+  it("reads an untouched checkbox as unchecked, with no blank in the type", () => {
+    const sheet = fetchedOccupancySheet();
+    const column = sheet.column("updateTermsSelect");
 
-    expect(row.valueOrEmpty("updateTermsSelect")).toBe("");
-    expect(() => row.value("updateTermsSelect")).toThrowError(/is empty/);
+    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe(false);
+    expect(column.value(BLANK_ROW_INDEX)).toBe(false);
+    expect(column.value(FILLED_ROW_INDEX)).toBe(true);
+    expect(sheet.row(BLANK_ROW_INDEX).value("updateTermsSelect")).toBe(false);
+    assertType<IsExactly<ReturnType<typeof column.value>, boolean>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, boolean>>(
+      true,
+    );
   });
 
   it("throws from ColumnNamed.value and returns empty from valueOrEmpty", () => {
@@ -158,7 +166,7 @@ describe("Named value accessors", () => {
 
     expect(row.valuesOrEmpty("id", "updateTermsSelect")).toEqual({
       id: "",
-      updateTermsSelect: "",
+      updateTermsSelect: false,
     });
   });
 

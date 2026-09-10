@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { CellValue } from "../00_base/base";
 import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
@@ -8,6 +9,7 @@ import {
   type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
+import type { CellRaw } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { ColumnRaw } from "./ColumnRaw";
@@ -1017,5 +1019,22 @@ describe("SpreadsheetRaw navigation", () => {
     expect(sheet.row(4)).toBeInstanceOf(RowRaw);
     expect(sheet.rowCommon(4)).toBeInstanceOf(RowRaw);
     expect(sheet.rowCommon(0)).toBeInstanceOf(UniformRowRaw);
+  });
+});
+
+describe("Raw value types", () => {
+  it("declares the blank the wire can hold, with nothing validating it away", () => {
+    assertType<
+      IsExactly<ReturnType<CellRaw<"boolean">["valueOrEmpty"]>, boolean | "">
+    >(true);
+    assertType<IsExactly<ReturnType<RowRaw["valueOrEmpty"]>, CellValue | "">>(
+      true,
+    );
+    assertType<
+      IsExactly<
+        ReturnType<UniformRowRaw<"action">["valueOrEmpty"]>,
+        boolean | ""
+      >
+    >(true);
   });
 });

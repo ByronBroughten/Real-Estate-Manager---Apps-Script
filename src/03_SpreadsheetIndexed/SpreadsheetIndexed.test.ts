@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
+import type { Value, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   blankSheetConfigRow,
@@ -127,11 +128,22 @@ describe("Indexed value accessors", () => {
     expect(cell.valueOrEmpty()).toBe("r:occ:row4");
   });
 
-  it("reads an untouched checkbox as empty rather than false", () => {
-    const column = fetchedOccupancySheet().column(SELECT_COLUMN_ID);
+  it("reads an untouched checkbox as unchecked through every accessor", () => {
+    const sheet = fetchedOccupancySheet();
+    const column = new ColumnIndexed<"checkbox">({
+      ...sheet.sheetIndexedProps,
+      columnId: SELECT_COLUMN_ID,
+    });
 
-    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe("");
-    expect(() => column.value(BLANK_ROW_INDEX)).toThrowError(/is empty/);
+    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe(false);
+    expect(column.value(BLANK_ROW_INDEX)).toBe(false);
+    expect(column.value(FILLED_ROW_INDEX)).toBe(true);
+    expect(column.valueArrOrEmpty).toEqual([true, false]);
+    expect(column.valueArr).toEqual([true, false]);
+    assertType<IsExactly<ReturnType<typeof column.value>, boolean>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, boolean>>(
+      true,
+    );
   });
 
   it("throws from ColumnIndexed.value and returns empty from valueOrEmpty", () => {
@@ -154,6 +166,19 @@ describe("Indexed value accessors", () => {
     expect(() => column.valueArr).toThrowError(/is empty/);
     expect(column.valueArrOrEmpty).toEqual(["r:occ:row4", ""]);
     expect(column.valueArrFilterEmpty).toEqual(["r:occ:row4"]);
+  });
+
+  it("gives the checkbox value name a type with no blank in it", () => {
+    assertType<IsExactly<Value<"checkbox">, boolean>>(true);
+    assertType<IsExactly<Value<"boolean">, boolean | "">>(true);
+  });
+
+  // What toWireValue asserts rather than proves, proved here.
+  it("sends the checkbox value name down to the boolean wire type", () => {
+    assertType<IsExactly<VnToCvn<"checkbox">, "boolean">>(true);
+    assertType<IsExactly<VnToCvn<"boolean">, "boolean">>(true);
+    assertType<IsExactly<VnToCvn<"id">, "string">>(true);
+    assertType<IsExactly<VnToCvn<"yesOrNo">, "string">>(true);
   });
 });
 
@@ -261,7 +286,8 @@ describe("RowIndexed.clearValues", () => {
     expect(sheet.topRow.isBlank).toBe(true);
   });
 
-  it("leaves an untouched checkbox reading empty rather than false", () => {
+  // The cell is cleared to a blank on the wire; the value name is what reads it back.
+  it("leaves a cleared checkbox reading unchecked rather than blank", () => {
     stubSheetConfigSheet({ 4: filledSheetConfigRow });
 
     const sheet = fetchedSheetConfig();
@@ -271,7 +297,19 @@ describe("RowIndexed.clearValues", () => {
       sheet.topRow.valueOrEmpty(
         columnConfigs.sheetConfig.letApiAccess.columnId,
       ),
-    ).toBe("");
+    ).toBe(false);
+    expect(sheet.topRow.isBlank).toBe(true);
+  });
+
+  // The default and the blank must agree, or an append and a read back disagree.
+  it("defaults a checkbox cell to the same unchecked a blank reads as", () => {
+    stubSheetConfigSheet({ 4: filledSheetConfigRow });
+
+    const columnId = columnConfigs.sheetConfig.letApiAccess.columnId;
+    const cell = fetchedSheetConfig().topRow.cell(columnId);
+    cell.updateToDefault();
+
+    expect(cell.valueOrEmpty()).toBe(false);
   });
 });
 

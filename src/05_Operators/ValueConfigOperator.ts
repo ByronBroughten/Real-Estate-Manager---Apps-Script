@@ -44,10 +44,8 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   newValueConfigs(): ValueConfigsBase {
     return [...this.activeHeaders].reduce(
       (acc, header) => {
-        const valueNameDataCol = this.sheet.raw.columnByHeader(
-          header,
-          "string",
-        );
+        const valueNameDataCol =
+          this.sheet.raw.columnByHeader<"string">(header);
         const valueName = this.schema.titleToName(header);
         acc[valueName] = valueNameDataCol.valueArrFilterEmpty;
         return acc;

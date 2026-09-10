@@ -7,11 +7,10 @@ export class RowRaw extends RowCommonRaw {
     super(props);
     this.validateIsDataRow();
   }
-  valueOrEmpty<VN extends CellValueName>(
+  valueOrEmpty<VN extends CellValueName = CellValueName>(
     colIndex: number,
-    valueNameAssert?: VN,
-  ): CellValue<VN> {
-    return this.cell(colIndex, valueNameAssert).valueOrEmpty();
+  ): CellValue<VN> | "" {
+    return this.cell<VN>(colIndex).valueOrEmpty();
   }
   get activeValueArr(): CellValue[] {
     return [...this.rowState.values()];

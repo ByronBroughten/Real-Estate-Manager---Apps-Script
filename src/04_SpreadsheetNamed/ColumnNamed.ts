@@ -1,3 +1,4 @@
+import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnName,
   ColumnValue,
@@ -6,7 +7,6 @@ import type {
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
-import type { StrictExclude } from "../utils/Arr";
 import { CellNamed } from "./CellNamed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
@@ -37,11 +37,11 @@ export class ColumnNamed<
   get valueArrOrEmpty(): ColumnValue<SN, CN>[] {
     return this.indexed.valueArrOrEmpty;
   }
-  get valueArrFilterEmpty(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+  get valueArrFilterEmpty(): NotEmpty<ColumnValue<SN, CN>>[] {
     return this.indexed.valueArrFilterEmpty;
   }
   // Not delegated to Indexed, so a blank throws with the Named message.
-  get valueArr(): StrictExclude<ColumnValue<SN, CN>, "">[] {
+  get valueArr(): NotEmpty<ColumnValue<SN, CN>>[] {
     return this.rowIndexesActive.map((rowIndex) => this.value(rowIndex));
   }
   hasValue(value: ColumnValue<SN, CN>): boolean {
@@ -50,7 +50,7 @@ export class ColumnNamed<
   valueOrEmpty(rowIndex: number): ColumnValue<SN, CN> {
     return this.cell(rowIndex).valueOrEmpty();
   }
-  value(rowIndex: number): StrictExclude<ColumnValue<SN, CN>, ""> {
+  value(rowIndex: number): NotEmpty<ColumnValue<SN, CN>> {
     return this.cell(rowIndex).value();
   }
   cell(rowIndex: number): CellNamed<SN, CN> {

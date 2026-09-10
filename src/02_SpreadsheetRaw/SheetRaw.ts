@@ -123,20 +123,16 @@ export class SheetRaw extends SheetCommonRaw {
   }
   column<VN extends CellValueName = CellValueName>(
     colIndex: number,
-    valueName?: VN,
   ): ColumnRaw<VN> {
-    return new ColumnRaw({
+    return new ColumnRaw<VN>({
       colIndex,
-      valueName,
       ...this.sheetRawProps,
     });
   }
   columnByHeader<VN extends CellValueName = CellValueName>(
     header: string,
-    valueName?: VN,
   ): ColumnRaw<VN> {
-    const colIndex = this.meta.headerRow.colIndexOfValue(header);
-    return this.column(colIndex, valueName);
+    return this.column<VN>(this.meta.headerRow.colIndexOfValue(header));
   }
   gatherFetchDataColumnsUsingHeaders<HD extends string>(
     ...headers: HD[]

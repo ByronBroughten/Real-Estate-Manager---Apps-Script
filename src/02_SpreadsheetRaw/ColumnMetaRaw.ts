@@ -6,6 +6,7 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../00_base/base";
+import type { BaseValueName } from "../00_base/baseValueSchemas";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
@@ -15,7 +16,7 @@ import { SheetMetaRaw } from "./SheetMetaRaw";
 
 export class ColumnMetaRaw<
   VN extends CellValueName = CellValueName,
-> extends ColumnRawBase<VN> {
+> extends ColumnRawBase {
   get sheet(): SheetMetaRaw {
     return new SheetMetaRaw(this.sheetRawProps);
   }
@@ -49,12 +50,9 @@ export class ColumnMetaRaw<
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
   ): CellRaw<UniformRowValueName<UN>> {
-    const rowIndex = this.schema.uniformRowIndex(rowName);
-    const valueName = this.schema.uniformValueName(rowName);
     return new CellRaw<UniformRowValueName<UN>>({
       ...this.columnRawProps,
-      rowIndex,
-      valueName,
+      rowIndex: this.schema.uniformRowIndex(rowName),
     });
   }
   initUniformCells({
@@ -101,7 +99,7 @@ export class ColumnMetaRaw<
     }
     return null;
   }
-  private _declaredValueName(): PrimitiveValueName | null {
+  private _declaredValueName(): BaseValueName | null {
     const columnType = this.activeDeclaredColumnType;
     if (columnType === undefined) {
       return null;
@@ -131,7 +129,7 @@ export class ColumnMetaRaw<
 }
 
 // DROPDOWN and COLUMN_TYPE_UNSPECIFIED are absent: neither says what a column holds.
-const columnTypeValueNames: Record<string, PrimitiveValueName> = {
+const columnTypeValueNames: Record<string, BaseValueName> = {
   DOUBLE: "number",
   CURRENCY: "number",
   PERCENT: "number",
@@ -144,7 +142,8 @@ const columnTypeValueNames: Record<string, PrimitiveValueName> = {
   FINANCE_CHIP: "string",
   PLACE_CHIP: "string",
   RATINGS_CHIP: "string",
-  BOOLEAN: "boolean",
+  // Declaring the type is what earns the never-blank guarantee; a sampled boolean doesn't.
+  BOOLEAN: "checkbox",
 };
 
 const numberFormatValueNames: Record<string, PrimitiveValueName> = {

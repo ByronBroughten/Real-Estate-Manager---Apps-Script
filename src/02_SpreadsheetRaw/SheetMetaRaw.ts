@@ -38,20 +38,16 @@ export class SheetMetaRaw extends SheetCommonRaw {
   }
   column<VN extends CellValueName = CellValueName>(
     colIndex: number,
-    valueName?: VN,
   ): ColumnMetaRaw<VN> {
-    return new ColumnMetaRaw({
+    return new ColumnMetaRaw<VN>({
       colIndex,
-      valueName,
       ...this.sheetRawProps,
     });
   }
   columnByActiveId<VN extends CellValueName = CellValueName>(
     columnId: string,
-    valueName?: VN,
   ): ColumnMetaRaw<VN> {
-    const colIndex = this.colIdRow.colIndexOfValue(columnId);
-    return this.column(colIndex, valueName);
+    return this.column<VN>(this.colIdRow.colIndexOfValue(columnId));
   }
   isActiveColumnId(columnId: string): boolean {
     return this.colIdRow.hasValue(columnId);
