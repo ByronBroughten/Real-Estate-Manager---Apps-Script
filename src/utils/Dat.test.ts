@@ -235,67 +235,233 @@ describe("Dat month bounds", () => {
   });
 });
 
-describe("Dat prorating", () => {
-  it("charges a whole month when the term covers it", () => {
-    expect(
-      Dat.prorateds({
-        amount: 1000,
-        startDate: ymd(2023, 12, 1),
-        endDate: ymd(2024, 3, 31),
-        month: 1,
-        year: 2024,
-      }),
-    ).toEqual({
-      proratedAmount: 1000,
-      proratedProportion: 1,
-      isProrated: false,
-    });
-  });
-
-  it("counts calendar days when the term starts mid-month", () => {
-    const proportion = Dat.proratedMonthlyProportion({
-      startDate: ymd(2024, 1, 16),
-      endDate: ymd(2024, 6, 30),
-      month: 1,
-      year: 2024,
-    });
-
-    expect(proportion).toBe(16 / 31);
-    expect(
-      Dat.proratedMonthlyAmount({
-        amount: 3100,
-        startDate: ymd(2024, 1, 16),
-        endDate: ymd(2024, 6, 30),
-        month: 1,
-        year: 2024,
-      }),
-    ).toBe((3100 * 16) / 31);
-  });
-
-  it("charges nothing for a month the term does not reach", () => {
-    expect(
-      Dat.prorateds({
-        amount: 1000,
-        startDate: ymd(2024, 1, 1),
-        endDate: ymd(2024, 1, 31),
-        month: 3,
-        year: 2024,
-      }),
-    ).toEqual({
-      proratedAmount: 0,
-      proratedProportion: 0,
-      isProrated: true,
-    });
-  });
-
-  it("counts calendar days when the term ends mid-month", () => {
+describe("Dat.proratedMonthlyProportion", () => {
+  it("gives exactly 1 for a range covering a whole month", () => {
     expect(
       Dat.proratedMonthlyProportion({
-        startDate: ymd(2023, 1, 1),
+        startDate: ymd(2024, 1, 1),
+        endDate: ymd(2024, 1, 31),
+      }),
+    ).toBe(1);
+  });
+
+  it("counts inclusive days over the month length when the range starts mid-month", () => {
+    expect(
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2024, 1, 16),
+        endDate: ymd(2024, 1, 31),
+      }),
+    ).toBe(16 / 31);
+  });
+
+  it("counts inclusive days over the month length when the range ends mid-month", () => {
+    expect(
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2024, 2, 1),
         endDate: ymd(2024, 2, 15),
-        month: 2,
-        year: 2024,
       }),
     ).toBe(15 / 29);
+  });
+
+  it("divides by 29 in a leap February and 28 in a common one", () => {
+    expect(
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2024, 2, 1),
+        endDate: ymd(2024, 2, 10),
+      }),
+    ).toBe(10 / 29);
+    expect(
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2023, 2, 1),
+        endDate: ymd(2023, 2, 10),
+      }),
+    ).toBe(10 / 28);
+  });
+
+  it("counts a single day as one day of the month", () => {
+    expect(
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2024, 4, 7),
+        endDate: ymd(2024, 4, 7),
+      }),
+    ).toBe(1 / 30);
+  });
+
+  it("throws naming both months when the range spans two of them", () => {
+    expect(() =>
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2024, 1, 16),
+        endDate: ymd(2024, 3, 15),
+      }),
+    ).toThrowError(/2024-1.*2024-3/);
+  });
+
+  it("throws when the end is before the start", () => {
+    expect(() =>
+      Dat.proratedMonthlyProportion({
+        startDate: ymd(2024, 1, 16),
+        endDate: ymd(2024, 1, 15),
+      }),
+    ).toThrowError(/after end date/);
+  });
+});
+
+describe("Dat.proratedMonthlyAmount", () => {
+  it("takes the amount first and returns the unrounded product", () => {
+    expect(
+      Dat.proratedMonthlyAmount(3100, {
+        startDate: ymd(2024, 1, 16),
+        endDate: ymd(2024, 1, 31),
+      }),
+    ).toBe(3100 * (16 / 31));
+  });
+
+  it("returns the whole amount for a whole month", () => {
+    expect(
+      Dat.proratedMonthlyAmount(1000, {
+        startDate: ymd(2024, 1, 1),
+        endDate: ymd(2024, 1, 31),
+      }),
+    ).toBe(1000);
+  });
+});
+
+describe("Dat.monthRanges", () => {
+  it("gives one entry for a term inside one month", () => {
+    expect(
+      Dat.monthRanges({
+        startDate: ymd(2024, 1, 5),
+        endDate: ymd(2024, 1, 20),
+      }),
+    ).toEqual([
+      {
+        month: 1,
+        year: 2024,
+        startDate: ymd(2024, 1, 5),
+        endDate: ymd(2024, 1, 20),
+      },
+    ]);
+  });
+
+  it("gives one entry of one day for a one-day term", () => {
+    expect(
+      Dat.monthRanges({
+        startDate: ymd(2024, 1, 5),
+        endDate: ymd(2024, 1, 5),
+      }),
+    ).toEqual([
+      {
+        month: 1,
+        year: 2024,
+        startDate: ymd(2024, 1, 5),
+        endDate: ymd(2024, 1, 5),
+      },
+    ]);
+  });
+
+  it("starts the first entry on the term's start and ends the last on its end", () => {
+    expect(
+      Dat.monthRanges({
+        startDate: ymd(2024, 1, 20),
+        endDate: ymd(2024, 2, 10),
+      }),
+    ).toEqual([
+      {
+        month: 1,
+        year: 2024,
+        startDate: ymd(2024, 1, 20),
+        endDate: ymd(2024, 1, 31),
+      },
+      {
+        month: 2,
+        year: 2024,
+        startDate: ymd(2024, 2, 1),
+        endDate: ymd(2024, 2, 10),
+      },
+    ]);
+  });
+
+  it("makes every interior entry a whole month, prorating to exactly 1", () => {
+    const interiorMonths = Dat.monthRanges({
+      startDate: ymd(2024, 1, 20),
+      endDate: ymd(2024, 3, 10),
+    }).slice(1, -1);
+
+    expect(interiorMonths).toEqual([
+      {
+        month: 2,
+        year: 2024,
+        startDate: ymd(2024, 2, 1),
+        endDate: ymd(2024, 2, 29),
+      },
+    ]);
+    expect(
+      interiorMonths.map((range) => Dat.proratedMonthlyProportion(range)),
+    ).toEqual([1]);
+  });
+
+  it("walks December into January across a year boundary", () => {
+    expect(
+      Dat.monthRanges({
+        startDate: ymd(2024, 12, 15),
+        endDate: ymd(2025, 1, 15),
+      }),
+    ).toEqual([
+      {
+        month: 12,
+        year: 2024,
+        startDate: ymd(2024, 12, 15),
+        endDate: ymd(2024, 12, 31),
+      },
+      {
+        month: 1,
+        year: 2025,
+        startDate: ymd(2025, 1, 1),
+        endDate: ymd(2025, 1, 15),
+      },
+    ]);
+  });
+
+  it("produces the months monthYearsOnAndBetween produces for the same span", () => {
+    const term = { startDate: ymd(2024, 11, 17), endDate: ymd(2025, 4, 3) };
+
+    expect(
+      Dat.monthRanges(term).map(({ month, year }) => ({ month, year })),
+    ).toEqual(
+      Dat.monthYearsOnAndBetween({
+        startMonthYear: Dat.monthYear(term.startDate),
+        endMonthYear: Dat.monthYear(term.endDate),
+      }),
+    );
+  });
+
+  it("throws when the end is before the start", () => {
+    expect(() =>
+      Dat.monthRanges({
+        startDate: ymd(2024, 3, 1),
+        endDate: ymd(2024, 1, 1),
+      }),
+    ).toThrowError(/after end date/);
+  });
+});
+
+describe("Dat.monthRanges through Dat.proratedMonthlyAmount", () => {
+  it("splits 5 January to 15 March 2026 at $1,500 a month into three amounts", () => {
+    const monthRanges = Dat.monthRanges({
+      startDate: ymd(2026, 1, 5),
+      endDate: ymd(2026, 3, 15),
+    });
+
+    expect(
+      monthRanges.map(({ month, year, ...range }) => ({
+        month,
+        year,
+        amount: Dat.proratedMonthlyAmount(1500, range),
+      })),
+    ).toEqual([
+      { month: 1, year: 2026, amount: 1500 * (27 / 31) },
+      { month: 2, year: 2026, amount: 1500 },
+      { month: 3, year: 2026, amount: 1500 * (15 / 31) },
+    ]);
   });
 });

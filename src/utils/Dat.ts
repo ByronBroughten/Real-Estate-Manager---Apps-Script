@@ -30,7 +30,7 @@ export interface FirstAndLastOfMonth {
   lastOfMonth: DateSerial;
 }
 
-interface ProrateProps extends MonthYear, DateRange {}
+export interface MonthRange extends MonthYear, DateRange {}
 
 // A guard and its throwing form, outside the bundle so `this` can't swallow the narrowing.
 function isSerial(value: unknown): value is DateSerial {
@@ -177,28 +177,47 @@ export const Dat = {
       lastOfMonth: this.lastDayOfMonthYear(monthYear),
     };
   },
-  proratedMonthlyProportion(p: ProrateProps): number {
-    const { firstOfMonth, lastOfMonth } = this.firstAndLastDayOfMonthYear(p);
-    const prorateStart = Math.max(validate(p.startDate), firstOfMonth);
-    const prorateEnd = Math.min(validate(p.endDate), lastOfMonth);
-    // A term that misses the month entirely charges nothing, rather than negative days.
-    const daysCharged = Math.max(prorateEnd - prorateStart + 1, 0);
-    return daysCharged / this._daysInMonthYear(p);
+  monthRanges(term: DateRange): MonthRange[] {
+    this._validateDateOrder(term);
+    return this.monthYearsOnAndBetween({
+      startMonthYear: this.monthYear(term.startDate),
+      endMonthYear: this.monthYear(term.endDate),
+      // Annotated because `this` can't infer the callback's param inside the bundle.
+    }).map((monthYear: MonthYear) => {
+      const { firstOfMonth, lastOfMonth } =
+        this.firstAndLastDayOfMonthYear(monthYear);
+      return {
+        ...monthYear,
+        startDate: validate(Math.max(term.startDate, firstOfMonth)),
+        endDate: validate(Math.min(term.endDate, lastOfMonth)),
+      };
+    });
   },
-  proratedMonthlyAmount(p: ProrateProps & { amount: number }): number {
-    return this.proratedMonthlyProportion(p) * p.amount;
+  proratedMonthlyProportion(range: DateRange): number {
+    const monthYear = this._validateSingleMonth(range);
+    return (
+      (range.endDate - range.startDate + 1) / this._daysInMonthYear(monthYear)
+    );
   },
-  prorateds(p: ProrateProps & { amount: number }): {
-    proratedAmount: number;
-    proratedProportion: number;
-    isProrated: boolean;
-  } {
-    const proratedProportion = this.proratedMonthlyProportion(p);
-    return {
-      proratedAmount: proratedProportion * p.amount,
-      proratedProportion,
-      isProrated: proratedProportion < 1,
-    };
+  proratedMonthlyAmount(amount: number, range: DateRange): number {
+    return this.proratedMonthlyProportion(range) * amount;
+  },
+  _validateDateOrder({ startDate, endDate }: DateRange): void {
+    if (validate(startDate) > validate(endDate)) {
+      throw new Error("Start date cannot be after end date.");
+    }
+  },
+  // Hands back the month it proved, so the caller doesn't derive it twice.
+  _validateSingleMonth(range: DateRange): MonthYear {
+    this._validateDateOrder(range);
+    const start = this.monthYear(range.startDate);
+    const end = this.monthYear(range.endDate);
+    if (start.month !== end.month || start.year !== end.year) {
+      throw new Error(
+        `A prorated range must lie in one month, but ${start.year}-${start.month} and ${end.year}-${end.month} differ.`,
+      );
+    }
+    return start;
   },
   _nextMonthYear({ month, year }: MonthYear): MonthYear {
     if (month === 12) {
