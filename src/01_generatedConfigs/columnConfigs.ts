@@ -346,7 +346,7 @@ export const columnConfigs = makeColumnConfigs({
     },
     "emptyValueAllowed": {
       "columnId": "c:ccf:volkLl6",
-      "header": "Empty allowed",
+      "header": "Empty value allowed",
       "valueName": "boolean",
       "isFormula": false,
       "emptyValueAllowed": false,
@@ -2586,9 +2586,9 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "latestOccupancyTermsStartDate": {
+    "latestTermsStartDate": {
       "columnId": "c:occ:ReIW5LE",
-      "header": "Latest occupancy terms start date",
+      "header": "Latest terms start date",
       "valueName": "date",
       "isFormula": true,
       "emptyValueAllowed": false,
@@ -2678,6 +2678,230 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:occ:bE5oQRM",
       "header": "Update terms, run status",
       "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentChargeMonthly": {
+      "columnId": "c:occ:3CYXsaY",
+      "header": "Rent charge monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "caretakerRentReductionMonthly": {
+      "columnId": "c:occ:vjkGuQq",
+      "header": "Caretaker rent reduction monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "petFeeMonthly": {
+      "columnId": "c:occ:eLmmB-c",
+      "header": "Pet fee monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasHeating": {
+      "columnId": "c:occ:9rHq_82",
+      "header": "Gas Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricHeating": {
+      "columnId": "c:occ:5Mi3j1C",
+      "header": "Electric Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasCooking": {
+      "columnId": "c:occ:TQxFE_r",
+      "header": "Gas Cooking",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricCooking": {
+      "columnId": "c:occ:0s6D5Wj",
+      "header": "Electric Cooking",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "otherElectric": {
+      "columnId": "c:occ:7VpBKcv",
+      "header": "Other Electric",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasWaterHeating": {
+      "columnId": "c:occ:YarwO8j",
+      "header": "Gas Water Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricWaterHeating": {
+      "columnId": "c:occ:9J0o9Hw",
+      "header": "Electric Water Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "waterSewer": {
+      "columnId": "c:occ:pjpAsK8",
+      "header": "Water & Sewer",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "trashCollection": {
+      "columnId": "c:occ:zHYOvut",
+      "header": "Trash Collection",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyHeating": {
+      "columnId": "c:occ:leS8Yug",
+      "header": "District Energy Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyWaterHeating": {
+      "columnId": "c:occ:Uqek_yL",
+      "header": "District Energy Water Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextCaretakerRentReductionMonthly": {
+      "columnId": "c:occ:SNX3ktK",
+      "header": "Next caretaker rent reduction monthly",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextPetFeeMonthly": {
+      "columnId": "c:occ:hphoFPB",
+      "header": "Next pet fee monthly",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasHeating": {
+      "columnId": "c:occ:taWBpdb",
+      "header": "Next gas heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasHeatingIsCurrent": {
+      "columnId": "c:occ:TOoTTE9",
+      "header": "Next gas heating is current",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextElectricHeating": {
+      "columnId": "c:occ:yrrKHG-",
+      "header": "Next electric heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasCooking": {
+      "columnId": "c:occ:uQ_6tbq",
+      "header": "Next gas cooking",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextElectricCooking": {
+      "columnId": "c:occ:8qPUO9t",
+      "header": "Next electric cooking",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextOtherElectric": {
+      "columnId": "c:occ:KYfara6",
+      "header": "Next other electric",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasWaterHeating": {
+      "columnId": "c:occ:4BkzVZM",
+      "header": "Next gas water heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextElectricWaterHeating": {
+      "columnId": "c:occ:0p1wSPK",
+      "header": "Next electric water heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextWaterSewer": {
+      "columnId": "c:occ:_zg_IwQ",
+      "header": "Next water & sewer",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextTrashCollection": {
+      "columnId": "c:occ:YncWdva",
+      "header": "Next trash collection",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextDistrictEnergyHeating": {
+      "columnId": "c:occ:L3iBT3R",
+      "header": "Next district energy heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextDistrictEnergyWaterHeating": {
+      "columnId": "c:occ:1acd-35",
+      "header": "Next district energy water heating",
+      "valueName": "boolean",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null

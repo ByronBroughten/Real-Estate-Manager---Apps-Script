@@ -17,10 +17,7 @@ type TimeLastRanOf<SN extends SheetNameSimple> = NonNullable<
 describe("Endpoint's column parameters", () => {
   it("resolve to the entry column's own sheet", () => {
     assertType<
-      IsExactly<
-        SelectorOf<"occupancy">,
-        "buildLedgerSelect" | "updateTermsSelect"
-      >
+      IsExactly<SelectorOf<"sheetConfig">, "hasIdColumn" | "letApiAccess">
     >(true);
     assertType<
       IsExactly<

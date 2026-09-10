@@ -142,11 +142,12 @@ describe("CheckboxColumnOperator, column constraint", () => {
     expect(formula.schema.isFormula).toBe(true);
   });
 
+  // A config-describing sheet, so regeneration can't churn the expected union.
   it("names exactly the non-formula boolean columns of a sheet", () => {
     assertType<
       IsExactly<
-        CheckboxColumnName<"occupancy">,
-        "buildLedgerSelect" | "updateTermsSelect"
+        CheckboxColumnName<"sheetConfig">,
+        "hasIdColumn" | "letApiAccess"
       >
     >(true);
   });

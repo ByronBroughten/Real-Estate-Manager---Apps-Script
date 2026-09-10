@@ -322,8 +322,8 @@ describe("ColumnFullName, absolute column addressing", () => {
   it("filters a column name within a sheet on the same two axes", () => {
     assertType<
       IsExactly<
-        ColumnNameFiltered<"occupancy", "boolean", false>,
-        "buildLedgerSelect" | "updateTermsSelect"
+        ColumnNameFiltered<"sheetConfig", "boolean", false>,
+        "hasIdColumn" | "letApiAccess"
       >
     >(true);
     assertType<
