@@ -3,8 +3,15 @@ import { Dat } from "./utils/Dat";
 
 export const businessEndpoints: Endpoints = {
   occupancy_updateTermsTimeLastRan: {
+    timeLastRan: "updateTermsTimeLastRan",
+    runStatus: "updateTermsRunStatus",
+    selector: { column: "updateTermsSelect" },
     action: (ss, { selectedRowIndexes }) => {
-      ss.sheet("occupancyTerms").prepFetchColumnsFull("id", "startDate");
+      ss.sheet("occupancyTerms").prepFetchColumnsFull(
+        "id",
+        "startDate",
+        "endDate",
+      );
       ss.sheet("occupancy").prepFetchColumnsSpecific(
         selectedRowIndexes,
         "latestOccupancyTermsId",
@@ -23,38 +30,42 @@ export const businessEndpoints: Endpoints = {
         );
 
         const lastStartDate = lastActiveTerm.value("startDate");
-        const lastEndDate = lastActiveTerm.value("endDate");
         if (nextStartDate <= lastStartDate) {
-
+          throw new Error(
+            "Start date next occupancy terms is before start date of latest",
+          );
         }
+        const lastEndDate = lastActiveTerm.value("endDate");
         if (lastEndDate && lastEndDate < nextStartDate) {
-          throw new Error("Start date next occupancy terms is before end date of latest")
-        };
-
-        if (!lastEndDate) {
-          // lastActiveTerm.updateValue("endDate", Dat.addDays(lastStartDate, 365));
-          
+          throw new Error(
+            "Start date next occupancy terms is before end date of latest",
+          );
         }
+        if (!lastEndDate) {
+          lastActiveTerm.updateValue("endDate", Dat.addDays(nextStartDate, -1));
+        }
+
         occupancyTerms.appendRowWithVals({
           startDate: nextStartDate,
           endDate: occRow.value("nextTermsEndDate"),
           rentChargeMonthly: occRow.value("nextBaseRentChargeMonthly"),
-          caretakerRentReductionMonthly: occRow.value("nextCaretakerRentReductionMonthly"),
+          caretakerRentReductionMonthly: occRow.value(
+            "nextCaretakerRentReductionMonthly",
+          ),
           gasWaterHeating: occRow.value("nextGasWaterHeating"),
           gasHeating: occRow.value("nextGasHeating"),
           gasCooking: occRow.value("nextGasCooking"),
           electricWaterHeating: occRow.value("nextElectricWaterHeating"),
           electricHeating: occRow.value("nextElectricHeating"),
           electricCooking: occRow.value("nextElectricCooking"),
-          districtEnergyWaterHeating: occRow.value("nextDistrictEnergyWaterHeating"),
-          districtEnergyHeating: occRow.value("nextDistrictEnergyHeating")
-        })
+          districtEnergyWaterHeating: occRow.value(
+            "nextDistrictEnergyWaterHeating",
+          ),
+          districtEnergyHeating: occRow.value("nextDistrictEnergyHeating"),
+        });
       }
       return "Occupancy terms updated";
     },
-    timeLastRan: "updateTermsTimeLastRan",
-    runStatus: "updateTermsRunStatus",
-    selector: { column: "updateTermsSelect" },
   },
   occupancy_buildLedgerTimeLastRan: {
     action: () => {
