@@ -71,7 +71,7 @@ export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
     );
   }
   // The column's own Empty value allowed tick is the only record of mandatoriness.
-  get blankRequiredColumnNames(): ColumnName<SN>[] {
+  blankRequiredColumnNames(): ColumnName<SN>[] {
     return this.activeCellNames.filter((columnName) => {
       const cell = this.cell(columnName);
       return !cell.schema.emptyValueAllowed && cell.valueOrEmpty() === "";

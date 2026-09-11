@@ -174,16 +174,16 @@ export class EndpointRun<
   ): void {
     const state = runStates[stateName];
     const { timeLastRan, runStatus } = this.endpoint;
-    this._updateFeedbackCells(timeLastRan, {
+    this._fillFeedbackColumn(timeLastRan, {
       value: startTime,
       backgroundColor: state.backgroundColor,
     });
-    this._updateFeedbackCells(runStatus, {
+    this._fillFeedbackColumn(runStatus, {
       value: message ?? state.message,
       backgroundColor: state.backgroundColor,
     });
   }
-  private _updateFeedbackCells(
+  private _fillFeedbackColumn(
     columnName: FeedbackColumnName<SN> | undefined,
     change: CellChange<"string">,
   ): void {

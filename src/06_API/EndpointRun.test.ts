@@ -11,7 +11,7 @@ import {
   stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { EndpointRun } from "./EndpointRun";
-import type { Endpoint } from "./Endpoints";
+import type { ActionReturn, Endpoint } from "./Endpoints";
 
 type BatchUpdateCall =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
@@ -816,6 +816,15 @@ describe("EndpointRun.run, a run report naming rows", () => {
     });
   });
 
+  it("costs the run no round trip of its own", () => {
+    const { batchUpdateCalls, getByDataFilterCalls } = stubOccupancySheet();
+
+    runEndpoint(reportingEndpoint(twoRowsFailed));
+
+    expect(getByDataFilterCalls).toHaveLength(1);
+    expect(batchUpdateCalls).toHaveLength(2);
+  });
+
   it("leaves a deleted row's delete standing when the same run also names it", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
@@ -833,6 +842,30 @@ describe("EndpointRun.run, a run report naming rows", () => {
     ).toHaveLength(1);
     expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
       { rowIndex: 7, value: "Amount is blank", backgroundColor: LIGHT_RED },
+    ]);
+  });
+});
+
+describe("the run report's type", () => {
+  it("refuses a warning or a failure that carries no message", () => {
+    // @ts-expect-error warning has no fallback sentence, so the type demands one
+    const warned: ActionReturn = { runState: "warning" };
+    // @ts-expect-error and failure has none either
+    const failed: ActionReturn = { runState: "failure" };
+
+    expect([warned, failed]).toEqual([
+      { runState: "warning" },
+      { runState: "failure" },
+    ]);
+  });
+
+  it("takes a success with no message, and a message with no state", () => {
+    const bare: ActionReturn = { runState: "success" };
+    const messaged: ActionReturn = { message: "Built 5 ledgers" };
+
+    expect([bare, messaged]).toEqual([
+      { runState: "success" },
+      { message: "Built 5 ledgers" },
     ]);
   });
 });

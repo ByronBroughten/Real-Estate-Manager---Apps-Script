@@ -715,7 +715,7 @@ describe("SheetNamed.appendRowWithAllVals", () => {
 });
 
 const ADD_EXPENSE_GID = sheetConfigs.addPropertyExpense.sheetGid;
-const ape = columnConfigs.addPropertyExpense;
+const expenseColumns = columnConfigs.addPropertyExpense;
 
 // Biller name alone is filled: amount is a required blank, notes an allowed one.
 function stubAddPropertyExpenseSheet() {
@@ -726,10 +726,10 @@ function stubAddPropertyExpenseSheet() {
         title: "Add Property Expense",
         rows: buildGridRows({
           0: [
-            ape.billerName.columnId,
-            ape.amount.columnId,
-            ape.notes.columnId,
-            ape.isUpfrontInvestment.columnId,
+            expenseColumns.billerName.columnId,
+            expenseColumns.amount.columnId,
+            expenseColumns.notes.columnId,
+            expenseColumns.isUpfrontInvestment.columnId,
           ],
           3: ["Biller name", "Amount", "Notes", "Is upfront investment"],
           4: ["Acme Roofing", null, null, null],
@@ -759,22 +759,26 @@ describe("RowNamed.blankRequiredColumnNames", () => {
   });
 
   it("names a blank column whose Empty value allowed box is unticked", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames).toContain("amount");
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).toContain(
+      "amount",
+    );
   });
 
   it("leaves out a blank column whose box is ticked", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames).not.toContain(
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).not.toContain(
       "notes",
     );
   });
 
   it("leaves out an unticked checkbox, whose blank is an answer", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames).not.toContain(
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).not.toContain(
       "isUpfrontInvestment",
     );
   });
 
-  it("leaves out a required column that is filled", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames).toEqual(["amount"]);
+  it("names every blank required column and nothing else", () => {
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).toEqual([
+      "amount",
+    ]);
   });
 });
