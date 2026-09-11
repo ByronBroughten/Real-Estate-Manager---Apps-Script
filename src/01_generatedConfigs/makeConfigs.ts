@@ -8,7 +8,7 @@ export function makeImportLine(
   return `import { ${configMagerName} } from "./makeConfigs";`;
 }
 
-export function makeStructuredConfig<const S extends unknown, T extends S>(
+export function makeStructuredConfig<S extends unknown, const T extends S>(
   _structure: S,
   t: T,
 ): T {
