@@ -255,6 +255,8 @@ ColumnNamedBase<SN, CN>          // the base: columnName, schema, columnNamedPro
 
 **Columns are the one chain whose base does not sit in `ClassBases/`** — `ColumnNamedBase` sits directly in the tier folder and *is* the base. There is no base class for the primary column alone: a class that wants to sit beside `ColumnNamed` rather than under it extends `ColumnNamedBase` and reaches the column through a getter — which is what `GenericSheetOperator` does one level up (`extends SheetNamedBase`), and what the column-scoped endpoint classes in `06_API` already do.
 
+**Rows and cells have base classes too, and an operator may hang off either.** The Named tier's `ClassBases/` holds four: `SpreadsheetNamedBase`, `SheetNamedBase` (adds `sheetName`), `RowNamedBase` (adds `rowIndex`) and `CellNamedBase`. The chains above show sheets and columns because those two needed explaining, not because they are the set an operator may extend. See STYLE.md for choosing between them.
+
 The Raw tier needs **two** sheet-level classes above its concrete pair, and both earn their place:
 
 ```
