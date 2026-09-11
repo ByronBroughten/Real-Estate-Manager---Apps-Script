@@ -124,12 +124,21 @@ function selectiveEndpoint(
   };
 }
 
+function oneRowEndpoint(
+  action: Endpoint<"occupancy">["action"],
+): Endpoint<"occupancy"> {
+  return {
+    ...reportingEndpoint(action),
+    selector: { column: "buildLedgerSelect", requireOneRow: true },
+  };
+}
+
 function retainingEndpoint(
   action: Endpoint<"occupancy">["action"],
 ): Endpoint<"occupancy"> {
   return {
     ...reportingEndpoint(action),
-    selector: { column: "buildLedgerSelect", retainsSelection: true },
+    selector: { column: "buildLedgerSelect", retainSelection: true },
   };
 }
 
@@ -318,7 +327,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
   it("unticks them on an untick run too, leaving the entry checkbox alone", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    runEndpoint({ ...selectiveEndpoint(noOp), runsOnUncheck: true }, false);
+    runEndpoint({ ...selectiveEndpoint(noOp), runOnUncheck: true }, false);
 
     expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([
       { startRowIndex: 4, endRowIndex: 5, value: false },
@@ -525,5 +534,84 @@ describe("EndpointRun.run, an empty selection", () => {
     expect(calls).toEqual([]);
     expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([]);
     expect(batchUpdateCalls).toHaveLength(1);
+  });
+});
+
+describe("EndpointRun.run, a selector that requires one row", () => {
+  it("refuses a selection of two, naming the sheet and how many were ticked", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(oneRowEndpoint(noOp));
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+      'Error: This endpoint runs on one row of "Occupancy" at a time, but 2 are selected.',
+    );
+  });
+
+  it("never reaches the action", () => {
+    stubOccupancySheet();
+    const calls: string[] = [];
+
+    runEndpoint(
+      oneRowEndpoint(() => {
+        calls.push("ran");
+      }),
+    );
+
+    expect(calls).toEqual([]);
+  });
+
+  it("leaves the ticks alone, so the extras can be unticked and the run retried", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(oneRowEndpoint(noOp));
+
+    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([]);
+  });
+
+  it("reports the refusal as a failed run on every ticked row", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(oneRowEndpoint(noOp));
+
+    expect(
+      fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX).slice(2),
+    ).toEqual([
+      {
+        startRowIndex: 4,
+        endRowIndex: 5,
+        value: undefined,
+        backgroundColor: LIGHT_RED,
+      },
+      {
+        startRowIndex: 6,
+        endRowIndex: 7,
+        value: undefined,
+        backgroundColor: LIGHT_RED,
+      },
+    ]);
+  });
+
+  it("hands the action its one row when exactly one is ticked", () => {
+    stubOccupancySheet([6]);
+    let received: number[] = [];
+
+    runEndpoint(
+      oneRowEndpoint((_ss, { selectedRowIndexes }) => {
+        received = selectedRowIndexes;
+      }),
+    );
+
+    expect(received).toEqual([6]);
+  });
+
+  it("succeeds on that one row", () => {
+    const { batchUpdateCalls } = stubOccupancySheet([6]);
+
+    runEndpoint(oneRowEndpoint(noOp));
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+      "Succeeded",
+    );
   });
 });

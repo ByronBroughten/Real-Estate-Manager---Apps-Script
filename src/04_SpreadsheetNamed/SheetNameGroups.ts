@@ -3,7 +3,6 @@ import {
   getSheetTraitByName,
   type SheetConfigs,
 } from "../01_generatedConfigs/sheetConfigsTypes";
-import { Arr } from "../utils/Arr";
 import { type SubType } from "../utils/Obj";
 
 export type SheetNameWithIdColumn = keyof SubType<
@@ -15,11 +14,6 @@ const sheetNameGroups = {
   hasIdColumn: configSheetNames.filter((sheetName) =>
     getSheetTraitByName(sheetName, "hasIdColumn"),
   ) as SheetNameWithIdColumn[],
-  ledgerInputs: Arr.extractStrict(
-    configSheetNames,
-    "occCharge",
-    "occPayAllocation",
-  ),
 } as const;
 
 type SheetNameGroups = typeof sheetNameGroups;

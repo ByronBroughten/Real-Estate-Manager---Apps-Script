@@ -79,6 +79,7 @@ export class EndpointRun<
     this._pruneToSelection(selectedRowIndexes);
     this._onRunSetup();
     try {
+      this._validateOneRowSelected(selectedRowIndexes);
       const message = this.endpoint.action(this.ss, {
         selectedRowIndexes,
         isChecked,
@@ -113,7 +114,7 @@ export class EndpointRun<
   }
   // The entry cell is a button unless the endpoint also runs on unticking.
   private _resetEntryCheckbox(): void {
-    if (this.endpoint.runsOnUncheck) return;
+    if (this.endpoint.runOnUncheck) return;
     this.sheet.meta.column(this.entryColumnName).actionRowToDefault();
   }
   // Unselected rows go inactive, so every later read of active rows is the selection.
@@ -126,10 +127,19 @@ export class EndpointRun<
     this._applyRunState("running", { startTime: Tim.nowTimestamp() });
     this.ss.batchUpdateGSheets();
   }
+  // First inside the `try`, so the refusal reports like any other failure and keeps the ticks.
+  private _validateOneRowSelected(selectedRowIndexes: number[]): void {
+    if (!this.endpoint.selector?.requireOneRow) return;
+    if (selectedRowIndexes.length <= 1) return;
+    throw new Error(
+      // The sheet's own title, not its config name: the operator reads this cell.
+      `This endpoint runs on one row of "${this.sheet.raw.title}" at a time, but ${selectedRowIndexes.length} are selected.`,
+    );
+  }
   // Inside the run's `try`, so an action that throws has its clearing discarded too.
   private _clearSelection(): void {
     const { selector } = this.endpoint;
-    if (!selector || selector.retainsSelection) return;
+    if (!selector || selector.retainSelection) return;
     this._checkboxColumn(selector.column).uncheckActiveCells();
   }
   // The timestamp is written once at setup; a state change only recolours it.

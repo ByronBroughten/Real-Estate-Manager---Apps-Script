@@ -34,7 +34,7 @@ export function makeSheetConfigs<T extends SheetConfigsBase>(
 }
 
 export type ValueConfigsBase = Record<string, readonly string[]>;
-export function makeValueConfigs<T extends ValueConfigsBase>(
+export function makeValueConfigs<const T extends ValueConfigsBase>(
   valueConfigs: T,
 ): T {
   return makeStructuredConfig(

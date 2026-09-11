@@ -65,7 +65,7 @@ function trackingEndpoints(calls: string[]): Endpoints {
       action: (_ss, { isChecked }) => {
         calls.push(`twoWay:${isChecked}`);
       },
-      runsOnUncheck: true,
+      runOnUncheck: true,
     },
     occupancy_buildLedgerTimeLastRan: {
       action: () => {
@@ -158,7 +158,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     expect(calls).toEqual([]);
   });
 
-  it("runs an entry that declares runsOnUncheck on both tick and untick", () => {
+  it("runs an entry that declares runOnUncheck on both tick and untick", () => {
     const calls: string[] = [];
     stubOccupancySheet();
     const api = Api.init(trackingEndpoints(calls));

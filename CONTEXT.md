@@ -37,7 +37,7 @@ An endpoint whose entry checkbox is the input rather than a button — it runs o
 _Avoid_: toggle, switch
 
 **Selector**:
-A column of checkboxes an endpoint may declare, naming the rows one run is about. Ticking rows picks them out; the run then acts on those rows and reports into those rows, and leaves every other row alone. A successful run **consumes** its selection — the ticks clear themselves, the way the run button does, so an empty selector column means nothing is selected and the next run costs what it looks like it costs. A run that fails leaves the ticks alone: they are the operator's input, and the same selection can be retried once the problem is fixed. An endpoint whose selector marks a standing set of rows rather than a one-off pick declares that it **retains its selection**, and its ticks survive a successful run untouched.
+A column of checkboxes an endpoint may declare, naming the rows one run is about. Ticking rows picks them out; the run then acts on those rows and reports into those rows, and leaves every other row alone. A successful run **consumes** its selection — the ticks clear themselves, the way the run button does, so an empty selector column means nothing is selected and the next run costs what it looks like it costs. A run that fails leaves the ticks alone: they are the operator's input, and the same selection can be retried once the problem is fixed. An endpoint whose selector marks a standing set of rows rather than a one-off pick declares that it **retains its selection**, and its ticks survive a successful run untouched. An endpoint whose work is about one row and could not be about two — a ledger is one page about one tenancy — declares that it **requires one row**, and a run with more than one ticked fails before it starts, saying how many you ticked, leaving every tick where it is so you can untick the extras and go again.
 _Avoid_: toggle, filter
 
 **Feedback column**:
@@ -83,3 +83,29 @@ _Avoid_: unset, automatic, missing type
 **Unit standard name**:
 A unit described by building type and bedroom count, as "Duplex-2BR". It is for comparing rents between units, not for addressing one. The unit's **name** is the address, as "730 Western, Unit 2".
 _Avoid_: standard name, unit type
+
+### The occupancy ledger
+
+**Occupancy ledger**:
+The one-page statement you hand a tenant, showing every charge they were billed, every payment that settled one, and what they still owe. It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it, and its lines carry no IDs.
+_Avoid_: statement, invoice, tenant report
+
+**Letterhead**:
+The block above the ledger's header row naming the tenant, the address and the day the page was built. Its cells are formulas, and they read the occupancy and the date that building the ledger writes into the Variable sheet. Building a ledger is what makes the letterhead say the right household.
+_Avoid_: header, title block
+
+**Issuer**:
+Whose money or decision a ledger line came from. A charge or a forgiveness says "Property management"; a payment the household made says "Household" plainly rather than repeating the tenant's name down the page; a payment made on the household's behalf names the payer; and money taken from the deposit says "Security deposit", because a draw is real money settling a bill rather than the landlord paying it.
+_Avoid_: source, from, party
+
+**Forgiveness**:
+A charge cancelled because it should never have stood. It appears on the ledger as a negative charge, so the page shows the charge going away rather than being paid.
+_Avoid_: credit, write-off, waiver
+
+**Security deposit draw**:
+Money taken from the deposit already held to settle a charge. It appears on the ledger as a payment against the charge it settled, named after that charge, and it lowers the deposit balance.
+_Avoid_: deposit deduction, withholding
+
+**Security deposit balance**:
+How much of the tenant's deposit is still being held, shown only on the lines where it changed. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A ledger starts it at zero, because the build covers the tenancy from its beginning.
+_Avoid_: deposit held, escrow

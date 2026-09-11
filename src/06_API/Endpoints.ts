@@ -30,8 +30,12 @@ export interface Endpoint<SN extends SheetNameSimple> {
   timeLastRan?: FeedbackColumnName<SN>;
   runStatus?: FeedbackColumnName<SN>;
   // Inline, not a named type: a named one compares by variance, which the widened dispatch boundary rejects.
-  selector?: { column: CheckboxColumnName<SN>; retainsSelection?: boolean };
-  runsOnUncheck?: boolean;
+  selector?: {
+    column: CheckboxColumnName<SN>;
+    retainSelection?: boolean;
+    requireOneRow?: boolean;
+  };
+  runOnUncheck?: boolean;
 }
 
 // The entry as the dispatch hands it over — a structural copy, for the same reason.

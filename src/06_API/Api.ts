@@ -72,7 +72,7 @@ export class Api extends SpreadsheetNamedBase {
     if (!endpoint) {
       return;
     }
-    if (!isChecked && !endpoint.runsOnUncheck) {
+    if (!isChecked && !endpoint.runOnUncheck) {
       return;
     }
     // The full name is only known at runtime, so the run widens to every sheet.
