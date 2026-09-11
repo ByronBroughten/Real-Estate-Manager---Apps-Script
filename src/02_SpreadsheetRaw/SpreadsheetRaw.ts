@@ -5,6 +5,7 @@ import type {
 import { Val } from "../utils/Val";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
+  RawSheetState,
   RowChangesToSave,
   SheetChangesToSave,
 } from "./ClassTypes/RawState";
@@ -14,7 +15,6 @@ import { SheetRaw } from "./SheetRaw";
 
 interface SheetIdentity {
   sheetGid: number;
-  title: string | null;
 }
 interface MisplacedTable extends SheetIdentity {
   startRowIndex: number;
@@ -97,7 +97,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         return;
       }
       if (state.activeTable === null) {
-        absentTables.push({ sheetGid, title: state.title });
+        absentTables.push({ sheetGid });
         return;
       }
       const sheet = this.sheet(sheetGid);
@@ -110,10 +110,24 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       state.colIndexesToFinalize.forEach((colIndex) => {
         sheet.column(colIndex).ensureFullActiveDataCells();
       });
+      this._ensureFetchedActiveFacts(sheet, state);
       state.rowIndexesToFinalize.clear();
       state.colIndexesToFinalize.clear();
     });
     this._reportTablePlacement(misplacedTables, absentTables);
+  }
+  // After the backfills above, so a blank fact is sampled rather than built.
+  private _ensureFetchedActiveFacts(
+    sheet: SheetRaw,
+    state: RawSheetState,
+  ): void {
+    if (state.rowIndexesToFinalize.has(this.schema.topDataRowIdx)) {
+      sheet.meta.ensureTableColumnsActiveFacts();
+    }
+    state.colIndexesToFinalize.forEach((colIndex) => {
+      if (!sheet.isTableColIndex(colIndex)) return;
+      sheet.meta.column(colIndex).ensureActiveFacts();
+    });
   }
   // A sheet outside the config never promised to follow the layout.
   private _misplacedTable(sheetGid: number): MisplacedTable | null {
@@ -126,12 +140,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (this.schema.isTableStart(startRowIndex, startColumnIndex)) {
       return null;
     }
-    return {
-      sheetGid,
-      title: state.title,
-      startRowIndex,
-      startColumnIndex,
-    };
+    return { sheetGid, startRowIndex, startColumnIndex };
   }
   private _reportTablePlacement(
     misplacedTables: MisplacedTable[],
@@ -179,8 +188,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       .join(", ");
     return `${absentTables.length} sheet(s) need a full row/column fetch but have no Table object — apply Insert > Table over their data range in Sheets: ${names}`;
   }
-  private _sheetLabel({ sheetGid, title }: SheetIdentity): string {
-    return `"${title ?? "(untitled)"}" (gid ${sheetGid})`;
+  private _sheetLabel({ sheetGid }: SheetIdentity): string {
+    return this.sheet(sheetGid).sheetLabel;
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
   // effectiveFormat) and columnValidationValues/columnDeclaredTypes (from

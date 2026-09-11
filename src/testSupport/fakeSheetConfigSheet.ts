@@ -56,8 +56,8 @@ export const blankSheetConfigRow: FakeCell[] = [
 /**
  * Stubs the Sheets service with just this sheet, its data rows keyed by
  * literal sheet row index (4 is the top data row). Pass `rowsWithNoGridData`
- * to make a row come back absent, which is what a row nothing ever fetched
- * looks like.
+ * to make a row come back with no cell data, which is what a row nothing was
+ * ever written to looks like.
  */
 export function stubSheetConfigSheet(
   dataRows: Record<number, FakeCell[]>,

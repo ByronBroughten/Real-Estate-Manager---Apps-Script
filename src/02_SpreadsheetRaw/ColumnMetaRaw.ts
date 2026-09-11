@@ -36,10 +36,15 @@ export class ColumnMetaRaw<
     return this._activeFacts.topValue;
   }
   private get _activeFacts(): RawCellFacts {
-    return Val.assert(
-      this.columnCellFacts.get(this.colIndex),
-      `active facts for sheetGid ${this.sheetGid} col ${this.colIndex}`,
-    );
+    const facts = this.columnCellFacts.get(this.colIndex);
+    if (facts === undefined) {
+      throw new Error(
+        `No active facts for column index ${this.colIndex} of sheet ${this.sheetLabel}: ` +
+          `nothing fetched its top data row in full. A column that was fetched and is ` +
+          `simply empty reports blank facts instead.`,
+      );
+    }
+    return facts;
   }
   get valueValidationStrings(): string[] {
     return this.activeTable.columnValidationValues.get(this.colIndex) ?? [];
@@ -80,6 +85,12 @@ export class ColumnMetaRaw<
       numberFormatType: cellValue?.effectiveFormat?.numberFormat?.type,
       topValue: this.primary.topCell.valueOrEmpty(), // sampled now; the row can be pruned later
     });
+  }
+  // Gap-filling only, so a fact the payload described always wins.
+  ensureActiveFacts(): void {
+    if (this.columnCellFacts.has(this.colIndex)) return;
+    if (!this.primary.topCell.isActive) return; // no top data row to sample
+    this.integrateActiveFacts(undefined);
   }
   activeValueTitle(): string {
     return this.activeDeclaredValueTitle() ?? this._actualPrimitiveValueName();

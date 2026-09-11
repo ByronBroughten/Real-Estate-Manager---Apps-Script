@@ -50,6 +50,12 @@ export interface FakeSheetProperties {
   table?: {
     endRowIndex: number;
     /**
+     * The exclusive bound of the Table's columns, defaulting to the widest
+     * row in `rows`. Set it narrower to model the real payload's habit of
+     * describing every grid column while the Table covers only some of them.
+     */
+    endColumnIndex?: number;
+    /**
      * Where the Table's range starts, defaulting to the layout every sheet
      * is required to follow (`headerRowIndexBase0`/`startTableColIndexBase0`).
      * Override either one only to build a deliberately misplaced Table, which
@@ -76,15 +82,22 @@ export interface FakeSheetProperties {
     columnDeclaredTypes?: Record<number, string>;
   };
   /**
-   * Row indices that come back with no grid data at all, simulating
-   * Google's real omission of a row that's never had any value or
-   * formatting set — as opposed to a row present in `rows` with empty
-   * cells, which (unlike a truly absent row) IS reported and so marks
-   * those cells active with an empty value. Use this to reproduce bugs
-   * where code assumes a row it explicitly fetched came back in the
-   * response.
+   * Row indices that come back as a grid-data block describing every column
+   * but carrying no `rowData` at all — the real API's shape, measured
+   * against the live spreadsheet, for a row inside the grid whose every
+   * cell lacks a value, a formula and an explicit number format. Contrast
+   * a row present in `rows` with empty cells, which IS reported and so
+   * marks those cells active with an empty value. Use this to reproduce
+   * bugs where code assumes a row it explicitly fetched came back with
+   * cells in the response.
    */
   rowsWithNoGridData?: readonly number[];
+  /**
+   * Row indices that come back with no grid-data block at all, splitting
+   * the grid into separate blocks — what the API really does for a row
+   * past the populated grid, as opposed to a blank row inside it.
+   */
+  rowsWithNoGridBlock?: readonly number[];
   /**
    * Makes this sheet's Table come back from `Spreadsheets.get` but not from
    * `getByDataFilter`, reproducing the real API's rule that a sheet's
@@ -158,28 +171,31 @@ function fakeValueToExtendedValue(
   return { boolValue: value };
 }
 
-function fakeRowsToGoogleSheetData(
-  rows: FakeSheetProperties["rows"],
-  rowsWithNoGridData: readonly number[] = [],
-): GoogleAppsScript.Sheets.Schema.Sheet["data"] | undefined {
+function fakeRowsToGoogleSheetData({
+  rows,
+  rowsWithNoGridData = [],
+  rowsWithNoGridBlock = [],
+}: FakeSheetProperties):
+  GoogleAppsScript.Sheets.Schema.Sheet["data"] | undefined {
   if (!rows) {
     return undefined;
   }
   const columnCount = Math.max(0, ...rows.map((row) => row.length));
   const noGridDataRows = new Set(rowsWithNoGridData);
+  const noGridBlockRows = new Set(rowsWithNoGridBlock);
 
-  // Real rowData blocks run contiguously from a real startRow — a wholly
-  // absent row (no value or formatting ever set) splits the grid into
-  // separate blocks rather than appearing as a padded-empty entry.
+  // Real rowData blocks run contiguously from a real startRow, so either
+  // kind of absent row ends the block it was in.
   const blocks: NonNullable<GoogleAppsScript.Sheets.Schema.Sheet["data"]> = [];
   let currentBlockRows: GoogleAppsScript.Sheets.Schema.RowData[] = [];
   let currentBlockStart: number | null = null;
+  const columnMetadata = () => Array.from({ length: columnCount }, () => ({}));
   const flushCurrentBlock = () => {
     if (currentBlockStart !== null) {
       blocks.push({
         startColumn: 0,
         startRow: currentBlockStart,
-        columnMetadata: Array.from({ length: columnCount }, () => ({})),
+        columnMetadata: columnMetadata(),
         rowData: currentBlockRows,
       });
     }
@@ -187,8 +203,18 @@ function fakeRowsToGoogleSheetData(
     currentBlockStart = null;
   };
   rows.forEach((row, rowIndex) => {
+    if (noGridBlockRows.has(rowIndex)) {
+      flushCurrentBlock();
+      return;
+    }
     if (noGridDataRows.has(rowIndex)) {
       flushCurrentBlock();
+      // Every grid column described, no rowData — the measured real shape.
+      blocks.push({
+        startColumn: 0,
+        startRow: rowIndex,
+        columnMetadata: columnMetadata(),
+      });
       return;
     }
     currentBlockStart ??= rowIndex;
@@ -258,10 +284,9 @@ function fakeSheetTables(
         endRowIndex: table.endRowIndex,
         startColumnIndex:
           table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),
-        endColumnIndex: Math.max(
-          0,
-          ...(sheet.rows ?? []).map((row) => row.length),
-        ),
+        endColumnIndex:
+          table.endColumnIndex ??
+          Math.max(0, ...(sheet.rows ?? []).map((row) => row.length)),
       },
       columnProperties: fakeTableColumnProperties(table),
     },
@@ -296,7 +321,7 @@ export function stubSheetsService(
     return {
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
-        data: fakeRowsToGoogleSheetData(s.rows, s.rowsWithNoGridData),
+        data: fakeRowsToGoogleSheetData(s),
         tables: fakeSheetTables(s, isFilteredFetch),
       })),
     };

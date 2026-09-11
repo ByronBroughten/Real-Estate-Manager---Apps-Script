@@ -34,6 +34,14 @@ export abstract class SheetCommonRaw extends SheetRawBase {
       });
     }
   }
+  // The table's own range, not the layout's: no table means no table columns.
+  isTableColIndex(colIndex: number): boolean {
+    const table = this.sheetState.activeTable;
+    if (table === null) return false;
+    return (
+      colIndex >= table.startColumnIndex && colIndex < table.endColumnIndex
+    );
+  }
   gatherFetchRange(gr: SheetGridRangeProps): this {
     this.rawState.fetcherGridRanges.push({
       sheetId: this.sheetGid,

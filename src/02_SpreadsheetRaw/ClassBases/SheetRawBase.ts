@@ -124,6 +124,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     return activeTable;
   }
+  get sheetLabel(): string {
+    return `"${this.sheetState.title ?? "(untitled)"}" (gid ${this.sheetGid})`;
+  }
   get rowStates(): RawSheetState["rowStates"] {
     return this.sheetState.rowStates;
   }

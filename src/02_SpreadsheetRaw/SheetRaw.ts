@@ -113,6 +113,12 @@ export class SheetRaw extends SheetCommonRaw {
       ...this.sheetRawProps,
     });
   }
+  // Every guess this sheet's columns made from a sample had none behind it.
+  topDataRowIsBlank(): boolean {
+    return this.fullTableColIndexes.every(
+      (colIndex) => this.topRow.valueOrEmpty(colIndex) === "",
+    );
+  }
   // Either kind of row, for callers that only touch what the two share.
   rowCommon(rowIndex: number): RowCommonRaw {
     if (this.schema.isUniformRowIndex(rowIndex)) {
@@ -179,7 +185,10 @@ export class SheetRaw extends SheetCommonRaw {
           row.cell(colIndex).integrateGState(cellData);
           // The column's live isFormula/numberFormatType facts are
           // sampled from this one representative row, not tracked per row.
-          if (rowIndex === this.schema.topDataRowIdx) {
+          if (
+            rowIndex === this.schema.topDataRowIdx &&
+            this.isTableColIndex(colIndex)
+          ) {
             this.meta.column(colIndex).integrateActiveFacts(cellData);
           }
         });

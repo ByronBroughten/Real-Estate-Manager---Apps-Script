@@ -75,6 +75,12 @@ export class SheetMetaRaw extends SheetCommonRaw {
     });
     return columnIndex;
   }
+  // Only table columns: a fact is always reached through a column ID.
+  ensureTableColumnsActiveFacts(): void {
+    this.fullTableColIndexes.forEach((colIndex) => {
+      this.column(colIndex).ensureActiveFacts();
+    });
+  }
   gatherFetchColumnIds(): this {
     this.colIdRow.gatherFetchFull();
     return this;

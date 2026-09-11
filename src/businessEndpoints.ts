@@ -93,9 +93,7 @@ export const businessEndpoints: Endpoints = {
   },
   addPropertyExpense_runStatus: {
     runStatus: "addPropertyExpenseRunStatus",
-    action: (ss) => {
-      
-    }
+    action: (ss) => {},
   },
   occupancy_buildLedgerTimeLastRan: {
     timeLastRan: "buildLedgerTimeLastRan",

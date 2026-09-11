@@ -38,6 +38,14 @@ A state model that can't express a real condition doesn't omit it — it *misrep
 
 *Instances:* a run killed mid-flight — an Apps Script timeout, a quota kill — runs no `finally`. Under the old boolean, it displayed the *previous* run's `TRUE`: a state with no representation became a confident lie. The colour model leaves that run yellow, which says "started, never reported back" (#4, `ac7a795`). Every cell's value type includes `""`, because an untouched cell is empty rather than defaulted — a `boolean` column reads `boolean | ""`, and code that branches on it has to say what empty means instead of assuming the base type (README.md, "Naming vocabulary").
 
+### The payload is not the grid
+
+A response describes what the remote system chose to send, not what exists. Code that treats an absence in the payload as an absence in the world misreports the empty case as the impossible one, and the failure surfaces far from the assumption that caused it. Where a wire format elides the empty case, repair it once at the boundary rather than teaching every consumer to tell the two apart.
+
+*Instances:* Sheets returns a row inside the table with no `rowData` when no cell in it holds a value, a formula or a number format, so a sheet left in its designed blank-row state crashed the config sync with a message naming a gid and a column index — the second debugging session that gap has cost. The fix put the missing facts inside the finalize pass that already backfills omitted cells, so "fetched and empty" and "never fetched" stay distinguishable in exactly one place and nowhere else (#17). The same pass already existed because the API omits empty *cells* from rows it does return; the row-shaped and column-shaped versions of that omission are the same fact one axis over.
+
+*Corollary:* the repair has to be narrowed by something authoritative, or it replaces one wrong answer with another. The payload describes every grid column, which on the reported sheet was 23 against a 12-column table, so the table's own range is what says which columns a fact may be about.
+
 ### Funnel the expensive thing through one place
 
 Design so the costly operation has exactly one chokepoint. Then instrumenting it measures everything, optimizing it optimizes everything, and a new call site can't quietly add cost behind your back.

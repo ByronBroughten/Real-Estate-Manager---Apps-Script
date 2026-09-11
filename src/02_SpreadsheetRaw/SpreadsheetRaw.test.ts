@@ -6,6 +6,7 @@ import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeCell,
   type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
@@ -252,6 +253,135 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
     expect(getByDataFilterCalls).toEqual([]);
     expect(raw.activeSheetGids).toEqual([]);
+  });
+});
+
+describe("ColumnMetaRaw active facts", () => {
+  const TABLE_END_ROW = TOP_DATA_ROW_INDEX + 1;
+
+  function stubSheetWithTopDataRow(
+    topDataRow: FakeCell[],
+    absence?: "rowsWithNoGridData" | "rowsWithNoGridBlock",
+  ) {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({
+            0: ["c:prp:aaa", "c:prp:bbb"],
+            [HEADER_ROW_INDEX]: ["Purchase Price", "Notes"],
+            [TOP_DATA_ROW_INDEX]: topDataRow,
+          }),
+          ...(absence ? { [absence]: [TOP_DATA_ROW_INDEX] } : {}),
+          table: { endRowIndex: TABLE_END_ROW },
+        },
+      ],
+    });
+  }
+
+  function fetchedPropertyColumnMeta(colIndex: number): ColumnMetaRaw {
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).topRow.gatherFetchFull();
+    raw.fetchAllGathered(true);
+    return raw.sheetMeta(PROPERTY_GID).column(colIndex);
+  }
+
+  function expectBlankFacts(column: ColumnMetaRaw): void {
+    expect(column.activeIsFormula).toBe(false);
+    expect(column.activeNumberFormatType).toBeUndefined();
+    expect(column.activeTopValue).toBe("");
+  }
+
+  it("reports blank facts for a top data row returned without any cell data", () => {
+    stubSheetWithTopDataRow([], "rowsWithNoGridData");
+
+    expectBlankFacts(fetchedPropertyColumnMeta(0));
+  });
+
+  it("reports blank facts for a top data row returned as no grid block at all", () => {
+    stubSheetWithTopDataRow([], "rowsWithNoGridBlock");
+
+    expectBlankFacts(fetchedPropertyColumnMeta(0));
+  });
+
+  it("reports the same facts an empty cell inside a returned row produces", () => {
+    stubSheetWithTopDataRow([null, "a note"]);
+
+    expectBlankFacts(fetchedPropertyColumnMeta(0));
+  });
+
+  it("keeps the facts the payload supplied rather than seeding over them", () => {
+    stubSheetWithTopDataRow([
+      { value: 42, isFormula: true, numberFormatType: "CURRENCY" },
+    ]);
+
+    const column = fetchedPropertyColumnMeta(0);
+
+    expect(column.activeIsFormula).toBe(true);
+    expect(column.activeNumberFormatType).toBe("CURRENCY");
+    expect(column.activeTopValue).toBe(42);
+  });
+
+  it("reports blank facts for a full-column fetch of a wholly blank column", () => {
+    stubSheetWithTopDataRow([], "rowsWithNoGridData");
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.fetchAllGathered();
+    raw.sheet(PROPERTY_GID).column(1).gatherFetchFull();
+    raw.fetchAllGathered(true);
+
+    expectBlankFacts(raw.sheetMeta(PROPERTY_GID).column(1));
+  });
+
+  it("throws naming the sheet and the missing fetch for a column nothing fetched", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ [HEADER_ROW_INDEX]: ["Purchase Price"] }),
+          table: { endRowIndex: TABLE_END_ROW },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.fetchAllGathered();
+
+    const message = thrownMessage(
+      () => raw.sheetMeta(PROPERTY_GID).column(0).activeIsFormula,
+    );
+    expect(message).toContain(`"Property" (gid ${PROPERTY_GID})`);
+    expect(message).toMatch(/top data row/);
+  });
+
+  it("writes no facts for a grid column outside the table", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({
+            0: ["c:prp:aaa"],
+            [HEADER_ROW_INDEX]: ["Purchase Price"],
+            [TOP_DATA_ROW_INDEX]: [100000, "outside the table"],
+          }),
+          table: { endRowIndex: TABLE_END_ROW, endColumnIndex: 1 },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).topRow.gatherFetchFull();
+    raw.fetchAllGathered(true);
+
+    expect(raw.sheetMeta(PROPERTY_GID).column(0).activeTopValue).toBe(100000);
+    expect(
+      () => raw.sheetMeta(PROPERTY_GID).column(1).activeTopValue,
+    ).toThrowError(/No active facts/);
   });
 });
 

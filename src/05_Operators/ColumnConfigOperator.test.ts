@@ -9,6 +9,7 @@ import {
   stubSheetsService,
   type FakeCell,
 } from "../testSupport/fakeSheetsService";
+import type { StrictOmit } from "../utils/Obj";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 
 // Real committed columnId strings, so fixtures stay honest to what the
@@ -567,75 +568,88 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
   });
 });
 
+interface ColumnsUnderTest {
+  headers: string[];
+  topDataRow?: FakeCell[];
+  topDataRowAbsence?: "rowsWithNoGridData" | "rowsWithNoGridBlock";
+  columnDeclaredTypes?: Record<number, string>;
+  columnValidationValues?: Record<number, string[]>;
+}
+
+function syncColumnsUnderTest({
+  headers,
+  topDataRow = [],
+  topDataRowAbsence,
+  columnDeclaredTypes,
+  columnValidationValues,
+}: ColumnsUnderTest): ColumnConfigOperator {
+  const columnIds = headers.map((_, index) => `c:test:col${index}`);
+  const columnConfigRows: Record<number, FakeCell[]> = {
+    0: columnConfigColumnIdRow,
+  };
+  columnIds.forEach((columnId, index) => {
+    columnConfigRows[4 + index] = [
+      TEST_SHEET_GID,
+      columnId,
+      "Test",
+      "",
+      false,
+      "",
+    ];
+  });
+  stubSheetsService({
+    sheets: [
+      {
+        sheetId: SHEET_CONFIG_GID,
+        title: "Sheet Config",
+        rows: buildGridRows({
+          0: sheetConfigColumnIdRow,
+          4: [TEST_SHEET_GID, "Test", true, true, "test"],
+        }),
+        table: { endRowIndex: 5 },
+      },
+      {
+        sheetId: COLUMN_CONFIG_GID,
+        title: "Column Config",
+        rows: buildGridRows(columnConfigRows),
+        table: { endRowIndex: 4 + columnIds.length },
+      },
+      {
+        sheetId: TEST_SHEET_GID,
+        title: "Test",
+        rows: buildGridRows({ 0: columnIds, 3: headers, 4: topDataRow }),
+        ...(topDataRowAbsence ? { [topDataRowAbsence]: [4] } : {}),
+        table: {
+          endRowIndex: 5,
+          columnDeclaredTypes,
+          columnValidationValues,
+        },
+      },
+    ],
+  });
+  const operator = ColumnConfigOperator.init();
+  syncColumnConfigOperator(operator);
+  return operator;
+}
+
+function valueTitles(operator: ColumnConfigOperator, count: number) {
+  const col = operator.sheet.columns("valueTitle");
+  return Array.from({ length: count }, (_, index) =>
+    col.valueTitle.value(4 + index),
+  );
+}
+
+// The reported bug's shape: a sheet emptied by a run that consumed its input.
+function syncBlankSheetUnderTest(
+  props: StrictOmit<ColumnsUnderTest, "topDataRow">,
+): ColumnConfigOperator {
+  return syncColumnsUnderTest({
+    topDataRowAbsence: "rowsWithNoGridData",
+    ...props,
+  });
+}
+
 describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () => {
-  interface ColumnsUnderTest {
-    headers: string[];
-    topDataRow?: FakeCell[];
-    columnDeclaredTypes?: Record<number, string>;
-    columnValidationValues?: Record<number, string[]>;
-  }
-
-  function syncColumnsUnderTest({
-    headers,
-    topDataRow = [],
-    columnDeclaredTypes,
-    columnValidationValues,
-  }: ColumnsUnderTest): ColumnConfigOperator {
-    const columnIds = headers.map((_, index) => `c:test:col${index}`);
-    const columnConfigRows: Record<number, FakeCell[]> = {
-      0: columnConfigColumnIdRow,
-    };
-    columnIds.forEach((columnId, index) => {
-      columnConfigRows[4 + index] = [
-        TEST_SHEET_GID,
-        columnId,
-        "Test",
-        "",
-        false,
-        "",
-      ];
-    });
-    stubSheetsService({
-      sheets: [
-        {
-          sheetId: SHEET_CONFIG_GID,
-          title: "Sheet Config",
-          rows: buildGridRows({
-            0: sheetConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "Test", true, true, "test"],
-          }),
-          table: { endRowIndex: 5 },
-        },
-        {
-          sheetId: COLUMN_CONFIG_GID,
-          title: "Column Config",
-          rows: buildGridRows(columnConfigRows),
-          table: { endRowIndex: 4 + columnIds.length },
-        },
-        {
-          sheetId: TEST_SHEET_GID,
-          title: "Test",
-          rows: buildGridRows({ 0: columnIds, 3: headers, 4: topDataRow }),
-          table: {
-            endRowIndex: 5,
-            columnDeclaredTypes,
-            columnValidationValues,
-          },
-        },
-      ],
-    });
-    const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator);
-    return operator;
-  }
-
-  function valueTitles(operator: ColumnConfigOperator, count: number) {
-    const col = operator.sheet.columns("valueTitle");
-    return Array.from({ length: count }, (_, index) =>
-      col.valueTitle.value(4 + index),
-    );
-  }
-
   it("maps every declared column type to its value name", () => {
     const operator = syncColumnsUnderTest({
       headers: [
@@ -820,6 +834,68 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     });
 
     expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+});
+
+describe("ColumnConfigOperator.syncToSpreadsheet -> a sheet whose only data row is blank", () => {
+  it("completes the sync and fills in every programmatic cell", () => {
+    const operator = syncBlankSheetUnderTest({
+      headers: ["Biller Name", "Amount"],
+      columnDeclaredTypes: { 1: "CURRENCY" },
+    });
+    const col = operator.sheet.columns("sheetTitle", "header", "valueTitle");
+
+    expect(col.sheetTitle.value(4)).toBe("Test");
+    expect(col.header.value(4)).toBe("Biller Name");
+    expect(col.valueTitle.value(4)).toBe("string");
+    expect(col.header.value(5)).toBe("Amount");
+    expect(col.valueTitle.value(5)).toBe("number");
+  });
+
+  it("records a column as no formula when the blank row proves nothing", () => {
+    const operator = syncBlankSheetUnderTest({ headers: ["Amount"] });
+
+    expect(operator.sheet.column("isFormula").value(4)).toBe(false);
+  });
+
+  it("notes the sheets whose guesses had no sample row behind them", () => {
+    const operator = syncBlankSheetUnderTest({ headers: ["Notes"] });
+
+    expect(operator.untypedColumnsSummary()).toBe(
+      "Succeeded, but 1 column(s) across 1 sheet(s) are untyped, so their " +
+        "value names were guessed. See the execution log for the list. " +
+        "On 1 of those sheet(s) the top data row was blank, so the guess had " +
+        'no sample behind it: "Test".',
+    );
+  });
+
+  it("stays silent for a blank sheet whose columns all declare their type", () => {
+    const operator = syncBlankSheetUnderTest({
+      headers: ["Amount"],
+      columnDeclaredTypes: { 0: "CURRENCY" },
+    });
+
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("syncs the columns of a brand-new sheet whose data row never existed", () => {
+    const operator = syncBlankSheetUnderTest({
+      headers: ["Biller Name"],
+      topDataRowAbsence: "rowsWithNoGridBlock",
+    });
+    const col = operator.sheet.columns("header", "valueTitle");
+
+    expect(col.header.value(4)).toBe("Biller Name");
+    expect(col.valueTitle.value(4)).toBe("string");
+  });
+
+  it("says nothing about a sample row that holds data", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Notes"],
+      topDataRow: ["a note"],
+    });
+
+    expect(operator.untypedColumnsSummary()).not.toContain("no sample");
   });
 });
 

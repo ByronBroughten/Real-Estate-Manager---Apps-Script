@@ -40,7 +40,7 @@ export class SheetMetaIndexed extends SheetCommon {
     return this.uniformRow(this.schema.uniformRowNameByIndex(rowIndex));
   }
   isTableColIndex(colIndex: number): boolean {
-    return this.raw.fullTableColIndexes.includes(colIndex);
+    return this.raw.isTableColIndex(colIndex);
   }
   ensureColumnIdsAreFetched(): this {
     this._gatherDataPrerequisites();

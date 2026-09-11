@@ -97,11 +97,31 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       (count, headers) => count + headers.length,
       0,
     );
-    return (
+    const sentences = [
       `Succeeded, but ${columnCount} column(s) across ${untypedHeaders.length} ` +
-      `sheet(s) are untyped, so their value names were guessed. See the ` +
-      `execution log for the list.`
-    );
+        `sheet(s) are untyped, so their value names were guessed. See the ` +
+        `execution log for the list.`,
+    ];
+    const blankSampleTitles = this._blankSampleSheetTitles();
+    if (blankSampleTitles.length > 0) {
+      const names = blankSampleTitles.map((title) => `"${title}"`).join(", ");
+      sentences.push(
+        `On ${blankSampleTitles.length} of those sheet(s) the top data row ` +
+          `was blank, so the guess had no sample behind it: ${names}.`,
+      );
+    }
+    return sentences.join(" ");
+  }
+  // Derived, since blank facts are deliberately indistinguishable from real ones.
+  private _blankSampleSheetTitles(): string[] {
+    const titles: string[] = [];
+    this.sheetGidsApiAccesses.forEach((sheetGid) => {
+      const sheet = this.ss.raw.sheet(sheetGid);
+      if (!this.untypedHeadersBySheetTitle.has(sheet.title)) return;
+      if (!sheet.topDataRowIsBlank()) return;
+      titles.push(sheet.title);
+    });
+    return titles;
   }
   private _isSheetGidApiAccesses(sheetGid: number): boolean {
     return this.sheetGidsApiAccesses.has(sheetGid);
