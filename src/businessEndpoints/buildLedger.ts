@@ -123,8 +123,7 @@ function chargeLine(charge: RowNamed<"occCharge">): LedgerLine {
     description: charge.value("description"),
     charge: charge.value("amount"),
     payment: "",
-    // Most charges carry none; ticking the column's Empty value allowed box makes this value().
-    notes: charge.valueOrEmpty("notes"),
+    notes: charge.value("notes"),
     depositDelta: 0,
   };
 }

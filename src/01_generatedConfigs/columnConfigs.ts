@@ -1057,7 +1057,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     }
   },
