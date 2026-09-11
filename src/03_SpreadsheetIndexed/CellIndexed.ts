@@ -8,6 +8,7 @@ import {
 } from "../01_generatedConfigs/valueSchemas";
 import { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import { CellIndexedBase } from "./CellIndexedBase";
+import type { CellChange } from "./ClassTypes/IndexedState";
 import { ColumnIndexed } from "./ColumnIndexed";
 
 export class CellIndexed<
@@ -48,6 +49,13 @@ export class CellIndexed<
     } else {
       return value as NotEmpty<Value<VN>>;
     }
+  }
+  // Both halves merge into the one queued change, so the field mask names both.
+  update({ value, backgroundColor }: CellChange<VN>): this {
+    if (value !== undefined) this.updateValue(value);
+    if (backgroundColor !== undefined)
+      this.updateBackgroundColor(backgroundColor);
+    return this;
   }
   updateValue(value: Value<VN>): this {
     this.schema.validateDataNotFormula();

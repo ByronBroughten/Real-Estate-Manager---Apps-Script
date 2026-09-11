@@ -19,11 +19,24 @@ export interface EndpointArgs {
   isChecked: boolean;
 }
 
+// Every state but running, which the framework writes for itself.
+export type RunStateReported = "success" | "warning" | "failure";
+
+// Neither warning nor failure has a fallback sentence, so the type demands one.
+export type RunReport =
+  | { runState?: "success"; message?: string }
+  | { runState: Exclude<RunStateReported, "success">; message: string };
+
+// Keyed by the same base-zero grid index the action is handed as its rows.
+export type RowReports = Map<number, RunReport>;
+
 // `void`, so an action with nothing to report needs no explicit `undefined`.
+export type ActionReturn = void | string | (RunReport & { rows?: RowReports });
+
 export type EndpointAction = (
   ss: SpreadsheetNamed,
   args: EndpointArgs,
-) => string | void;
+) => ActionReturn;
 
 export interface Endpoint<SN extends SheetNameSimple> {
   action: EndpointAction;

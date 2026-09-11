@@ -13,7 +13,14 @@ import {
   type CheckboxColumnName,
 } from "../05_Operators/CheckboxColumnOperator";
 import { Tim } from "../utils/Tim";
-import type { EndpointDispatched, FeedbackColumnName } from "./Endpoints";
+import type {
+  ActionReturn,
+  EndpointDispatched,
+  FeedbackColumnName,
+  RowReports,
+  RunReport,
+  RunStateReported,
+} from "./Endpoints";
 
 interface RunState {
   message: string;
@@ -26,21 +33,26 @@ const runStates = {
     message: "Running…",
     backgroundColor: { red: 1, green: 0.949, blue: 0.8 },
   },
-  succeeded: {
+  success: {
     message: "Succeeded",
     backgroundColor: { red: 0.851, green: 0.918, blue: 0.827 },
   },
-  failed: {
+  // Between running's yellow and failure's red, so the states read as a scale.
+  warning: {
+    message: "Warning",
+    backgroundColor: { red: 0.99, green: 0.85, blue: 0.7 },
+  },
+  failure: {
     message: "Failed",
     backgroundColor: { red: 0.957, green: 0.8, blue: 0.8 },
   },
-} as const satisfies Record<string, RunState>;
+} as const satisfies Record<RunStateName, RunState>;
 
-type RunStateName = keyof typeof runStates;
+type RunStateName = RunStateReported | "running";
 
 interface RunStateProps {
   startTime?: string;
-  message?: string | void;
+  message?: string;
 }
 
 export interface EndpointRunProps<
@@ -80,12 +92,12 @@ export class EndpointRun<
     this._onRunSetup();
     try {
       this._validateOneRowSelected(selectedRowIndexes);
-      const message = this.endpoint.action(this.ss, {
+      const report = this.endpoint.action(this.ss, {
         selectedRowIndexes,
         isChecked,
       });
       this._clearSelection();
-      this._applyRunState("succeeded", { message });
+      this._applyActionReport(report);
     } catch (error) {
       this._onRunError(error);
     } finally {
@@ -142,6 +154,19 @@ export class EndpointRun<
     if (!selector || selector.retainSelection) return;
     this._checkboxColumn(selector.column).uncheckActiveCells();
   }
+  // A string is a success with that message, and nothing at all is a bare success.
+  private _applyActionReport(report: ActionReturn): void {
+    if (typeof report === "string") {
+      this._applyRunState("success", { message: report });
+      return;
+    }
+    const { runState, message, rows }: RunReport & { rows?: RowReports } =
+      report ?? {};
+    this._applyRunState(runState ?? "success", { message });
+    rows?.forEach((rowReport, rowIndex) => {
+      this._applyRowReport(rowIndex, rowReport);
+    });
+  }
   // The timestamp is written once at setup; a state change only recolours it.
   private _applyRunState(
     stateName: RunStateName,
@@ -153,7 +178,10 @@ export class EndpointRun<
       value: startTime,
       backgroundColor: state.backgroundColor,
     });
-    this._updateFeedbackCells(runStatus, { value: message ?? state.message });
+    this._updateFeedbackCells(runStatus, {
+      value: message ?? state.message,
+      backgroundColor: state.backgroundColor,
+    });
   }
   private _updateFeedbackCells(
     columnName: FeedbackColumnName<SN> | undefined,
@@ -168,10 +196,38 @@ export class EndpointRun<
       column.updateAllCells(change);
     }
   }
+  // Per-cell, so it lands on top of the run-level fill the same batch sends first.
+  private _applyRowReport(rowIndex: number, report: RunReport): void {
+    this._validateIsDataRow(rowIndex);
+    const state = runStates[report.runState ?? "success"];
+    const { timeLastRan, runStatus } = this.endpoint;
+    this._updateFeedbackCell(timeLastRan, rowIndex, {
+      backgroundColor: state.backgroundColor,
+    });
+    this._updateFeedbackCell(runStatus, rowIndex, {
+      value: report.message ?? state.message,
+      backgroundColor: state.backgroundColor,
+    });
+  }
+  // A key outside the data rows is a reporting bug, and would write somewhere surprising.
+  private _validateIsDataRow(rowIndex: number): void {
+    if (this.sheet.raw.rowIndexesFull.includes(rowIndex)) return;
+    throw new Error(
+      `Row ${rowIndex} is not a data row of "${this.sheet.raw.title}", so this run cannot report into it.`,
+    );
+  }
+  private _updateFeedbackCell(
+    columnName: FeedbackColumnName<SN> | undefined,
+    rowIndex: number,
+    change: CellChange<"string">,
+  ): void {
+    if (!columnName) return;
+    this.sheet.columnIndexed(columnName).cell(rowIndex).update(change);
+  }
   // Queued changes are shared by reference, so a half-finished run must be dropped before status is written.
   private _onRunError(error: unknown): void {
     this.ss.discardQueuedChanges();
-    this._applyRunState("failed", { message: String(error) });
+    this._applyRunState("failure", { message: String(error) });
     Logger.log(`Endpoint run failed: ${String(error)}`);
   }
 }

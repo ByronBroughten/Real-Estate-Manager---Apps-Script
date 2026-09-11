@@ -713,3 +713,68 @@ describe("SheetNamed.appendRowWithAllVals", () => {
     ]);
   });
 });
+
+const ADD_EXPENSE_GID = sheetConfigs.addPropertyExpense.sheetGid;
+const ape = columnConfigs.addPropertyExpense;
+
+// Biller name alone is filled: amount is a required blank, notes an allowed one.
+function stubAddPropertyExpenseSheet() {
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: ADD_EXPENSE_GID,
+        title: "Add Property Expense",
+        rows: buildGridRows({
+          0: [
+            ape.billerName.columnId,
+            ape.amount.columnId,
+            ape.notes.columnId,
+            ape.isUpfrontInvestment.columnId,
+          ],
+          3: ["Biller name", "Amount", "Notes", "Is upfront investment"],
+          4: ["Acme Roofing", null, null, null],
+        }),
+        table: { endRowIndex: 5 },
+      },
+    ],
+  });
+}
+
+function fetchedAddExpenseRow(): RowNamed<"addPropertyExpense"> {
+  const ss = SpreadsheetNamed.init();
+  ss.sheet("addPropertyExpense").prepFetchColumnsFull(
+    "billerName",
+    "amount",
+    "notes",
+    "isUpfrontInvestment",
+  );
+  ss.fetchAllPrepped();
+  return ss.sheet("addPropertyExpense").row(TOP_DATA_ROW_INDEX);
+}
+
+describe("RowNamed.blankRequiredColumnNames", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+    stubAddPropertyExpenseSheet();
+  });
+
+  it("names a blank column whose Empty value allowed box is unticked", () => {
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames).toContain("amount");
+  });
+
+  it("leaves out a blank column whose box is ticked", () => {
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames).not.toContain(
+      "notes",
+    );
+  });
+
+  it("leaves out an unticked checkbox, whose blank is an answer", () => {
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames).not.toContain(
+      "isUpfrontInvestment",
+    );
+  });
+
+  it("leaves out a required column that is filled", () => {
+    expect(fetchedAddExpenseRow().blankRequiredColumnNames).toEqual(["amount"]);
+  });
+});

@@ -39,6 +39,7 @@ const END_ROW_INDEX = 9;
 
 const LIGHT_YELLOW = { red: 1, green: 0.949, blue: 0.8 };
 const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
+const LIGHT_ORANGE = { red: 0.99, green: 0.85, blue: 0.7 };
 const LIGHT_RED = { red: 0.957, green: 0.8, blue: 0.8 };
 
 const TIMESTAMP = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
@@ -172,6 +173,23 @@ function checkboxFillsFor(calls: BatchUpdateCall[], colIndex: number) {
   }));
 }
 
+function cellWritesFor(calls: BatchUpdateCall[], colIndex: number) {
+  return allRequests(calls)
+    .filter(
+      (request) =>
+        request.updateCells?.range?.startColumnIndex === colIndex &&
+        (request.updateCells.range.startRowIndex ?? 0) >= TOP_DATA_ROW_INDEX,
+    )
+    .map((request) => {
+      const cell = request.updateCells?.rows?.[0]?.values?.[0];
+      return {
+        rowIndex: request.updateCells?.range?.startRowIndex,
+        value: cell?.userEnteredValue?.stringValue,
+        backgroundColor: cell?.userEnteredFormat?.backgroundColor,
+      };
+    });
+}
+
 function actionRowWrites(calls: BatchUpdateCall[]) {
   return allRequests(calls).filter((request) => {
     const range = request.repeatCell?.range ?? request.updateCells?.range;
@@ -207,25 +225,25 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
         startRowIndex: 4,
         endRowIndex: 5,
         value: "Running…",
-        backgroundColor: undefined,
+        backgroundColor: LIGHT_YELLOW,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: "Running…",
-        backgroundColor: undefined,
+        backgroundColor: LIGHT_YELLOW,
       },
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: "Succeeded",
-        backgroundColor: undefined,
+        backgroundColor: LIGHT_GREEN,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: "Succeeded",
-        backgroundColor: undefined,
+        backgroundColor: LIGHT_GREEN,
       },
     ]);
   });
@@ -408,7 +426,7 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
       startRowIndex: TOP_DATA_ROW_INDEX,
       endRowIndex: END_ROW_INDEX,
       value: "Running…",
-      backgroundColor: undefined,
+      backgroundColor: LIGHT_YELLOW,
     });
   });
 });
@@ -481,13 +499,13 @@ describe("EndpointRun.run, a run that fails", () => {
         startRowIndex: 4,
         endRowIndex: 5,
         value: expect.stringMatching(/^Error: /) as string,
-        backgroundColor: undefined,
+        backgroundColor: LIGHT_RED,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: expect.stringMatching(/^Error: /) as string,
-        backgroundColor: undefined,
+        backgroundColor: LIGHT_RED,
       },
     ]);
     expect(
@@ -613,5 +631,208 @@ describe("EndpointRun.run, a selector that requires one row", () => {
     expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
       "Succeeded",
     );
+  });
+});
+
+describe("EndpointRun.run, a run report naming a state", () => {
+  it("writes the warning's own message, since warning has no useful default", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint(() => ({
+        runState: "warning" as const,
+        message: "Added 3 of 5",
+      })),
+    );
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+      "Added 3 of 5",
+    );
+  });
+
+  it("colours both feedback columns, so a sheet with one of them still shows it", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint(() => ({
+        runState: "warning" as const,
+        message: "Added 3 of 5",
+      })),
+    );
+
+    expect(
+      fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.backgroundColor,
+    ).toEqual(LIGHT_ORANGE);
+    expect(
+      fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX).at(-1)
+        ?.backgroundColor,
+    ).toEqual(LIGHT_ORANGE);
+  });
+
+  it("leaves the start time written once, recolouring it without a value", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint(() => ({
+        runState: "warning" as const,
+        message: "Added 3 of 5",
+      })),
+    );
+    const writes = fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX);
+
+    expect(writes[0]?.value).toMatch(TIMESTAMP);
+    expect(writes[1]?.value).toBeUndefined();
+    expect(writes).toHaveLength(2);
+  });
+});
+
+describe("EndpointRun.run, a run report naming rows", () => {
+  function twoRowsFailed() {
+    return {
+      rows: new Map([
+        [5, { runState: "failure" as const, message: "No such unit" }],
+        [7, { runState: "failure" as const, message: "Amount is blank" }],
+      ]),
+    };
+  }
+
+  it("writes each named row's own message and colour into its own cell", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(reportingEndpoint(twoRowsFailed));
+
+    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
+      { rowIndex: 5, value: "No such unit", backgroundColor: LIGHT_RED },
+      { rowIndex: 7, value: "Amount is blank", backgroundColor: LIGHT_RED },
+    ]);
+  });
+
+  it("colours the named rows' start-time cells without rewriting the time", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(reportingEndpoint(twoRowsFailed));
+
+    expect(cellWritesFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX)).toEqual([
+      { rowIndex: 5, value: undefined, backgroundColor: LIGHT_RED },
+      { rowIndex: 7, value: undefined, backgroundColor: LIGHT_RED },
+    ]);
+  });
+
+  it("defaults the unnamed rows to success when no state is named", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(reportingEndpoint(twoRowsFailed));
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)).toEqual({
+      startRowIndex: TOP_DATA_ROW_INDEX,
+      endRowIndex: END_ROW_INDEX,
+      value: "Succeeded",
+      backgroundColor: LIGHT_GREEN,
+    });
+  });
+
+  it("gives the unnamed rows the state named beside the map", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint(() => ({
+        runState: "warning" as const,
+        message: "Added 3 of 5",
+        ...twoRowsFailed(),
+      })),
+    );
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)).toEqual({
+      startRowIndex: TOP_DATA_ROW_INDEX,
+      endRowIndex: END_ROW_INDEX,
+      value: "Added 3 of 5",
+      backgroundColor: LIGHT_ORANGE,
+    });
+  });
+
+  it("lets a named row be warned rather than failed", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint(() => ({
+        rows: new Map([
+          [5, { runState: "warning" as const, message: "Check this one" }],
+        ]),
+      })),
+    );
+
+    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
+      { rowIndex: 5, value: "Check this one", backgroundColor: LIGHT_ORANGE },
+    ]);
+  });
+
+  it("keeps the rest of the run's writes, since a returned failure is not a throw", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint((ss) => {
+        ss.sheet("occupancy").row(4).cell("id").updateValue("r:occ:written");
+        return twoRowsFailed();
+      }),
+    );
+
+    expect(cellWritesFor(batchUpdateCalls, 0)).toEqual([
+      { rowIndex: 4, value: "r:occ:written", backgroundColor: undefined },
+    ]);
+  });
+
+  it("lets a selector endpoint flag some of its selected rows and not others", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      selectiveEndpoint(() => ({
+        rows: new Map([
+          [6, { runState: "failure" as const, message: "No such unit" }],
+        ]),
+      })),
+    );
+
+    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
+      { rowIndex: 6, value: "No such unit", backgroundColor: LIGHT_RED },
+    ]);
+  });
+
+  it("fails the run when a key is not a data row of the sheet", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint(() => ({
+        rows: new Map([
+          [END_ROW_INDEX, { runState: "failure" as const, message: "Nowhere" }],
+        ]),
+      })),
+    );
+
+    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)).toEqual({
+      startRowIndex: TOP_DATA_ROW_INDEX,
+      endRowIndex: END_ROW_INDEX,
+      value: `Error: Row ${END_ROW_INDEX} is not a data row of "Occupancy", so this run cannot report into it.`,
+      backgroundColor: LIGHT_RED,
+    });
+  });
+
+  it("leaves a deleted row's delete standing when the same run also names it", () => {
+    const { batchUpdateCalls } = stubOccupancySheet();
+
+    runEndpoint(
+      reportingEndpoint((ss) => {
+        ss.sheet("occupancy").row(5).delete();
+        return twoRowsFailed();
+      }),
+    );
+
+    expect(
+      allRequests(batchUpdateCalls).filter(
+        (request) => request.deleteDimension?.range?.startIndex === 5,
+      ),
+    ).toHaveLength(1);
+    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
+      { rowIndex: 7, value: "Amount is blank", backgroundColor: LIGHT_RED },
+    ]);
   });
 });

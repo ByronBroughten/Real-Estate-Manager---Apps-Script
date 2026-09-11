@@ -45,16 +45,24 @@ A column an endpoint declares for the framework to write into on its behalf, rat
 _Avoid_: output column, status column
 
 **Run status**:
-The sentence an endpoint writes for the operator to read: that it is running, that it succeeded — in its own words if it has any — or what went wrong. It is written into the run-status cell of every row the run is about.
+The sentence an endpoint writes for the operator to read: that it is running, that it succeeded — in its own words if it has any — or what went wrong. It is written into the run-status cell of every row the run is about, and a run may give a particular row a sentence of its own instead.
 _Avoid_: error message, log, result
 
 **Run state**:
-Which of an endpoint's three conditions its last run is in — running, succeeded, or failed. A run state is always a run status message and a colour together, so the two can never disagree.
+Which of an endpoint's four conditions its last run is in — running, success, warning or failure. A run state is always a run status message and a colour together, so the two can never disagree, and both feedback columns are painted in it, so the state is visible whichever of them an endpoint declares. Every row the run is about carries one, and a run may put a different one on a particular row.
 _Avoid_: run outcome, status code
 
 **Running**:
-Work has begun and has not reported back. A run killed mid-flight stays here, which is how "died" is distinguishable from both "succeeded" and "failed".
+Work has begun and has not reported back. A run killed mid-flight stays here, which is how "died" is distinguishable from success, warning and failure alike.
 _Avoid_: in progress, pending, processing
+
+**Warning**:
+The run committed its work, and something about it wants your attention — most often that some of the rows it was about went through and some did not. Its orange sits between the success green and the failure red, so the three read as a scale, and it always carries a sentence of its own, since an orange cell with nothing to say would be a puzzle.
+_Avoid_: partial, incomplete, soft failure
+
+**Run report**:
+What an endpoint hands back when its work is done: nothing, a sentence, a run state with a sentence, or a set of rows that differ from the rest, each with the state and sentence it gets. Rows the report does not name take the run's own state, which is success unless the report says otherwise. A run that **fails by throwing** is a different thing: the work is abandoned, nothing is written, and every row goes red. A failure the report *names* means that one row did not go through while the rest of the run stood — the same red, because what you do about the row in front of you is the same either way.
+_Avoid_: result, outcome, return value
 
 **Start time**:
 When a run began, written once into every row the run is about and never rewritten, so elapsed time stays readable while a slow run is still going.
