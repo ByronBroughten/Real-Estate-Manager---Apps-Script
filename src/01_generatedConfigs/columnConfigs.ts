@@ -1907,6 +1907,14 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
+    },
+    "buildLedgerStartDate": {
+      "columnId": "c:occ:hRbSeP1",
+      "header": "Build ledger, start date",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
     }
   },
   "occupancyLedger": {
@@ -3091,7 +3099,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "billerName": {
@@ -3147,7 +3155,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Tax adjust",
       "valueName": "residenceTaxAdjust",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "isUpfrontInvestment": {
@@ -3163,7 +3171,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "splitReceiptId": {
@@ -3171,7 +3179,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Split receipt ID",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     }
   },
@@ -3225,7 +3233,7 @@ export const columnConfigs = makeColumnConfigs({
       "customDefaultValue": null
     }
   },
-  "splitRecipet": {
+  "splitReceipt": {
     "name": {
       "columnId": "c:srct:CHhpNpt",
       "header": "Name",

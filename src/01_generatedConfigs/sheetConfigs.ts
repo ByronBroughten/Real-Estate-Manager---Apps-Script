@@ -146,7 +146,7 @@ export const sheetConfigs = makeSheetConfigs({
     "idPrefix": "vrb",
     "hasIdColumn": false
   },
-  "splitRecipet": {
+  "splitReceipt": {
     "sheetGid": 1231483768,
     "idPrefix": "srct",
     "hasIdColumn": true

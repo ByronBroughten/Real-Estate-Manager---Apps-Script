@@ -12,7 +12,6 @@ const issuers = {
 
 // The charge description a payment must settle for the deposit balance to rise.
 const securityDepositCharge = "Security deposit";
-
 // Charge before reduction before payment, so a same-day settlement never shows a balance the tenant never had.
 const kindRanks = { charge: 0, reduction: 1, payment: 2 } as const;
 
@@ -191,10 +190,7 @@ function unroutableReduction(description: never): never {
   );
 }
 
-function paymentLines(
-  ss: SpreadsheetNamed,
-  occupancyId: string,
-): LedgerLine[] {
+function paymentLines(ss: SpreadsheetNamed, occupancyId: string): LedgerLine[] {
   const allocations = ss
     .sheet("occPayAllocation")
     .rowsFiltered({ occupancyId, filledOut: "Yes" });
@@ -277,17 +273,17 @@ function rebuildLedger(ss: SpreadsheetNamed, lines: LedgerLine[]): void {
 }
 
 // Blank wherever the balance didn't move, so the column draws the eye to what moved it.
-function depositBalanceCell(line: LedgerLine, depositHeld: number): number | "" {
+function depositBalanceCell(
+  line: LedgerLine,
+  depositHeld: number,
+): number | "" {
   if (line.depositDelta === 0) {
     return "";
   }
   return depositHeld;
 }
 
-function runStatusMessage(
-  occupancyName: string,
-  lines: LedgerLine[],
-): string {
+function runStatusMessage(occupancyName: string, lines: LedgerLine[]): string {
   if (lines.length === 0) {
     return `No charges or payments for ${occupancyName}.`;
   }
