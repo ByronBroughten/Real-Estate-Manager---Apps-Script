@@ -2,13 +2,15 @@
 
 Distilled from the user's own refactors of AI-generated code, plus a survey of the rest of `src/` for consistent, repeated patterns. Apply these on top of README.md's naming vocabulary and CLAUDE.md's architecture rules — this file is about code *shape*, not where things live.
 
-Known not-yet-representative code (still AI-shaped, not mined for any rule below): `src/02_SpreadsheetRaw/toIntegrate.ts`, `src/businessEndpointHandlers/`, and `*.test.ts` files generally.
+Known not-yet-representative code (still AI-shaped, not mined for any rule below): `src/02_SpreadsheetRaw/toIntegrate.ts` and `*.test.ts` files generally.
 
 ## Class shape
 
 ### Coordinators are classes, not function modules
 
 When code coordinates other stateful objects (other Operators, a Spreadsheet), write it as a class extending the tier's Base class (matching `SheetConfigOperator`), not a module of exported free functions.
+
+This was mined from the framework tiers. It does **not** govern business endpoints: an endpoint is a plain entry with module-private helpers, matching the endpoints already in the registry. Reach for a class only once a file is unwieldy or its logic finds a second caller.
 
 - `static init(): Self` is the only public construction path; the real constructor just takes a `props` object.
 - Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this` — never constructor-injected instances, never threaded through as a returned object.

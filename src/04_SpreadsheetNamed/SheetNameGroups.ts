@@ -15,12 +15,6 @@ const sheetNameGroups = {
   hasIdColumn: configSheetNames.filter((sheetName) =>
     getSheetTraitByName(sheetName, "hasIdColumn"),
   ) as SheetNameWithIdColumn[],
-  aggregateApi: Arr.extractStrict(
-    configSheetNames,
-    "addOccChargesOnetime",
-    "addOccPaymentsOnetime",
-    "addPropertyExpenses",
-  ),
   ledgerInputs: Arr.extractStrict(
     configSheetNames,
     "occCharge",

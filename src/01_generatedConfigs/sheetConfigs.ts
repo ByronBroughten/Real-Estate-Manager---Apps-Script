@@ -31,20 +31,20 @@ export const sheetConfigs = makeSheetConfigs({
     "idPrefix": "test",
     "hasIdColumn": true
   },
-  "addOccChargesOnetime": {
+  "addOccCharge": {
     "sheetGid": 1202471195,
     "idPrefix": "aoco",
-    "hasIdColumn": true
+    "hasIdColumn": false
   },
-  "addOccPaymentsOnetime": {
+  "addOccPayment": {
     "sheetGid": 1485718763,
     "idPrefix": "aopo",
-    "hasIdColumn": true
+    "hasIdColumn": false
   },
-  "addPropertyExpenses": {
+  "addPropertyExpense": {
     "sheetGid": 1964495656,
     "idPrefix": "ape",
-    "hasIdColumn": true
+    "hasIdColumn": false
   },
   "property": {
     "sheetGid": 619816967,
@@ -139,6 +139,16 @@ export const sheetConfigs = makeSheetConfigs({
   "occupancyLedger": {
     "sheetGid": 731807482,
     "idPrefix": "old",
+    "hasIdColumn": false
+  },
+  "variable": {
+    "sheetGid": 695651834,
+    "idPrefix": "vrb",
+    "hasIdColumn": false
+  },
+  "splitRecipet": {
+    "sheetGid": 1231483768,
+    "idPrefix": "srct",
     "hasIdColumn": true
   }
 });

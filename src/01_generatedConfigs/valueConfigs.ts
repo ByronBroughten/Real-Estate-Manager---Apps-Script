@@ -1,10 +1,6 @@
 import { makeValueConfigs } from "./makeConfigs";
 
 export const valueConfigs = makeValueConfigs({
-  "yesOrNo": [
-    "Yes",
-    "No"
-  ],
   "chargeOnetimeDescription": [
     "Security deposit",
     "Late fee",
@@ -68,13 +64,17 @@ export const valueConfigs = makeValueConfigs({
     "Forgiveness",
     "Security deposit"
   ],
-  "paymentType": [
-    "Currency",
-    "Caretaking"
-  ],
   "paymentAllocateWhat": [
     "Full payment",
     "Full charge",
     "Lesser amount"
+  ],
+  "yesOrNo": [
+    "Yes",
+    "No"
+  ],
+  "paymentType": [
+    "Currency",
+    "Caretaking"
   ]
 });

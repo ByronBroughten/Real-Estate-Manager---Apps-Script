@@ -77,3 +77,9 @@ _Avoid_: nullable, optional column, blank allowed
 **Untyped**:
 Said of a column whose type menu tells the app nothing about what it holds — left on Automatic, or a dropdown that no Value Config rule backs. The app then guesses from the column's top row, and says how many such columns are left every time the config sheets sync.
 _Avoid_: unset, automatic, missing type
+
+### Units
+
+**Unit standard name**:
+A unit described by building type and bedroom count, as "Duplex-2BR". It is for comparing rents between units, not for addressing one. The unit's **name** is the address, as "730 Western, Unit 2".
+_Avoid_: standard name, unit type

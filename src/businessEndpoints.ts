@@ -61,7 +61,6 @@ export const businessEndpoints: Endpoints = {
         if (!lastEndDate) {
           lastActiveTerm.updateValue("endDate", Dat.dayBefore(nextStartDate));
         }
-
         occupancyTerms.appendRowWithAllVals({
           noticeDate: occRow.value("nextTermsNoticeSentDate"),
           startDate: nextStartDate,
@@ -92,7 +91,7 @@ export const businessEndpoints: Endpoints = {
     },
   },
   addPropertyExpense_runStatus: {
-    runStatus: "addPropertyExpenseRunStatus",
+    runStatus: "runStatus",
     action: (ss) => {},
   },
   occupancy_buildLedgerTimeLastRan: {

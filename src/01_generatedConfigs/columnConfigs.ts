@@ -1,483 +1,7 @@
 import { makeColumnConfigs } from "./makeConfigs";
 
 export const columnConfigs = makeColumnConfigs({
-  "spreadsheetControls": {
-    "fillRowIdsRunStatus": {
-      "columnId": "c:sct:ry4RjGc",
-      "header": "Fill row IDs, run status",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "syncConfigSheetRowsTimeLastRan": {
-      "columnId": "c:sct:9SE5ZSP",
-      "header": "Sync config sheet rows, time last ran",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "syncConfigSheetRowsRunStatus": {
-      "columnId": "c:sct:M2bLafa",
-      "header": "Sync config sheet rows, run status",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "tableControlsSpace": {
-      "columnId": "c:sct:jIYLttI",
-      "header": "Table controls space",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "fillRowIdsTimeLastRan": {
-      "columnId": "c:sct:9C6CjOp",
-      "header": "Fill row IDs, time last ran",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "valueConfig": {
-    "tableControlsSpace": {
-      "columnId": "c:vcf:_ocORnq",
-      "header": "Table controls space",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "yesOrNo": {
-      "columnId": "c:vcf:x5cyAIy",
-      "header": "Yes or no",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "transactionDescription": {
-      "columnId": "c:vcf:kfDc8M2",
-      "header": "Transaction description",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeDescription": {
-      "columnId": "c:vcf:TZgwSb6",
-      "header": "Charge description",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeRecurringDescription": {
-      "columnId": "c:vcf:yaVnd_N",
-      "header": "Charge recurring description",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeOnetimeDescription": {
-      "columnId": "c:vcf:cr1CbP0",
-      "header": "Charge onetime description",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeReduceDescription": {
-      "columnId": "c:vcf:CTSfi2I",
-      "header": "Charge reduce description",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentPortionName": {
-      "columnId": "c:vcf:4SpqUAJ",
-      "header": "Rent portion name",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentType": {
-      "columnId": "c:vcf:qiYfMNg",
-      "header": "Payment type",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "payerCategory": {
-      "columnId": "c:vcf:lQwlO7B",
-      "header": "Payer category",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentAllocateWhat": {
-      "columnId": "c:vcf:S-lM-36",
-      "header": "Payment allocate what",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "expenseCategory": {
-      "columnId": "c:vcf:wHfVRNb",
-      "header": "Expense category",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "expenseCategoryTaxable": {
-      "columnId": "c:vcf:XYrxqhT",
-      "header": "Expense category taxable",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "expenseCategoryBank": {
-      "columnId": "c:vcf:tZ00pGQ",
-      "header": "Expense category bank",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "residenceTaxAdjust": {
-      "columnId": "c:vcf:xnZzo-H",
-      "header": "Residence tax adjust",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "receiptFormat": {
-      "columnId": "c:vcf:nYa59d2",
-      "header": "Receipt format",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "firstOfEachMonthThisYear": {
-      "columnId": "c:vcf:pMq2Sj4",
-      "header": "First of each month this year",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "januaryQuartersThisYear": {
-      "columnId": "c:vcf:ibXd9HV",
-      "header": "January quarters this year",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "februaryQuartersThisYear": {
-      "columnId": "c:vcf:0KdHcbs",
-      "header": "February quarters this year",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "marchQuartersThisYear": {
-      "columnId": "c:vcf:NmxoP8G",
-      "header": "March quarters this year",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "oneOccupancyOrAll": {
-      "columnId": "c:vcf:u7yfxlj",
-      "header": "One occupancy or all",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "buildingType": {
-      "columnId": "c:vcf:KmPO72N",
-      "header": "Building type",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "buildingTypeAndAny": {
-      "columnId": "c:vcf:gIU41Iy",
-      "header": "Building type and any",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "sheetConfig": {
-    "sheetGid": {
-      "columnId": "c:scf:WgnoW8d",
-      "header": "Sheet GID",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "sheetTitle": {
-      "columnId": "c:scf:0Ctj9xZ",
-      "header": "Sheet title",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "hasIdColumn": {
-      "columnId": "c:scf:Z3g5nmg",
-      "header": "Has ID column",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "letApiAccess": {
-      "columnId": "c:scf:GOJ0ixi",
-      "header": "Let api access",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "idPrefix": {
-      "columnId": "c:scf:3dZ5h-J",
-      "header": "ID prefix",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "idPrefixIsUniqueOrEmpty": {
-      "columnId": "c:scf:cK5WM0v",
-      "header": "ID prefix Is unique or empty",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "columnConfig": {
-    "sheetGid": {
-      "columnId": "c:ccf:1-6AQIj",
-      "header": "Sheet GID",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "columnId": {
-      "columnId": "c:ccf:vj9_rre",
-      "header": "Column ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "sheetTitle": {
-      "columnId": "c:ccf:949GjdB",
-      "header": "Sheet title",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "header": {
-      "columnId": "c:ccf:kqA31oK",
-      "header": "Header",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "isFormula": {
-      "columnId": "c:ccf:-99iXjo",
-      "header": "Is formula",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "valueTitle": {
-      "columnId": "c:ccf:0mh_HUU",
-      "header": "Value title",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "isActionControl": {
-      "columnId": "c:ccf:AUffOV9",
-      "header": "Is action control",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "customDefaultValue": {
-      "columnId": "c:ccf:1msMno3",
-      "header": "Custom default value",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "emptyValueAllowed": {
-      "columnId": "c:ccf:volkLl6",
-      "header": "Empty value allowed",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "spreadsheetConfig": {
-    "idDelimiter": {
-      "columnId": "c:scf:8uxVA53",
-      "header": "ID delimiter",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nameDelimiter": {
-      "columnId": "c:scf:JI6_3tB",
-      "header": "Name delimiter",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "columnIdRowIndexBase0": {
-      "columnId": "c:scf:Kt9oKSY",
-      "header": "Column ID row index base 0",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "actionRowIndexBase0": {
-      "columnId": "c:scf:GKSJHu0",
-      "header": "Action row index base 0",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "headerRowIndexBase0": {
-      "columnId": "c:scf:58r8zkF",
-      "header": "Header row index base 0",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "topBodyRowIndexBase0": {
-      "columnId": "c:scf:U4WFNA4",
-      "header": "Top body row index base 0",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "idHeader": {
-      "columnId": "c:sscf:XOpXA8U",
-      "header": "ID header",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "selectorEndpointSuffix": {
-      "columnId": "c:sscf:YODUzqy",
-      "header": "Selector endpoint suffix",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "runnerEndpointSuffix": {
-      "columnId": "c:sscf:1nbfnw6",
-      "header": "Runner endpoint suffix",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "test": {
-    "name": {
-      "columnId": "c:tst:Xr9XZGV",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:tst:-uGn8dY",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "number": {
-      "columnId": "c:tst:VzKaUqz",
-      "header": "Number",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "dropdown": {
-      "columnId": "c:tst:cQEliR8",
-      "header": "Dropdown",
-      "valueName": "yesOrNo",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
-      "columnId": "c:test:HL-G329",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "sampledBoolean": {
-      "columnId": "c:test:KLMZlb4",
-      "header": "Sampled Boolean",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "addOccChargesOnetime": {
+  "addOccCharge": {
     "date": {
       "columnId": "c:aoco:J4MWCSt",
       "header": "Date",
@@ -542,32 +66,16 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "id": {
-      "columnId": "c:aoco:jnyfXyA",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "select": {
-      "columnId": "c:aoco:bDLq2t2",
-      "header": "Select",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "statusAndEnter": {
+    "runStatus": {
       "columnId": "c:aoco:xOjolKO",
-      "header": "Status and enter",
+      "header": "Run status",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
-  "addOccPaymentsOnetime": {
+  "addOccPayment": {
     "householdName": {
       "columnId": "c:aopo:RjrLe5t",
       "header": "Household name",
@@ -612,14 +120,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:aopo:3zUTSvH",
       "header": "Subsidy agreement name",
       "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:aopo:WcdWvGP",
-      "header": "ID",
-      "valueName": "id",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -728,24 +228,16 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "select": {
-      "columnId": "c:aopo:2ZvPSM2",
-      "header": "Select",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "statusAndEnter": {
+    "runStatus": {
       "columnId": "c:aopo:sPcJx49",
-      "header": "Status and enter",
+      "header": "Run status",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
-  "addPropertyExpenses": {
+  "addPropertyExpense": {
     "date": {
       "columnId": "c:ape:hZgf6pR",
       "header": "Date",
@@ -759,7 +251,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Property name",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "unitName": {
@@ -767,7 +259,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Unit name",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "billerName": {
@@ -807,7 +299,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Tax adjust",
       "valueName": "residenceTaxAdjust",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "receiptFormat": {
@@ -823,77 +315,1969 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Notes",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
-    "householdToCharge": {
-      "columnId": "c:ape:RTE0P-C",
-      "header": "Household to charge",
+    "runStatus": {
+      "columnId": "c:ape:qmqL2TE",
+      "header": "Run Status",
       "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": true,
+      "customDefaultValue": null
+    },
+    "splitReceiptName": {
+      "columnId": "c:ape:cBCWgJw",
+      "header": "Split receipt name",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": true,
+      "customDefaultValue": null
+    },
+    "isUpfrontInvestment": {
+      "columnId": "c:ape:drjacxj",
+      "header": "Is upfront investment",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
-    },
-    "householdChargeLesserAmount": {
-      "columnId": "c:ape:qNxRKzT",
-      "header": "Household charge lesser amount",
+    }
+  },
+  "columnConfig": {
+    "sheetGid": {
+      "columnId": "c:ccf:1-6AQIj",
+      "header": "Sheet GID",
       "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "hhChargeNotes": {
-      "columnId": "c:ape:5hpfRz7",
-      "header": "HH charge notes",
+    "columnId": {
+      "columnId": "c:ccf:vj9_rre",
+      "header": "Column ID",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "householdId": {
-      "columnId": "c:ape:YxOak8p",
-      "header": "Household ID",
+    "sheetTitle": {
+      "columnId": "c:ccf:949GjdB",
+      "header": "Sheet title",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "header": {
+      "columnId": "c:ccf:kqA31oK",
+      "header": "Header",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "isFormula": {
+      "columnId": "c:ccf:-99iXjo",
+      "header": "Is formula",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "valueTitle": {
+      "columnId": "c:ccf:0mh_HUU",
+      "header": "Value title",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "isActionControl": {
+      "columnId": "c:ccf:AUffOV9",
+      "header": "Is action control",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "customDefaultValue": {
+      "columnId": "c:ccf:1msMno3",
+      "header": "Custom default value",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "emptyValueAllowed": {
+      "columnId": "c:ccf:volkLl6",
+      "header": "Empty value allowed",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "household": {
+    "name": {
+      "columnId": "c:hsh:SyW98RT",
+      "header": "Name",
       "valueName": "string",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "id": {
-      "columnId": "c:ape:IAqu90A",
+      "columnId": "c:hsh:H7tT_DN",
       "header": "ID",
       "valueName": "id",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "propertyId": {
-      "columnId": "c:ape:vDmIZra",
-      "header": "Property ID",
+    "fullName": {
+      "columnId": "c:hsh:vLZN3sC",
+      "header": "Full name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "residentCount": {
+      "columnId": "c:hsh:4qbowxm",
+      "header": "Resident count",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "residentFullNames": {
+      "columnId": "c:hsh:EQ-sJ6J",
+      "header": "Resident full names",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "residentFirstNames": {
+      "columnId": "c:hsh:OmtHohZ",
+      "header": "Resident first names",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "isActive": {
+      "columnId": "c:hsh:aQIkHE-",
+      "header": "Is active",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "latestOccupancyId": {
+      "columnId": "c:hsh:OyJMhpP",
+      "header": "Latest occupancy ID",
       "valueName": "string",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "unitId": {
-      "columnId": "c:ape:Egz7qwo",
+      "columnId": "c:hsh:u91Y3WP",
       "header": "Unit ID",
       "valueName": "string",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "select": {
-      "columnId": "c:ape:6_wLySa",
-      "header": "Select",
+    "unitName": {
+      "columnId": "c:hsh:pNcth02",
+      "header": "Unit name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "propertyId": {
+      "columnId": "c:hsh:Idvy-q3",
+      "header": "Property ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyCount": {
+      "columnId": "c:hsh:Rd-Uk6W",
+      "header": "Subsidy count",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextRentNoticeDate": {
+      "columnId": "c:hsh:xAQ3UkS",
+      "header": "Next rent notice date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "2MonthsFromLastNotice": {
+      "columnId": "c:hsh:3FJjC5Q",
+      "header": "2 months from last notice",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "properNoticeBeforeNextIncrease": {
+      "columnId": "c:hsh:AM5z4Ip",
+      "header": "Proper notice before next increase",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "properNoticeAfterNextIncrease": {
+      "columnId": "c:hsh:LttiXhC",
+      "header": "Proper notice after next increase",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lastRentNoticeDate": {
+      "columnId": "c:hsh:n6lqOVy",
+      "header": "Last rent notice date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextRentChangeDate": {
+      "columnId": "c:hsh:iod7cz8",
+      "header": "Next rent change date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextRentIncreaseDateOverride": {
+      "columnId": "c:hsh:1RWAZt8",
+      "header": "Next rent increase date override",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextIncreaseDateIfNoticeNotGiven": {
+      "columnId": "c:hsh:OG8D-Ml",
+      "header": "Next increase date if notice not given",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextIncreaseDateIfNoticeGiven": {
+      "columnId": "c:hsh:vob4t8W",
+      "header": "Next increase date if notice given",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "increaseAnnualDate": {
+      "columnId": "c:hsh:mbaAzpb",
+      "header": "Increase annual date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "currentLeaseId": {
+      "columnId": "c:hsh:p76qLjy",
+      "header": "Current lease ID",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lastRentChangeDate": {
+      "columnId": "c:hsh:Ruh_lh-",
+      "header": "Last rent change date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "firstRentChargeDate": {
+      "columnId": "c:hsh:Af-dXAe",
+      "header": "First rent charge date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lastDayRented": {
+      "columnId": "c:hsh:yXmzx_D",
+      "header": "Last day rented",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "baseRentChargeMonthly": {
+      "columnId": "c:hsh:uOiGOWP",
+      "header": "Base rent charge monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextBaseRentChargeMonthly": {
+      "columnId": "c:hsh:lxsandI",
+      "header": "Next base rent charge monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "increaseBy": {
+      "columnId": "c:hsh:STBh2TO",
+      "header": "Increase by %",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextRentChargeOverride": {
+      "columnId": "c:hsh:8HU_cKW",
+      "header": "Next rent charge override",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "increaseByOverride": {
+      "columnId": "c:hsh:3h_LCAQ",
+      "header": "Increase by % override",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "increaseBy3PerYear": {
+      "columnId": "c:hsh:0HqC63O",
+      "header": "Increase by 3% per year",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextMinusLastIncreaseYears": {
+      "columnId": "c:hsh:phNi--B",
+      "header": "Next minus last increase years",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "daysInNextRentIncreaseYear": {
+      "columnId": "c:hsh:4HS9STA",
+      "header": "Days in next rent increase year",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentReasonablenessBaseRentMax": {
+      "columnId": "c:hsh:knsprbY",
+      "header": "Rent reasonableness base rent max",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGrossRentMonthly": {
+      "columnId": "c:hsh:kO67XhZ",
+      "header": "Next gross rent monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "grossRentMonthly": {
+      "columnId": "c:hsh:FWkqtWD",
+      "header": "Gross rent monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentReasonablenessGrossRentMax": {
+      "columnId": "c:hsh:-rZ5V-A",
+      "header": "Rent reasonableness gross rent max",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentCompType": {
+      "columnId": "c:hsh:lFXK_Av",
+      "header": "Rent comp type",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentStandardGrossRentMax": {
+      "columnId": "c:hsh:8GB97Dj",
+      "header": "Payment standard gross rent max",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentStandardUtilities": {
+      "columnId": "c:hsh:YCxvJqN",
+      "header": "Payment standard utilities",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentStandardName": {
+      "columnId": "c:hsh:JTmw4uO",
+      "header": "Payment standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasHeating": {
+      "columnId": "c:hsh:LZcFFoq",
+      "header": "Gas Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricHeating": {
+      "columnId": "c:hsh:eIqxDfI",
+      "header": "Electric Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasCooking": {
+      "columnId": "c:hsh:iK_JWHa",
+      "header": "Gas Cooking",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricCooking": {
+      "columnId": "c:hsh:g8lntDD",
+      "header": "Electric Cooking",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "otherElectric": {
+      "columnId": "c:hsh:HQ3oDvp",
+      "header": "Other Electric",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasWaterHeating": {
+      "columnId": "c:hsh:7jkdbQ5",
+      "header": "Gas Water Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricWaterHeating": {
+      "columnId": "c:hsh:zypRSYV",
+      "header": "Electric Water Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "waterSewer": {
+      "columnId": "c:hsh:vGKTs3B",
+      "header": "Water & Sewer",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "trashCollection": {
+      "columnId": "c:hsh:eFaSrwm",
+      "header": "Trash Collection",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyHeating": {
+      "columnId": "c:hsh:8wmWU1S",
+      "header": "District Energy Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyWaterHeating": {
+      "columnId": "c:hsh:y7LvVZa",
+      "header": "District Energy Water Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "netChargeMonthly": {
+      "columnId": "c:hsh:fa1Ovt_",
+      "header": "Net charge monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "caretakerRentReductionMonthly": {
+      "columnId": "c:hsh:IXKSBiI",
+      "header": "Caretaker rent reduction monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "petFeeMonthly": {
+      "columnId": "c:hsh:IdPxYeu",
+      "header": "Pet fee monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "hhTotalPaymentMonthly": {
+      "columnId": "c:hsh:TWp3Dxt",
+      "header": "HH total payment monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "hhBaseRentPortionMonthly": {
+      "columnId": "c:hsh:-y5wrUb",
+      "header": "HH base rent portion monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyRentPortionMonthly": {
+      "columnId": "c:hsh:aKW4ydN",
+      "header": "Subsidy rent portion monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "currentHhBalance": {
+      "columnId": "c:hsh:mD8e5Ao",
+      "header": "Current hh balance",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalHhCharges": {
+      "columnId": "c:hsh:XnSPAl2",
+      "header": "Total hh charges",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalHhPayments": {
+      "columnId": "c:hsh:SMQY3UM",
+      "header": "Total hh payments",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositCharged": {
+      "columnId": "c:hsh:wLjwHB0",
+      "header": "Deposit charged",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositReceived": {
+      "columnId": "c:hsh:oaW6hMt",
+      "header": "Deposit received",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "currentSubsidyBalance": {
+      "columnId": "c:hsh:B80CKwO",
+      "header": "Current subsidy balance",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalSubsidyCharges": {
+      "columnId": "c:hsh:yBVlLgZ",
+      "header": "Total subsidy charges",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalSubsidyPayments": {
+      "columnId": "c:hsh:5J2pkXP",
+      "header": "Total subsidy payments",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "grandPaymentTotalForTaxes": {
+      "columnId": "c:hsh:jv-H6Dh",
+      "header": "Grand payment total for taxes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "tenantPaymentTotalForTaxes": {
+      "columnId": "c:hsh:qwEBFRG",
+      "header": "Tenant payment total for taxes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "phaPaymentTotalForTaxes": {
+      "columnId": "c:hsh:mYTLX2Y",
+      "header": "PHA payment total for taxes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occCharge": {
+    "name": {
+      "columnId": "c:och:QLHA14A",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:och:jf5MJp0",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:och:Qwh8wpT",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyName": {
+      "columnId": "c:och:Cr0DHGT",
+      "header": "Occupancy name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:och:HBdV-ml",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "description": {
+      "columnId": "c:och:w0UZN29",
+      "header": "Description",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:och:H22HUfA",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountAccounted": {
+      "columnId": "c:och:O-sXDUV",
+      "header": "Amount accounted",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountUnaccounted": {
+      "columnId": "c:och:S40ncaK",
+      "header": "Amount unaccounted",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "notes": {
+      "columnId": "c:och:bMDOGg5",
+      "header": "Notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occChargeReduce": {
+    "id": {
+      "columnId": "c:ocr:_WLZPu9",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:ocr:E1durbt",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeId": {
+      "columnId": "c:ocr:gWl8dkU",
+      "header": "Charge ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeName": {
+      "columnId": "c:ocr:XDiTetf",
+      "header": "Charge name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "description": {
+      "columnId": "c:ocr:2buA3J4",
+      "header": "Description",
+      "valueName": "chargeReduceDescription",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeAmount": {
+      "columnId": "c:ocr:B3SfzGf",
+      "header": "Charge amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:ocr:aUugdC0",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "reduceFullAmount": {
+      "columnId": "c:ocr:opSishH",
+      "header": "Reduce full amount",
       "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "selectAndEnter": {
-      "columnId": "c:ape:qmqL2TE",
-      "header": "Select and enter",
+    "reduceCustomAmount": {
+      "columnId": "c:ocr:TX4VqPt",
+      "header": "Reduce custom amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occPayAllocation": {
+    "name": {
+      "columnId": "c:opa:caCLRPL",
+      "header": "Name",
       "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyName": {
+      "columnId": "c:opa:yXts8sS",
+      "header": "Occupancy name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:opa:vm_RNVw",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentId": {
+      "columnId": "c:opa:lypy6OR",
+      "header": "Payment ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "payerCategory": {
+      "columnId": "c:opa:0SIj8rw",
+      "header": "Payer category",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "payerName": {
+      "columnId": "c:opa:Y6aWH2g",
+      "header": "Payer name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "formOfPayment": {
+      "columnId": "c:opa:PpXdAcb",
+      "header": "Form of payment",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentAllocated": {
+      "columnId": "c:opa:zdaGT5A",
+      "header": "Payment allocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentDate": {
+      "columnId": "c:opa:Z6lxCz6",
+      "header": "Payment date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentAmount": {
+      "columnId": "c:opa:SUV1bxP",
+      "header": "Payment amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeId": {
+      "columnId": "c:opa:NuTmXgC",
+      "header": "Charge ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:opa:CsnRygh",
+      "header": "Occupancy id",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "propertyId": {
+      "columnId": "c:opa:lloaz5_",
+      "header": "Property id",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeDescription": {
+      "columnId": "c:opa:oh7TraW",
+      "header": "Charge description",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargePaid": {
+      "columnId": "c:opa:lzDcQoE",
+      "header": "Charge paid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeDate": {
+      "columnId": "c:opa:r02Ez4Q",
+      "header": "Charge date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeAmount": {
+      "columnId": "c:opa:zpAt_Hr",
+      "header": "Charge amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentSummary": {
+      "columnId": "c:opa:HKjqTQu",
+      "header": "Payment summary",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeSummary": {
+      "columnId": "c:opa:A2zvfbX",
+      "header": "Charge summary",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentUnallocated": {
+      "columnId": "c:opa:brENy9o",
+      "header": "Payment unallocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeUnpaid": {
+      "columnId": "c:opa:ixLhj8U",
+      "header": "Charge unpaid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:opa:xN5Cy2e",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "allocateWhat": {
+      "columnId": "c:opa:lRjic6v",
+      "header": "Allocate what",
+      "valueName": "paymentAllocateWhat",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lesserAmount": {
+      "columnId": "c:opa:pckNX_K",
+      "header": "Lesser amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "filledOut": {
+      "columnId": "c:opa:2hVYB84",
+      "header": "Filled out",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "processed": {
+      "columnId": "c:opa:vFpB5Hn",
+      "header": "Processed",
+      "valueName": "yesOrNo",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occPayment": {
+    "id": {
+      "columnId": "c:opy:NV1sUR-",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentName": {
+      "columnId": "c:opy:5mteAe6",
+      "header": "Payment name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "allocatedOccupancy": {
+      "columnId": "c:opy:f0ef23C",
+      "header": "Allocated occupancy",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:opy:ML3AsZf",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:opy:6UAbLy9",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "payerCategory": {
+      "columnId": "c:opy:XrhVhn3",
+      "header": "Payer category",
+      "valueName": "payerCategory",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "payerName": {
+      "columnId": "c:opy:EXyFtvV",
+      "header": "Payer name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "householdId": {
+      "columnId": "c:opy:Vj3Yhcu",
+      "header": "Household ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nonResidentPayerId": {
+      "columnId": "c:opy:qtts0sn",
+      "header": "Non-resident payer ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "formOfPayment": {
+      "columnId": "c:opy:-Ar7jrg",
+      "header": "Form of payment",
+      "valueName": "paymentType",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "detailsVerified": {
+      "columnId": "c:opy:OewRHtm",
+      "header": "Details verified",
+      "valueName": "yesOrNo",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountAllocated": {
+      "columnId": "c:opy:DrLXuGg",
+      "header": "Amount allocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyCount": {
+      "columnId": "c:opy:MqwGuG2",
+      "header": "Occupancy count",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountUnallocated": {
+      "columnId": "c:opy:fMa6Kmr",
+      "header": "Amount unallocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "processed": {
+      "columnId": "c:opy:xzjkI0l",
+      "header": "Processed",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "notes": {
+      "columnId": "c:opy:tI8xB-J",
+      "header": "Notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occupancy": {
+    "name": {
+      "columnId": "c:occ:1gNRAmL",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:occ:a17P6I3",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "householdId": {
+      "columnId": "c:occ:cugp4rk",
+      "header": "Household ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "residentCount": {
+      "columnId": "c:occ:9JoCJuR",
+      "header": "Resident count",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "unitId": {
+      "columnId": "c:occ:BI4kmdL",
+      "header": "Unit ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "propertyId": {
+      "columnId": "c:occ:BXyo5FX",
+      "header": "Property ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "unitStandardName": {
+      "columnId": "c:occ:6GSZt1x",
+      "header": "Unit standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "isActive": {
+      "columnId": "c:occ:CQ3Ns0l",
+      "header": "Is active",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "firstOccupancyTermsId": {
+      "columnId": "c:occ:vJLju4t",
+      "header": "First occupancy terms ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "activeOccupancyTermsId": {
+      "columnId": "c:occ:UUyv-Tx",
+      "header": "Active occupancy terms ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "latestOccupancyTermsId": {
+      "columnId": "c:occ:QPrtDUC",
+      "header": "Latest occupancy terms ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "latestEndedOccupancyTermsId": {
+      "columnId": "c:occ:lEW69sa",
+      "header": "Latest ended occupancy terms ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "latestTermsStartDate": {
+      "columnId": "c:occ:ReIW5LE",
+      "header": "Latest terms start date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "firstOccupancyDate": {
+      "columnId": "c:occ:uFu32uf",
+      "header": "First occupancy date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "latestOccupancyDate": {
+      "columnId": "c:occ:GoM5N6d",
+      "header": "Latest occupancy date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyCount": {
+      "columnId": "c:occ:ZDjMogr",
+      "header": "Subsidy count",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "buildLedgerTimeLastRan": {
+      "columnId": "c:occ:bWui7_6",
+      "header": "Build ledger, time last ran",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "buildLedgerSelect": {
+      "columnId": "c:occ:rkkBN4F",
+      "header": "Build ledger, select",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "buildLedgerRunStatus": {
+      "columnId": "c:occ:UpuGA83",
+      "header": "Build ledger, run status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "updateTermsTimeLastRan": {
+      "columnId": "c:occ:Oj151Y7",
+      "header": "Update terms, time last ran",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "updateTermsSelect": {
+      "columnId": "c:occ:WdyvFsF",
+      "header": "Update terms, select",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextTermsStartDate": {
+      "columnId": "c:occ:QBzak06",
+      "header": "Next terms start date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextBaseRentChargeMonthly": {
+      "columnId": "c:occ:N9SJ-5y",
+      "header": "Next base rent charge monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "updateTermsRunStatus": {
+      "columnId": "c:occ:bE5oQRM",
+      "header": "Update terms, run status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentChargeMonthly": {
+      "columnId": "c:occ:3CYXsaY",
+      "header": "Rent charge monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "caretakerRentReductionMonthly": {
+      "columnId": "c:occ:vjkGuQq",
+      "header": "Caretaker rent reduction monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "petFeeMonthly": {
+      "columnId": "c:occ:eLmmB-c",
+      "header": "Pet fee monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasHeating": {
+      "columnId": "c:occ:9rHq_82",
+      "header": "Gas Heating",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricHeating": {
+      "columnId": "c:occ:5Mi3j1C",
+      "header": "Electric Heating",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasCooking": {
+      "columnId": "c:occ:TQxFE_r",
+      "header": "Gas Cooking",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricCooking": {
+      "columnId": "c:occ:0s6D5Wj",
+      "header": "Electric Cooking",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "otherElectric": {
+      "columnId": "c:occ:7VpBKcv",
+      "header": "Other Electric",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasWaterHeating": {
+      "columnId": "c:occ:YarwO8j",
+      "header": "Gas Water Heating",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricWaterHeating": {
+      "columnId": "c:occ:9J0o9Hw",
+      "header": "Electric Water Heating",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "waterSewer": {
+      "columnId": "c:occ:pjpAsK8",
+      "header": "Water & Sewer",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "trashCollection": {
+      "columnId": "c:occ:zHYOvut",
+      "header": "Trash Collection",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyHeating": {
+      "columnId": "c:occ:leS8Yug",
+      "header": "District Energy Heating",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyWaterHeating": {
+      "columnId": "c:occ:Uqek_yL",
+      "header": "District Energy Water Heating",
+      "valueName": "checkbox",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextCaretakerRentReductionMonthly": {
+      "columnId": "c:occ:SNX3ktK",
+      "header": "Next caretaker rent reduction monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextPetFeeMonthly": {
+      "columnId": "c:occ:hphoFPB",
+      "header": "Next pet fee monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasHeating": {
+      "columnId": "c:occ:taWBpdb",
+      "header": "Next gas heating",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextElectricHeating": {
+      "columnId": "c:occ:yrrKHG-",
+      "header": "Next electric heating",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasCooking": {
+      "columnId": "c:occ:uQ_6tbq",
+      "header": "Next gas cooking",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextElectricCooking": {
+      "columnId": "c:occ:8qPUO9t",
+      "header": "Next electric cooking",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextOtherElectric": {
+      "columnId": "c:occ:KYfara6",
+      "header": "Next other electric",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextGasWaterHeating": {
+      "columnId": "c:occ:4BkzVZM",
+      "header": "Next gas water heating",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextElectricWaterHeating": {
+      "columnId": "c:occ:0p1wSPK",
+      "header": "Next electric water heating",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextWaterSewer": {
+      "columnId": "c:occ:_zg_IwQ",
+      "header": "Next water & sewer",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextTrashCollection": {
+      "columnId": "c:occ:YncWdva",
+      "header": "Next trash collection",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextDistrictEnergyHeating": {
+      "columnId": "c:occ:L3iBT3R",
+      "header": "Next district energy heating",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextDistrictEnergyWaterHeating": {
+      "columnId": "c:occ:1acd-35",
+      "header": "Next district energy water heating",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextTermsEndDate": {
+      "columnId": "c:occ:CyaqAOx",
+      "header": "Next terms end date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": true,
+      "customDefaultValue": null
+    },
+    "nextTermsNoticeSentDate": {
+      "columnId": "c:occ:P5wcm1S",
+      "header": "Next terms notice sent date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextTermsNotes": {
+      "columnId": "c:occ:XlxDugC",
+      "header": "Next terms notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occupancyLedger": {
+    "date": {
+      "columnId": "c:old:hAdETIR",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "issuer": {
+      "columnId": "c:old:hNoOjyD",
+      "header": "Issuer",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "description": {
+      "columnId": "c:old:3CQQ2L6",
+      "header": "Description",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "charge": {
+      "columnId": "c:old:HvMQgG6",
+      "header": "Charge",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "payment": {
+      "columnId": "c:old:SBXXPBY",
+      "header": "Payment",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountOwed": {
+      "columnId": "c:old:Npm6xGn",
+      "header": "Amount owed",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "notes": {
+      "columnId": "c:old:UwjAgCt",
+      "header": "Notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "securityDeposit": {
+      "columnId": "c:old:K4OM_hu",
+      "header": "Security deposit",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occupancyTerms": {
+    "residentAndUnitName": {
+      "columnId": "c:otr:PrwDtuG",
+      "header": "Resident and unit name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:otr:vOQK3mp",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:otr:QHvg4Sj",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "noticeDate": {
+      "columnId": "c:otr:uaYOrFx",
+      "header": "Notice date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "startDate": {
+      "columnId": "c:otr:2UdtWxh",
+      "header": "Start date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "endDate": {
+      "columnId": "c:otr:aek7dXD",
+      "header": "End date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": true,
+      "customDefaultValue": null
+    },
+    "rentChargeMonthly": {
+      "columnId": "c:otr:WWDYJ4o",
+      "header": "Rent charge monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "caretakerRentReductionMonthly": {
+      "columnId": "c:otr:nR84uwS",
+      "header": "Caretaker rent reduction monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "petFeeMonthly": {
+      "columnId": "c:otr:2wdl3LG",
+      "header": "Pet fee monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasHeating": {
+      "columnId": "c:otr:f_63oWc",
+      "header": "Gas Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricHeating": {
+      "columnId": "c:otr:noK1Dd-",
+      "header": "Electric Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasCooking": {
+      "columnId": "c:otr:TSaPmOf",
+      "header": "Gas Cooking",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricCooking": {
+      "columnId": "c:otr:q2wqaed",
+      "header": "Electric Cooking",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "otherElectric": {
+      "columnId": "c:otr:Sa8QhH7",
+      "header": "Other Electric",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasWaterHeating": {
+      "columnId": "c:otr:7lIs-Ln",
+      "header": "Gas Water Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricWaterHeating": {
+      "columnId": "c:otr:YcnKxHz",
+      "header": "Electric Water Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "waterSewer": {
+      "columnId": "c:otr:CdKTvxu",
+      "header": "Water & Sewer",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "trashCollection": {
+      "columnId": "c:otr:CH8bAB_",
+      "header": "Trash Collection",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyHeating": {
+      "columnId": "c:otr:mwiumT6",
+      "header": "District Energy Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyWaterHeating": {
+      "columnId": "c:otr:Cdr_hI7",
+      "header": "District Energy Water Heating",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "notes": {
+      "columnId": "c:otr:HOKxKIs",
+      "header": "Notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "occupancyYear": {
+    "name": {
+      "columnId": "c:oyr:yfZK2o-",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:oyr:1OxlfHc",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:oyr:I9YfD0u",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "year": {
+      "columnId": "c:oyr:CNKBWjp",
+      "header": "Year",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "residentCount": {
+      "columnId": "c:oyr:Wo1Ku-N",
+      "header": "Resident count",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "householdRentPaidPerResident": {
+      "columnId": "c:oyr:pH8A6yN",
+      "header": "Household rent paid per resident",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "caretakerRentReducedPerResident": {
+      "columnId": "c:oyr:l6TTWUi",
+      "header": "Caretaker rent reduced per resident",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalAttributedPerResident": {
+      "columnId": "c:oyr:pkGdFbB",
+      "header": "Total attributed per resident",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalAttributedToOccupancy": {
+      "columnId": "c:oyr:Ey2y1Xl",
+      "header": "Total attributed to occupancy",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "caretakerRentReduced": {
+      "columnId": "c:oyr:Pmj1PFp",
+      "header": "Caretaker rent reduced",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "householdRentPaid": {
+      "columnId": "c:oyr:WOUr2n9",
+      "header": "Household rent paid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "firstDateChargedRentInYear": {
+      "columnId": "c:oyr:M4fJ0w8",
+      "header": "First date charged rent in year",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lastDateChargedRentInYear": {
+      "columnId": "c:oyr:a7KUWNx",
+      "header": "Last date charged rent in year",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "firstRentChargeDate": {
+      "columnId": "c:oyr:uHDqm-I",
+      "header": "First rent charge date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lastDateChargedRent": {
+      "columnId": "c:oyr:UgwCMFZ",
+      "header": "Last date charged rent",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyRentPaid": {
+      "columnId": "c:oyr:cMwTCw9",
+      "header": "Subsidy rent paid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "scrollSpace": {
+      "columnId": "c:oyr:hY40794",
+      "header": "_scroll space",
+      "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -1653,6 +3037,1224 @@ export const columnConfigs = makeColumnConfigs({
       "customDefaultValue": null
     }
   },
+  "propertyExpense": {
+    "expenseName": {
+      "columnId": "c:pex:AWBDank",
+      "header": "Expense name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:pex:jnoYPQx",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "propertyId": {
+      "columnId": "c:pex:MCn6Kvx",
+      "header": "Property ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:pex:dNrx6yp",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "year": {
+      "columnId": "c:pex:3XD-BQu",
+      "header": "Year",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "propertyYearId": {
+      "columnId": "c:pex:FgKwCJe",
+      "header": "Property year ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "unitId": {
+      "columnId": "c:pex:P_TAHem",
+      "header": "Unit ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "billerName": {
+      "columnId": "c:pex:kEVAHnv",
+      "header": "Biller name",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "description": {
+      "columnId": "c:pex:eX0lqhK",
+      "header": "Description",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "expenseCategory": {
+      "columnId": "c:pex:ZtOH0hy",
+      "header": "Expense category",
+      "valueName": "expenseCategory",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "receiptFormat": {
+      "columnId": "c:pex:Ogxr8Qq",
+      "header": "Receipt format",
+      "valueName": "receiptFormat",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:pex:h_EK-rA",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "taxDeductibleAmount": {
+      "columnId": "c:pex:01LmwKI",
+      "header": "Tax deductible amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "taxAdjust": {
+      "columnId": "c:pex:hUfiMGU",
+      "header": "Tax adjust",
+      "valueName": "residenceTaxAdjust",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "isUpfrontInvestment": {
+      "columnId": "c:pex:EdmSWwR",
+      "header": "Is upfront investment",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "notes": {
+      "columnId": "c:pex:MhdHdwr",
+      "header": "Notes",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "splitReceiptId": {
+      "columnId": "c:pex:Iw7ytdB",
+      "header": "Split receipt ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "sheetConfig": {
+    "sheetGid": {
+      "columnId": "c:scf:WgnoW8d",
+      "header": "Sheet GID",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "sheetTitle": {
+      "columnId": "c:scf:0Ctj9xZ",
+      "header": "Sheet title",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "hasIdColumn": {
+      "columnId": "c:scf:Z3g5nmg",
+      "header": "Has ID column",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "letApiAccess": {
+      "columnId": "c:scf:GOJ0ixi",
+      "header": "Let api access",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "idPrefix": {
+      "columnId": "c:scf:3dZ5h-J",
+      "header": "ID prefix",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "idPrefixIsUniqueOrEmpty": {
+      "columnId": "c:scf:cK5WM0v",
+      "header": "ID prefix Is unique or empty",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "splitRecipet": {
+    "name": {
+      "columnId": "c:srct:CHhpNpt",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:srct:zrdUEcC",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:srct:33NEZIm",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:srct:M_dy7_m",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "descriptor": {
+      "columnId": "c:srct:CeBmFm4",
+      "header": "Descriptor",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountAllocated": {
+      "columnId": "c:srct:b97l0T7",
+      "header": "Amount allocated",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "spreadsheetConfig": {
+    "idDelimiter": {
+      "columnId": "c:scf:8uxVA53",
+      "header": "ID delimiter",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nameDelimiter": {
+      "columnId": "c:scf:JI6_3tB",
+      "header": "Name delimiter",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "columnIdRowIndexBase0": {
+      "columnId": "c:scf:Kt9oKSY",
+      "header": "Column ID row index base 0",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "actionRowIndexBase0": {
+      "columnId": "c:scf:GKSJHu0",
+      "header": "Action row index base 0",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "headerRowIndexBase0": {
+      "columnId": "c:scf:58r8zkF",
+      "header": "Header row index base 0",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "topBodyRowIndexBase0": {
+      "columnId": "c:scf:U4WFNA4",
+      "header": "Top body row index base 0",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "idHeader": {
+      "columnId": "c:sscf:XOpXA8U",
+      "header": "ID header",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "selectorEndpointSuffix": {
+      "columnId": "c:sscf:YODUzqy",
+      "header": "Selector endpoint suffix",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "runnerEndpointSuffix": {
+      "columnId": "c:sscf:1nbfnw6",
+      "header": "Runner endpoint suffix",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "spreadsheetControls": {
+    "fillRowIdsRunStatus": {
+      "columnId": "c:sct:ry4RjGc",
+      "header": "Fill row IDs, run status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "syncConfigSheetRowsTimeLastRan": {
+      "columnId": "c:sct:9SE5ZSP",
+      "header": "Sync config sheet rows, time last ran",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "syncConfigSheetRowsRunStatus": {
+      "columnId": "c:sct:M2bLafa",
+      "header": "Sync config sheet rows, run status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "tableControlsSpace": {
+      "columnId": "c:sct:jIYLttI",
+      "header": "Table controls space",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "fillRowIdsTimeLastRan": {
+      "columnId": "c:sct:9C6CjOp",
+      "header": "Fill row IDs, time last ran",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subPayAllocation": {
+    "name": {
+      "columnId": "c:spa:BS1Efgp",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:spa:m3PZSvz",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentId": {
+      "columnId": "c:spa:_TA4Ofb",
+      "header": "Payment ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentDate": {
+      "columnId": "c:spa:TIFgXb4",
+      "header": "Payment date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "formOfPayment": {
+      "columnId": "c:spa:m3x2kTk",
+      "header": "Form of payment",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentAllocated": {
+      "columnId": "c:spa:W69ALZS",
+      "header": "Payment allocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeId": {
+      "columnId": "c:spa:7-wZLoZ",
+      "header": "Charge ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeDescription": {
+      "columnId": "c:spa:bFHogF4",
+      "header": "Charge description",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyAgreementId": {
+      "columnId": "c:spa:WLJsNxE",
+      "header": "Subsidy agreement ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:spa:8HCbTb9",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "propertyId": {
+      "columnId": "c:spa:knEaE_D",
+      "header": "Property ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentUnallocated": {
+      "columnId": "c:spa:BBxNLEO",
+      "header": "Payment unallocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "chargeUnpaid": {
+      "columnId": "c:spa:8SuRcZc",
+      "header": "Charge unpaid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:spa:xkTbhwg",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "allocateFullAmount": {
+      "columnId": "c:spa:qxM6Q5V",
+      "header": "Allocate full amount",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lesserAmount": {
+      "columnId": "c:spa:rjKa2fK",
+      "header": "Lesser amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "filledOut": {
+      "columnId": "c:spa:SvFhFXF",
+      "header": "Filled out",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "processed": {
+      "columnId": "c:spa:_iZUS4s",
+      "header": "Processed",
+      "valueName": "yesOrNo",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subsidyAgreement": {
+    "name": {
+      "columnId": "c:sag:hQoSOxB",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:sag:tIWV4dy",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:sag:YjEcwrJ",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyProgramId": {
+      "columnId": "c:sag:MKQ-keK",
+      "header": "Subsidy program ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentGroupId": {
+      "columnId": "c:sag:5uzrP0L",
+      "header": "Payment group ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentGroupName": {
+      "columnId": "c:sag:WcIfyGa",
+      "header": "Payment group name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "agreementStandardName": {
+      "columnId": "c:sag:_wHCrTy",
+      "header": "Agreement standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "programStandardName": {
+      "columnId": "c:sag:yMQDMwP",
+      "header": "Program standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "unitStandardName": {
+      "columnId": "c:sag:wuEEV97",
+      "header": "Unit standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "annualRenewalMonth": {
+      "columnId": "c:sag:UyV3Uli",
+      "header": "Annual renewal month",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "annualInspectionMonth": {
+      "columnId": "c:sag:H1kNqWl",
+      "header": "Annual inspection month",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyContractStartDate": {
+      "columnId": "c:sag:Bzhj-RM",
+      "header": "Subsidy contract start date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentPortionMonthly": {
+      "columnId": "c:sag:xczn9bG",
+      "header": "Rent portion monthly",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextSubsidyContractStartDate": {
+      "columnId": "c:sag:zIydEwk",
+      "header": "Next subsidy contract start date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nextRentPortionMonthly": {
+      "columnId": "c:sag:dFk3qTP",
+      "header": "Next rent portion monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "updateSubsidyContractEnter": {
+      "columnId": "c:sag:DDtS-Mn",
+      "header": "Update subsidy contract enter",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyWorkerId": {
+      "columnId": "c:sag:xaLuw-U",
+      "header": "Subsidy worker ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyWorkerFirstName": {
+      "columnId": "c:sag:SQvmt9U",
+      "header": "Subsidy worker first name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyWorkerEmail": {
+      "columnId": "c:sag:03q2Isd",
+      "header": "Subsidy worker email",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalCharges": {
+      "columnId": "c:sag:C2viRB_",
+      "header": "Total charges",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "totalPayments": {
+      "columnId": "c:sag:FrOty3H",
+      "header": "Total payments",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "balance": {
+      "columnId": "c:sag:UUFNn1O",
+      "header": "Balance",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subsidyCharge": {
+    "name": {
+      "columnId": "c:sch:t6bth7v",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:sch:h3V4ebn",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyAgreementId": {
+      "columnId": "c:sch:41KCH28",
+      "header": "Subsidy agreement ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:sch:DM4WwNz",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "description": {
+      "columnId": "c:sch:24ulbpU",
+      "header": "Description",
+      "valueName": "chargeDescription",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:sch:cofaPN_",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountPaid": {
+      "columnId": "c:sch:rHIMNPr",
+      "header": "Amount paid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountUnpaid": {
+      "columnId": "c:sch:6yLAQIR",
+      "header": "Amount unpaid",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subsidyPayment": {
+    "date": {
+      "columnId": "c:spy:qs_oGze",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:spy:BZy8MwJ",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "allocationName": {
+      "columnId": "c:spy:sp9AKTD",
+      "header": "Allocation name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyProgramId": {
+      "columnId": "c:spy:5sgkWsR",
+      "header": "Subsidy program ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "numAllocated": {
+      "columnId": "c:spy:P5VBi4R",
+      "header": "Num allocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "formOfPayment": {
+      "columnId": "c:spy:gFJlkUq",
+      "header": "Form of payment",
+      "valueName": "paymentType",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amount": {
+      "columnId": "c:spy:enN2U3k",
+      "header": "Amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "detailsVerified": {
+      "columnId": "c:spy:6zhfIoI",
+      "header": "Details verified",
+      "valueName": "yesOrNo",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountAllocated": {
+      "columnId": "c:spy:l--j7ZZ",
+      "header": "Amount allocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "amountUnallocated": {
+      "columnId": "c:spy:sVn04cq",
+      "header": "Amount unallocated",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "processed": {
+      "columnId": "c:spy:2o6HzvE",
+      "header": "Processed",
+      "valueName": "yesOrNo",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subsidyProgram": {
+    "name": {
+      "columnId": "c:spr:E6cdHOL",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:spr:gLnTyIn",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nonResidentPayerId": {
+      "columnId": "c:spr:yFxrnQ2",
+      "header": "Non-resident payer ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "nonResidentPayerName": {
+      "columnId": "c:spr:RGOYqHD",
+      "header": "Non-resident payer name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "programStandardName": {
+      "columnId": "c:spr:xhY7jab",
+      "header": "Program standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentStandardType": {
+      "columnId": "c:spr:kTYj3l2",
+      "header": "Payment standard type",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentStandardArea": {
+      "columnId": "c:spr:xvJgZPn",
+      "header": "Payment standard area",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subsidyTerms": {
+    "name": {
+      "columnId": "c:str:Veo5DXE",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:str:Jqh2XHY",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyAgreementId": {
+      "columnId": "c:str:nzX-656",
+      "header": "Subsidy agreement ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:str:YIs9xEX",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "subsidyProgramId": {
+      "columnId": "c:str:SyfXXaU",
+      "header": "Subsidy program ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyTermsId": {
+      "columnId": "c:str:zm41i2U",
+      "header": "Occupancy terms ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "rentChargeMonthly": {
+      "columnId": "c:str:a3ojqya",
+      "header": "Rent charge monthly",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "startDate": {
+      "columnId": "c:str:Y9RzkGf",
+      "header": "Start date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "endDate": {
+      "columnId": "c:str:jx8KNp2",
+      "header": "End date",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "grossRent": {
+      "columnId": "c:str:WE0qc5u",
+      "header": "Gross rent",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "grossUtilities": {
+      "columnId": "c:str:Q6udYub",
+      "header": "Gross utilities",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "paymentStandardName": {
+      "columnId": "c:str:uy9Vhdu",
+      "header": "Payment standard name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasHeating": {
+      "columnId": "c:str:JcE8Av5",
+      "header": "Gas Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricHeating": {
+      "columnId": "c:str:PgOI6WX",
+      "header": "Electric Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasCooking": {
+      "columnId": "c:str:9hR6Xyk",
+      "header": "Gas Cooking",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricCooking": {
+      "columnId": "c:str:TfYZXlu",
+      "header": "Electric Cooking",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "otherElectric": {
+      "columnId": "c:str:OKO-FEQ",
+      "header": "Other Electric",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "gasWaterHeating": {
+      "columnId": "c:str:tVqD6Ow",
+      "header": "Gas Water Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "electricWaterHeating": {
+      "columnId": "c:str:XH7h1mh",
+      "header": "Electric Water Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "waterSewer": {
+      "columnId": "c:str:TAtNJrF",
+      "header": "Water & Sewer",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "trashCollection": {
+      "columnId": "c:str:UycNONt",
+      "header": "Trash Collection",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyHeating": {
+      "columnId": "c:str:KSs17w-",
+      "header": "District Energy Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "districtEnergyWaterHeating": {
+      "columnId": "c:str:rnmuxE5",
+      "header": "District Energy Water Heating",
+      "valueName": "boolean",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "space": {
+      "columnId": "c:str:9OHmvZJ",
+      "header": "_space",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "subsidyWorker": {
+    "firstName": {
+      "columnId": "c:swr:_sQNkf0",
+      "header": "First name",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "lastName": {
+      "columnId": "c:swr:hm_DV6y",
+      "header": "Last name",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:swr:x2vFg9I",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "email": {
+      "columnId": "c:swr:ugLjZRA",
+      "header": "Email",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "backupEmail": {
+      "columnId": "c:swr:9Ub7LFF",
+      "header": "Backup email",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "phoneNumber": {
+      "columnId": "c:swr:15h-Szi",
+      "header": "Phone number",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "organization": {
+      "columnId": "c:swr:ySSi9kt",
+      "header": "Organization",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "programs": {
+      "columnId": "c:swr:PES3Rdd",
+      "header": "Programs",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "covers": {
+      "columnId": "c:swr:gx4X8fs",
+      "header": "Covers",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "updateDate": {
+      "columnId": "c:swr:2GsBCol",
+      "header": "Update date",
+      "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
+  "test": {
+    "name": {
+      "columnId": "c:tst:Xr9XZGV",
+      "header": "Name",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:tst:-uGn8dY",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "number": {
+      "columnId": "c:tst:VzKaUqz",
+      "header": "Number",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "dropdown": {
+      "columnId": "c:tst:cQEliR8",
+      "header": "Dropdown",
+      "valueName": "yesOrNo",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "date": {
+      "columnId": "c:test:HL-G329",
+      "header": "Date",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "sampledBoolean": {
+      "columnId": "c:test:KLMZlb4",
+      "header": "Sampled Boolean",
+      "valueName": "boolean",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    }
+  },
   "unit": {
     "name": {
       "columnId": "c:unt:jC9vwrI",
@@ -1933,2814 +4535,288 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
-    }
-  },
-  "household": {
-    "name": {
-      "columnId": "c:hsh:SyW98RT",
-      "header": "Name",
+    },
+    "areaAddress": {
+      "columnId": "c:unt:N71Gdxg",
+      "header": "Area address",
       "valueName": "string",
       "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:hsh:H7tT_DN",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "fullName": {
-      "columnId": "c:hsh:vLZN3sC",
-      "header": "Full name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "residentCount": {
-      "columnId": "c:hsh:4qbowxm",
-      "header": "Resident count",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "residentFullNames": {
-      "columnId": "c:hsh:EQ-sJ6J",
-      "header": "Resident full names",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "residentFirstNames": {
-      "columnId": "c:hsh:OmtHohZ",
-      "header": "Resident first names",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "isActive": {
-      "columnId": "c:hsh:aQIkHE-",
-      "header": "Is active",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "latestOccupancyId": {
-      "columnId": "c:hsh:OyJMhpP",
-      "header": "Latest occupancy ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitId": {
-      "columnId": "c:hsh:u91Y3WP",
-      "header": "Unit ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitName": {
-      "columnId": "c:hsh:pNcth02",
-      "header": "Unit name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "propertyId": {
-      "columnId": "c:hsh:Idvy-q3",
-      "header": "Property ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyCount": {
-      "columnId": "c:hsh:Rd-Uk6W",
-      "header": "Subsidy count",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextRentNoticeDate": {
-      "columnId": "c:hsh:xAQ3UkS",
-      "header": "Next rent notice date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "2MonthsFromLastNotice": {
-      "columnId": "c:hsh:3FJjC5Q",
-      "header": "2 months from last notice",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "properNoticeBeforeNextIncrease": {
-      "columnId": "c:hsh:AM5z4Ip",
-      "header": "Proper notice before next increase",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "properNoticeAfterNextIncrease": {
-      "columnId": "c:hsh:LttiXhC",
-      "header": "Proper notice after next increase",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "lastRentNoticeDate": {
-      "columnId": "c:hsh:n6lqOVy",
-      "header": "Last rent notice date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextRentChangeDate": {
-      "columnId": "c:hsh:iod7cz8",
-      "header": "Next rent change date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextRentIncreaseDateOverride": {
-      "columnId": "c:hsh:1RWAZt8",
-      "header": "Next rent increase date override",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextIncreaseDateIfNoticeNotGiven": {
-      "columnId": "c:hsh:OG8D-Ml",
-      "header": "Next increase date if notice not given",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextIncreaseDateIfNoticeGiven": {
-      "columnId": "c:hsh:vob4t8W",
-      "header": "Next increase date if notice given",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "increaseAnnualDate": {
-      "columnId": "c:hsh:mbaAzpb",
-      "header": "Increase annual date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "currentLeaseId": {
-      "columnId": "c:hsh:p76qLjy",
-      "header": "Current lease ID",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "lastRentChangeDate": {
-      "columnId": "c:hsh:Ruh_lh-",
-      "header": "Last rent change date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "firstRentChargeDate": {
-      "columnId": "c:hsh:Af-dXAe",
-      "header": "First rent charge date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "lastDayRented": {
-      "columnId": "c:hsh:yXmzx_D",
-      "header": "Last day rented",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseRentChargeMonthly": {
-      "columnId": "c:hsh:uOiGOWP",
-      "header": "Base rent charge monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextBaseRentChargeMonthly": {
-      "columnId": "c:hsh:lxsandI",
-      "header": "Next base rent charge monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "increaseBy": {
-      "columnId": "c:hsh:STBh2TO",
-      "header": "Increase by %",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextRentChargeOverride": {
-      "columnId": "c:hsh:8HU_cKW",
-      "header": "Next rent charge override",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "increaseByOverride": {
-      "columnId": "c:hsh:3h_LCAQ",
-      "header": "Increase by % override",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "increaseBy3PerYear": {
-      "columnId": "c:hsh:0HqC63O",
-      "header": "Increase by 3% per year",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextMinusLastIncreaseYears": {
-      "columnId": "c:hsh:phNi--B",
-      "header": "Next minus last increase years",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "daysInNextRentIncreaseYear": {
-      "columnId": "c:hsh:4HS9STA",
-      "header": "Days in next rent increase year",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentReasonablenessBaseRentMax": {
-      "columnId": "c:hsh:knsprbY",
-      "header": "Rent reasonableness base rent max",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextGrossRentMonthly": {
-      "columnId": "c:hsh:kO67XhZ",
-      "header": "Next gross rent monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "grossRentMonthly": {
-      "columnId": "c:hsh:FWkqtWD",
-      "header": "Gross rent monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentReasonablenessGrossRentMax": {
-      "columnId": "c:hsh:-rZ5V-A",
-      "header": "Rent reasonableness gross rent max",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentCompType": {
-      "columnId": "c:hsh:lFXK_Av",
-      "header": "Rent comp type",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentStandardGrossRentMax": {
-      "columnId": "c:hsh:8GB97Dj",
-      "header": "Payment standard gross rent max",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentStandardUtilities": {
-      "columnId": "c:hsh:YCxvJqN",
-      "header": "Payment standard utilities",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentStandardName": {
-      "columnId": "c:hsh:JTmw4uO",
-      "header": "Payment standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasHeating": {
-      "columnId": "c:hsh:LZcFFoq",
-      "header": "Gas Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricHeating": {
-      "columnId": "c:hsh:eIqxDfI",
-      "header": "Electric Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasCooking": {
-      "columnId": "c:hsh:iK_JWHa",
-      "header": "Gas Cooking",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricCooking": {
-      "columnId": "c:hsh:g8lntDD",
-      "header": "Electric Cooking",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "otherElectric": {
-      "columnId": "c:hsh:HQ3oDvp",
-      "header": "Other Electric",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasWaterHeating": {
-      "columnId": "c:hsh:7jkdbQ5",
-      "header": "Gas Water Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricWaterHeating": {
-      "columnId": "c:hsh:zypRSYV",
-      "header": "Electric Water Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "waterSewer": {
-      "columnId": "c:hsh:vGKTs3B",
-      "header": "Water & Sewer",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "trashCollection": {
-      "columnId": "c:hsh:eFaSrwm",
-      "header": "Trash Collection",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyHeating": {
-      "columnId": "c:hsh:8wmWU1S",
-      "header": "District Energy Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyWaterHeating": {
-      "columnId": "c:hsh:y7LvVZa",
-      "header": "District Energy Water Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "netChargeMonthly": {
-      "columnId": "c:hsh:fa1Ovt_",
-      "header": "Net charge monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "caretakerRentReductionMonthly": {
-      "columnId": "c:hsh:IXKSBiI",
-      "header": "Caretaker rent reduction monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "petFeeMonthly": {
-      "columnId": "c:hsh:IdPxYeu",
-      "header": "Pet fee monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "hhTotalPaymentMonthly": {
-      "columnId": "c:hsh:TWp3Dxt",
-      "header": "HH total payment monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "hhBaseRentPortionMonthly": {
-      "columnId": "c:hsh:-y5wrUb",
-      "header": "HH base rent portion monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyRentPortionMonthly": {
-      "columnId": "c:hsh:aKW4ydN",
-      "header": "Subsidy rent portion monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "currentHhBalance": {
-      "columnId": "c:hsh:mD8e5Ao",
-      "header": "Current hh balance",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalHhCharges": {
-      "columnId": "c:hsh:XnSPAl2",
-      "header": "Total hh charges",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalHhPayments": {
-      "columnId": "c:hsh:SMQY3UM",
-      "header": "Total hh payments",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "depositCharged": {
-      "columnId": "c:hsh:wLjwHB0",
-      "header": "Deposit charged",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "depositReceived": {
-      "columnId": "c:hsh:oaW6hMt",
-      "header": "Deposit received",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "currentSubsidyBalance": {
-      "columnId": "c:hsh:B80CKwO",
-      "header": "Current subsidy balance",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalSubsidyCharges": {
-      "columnId": "c:hsh:yBVlLgZ",
-      "header": "Total subsidy charges",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalSubsidyPayments": {
-      "columnId": "c:hsh:5J2pkXP",
-      "header": "Total subsidy payments",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "grandPaymentTotalForTaxes": {
-      "columnId": "c:hsh:jv-H6Dh",
-      "header": "Grand payment total for taxes",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "tenantPaymentTotalForTaxes": {
-      "columnId": "c:hsh:qwEBFRG",
-      "header": "Tenant payment total for taxes",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "phaPaymentTotalForTaxes": {
-      "columnId": "c:hsh:mYTLX2Y",
-      "header": "PHA payment total for taxes",
-      "valueName": "string",
-      "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
-  "occupancy": {
-    "name": {
-      "columnId": "c:occ:1gNRAmL",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:occ:a17P6I3",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "householdId": {
-      "columnId": "c:occ:cugp4rk",
-      "header": "Household ID",
+  "valueConfig": {
+    "tableControlsSpace": {
+      "columnId": "c:vcf:_ocORnq",
+      "header": "Table controls space",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "residentCount": {
-      "columnId": "c:occ:9JoCJuR",
-      "header": "Resident count",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitId": {
-      "columnId": "c:occ:BI4kmdL",
-      "header": "Unit ID",
+    "yesOrNo": {
+      "columnId": "c:vcf:x5cyAIy",
+      "header": "Yes or no",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "propertyId": {
-      "columnId": "c:occ:BXyo5FX",
-      "header": "Property ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitStandardName": {
-      "columnId": "c:occ:6GSZt1x",
-      "header": "Unit standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "isActive": {
-      "columnId": "c:occ:CQ3Ns0l",
-      "header": "Is active",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "firstOccupancyTermsId": {
-      "columnId": "c:occ:vJLju4t",
-      "header": "First occupancy terms ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "activeOccupancyTermsId": {
-      "columnId": "c:occ:UUyv-Tx",
-      "header": "Active occupancy terms ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "latestOccupancyTermsId": {
-      "columnId": "c:occ:QPrtDUC",
-      "header": "Latest occupancy terms ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "latestEndedOccupancyTermsId": {
-      "columnId": "c:occ:lEW69sa",
-      "header": "Latest ended occupancy terms ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "latestTermsStartDate": {
-      "columnId": "c:occ:ReIW5LE",
-      "header": "Latest terms start date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "firstOccupancyDate": {
-      "columnId": "c:occ:uFu32uf",
-      "header": "First occupancy date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "latestOccupancyDate": {
-      "columnId": "c:occ:GoM5N6d",
-      "header": "Latest occupancy date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyCount": {
-      "columnId": "c:occ:ZDjMogr",
-      "header": "Subsidy count",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "buildLedgerTimeLastRan": {
-      "columnId": "c:occ:bWui7_6",
-      "header": "Build ledger, time last ran",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "buildLedgerSelect": {
-      "columnId": "c:occ:rkkBN4F",
-      "header": "Build ledger, select",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "buildLedgerRunStatus": {
-      "columnId": "c:occ:UpuGA83",
-      "header": "Build ledger, run status",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "updateTermsTimeLastRan": {
-      "columnId": "c:occ:Oj151Y7",
-      "header": "Update terms, time last ran",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "updateTermsSelect": {
-      "columnId": "c:occ:WdyvFsF",
-      "header": "Update terms, select",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextTermsStartDate": {
-      "columnId": "c:occ:QBzak06",
-      "header": "Next terms start date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextBaseRentChargeMonthly": {
-      "columnId": "c:occ:N9SJ-5y",
-      "header": "Next base rent charge monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "updateTermsRunStatus": {
-      "columnId": "c:occ:bE5oQRM",
-      "header": "Update terms, run status",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentChargeMonthly": {
-      "columnId": "c:occ:3CYXsaY",
-      "header": "Rent charge monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "caretakerRentReductionMonthly": {
-      "columnId": "c:occ:vjkGuQq",
-      "header": "Caretaker rent reduction monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "petFeeMonthly": {
-      "columnId": "c:occ:eLmmB-c",
-      "header": "Pet fee monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasHeating": {
-      "columnId": "c:occ:9rHq_82",
-      "header": "Gas Heating",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricHeating": {
-      "columnId": "c:occ:5Mi3j1C",
-      "header": "Electric Heating",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasCooking": {
-      "columnId": "c:occ:TQxFE_r",
-      "header": "Gas Cooking",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricCooking": {
-      "columnId": "c:occ:0s6D5Wj",
-      "header": "Electric Cooking",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "otherElectric": {
-      "columnId": "c:occ:7VpBKcv",
-      "header": "Other Electric",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasWaterHeating": {
-      "columnId": "c:occ:YarwO8j",
-      "header": "Gas Water Heating",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricWaterHeating": {
-      "columnId": "c:occ:9J0o9Hw",
-      "header": "Electric Water Heating",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "waterSewer": {
-      "columnId": "c:occ:pjpAsK8",
-      "header": "Water & Sewer",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "trashCollection": {
-      "columnId": "c:occ:zHYOvut",
-      "header": "Trash Collection",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyHeating": {
-      "columnId": "c:occ:leS8Yug",
-      "header": "District Energy Heating",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyWaterHeating": {
-      "columnId": "c:occ:Uqek_yL",
-      "header": "District Energy Water Heating",
-      "valueName": "checkbox",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextCaretakerRentReductionMonthly": {
-      "columnId": "c:occ:SNX3ktK",
-      "header": "Next caretaker rent reduction monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextPetFeeMonthly": {
-      "columnId": "c:occ:hphoFPB",
-      "header": "Next pet fee monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextGasHeating": {
-      "columnId": "c:occ:taWBpdb",
-      "header": "Next gas heating",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextElectricHeating": {
-      "columnId": "c:occ:yrrKHG-",
-      "header": "Next electric heating",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextGasCooking": {
-      "columnId": "c:occ:uQ_6tbq",
-      "header": "Next gas cooking",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextElectricCooking": {
-      "columnId": "c:occ:8qPUO9t",
-      "header": "Next electric cooking",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextOtherElectric": {
-      "columnId": "c:occ:KYfara6",
-      "header": "Next other electric",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextGasWaterHeating": {
-      "columnId": "c:occ:4BkzVZM",
-      "header": "Next gas water heating",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextElectricWaterHeating": {
-      "columnId": "c:occ:0p1wSPK",
-      "header": "Next electric water heating",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextWaterSewer": {
-      "columnId": "c:occ:_zg_IwQ",
-      "header": "Next water & sewer",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextTrashCollection": {
-      "columnId": "c:occ:YncWdva",
-      "header": "Next trash collection",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextDistrictEnergyHeating": {
-      "columnId": "c:occ:L3iBT3R",
-      "header": "Next district energy heating",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextDistrictEnergyWaterHeating": {
-      "columnId": "c:occ:1acd-35",
-      "header": "Next district energy water heating",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextTermsEndDate": {
-      "columnId": "c:occ:CyaqAOx",
-      "header": "Next terms end date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": true,
-      "customDefaultValue": null
-    }
-  },
-  "occupancyTerms": {
-    "residentAndUnitName": {
-      "columnId": "c:otr:PrwDtuG",
-      "header": "Resident and unit name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:otr:vOQK3mp",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:otr:QHvg4Sj",
-      "header": "Occupancy ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "noticeDate": {
-      "columnId": "c:otr:uaYOrFx",
-      "header": "Notice date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "startDate": {
-      "columnId": "c:otr:2UdtWxh",
-      "header": "Start date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "endDate": {
-      "columnId": "c:otr:aek7dXD",
-      "header": "End date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": true,
-      "customDefaultValue": null
-    },
-    "rentChargeMonthly": {
-      "columnId": "c:otr:WWDYJ4o",
-      "header": "Rent charge monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "caretakerRentReductionMonthly": {
-      "columnId": "c:otr:nR84uwS",
-      "header": "Caretaker rent reduction monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "petFeeMonthly": {
-      "columnId": "c:otr:2wdl3LG",
-      "header": "Pet fee monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasHeating": {
-      "columnId": "c:otr:f_63oWc",
-      "header": "Gas Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricHeating": {
-      "columnId": "c:otr:noK1Dd-",
-      "header": "Electric Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasCooking": {
-      "columnId": "c:otr:TSaPmOf",
-      "header": "Gas Cooking",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricCooking": {
-      "columnId": "c:otr:q2wqaed",
-      "header": "Electric Cooking",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "otherElectric": {
-      "columnId": "c:otr:Sa8QhH7",
-      "header": "Other Electric",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasWaterHeating": {
-      "columnId": "c:otr:7lIs-Ln",
-      "header": "Gas Water Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricWaterHeating": {
-      "columnId": "c:otr:YcnKxHz",
-      "header": "Electric Water Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "waterSewer": {
-      "columnId": "c:otr:CdKTvxu",
-      "header": "Water & Sewer",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "trashCollection": {
-      "columnId": "c:otr:CH8bAB_",
-      "header": "Trash Collection",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyHeating": {
-      "columnId": "c:otr:mwiumT6",
-      "header": "District Energy Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyWaterHeating": {
-      "columnId": "c:otr:Cdr_hI7",
-      "header": "District Energy Water Heating",
-      "valueName": "boolean",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "notes": {
-      "columnId": "c:otr:HOKxKIs",
-      "header": "Notes",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "occCharge": {
-    "name": {
-      "columnId": "c:och:QLHA14A",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:och:jf5MJp0",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:och:Qwh8wpT",
-      "header": "Occupancy ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyName": {
-      "columnId": "c:och:Cr0DHGT",
-      "header": "Occupancy name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
-      "columnId": "c:och:HBdV-ml",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "description": {
-      "columnId": "c:och:w0UZN29",
-      "header": "Description",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:och:H22HUfA",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountAccounted": {
-      "columnId": "c:och:O-sXDUV",
-      "header": "Amount accounted",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountUnaccounted": {
-      "columnId": "c:och:S40ncaK",
-      "header": "Amount unaccounted",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "notes": {
-      "columnId": "c:och:bMDOGg5",
-      "header": "Notes",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "occChargeReduce": {
-    "id": {
-      "columnId": "c:ocr:_WLZPu9",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
-      "columnId": "c:ocr:E1durbt",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeId": {
-      "columnId": "c:ocr:gWl8dkU",
-      "header": "Charge ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeName": {
-      "columnId": "c:ocr:XDiTetf",
-      "header": "Charge name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "description": {
-      "columnId": "c:ocr:2buA3J4",
-      "header": "Description",
-      "valueName": "chargeReduceDescription",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeAmount": {
-      "columnId": "c:ocr:B3SfzGf",
-      "header": "Charge amount",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:ocr:aUugdC0",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "reduceFullAmount": {
-      "columnId": "c:ocr:opSishH",
-      "header": "Reduce full amount",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "reduceCustomAmount": {
-      "columnId": "c:ocr:TX4VqPt",
-      "header": "Reduce custom amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "occPayment": {
-    "id": {
-      "columnId": "c:opy:NV1sUR-",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentName": {
-      "columnId": "c:opy:5mteAe6",
-      "header": "Payment name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "allocatedOccupancy": {
-      "columnId": "c:opy:f0ef23C",
-      "header": "Allocated occupancy",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
-      "columnId": "c:opy:ML3AsZf",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:opy:6UAbLy9",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "payerCategory": {
-      "columnId": "c:opy:XrhVhn3",
-      "header": "Payer category",
-      "valueName": "payerCategory",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "payerName": {
-      "columnId": "c:opy:EXyFtvV",
-      "header": "Payer name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "householdId": {
-      "columnId": "c:opy:Vj3Yhcu",
-      "header": "Household ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nonResidentPayerId": {
-      "columnId": "c:opy:qtts0sn",
-      "header": "Non-resident payer ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "formOfPayment": {
-      "columnId": "c:opy:-Ar7jrg",
-      "header": "Form of payment",
-      "valueName": "paymentType",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "detailsVerified": {
-      "columnId": "c:opy:OewRHtm",
-      "header": "Details verified",
-      "valueName": "yesOrNo",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountAllocated": {
-      "columnId": "c:opy:DrLXuGg",
-      "header": "Amount allocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyCount": {
-      "columnId": "c:opy:MqwGuG2",
-      "header": "Occupancy count",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountUnallocated": {
-      "columnId": "c:opy:fMa6Kmr",
-      "header": "Amount unallocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "processed": {
-      "columnId": "c:opy:xzjkI0l",
-      "header": "Processed",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "notes": {
-      "columnId": "c:opy:tI8xB-J",
-      "header": "Notes",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "occPayAllocation": {
-    "name": {
-      "columnId": "c:opa:caCLRPL",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyName": {
-      "columnId": "c:opa:yXts8sS",
-      "header": "Occupancy name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:opa:vm_RNVw",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentId": {
-      "columnId": "c:opa:lypy6OR",
-      "header": "Payment ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "payerCategory": {
-      "columnId": "c:opa:0SIj8rw",
-      "header": "Payer category",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "payerName": {
-      "columnId": "c:opa:Y6aWH2g",
-      "header": "Payer name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "formOfPayment": {
-      "columnId": "c:opa:PpXdAcb",
-      "header": "Form of payment",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentAllocated": {
-      "columnId": "c:opa:zdaGT5A",
-      "header": "Payment allocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentDate": {
-      "columnId": "c:opa:Z6lxCz6",
-      "header": "Payment date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentAmount": {
-      "columnId": "c:opa:SUV1bxP",
-      "header": "Payment amount",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeId": {
-      "columnId": "c:opa:NuTmXgC",
-      "header": "Charge ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:opa:CsnRygh",
-      "header": "Occupancy id",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "propertyId": {
-      "columnId": "c:opa:lloaz5_",
-      "header": "Property id",
+    "transactionDescription": {
+      "columnId": "c:vcf:kfDc8M2",
+      "header": "Transaction description",
       "valueName": "string",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "chargeDescription": {
-      "columnId": "c:opa:oh7TraW",
+      "columnId": "c:vcf:TZgwSb6",
       "header": "Charge description",
       "valueName": "string",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "chargePaid": {
-      "columnId": "c:opa:lzDcQoE",
-      "header": "Charge paid",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeDate": {
-      "columnId": "c:opa:r02Ez4Q",
-      "header": "Charge date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeAmount": {
-      "columnId": "c:opa:zpAt_Hr",
-      "header": "Charge amount",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentSummary": {
-      "columnId": "c:opa:HKjqTQu",
-      "header": "Payment summary",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeSummary": {
-      "columnId": "c:opa:A2zvfbX",
-      "header": "Charge summary",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentUnallocated": {
-      "columnId": "c:opa:brENy9o",
-      "header": "Payment unallocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeUnpaid": {
-      "columnId": "c:opa:ixLhj8U",
-      "header": "Charge unpaid",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:opa:xN5Cy2e",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "allocateWhat": {
-      "columnId": "c:opa:lRjic6v",
-      "header": "Allocate what",
-      "valueName": "paymentAllocateWhat",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "lesserAmount": {
-      "columnId": "c:opa:pckNX_K",
-      "header": "Lesser amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "filledOut": {
-      "columnId": "c:opa:2hVYB84",
-      "header": "Filled out",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "processed": {
-      "columnId": "c:opa:vFpB5Hn",
-      "header": "Processed",
-      "valueName": "yesOrNo",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subsidyWorker": {
-    "firstName": {
-      "columnId": "c:swr:_sQNkf0",
-      "header": "First name",
+    "chargeRecurringDescription": {
+      "columnId": "c:vcf:yaVnd_N",
+      "header": "Charge recurring description",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "lastName": {
-      "columnId": "c:swr:hm_DV6y",
-      "header": "Last name",
+    "chargeOnetimeDescription": {
+      "columnId": "c:vcf:cr1CbP0",
+      "header": "Charge onetime description",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "id": {
-      "columnId": "c:swr:x2vFg9I",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "email": {
-      "columnId": "c:swr:ugLjZRA",
-      "header": "Email",
+    "chargeReduceDescription": {
+      "columnId": "c:vcf:CTSfi2I",
+      "header": "Charge reduce description",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "backupEmail": {
-      "columnId": "c:swr:9Ub7LFF",
-      "header": "Backup email",
+    "rentPortionName": {
+      "columnId": "c:vcf:4SpqUAJ",
+      "header": "Rent portion name",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "phoneNumber": {
-      "columnId": "c:swr:15h-Szi",
-      "header": "Phone number",
+    "paymentType": {
+      "columnId": "c:vcf:qiYfMNg",
+      "header": "Payment type",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "organization": {
-      "columnId": "c:swr:ySSi9kt",
-      "header": "Organization",
+    "payerCategory": {
+      "columnId": "c:vcf:lQwlO7B",
+      "header": "Payer category",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "programs": {
-      "columnId": "c:swr:PES3Rdd",
-      "header": "Programs",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "covers": {
-      "columnId": "c:swr:gx4X8fs",
-      "header": "Covers",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "updateDate": {
-      "columnId": "c:swr:2GsBCol",
-      "header": "Update date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subsidyProgram": {
-    "name": {
-      "columnId": "c:spr:E6cdHOL",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:spr:gLnTyIn",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nonResidentPayerId": {
-      "columnId": "c:spr:yFxrnQ2",
-      "header": "Non-resident payer ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nonResidentPayerName": {
-      "columnId": "c:spr:RGOYqHD",
-      "header": "Non-resident payer name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "programStandardName": {
-      "columnId": "c:spr:xhY7jab",
-      "header": "Program standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentStandardType": {
-      "columnId": "c:spr:kTYj3l2",
-      "header": "Payment standard type",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentStandardArea": {
-      "columnId": "c:spr:xvJgZPn",
-      "header": "Payment standard area",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subsidyAgreement": {
-    "name": {
-      "columnId": "c:sag:hQoSOxB",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:sag:tIWV4dy",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:sag:YjEcwrJ",
-      "header": "Occupancy ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyProgramId": {
-      "columnId": "c:sag:MKQ-keK",
-      "header": "Subsidy program ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentGroupId": {
-      "columnId": "c:sag:5uzrP0L",
-      "header": "Payment group ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentGroupName": {
-      "columnId": "c:sag:WcIfyGa",
-      "header": "Payment group name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "agreementStandardName": {
-      "columnId": "c:sag:_wHCrTy",
-      "header": "Agreement standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "programStandardName": {
-      "columnId": "c:sag:yMQDMwP",
-      "header": "Program standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitStandardName": {
-      "columnId": "c:sag:wuEEV97",
-      "header": "Unit standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "annualRenewalMonth": {
-      "columnId": "c:sag:UyV3Uli",
-      "header": "Annual renewal month",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "annualInspectionMonth": {
-      "columnId": "c:sag:H1kNqWl",
-      "header": "Annual inspection month",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyContractStartDate": {
-      "columnId": "c:sag:Bzhj-RM",
-      "header": "Subsidy contract start date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentPortionMonthly": {
-      "columnId": "c:sag:xczn9bG",
-      "header": "Rent portion monthly",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextSubsidyContractStartDate": {
-      "columnId": "c:sag:zIydEwk",
-      "header": "Next subsidy contract start date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "nextRentPortionMonthly": {
-      "columnId": "c:sag:dFk3qTP",
-      "header": "Next rent portion monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "updateSubsidyContractEnter": {
-      "columnId": "c:sag:DDtS-Mn",
-      "header": "Update subsidy contract enter",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyWorkerId": {
-      "columnId": "c:sag:xaLuw-U",
-      "header": "Subsidy worker ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyWorkerFirstName": {
-      "columnId": "c:sag:SQvmt9U",
-      "header": "Subsidy worker first name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyWorkerEmail": {
-      "columnId": "c:sag:03q2Isd",
-      "header": "Subsidy worker email",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalCharges": {
-      "columnId": "c:sag:C2viRB_",
-      "header": "Total charges",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalPayments": {
-      "columnId": "c:sag:FrOty3H",
-      "header": "Total payments",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "balance": {
-      "columnId": "c:sag:UUFNn1O",
-      "header": "Balance",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subsidyTerms": {
-    "name": {
-      "columnId": "c:str:Veo5DXE",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:str:Jqh2XHY",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyAgreementId": {
-      "columnId": "c:str:nzX-656",
-      "header": "Subsidy agreement ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:str:YIs9xEX",
-      "header": "Occupancy ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyProgramId": {
-      "columnId": "c:str:SyfXXaU",
-      "header": "Subsidy program ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyTermsId": {
-      "columnId": "c:str:zm41i2U",
-      "header": "Occupancy terms ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "rentChargeMonthly": {
-      "columnId": "c:str:a3ojqya",
-      "header": "Rent charge monthly",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "startDate": {
-      "columnId": "c:str:Y9RzkGf",
-      "header": "Start date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "endDate": {
-      "columnId": "c:str:jx8KNp2",
-      "header": "End date",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "grossRent": {
-      "columnId": "c:str:WE0qc5u",
-      "header": "Gross rent",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "grossUtilities": {
-      "columnId": "c:str:Q6udYub",
-      "header": "Gross utilities",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentStandardName": {
-      "columnId": "c:str:uy9Vhdu",
-      "header": "Payment standard name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasHeating": {
-      "columnId": "c:str:JcE8Av5",
-      "header": "Gas Heating",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricHeating": {
-      "columnId": "c:str:PgOI6WX",
-      "header": "Electric Heating",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasCooking": {
-      "columnId": "c:str:9hR6Xyk",
-      "header": "Gas Cooking",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricCooking": {
-      "columnId": "c:str:TfYZXlu",
-      "header": "Electric Cooking",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "otherElectric": {
-      "columnId": "c:str:OKO-FEQ",
-      "header": "Other Electric",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "gasWaterHeating": {
-      "columnId": "c:str:tVqD6Ow",
-      "header": "Gas Water Heating",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "electricWaterHeating": {
-      "columnId": "c:str:XH7h1mh",
-      "header": "Electric Water Heating",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "waterSewer": {
-      "columnId": "c:str:TAtNJrF",
-      "header": "Water & Sewer",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "trashCollection": {
-      "columnId": "c:str:UycNONt",
-      "header": "Trash Collection",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyHeating": {
-      "columnId": "c:str:KSs17w-",
-      "header": "District Energy Heating",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "districtEnergyWaterHeating": {
-      "columnId": "c:str:rnmuxE5",
-      "header": "District Energy Water Heating",
-      "valueName": "boolean",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "space": {
-      "columnId": "c:str:9OHmvZJ",
-      "header": "_space",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subsidyCharge": {
-    "name": {
-      "columnId": "c:sch:t6bth7v",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:sch:h3V4ebn",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyAgreementId": {
-      "columnId": "c:sch:41KCH28",
-      "header": "Subsidy agreement ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
-      "columnId": "c:sch:DM4WwNz",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "description": {
-      "columnId": "c:sch:24ulbpU",
-      "header": "Description",
-      "valueName": "chargeDescription",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:sch:cofaPN_",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountPaid": {
-      "columnId": "c:sch:rHIMNPr",
-      "header": "Amount paid",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountUnpaid": {
-      "columnId": "c:sch:6yLAQIR",
-      "header": "Amount unpaid",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subsidyPayment": {
-    "date": {
-      "columnId": "c:spy:qs_oGze",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:spy:BZy8MwJ",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "allocationName": {
-      "columnId": "c:spy:sp9AKTD",
-      "header": "Allocation name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyProgramId": {
-      "columnId": "c:spy:5sgkWsR",
-      "header": "Subsidy program ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "numAllocated": {
-      "columnId": "c:spy:P5VBi4R",
-      "header": "Num allocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "formOfPayment": {
-      "columnId": "c:spy:gFJlkUq",
-      "header": "Form of payment",
-      "valueName": "paymentType",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:spy:enN2U3k",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "detailsVerified": {
-      "columnId": "c:spy:6zhfIoI",
-      "header": "Details verified",
-      "valueName": "yesOrNo",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountAllocated": {
-      "columnId": "c:spy:l--j7ZZ",
-      "header": "Amount allocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountUnallocated": {
-      "columnId": "c:spy:sVn04cq",
-      "header": "Amount unallocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "processed": {
-      "columnId": "c:spy:2o6HzvE",
-      "header": "Processed",
-      "valueName": "yesOrNo",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "subPayAllocation": {
-    "name": {
-      "columnId": "c:spa:BS1Efgp",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:spa:m3PZSvz",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentId": {
-      "columnId": "c:spa:_TA4Ofb",
-      "header": "Payment ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentDate": {
-      "columnId": "c:spa:TIFgXb4",
-      "header": "Payment date",
-      "valueName": "date",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "formOfPayment": {
-      "columnId": "c:spa:m3x2kTk",
-      "header": "Form of payment",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentAllocated": {
-      "columnId": "c:spa:W69ALZS",
-      "header": "Payment allocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeId": {
-      "columnId": "c:spa:7-wZLoZ",
-      "header": "Charge ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeDescription": {
-      "columnId": "c:spa:bFHogF4",
-      "header": "Charge description",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyAgreementId": {
-      "columnId": "c:spa:WLJsNxE",
-      "header": "Subsidy agreement ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:spa:8HCbTb9",
-      "header": "Occupancy ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "propertyId": {
-      "columnId": "c:spa:knEaE_D",
-      "header": "Property ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentUnallocated": {
-      "columnId": "c:spa:BBxNLEO",
-      "header": "Payment unallocated",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "chargeUnpaid": {
-      "columnId": "c:spa:8SuRcZc",
-      "header": "Charge unpaid",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:spa:xkTbhwg",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "allocateFullAmount": {
-      "columnId": "c:spa:qxM6Q5V",
-      "header": "Allocate full amount",
-      "valueName": "checkbox",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "lesserAmount": {
-      "columnId": "c:spa:rjKa2fK",
-      "header": "Lesser amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "filledOut": {
-      "columnId": "c:spa:SvFhFXF",
-      "header": "Filled out",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "processed": {
-      "columnId": "c:spa:_iZUS4s",
-      "header": "Processed",
-      "valueName": "yesOrNo",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "propertyExpense": {
-    "expenseName": {
-      "columnId": "c:pex:AWBDank",
-      "header": "Expense name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:pex:jnoYPQx",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "propertyId": {
-      "columnId": "c:pex:MCn6Kvx",
-      "header": "Property ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
-      "columnId": "c:pex:dNrx6yp",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "year": {
-      "columnId": "c:pex:3XD-BQu",
-      "header": "Year",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "propertyYearId": {
-      "columnId": "c:pex:FgKwCJe",
-      "header": "Property year ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitId": {
-      "columnId": "c:pex:P_TAHem",
-      "header": "Unit ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "billerName": {
-      "columnId": "c:pex:kEVAHnv",
-      "header": "Biller name",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "description": {
-      "columnId": "c:pex:eX0lqhK",
-      "header": "Description",
+    "paymentAllocateWhat": {
+      "columnId": "c:vcf:S-lM-36",
+      "header": "Payment allocate what",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "expenseCategory": {
-      "columnId": "c:pex:ZtOH0hy",
+      "columnId": "c:vcf:wHfVRNb",
       "header": "Expense category",
-      "valueName": "expenseCategory",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "expenseCategoryTaxable": {
+      "columnId": "c:vcf:XYrxqhT",
+      "header": "Expense category taxable",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "expenseCategoryBank": {
+      "columnId": "c:vcf:tZ00pGQ",
+      "header": "Expense category bank",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "residenceTaxAdjust": {
+      "columnId": "c:vcf:xnZzo-H",
+      "header": "Residence tax adjust",
+      "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
     "receiptFormat": {
-      "columnId": "c:pex:Ogxr8Qq",
+      "columnId": "c:vcf:nYa59d2",
       "header": "Receipt format",
-      "valueName": "receiptFormat",
+      "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "amount": {
-      "columnId": "c:pex:h_EK-rA",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "deductibleAmount": {
-      "columnId": "c:pex:01LmwKI",
-      "header": "Deductible amount",
-      "valueName": "number",
+    "firstOfEachMonthThisYear": {
+      "columnId": "c:vcf:pMq2Sj4",
+      "header": "First of each month this year",
+      "valueName": "date",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "taxAdjust": {
-      "columnId": "c:pex:hUfiMGU",
-      "header": "Tax adjust",
-      "valueName": "residenceTaxAdjust",
-      "isFormula": false,
+    "januaryQuartersThisYear": {
+      "columnId": "c:vcf:ibXd9HV",
+      "header": "January quarters this year",
+      "valueName": "date",
+      "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "isUpfrontInvestment": {
-      "columnId": "c:pex:EdmSWwR",
-      "header": "Is upfront investment",
-      "valueName": "yesOrNo",
-      "isFormula": false,
+    "februaryQuartersThisYear": {
+      "columnId": "c:vcf:0KdHcbs",
+      "header": "February quarters this year",
+      "valueName": "date",
+      "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "notes": {
-      "columnId": "c:pex:MhdHdwr",
-      "header": "Notes",
+    "marchQuartersThisYear": {
+      "columnId": "c:vcf:NmxoP8G",
+      "header": "March quarters this year",
+      "valueName": "date",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "oneOccupancyOrAll": {
+      "columnId": "c:vcf:u7yfxlj",
+      "header": "One occupancy or all",
       "valueName": "string",
       "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "buildingType": {
+      "columnId": "c:vcf:KmPO72N",
+      "header": "Building type",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "buildingTypeAndAny": {
+      "columnId": "c:vcf:gIU41Iy",
+      "header": "Building type and any",
+      "valueName": "string",
+      "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     }
   },
-  "occupancyYear": {
-    "name": {
-      "columnId": "c:oyr:yfZK2o-",
-      "header": "Name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:oyr:1OxlfHc",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "occupancyId": {
-      "columnId": "c:oyr:I9YfD0u",
-      "header": "Occupancy ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "year": {
-      "columnId": "c:oyr:CNKBWjp",
-      "header": "Year",
+  "variable": {
+    "domLate": {
+      "columnId": "c:vrb:5EBTMDP",
+      "header": "DOM late",
       "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "residentCount": {
-      "columnId": "c:oyr:Wo1Ku-N",
-      "header": "Resident count",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "householdRentPaidPerResident": {
-      "columnId": "c:oyr:pH8A6yN",
-      "header": "Household rent paid per resident",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "caretakerRentReducedPerResident": {
-      "columnId": "c:oyr:l6TTWUi",
-      "header": "Caretaker rent reduced per resident",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalAttributedPerResident": {
-      "columnId": "c:oyr:pkGdFbB",
-      "header": "Total attributed per resident",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "totalAttributedToOccupancy": {
-      "columnId": "c:oyr:Ey2y1Xl",
-      "header": "Total attributed to occupancy",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "caretakerRentReduced": {
-      "columnId": "c:oyr:Pmj1PFp",
-      "header": "Caretaker rent reduced",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "householdRentPaid": {
-      "columnId": "c:oyr:WOUr2n9",
-      "header": "Household rent paid",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "firstDateChargedRentInYear": {
-      "columnId": "c:oyr:M4fJ0w8",
-      "header": "First date charged rent in year",
+    "today": {
+      "columnId": "c:vrb:3r3oN9J",
+      "header": "Today",
       "valueName": "date",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "lastDateChargedRentInYear": {
-      "columnId": "c:oyr:a7KUWNx",
-      "header": "Last date charged rent in year",
+    "15thOfThisMonth": {
+      "columnId": "c:vrb:HfV3X0H",
+      "header": "15th of this month",
       "valueName": "date",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "firstRentChargeDate": {
-      "columnId": "c:oyr:uHDqm-I",
-      "header": "First rent charge date",
+    "2MonthsOut": {
+      "columnId": "c:vrb:x8uLqIs",
+      "header": "2 months out",
       "valueName": "date",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "lastDateChargedRent": {
-      "columnId": "c:oyr:UgwCMFZ",
-      "header": "Last date charged rent",
+    "primeRate": {
+      "columnId": "c:vrb:bspnHDO",
+      "header": "Prime rate",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "sampleHelocAmount": {
+      "columnId": "c:vrb:AvXx8IG",
+      "header": "Sample HELOC amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "sampleMortgageAmount": {
+      "columnId": "c:vrb:Z_e9bB0",
+      "header": "Sample mortgage amount",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyLedgerOccId": {
+      "columnId": "c:vrb:J-DC-iF",
+      "header": "Occupancy ledger occ ID",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyLedgerDateRan": {
+      "columnId": "c:vrb:l9m6nOV",
+      "header": "Occupancy ledger date ran",
       "valueName": "date",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occLedgerUnitId": {
+      "columnId": "c:vrb:Gm5hqCo",
+      "header": "Occ ledger unit ID",
+      "valueName": "string",
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "subsidyRentPaid": {
-      "columnId": "c:oyr:cMwTCw9",
-      "header": "Subsidy rent paid",
-      "valueName": "number",
+    "occLedgerHouseholdId": {
+      "columnId": "c:vrb:Jx-ItJS",
+      "header": "Occ ledger household ID",
+      "valueName": "string",
       "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "scrollSpace": {
-      "columnId": "c:oyr:hY40794",
-      "header": "_scroll space",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
-  },
-  "occupancyLedger": {
-    "date": {
-      "columnId": "c:old:hAdETIR",
-      "header": "Date",
-      "valueName": "date",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "id": {
-      "columnId": "c:old:HYOs7sr",
-      "header": "ID",
-      "valueName": "id",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "baseId": {
-      "columnId": "c:old:Nu6czOu",
-      "header": "Base ID",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unit": {
-      "columnId": "c:old:F8zIyn9",
-      "header": "Unit",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "issuer": {
-      "columnId": "c:old:hNoOjyD",
-      "header": "Issuer",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "description": {
-      "columnId": "c:old:3CQQ2L6",
-      "header": "Description",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "charge": {
-      "columnId": "c:old:HvMQgG6",
-      "header": "Charge",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "payment": {
-      "columnId": "c:old:SBXXPBY",
-      "header": "Payment",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amountOwed": {
-      "columnId": "c:old:Npm6xGn",
-      "header": "Amount owed",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "notes": {
-      "columnId": "c:old:UwjAgCt",
-      "header": "Notes",
-      "valueName": "string",
-      "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     }
