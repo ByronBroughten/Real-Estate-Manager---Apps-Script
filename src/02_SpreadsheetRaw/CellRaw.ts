@@ -31,6 +31,11 @@ export class CellRaw<
   }
   gatherFetchRange(): this {
     this.sheet.gatherFetchRange(this.gridRange);
+    // Sheets omits a never-written cell; finalize treats that as empty.
+    const colIndexes =
+      this.sheetState.cellsToFinalize.get(this.rowIndex) ?? new Set();
+    colIndexes.add(this.colIndex);
+    this.sheetState.cellsToFinalize.set(this.rowIndex, colIndexes);
     return this;
   }
   gatherUpdateRequest(change: RowCellChange): void {

@@ -51,6 +51,7 @@ export interface RawSheetState {
   columnCellFacts: RawColumnCellFacts;
   rowIndexesToFinalize: Set<RowIndex>;
   colIndexesToFinalize: Set<ColIndex>;
+  cellsToFinalize: Map<RowIndex, Set<ColIndex>>;
 }
 
 export type RawRowStates = Map<RowIndex, RawRowState>;

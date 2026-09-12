@@ -119,6 +119,35 @@ describe("Indexed value accessors", () => {
     expect(cell.valueOrEmpty()).toBe("");
   });
 
+  it("reads a specifically fetched cell that Sheets omitted as empty, not unfetched", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: OCCUPANCY_GID,
+          title: "Occupancy",
+          rows: buildGridRows({
+            0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+            3: ["ID", "Update terms, select"],
+            4: ["r:occ:row4", true],
+            5: [null, null],
+          }),
+          rowsWithNoGridData: [BLANK_ROW_INDEX],
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    const sheet = ssi.sheet(OCCUPANCY_GID);
+    sheet.column(ID_COLUMN_ID).prepFetchSpecific([BLANK_ROW_INDEX]);
+    ssi.fetchAllPrepped();
+
+    expect(sheet.column(ID_COLUMN_ID).cell(BLANK_ROW_INDEX).valueOrEmpty()).toBe(
+      "",
+    );
+  });
+
   it("reads a filled cell identically through both forms", () => {
     const cell = fetchedOccupancySheet()
       .column(ID_COLUMN_ID)

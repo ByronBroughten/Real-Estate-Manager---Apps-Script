@@ -335,6 +335,19 @@ describe("ColumnMetaRaw active facts", () => {
     expectBlankFacts(raw.sheetMeta(PROPERTY_GID).column(1));
   });
 
+  it("reads a specifically fetched cell omitted from the payload as empty, not unfetched", () => {
+    stubSheetWithTopDataRow([], "rowsWithNoGridData");
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.fetchAllGathered();
+    const cell = raw.sheet(PROPERTY_GID).row(TOP_DATA_ROW_INDEX).cell(0);
+    cell.gatherFetchRange();
+    raw.fetchAllGathered();
+
+    expect(cell.valueOrEmpty()).toBe("");
+  });
+
   it("throws naming the sheet and the missing fetch for a column nothing fetched", () => {
     stubSheetsService({
       sheets: [

@@ -44,6 +44,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         columnCellFacts: new Map(),
         rowIndexesToFinalize: new Set(),
         colIndexesToFinalize: new Set(),
+        cellsToFinalize: new Map(),
       });
     }
   }

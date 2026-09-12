@@ -87,9 +87,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this._finalizeGatheredFetches();
     this.rawState.fetcherGridRanges = [];
   }
-  // Backfills cells for every full row/column fetched this cycle so a
-  // Sheets response that omits empty cells (or whole blank rows) never
-  // leaves them looking merely "not yet fetched" to callers.
+  // Backfills cells for every range fetched this cycle so a Sheets
+  // response that omits empty cells (or whole blank rows) never leaves
+  // them looking merely "not yet fetched" to callers.
   private _finalizeGatheredFetches(): void {
     const misplacedTables: MisplacedTable[] = [];
     const absentTables: SheetIdentity[] = [];
@@ -100,6 +100,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         misplacedTables.push(misplacedTable);
         return;
       }
+      const sheet = this.sheet(sheetGid);
+      this._finalizeFetchedCells(sheet, state);
       if (
         state.rowIndexesToFinalize.size === 0 &&
         state.colIndexesToFinalize.size === 0
@@ -110,7 +112,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         absentTables.push({ sheetGid });
         return;
       }
-      const sheet = this.sheet(sheetGid);
       if (state.rowIndexesToFinalize.has(this.schema.colIdRowIndex)) {
         state.hasFetchedColumnIds = true;
       }
@@ -125,6 +126,16 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       state.colIndexesToFinalize.clear();
     });
     this._reportTablePlacement(misplacedTables, absentTables);
+  }
+  private _finalizeFetchedCells(sheet: SheetRaw, state: RawSheetState): void {
+    state.cellsToFinalize.forEach((colIndexes, rowIndex) => {
+      const row = sheet.rowCommon(rowIndex);
+      row.ensureStateExists();
+      colIndexes.forEach((colIndex) => {
+        row.cell(colIndex).ensureActive();
+      });
+    });
+    state.cellsToFinalize.clear();
   }
   // After the backfills above, so a blank fact is sampled rather than built.
   private _ensureFetchedActiveFacts(
