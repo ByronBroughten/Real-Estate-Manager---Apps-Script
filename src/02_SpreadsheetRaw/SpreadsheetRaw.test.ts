@@ -418,6 +418,65 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(batchUpdateCalls).toEqual([]);
   });
 
+  it("sends one appendCells whose rows array is the full append, so a Sheets table grows by every row rather than by one", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).appendDataRow();
+    raw.sheet(111).appendDataRow();
+    raw.sheet(111).appendDataRow();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        appendCells: {
+          sheetId: 111,
+          tableId: "fake-table-111",
+          rows: [{}, {}, {}],
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("keeps a second sheet's append as its own request rather than folding it into the first table's", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [
+        { sheetId: 111, title: "Leases", table: { endRowIndex: 11 } },
+        { sheetId: 222, title: "Units", table: { endRowIndex: 6 } },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).appendDataRow();
+    raw.sheet(222).appendDataRow();
+    raw.sheet(111).appendDataRow();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        appendCells: {
+          sheetId: 111,
+          tableId: "fake-table-111",
+          rows: [{}, {}],
+          fields: "userEnteredValue",
+        },
+      },
+      {
+        appendCells: {
+          sheetId: 222,
+          tableId: "fake-table-222",
+          rows: [{}],
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
   it("still gathers an append queued after a deletion on the same sheet, since row indexes only shift once the deletes are sent", () => {
     const { batchUpdateCalls } = stubSheetsService({
       sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],

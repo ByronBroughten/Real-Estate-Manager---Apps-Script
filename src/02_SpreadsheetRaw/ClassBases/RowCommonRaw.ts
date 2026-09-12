@@ -108,13 +108,23 @@ export abstract class RowCommonRaw extends RowRawBase {
     };
   }
   gatherAppendRequest(): void {
-    this.updateRequests.append.push({
-      appendCells: {
-        sheetId: this.sheetGid,
-        tableId: `${this.activeTable.tableId}`,
-        rows: [{}],
-        fields: "userEnteredValue",
-      },
-    });
+    const appendCells = this._appendCellsRequest();
+    appendCells.rows = [...(appendCells.rows ?? []), {}];
+  }
+  // One request per table: Sheets treats each appendCells as targeting the
+  // same first free row, so N one-row requests only grow the table by one.
+  private _appendCellsRequest(): GoogleAppsScript.Sheets.Schema.AppendCellsRequest {
+    const existing = this.updateRequests.append.find(
+      (request) => request.appendCells?.sheetId === this.sheetGid,
+    )?.appendCells;
+    if (existing) return existing;
+    const appendCells: GoogleAppsScript.Sheets.Schema.AppendCellsRequest = {
+      sheetId: this.sheetGid,
+      tableId: `${this.activeTable.tableId}`,
+      rows: [],
+      fields: "userEnteredValue",
+    };
+    this.updateRequests.append.push({ appendCells });
+    return appendCells;
   }
 }

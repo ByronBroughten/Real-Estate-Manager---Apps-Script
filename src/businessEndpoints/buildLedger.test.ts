@@ -148,7 +148,14 @@ function stubOccCharge(dataRows: ChargeRow[] = chargeRows) {
   return stubSheet({
     sheetName: "occCharge",
     config: columnConfigs.occCharge,
-    columnNames: ["id", "occupancyId", "date", "description", "amount", "notes"],
+    columnNames: [
+      "id",
+      "occupancyId",
+      "date",
+      "description",
+      "amount",
+      "notes",
+    ],
     dataRows,
   });
 }
@@ -371,8 +378,9 @@ function cellsWrittenTo(
     const row = rows.get(rowIndex) ?? new Map<number, WrittenValue>();
     row.set(
       range.startColumnIndex ?? 0,
-      writtenValue(request.updateCells?.rows?.[0]?.values?.[0]
-        ?.userEnteredValue),
+      writtenValue(
+        request.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue,
+      ),
     );
     return rows.set(rowIndex, row);
   }, new Map<number, Map<number, WrittenValue>>());
@@ -390,7 +398,9 @@ function ledgerRowsWritten(calls: BatchUpdateCall[]): WrittenValue[][] {
 
 function ledgerRowShapeRequests(calls: BatchUpdateCall[]): string[] {
   return allRequests(calls).flatMap((request) => {
-    if (request.appendCells?.sheetId === LEDGER_GID) return ["append"];
+    if (request.appendCells?.sheetId === LEDGER_GID) {
+      return [`append ${String(request.appendCells.rows?.length ?? 0)}`];
+    }
     const deleted = request.deleteDimension?.range;
     if (deleted?.sheetId !== LEDGER_GID) return [];
     return [`delete ${String(deleted.startIndex)}`];
@@ -472,7 +482,7 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(ledgerRowShapeRequests(batchUpdateCalls)).toEqual([
-      ...Array(7).fill("append"),
+      "append 7",
       "delete 6",
       "delete 5",
     ]);
@@ -483,17 +493,17 @@ describe("buildLedger, the page it writes", () => {
 
     runBuildLedger();
 
-    expect([...cellsWrittenTo(batchUpdateCalls, VARIABLE_GID).entries()]).toEqual(
+    expect([
+      ...cellsWrittenTo(batchUpdateCalls, VARIABLE_GID).entries(),
+    ]).toEqual([
       [
-        [
-          TOP_DATA_ROW_INDEX,
-          new Map<number, WrittenValue>([
-            [0, TENANT],
-            [1, Dat.today()],
-          ]),
-        ],
+        TOP_DATA_ROW_INDEX,
+        new Map<number, WrittenValue>([
+          [0, TENANT],
+          [1, Dat.today()],
+        ]),
       ],
-    );
+    ]);
   });
 
   it("reads every input sheet in one fetch cycle of its own", () => {
