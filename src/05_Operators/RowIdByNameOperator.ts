@@ -64,12 +64,10 @@ export class RowIdByNameOperator<
   }
   // The id column is the framework's own, so it is named at the widened sheet type.
   private get _idColumn(): ColumnIndexed<"id"> {
-    const { columnId } = SheetSchema.fromSheetName<SheetNameWithIdColumn>(
-      this.sheetName,
-    ).columnByName("id");
     return new ColumnIndexed<"id">({
       ...this.sheet.indexed.sheetIndexedProps,
-      columnId,
+      columnId: SheetSchema.fromSheetName<SheetNameWithIdColumn>(this.sheetName)
+        .columnByName("id").columnId,
     });
   }
 }

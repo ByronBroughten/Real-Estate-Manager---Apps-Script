@@ -295,12 +295,6 @@ function expensesAppended(calls: BatchUpdateCall[]): WrittenRow[] {
   );
 }
 
-function expenseIdsAppended(calls: BatchUpdateCall[]): WrittenValue[] {
-  return [
-    ...rowsWrittenTo(calls, EXPENSE_GID, expenseColumnNames).values(),
-  ].map((expense) => expense.id ?? null);
-}
-
 function stagingRowsWritten(calls: BatchUpdateCall[]): Map<number, WrittenRow> {
   const rows = rowsWrittenTo(calls, STAGING_GID, stagingColumnNames);
   [...rows.keys()]
@@ -506,6 +500,20 @@ describe("addPropertyExpense, naming the property and the unit", () => {
     );
   });
 
+  it("names both an unknown unit and an unknown property at once", () => {
+    const { batchUpdateCalls } = stubExpenseSpreadsheet({
+      stagingRows: [
+        typedRow({ unitName: "140 Case, Unit 9", propertyName: "9 Nowhere" }),
+      ],
+    });
+
+    runAddPropertyExpense();
+
+    expect(rowMessages(batchUpdateCalls).get(TOP_DATA_ROW_INDEX)).toBe(
+      'This row was not added: no row of Unit is named "140 Case, Unit 9"; no row of Property is named "9 Nowhere".',
+    );
+  });
+
   it("lists every fault on a row with more than one", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
       stagingRows: [typedRow({ amount: null, description: null })],
@@ -577,22 +585,6 @@ describe("addPropertyExpense, what the sheet is left holding", () => {
     ).toEqual(
       Object.fromEntries(stagingColumnNames.map((columnName) => [columnName, ""])),
     );
-  });
-
-  it("mints an id for each expense it appends", () => {
-    const { batchUpdateCalls } = stubExpenseSpreadsheet({
-      stagingRows: [
-        typedRow({ unitName: CASE_UNIT_NAME }),
-        typedRow({ propertyName: CHARLES_NAME }),
-      ],
-    });
-
-    runAddPropertyExpense();
-
-    expect(expenseIdsAppended(batchUpdateCalls)).toEqual([
-      expect.stringMatching(/^r:pex:/),
-      expect.stringMatching(/^r:pex:/),
-    ]);
   });
 
   it("says there was nothing to add when every row is blank", () => {

@@ -1,5 +1,4 @@
 import type { SheetDataValuesAll } from "../../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import { SheetNamedBase } from "../../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { RowNamed } from "../../04_SpreadsheetNamed/RowNamed";
@@ -9,10 +8,15 @@ import {
   RowIdByNameOperator,
   type RowIdByName,
 } from "../../05_Operators/RowIdByNameOperator";
-import type { ActionReturn, RowReports, RunReport } from "../../06_API/Endpoints";
+import type {
+  ActionReturn,
+  RowReports,
+  RunReport,
+} from "../../06_API/Endpoints";
 
 type StagingRow = RowNamed<"addPropertyExpense">;
 type NameUnresolved = Exclude<RowIdByName, { found: "one" }>;
+type NamedSheetName = "unit" | "property" | "splitReceipt";
 
 // The columns a person types into; the run status is left out so its own message can't make a row look filled in.
 const typedColumns = [
@@ -30,7 +34,12 @@ const typedColumns = [
   "isUpfrontInvestment",
 ] as const;
 
-// Blank wherever a complaint stands beside it, and then never read.
+interface PlaceNames {
+  unitName: string;
+  propertyName: string;
+}
+
+// The ids are read only where no complaint stands beside them.
 interface ExpensePlace {
   propertyId: string;
   unitId: string;
@@ -42,13 +51,12 @@ interface SplitReceiptRef {
   complaints: string[];
 }
 
-/**
- * Turns a batch of typed rows on Add Property Expense into rows here,
- * naming what is wrong with each row it refuses.
- * The endpoint entry is businessEndpoints/addPropertyExpense.ts;
- * name-to-id lookup is 05_Operators/RowIdByNameOperator.
- * docs/architecture/endpoint-dispatch.md
- */
+interface ExpenseReport {
+  convertedCount: number;
+  entryCount: number;
+  refusals: RowReports;
+}
+
 export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
   constructor(props: SpreadsheetNamedProps) {
     super({
@@ -69,7 +77,7 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
     return this.ss.sheet("addPropertyExpense");
   }
   add(stagingRowIndexes: number[]): ActionReturn {
-    this._prepFetchInputs();
+    this._gatherFetchInputs();
     const stagingRows = this._entryRows(stagingRowIndexes);
     if (stagingRows.length === 0) return "There are no expenses to add.";
     const converted: StagingRow[] = [];
@@ -83,15 +91,19 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
       }
     });
     converted.forEach((stagingRow) => stagingRow.delete());
-    return this._report(converted.length, stagingRows.length, refusals);
+    return this._report({
+      convertedCount: converted.length,
+      entryCount: stagingRows.length,
+      refusals,
+    });
   }
-  private _prepFetchInputs(): void {
+  private _gatherFetchInputs(): void {
     const { ss } = this;
     this.staging.prepFetchColumnsFull(...typedColumns);
-    this._unitRowIds.prepFetch();
+    this._rowIdsByName("unit").prepFetch();
     ss.sheet("unit").prepFetchColumnsFull("propertyId");
-    this._propertyRowIds.prepFetch();
-    this._splitReceiptRowIds.prepFetch();
+    this._rowIdsByName("property").prepFetch();
+    this._rowIdsByName("splitReceipt").prepFetch();
     // The append needs this sheet's column ids and table bounds, which only a prepped read brings.
     this.sheet.prepFetchColumnsFull("id");
     ss.fetchAllPrepped();
@@ -141,39 +153,44 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
     const unitName = stagingRow.value("unitName");
     const propertyName = stagingRow.value("propertyName");
     if (unitName === "") return this._placeFromProperty(propertyName);
-    return this._placeFromUnit(unitName, propertyName);
+    return this._placeFromUnit({ unitName, propertyName });
   }
   // A roof or a driveway belongs to the property and to no one unit.
   private _placeFromProperty(propertyName: string): ExpensePlace {
     if (propertyName === "") {
-      return nowhere(["name a unit or a property"]);
+      return emptyPlace(["name a unit or a property"]);
     }
-    const property = this._propertyRowIds.rowIdByName(propertyName);
+    const property = this._rowIdsByName("property").rowIdByName(propertyName);
     if (property.found !== "one") {
-      return nowhere([this._unresolved(property, "property", propertyName)]);
+      return emptyPlace(this._nameComplaints(property, "property", propertyName));
     }
     return { propertyId: property.rowId, unitId: "", complaints: [] };
   }
   // Naming a unit states its property too, so a named property only has to agree.
-  private _placeFromUnit(unitName: string, propertyName: string): ExpensePlace {
-    const unit = this._unitRowIds.rowIdByName(unitName);
+  private _placeFromUnit({ unitName, propertyName }: PlaceNames): ExpensePlace {
+    const property = this._propertyMatch(propertyName);
+    // Gathered before the unit is judged, so one unknown name can't hide the other.
+    const propertyComplaints = this._nameComplaints(
+      property,
+      "property",
+      propertyName,
+    );
+    const unit = this._rowIdsByName("unit").rowIdByName(unitName);
     if (unit.found !== "one") {
-      return nowhere([this._unresolved(unit, "unit", unitName)]);
+      return emptyPlace([
+        ...this._nameComplaints(unit, "unit", unitName),
+        ...propertyComplaints,
+      ]);
     }
     const propertyId = this.ss
       .sheet("unit")
       .row(unit.rowIndex)
       .value("propertyId");
     const place = { propertyId, unitId: unit.rowId };
-    if (propertyName === "") return { ...place, complaints: [] };
-    const property = this._propertyRowIds.rowIdByName(propertyName);
-    if (property.found !== "one") {
-      return {
-        ...place,
-        complaints: [this._unresolved(property, "property", propertyName)],
-      };
+    if (propertyComplaints.length > 0) {
+      return { ...place, complaints: propertyComplaints };
     }
-    if (property.rowId !== propertyId) {
+    if (property?.found === "one" && property.rowId !== propertyId) {
       return {
         ...place,
         complaints: [
@@ -183,22 +200,35 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
     }
     return { ...place, complaints: [] };
   }
+  private _propertyMatch(propertyName: string): RowIdByName | undefined {
+    if (propertyName === "") return undefined;
+    return this._rowIdsByName("property").rowIdByName(propertyName);
+  }
   private _splitReceipt(stagingRow: StagingRow): SplitReceiptRef {
     const name = stagingRow.value("splitReceiptName");
     if (name === "") return { splitReceiptId: "", complaints: [] };
-    const receipt = this._splitReceiptRowIds.rowIdByName(name);
+    const receipt = this._rowIdsByName("splitReceipt").rowIdByName(name);
     if (receipt.found !== "one") {
       return {
         splitReceiptId: "",
-        complaints: [this._unresolved(receipt, "splitReceipt", name)],
+        complaints: this._nameComplaints(receipt, "splitReceipt", name),
       };
     }
     return { splitReceiptId: receipt.rowId, complaints: [] };
   }
+  // A name nobody gave is no fault of the row's; what a missing one means is decided above.
+  private _nameComplaints(
+    match: RowIdByName | undefined,
+    sheetName: NamedSheetName,
+    name: string,
+  ): string[] {
+    if (!match || match.found === "one") return [];
+    return [this._unresolved(match, sheetName, name)];
+  }
   // The live sheet title, not its config name: the operator reads this cell.
   private _unresolved(
     match: NameUnresolved,
-    sheetName: SheetName,
+    sheetName: NamedSheetName,
     name: string,
   ): string {
     const title = this.ss.sheet(sheetName).raw.title;
@@ -207,11 +237,11 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
     }
     return `no row of ${title} is named "${name}"`;
   }
-  private _report(
-    convertedCount: number,
-    entryCount: number,
-    refusals: RowReports,
-  ): ActionReturn {
+  private _report({
+    convertedCount,
+    entryCount,
+    refusals,
+  }: ExpenseReport): ActionReturn {
     if (refusals.size === 0) {
       return `Added ${countOfExpenses(convertedCount)}.`;
     }
@@ -221,33 +251,18 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
       rows: refusals,
     };
   }
-  private get _unitRowIds(): RowIdByNameOperator<"unit", "name"> {
+  private _rowIdsByName(
+    sheetName: NamedSheetName,
+  ): RowIdByNameOperator<NamedSheetName, "name"> {
     return new RowIdByNameOperator({
       ...this.spreadsheetNamedProps,
-      sheetName: "unit",
-      columnName: "name",
-    });
-  }
-  private get _propertyRowIds(): RowIdByNameOperator<"property", "name"> {
-    return new RowIdByNameOperator({
-      ...this.spreadsheetNamedProps,
-      sheetName: "property",
-      columnName: "name",
-    });
-  }
-  private get _splitReceiptRowIds(): RowIdByNameOperator<
-    "splitReceipt",
-    "name"
-  > {
-    return new RowIdByNameOperator({
-      ...this.spreadsheetNamedProps,
-      sheetName: "splitReceipt",
+      sheetName,
       columnName: "name",
     });
   }
 }
 
-function nowhere(complaints: string[]): ExpensePlace {
+function emptyPlace(complaints: string[]): ExpensePlace {
   return { propertyId: "", unitId: "", complaints };
 }
 
