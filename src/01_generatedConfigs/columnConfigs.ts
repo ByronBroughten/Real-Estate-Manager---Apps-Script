@@ -1473,6 +1473,22 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
+    },
+    "intendedOccupancyAllocation": {
+      "columnId": "c:opy:ZkvJt2D",
+      "header": "Intended occupancy allocation",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "intendedCharge": {
+      "columnId": "c:opy:qkuz-n4",
+      "header": "Intended charge",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
     }
   },
   "occupancy": {
@@ -1609,7 +1625,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, time last ran",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "buildLedgerSelect": {
@@ -1617,7 +1633,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, select",
       "valueName": "checkbox",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "buildLedgerRunStatus": {
@@ -1625,7 +1641,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, run status",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     },
     "updateTermsTimeLastRan": {
