@@ -2,7 +2,7 @@ import type { CellValue, CellValueName } from "../00_base/base";
 import { Arr } from "../utils/Arr";
 import { CellRaw } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import type { RowCellChange } from "./ClassTypes/RawState";
+import type { FindReplaceTerms, RowCellChange } from "./ClassTypes/RawState";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
@@ -31,6 +31,15 @@ export class ColumnRaw<
   }
   get topCell(): CellRaw<VN> {
     return this.cell(this.schema.topDataRowIdx);
+  }
+  get dataGridRange() {
+    return {
+      sheetId: this.sheetGid,
+      startRowIndex: this.schema.topDataRowIdx,
+      endRowIndex: this.activeTable.endRowIndex,
+      startColumnIndex: this.colIndex,
+      endColumnIndex: this.colIndex + 1,
+    };
   }
   get cellIndexesActive(): number[] {
     return this.sheet.rowIndexesActive;
@@ -91,6 +100,13 @@ export class ColumnRaw<
         ...change,
       });
     });
+    return this;
+  }
+  // Reaches every data row like a whole-column fill, so it takes the same guards.
+  findReplace(terms: FindReplaceTerms): this {
+    this.validateIndexNotStale();
+    this.sheet.validateNotPrunedToSelection();
+    this.ss.findReplace({ ...terms, scope: { range: this.dataGridRange } });
     return this;
   }
   gatherFetchActive(): this {

@@ -10,7 +10,11 @@ import { Val } from "../utils/Val";
 import { cellChangeFieldMask, cellChangeToCellData } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
-import { type ColumnFill, type SortParameters } from "./ClassTypes/RawState";
+import {
+  type ColumnFill,
+  type FindReplaceTerms,
+  type SortParameters,
+} from "./ClassTypes/RawState";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
@@ -95,8 +99,19 @@ export class SheetRaw extends SheetCommonRaw {
     });
     return count;
   }
+  get cellStateIsStale(): boolean {
+    return this.sheetState.cellStateIsStale;
+  }
   invalidateRowIndexes(): void {
     this.sheetState.rowIndexesAreValid = false;
+  }
+  invalidateCellState(): void {
+    this.sheetState.rowStates.clear();
+    this.sheetState.cellStateIsStale = true;
+  }
+  findReplace(terms: FindReplaceTerms): this {
+    this.ss.findReplace({ ...terms, scope: { sheetId: this.sheetGid } });
+    return this;
   }
   validateRowIndexes(): void {
     this.sheetState.rowIndexesAreValid = true;
@@ -163,6 +178,7 @@ export class SheetRaw extends SheetCommonRaw {
   }
   integrateSheetState(sheet: GoogleSheet): void {
     this._initSheetState(sheet);
+    this.sheetState.cellStateIsStale = false;
     if (sheet.data) {
       this._integrateSheetData(sheet.data);
     }

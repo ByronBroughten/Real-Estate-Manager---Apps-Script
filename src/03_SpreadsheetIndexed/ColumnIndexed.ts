@@ -5,7 +5,10 @@ import {
   type ValueName,
   type VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
-import type { RowCellChange } from "../02_SpreadsheetRaw/ClassTypes/RawState";
+import type {
+  FindReplaceTerms,
+  RowCellChange,
+} from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import { CellIndexed } from "./CellIndexed";
 import type { CellChange } from "./ClassTypes/IndexedState";
@@ -100,6 +103,11 @@ export class ColumnIndexed<
   }
   updateActiveCells(change: CellChange<VN>): this {
     this.raw.updateActiveCells(this._rawChange(change));
+    return this;
+  }
+  // Google matches the text, so neither string is checked against the value config.
+  findReplace(terms: FindReplaceTerms): this {
+    this.raw.findReplace(terms);
     return this;
   }
   // A colour-only write is legitimate on a formula column; a value is not.

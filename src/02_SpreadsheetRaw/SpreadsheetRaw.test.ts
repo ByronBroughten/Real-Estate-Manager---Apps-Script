@@ -1260,3 +1260,201 @@ describe("Raw value types", () => {
     >(true);
   });
 });
+
+describe("SpreadsheetRaw.findReplace", () => {
+  function stubFilledSheet() {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            4: ["r:lse:1", "Currency"],
+            5: ["r:lse:2", "Caretaking"],
+            6: ["r:lse:3", "Currency"],
+          }),
+          table: { endRowIndex: 7 },
+        },
+      ],
+    });
+  }
+  function fetchedColumn() {
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).column(1).gatherFetchFull();
+    raw.fetchAllGathered();
+    return raw;
+  }
+
+  it("scopes a column's replace to that column's data rows", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.sheet(111).column(1).findReplace({
+      find: "Currency",
+      replacement: "Payment",
+      matchEntireCell: true,
+    });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        findReplace: {
+          find: "Currency",
+          replacement: "Payment",
+          matchEntireCell: true,
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 7,
+            startColumnIndex: 1,
+            endColumnIndex: 2,
+          },
+        },
+      },
+    ]);
+  });
+
+  it("scopes a sheet's replace by sheetId rather than by range", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).findReplace({ find: "Currency", replacement: "Payment" });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        findReplace: {
+          find: "Currency",
+          replacement: "Payment",
+          sheetId: 111,
+        },
+      },
+    ]);
+  });
+
+  it("carries an allSheets scope straight through", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.findReplace({
+      find: "Currency",
+      replacement: "Payment",
+      scope: { allSheets: true },
+      includeFormulas: true,
+    });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        findReplace: {
+          find: "Currency",
+          replacement: "Payment",
+          includeFormulas: true,
+          allSheets: true,
+        },
+      },
+    ]);
+  });
+
+  it("sends after the per-cell writes, whose text it would otherwise miss", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.findReplace({
+      find: "Currency",
+      replacement: "Payment",
+      scope: { allSheets: true },
+    });
+    raw.sheet(111).row(5).cell(1).updateValue("Currency");
+    raw.sheet(111).row(6).delete();
+    raw.batchUpdateGSheets();
+
+    const requests = batchUpdateCalls[0]?.requests ?? [];
+    expect(requests.map((request) => Object.keys(request)[0])).toEqual([
+      "updateCells",
+      "findReplace",
+      "deleteDimension",
+    ]);
+  });
+
+  it("leaves fetched values readable until the flush actually sends", () => {
+    stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw
+      .sheet(111)
+      .column(1)
+      .findReplace({ find: "Currency", replacement: "Payment" });
+
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
+      "Currency",
+      "Caretaking",
+      "Currency",
+    ]);
+  });
+
+  it("makes a read after the flush throw rather than return a pre-replace value", () => {
+    stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw
+      .sheet(111)
+      .column(1)
+      .findReplace({ find: "Currency", replacement: "Payment" });
+    raw.batchUpdateGSheets();
+
+    expect(() => raw.sheet(111).row(4).cell(1).valueOrEmpty()).toThrowError(
+      /went stale when a findReplace was sent/,
+    );
+  });
+
+  it("leaves fetched values alone when no findReplace was queued", () => {
+    stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw.sheet(111).row(4).cell(1).updateValue("Payment");
+    raw.batchUpdateGSheets();
+
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
+      "Payment",
+      "Caretaking",
+      "Currency",
+    ]);
+  });
+
+  it("makes the values readable again after a re-fetch", () => {
+    stubFilledSheet();
+
+    const raw = fetchedColumn();
+    raw
+      .sheet(111)
+      .column(1)
+      .findReplace({ find: "Currency", replacement: "Payment" });
+    raw.batchUpdateGSheets();
+    raw.sheet(111).column(1).gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
+      "Currency",
+      "Caretaking",
+      "Currency",
+    ]);
+  });
+
+  it("discards a queued replace alongside every other change", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.findReplace({
+      find: "Currency",
+      replacement: "Payment",
+      scope: { allSheets: true },
+    });
+    raw.discardQueuedChanges();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+  });
+});

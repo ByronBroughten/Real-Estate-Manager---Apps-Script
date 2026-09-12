@@ -51,13 +51,20 @@ export class CellRaw<
     this.rowState.set(this.colIndex, value);
   }
   get isEmpty(): boolean {
-    if (!this.isActive) {
-      throw new Error(
-        `Row ${this.rowIndex} does not have a value set for column index ${this.colIndex}.`,
-      );
-    }
+    this.validateIsActive();
     const value = this.rowState.get(this.colIndex);
     return value === "";
+  }
+  validateIsActive(): void {
+    if (this.isActive) return;
+    if (this.sheet.cellStateIsStale) {
+      throw new Error(
+        `Cell values went stale when a findReplace was sent; re-fetch before reading row ${this.rowIndex}, column index ${this.colIndex}.`,
+      );
+    }
+    throw new Error(
+      `Row ${this.rowIndex} does not have a value set for column index ${this.colIndex}.`,
+    );
   }
   get isActive(): boolean {
     return this.row.rowIsActive() && this.rowState.has(this.colIndex);
@@ -69,11 +76,7 @@ export class CellRaw<
   }
   // An untouched cell holds nothing; Raw reports that rather than judging it.
   valueOrEmpty(): CellValue<VN> | "" {
-    if (!this.isActive) {
-      throw new Error(
-        `Row ${this.rowIndex} does not have a value set for column index ${this.colIndex}.`,
-      );
-    }
+    this.validateIsActive();
     return this.rowState.get(this.colIndex) as CellValue<VN> | "";
   }
   updateValue(value: CellValue<VN>): this {

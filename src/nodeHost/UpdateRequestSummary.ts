@@ -13,6 +13,12 @@ const MAX_SAMPLE_VALUES = 4;
 const MAX_RAW_CHARS = 120;
 const SUBJECT_WIDTH = 24;
 const COUNT_WIDTH = 14;
+const FIND_REPLACE_FLAGS = [
+  "matchCase",
+  "matchEntireCell",
+  "searchByRegex",
+  "includeFormulas",
+] as const;
 
 type RequestVerb = keyof GoogleUpdateRequest;
 
@@ -64,6 +70,8 @@ export class UpdateRequestSummary {
         return this._dimensionBody(request.deleteDimension?.range, "delete");
       case "sortRange":
         return this._sortRangeBody(request.sortRange);
+      case "findReplace":
+        return this._findReplaceBody(request.findReplace);
       default:
         return this._rawBody(request, verb);
     }
@@ -136,6 +144,33 @@ export class UpdateRequestSummary {
       "",
       "",
     );
+  }
+  // The count lives in a response a dry run never gets, so the line can't claim one.
+  private _findReplaceBody(
+    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
+  ): string {
+    return this._columns(
+      this._findReplaceScopeLabel(findReplace),
+      "matching cells",
+      `"${findReplace?.find ?? ""}" → "${findReplace?.replacement ?? ""}"`,
+      this._findReplaceFlagsLabel(findReplace),
+    );
+  }
+  private _findReplaceScopeLabel(
+    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
+  ): string {
+    if (findReplace?.allSheets) return "every sheet";
+    if (findReplace?.sheetId !== undefined) {
+      return `${this._sheetLabel(findReplace.sheetId)}!all`;
+    }
+    return this._rangeLabel(findReplace?.range);
+  }
+  private _findReplaceFlagsLabel(
+    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
+  ): string {
+    const flags = FIND_REPLACE_FLAGS.filter((flag) => findReplace?.[flag]);
+    if (flags.length === 0) return "(no flags)";
+    return flags.join(", ");
   }
   // The opening's own line format: no type layer to read it through.
   private _rawBody(request: GoogleUpdateRequest, verb: RequestVerb): string {

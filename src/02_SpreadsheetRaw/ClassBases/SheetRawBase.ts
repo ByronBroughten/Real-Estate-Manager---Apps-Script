@@ -35,6 +35,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         title: null,
         activeTable: null,
         rowIndexesAreValid: true,
+        cellStateIsStale: false,
         hasFetchedColumnIds: false,
         isPrunedToSelection: false,
         firstStaleColIndex: null,

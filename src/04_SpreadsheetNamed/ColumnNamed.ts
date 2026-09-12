@@ -6,6 +6,7 @@ import type {
   ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { CellNamed } from "./CellNamed";
@@ -74,6 +75,11 @@ export class ColumnNamed<
   }
   updateActiveCells(change: CellChange<ColumnValueName<SN, CN>>): this {
     this.indexed.updateActiveCells(change);
+    return this;
+  }
+  // Plain strings, unlike every other write here: Google matches the cell's text.
+  findReplace(terms: FindReplaceTerms): this {
+    this.indexed.findReplace(terms);
     return this;
   }
   prepFetchSpecific(rowIndexes: number[]): this {

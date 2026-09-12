@@ -5,6 +5,7 @@ import type {
   SheetDataValuesAll,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
@@ -116,6 +117,10 @@ export class SheetNamed<
   }
   DELETE_ALL_DATA_ROWS(): void {
     this.indexed.DELETE_ALL_DATA_ROWS();
+  }
+  findReplace(terms: FindReplaceTerms): this {
+    this.indexed.findReplace(terms);
+    return this;
   }
   rowsFiltered(values: Partial<SheetDataValues<SN>>): RowNamed<SN>[] {
     return this.rows.filter((row) => {

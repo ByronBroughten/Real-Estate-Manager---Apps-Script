@@ -68,6 +68,7 @@ export class SpreadsheetRawBase {
       sort: [],
       insertColumn: [],
       fill: [],
+      findReplace: [],
       raw: [],
     };
   }

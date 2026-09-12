@@ -15,5 +15,7 @@ A **chore** is a unit of work run from the terminal against the live spreadsheet
 - **`src/chores/`** — durable chores, kept. `addMissingColumnIds` and `fillMissingRowIds` are the two, both converted out of a scratch function in `src/index.ts`. A twice-a-year repair belongs here rather than earning a column and a checkbox on a sheet.
 - **The framework tiers** — anything generalizable. A job that wants a capability the framework does not model is the evidence that the capability is worth building.
 
+**A bulk edit across many cells is `findReplace`, not a raw request and not a loop.** It is the framework's sanctioned sweep — rename a stored value across a column, correct a typo across a sheet, edit a formula's text in place — and [queued-writes](./queued-writes.md) has its fields, its ordering and the read it invalidates. Reach for it before `gatherRawRequest`, whose obligation to file an issue exists precisely because a capability like this one was missing.
+
 **Chores are not tested**, and that is deliberate: a test for a one-off would be a second statement of the same thing, written by the same hand in the same hour, and its real check is the preview read before saying send. Durable chores are the arguable middle and are still skipped. A chore that no longer type-checks against the current configs surfaces under `npm run tsc`, which is the intended failure.
 

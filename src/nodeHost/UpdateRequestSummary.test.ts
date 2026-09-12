@@ -116,6 +116,56 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("sortRange occupancy!A5: by column C ascending");
   });
 
+  it("states a range-scoped replace as its range, its two strings and its flags", () => {
+    expect(
+      onlyLine({
+        findReplace: {
+          find: "Currency",
+          replacement: "Payment",
+          matchEntireCell: true,
+          range: {
+            sheetId: OCCUPANCY_GID,
+            startRowIndex: 4,
+            endRowIndex: 9,
+            startColumnIndex: 2,
+            endColumnIndex: 3,
+          },
+        },
+      }),
+    ).toBe(
+      'findReplace occupancy!C5:C9 matching cells "Currency" → "Payment" matchEntireCell',
+    );
+  });
+
+  it("names the whole sheet when the replace is scoped by sheet rather than range", () => {
+    expect(
+      onlyLine({
+        findReplace: {
+          find: "Currency",
+          replacement: "Payment",
+          sheetId: OCCUPANCY_GID,
+        },
+      }),
+    ).toBe(
+      'findReplace occupancy!all matching cells "Currency" → "Payment" (no flags)',
+    );
+  });
+
+  it("says every sheet when the replace is unscoped", () => {
+    expect(
+      onlyLine({
+        findReplace: {
+          find: "Currency",
+          replacement: "Payment",
+          allSheets: true,
+          includeFormulas: true,
+        },
+      }),
+    ).toBe(
+      'findReplace every sheet matching cells "Currency" → "Payment" includeFormulas',
+    );
+  });
+
   it("renders a request the framework does not model as its own verb and JSON", () => {
     const line = onlyLine({
       addConditionalFormatRule: {

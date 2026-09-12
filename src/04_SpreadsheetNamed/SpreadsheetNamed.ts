@@ -1,4 +1,5 @@
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes.js";
+import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
@@ -194,6 +195,11 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
   }
   batchUpdateGSheets(): void {
     this.raw.batchUpdateGSheets();
+  }
+  // The scope is explicit here because allSheets has no narrower home.
+  findReplace(props: FindReplaceProps): this {
+    this.raw.findReplace(props);
+    return this;
   }
   discardQueuedChanges(): this {
     this.raw.discardQueuedChanges();

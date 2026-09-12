@@ -21,6 +21,7 @@ const updateRequestNames = [
   "sort",
   "insertColumn",
   "fill",
+  "findReplace",
   "raw",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
@@ -39,6 +40,8 @@ export interface RawSheetState {
       } & RawColumnPropertiesState)
     | null;
   rowIndexesAreValid: boolean;
+  // A findReplace matches by content, so what it changed is unknowable locally.
+  cellStateIsStale: boolean;
   hasFetchedColumnIds: boolean;
   isPrunedToSelection: boolean;
   firstStaleColIndex: number | null;
@@ -110,6 +113,21 @@ export interface ColumnFill extends RowCellChange {
 
 export interface SheetChangeSortProps extends SortParameters {
   action: "sort";
+}
+
+export type FindReplaceScope =
+  { range: GridRangeProps } | { sheetId: number } | { allSheets: true };
+// Google's own field names, so Google's own semantics are what they mean.
+export interface FindReplaceTerms {
+  find: string;
+  replacement: string;
+  matchCase?: boolean;
+  matchEntireCell?: boolean;
+  searchByRegex?: boolean;
+  includeFormulas?: boolean;
+}
+export interface FindReplaceProps extends FindReplaceTerms {
+  scope: FindReplaceScope;
 }
 
 export type SheetChangePropsObj = {

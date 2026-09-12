@@ -1,4 +1,5 @@
 import type { Value } from "../01_generatedConfigs/valueSchemas";
+import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { RowIndexed } from "./RowIndexed";
@@ -40,6 +41,10 @@ export class SheetIndexed extends SheetCommon {
       ...this.sheetIndexedProps,
       columnId,
     });
+  }
+  findReplace(terms: FindReplaceTerms): this {
+    this.raw.findReplace(terms);
+    return this;
   }
   row(rowIndex: number): RowIndexed {
     return new RowIndexed({

@@ -5,6 +5,7 @@ import type {
 import { Val } from "../utils/Val";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
+  FindReplaceProps,
   RawSheetState,
   RowChangesToSave,
   SheetChangesToSave,
@@ -251,10 +252,25 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   batchUpdateGSheets() {
     this._gatherUpdateRequests();
     const sheetGidsWithRowDeletes = this._sheetGidsWithRowDeletes();
+    const hasFindReplace = this.updateRequests.findReplace.length > 0;
     this._sendUpdateRequests();
     // Row indexes only actually shift once the deletes have been sent.
     sheetGidsWithRowDeletes.forEach((sheetGid) =>
       this.sheet(sheetGid).invalidateRowIndexes(),
+    );
+    if (hasFindReplace) this._invalidateFetchedCellState();
+  }
+  // Matches by content rather than by coordinate, so no local mirror is possible.
+  findReplace({ scope, ...terms }: FindReplaceProps): this {
+    this.updateRequests.findReplace.push({
+      findReplace: { ...terms, ...scope },
+    });
+    return this;
+  }
+  // Scope can be allSheets, so one rule: every sheet's fetched cells go stale.
+  private _invalidateFetchedCellState(): void {
+    this.rawSheetsState.forEach((_, sheetGid) =>
+      this.sheet(sheetGid).invalidateCellState(),
     );
   }
   // The one bypass of the type layer; using it obliges filing an issue (README).
@@ -327,6 +343,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       // Fills go before updates, so a per-cell write on a filled column wins.
       ...surs.fill,
       ...surs.update,
+      // Reads the text as it stands mid-batch, so it must follow what writes it.
+      ...surs.findReplace,
       ...this._deleteRequestsDescending(),
       ...surs.sort,
       // Outside the ordering rules the queue was built around, so last.
