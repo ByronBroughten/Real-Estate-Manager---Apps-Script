@@ -539,6 +539,39 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
   });
 });
 
+describe("SpreadsheetRaw.gatherRawRequest", () => {
+  it("sends a raw request last, after every request the framework models", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.gatherRawRequest({ updateTable: { table: { tableId: "t" } } });
+    raw.sheet(111).row(5).cell(2).updateValue("Processing...");
+    raw.sheet(111).row(10).delete();
+    raw.batchUpdateGSheets();
+
+    const requests = batchUpdateCalls[0]?.requests ?? [];
+    expect(requests.map((request) => Object.keys(request)[0])).toEqual([
+      "updateCells",
+      "deleteDimension",
+      "updateTable",
+    ]);
+  });
+
+  it("discards a raw request alongside every other queued change", () => {
+    const { batchUpdateCalls } = stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherRawRequest({ updateTable: { table: { tableId: "t" } } });
+    raw.discardQueuedChanges();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+  });
+});
+
 describe("RowRaw.delete", () => {
   function stubSheetWithDataRows(dataRowCount: number) {
     return stubSheetsService({

@@ -214,8 +214,8 @@ banner "Make gen:configs stop expiring every 7 days"
 
 # ── Stage 1 ───────────────────────────────────────────────────────────────
 stage "Preflight: check state and back up your credentials"
-say "npm run gen:configs shells out to:"
-note "  clasp run --json -u $CLASP_USER generateConfigFiles"
+say "npm run gen:configs and npm run chore both authenticate as:"
+note "  the '$CLASP_USER' credential stored in $CLASPRC"
 say ""
 say "That token expires every 7 days for as long as GCP project '$PROJECT_ID'"
 say "has its OAuth consent screen set to External + Testing. This wizard makes"

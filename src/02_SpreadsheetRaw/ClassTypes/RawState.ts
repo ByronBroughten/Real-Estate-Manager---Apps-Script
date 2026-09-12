@@ -21,6 +21,7 @@ const updateRequestNames = [
   "sort",
   "insertColumn",
   "fill",
+  "raw",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
 

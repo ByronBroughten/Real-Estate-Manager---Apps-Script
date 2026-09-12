@@ -21,6 +21,15 @@ interface MisplacedTable extends SheetIdentity {
   startColumnIndex: number;
 }
 
+/**
+ * Spreadsheet-level Raw: GID+index fetch and the two Sheets chokepoints
+ * (`fetchAllGathered`, `_sendUpdateRequests`). Sheet/row/column by index
+ * live on SheetRaw / RowRaw / ColumnRaw in this folder.
+ * Column-by-name and columnId resolution are Indexed/Named.
+ * Schema classes that resolve columns share SpreadsheetSchema.ts here
+ * because they must sit below both consumer tiers.
+ * docs/architecture/round-trips.md, schema-classes.md, class-chains.md
+ */
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
     return new SpreadsheetRaw(SpreadsheetRawBase.initSpreadsheetRawProps());
@@ -248,6 +257,11 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.sheet(sheetGid).invalidateRowIndexes(),
     );
   }
+  // The one bypass of the type layer; using it obliges filing an issue (README).
+  gatherRawRequest(request: GoogleUpdateRequest): this {
+    this.updateRequests.raw.push(request);
+    return this;
+  }
   // Abandons queued writes while local state still reflects them — terminal step only.
   discardQueuedChanges(): this {
     this.rawState.changesToSave = new Map();
@@ -315,6 +329,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ...surs.update,
       ...this._deleteRequestsDescending(),
       ...surs.sort,
+      // Outside the ordering rules the queue was built around, so last.
+      ...surs.raw,
     ];
     if (requests.length > 0) {
       this.sheetsService.Spreadsheets.batchUpdate(

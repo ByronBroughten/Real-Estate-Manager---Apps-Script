@@ -119,10 +119,10 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
 });
 
 describe("ConfigOrchestrator.generateConfigFiles", () => {
-  it("returns both files' source as one JSON payload, reflecting the synced state", () => {
+  it("returns every file's source together, reflecting the synced state", () => {
     seedFixture();
 
-    const parsed = JSON.parse(ConfigOrchestrator.init().generateConfigFiles());
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
     expect(typeof parsed.sheetConfigs).toBe("string");
     expect(typeof parsed.columnConfigs).toBe("string");
     expect(parsed.sheetConfigs).toContain('"test"');
@@ -130,5 +130,13 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     // Config as part of the sync, then given its real header/valueName by
     // _updateProgrammaticValues before toFileSource read it back out.
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
+  });
+
+  it("carries the untyped-column summary back, since no run status cell will show it", () => {
+    seedFixture();
+
+    expect(
+      ConfigOrchestrator.init().generateConfigFiles().untypedColumnsSummary,
+    ).toContain("1 column(s) across 1 sheet(s)");
   });
 });

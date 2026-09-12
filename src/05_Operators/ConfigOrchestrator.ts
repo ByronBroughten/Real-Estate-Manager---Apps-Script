@@ -4,12 +4,22 @@ import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
-// Syncs the live Sheet Config sheet, then (now that it's current) the live
-// Column Config sheet, sharing one ColumnConfigOperator's state so both
-// sets of queued changes — plus any column IDs written to business sheets
-// along the way — persist in a single flush. See CLAUDE.md/README for why
-// these two must be synced and regenerated together.
+export interface ConfigRegeneration {
+  sheetConfigs: string;
+  columnConfigs: string;
+  valueConfigs: string;
+  untypedColumnsSummary: string | undefined;
+}
 
+/**
+ * Coordinates Sheet/Column/Value Config: sync the live config sheets,
+ * one flush, then emit all three generated files or none.
+ * Config maintenance is this Operator family, not Raw or Named.
+ * Sheet Config then Column Config share one operator so both queues
+ * plus column IDs written to business sheets flush together.
+ * npm run gen:configs is the only regeneration path.
+ * docs/generated-data.md
+ */
 export class ConfigOrchestrator extends SpreadsheetNamedBase {
   static init(): ConfigOrchestrator {
     return new ConfigOrchestrator(
@@ -44,14 +54,15 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
     this.ss.batchUpdateGSheets();
     return summary;
   }
-  generateConfigFiles(): string {
-    this.syncConfigSheetRows();
+  generateConfigFiles(): ConfigRegeneration {
+    const untypedColumnsSummary = this.syncConfigSheetRows();
     this.ss.batchUpdateGSheets();
     this.valueConfigOperator.fetchAfterColumnConfigSynced();
-    return JSON.stringify({
+    return {
       sheetConfigs: this.sheetConfigOperator.toFileSource(),
       columnConfigs: this.columnConfigOperator.toFileSource(),
       valueConfigs: this.valueConfigOperator.toFileSource(),
-    });
+      untypedColumnsSummary,
+    };
   }
 }
