@@ -198,12 +198,20 @@ function paymentLines(ss: SpreadsheetNamed, occupancyId: string): LedgerLine[] {
     kind: "payment",
     date: group.date,
     issuer: group.issuer,
-    description: group.description,
+    description: paymentLineDescription(group),
     charge: "",
     payment: group.amount,
     notes: "",
     depositDelta: group.depositAmount,
   }));
+}
+
+// A payment that only funds the held deposit says so, rather than reading as a generic Payment.
+function paymentLineDescription(group: PaymentGroup): string {
+  if (group.depositAmount === group.amount && group.amount > 0) {
+    return securityDepositCharge;
+  }
+  return group.description;
 }
 
 // One line per payment, so a tenant can check the page against one bank transaction.

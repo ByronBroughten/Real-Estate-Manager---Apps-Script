@@ -115,5 +115,5 @@ Money taken from the deposit already held to settle a charge. It appears on the 
 _Avoid_: deposit deduction, withholding
 
 **Security deposit balance**:
-How much of the tenant's deposit is still being held, shown only on the lines where it changed. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A ledger starts it at zero, because the build covers the tenancy from its beginning.
+How much of the tenant's deposit is still being held, shown only on the lines where it changed. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A payment that funds it is described as "Security deposit". A ledger starts it at zero, because the build covers the tenancy from its beginning.
 _Avoid_: deposit held, escrow

@@ -190,8 +190,79 @@ function stubOccChargeReduce() {
   });
 }
 
+type AllocationRow = FakeRow<typeof columnConfigs.occPayAllocation>;
+
 // The first two are one payment split across two charges; the last two must not appear.
-function stubOccPayAllocation() {
+const allocationRows: AllocationRow[] = [
+  {
+    paymentId: "r:opy:rentAndDeposit",
+    occupancyId: TENANT,
+    filledOut: "Yes",
+    formOfPayment: "Currency",
+    payerCategory: "Household",
+    payerName: TENANT_NAME,
+    paymentDate: DAY_ONE,
+    amount: 50,
+    chargeDescription: "Rent (base)",
+  },
+  {
+    paymentId: "r:opy:rentAndDeposit",
+    occupancyId: TENANT,
+    filledOut: "Yes",
+    formOfPayment: "Currency",
+    payerCategory: "Household",
+    payerName: TENANT_NAME,
+    paymentDate: DAY_ONE,
+    amount: 1100,
+    chargeDescription: "Security deposit",
+  },
+  {
+    paymentId: "r:opy:caretaking",
+    occupancyId: TENANT,
+    filledOut: "Yes",
+    formOfPayment: "Caretaking",
+    payerCategory: "Household",
+    payerName: TENANT_NAME,
+    paymentDate: DAY_TWO,
+    amount: 25,
+    chargeDescription: "Rent (base)",
+  },
+  {
+    paymentId: "r:opy:agency",
+    occupancyId: TENANT,
+    filledOut: "Yes",
+    formOfPayment: "Currency",
+    payerCategory: "Non-resident",
+    payerName: "Ramsey County",
+    paymentDate: DAY_TWO,
+    amount: 200,
+    chargeDescription: "Damage, waste, or service",
+  },
+  {
+    paymentId: "r:opy:halfEntered",
+    occupancyId: TENANT,
+    filledOut: "No",
+    formOfPayment: "Currency",
+    payerCategory: "Household",
+    payerName: TENANT_NAME,
+    paymentDate: DAY_TWO,
+    amount: 77,
+    chargeDescription: "Rent (base)",
+  },
+  {
+    paymentId: "r:opy:neighbour",
+    occupancyId: NEIGHBOUR,
+    filledOut: "Yes",
+    formOfPayment: "Currency",
+    payerCategory: "Household",
+    payerName: "Someone Else`99 Elsewhere, Unit 2",
+    paymentDate: DAY_TWO,
+    amount: 888,
+    chargeDescription: "Rent (base)",
+  },
+];
+
+function stubOccPayAllocation(dataRows: AllocationRow[] = allocationRows) {
   return stubSheet({
     sheetName: "occPayAllocation",
     config: columnConfigs.occPayAllocation,
@@ -206,74 +277,7 @@ function stubOccPayAllocation() {
       "amount",
       "chargeDescription",
     ],
-    dataRows: [
-      {
-        paymentId: "r:opy:rentAndDeposit",
-        occupancyId: TENANT,
-        filledOut: "Yes",
-        formOfPayment: "Currency",
-        payerCategory: "Household",
-        payerName: TENANT_NAME,
-        paymentDate: DAY_ONE,
-        amount: 50,
-        chargeDescription: "Rent (base)",
-      },
-      {
-        paymentId: "r:opy:rentAndDeposit",
-        occupancyId: TENANT,
-        filledOut: "Yes",
-        formOfPayment: "Currency",
-        payerCategory: "Household",
-        payerName: TENANT_NAME,
-        paymentDate: DAY_ONE,
-        amount: 1100,
-        chargeDescription: "Security deposit",
-      },
-      {
-        paymentId: "r:opy:caretaking",
-        occupancyId: TENANT,
-        filledOut: "Yes",
-        formOfPayment: "Caretaking",
-        payerCategory: "Household",
-        payerName: TENANT_NAME,
-        paymentDate: DAY_TWO,
-        amount: 25,
-        chargeDescription: "Rent (base)",
-      },
-      {
-        paymentId: "r:opy:agency",
-        occupancyId: TENANT,
-        filledOut: "Yes",
-        formOfPayment: "Currency",
-        payerCategory: "Non-resident",
-        payerName: "Ramsey County",
-        paymentDate: DAY_TWO,
-        amount: 200,
-        chargeDescription: "Damage, waste, or service",
-      },
-      {
-        paymentId: "r:opy:halfEntered",
-        occupancyId: TENANT,
-        filledOut: "No",
-        formOfPayment: "Currency",
-        payerCategory: "Household",
-        payerName: TENANT_NAME,
-        paymentDate: DAY_TWO,
-        amount: 77,
-        chargeDescription: "Rent (base)",
-      },
-      {
-        paymentId: "r:opy:neighbour",
-        occupancyId: NEIGHBOUR,
-        filledOut: "Yes",
-        formOfPayment: "Currency",
-        payerCategory: "Household",
-        payerName: "Someone Else`99 Elsewhere, Unit 2",
-        paymentDate: DAY_TWO,
-        amount: 888,
-        chargeDescription: "Rent (base)",
-      },
-    ],
+    dataRows,
   });
 }
 
@@ -320,18 +324,20 @@ function stubOccupancyLedger() {
 interface LedgerSpreadsheetProps {
   selectedOccupancyId?: string;
   charges?: ChargeRow[];
+  allocations?: AllocationRow[];
 }
 
 function stubLedgerSpreadsheet({
   selectedOccupancyId = TENANT,
   charges = chargeRows,
+  allocations = allocationRows,
 }: LedgerSpreadsheetProps = {}) {
   return stubSheetsService({
     sheets: [
       stubOccupancy(selectedOccupancyId),
       stubOccCharge(charges),
       stubOccChargeReduce(),
-      stubOccPayAllocation(),
+      stubOccPayAllocation(allocations),
       stubVariable(),
       stubOccupancyLedger(),
     ],
@@ -461,6 +467,49 @@ describe("buildLedger, the page it writes", () => {
         990,
         "",
       ],
+    ]);
+  });
+
+  it("names a household payment that funds the deposit as Security deposit", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      charges: [
+        {
+          id: DEPOSIT_CHARGE,
+          occupancyId: TENANT,
+          date: DAY_ONE,
+          description: "Security deposit",
+          amount: 1100,
+        },
+      ],
+      allocations: [
+        {
+          paymentId: "r:opy:deposit",
+          occupancyId: TENANT,
+          filledOut: "Yes",
+          formOfPayment: "Currency",
+          payerCategory: "Household",
+          payerName: TENANT_NAME,
+          paymentDate: DAY_ONE,
+          amount: 875,
+          chargeDescription: "Security deposit",
+        },
+      ],
+    });
+
+    runBuildLedger();
+
+    expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
+      [
+        DAY_ONE,
+        "Property management",
+        "Security deposit",
+        1100,
+        "",
+        null,
+        "",
+        "",
+      ],
+      [DAY_ONE, "Household", "Security deposit", "", 875, null, 875, ""],
     ]);
   });
 
