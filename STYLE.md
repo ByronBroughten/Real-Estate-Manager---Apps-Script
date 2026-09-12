@@ -1,34 +1,19 @@
 # Coding style
 
-Distilled from the user's own refactors of AI-generated code, plus a survey of the rest of `src/` for consistent, repeated patterns. Apply these on top of README.md's naming vocabulary and CLAUDE.md's architecture rules — this file is about code *shape*, not where things live.
+Distilled from the user's own refactors of AI-generated code, plus a survey of the rest of `src/` for consistent, repeated patterns. Apply these on top of README.md's naming vocabulary and the files under `docs/architecture/` — this file is about code *shape*, not where things live.
 
 Known not-yet-representative code (still AI-shaped, not mined for any rule below): `src/02_SpreadsheetRaw/toIntegrate.ts` and `*.test.ts` files generally.
 
 ## Class shape
 
-### Coordinators are classes, not function modules
+### Coordinator classes
 
-When code coordinates other stateful objects (other Operators, a Spreadsheet), write it as a class extending the tier's Base class (matching `SheetConfigOperator`), not a module of exported free functions.
+When code coordinates other stateful objects (other Operators, a Spreadsheet), write it as a **coordinator class** extending the tier's Base class (matching `SheetConfigOperator`).
 
 This was mined from the framework tiers. It does **not** govern business endpoints: an endpoint is a plain entry with module-private helpers, matching the endpoints already in the registry. Reach for a class only once a file is unwieldy or its logic finds a second caller.
 
-- **`static init()` is how a caller outside the class builds one; `new X(props)` is how a class builds its own collaborators.** `init` takes whatever the caller already holds — nothing at all for an entry point that starts a run (`ConfigOrchestrator.init()`), or a live collaborator whose state must be shared, as when an endpoint action builds an operator from the `ss` it was handed — and assembles the props itself. A collaborator reached from props already on `this` skips `init` and is constructed directly in a getter: `new ColumnConfigOperator(this.spreadsheetNamedProps)`. Either way the real constructor just takes a `props` object.
-- Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this` — never constructor-injected instances, never threaded through as a returned object.
-
-AI tends to reach for a function module that builds collaborators once and returns them in a bag so the caller can pick apart internal state:
-
-```ts
-export function syncAndFlushConfigSheets() {
-  const columnConfigOperator = ColumnConfigOperator.init();
-  const sheetConfigOperator = columnConfigOperator.sheetConfigOperator;
-  sheetConfigOperator.fetchAndUpdateAll();
-  columnConfigOperator.fetchAndUpdateColumnConfig();
-  columnConfigOperator.ss.batchUpdateGSheets();
-  return { sheetConfigOperator, columnConfigOperator };
-}
-```
-
-Prefer a class exposing the same state as getters, with the method itself returning nothing:
+- **`init`** is how a caller outside the class builds one; **`new`** is how a class builds its own collaborators from props already on `this`. `init` takes whatever the caller already holds — nothing at all for an entry point that starts a run (`ConfigOrchestrator.init()`), or a live collaborator whose state must be shared, as when an endpoint action builds an operator from the `ss` it was handed — and assembles the props itself. A collaborator reached from props already on `this` skips `init` and is constructed directly in a getter: `new ColumnConfigOperator(this.spreadsheetNamedProps)`. Either way the real constructor just takes a `props` object.
+- Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this`.
 
 ```ts
 export class ConfigOrchestrator extends SpreadsheetNamedBase {
@@ -49,7 +34,7 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
 }
 ```
 
-Callers reach into `orchestrator.sheetConfigOperator` directly instead of destructuring a method's return value.
+Callers reach `orchestrator.sheetConfigOperator` on the instance. The method returns nothing.
 
 ### An Operator extends a `*NamedBase` and reaches its subject through a getter
 
@@ -138,15 +123,16 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
   private _prepFetchRowSpecifier(sheet: SheetIndexed, rowSpecifier: RowSpecifierName, columnId: string): void
   ```
 - **The one argument every implementation will use is hoisted out of the bag and passed first, positionally.** The grouping rule above is about params that travel together; it doesn't apply to a collaborator that essentially every implementation of a signature needs. An endpoint's action takes the spreadsheet first and its remaining inputs as a second destructured object, because every action needs the spreadsheet and only some need the rest — burying it in the bag would make every implementation destructure to reach the thing it always wants.
-- **The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. `scripts/generateConfigFiles.mjs` groups its two output paths as `path: { sheetConfigs, columnConfigs }` rather than two separate `sheetConfigsPath`/`columnConfigsPath` members.
+- **The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. `scripts/genConfigs.mjs` groups its three output paths as `path: { sheetConfigs, columnConfigs, valueConfigs }` rather than three separate `sheetConfigsPath`/`columnConfigsPath`/`valueConfigsPath` members.
 
 ## Comments
 
 - **Prefer decomposing into small, descriptively-named methods over a large comment.** When a chunk of code would otherwise need a comment explaining what it does (as opposed to a comment explaining a non-obvious *why*), that's usually a sign it should be pulled into its own small private method whose name says what the block does — see `SheetConfigOperator._updateAll` → `_deleteStaleSheetConfigs`/`_appendMissingSheetConfigs`/`_updateProgrammaticValues`. The method name replaces the comment.
 - **Default to no comments.** Most files in this codebase have zero — code and types carry the meaning.
 - **When one does appear, it's one line, trailing the line it explains (or immediately above), and it explains a "why not the obvious thing"** — never restating what the line already says. E.g. `action: "boolean", // Should perhaps be "boolean" | "string"`; `// intentionally not cell named, because named cells only work for data...`.
-- **Never a multi-line comment block.** If the "why" doesn't fit on one short line, cut it rather than expand it — a multi-sentence comment is a sign the explanation belongs in a commit message or PR description, not the file.
-- **Trim method names to what the return type doesn't already say** — a method returning a string of file source doesn't also need "Sources" in its name on top of "Files": `generateConfigFilesSources` → `generateConfigFiles`.
+- **Never a multi-line comment block** — with one exception. If the "why" doesn't fit on one short line, cut it rather than expand it: a multi-sentence comment is a sign the explanation belongs in a commit message or PR description, not the file.
+- **Exception — a file-level navigation block** immediately above the exported class, 5–10 lines, stating this file's job and where neighbouring work lives so an agent opens the right sibling instead of the whole tier. `SpreadsheetRaw`, `EndpointRun`, `SheetNamed`, and `ConfigOrchestrator` are the current set. Not a licence for multi-line comments elsewhere.
+- **Trim method names to what the return type doesn't already say** — a method returning the generated files' source doesn't also need "Sources" in its name on top of "Files": `generateConfigFilesSources` → `generateConfigFiles`.
 
 ## Error handling & validation
 
@@ -163,12 +149,12 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
 - **Generic params get short domain abbreviations with a constraint, not bare letters** — `SN` (SheetName), `VN` (ValueName), `CN` (ColumnName), `UN` (UniformRowName), `IF` (IsFormula), `TN`, each usually `extends <DomainType>`. Two letters, not one, even where one would be unambiguous: a lone `F` or `I` reads as a bare letter rather than an abbreviation. Bare `T`/`K`/`V`/`O` are reserved for domain-free structural utilities (`utils/Obj.ts`, `utils/Arr.ts`) that have no domain concept to abbreviate.
 - **Verify a type-level claim with an identity check, never an assignment.** `const x: Expected = valueOfNewType` proves nothing about a mapped or conditional type: it passes against `any` and against `never`. Use the identity-based `IsExactly`/`assertType` pair already in `SpreadsheetSchema.test.ts`, and `assertNotType` for the claim that two types are *not* identical — the only way to state that a branded type like `DateSerial` is not just `number` (#15). Two corollaries, both learned the hard way:
   - **A probe that needed an `any` to compile has proved nothing.** Intersecting to satisfy an indexer (`(T & Record<K, any>)[K]`) resolves to `any`, so every assertion downstream of it passes vacuously. If a type won't index without that workaround, fix the type — carry the data inside the entry so the key is provably present — rather than casting past it.
-  - **Measure before adopting a mapped type over the config unions**, with `npx tsc --noEmit --extendedDiagnostics`. See README's "Type-check cost" for the baseline and the one known cliff.
+  - **Measure before adopting a mapped type over the config unions**, with `npx tsc --noEmit --extendedDiagnostics`. See `docs/architecture/type-check-cost.md` for the baseline and the one known cliff.
 - **Prefer improving type specificity over branded-string fallbacks** — narrow the domain until the empty case can't arise rather than encoding the explanation into a fallback string literal. A branded fallback also silently stops working in constraint position, where the intersection that satisfies the parent's constraint collapses it back to `never`. See DESIGN.md, "Make disagreement structurally impossible rather than validating against it."
 - **`as` casts are for type-level narrowing on data that's already runtime-safe, never a substitute for validation.** Three accepted idioms in production code:
   - Seed a fully-typed empty accumulator up front, then fill it: `{} as SheetColumnNamesStandard<SN>`, not a cast at the point of use.
   - `as any` / `as unknown as X` as an escape hatch, but only inside low-level structural utilities (`utils/Obj.ts`, `utils/Arr.ts` and similar) doing generic structural-typing gymnastics — not general license elsewhere.
-  - `as unknown as X` in ordinary code, but **only to buy back type-check time, and only when a test already proves the same thing more cheaply.** Both halves are required. The cost half: the cast must be removing real, measured work — run `npx tsc --noEmit --extendedDiagnostics` before and after, and if the saving isn't in the tens of thousands of instantiations, don't do it. The proof half: somewhere else, a test must already check the exact shape the cast is claiming, written against one named sheet rather than a type parameter. That is what keeps the cast from being a hole. `SheetNamed.appendRowWithAllVals` is the only place in the repo that qualifies (#14) — see README's "Type-check cost" for the numbers and for the profile that found no second candidate.
+  - `as unknown as X` in ordinary code, but **only to buy back type-check time, and only when a test already proves the same thing more cheaply.** Both halves are required. The cost half: the cast must be removing real, measured work — run `npx tsc --noEmit --extendedDiagnostics` before and after, and if the saving isn't in the tens of thousands of instantiations, don't do it. The proof half: somewhere else, a test must already check the exact shape the cast is claiming, written against one named sheet rather than a type parameter. That is what keeps the cast from being a hole. `SheetNamed.appendRowWithAllVals` is the only place in the repo that qualifies (#14) — see `docs/architecture/type-check-cost.md` for the numbers and for the profile that found no second candidate.
   Actual validation of real external/unknown values (Sheets cell data) always routes through `Val.validate.*`/`Val.is.*`, never a bare cast. (Test files are separately mid-migration off `as` via the `migrate-to-shoehorn` skill — that's in-progress project state, not a contradicting rule.)
 - **A registry keyed by a finite name union takes a plain `: Type` annotation, not `makeStructuredConfig`.** `makeStructuredConfig` infers the literal into a type parameter, and that inference silently accepts an unknown key whenever at least one *valid* key sits beside it in the same literal — a bogus key on its own does error, which is exactly what makes the hole easy to miss. That's how `occupancy_buildLedgerRunTimeLastRan` (no such column) reached the endpoint map and still passed `npm run tsc`. `export const businessEndpoints: Endpoints = { ... }` restores excess-property checking and reports the typo with a "did you mean". Keep `makeStructuredConfig` for the generated config files, where the keys come from the generator rather than a hand-typed literal.
 - **Custom generic utility types live in `utils/Obj.ts`**, PascalCase, one clear transform per name (`StrictOmit`, `DistributiveOmit`, `StrictPick`, `PickStartsWith`) — colocated rather than scattered per-file. One deliberate exception: `NotEmpty<V>` sits in `00_base/base.ts` beside the wire value types, because the blank it removes is the cell blank those types define rather than a general structural transform (#12).
@@ -200,6 +186,7 @@ Everything above still applies as-is to test code: boolean `is`/`has` prefixes, 
 
 Proposed test-specific extensions of that same spirit:
 
+- **Understand a class from its implementation.** Open the sibling `Foo.test.ts` when changing tests.
 - **A named setup/fixture-builder function over a comment explaining a seeded row.** Instead of a comment like `// Pre-existing row for the "test" sheet, with API access so its column IDs get gathered` beside a literal, pull it into a small function whose name states the scenario — `seedActiveSheetWithApiAccess()` — so the scenario is legible from the call site, not a comment.
 - **One behavior per `it()`, named as a sentence describing the behavior, not the mechanism** — e.g. `"flushes Sheet Config and Column Config changes in a single batchUpdate call"`.
 - **`describe` blocks named after the real method/class under test**, not an invented suite label — e.g. `describe("syncAndFlushConfigSheets", ...)`, `describe("ColumnConfigOperator.columnEntries / toFileSource", ...)`.

@@ -62,6 +62,14 @@ export interface EndpointRunProps<
   endpoint: EndpointDispatched<SN>;
 }
 
+/**
+ * Owns everything after Api dispatches: selector prune, running-state
+ * flush, action try/catch, selection consume, outcome flush.
+ * Api only decodes the edit event and looks up the endpoint map.
+ * Action bodies live in businessEndpoints/<name>.ts; the registry is
+ * businessEndpoints.ts. Run-report shape and flags: CONTEXT.md.
+ * docs/architecture/endpoint-dispatch.md
+ */
 export class EndpointRun<
   SN extends SheetNameSimple = SheetNameSimple,
 > extends SheetNamedBase<SN> {

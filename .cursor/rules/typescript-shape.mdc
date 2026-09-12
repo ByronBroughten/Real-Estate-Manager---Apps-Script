@@ -1,0 +1,9 @@
+---
+description: TypeScript code shape. Apply STYLE.md when writing or refactoring TS.
+globs: "**/*.ts"
+alwaysApply: false
+---
+
+Write TypeScript to [`STYLE.md`](../../STYLE.md). Coordinator classes use `init` (outside caller) and `new` (from props already on `this`). Endpoints stay a plain entry with module-private helpers.
+
+Understand a class from its implementation. Open the sibling `Foo.test.ts` when changing tests.

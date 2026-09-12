@@ -18,6 +18,12 @@ This is a single-context repo, and it keeps no ADR tree:
 /
 ├── CONTEXT.md
 ├── DESIGN.md
+├── README.md          # map: tiers, naming vocabulary
+├── docs/architecture.md
+├── docs/architecture/
+├── docs/how-it-runs.md
+├── docs/generated-data.md
+├── docs/testing.md
 └── src/
 ```
 
