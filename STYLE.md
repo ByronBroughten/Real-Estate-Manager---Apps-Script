@@ -13,8 +13,9 @@ One line per rule. The reasoning and the worked examples behind the first two se
 
 ## Class shape
 
-- **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** `init` is how an outside caller builds one; `new` is how a class builds its own collaborators from props already on `this`; collaborators are lazy getters. Endpoints are exempt — a plain entry with module-private helpers.
+- **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** `init` is how an outside caller builds one; `new` is how a class builds its own collaborators from props already on `this`; collaborators are lazy getters. Endpoints are exempt — a plain entry with module-private helpers, until a body turns unwieldy: 303 lines and eighteen free functions threading a collaborator through crossed that line and moved onto a business operator (#22).
 - **An Operator extends its subject's `*NamedBase` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
+- **What an Operator holds as props is its identity; a per-run value is an argument to the method that needs it** — `OccupancyLedgerOperator` holds the spreadsheet, and `build` takes the occupancy row index.
 - **A composition of collaborator calls that answers one domain question belongs on the collaborator**, under its own name. A parameter that its only caller already holds as its own state means the query belongs on the instance.
 - **Extract the shared piece when you can name the second caller**, not when it arrives.
 - **A member that samples the top data row for a column-wide fact belongs on the Meta column.** `topCell`/`topRow` stay primary.
@@ -30,6 +31,7 @@ One line per rule. The reasoning and the worked examples behind the first two se
   - **A flag in a config literal is the exception: it is an imperative directive to whatever reads the literal** — `retainSelection`, `requireOneRow`, `runOnUncheck`. One mood per literal.
 - **Prefix a getter `active` when it reads live sheet state that has a same-named schema/config counterpart** — `ColumnMetaRaw.activeIsFormula` vs `ColumnSchema.isFormula`. A helper that moves down onto the object it's about renames `_actualX` → `activeX`.
 - **`column` abbreviates to `col` by default, and is spelled out beside an already-short suffix** — `colIndex`, but `columnId`. One form per scope.
+- **A sheet takes the unmarked name and a row is marked with a spelled-out `Row` suffix** — `occupancy` is the sheet, `occupancyRow` the row.
 - **A plural method name promises more of the same return, not a different container.**
 - **A name has to read to someone who has never opened this codebase** — never jargon named after the mechanism that sets it.
 - **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name**, and keeps it once a guard makes the operation safe.

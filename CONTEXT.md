@@ -98,6 +98,10 @@ _Avoid_: standard name, unit type
 The one-page statement you hand a tenant, showing every charge they were billed, every payment that settled one, and what they still owe. It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it, and its lines carry no IDs.
 _Avoid_: statement, invoice, tenant report
 
+**Ledger line**:
+One row of the page: a charge billed, a charge forgiven, a payment received, or a draw from the deposit. It carries the day it happened, who it came from, what it was for and the amount, and the lines run in the order things happened, with a charge shown before anything that settled it the same day. A line carries no identifier, because nothing points at it.
+_Avoid_: entry, row, transaction
+
 **Letterhead**:
 The block above the ledger's header row naming the tenant, the address and the day the page was built. Its cells are formulas, and they read the occupancy and the date that building the ledger writes into the Variable sheet. Building a ledger is what makes the letterhead say the right household.
 _Avoid_: header, title block
@@ -117,3 +121,7 @@ _Avoid_: deposit deduction, withholding
 **Security deposit balance**:
 How much of the tenant's deposit is still being held, shown only on the lines where it changed. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A payment that funds it is described as "Security deposit". A ledger starts it at zero, because the build covers the tenancy from its beginning.
 _Avoid_: deposit held, escrow
+
+**Allocation**:
+One part of a payment, naming the charge that part settled. A payment split across three charges is three allocations, and they are how the app knows money went to the deposit rather than to rent. The ledger shows the payment rather than its allocations, so one line matches one bank transaction.
+_Avoid_: split, line item, apportionment

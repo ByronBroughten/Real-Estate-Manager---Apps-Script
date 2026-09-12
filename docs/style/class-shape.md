@@ -9,6 +9,8 @@ When code coordinates other stateful objects (other Operators, a Spreadsheet), w
 
 This was mined from the framework tiers. It does **not** govern business endpoints: an endpoint is a plain entry with module-private helpers, matching the endpoints already in the registry. Reach for a class only once a file is unwieldy or its logic finds a second caller.
 
+**What unwieldy meant, the one time it was crossed.** `buildLedger.ts` was 303 lines holding eighteen free functions, and almost every one of them existed to thread a collaborator through: the spreadsheet appeared in six of their signatures, the occupancy id in three, and a map of charges keyed by id in one more (#22). The number is the threshold's first data point, not its definition — what made it unwieldy was the threading, and the win was signatures rather than lines, since the body came out about the same length as `OccupancyLedgerOperator`.
+
 - **`init`** is how a caller outside the class builds one; **`new`** is how a class builds its own collaborators from props already on `this`. `init` takes whatever the caller already holds — nothing at all for an entry point that starts a run (`ConfigOrchestrator.init()`), or a live collaborator whose state must be shared, as when an endpoint action builds an operator from the `ss` it was handed — and assembles the props itself. A collaborator reached from props already on `this` skips `init` and is constructed directly in a getter: `new ColumnConfigOperator(this.spreadsheetNamedProps)`. Either way the real constructor just takes a `props` object.
 - Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this`.
 
@@ -38,6 +40,12 @@ Callers reach `orchestrator.sheetConfigOperator` on the instance. The method ret
 Whatever an Operator operates on — a sheet, a column — it extends that thing's `*NamedBase` class and adds methods suited to that data structure. It does **not** extend the concrete class it works through, and it doesn't take one as a constructor argument: the subject is a lazy collaborator getter built from the props already on `this`, named for what it is (`ss`, `sheet`, `column`). `GenericSheetOperator extends SheetNamedBase<SN>` with `ss`/`sheet`/`schema` getters is the reference shape — `sheet` is the primary (data) sheet, and the metadata view is `sheet.meta`; a column-scoped operator extends `ColumnNamedBase<SN, CN>` and exposes a `column` getter the same way.
 
 Inheriting the concrete class instead would put its whole surface on the operator, which is the opposite of what the operator is for — it exists to offer a *narrower*, more specific set of methods than the general class does.
+
+## An Operator's props are its identity
+
+What an Operator holds as props is what it *is*; a value that only one run cares about is an argument to the method that needs it. `OccupancyLedgerOperator` is constructed from the spreadsheet alone and its `build(occupancyRowIndex)` takes the occupancy per run, so any caller holding a spreadsheet can build a ledger and two builds in a row are independent.
+
+Holding the row index as an optional field assigned at the start of a build was considered and rejected (#22). It gives the operator two lifetimes with nothing in the type separating them: before a build the field is unset and every step reading it fails, and after one returns the field still names the previous occupancy, so anything reading the operator then gets a confident answer about the wrong tenancy. That is DESIGN.md's "Make disagreement structurally impossible" applied to an operator's own state.
 
 ## Push a domain query onto the object that owns it
 
