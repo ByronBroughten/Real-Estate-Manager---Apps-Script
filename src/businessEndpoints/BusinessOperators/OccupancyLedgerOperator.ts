@@ -204,7 +204,7 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
       const payment = payments.get(paymentId) ?? {
         date: allocation.value("paymentDate"),
         issuer: paymentIssuer(allocation),
-        description: paymentDescription(allocation.value("formOfPayment")),
+        description: allocation.value("formOfPayment"),
         amount: 0,
         depositAmount: 0,
       };
@@ -272,14 +272,6 @@ function paymentIssuer(allocation: RowNamed<"occPayAllocation">): string {
     return issuers.household;
   }
   return allocation.value("payerName");
-}
-
-// Every other form reads "Payment" until the stored Currency value is renamed.
-function paymentDescription(formOfPayment: string): string {
-  if (formOfPayment === "Caretaking") {
-    return "Caretaking";
-  }
-  return "Payment";
 }
 
 function compareLines(a: LedgerLine, b: LedgerLine): number {

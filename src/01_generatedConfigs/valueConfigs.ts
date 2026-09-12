@@ -74,7 +74,7 @@ export const valueConfigs = makeValueConfigs({
     "No"
   ],
   "paymentType": [
-    "Currency",
+    "Payment",
     "Caretaking"
   ]
 });
