@@ -10,7 +10,7 @@ Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./R
 - `npm run tsc` and a chore dry run (`npm run chore <name>`, no `--send`) are always safe. Dry-run writes cannot reach Google: suppression is in the Node host adapter.
 - `npm run gen:configs` has standing permission only when **all four** hold: no uncommitted changes in `src/01_generatedConfigs/`; none in `src/05_Operators/`; report what changed **and the untyped-column count**; never a blind fix for an unidentified type error. One regeneration path. Sheet-shape bugs are fixed on the sheet, then regenerated. After any sheet change, read the regenerated entry before building on it. [`docs/generated-data.md`](./docs/generated-data.md).
 - Don't hand-edit `sheetConfigs` / `columnConfigs` / `valueConfigs`. Exception: the config-sheet floor (`sheetConfig`, `columnConfig`, `spreadsheetConfig`, `valueConfig`).
-- **Never read `columnConfigs.ts` whole.** `sheetConfigs.ts` is the sheet list; grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only.
+- **Read the block, not the file.** Reading `columnConfigs.ts` is denied in `.claude/settings.json`: grep it for the sheet key (`"occupancy":`) and read that object only, with `sheetConfigs.ts` as the sheet list. A long test file is the same — open the `describe` block you are changing.
 - Understand a class from its implementation. Open the sibling `Foo.test.ts` when changing tests.
 - gsheets MCP reads (`list_spreadsheets`, `list_sheets`, `get_sheet_data`) are always fine. Writes need an exact plan (sheet/range/values or new sheet) and a yes. `share_spreadsheet` needs its own yes: who, and at what permission.
 - Commit to `master` by default. Branch only if asked, or if other work is already in flight — then ask which. Commit or push only when asked.
@@ -21,6 +21,16 @@ Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./R
 - A one-off against the live sheet is a chore — no scratch `src/index.ts` function, no ad-hoc `scripts/` Sheets client, no deploy-to-run. `gatherRawRequest` obliges an issue naming the missing capability. [`docs/architecture/chores.md`](./docs/architecture/chores.md), [`docs/architecture/raw-request-opening.md`](./docs/architecture/raw-request-opening.md).
 - During design or grilling, write nothing until the user invokes the skill that files it.
 - Don't create `docs/adr/`.
+
+## Delegating
+
+A dispatched agent starts **cold**: it re-pays this file plus every doc it opens. Delegation pays when an agent reads a lot and returns a little — a sweep across many files, a review, research. Handle single-file edits and anything already in context inline.
+
+- **The gates stay in the main session.** A dispatched agent has no one to ask, so it reports the command it would run and the plan behind it; this session gets the yes and runs it. Commits and `gh` writes the same.
+- **Name the doc in the prompt.** Quote the Read-by-task row and the exact file and block; a cold agent handed a topic re-reads the map. The `columnConfigs.ts` denial covers `Read` alone — tell it to grep the sheet key.
+- **Cite what comes back.** Require `file:line` and verbatim quotes in the report. A paraphrase has to be re-read to trust, which spends more than the delegation saved.
+- **Parallel agents read; one agent edits.** They share one working tree. `tsc` and tests run once here, after the edits land.
+- **During design or grilling, dispatch reads.** Findings come back in the report; filing waits for the skill the user invokes, `/research` included.
 
 ## Read by task
 

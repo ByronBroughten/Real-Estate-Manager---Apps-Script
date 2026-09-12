@@ -4,100 +4,36 @@ Distilled from the user's own refactors of AI-generated code, plus a survey of t
 
 Known not-yet-representative code (still AI-shaped, not mined for any rule below): `src/02_SpreadsheetRaw/toIntegrate.ts` and `*.test.ts` files generally.
 
+One line per rule. The reasoning and the worked examples behind the first two sections are one file away:
+
+| When | File |
+| --- | --- |
+| Writing a coordinator or an Operator, placing a member | [`docs/style/class-shape.md`](./docs/style/class-shape.md) |
+| Naming a value, method, flag, getter or param bag | [`docs/style/naming.md`](./docs/style/naming.md) |
+
 ## Class shape
 
-### Coordinator classes
-
-When code coordinates other stateful objects (other Operators, a Spreadsheet), write it as a **coordinator class** extending the tier's Base class (matching `SheetConfigOperator`).
-
-This was mined from the framework tiers. It does **not** govern business endpoints: an endpoint is a plain entry with module-private helpers, matching the endpoints already in the registry. Reach for a class only once a file is unwieldy or its logic finds a second caller.
-
-- **`init`** is how a caller outside the class builds one; **`new`** is how a class builds its own collaborators from props already on `this`. `init` takes whatever the caller already holds — nothing at all for an entry point that starts a run (`ConfigOrchestrator.init()`), or a live collaborator whose state must be shared, as when an endpoint action builds an operator from the `ss` it was handed — and assembles the props itself. A collaborator reached from props already on `this` skips `init` and is constructed directly in a getter: `new ColumnConfigOperator(this.spreadsheetNamedProps)`. Either way the real constructor just takes a `props` object.
-- Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this`.
-
-```ts
-export class ConfigOrchestrator extends SpreadsheetNamedBase {
-  static init(): ConfigOrchestrator {
-    return new ConfigOrchestrator(ConfigOrchestrator.initSpreadsheetNamedProps());
-  }
-  get sheetConfigOperator() {
-    return new SheetConfigOperator(this.spreadsheetNamedProps);
-  }
-  get columnConfigOperator() {
-    return new ColumnConfigOperator(this.spreadsheetNamedProps);
-  }
-  syncAndFlushConfigSheets() {
-    this.sheetConfigOperator.fetchAndUpdateAll();
-    this.columnConfigOperator.fetchAndUpdateColumnConfig();
-    this.ss.batchUpdateGSheets();
-  }
-}
-```
-
-Callers reach `orchestrator.sheetConfigOperator` on the instance. The method returns nothing.
-
-### An Operator extends a `*NamedBase` and reaches its subject through a getter
-
-Whatever an Operator operates on — a sheet, a column — it extends that thing's `*NamedBase` class and adds methods suited to that data structure. It does **not** extend the concrete class it works through, and it doesn't take one as a constructor argument: the subject is a lazy collaborator getter built from the props already on `this`, named for what it is (`ss`, `sheet`, `column`). `GenericSheetOperator extends SheetNamedBase<SN>` with `ss`/`sheet`/`schema` getters is the reference shape — `sheet` is the primary (data) sheet, and the metadata view is `sheet.meta`; a column-scoped operator extends `ColumnNamedBase<SN, CN>` and exposes a `column` getter the same way.
-
-Inheriting the concrete class instead would put its whole surface on the operator, which is the opposite of what the operator is for — it exists to offer a *narrower*, more specific set of methods than the general class does.
-
-### Push a domain query onto the object that owns it
-
-When a coordinating class composes several calls on a collaborator to answer one domain question, that composition belongs on the collaborator as its own named method — not re-inlined at every call site. `ColumnConfigOperator` used to reach through `sheet.uniformRow("columnId").activeValueArr` and `.hasValue(columnId)` directly; that logic moved onto `SheetMetaNamed` itself as `get activeColumnIds()` and `isActiveColumnId(columnId)`, and `ColumnConfigOperator`'s own private helper now just delegates:
-
-```ts
-private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
-  return this.ss.raw.sheetMeta(sheetGid).isActiveColumnId(columnId);
-}
-```
-
-Destructure a collaborator's getter directly when only one property is needed: `const { activeColumnIds } = this.ss.raw.sheetMeta(sheetGid);`.
-
-A container method that takes an index/id as a parameter, but is only ever called by code that already has that exact value as its own instance state, is a sign the query belongs on the instance instead — drop the parameter along with the method. `SheetRawBase.columnValidationValues(colIndex: number)` was deleted; its one caller always already had its own `colIndex`, so the query moved to `ColumnMetaRaw` as `get valueValidationStrings()`, reading `this.activeTable.columnValidationValues.get(this.colIndex)` (`ColumnMetaRaw.ts`). The parameter disappearing is what turns it into a getter (see the getter rule below).
-
-### Extract the shared piece when the second caller is foreseen, not when it arrives
-
-Keeping a helper private until a second call site actually exists is the wrong default here. When the sibling caller is already visible — another sheet of the same shape, another endpoint of the same family — build the shared class now and put it where the framework keeps its operators. The name-to-ID resolver was written as a general operator on its first caller because Add Occ Charge and Add Occ Payment obviously want it (#24). The same judgment governs framework behaviour an endpoint asks for: build the general form rather than the one fitted to the endpoint that asked, which is why per-row reporting serves any endpoint instead of only the batch one that motivated it (#23). This is not licence to build for imagined callers, and DESIGN.md's "Record a deliberate absence as deliberate" still governs a feature nobody has asked for. The test is whether you can name the second caller.
-
-### Model state at the granularity the concept actually has
-
-The principle and its other instances live in DESIGN.md; what follows is where it lands on member placement. A member that **samples the top data row to derive a column-wide fact** belongs on the Meta column — that is membership criterion 2 of the Meta/primary axis (README.md, "Naming vocabulary"), and `isFormula`/`numberFormatType` are the case that produced it. They match `ColumnSchema.isFormula`, the schema-based trait, and are read off the column's top data-row cell only because that is how the API delivers them; so they live as `activeIsFormula`/`activeNumberFormatType` on `ColumnMetaRaw`, populated once per column by `SheetRaw._integrateSheetData`, not as per-row/per-cell state on `CellRaw`/`RowRawBase`.
-
-The criterion bites on the derived fact, not on row or cell addressing: `topCell` and `topRow` stay primary, or a Meta class would end up handing out data rows.
-
-### Class member order
-
-1. `static init()`
-2. Plain getters for derived collaborators/state (`ss`, `schema`, `sheetConfigOperator`, ...)
-3. Public behavior methods
-4. Private helpers, `_`-prefixed — ordered so a helper used by only one caller sits immediately after that caller (detail follows the step that needs it); a helper reused by several later methods comes first, in the order of its first use. (`_initSheetGidsApiAccesses`/`_isSheetGidApiAccesses`, each used by multiple methods, sit first in `ColumnConfigOperator`; `_isActiveColumnId`, called only by `_pruneColumnRows`, sits directly after it.)
-
-### Delete dead scaffolding you touch — with one exception
-
-Editing a file is the moment to remove, not preserve, a stub nothing calls, a placeholder function (`function triggerAuth(): void { return; }`), or a variable instantiated and discarded (`const columnConfig = ColumnConfigOperator.init();` with no use of `columnConfig`). An empty function body is better than a dead unused variable or an unreferenced helper kept "in case."
-
-**Exception: commented-out code.** Flag it and ask before deleting — don't remove it as part of a cleanup pass. It might be an intentional breadcrumb rather than leftover cruft.
-
-**Zero callers is not proof of dead.** Some members are parked for planned work and carry no marker distinguishing them from cruft — `SheetRaw.validateRowIndexes` and `SheetRaw.requestSortGSheet` are both intentional. A grep-derived list of uncalled members is a set of candidates, not a verdict: name what you found and ask, rather than deleting on the count. A member whose only caller is a test is a third case again — deleting it deletes coverage.
-
-### Keep "why" comments across a refactor
-
-A comment explaining a non-obvious invariant (e.g. why two sheets must sync in one flush) carries over verbatim across a restructure — it documents the invariant, not the code shape around it.
+- **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** `init` is how an outside caller builds one; `new` is how a class builds its own collaborators from props already on `this`; collaborators are lazy getters. Endpoints are exempt — a plain entry with module-private helpers.
+- **An Operator extends its subject's `*NamedBase` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
+- **A composition of collaborator calls that answers one domain question belongs on the collaborator**, under its own name. A parameter that its only caller already holds as its own state means the query belongs on the instance.
+- **Extract the shared piece when you can name the second caller**, not when it arrives.
+- **A member that samples the top data row for a column-wide fact belongs on the Meta column.** `topCell`/`topRow` stay primary.
+- **Member order:** `static init()`, then collaborator getters, then public behavior methods, then `_`-prefixed private helpers — a single-caller helper sits right after its caller.
+- **Delete dead scaffolding in a file you touch** — a stub nothing calls, a placeholder, a variable instantiated and discarded. **Ask before deleting commented-out code.** Zero callers is a list of candidates, not a verdict.
+- **A "why" comment carries over verbatim across a restructure.**
 
 ## Naming
 
-- **Prefer a term from TS/JS's own vocabulary over a made-up adjective, once one fits.** `PureValueName`/`PureValue`/`PureValueNamesToTypes` (`utils/Val.ts`) named the `string | number | boolean | date` family after a vague "pure" adjective; renamed to `PrimitiveValueName`/`PrimitiveValue`/`PrimitiveValueNamesToTypes` once it was clear that's exactly what the set is — no invented term needed when the language already has one.
-- **Name a value after the domain type it holds, not a generic container word.** `entries`, `results`, `data` describe the shape (a container) but not what's in it; prefer the name that matches the actual type/concept, especially when that type already has a name elsewhere in the codebase. `columnEntries()` → `newColumnConfigs()` (returns what becomes `columnConfigs.ts`), its local `entries` → `columnConfigs`, and the per-sheet `sheetEntries` → `tableColumnConfigs` (matching the `TableColumnConfigs` type each value actually is).
-- **A boolean is named as a third-person statement about its subject, never a bare adjective.** `is` and `has` are the usual verbs — `isActive`, `isFormula`, `hasValue`, `hasIdColumn` — but they're the common case, not the rule; reach for whatever verb states the thing plainly. `isRunOnUncheck` names a property of the flag rather than a behaviour of its subject, and is wrong for that reason. Such a flag defaults to `false`, so its absence means the ordinary behaviour and it only ever appears where it's doing something.
-  - **An optional flag in a config literal is the exception: it is an imperative directive to whatever reads the literal, not a statement about the thing it sits on.** An endpoint entry's flags are `retainSelection`, `requireOneRow`, `runOnUncheck` — retain the selection, require one row, run on uncheck (#18). They read as third-person statements first (`retainsSelection`, `runsOnUncheck`, #11), which was defensible one flag at a time and stopped being so once a flag arrived — `requireOneRow` — that commands something the framework does rather than describing something the entry is. Mixing the two moods in one literal makes a reader work out which flags command and which describe, so the whole set takes the imperative.
-- **Prefix a getter `active` when it reads live/fetched sheet state that has a same-named counterpart sourced from schema/generated-config data** — disambiguates the live read from the committed one. `ColumnMetaRaw.activeIsFormula` (this run's live sheet data) vs. `ColumnSchema.isFormula` (the committed `columnConfigs.ts` trait) — same underlying concept, two different sources of truth. Matches the existing `active` vocabulary for "what's actually in the fetched state right now": `activeTable`, `activeColumnIds`, `activeSheetGids`, `activeRowIndexes`.
-- **When a "compute the true/live value" helper moves from a coordinating Operator down onto the domain object it's actually about, rename it from `_actualX` to `activeX` to match that vocabulary.** `ColumnConfigOperator._actualValueTitle`/`_actualValidationValueName`/`_actualPrimitiveValueName` — named from the coordinator's point of view, contrasting a *live* value against the *stored config* value — became `ColumnMetaRaw.activeValueTitle()`/`.activeValidationValueTitle()`/`._actualPrimitiveValueName()` once they moved onto the column itself: from that object's own point of view it's just its current state, matching sibling getters like `activeHeader`/`activeIsFormula` on the same class. (The innermost helper, `_actualPrimitiveValueName`, kept its old name and stayed `private` — it has no live/committed counterpart to disambiguate, so `active` wouldn't fit; see the `_`-prefix note below for why it's still underscored while its siblings aren't.)
-- **`column` abbreviates to `col` by default — it's referenced constantly, so shortening it earns its keep (`colIndex`) — except when it's paired with an already-short suffix, where spelling it out keeps the identifier legible** (`columnId`, not `colId`: `Id` alone is too short to pair with `col` without the result reading as a cryptic blob). Whichever form fits, use it consistently within one scope: `activeColIds` next to `existingColumnIds` in the same method reads as a typo, not a style choice; it became `activeColumnIds` to match.
-- **A plural method name promises more of the same return, not a different container.** `rowByValue` finds one row by a value, so `rowsByValue` could only mean every row matching a value. When the plural would change the shape rather than the count, it needs its own name.
-- **A name has to read to someone who has never opened this codebase.** A flag named after the mechanism that sets it becomes jargon at every call site that isn't that mechanism. Prefer the word a newcomer would guess: a row held even though it looks empty is `isReserved`, not `claimed` (#10).
-- **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name** (`SheetIndexed.DELETE_ALL_DATA_ROWS` and the `SheetNamed` method that delegates to it). Nothing else in the codebase is spelled that way, so the shout is the warning: a caller can't reach one by reflex. It stays shouty even once a guard makes the operation safe — the point is that the reader stops, not that the operation is unguarded.
-- **Method names draw from one controlled verb vocabulary**, each with a distinct meaning — don't invent a new verb for a meaning already on this list:
+- **Prefer a term from TS/JS's own vocabulary over a made-up adjective** — `Primitive`, not `Pure`.
+- **Name a value after the domain type it holds, not a generic container word** — `columnConfigs`, not `entries`.
+- **A boolean is a third-person statement about its subject, never a bare adjective.** `is`/`has` are the common case, not the rule.
+  - **A flag in a config literal is the exception: it is an imperative directive to whatever reads the literal** — `retainSelection`, `requireOneRow`, `runOnUncheck`. One mood per literal.
+- **Prefix a getter `active` when it reads live sheet state that has a same-named schema/config counterpart** — `ColumnMetaRaw.activeIsFormula` vs `ColumnSchema.isFormula`. A helper that moves down onto the object it's about renames `_actualX` → `activeX`.
+- **`column` abbreviates to `col` by default, and is spelled out beside an already-short suffix** — `colIndex`, but `columnId`. One form per scope.
+- **A plural method name promises more of the same return, not a different container.**
+- **A name has to read to someone who has never opened this codebase** — never jargon named after the mechanism that sets it.
+- **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name**, and keeps it once a guard makes the operation safe.
+- **Method names draw from one controlled verb vocabulary** — don't invent a new verb for a meaning already on this list:
   - `fetch` — actually hits the live Sheets API
   - `prep`/`gather` — queue state locally before a fetch (`prepFetchX` queues only; `gatherFetchX` queues *and* fetches)
   - `update` — writes a local/queued change, not yet flushed
@@ -108,22 +44,9 @@ A comment explaining a non-obvious invariant (e.g. why two sheets must sync in o
   - `sync`/`flush` — coordinate multiple operators / send a batched write
   - `discard` — drop queued changes without sending them; the counterpart to `flush`
   - **The list governs framework methods.** A business operator's public method takes its verb from `CONTEXT.md` instead, so the code and the operator-facing vocabulary agree: the glossary says a ledger is _built_, so the method is `build`.
-- **Getters are only for cheap, no-arg, side-effect-free derived values that might need re-deriving from updated state** (`get ss`, `get schema`, `get sheetConfigOperator` — each rebuilds from `this.spreadsheetNamedProps`, which can reflect state mutated since construction). Anything that takes an argument or has a side effect is a method, never a getter. And a value that's genuinely fixed for the object's whole lifetime (e.g. a file path built once from `import.meta.url`) is a plain field computed once, not a getter recomputed on every read.
-  - No-arg and side-effect-free isn't sufficient on its own — a getter is reserved for a one-line pass-through/delegation to another value. `ColumnRaw.get topCell()` (`return this.cell(this.schema.topDataRowIdx)`) and `ColumnMetaRaw.get valueValidationStrings()` (`return this.activeTable.columnValidationValues.get(this.colIndex) ?? []`) are getters for exactly this reason — one expression, no branching. A no-arg method that loops or branches to *compute* its answer — `ColumnMetaRaw.activeValidationValueTitle()` (loops over validation strings, regex-matching each), `.activeValueTitle()` (branches on the header), `._actualPrimitiveValueName()` (branches on typeof/format) — stays a called method with `()`. The parens are the reader's signal that real work happens inside, not just a field read.
-- **`_` prefix means "narrow-purpose, not general API," and shows up in two shapes:**
-  1. A true private helper, decomposing a public method — pair it with the `private` keyword.
-  2. A method that a coordinating/encapsulating class must call as one step of a specific flow, but that isn't meant as general-purpose API on its own class. It *can't* be marked `private` (TS blocks cross-class access even from a coordinator), so the leading `_` is the only signal a future caller gets that this isn't for general use. Real example: `SheetMetaIndexed._gatherDataPrerequisites` is called by `SpreadsheetIndexed.fetchAllPrepped` as one step sandwiched between two ordinary public methods (`gatherFetchDataPrepped`, `finalizeFetchedData`) — it's underscored precisely because it only makes sense inside that one flow.
-  - This case-2 underscore is about the method's *concept* being orchestration-only, not about how many callers it happens to have today. A method that instead reads as ordinary domain vocabulary for the class it's on — because it matches an existing naming family already used for sibling members — stays unprefixed even with exactly one current caller. `ColumnMetaRaw.activeValueTitle()` and `.activeValidationValueTitle()` are each called only from `ColumnConfigOperator._updateProgrammaticValues` today (and say so in a trailing comment, kept for context per "Keep 'why' comments across a refactor" below), but they're plain public methods, not `_activeValueTitle` — they fit the same `active*` family as `activeHeader`/`activeIsFormula` on the same classes, so they read as legitimate queries on the column itself rather than glue steps of someone else's flow.
-- **Param style: destructure into a named type when the params already justify grouping; otherwise stay positional.** Destructure + a type (existing or newly introduced) when there are 3+ params, or 2+ params of the same type, or a named type for the bag already exists elsewhere. Otherwise keep params positional. Example (`SpreadsheetNamed._prepFetchStandardProps` / `._prepFetchRowSpecifier`):
-  ```ts
-  private _prepFetchStandardProps({ rowSpecifier, sheetColumnNames }: FetchPropsStandardNamed): void
-  ```
-  destructures because `FetchPropsStandardNamed` already exists as a named type — the method just unpacks an existing concept. Compare a case that stays positional because nothing ties the params together as one concept — three unrelated single-use values, no shared type:
-  ```ts
-  private _prepFetchRowSpecifier(sheet: SheetIndexed, rowSpecifier: RowSpecifierName, columnId: string): void
-  ```
-- **The one argument every implementation will use is hoisted out of the bag and passed first, positionally.** The grouping rule above is about params that travel together; it doesn't apply to a collaborator that essentially every implementation of a signature needs. An endpoint's action takes the spreadsheet first and its remaining inputs as a second destructured object, because every action needs the spreadsheet and only some need the rest — burying it in the bag would make every implementation destructure to reach the thing it always wants.
-- **The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. `scripts/genConfigs.mjs` groups its three output paths as `path: { sheetConfigs, columnConfigs, valueConfigs }` rather than three separate `sheetConfigsPath`/`columnConfigsPath`/`valueConfigsPath` members.
+- **A getter is a cheap, no-arg, side-effect-free, one-expression pass-through.** Anything that takes an argument, has a side effect, or loops/branches to compute its answer is a called method — the parens signal that real work happens inside. A value fixed for the object's whole lifetime is a plain field, not a getter.
+- **`_` prefix means "narrow-purpose, not general API"**: a true `private` helper, or a step a coordinating class must call that TS won't let you mark `private`. It marks the concept as orchestration-only, not today's caller count.
+- **Destructure params into a named type at 3+ params, 2+ params of one type, or when a named type for the bag already exists**; otherwise stay positional. The one argument every implementation will use is hoisted out of the bag and passed first. The same grouping judgment applies to fields.
 
 ## Comments
 

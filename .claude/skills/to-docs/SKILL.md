@@ -34,7 +34,7 @@ Done when every wrong turn, rediscovered fact, and user-stated rule in the sessi
 ## 3. Route and rank
 
 - **README.md** — the map: tiers, naming vocabulary. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md`; testing in `docs/testing.md`.
-- **STYLE.md** — code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** almost always lands here.
+- **STYLE.md** — code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** almost always lands here, as one line. Its reasoning and worked examples live under `docs/style/`; a rule that needs an example adds the line to STYLE.md and the example to the fragment.
 - **CLAUDE.md** — loaded every turn, so it earns a line only if that line changes turn-one behavior. Everything else goes in the other two with a pointer at most.
 
 Rank by time the change would have saved this session, and say so. A ranked list lets the user take the top three and stop.

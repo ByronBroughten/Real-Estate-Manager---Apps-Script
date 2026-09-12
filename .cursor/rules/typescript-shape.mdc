@@ -4,6 +4,6 @@ globs: "**/*.ts"
 alwaysApply: false
 ---
 
-Write TypeScript to [`STYLE.md`](../../STYLE.md). Coordinator classes use `init` (outside caller) and `new` (from props already on `this`). Endpoints stay a plain entry with module-private helpers.
+Write TypeScript to [`STYLE.md`](../../STYLE.md), one line per rule. Reasoning and worked examples: [`docs/style/class-shape.md`](../../docs/style/class-shape.md), [`docs/style/naming.md`](../../docs/style/naming.md). Coordinator classes use `init` (outside caller) and `new` (from props already on `this`). Endpoints stay a plain entry with module-private helpers.
 
 Understand a class from its implementation. Open the sibling `Foo.test.ts` when changing tests.

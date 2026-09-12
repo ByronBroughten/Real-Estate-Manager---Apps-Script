@@ -23,7 +23,7 @@ Do not read this file whole. Open the one section or disclosed doc the task need
 | Architecture mechanics | [`docs/architecture.md`](./docs/architecture.md) index — open one file from it |
 | Regenerating configs | [`docs/generated-data.md`](./docs/generated-data.md) |
 | Tests and fakes | [`docs/testing.md`](./docs/testing.md) |
-| Code shape | [`STYLE.md`](./STYLE.md) |
+| Code shape | [`STYLE.md`](./STYLE.md) — rules; examples under `docs/style/` |
 | Operator-facing words | [`CONTEXT.md`](./CONTEXT.md) |
 | Why a gap is deliberate | [`DESIGN.md`](./DESIGN.md) |
 | Agent operating rules | [`CLAUDE.md`](./CLAUDE.md) |
@@ -58,7 +58,7 @@ They are used precisely and consistently — don't use them loosely:
 - **Raw** — depends on nothing generated from the spreadsheet's config sheets except `spreadsheetConfig` and sheet GIDs. If a *class* resolves a column by name or `columnId`, it is not "Raw," regardless of what folder it's in. Raw's job is raw-index Sheets API access only — fetching whole rows/columns and sheet properties. The schema module is the one thing in `02` that resolves columns, and only because it has to sit below its consumers; Raw classes get `SpreadsheetSchema` and nothing more.
 - **Indexed** — config-dependent, addresses things by sheet GID / column index (not by name). A column's index isn't stored in config data; Indexed resolves it live from the column's `columnId` against the live "columnId" row.
 - **Named** — config-dependent, addresses things by sheet name / column name.
-- **Operator** — a class based on a Named base class that adds methods suited to one particular data structure, reaching its subject through a getter rather than inheriting it (see STYLE.md). Config maintenance is one family of Operators, not the definition: `SheetConfigOperator`/`ColumnConfigOperator`/`ValueConfigOperator` each read a real Config sheet by name and regenerate the matching tier-01 config file, and `ConfigOrchestrator` coordinates several into one flow. Maintaining generated data is an Operator-tier job, not Named's. `CheckboxColumnOperator` is the non-config kind — a column operator that can only be attached to a non-formula `checkbox` column.
+- **Operator** — a class based on a Named base class that adds methods suited to one particular data structure, reaching its subject through a getter rather than inheriting it (see `docs/style/class-shape.md`). Config maintenance is one family of Operators, not the definition: `SheetConfigOperator`/`ColumnConfigOperator`/`ValueConfigOperator` each read a real Config sheet by name and regenerate the matching tier-01 config file, and `ConfigOrchestrator` coordinates several into one flow. Maintaining generated data is an Operator-tier job, not Named's. `CheckboxColumnOperator` is the non-config kind — a column operator that can only be attached to a non-formula `checkbox` column.
 - **Config** — the data describing the spreadsheet's own structure, generated (or eventually generated) from the real spreadsheet rather than freely made up. Lives in `01_generatedConfigs`. Naming has three tiers, from a full collection down to a single fact:
   - **`xConfigs`** (plural, e.g. `sheetConfigs`) — the whole map, one entry per sheet/column/value-name.
   - **`XConfig`** (singular, e.g. `SheetConfig`, `ColumnConfig`) — one entry's full record.

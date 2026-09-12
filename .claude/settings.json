@@ -2,7 +2,25 @@
   "permissions": {
     "allow": [
       "Bash(npm run tsc)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(npx vitest run)",
+      "Bash(npx vitest run *)",
+      "Bash(npm test)",
+      "Bash(npm test *)",
+      "Bash(npm run tsc *)",
+      "Bash(npm run gen:configs)",
+      "Bash(npm run chore)",
+      "Bash(npm run chore addMissingColumnIds)",
+      "Bash(npm run chore fillMissingRowIds)",
+      "Bash(npx prettier --check *)",
+      "Bash(npx eslint *)",
+      "Bash(gh label list *)",
+      "mcp__gsheets__get_sheet_data",
+      "mcp__gsheets__list_sheets"
+    ],
+    "ask": ["Bash(npm run chore * --send*)"],
+    "deny": [
+      "Read(./src/01_generatedConfigs/columnConfigs.ts)"
     ]
   }
 }
