@@ -1911,7 +1911,7 @@ export const columnConfigs = makeColumnConfigs({
     "buildLedgerStartDate": {
       "columnId": "c:occ:hRbSeP1",
       "header": "Build ledger, start date",
-      "valueName": "string",
+      "valueName": "date",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -4780,19 +4780,11 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "sampleHelocAmount": {
-      "columnId": "c:vrb:AvXx8IG",
-      "header": "Sample HELOC amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
     "sampleMortgageAmount": {
       "columnId": "c:vrb:Z_e9bB0",
       "header": "Sample mortgage amount",
       "valueName": "number",
-      "isFormula": false,
+      "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
@@ -4825,6 +4817,14 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Occ ledger household ID",
       "valueName": "string",
       "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "samplePropertyValue": {
+      "columnId": "c:vrb:CBRPGqg",
+      "header": "Sample property value",
+      "valueName": "number",
+      "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     }
