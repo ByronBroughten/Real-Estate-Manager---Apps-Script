@@ -13,8 +13,13 @@ const issuers = {
 
 // The charge description a payment must settle for the deposit balance to rise.
 const securityDepositCharge = "Security deposit";
-// Charge before reduction before payment, so a same-day settlement never shows a balance the tenant never had.
-const kindRanks = { charge: 0, reduction: 1, payment: 2 } as const;
+// Opening figure, then charge before reduction before payment, so a same-day settlement never shows a balance the tenant never had.
+const kindRanks = {
+  priorBalance: 0,
+  charge: 1,
+  reduction: 2,
+  payment: 3,
+} as const;
 
 interface LedgerLine {
   kind: keyof typeof kindRanks;
@@ -33,6 +38,12 @@ interface PaymentFromAllocations {
   description: string;
   amount: number;
   depositAmount: number;
+}
+
+interface RunStatusProps {
+  allLines: LedgerLine[];
+  pageLines: LedgerLine[];
+  startDate: DateSerial | "";
 }
 
 export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
@@ -55,14 +66,20 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
     this._gatherFetchInputs(occupancyRowIndex);
     const occupancyRow = this.ss.sheet("occupancy").row(occupancyRowIndex);
     const occupancyId = occupancyRow.value("id");
+    const startDate = occupancyRow.value("buildLedgerStartDate");
     this._updateLetterhead(occupancyId);
-    const lines = [
+    const allLines = [
       ...this._chargeLines(occupancyId),
       ...this._reductionLines(occupancyId),
       ...this._paymentLines(occupancyId),
     ].sort(compareLines);
-    this._rebuildPage(lines);
-    return this._runStatusMessage(occupancyRow.value("name"), lines);
+    const pageLines = cutPageLines(allLines, startDate);
+    this._rebuildPage(pageLines);
+    return this._runStatusMessage(occupancyRow.value("name"), {
+      allLines,
+      pageLines,
+      startDate,
+    });
   }
   private _gatherFetchInputs(occupancyRowIndex: number): void {
     const { ss } = this;
@@ -70,6 +87,7 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
       [occupancyRowIndex],
       "id",
       "name",
+      "buildLedgerStartDate",
     );
     ss.sheet("occCharge").prepFetchColumnsFull(
       "id",
@@ -236,12 +254,16 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
   }
   private _runStatusMessage(
     occupancyName: string,
-    lines: LedgerLine[],
+    { allLines, pageLines, startDate }: RunStatusProps,
   ): string {
-    if (lines.length === 0) {
+    if (allLines.length === 0) {
       return `No charges or payments for ${occupancyName}.`;
     }
-    return `Built ledger for ${occupancyName}: ${countOfKind(lines, "charge")} charges, ${countOfKind(lines, "payment")} payments, ${countOfKind(lines, "reduction")} reductions.`;
+    const counts = `${countPhrase(countOfKind(pageLines, "charge"), "charge")}, ${countPhrase(countOfKind(pageLines, "payment"), "payment")}, ${countPhrase(countOfKind(pageLines, "reduction"), "reduction")}`;
+    if (startDate === "") {
+      return `Built ledger for ${occupancyName}: ${counts}.`;
+    }
+    return `Built ledger for ${occupancyName}, from ${Dat.toDayMonthYear(startDate)}: ${counts}.`;
   }
 }
 
@@ -281,17 +303,66 @@ function compareLines(a: LedgerLine, b: LedgerLine): number {
   return kindRanks[a.kind] - kindRanks[b.kind];
 }
 
+function cutPageLines(
+  lines: LedgerLine[],
+  startDate: DateSerial | "",
+): LedgerLine[] {
+  if (startDate === "") {
+    return lines;
+  }
+  const before = lines.filter((line) => line.date < startDate);
+  const onOrAfter = lines.filter((line) => line.date >= startDate);
+  if (before.length === 0) {
+    return onOrAfter;
+  }
+  return [priorBalanceLine(startDate, before), ...onOrAfter];
+}
+
+function priorBalanceLine(
+  startDate: DateSerial,
+  collapsed: LedgerLine[],
+): LedgerLine {
+  return {
+    kind: "priorBalance",
+    date: startDate,
+    issuer: issuers.propertyManagement,
+    description: "Prior balance",
+    charge: netAmountOwed(collapsed),
+    payment: "",
+    notes: "",
+    depositDelta: collapsed.reduce((held, line) => held + line.depositDelta, 0),
+  };
+}
+
+function netAmountOwed(lines: LedgerLine[]): number {
+  return lines.reduce((owed, line) => {
+    const charge = line.charge === "" ? 0 : line.charge;
+    const payment = line.payment === "" ? 0 : line.payment;
+    return owed + charge - payment;
+  }, 0);
+}
+
 // Blank wherever the balance didn't move, so the column draws the eye to what moved it.
 function depositBalanceCell(
   line: LedgerLine,
   depositHeld: number,
 ): number | "" {
+  if (line.kind === "priorBalance") {
+    return depositHeld;
+  }
   if (line.depositDelta === 0) {
     return "";
   }
   return depositHeld;
 }
 
-function countOfKind(lines: LedgerLine[], kind: LedgerLine["kind"]): number {
+function countOfKind(
+  lines: LedgerLine[],
+  kind: Exclude<LedgerLine["kind"], "priorBalance">,
+): number {
   return lines.filter((line) => line.kind === kind).length;
+}
+
+function countPhrase(count: number, singular: string): string {
+  return `${count} ${singular}${count === 1 ? "" : "s"}`;
 }

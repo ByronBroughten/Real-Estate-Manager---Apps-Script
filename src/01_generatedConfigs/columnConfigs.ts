@@ -1913,7 +1913,7 @@ export const columnConfigs = makeColumnConfigs({
       "header": "Build ledger, start date",
       "valueName": "date",
       "isFormula": false,
-      "emptyValueAllowed": false,
+      "emptyValueAllowed": true,
       "customDefaultValue": null
     }
   },

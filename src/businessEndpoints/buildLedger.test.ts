@@ -79,13 +79,17 @@ function stubSheet<C extends Record<string, ColumnFixture>>({
   };
 }
 
-function stubOccupancy(selectedOccupancyId: string) {
+function stubOccupancy(
+  selectedOccupancyId: string,
+  startDates: Partial<Record<string, number>> = {},
+) {
   return stubSheet({
     sheetName: "occupancy",
     config: columnConfigs.occupancy,
     columnNames: [
       "id",
       "name",
+      "buildLedgerStartDate",
       "buildLedgerSelect",
       "buildLedgerTimeLastRan",
       "buildLedgerRunStatus",
@@ -94,16 +98,19 @@ function stubOccupancy(selectedOccupancyId: string) {
       {
         id: TENANT,
         name: TENANT_NAME,
+        buildLedgerStartDate: startDates[TENANT],
         buildLedgerSelect: selectedOccupancyId === TENANT,
       },
       {
         id: NEIGHBOUR,
         name: "Someone Else`99 Elsewhere, Unit 2",
+        buildLedgerStartDate: startDates[NEIGHBOUR],
         buildLedgerSelect: selectedOccupancyId === NEIGHBOUR,
       },
       {
         id: NEWCOMER,
         name: NEWCOMER_NAME,
+        buildLedgerStartDate: startDates[NEWCOMER],
         buildLedgerSelect: selectedOccupancyId === NEWCOMER,
       },
     ],
@@ -325,16 +332,18 @@ interface LedgerSpreadsheetProps {
   selectedOccupancyId?: string;
   charges?: ChargeRow[];
   allocations?: AllocationRow[];
+  startDates?: Partial<Record<string, number>>;
 }
 
 function stubLedgerSpreadsheet({
   selectedOccupancyId = TENANT,
   charges = chargeRows,
   allocations = allocationRows,
+  startDates = {},
 }: LedgerSpreadsheetProps = {}) {
   return stubSheetsService({
     sheets: [
-      stubOccupancy(selectedOccupancyId),
+      stubOccupancy(selectedOccupancyId, startDates),
       stubOccCharge(charges),
       stubOccChargeReduce(),
       stubOccPayAllocation(allocations),
@@ -538,7 +547,9 @@ describe("buildLedger, the page it writes", () => {
   });
 
   it("stamps the occupancy and the day it ran into the Variable sheet", () => {
-    const { batchUpdateCalls } = stubLedgerSpreadsheet();
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_TWO },
+    });
 
     runBuildLedger();
 
@@ -562,6 +573,146 @@ describe("buildLedger, the page it writes", () => {
 
     expect(getByDataFilterCalls).toHaveLength(4);
   });
+
+  it("opens a cut page with a prior balance, then only lines on or after the start date", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_TWO },
+    });
+
+    runBuildLedger();
+
+    expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
+      [
+        DAY_TWO,
+        "Property management",
+        "Prior balance",
+        0,
+        "",
+        null,
+        1100,
+        "",
+      ],
+      [
+        DAY_TWO,
+        "Property management",
+        "Damage, waste, or service",
+        220,
+        "",
+        null,
+        "",
+        "Plumber cost",
+      ],
+      [DAY_TWO, "Household", "Caretaking", "", 25, null, "", ""],
+      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, "", ""],
+      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, "", ""],
+      [
+        DAY_THREE,
+        "Security deposit",
+        "Damage, waste, or service",
+        "",
+        110,
+        null,
+        990,
+        "",
+      ],
+    ]);
+  });
+
+  it("keeps a charge on the start date as its own line after the prior balance", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_TWO },
+    });
+
+    runBuildLedger();
+
+    const rows = ledgerRowsWritten(batchUpdateCalls);
+    expect(rows[0]?.[2]).toBe("Prior balance");
+    expect(rows[1]?.[2]).toBe("Damage, waste, or service");
+    expect(rows[1]?.[0]).toBe(DAY_TWO);
+  });
+
+  it("writes the full ledger with no prior balance when the start date is before every line", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_ONE - 1 },
+    });
+
+    runBuildLedger();
+
+    expect(ledgerRowsWritten(batchUpdateCalls).map((row) => row[2])).toEqual([
+      "Rent (base)",
+      "Security deposit",
+      "Payment",
+      "Damage, waste, or service",
+      "Caretaking",
+      "Payment",
+      "Forgiveness",
+      "Damage, waste, or service",
+    ]);
+  });
+
+  it("is only the prior balance when the start date is after every line", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_THREE + 1 },
+    });
+
+    runBuildLedger();
+
+    expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
+      [
+        DAY_THREE + 1,
+        "Property management",
+        "Prior balance",
+        -225,
+        "",
+        null,
+        990,
+        "",
+      ],
+    ]);
+  });
+
+  it("still shows a $0 prior balance when history is paid and the deposit is held", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_TWO },
+      charges: [
+        {
+          id: DEPOSIT_CHARGE,
+          occupancyId: TENANT,
+          date: DAY_ONE,
+          description: "Security deposit",
+          amount: 1100,
+        },
+      ],
+      allocations: [
+        {
+          paymentId: "r:opy:deposit",
+          occupancyId: TENANT,
+          filledOut: "Yes",
+          formOfPayment: "Payment",
+          payerCategory: "Household",
+          payerName: TENANT_NAME,
+          paymentDate: DAY_ONE,
+          amount: 1100,
+          chargeDescription: "Security deposit",
+        },
+      ],
+    });
+
+    runBuildLedger();
+
+    expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
+      [
+        DAY_TWO,
+        "Property management",
+        "Prior balance",
+        0,
+        "",
+        null,
+        1100,
+        "",
+      ],
+    ]);
+  });
 });
 
 describe("buildLedger, what it reports", () => {
@@ -575,9 +726,79 @@ describe("buildLedger, what it reports", () => {
     );
   });
 
+  it("drops the s from a count of one", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      charges: [
+        {
+          id: RENT_CHARGE,
+          occupancyId: TENANT,
+          date: DAY_ONE,
+          description: "Rent (base)",
+          amount: 50,
+        },
+      ],
+      allocations: [
+        {
+          paymentId: "r:opy:rent",
+          occupancyId: TENANT,
+          filledOut: "Yes",
+          formOfPayment: "Payment",
+          payerCategory: "Household",
+          payerName: TENANT_NAME,
+          paymentDate: DAY_ONE,
+          amount: 50,
+          chargeDescription: "Rent (base)",
+        },
+      ],
+    });
+
+    runBuildLedger();
+
+    expect(runStatusWritten(batchUpdateCalls)).toBe(
+      `Built ledger for ${TENANT_NAME}: 1 charge, 1 payment, 0 reductions.`,
+    );
+  });
+
+  it("names the start date in the run status and ignores the prior balance in the counts", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_TWO },
+    });
+
+    runBuildLedger();
+
+    expect(runStatusWritten(batchUpdateCalls)).toBe(
+      `Built ledger for ${TENANT_NAME}, from 25 Mar 2023: 1 charge, 2 payments, 2 reductions.`,
+    );
+  });
+
+  it("reports a prior-balance-only window as a built page of zeroes", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_THREE + 1 },
+    });
+
+    runBuildLedger();
+
+    expect(runStatusWritten(batchUpdateCalls)).toBe(
+      `Built ledger for ${TENANT_NAME}, from 5 Apr 2023: 0 charges, 0 payments, 0 reductions.`,
+    );
+  });
+
+  it("still carries from in the run status when the start date is before every line", () => {
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      startDates: { [TENANT]: DAY_ONE - 1 },
+    });
+
+    runBuildLedger();
+
+    expect(runStatusWritten(batchUpdateCalls)).toBe(
+      `Built ledger for ${TENANT_NAME}, from 14 Mar 2023: 3 charges, 3 payments, 2 reductions.`,
+    );
+  });
+
   it("says so plainly when an occupancy has nothing billed or paid", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
       selectedOccupancyId: NEWCOMER,
+      startDates: { [NEWCOMER]: DAY_TWO },
     });
 
     runBuildLedger();

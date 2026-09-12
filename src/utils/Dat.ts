@@ -44,6 +44,21 @@ function validate(value: unknown): DateSerial {
   throw new Error(`value "${String(value)}" is not a whole-day date serial`);
 }
 
+const MONTH_ABBREVS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
 export const Dat = {
   SHEET_TIMEZONE: "America/Chicago",
   SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30), // Dec 30, 1899, 00:00 UTC
@@ -85,6 +100,14 @@ export const Dat = {
       month: utc.getUTCMonth() + 1,
       day: utc.getUTCDate(),
     };
+  },
+  toDayMonthYear(date: DateSerial): string {
+    const { year, month, day } = this.toYmd(date);
+    const monthAbbrev = MONTH_ABBREVS[month - 1];
+    if (monthAbbrev === undefined) {
+      throw new Error(`month ${month} is not 1-12`);
+    }
+    return `${day} ${monthAbbrev} ${year}`;
   },
   addDays(date: DateSerial, days: number): DateSerial {
     return validate(validate(date) + days);

@@ -95,12 +95,24 @@ _Avoid_: standard name, unit type
 ### The occupancy ledger
 
 **Occupancy ledger**:
-The one-page statement you hand a tenant, showing every charge they were billed, every payment that settled one, and what they still owe. It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it, and its lines carry no IDs.
+The one-page statement you hand a tenant, showing every charge they were billed, every payment that settled one, and what they still owe. It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. When that occupancy names a ledger start date, the page begins that day rather than at the beginning of the tenancy. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it, and its lines carry no IDs.
 _Avoid_: statement, invoice, tenant report
 
+**Ledger start date**:
+The occupancy cell that, when filled, cuts the ledger so the page begins that day. Blank means the tenancy from its beginning.
+_Avoid_: from date, window start, statement date
+
 **Ledger line**:
-One row of the page: a charge billed, a charge forgiven, a payment received, or a draw from the deposit. It carries the day it happened, who it came from, what it was for and the amount, and the lines run in the order things happened, with a charge shown before anything that settled it the same day. A line carries no identifier, because nothing points at it.
+One row of the page: a charge billed, a charge forgiven, a payment received, a draw from the deposit, or a prior balance. It carries the day it happened, who it came from, what it was for and the amount, and the lines run in the order things happened, with a charge shown before anything that settled it the same day. A line carries no identifier, because nothing points at it.
 _Avoid_: entry, row, transaction
+
+**Prior balance**:
+The collapsed history from before the ledger start date, shown as the first ledger line so Amount owed and the security deposit balance are already right that morning. Dated the start date, issued by Property management, described as "Prior balance", written as one charge — positive or negative — with the deposit still held shown on that line even if the rest of the page never moves it; it is not a bill.
+_Avoid_: opening balance, brought forward, carry-forward, first row
+
+**Amount owed**:
+What the household still owes as you read down the page, a running Charge minus Payment that the sheet's own formula keeps. Building a ledger never writes this column.
+_Avoid_: balance due, outstanding, running total
 
 **Letterhead**:
 The block above the ledger's header row naming the tenant, the address and the day the page was built. Its cells are formulas, and they read the occupancy and the date that building the ledger writes into the Variable sheet. Building a ledger is what makes the letterhead say the right household.
@@ -119,7 +131,7 @@ Money taken from the deposit already held to settle a charge. It appears on the 
 _Avoid_: deposit deduction, withholding
 
 **Security deposit balance**:
-How much of the tenant's deposit is still being held, shown only on the lines where it changed. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A payment that funds it is described as "Security deposit". A ledger starts it at zero, because the build covers the tenancy from its beginning.
+How much of the tenant's deposit is still being held, shown on the lines where it changed and on a prior balance. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A payment that funds it is described as "Security deposit". A page that covers the tenancy from its beginning starts it at zero; a page that starts later starts it at what was still held that morning.
 _Avoid_: deposit held, escrow
 
 **Allocation**:

@@ -69,6 +69,13 @@ describe("Dat.fromYmd / Dat.toYmd", () => {
   });
 });
 
+describe("Dat.toDayMonthYear", () => {
+  it("writes the civil day as day, abbreviated English month, year", () => {
+    expect(Dat.toDayMonthYear(ymd(2026, 9, 12))).toBe("12 Sep 2026");
+    expect(Dat.toDayMonthYear(ymd(2023, 3, 5))).toBe("5 Mar 2023");
+  });
+});
+
 describe("Dat.today", () => {
   afterEach(() => {
     vi.useRealTimers();
