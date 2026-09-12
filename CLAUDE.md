@@ -14,6 +14,7 @@ Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./R
 - Understand a class from its implementation. Open the sibling `Foo.test.ts` when changing tests.
 - gsheets MCP reads (`list_spreadsheets`, `list_sheets`, `get_sheet_data`) are always fine. Writes need an exact plan (sheet/range/values or new sheet) and a yes. `share_spreadsheet` needs its own yes: who, and at what permission.
 - Commit to `master` by default. Branch only if asked, or if other work is already in flight — then ask which. Commit or push only when asked.
+- A `backup/*` branch is single-session scaffolding: take one before a history rewrite, retire it once verified, and say so. Surface a stale one with its ahead/behind counts before other git work.
 - No Node/DOM APIs in `src/` (`nodeHost/` included). Node-specific half is `scripts/*.mjs`.
 - Tests: `npm test` is always safe. Co-locate `Foo.test.ts`; GAS fakes live in `src/testSupport/`. Run `tsc` and tests before calling a change done. [`docs/testing.md`](./docs/testing.md).
 - Type-level claims: `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts` — never assignment, never a probe that needed `any`. See STYLE.md "Type modeling".
