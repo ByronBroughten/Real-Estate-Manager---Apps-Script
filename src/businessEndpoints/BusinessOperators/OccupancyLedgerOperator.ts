@@ -11,9 +11,7 @@ const issuers = {
   household: "Household",
 } as const;
 
-// The charge description a payment must settle for the deposit balance to rise.
-const securityDepositCharge = "Security deposit";
-// Opening figure, then charge before reduction before payment, so a same-day settlement never shows a balance the tenant never had.
+// Opening figure, then charge before reduction before payment, so a same-day settlement never shows an amount owed the tenant never had.
 const kindRanks = {
   priorBalance: 0,
   charge: 1,
@@ -29,7 +27,6 @@ interface LedgerLine {
   charge: number | "";
   payment: number | "";
   notes: string;
-  depositDelta: number;
 }
 
 interface PaymentFromAllocations {
@@ -37,7 +34,6 @@ interface PaymentFromAllocations {
   issuer: string;
   description: string;
   amount: number;
-  depositAmount: number;
 }
 
 interface RunStatusProps {
@@ -124,7 +120,6 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
       "description",
       "charge",
       "payment",
-      "securityDeposit",
       "notes",
     );
     ss.fetchAllPrepped();
@@ -178,7 +173,6 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
         charge: -amount,
         payment: "",
         notes: "",
-        depositDelta: 0,
       };
     } else if (description === "Security deposit") {
       return {
@@ -189,7 +183,6 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
         charge: "",
         payment: amount,
         notes: "",
-        depositDelta: -amount,
       };
     } else {
       throw new Error(
@@ -205,11 +198,10 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
       kind: "payment",
       date: payment.date,
       issuer: payment.issuer,
-      description: paymentLineDescription(payment),
+      description: payment.description,
       charge: "",
       payment: payment.amount,
       notes: "",
-      depositDelta: payment.depositAmount,
     }));
   }
   // One line per payment, so a tenant can check the page against one bank transaction.
@@ -224,12 +216,8 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
         issuer: paymentIssuer(allocation),
         description: allocation.value("formOfPayment"),
         amount: 0,
-        depositAmount: 0,
       };
       payment.amount += amount;
-      if (allocation.value("chargeDescription") === securityDepositCharge) {
-        payment.depositAmount += amount;
-      }
       payments.set(paymentId, payment);
       return payments;
     }, new Map<string, PaymentFromAllocations>());
@@ -238,16 +226,13 @@ export class OccupancyLedgerOperator extends SheetNamedBase<"occupancyLedger"> {
   private _rebuildPage(lines: LedgerLine[]): void {
     const { sheet } = this;
     sheet.DELETE_ALL_DATA_ROWS();
-    let depositHeld = 0;
     lines.forEach((line) => {
-      depositHeld += line.depositDelta;
       sheet.appendRowWithAllVals({
         date: line.date,
         issuer: line.issuer,
         description: line.description,
         charge: line.charge,
         payment: line.payment,
-        securityDeposit: depositBalanceCell(line, depositHeld),
         notes: line.notes,
       });
     });
@@ -276,16 +261,7 @@ function chargeLine(charge: RowNamed<"occCharge">): LedgerLine {
     charge: charge.value("amount"),
     payment: "",
     notes: charge.value("notes"),
-    depositDelta: 0,
   };
-}
-
-// A payment that only funds the held deposit says so, rather than reading as a generic Payment.
-function paymentLineDescription(payment: PaymentFromAllocations): string {
-  if (payment.depositAmount === payment.amount && payment.amount > 0) {
-    return securityDepositCharge;
-  }
-  return payment.description;
 }
 
 // The tenant's own money says so plainly rather than repeating their name down the page.
@@ -330,7 +306,6 @@ function priorBalanceLine(
     charge: netAmountOwed(collapsed),
     payment: "",
     notes: "",
-    depositDelta: collapsed.reduce((held, line) => held + line.depositDelta, 0),
   };
 }
 
@@ -340,20 +315,6 @@ function netAmountOwed(lines: LedgerLine[]): number {
     const payment = line.payment === "" ? 0 : line.payment;
     return owed + charge - payment;
   }, 0);
-}
-
-// Blank wherever the balance didn't move, so the column draws the eye to what moved it.
-function depositBalanceCell(
-  line: LedgerLine,
-  depositHeld: number,
-): number | "" {
-  if (line.kind === "priorBalance") {
-    return depositHeld;
-  }
-  if (line.depositDelta === 0) {
-    return "";
-  }
-  return depositHeld;
 }
 
 function countOfKind(

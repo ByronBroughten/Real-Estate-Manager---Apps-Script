@@ -76,81 +76,17 @@ export const columnConfigs = makeColumnConfigs({
     }
   },
   "addOccPayment": {
-    "householdName": {
+    "occupancyName": {
       "columnId": "c:aopo:RjrLe5t",
-      "header": "Household name",
+      "header": "Occupancy name",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "portion": {
-      "columnId": "c:aopo:Wlnqemg",
-      "header": "Portion",
-      "valueName": "rentPortionName",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "description": {
-      "columnId": "c:aopo:m5vshan",
-      "header": "Description",
-      "valueName": "chargeDescription",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "amount": {
-      "columnId": "c:aopo:UovAKGR",
-      "header": "Amount",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitName": {
-      "columnId": "c:aopo:qMSBSFt",
-      "header": "Unit name",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyAgreementName": {
-      "columnId": "c:aopo:3zUTSvH",
-      "header": "Subsidy agreement name",
-      "valueName": "number",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "householdId": {
-      "columnId": "c:aopo:MOEDK0O",
-      "header": "Household ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "unitId": {
-      "columnId": "c:aopo:ETj3XDG",
-      "header": "Unit ID",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyAgreementId": {
-      "columnId": "c:aopo:zbuLhNC",
-      "header": "Subsidy agreement ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "date": {
+    "paymentDate": {
       "columnId": "c:aopo:P-Qv7lo",
-      "header": "Date",
+      "header": "Payment date",
       "valueName": "date",
       "isFormula": true,
       "emptyValueAllowed": false,
@@ -159,7 +95,7 @@ export const columnConfigs = makeColumnConfigs({
     "detailsVerified": {
       "columnId": "c:aopo:lYW1H8g",
       "header": "Details verified",
-      "valueName": "number",
+      "valueName": "checkbox",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
@@ -172,51 +108,11 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "paymentHhName": {
-      "columnId": "c:aopo:ztoEKCA",
-      "header": "Payment HH name",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyProgramName": {
-      "columnId": "c:aopo:u2eIEih",
-      "header": "Subsidy program name",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "otherPayerName": {
+    "nonHouseholdPayerName": {
       "columnId": "c:aopo:8jQKyrp",
-      "header": "Other payer name",
+      "header": "Non-household payer name",
       "valueName": "string",
       "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "paymentHhId": {
-      "columnId": "c:aopo:5t-4ni2",
-      "header": "Payment HH ID",
-      "valueName": "number",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "subsidyProgramId": {
-      "columnId": "c:aopo:5f0Mdrm",
-      "header": "Subsidy program ID",
-      "valueName": "string",
-      "isFormula": true,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "otherPayerId": {
-      "columnId": "c:aopo:CwC0A85",
-      "header": "Other payer ID",
-      "valueName": "string",
-      "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
@@ -231,6 +127,62 @@ export const columnConfigs = makeColumnConfigs({
     "runStatus": {
       "columnId": "c:aopo:sPcJx49",
       "header": "Run status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "addMultiIntentionSelect": {
+      "columnId": "c:aopo:tYtR6U0",
+      "header": "Add multi intention select",
+      "valueName": "checkbox",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "addMultiIntentionRunStatus": {
+      "columnId": "c:aopo:WqkXs3e",
+      "header": "Add multi intention run Status",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "id": {
+      "columnId": "c:aopo:Wh7mXWF",
+      "header": "ID",
+      "valueName": "id",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "defaultOccupancy": {
+      "columnId": "c:aopo:tM8ymJy",
+      "header": "Default occupancy",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "singleStatedSpecificCharge": {
+      "columnId": "c:aopo:45Sn92m",
+      "header": "Single stated specific charge",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "singleStatedChargeDescription": {
+      "columnId": "c:aopo:cYn8vtn",
+      "header": "Single stated charge description",
+      "valueName": "chargeDescription",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "singleStatedChargeTimeframe": {
+      "columnId": "c:aopo:JLhQsdk",
+      "header": "Single stated charge timeframe",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
@@ -1133,6 +1085,22 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null
+    },
+    "chargeDescription": {
+      "columnId": "c:ocr:ImRN1pV",
+      "header": "Charge description",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:ocr:-GbXREo",
+      "header": "Occupancy ID",
+      "valueName": "string",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
     }
   },
   "occPayAllocation": {
@@ -1343,6 +1311,14 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
+    },
+    "intendedOccupancyName": {
+      "columnId": "c:opa:10VY2Lr",
+      "header": "Intended occupancy name",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
     }
   },
   "occPayment": {
@@ -1406,7 +1382,7 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:opy:Vj3Yhcu",
       "header": "Household ID",
       "valueName": "string",
-      "isFormula": false,
+      "isFormula": true,
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
@@ -1474,9 +1450,9 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "intendedOccupancyAllocation": {
+    "singleOccupancyIntention": {
       "columnId": "c:opy:ZkvJt2D",
-      "header": "Intended occupancy allocation",
+      "header": "Single occupancy intention",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
@@ -1485,6 +1461,14 @@ export const columnConfigs = makeColumnConfigs({
     "intendedCharge": {
       "columnId": "c:opy:qkuz-n4",
       "header": "Intended charge",
+      "valueName": "string",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "occupancyId": {
+      "columnId": "c:opy:xJIY9Pa",
+      "header": "Occupancy ID",
       "valueName": "string",
       "isFormula": false,
       "emptyValueAllowed": false,
@@ -1931,6 +1915,54 @@ export const columnConfigs = makeColumnConfigs({
       "isFormula": false,
       "emptyValueAllowed": true,
       "customDefaultValue": null
+    },
+    "depositRemaining": {
+      "columnId": "c:occ:_X3upH-",
+      "header": "Deposit remaining",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositCharged": {
+      "columnId": "c:occ:hOwrZVe",
+      "header": "Deposit charged",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositAccounted": {
+      "columnId": "c:occ:wBNdMk-",
+      "header": "Deposit accounted",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositChargeReduced": {
+      "columnId": "c:occ:hwjVw7o",
+      "header": "Deposit charge reduced",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositDrawn": {
+      "columnId": "c:occ:xdTvzwE",
+      "header": "Deposit drawn",
+      "valueName": "number",
+      "isFormula": true,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
+    },
+    "depositPaidOut": {
+      "columnId": "c:occ:HVac9lD",
+      "header": "Deposit paid out",
+      "valueName": "number",
+      "isFormula": false,
+      "emptyValueAllowed": false,
+      "customDefaultValue": null
     }
   },
   "occupancyLedger": {
@@ -1986,14 +2018,6 @@ export const columnConfigs = makeColumnConfigs({
       "columnId": "c:old:UwjAgCt",
       "header": "Notes",
       "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "securityDeposit": {
-      "columnId": "c:old:K4OM_hu",
-      "header": "Security deposit",
-      "valueName": "number",
       "isFormula": false,
       "emptyValueAllowed": false,
       "customDefaultValue": null

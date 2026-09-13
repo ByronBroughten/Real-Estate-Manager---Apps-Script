@@ -107,7 +107,7 @@ One row of the page: a charge billed, a charge forgiven, a payment received, a d
 _Avoid_: entry, row, transaction
 
 **Prior balance**:
-The collapsed history from before the ledger start date, shown as the first ledger line so Amount owed and the security deposit balance are already right that morning. Dated the start date, issued by Property management, described as "Prior balance", written as one charge — positive or negative — with the deposit still held shown on that line even if the rest of the page never moves it; it is not a bill.
+The collapsed history from before the ledger start date, shown as the first ledger line so Amount owed is already right that morning. Dated the start date, issued by Property management, described as "Prior balance", written as one charge — positive or negative; it is not a bill.
 _Avoid_: opening balance, brought forward, carry-forward, first row
 
 **Amount owed**:
@@ -127,13 +127,9 @@ A charge cancelled because it should never have stood. It appears on the ledger 
 _Avoid_: credit, write-off, waiver
 
 **Security deposit draw**:
-Money taken from the deposit already held to settle a charge. It appears on the ledger as a payment against the charge it settled, named after that charge, and it lowers the deposit balance.
+Money taken from the deposit already held to settle a charge. It appears on the ledger as a payment against the charge it settled, named after that charge.
 _Avoid_: deposit deduction, withholding
 
-**Security deposit balance**:
-How much of the tenant's deposit is still being held, shown on the lines where it changed and on a prior balance. It rises when deposit money is actually received, not when a deposit is billed, and falls on a draw. A payment that funds it is described as "Security deposit". A page that covers the tenancy from its beginning starts it at zero; a page that starts later starts it at what was still held that morning.
-_Avoid_: deposit held, escrow
-
 **Allocation**:
-One part of a payment, naming the charge that part settled. A payment split across three charges is three allocations, and they are how the app knows money went to the deposit rather than to rent. The ledger shows the payment rather than its allocations, so one line matches one bank transaction.
+One part of a payment, naming the charge that part settled. A payment split across three charges is three allocations. The ledger shows the payment rather than its allocations, so one line matches one bank transaction.
 _Avoid_: split, line item, apportionment

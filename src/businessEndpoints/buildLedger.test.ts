@@ -29,7 +29,7 @@ type FakeRow<C> = Partial<Record<keyof C, FakeCell>>;
 const TOP_DATA_ROW_INDEX = 4;
 const LEDGER_GID = sheetConfigs.occupancyLedger.sheetGid;
 const VARIABLE_GID = sheetConfigs.variable.sheetGid;
-const LEDGER_COLUMN_COUNT = 8;
+const LEDGER_COLUMN_COUNT = 7;
 const AMOUNT_OWED_COL_INDEX = 5;
 
 const TENANT = "r:occ:tenant";
@@ -308,7 +308,6 @@ function stubOccupancyLedger() {
     charge: 1,
     payment: "",
     amountOwed: 1,
-    securityDeposit: "",
     notes: "",
   };
   return stubSheet({
@@ -321,7 +320,6 @@ function stubOccupancyLedger() {
       "charge",
       "payment",
       "amountOwed",
-      "securityDeposit",
       "notes",
     ],
     dataRows: [staleRow, staleRow, staleRow],
@@ -441,7 +439,7 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
-      [DAY_ONE, "Property management", "Rent (base)", 50, "", null, "", ""],
+      [DAY_ONE, "Property management", "Rent (base)", 50, "", null, ""],
       [
         DAY_ONE,
         "Property management",
@@ -450,9 +448,8 @@ describe("buildLedger, the page it writes", () => {
         "",
         null,
         "",
-        "",
       ],
-      [DAY_ONE, "Household", "Payment", "", 1150, null, 1100, ""],
+      [DAY_ONE, "Household", "Payment", "", 1150, null, ""],
       [
         DAY_TWO,
         "Property management",
@@ -460,12 +457,11 @@ describe("buildLedger, the page it writes", () => {
         220,
         "",
         null,
-        "",
         "Plumber cost",
       ],
-      [DAY_TWO, "Household", "Caretaking", "", 25, null, "", ""],
-      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, "", ""],
-      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, "", ""],
+      [DAY_TWO, "Household", "Caretaking", "", 25, null, ""],
+      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, ""],
+      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, ""],
       [
         DAY_THREE,
         "Security deposit",
@@ -473,13 +469,12 @@ describe("buildLedger, the page it writes", () => {
         "",
         110,
         null,
-        990,
         "",
       ],
     ]);
   });
 
-  it("names a household payment that funds the deposit as Security deposit", () => {
+  it("keeps a household payment's form of payment when the whole amount funds the deposit", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
       charges: [
         {
@@ -516,9 +511,8 @@ describe("buildLedger, the page it writes", () => {
         "",
         null,
         "",
-        "",
       ],
-      [DAY_ONE, "Household", "Security deposit", "", 875, null, 875, ""],
+      [DAY_ONE, "Household", "Payment", "", 875, null, ""],
     ]);
   });
 
@@ -589,7 +583,6 @@ describe("buildLedger, the page it writes", () => {
         0,
         "",
         null,
-        1100,
         "",
       ],
       [
@@ -599,12 +592,11 @@ describe("buildLedger, the page it writes", () => {
         220,
         "",
         null,
-        "",
         "Plumber cost",
       ],
-      [DAY_TWO, "Household", "Caretaking", "", 25, null, "", ""],
-      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, "", ""],
-      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, "", ""],
+      [DAY_TWO, "Household", "Caretaking", "", 25, null, ""],
+      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, ""],
+      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, ""],
       [
         DAY_THREE,
         "Security deposit",
@@ -612,7 +604,6 @@ describe("buildLedger, the page it writes", () => {
         "",
         110,
         null,
-        990,
         "",
       ],
     ]);
@@ -665,13 +656,12 @@ describe("buildLedger, the page it writes", () => {
         -225,
         "",
         null,
-        990,
         "",
       ],
     ]);
   });
 
-  it("still shows a $0 prior balance when history is paid and the deposit is held", () => {
+  it("still shows a $0 prior balance when history is paid", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
       startDates: { [TENANT]: DAY_TWO },
       charges: [
@@ -708,7 +698,6 @@ describe("buildLedger, the page it writes", () => {
         0,
         "",
         null,
-        1100,
         "",
       ],
     ]);

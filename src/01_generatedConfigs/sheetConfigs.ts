@@ -39,7 +39,7 @@ export const sheetConfigs = makeSheetConfigs({
   "addOccPayment": {
     "sheetGid": 1485718763,
     "idPrefix": "aopo",
-    "hasIdColumn": false
+    "hasIdColumn": true
   },
   "addPropertyExpense": {
     "sheetGid": 1964495656,

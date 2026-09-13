@@ -4,26 +4,12 @@ export const valueConfigs = makeValueConfigs({
   "chargeOnetimeDescription": [
     "Security deposit",
     "Late fee",
-    "Damage, waste, or service",
-    "Forgiveness"
-  ],
-  "rentPortionName": [
-    "Household",
-    "Subsidy program"
-  ],
-  "chargeDescription": [
-    "Rent (base)",
-    "Rent (utilities)",
-    "Pet fee (recurring)",
-    "Caretaker rent reduction",
-    "Security deposit",
-    "Late fee",
-    "Damage, waste, or service",
-    "Forgiveness"
+    "Damage, waste, or service"
   ],
   "payerCategory": [
     "Household",
-    "Non-resident"
+    "Non-resident",
+    "Security deposit"
   ],
   "expenseCategory": [
     "Repair",
@@ -61,8 +47,7 @@ export const valueConfigs = makeValueConfigs({
     "Unknown"
   ],
   "chargeReduceDescription": [
-    "Forgiveness",
-    "Security deposit"
+    "Forgiveness"
   ],
   "paymentAllocateWhat": [
     "Full payment",
@@ -76,5 +61,14 @@ export const valueConfigs = makeValueConfigs({
   "paymentType": [
     "Payment",
     "Caretaking"
+  ],
+  "chargeDescription": [
+    "Base rent",
+    "Utilities",
+    "Pet rent",
+    "Caretaker rent reduction",
+    "Security deposit",
+    "Late fee",
+    "Damage, waste, or service"
   ]
 });
