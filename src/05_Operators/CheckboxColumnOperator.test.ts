@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import type { ColumnValueName } from "../01_generatedConfigs/columnConfigsTypes";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
 import type { ColumnNamedProps } from "../04_SpreadsheetNamed/ColumnNamedBase";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -155,6 +156,12 @@ describe("CheckboxColumnOperator, column constraint", () => {
     expect(sampled.schema.valueName).toBe("boolean");
     expect(sampled.schema.isFormula).toBe(false);
     expect(formula.schema.isFormula).toBe(true);
+    assertType<
+      IsExactly<
+        ColumnValueName<"occupancy", CheckboxColumnName<"occupancy">>,
+        "checkbox"
+      >
+    >(true);
   });
 
   // A config-describing sheet, so regeneration can't churn the expected union.
