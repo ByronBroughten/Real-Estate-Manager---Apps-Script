@@ -36,6 +36,12 @@ export class SheetIndexed extends SheetCommon {
   get rowIndexesFullWithData(): number[] {
     return this._withoutBlankRows(this.raw.rowIndexesFull);
   }
+  // A configured column the sheet doesn't have holds nothing to read, clear, or default.
+  get nonFormulaColumnIds(): string[] {
+    return this.schema.nonFormulaColumnIds.filter((columnId) =>
+      this.meta.isActiveColumnId(columnId),
+    );
+  }
   column(columnId: string): ColumnIndexed {
     return new ColumnIndexed({
       ...this.sheetIndexedProps,
@@ -67,12 +73,6 @@ export class SheetIndexed extends SheetCommon {
     row.reserve();
     return row;
   }
-  // A configured column the sheet doesn't have holds nothing to read, clear, or default.
-  get _nonFormulaColumnIdsOnSheet(): string[] {
-    return this.schema.nonFormulaColumnIds.filter((columnId) =>
-      this.meta.isActiveColumnId(columnId),
-    );
-  }
   // A queued delete makes the survivor's index unknowable until the flush.
   private get _isTopRowTheOnlyRow(): boolean {
     return (
@@ -97,7 +97,7 @@ export class SheetIndexed extends SheetCommon {
     return this.topRow.isReusable;
   }
   private _defaultDataValues(): Map<string, Value> {
-    return this._nonFormulaColumnIdsOnSheet.reduce((acc, columnId) => {
+    return this.nonFormulaColumnIds.reduce((acc, columnId) => {
       acc.set(
         columnId,
         this.schema.columnById(columnId).makeDefaultDataValue(),
