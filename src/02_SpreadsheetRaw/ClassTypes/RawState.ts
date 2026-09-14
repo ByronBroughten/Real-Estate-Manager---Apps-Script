@@ -39,6 +39,7 @@ export interface RawSheetState {
         endColumnIndex: number; // lastColumnIndex + 1
       } & RawColumnPropertiesState)
     | null;
+  hasExtraTables: boolean;
   rowIndexesAreValid: boolean;
   // A findReplace matches by content, so what it changed is unknowable locally.
   cellStateIsStale: boolean;
