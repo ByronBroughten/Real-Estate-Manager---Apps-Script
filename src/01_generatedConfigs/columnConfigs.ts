@@ -50,7 +50,6 @@ export const columnConfigs = makeColumnConfigs({
     "header": { "columnId": "c:ccf:kqA31oK", "header": "Header", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "isFormula": { "columnId": "c:ccf:-99iXjo", "header": "Is formula", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "valueTitle": { "columnId": "c:ccf:0mh_HUU", "header": "Value title", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "isActionControl": { "columnId": "c:ccf:AUffOV9", "header": "Is action control", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "customDefaultValue": { "columnId": "c:ccf:1msMno3", "header": "Custom default value", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "emptyValueAllowed": { "columnId": "c:ccf:volkLl6", "header": "Empty value allowed", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },

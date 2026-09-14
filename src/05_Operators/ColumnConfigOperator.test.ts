@@ -38,7 +38,6 @@ const columnConfigColumnIdRow = [
   cc.header.columnId,
   cc.isFormula.columnId,
   cc.valueTitle.columnId,
-  cc.isActionControl.columnId,
   cc.emptyValueAllowed.columnId,
   cc.customDefaultValue.columnId,
 ];
@@ -239,7 +238,6 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               "Rent Amount",
               false,
               "number",
-              false,
               true,
             ],
             5: [
@@ -249,7 +247,6 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               "Notes",
               false,
               "string",
-              false,
               false,
             ],
           }),
@@ -1014,7 +1011,6 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     "Header",
     "Is formula",
     "Value title",
-    "Is action control",
     "Empty allowed",
     "Custom default value",
   ];

@@ -63,7 +63,6 @@ function seedFixture() {
             cc.header.columnId,
             cc.isFormula.columnId,
             cc.valueTitle.columnId,
-            cc.isActionControl.columnId,
             cc.emptyValueAllowed.columnId,
             cc.customDefaultValue.columnId,
           ],
