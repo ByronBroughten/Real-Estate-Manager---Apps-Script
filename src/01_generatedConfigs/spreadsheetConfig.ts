@@ -2,7 +2,6 @@ import { makeSpreadsheetConfig } from "./makeConfigs";
 
 export const spreadsheetConfig = makeSpreadsheetConfig({
   idDelimiter: ":",
-  nameDelimiter: "`",
   idHeader: "ID",
   startTableColIndexBase0: 0,
   columnIdRowIdxBase0: 0,

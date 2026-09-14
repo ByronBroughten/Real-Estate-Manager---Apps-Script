@@ -27,7 +27,6 @@ const ssc = columnConfigs.spreadsheetConfig;
 
 const spreadsheetConfigHeaders = [
   ssc.idDelimiter.header,
-  ssc.nameDelimiter.header,
   ssc.idHeader.header,
   ssc.startTableColumnIndexBase1.header,
   ssc.columnIdRowIndexBase1.header,
@@ -61,7 +60,7 @@ function spreadsheetConfigSheet(
     title: "Spreadsheet Config",
     rows: buildGridRows({
       3: spreadsheetConfigHeaders,
-      4: [idDelimiter, "`", "ID", 1, 1, 2, 3, 4],
+      4: [idDelimiter, "ID", 1, 1, 2, 3, 4],
       ...options.extraRows,
     }),
     table: { endRowIndex: options.tableEndRowIndex ?? 5 },
@@ -248,7 +247,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Spreadsheet Config Table", () =
   it("ignores a filled row below Spreadsheet Config's Table", () => {
     seedFixture({
       spreadsheetConfigExtraRows: {
-        5: ["junk", "", "", "", "", "", "", ""],
+        5: ["junk", "", "", "", "", "", ""],
       },
     });
 

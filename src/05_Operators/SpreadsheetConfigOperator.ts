@@ -14,7 +14,6 @@ type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
 
 const guaranteedColumns: readonly SpreadsheetConfigColumnName[] = [
   "idDelimiter",
-  "nameDelimiter",
   "idHeader",
   "startTableColumnIndexBase1",
   "columnIdRowIndexBase1",
@@ -85,11 +84,6 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
         dataRowIndex,
         colIndexByHeader,
         "idDelimiter",
-      ),
-      nameDelimiter: this._stringCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "nameDelimiter",
       ),
       idHeader: this._stringCell(dataRowIndex, colIndexByHeader, "idHeader"),
       startTableColIndexBase0: this._indexCell(

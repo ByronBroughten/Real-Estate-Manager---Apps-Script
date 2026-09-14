@@ -447,7 +447,6 @@ export const columnConfigs = makeColumnConfigs({
   },
   "spreadsheetConfig": {
     "idDelimiter": { "columnId": "c:scf:8uxVA53", "header": "ID delimiter", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "nameDelimiter": { "columnId": "c:scf:JI6_3tB", "header": "Name delimiter", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "columnIdRowIndexBase1": { "columnId": "c:scf:Kt9oKSY", "header": "Column ID row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "actionRowIndexBase1": { "columnId": "c:scf:GKSJHu0", "header": "Action row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "tableHeaderRowIndexBase1": { "columnId": "c:scf:58r8zkF", "header": "Table header row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
