@@ -33,6 +33,7 @@ export class SpreadsheetNamedBase extends SpreadsheetIndexedBase {
           untypedHeadersBySheetTitle: new Map(),
         },
         valueConfigSync: { activeHeaders: new Set() },
+        spreadsheetConfigSync: { liveConfig: null },
       },
     };
   }

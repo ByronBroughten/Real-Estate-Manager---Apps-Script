@@ -1,4 +1,5 @@
 import type {
+  GoogleGridRange,
   GoogleSpreadsheet,
   GoogleUpdateRequest,
 } from "../00_base/AppsScriptTypes";
@@ -33,7 +34,8 @@ type TablePlacement =
 
 /**
  * Spreadsheet-level Raw: GID+index fetch and the two Sheets chokepoints
- * (`fetchAllGathered`, `_sendUpdateRequests`). Sheet/row/column by index
+ * (`fetchAllGathered` / `fetchSheetUsedGrid` via `_fetchByDataFilter`,
+ * `_fetchByDataFilter`, `_sendUpdateRequests`). Sheet/row/column by index
  * live on SheetRaw / RowRaw / ColumnRaw in this folder.
  * Column-by-name and columnId resolution are Indexed/Named.
  * Schema classes that resolve columns share SpreadsheetSchema.ts here
@@ -99,6 +101,19 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this._addDataToState(data);
     this._finalizeGatheredFetches();
     this.rawState.fetcherGridRanges = [];
+  }
+  // One sheet by GID without Table-placement finalize, so a moved Table can wait for overlay.
+  fetchSheetUsedGrid(sheetGid: number): void {
+    const data = this._fetchByDataFilter(false, [{ sheetId: sheetGid }]);
+    const sheets = Val.assert(data.sheets, "data.sheets").filter(
+      (sheet) => sheet.properties?.sheetId === sheetGid,
+    );
+    if (sheets.length === 0) {
+      throw new Error(
+        `Sheet gid ${sheetGid} was missing from the Sheets get.`,
+      );
+    }
+    this._addDataToState({ sheets });
   }
   // A sheet outside the config never promised to follow the layout.
   private _tablePlacement(sheetGid: number): TablePlacement {
@@ -282,6 +297,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // wastefully on every ordinary read.
   private _fetchByDataFilter(
     includeProgrammaticFacts: boolean,
+    gridRanges: GoogleGridRange[] = this.fetcherGridRanges,
   ): GoogleSpreadsheet {
     const withProgrammaticFacts =
       "sheets(" +
@@ -296,7 +312,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
       ")";
     return this.sheetsService.Spreadsheets.getByDataFilter(
-      this._makeFetchResource(),
+      this._makeFetchResource(gridRanges),
       this.spreadsheetId,
       {
         fields: includeProgrammaticFacts
@@ -305,9 +321,11 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       },
     );
   }
-  private _makeFetchResource() {
+  private _makeFetchResource(
+    gridRanges: GoogleGridRange[] = this.fetcherGridRanges,
+  ) {
     return {
-      dataFilters: this.fetcherGridRanges.map((gr) => ({
+      dataFilters: gridRanges.map((gr) => ({
         gridRange: gr,
       })),
       includeGridData: true,

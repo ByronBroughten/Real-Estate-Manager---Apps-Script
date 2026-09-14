@@ -28,6 +28,7 @@ import {
 } from "../01_generatedConfigs/sheetConfigsTypes";
 import {
   ssConfigGet,
+  type LiveSpreadsheetConfig,
   type SpreadsheetConfig,
 } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import {
@@ -37,19 +38,24 @@ import {
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
 
-const uniformRowIndexes = {
-  columnId: ssConfigGet("columnIdRowIdxBase0"),
-  colGroupName: ssConfigGet("columnGroupHeadingRowIndexBase0"),
-  action: ssConfigGet("actionRowIndexBase0"),
-  header: ssConfigGet("headerRowIndexBase0"),
-};
+function getUniformRowIndexes(): Record<UniformRowName, number> {
+  return {
+    columnId: ssConfigGet("columnIdRowIdxBase0"),
+    colGroupName: ssConfigGet("columnGroupHeadingRowIndexBase0"),
+    action: ssConfigGet("actionRowIndexBase0"),
+    header: ssConfigGet("headerRowIndexBase0"),
+  };
+}
 export function getUniformRowIndex(name: UniformRowName): number {
-  return uniformRowIndexes[name];
+  return getUniformRowIndexes()[name];
 }
 
-const rowIndexToUniformName = new Map(
-  Obj.keys(uniformRowIndexes).map((name) => [uniformRowIndexes[name], name]),
-) as Map<number, UniformRowName>;
+function rowIndexToUniformName(): Map<number, UniformRowName> {
+  const uniformRowIndexes = getUniformRowIndexes();
+  return new Map(
+    Obj.keys(uniformRowIndexes).map((name) => [uniformRowIndexes[name], name]),
+  ) as Map<number, UniformRowName>;
+}
 
 export class SpreadsheetSchema {
   get codebaseNameDelimiter(): CodebaseNameDelimiter {
@@ -75,10 +81,10 @@ export class SpreadsheetSchema {
   }
   private ssConfig<K extends keyof SpreadsheetConfig>(
     key: K,
-  ): SpreadsheetConfig[K] {
+  ): LiveSpreadsheetConfig[K] {
     return ssConfigGet(key);
   }
-  get idHeader(): SpreadsheetConfig["idHeader"] {
+  get idHeader(): LiveSpreadsheetConfig["idHeader"] {
     return this.ssConfig("idHeader");
   }
   titleToName(sheetTitle: string): string {
@@ -93,7 +99,7 @@ export class SpreadsheetSchema {
     return getUniformRowIndex(name);
   }
   uniformRowNameByIndex(rowIndex: number): UniformRowName {
-    const uniformRowName = rowIndexToUniformName.get(rowIndex);
+    const uniformRowName = rowIndexToUniformName().get(rowIndex);
     if (!uniformRowName) {
       throw new Error(
         `Row index ${rowIndex} does not correspond to a known uniform row name.`,
@@ -102,7 +108,7 @@ export class SpreadsheetSchema {
     return uniformRowName;
   }
   isUniformRowIndex(rowIndex: number, rowName?: UniformRowName): boolean {
-    const isUniform = rowIndexToUniformName.has(rowIndex);
+    const isUniform = rowIndexToUniformName().has(rowIndex);
     if (rowName) {
       return isUniform && this.uniformRowNameByIndex(rowIndex) === rowName;
     } else {
@@ -113,9 +119,9 @@ export class SpreadsheetSchema {
     if (!this.isUniformRowIndex(rowIndex, rowName)) {
       throw new Error(
         `Row index ${rowIndex} is not a uniform row. Uniform rows are: ${Obj.keys(
-          uniformRowIndexes,
+          getUniformRowIndexes(),
         )
-          .map((name) => `${name} (index ${uniformRowIndexes[name]})`)
+          .map((name) => `${name} (index ${getUniformRowIndexes()[name]})`)
           .join(", ")}`,
       );
     }
@@ -158,13 +164,13 @@ export class SpreadsheetSchema {
     return this.ssConfig("startTableColIndexBase0");
   }
   get colIdRowIndex(): number {
-    return uniformRowIndexes.columnId;
+    return getUniformRowIndexes().columnId;
   }
   get headerRowIndex(): number {
-    return uniformRowIndexes.header;
+    return getUniformRowIndexes().header;
   }
   get actionRowIndex(): number {
-    return uniformRowIndexes.action;
+    return getUniformRowIndexes().action;
   }
   get topDataRowIdx(): number {
     return this.ssConfig("topDataRowIdxBase0");

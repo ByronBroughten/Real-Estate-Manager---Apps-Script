@@ -1,4 +1,4 @@
-// Regenerates the three config files from the live config sheets, on the Node host.
+// Regenerates the four config files from the live config sheets, on the Node host.
 import { spawnSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -6,6 +6,7 @@ import { startNodeHost } from "./nodeHost.mjs";
 
 class ConfigFilesGenerator {
   path = {
+    spreadsheetConfig: configsPath("spreadsheetConfig"),
     sheetConfigs: configsPath("sheetConfigs"),
     columnConfigs: configsPath("columnConfigs"),
     valueConfigs: configsPath("valueConfigs"),
@@ -14,13 +15,20 @@ class ConfigFilesGenerator {
     return new ConfigFilesGenerator();
   }
   async run() {
-    const { sheetConfigs, columnConfigs, valueConfigs, untypedColumnsSummary } =
-      await this._generate();
+    const {
+      spreadsheetConfig,
+      sheetConfigs,
+      columnConfigs,
+      valueConfigs,
+      untypedColumnsSummary,
+    } = await this._generate();
 
-    // Write nothing until all three are confirmed good; a subset would go stale.
+    // Write nothing until all four are confirmed good; a subset would go stale.
+    writeFileSync(this.path.spreadsheetConfig, spreadsheetConfig);
     writeFileSync(this.path.sheetConfigs, sheetConfigs);
     writeFileSync(this.path.columnConfigs, columnConfigs);
     writeFileSync(this.path.valueConfigs, valueConfigs);
+    console.log(`Wrote ${this.path.spreadsheetConfig}`);
     console.log(`Wrote ${this.path.sheetConfigs}`);
     console.log(`Wrote ${this.path.columnConfigs}`);
     console.log(`Wrote ${this.path.valueConfigs}`);
@@ -50,7 +58,7 @@ class ConfigFilesGenerator {
 
   _reportTscFailure() {
     console.error(
-      "\ngen:configs: regeneration succeeded and all three files were written, " +
+      "\ngen:configs: regeneration succeeded and all four files were written, " +
         "but `npm run tsc` failed above. This usually means a hand-written " +
         "file (e.g. SheetNameGroups.ts) still references a sheet/column name " +
         "that no longer exists after this regeneration. Fix those references " +

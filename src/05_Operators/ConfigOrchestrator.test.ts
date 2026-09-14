@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import { spreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfig";
+import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
+import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import {
   stubLogger,
   stubPropertiesService,
@@ -13,9 +16,26 @@ import { ConfigOrchestrator } from "./ConfigOrchestrator";
 const TEST_SHEET_GID = 2089200354;
 const SHEET_CONFIG_GID = 210603630;
 const COLUMN_CONFIG_GID = 2034522667;
+const SPREADSHEET_CONFIG_GID = getSheetTraitByName(
+  "spreadsheetConfig",
+  "sheetGid",
+);
 
 const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
+const ssc = columnConfigs.spreadsheetConfig;
+
+const spreadsheetConfigHeaders = [
+  ssc.idDelimiter.header,
+  ssc.nameDelimiter.header,
+  ssc.idHeader.header,
+  ssc.startTableColumnIndexBase1.header,
+  ssc.columnIdRowIndexBase1.header,
+  ssc.columnGroupHeadingRowIndexBase1.header,
+  ssc.actionRowIndexBase1.header,
+  ssc.headerRowIndexBase1.header,
+  ssc.topBodyRowIndexBase5.header,
+];
 
 const testSheetConfigRowWithApiAccess = [
   TEST_SHEET_GID,
@@ -30,9 +50,26 @@ beforeEach(() => {
   stubLogger();
 });
 
-function seedFixture() {
+function spreadsheetConfigSheet(idDelimiter: string) {
+  return {
+    sheetId: SPREADSHEET_CONFIG_GID,
+    title: "Spreadsheet Config",
+    rows: buildGridRows({
+      3: spreadsheetConfigHeaders,
+      4: [idDelimiter, "`", "ID", 1, 1, 2, 3, 4, 5],
+    }),
+    table: { endRowIndex: 5 },
+  };
+}
+
+function seedFixture(
+  options: { idDelimiter?: string; testColumnId?: string } = {},
+) {
+  const idDelimiter = options.idDelimiter ?? ":";
+  const testColumnId = options.testColumnId ?? "c:test:xyz123";
   return stubSheetsService({
     sheets: [
+      spreadsheetConfigSheet(idDelimiter),
       {
         sheetId: SHEET_CONFIG_GID,
         title: "Sheet Config",
@@ -80,7 +117,7 @@ function seedFixture() {
         // header row (3) needs real text — newColumnConfigs() now throws
         // rather than skips a column still missing one after a sync.
         rows: buildGridRows({
-          0: ["c:test:xyz123"],
+          0: [testColumnId],
           3: ["Some Header"],
           4: [],
         }),
@@ -108,12 +145,13 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
     });
   });
 
-  it("returns the untyped-column summary for the endpoint to report", () => {
+  it("returns the untyped-column summary for the endpoint to report, with no file sources", () => {
     seedFixture();
 
-    const summary = ConfigOrchestrator.init().syncAndFlushConfigSheets();
+    const summary = ConfigOrchestrator.init().syncConfigSheetRows();
 
     expect(summary).toContain("1 column(s) across 1 sheet(s)");
+    expect(typeof summary).toBe("string");
   });
 });
 
@@ -122,13 +160,40 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     seedFixture();
 
     const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(typeof parsed.spreadsheetConfig).toBe("string");
     expect(typeof parsed.sheetConfigs).toBe("string");
     expect(typeof parsed.columnConfigs).toBe("string");
     expect(parsed.sheetConfigs).toContain('"test"');
+    expect(typeof parsed.valueConfigs).toBe("string");
     // The "test" sheet's column ID was gathered and appended to Column
     // Config as part of the sync, then given its real header/valueName by
     // _updateProgrammaticValues before toFileSource read it back out.
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
+  });
+
+  it("emits the live Spreadsheet Config values and uses them for new column IDs", () => {
+    seedFixture({ idDelimiter: "|", testColumnId: "" });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.spreadsheetConfig).toContain('idDelimiter: "|"');
+    expect(parsed.columnConfigs).toMatch(/c\|test\|/);
+    expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
+  });
+
+  it("clears the live layout after the call returns", () => {
+    seedFixture({ idDelimiter: "|" });
+
+    ConfigOrchestrator.init().generateConfigFiles();
+    expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
+  });
+
+  it("clears the live layout when later work throws", () => {
+    stubSheetsService({
+      sheets: [spreadsheetConfigSheet("|")],
+    });
+
+    expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow();
+    expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
   });
 
   it("carries the untyped-column summary back, since no run status cell will show it", () => {

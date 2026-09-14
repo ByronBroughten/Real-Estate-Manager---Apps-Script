@@ -1,0 +1,187 @@
+import { beforeEach, describe, expect, it } from "vitest";
+import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
+import {
+  stubLogger,
+  stubPropertiesService,
+} from "../testSupport/fakeAppsScriptGlobals";
+import {
+  buildGridRows,
+  stubSheetsService,
+} from "../testSupport/fakeSheetsService";
+import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
+
+const SPREADSHEET_CONFIG_GID = getSheetTraitByName(
+  "spreadsheetConfig",
+  "sheetGid",
+);
+const ssc = columnConfigs.spreadsheetConfig;
+
+const spreadsheetConfigHeaders = [
+  ssc.idDelimiter.header,
+  ssc.nameDelimiter.header,
+  ssc.idHeader.header,
+  ssc.startTableColumnIndexBase1.header,
+  ssc.columnIdRowIndexBase1.header,
+  ssc.columnGroupHeadingRowIndexBase1.header,
+  ssc.actionRowIndexBase1.header,
+  ssc.headerRowIndexBase1.header,
+  ssc.topBodyRowIndexBase5.header,
+];
+
+const matchingCommittedFileValues = [
+  ":",
+  "`",
+  "ID",
+  1,
+  1,
+  2,
+  3,
+  4,
+  5,
+] as const;
+
+function stubSpreadsheetConfigSheet(
+  rowsByIndex: Record<number, readonly (string | number | boolean | null)[]>,
+) {
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: SPREADSHEET_CONFIG_GID,
+        title: "Spreadsheet Config",
+        rows: buildGridRows(rowsByIndex),
+      },
+    ],
+  });
+}
+
+function fetchedOperator() {
+  const operator = SpreadsheetConfigOperator.init();
+  operator.fetchLiveConfig();
+  return operator;
+}
+
+beforeEach(() => {
+  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  stubLogger();
+});
+
+describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
+  it("emits makeSpreadsheetConfig of the live row with base-1 indexes minus one", () => {
+    const { getByDataFilterCalls } = stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: ["|", "`", "ID", 1, 1, 2, 3, 4, 5],
+    });
+
+    expect(fetchedOperator().toFileSource()).toBe(
+      [
+        `import { makeSpreadsheetConfig } from "./makeConfigs";`,
+        ``,
+        `export const spreadsheetConfig = makeSpreadsheetConfig({`,
+        `  idDelimiter: "|",`,
+        `  nameDelimiter: "\`",`,
+        `  idHeader: "ID",`,
+        `  startTableColIndexBase0: 0,`,
+        `  columnIdRowIdxBase0: 0,`,
+        `  columnGroupHeadingRowIndexBase0: 1,`,
+        `  actionRowIndexBase0: 2,`,
+        `  headerRowIndexBase0: 3,`,
+        `  topDataRowIdxBase0: 4,`,
+        `} as const);`,
+        ``,
+      ].join("\n"),
+    );
+    expect(getByDataFilterCalls[0]).toMatchObject({
+      dataFilters: [{ gridRange: { sheetId: SPREADSHEET_CONFIG_GID } }],
+    });
+  });
+
+  it("ignores an extra column that is not in the closed map", () => {
+    stubSpreadsheetConfigSheet({
+      3: [...spreadsheetConfigHeaders, "Notes"],
+      4: [...matchingCommittedFileValues, "ignore me"],
+    });
+
+    expect(fetchedOperator().toFileSource()).toContain('idDelimiter: ":"');
+    expect(fetchedOperator().toFileSource()).not.toContain("Notes");
+  });
+
+  it("throws when the header row is not uniquely findable", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      6: spreadsheetConfigHeaders,
+      4: [...matchingCommittedFileValues],
+      7: [...matchingCommittedFileValues],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when there are no data rows", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when a second row below the header still holds guaranteed-column values", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: [...matchingCommittedFileValues],
+      5: ["x", "", "", "", "", "", "", "", ""],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when a guaranteed header is missing", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders.slice(1),
+      4: ["`", "ID", 1, 1, 2, 3, 4, 5],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when a guaranteed cell is blank", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: ["", "`", "ID", 1, 1, 2, 3, 4, 5],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when an index is not an integer ≥ 1", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: [":", "`", "ID", 0, 1, 2, 3, 4, 5],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when an index is not an integer", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: [":", "`", "ID", 1.5, 1, 2, 3, 4, 5],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+});

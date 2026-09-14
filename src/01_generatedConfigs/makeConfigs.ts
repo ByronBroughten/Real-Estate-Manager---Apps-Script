@@ -3,7 +3,10 @@ import type { Value, ValueName } from "./valueSchemas";
 
 export function makeImportLine(
   configMagerName:
-    "makeSheetConfigs" | "makeColumnConfigs" | "makeValueConfigs",
+    | "makeSheetConfigs"
+    | "makeColumnConfigs"
+    | "makeValueConfigs"
+    | "makeSpreadsheetConfig",
 ) {
   return `import { ${configMagerName} } from "./makeConfigs";`;
 }

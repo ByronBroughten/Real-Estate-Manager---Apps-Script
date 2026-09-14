@@ -1,10 +1,16 @@
+import {
+  clearSpreadsheetConfigOverlay,
+  overlaySpreadsheetConfig,
+} from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { SpreadsheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
+import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
 export interface ConfigRegeneration {
+  spreadsheetConfig: string;
   sheetConfigs: string;
   columnConfigs: string;
   valueConfigs: string;
@@ -12,11 +18,9 @@ export interface ConfigRegeneration {
 }
 
 /**
- * Coordinates Sheet/Column/Value Config: sync the live config sheets,
- * one flush, then emit all three generated files or none.
- * Config maintenance is this Operator family, not Raw or Named.
- * Sheet Config then Column Config share one operator so both queues
- * plus column IDs written to business sheets flush together.
+ * Coordinates Spreadsheet/Sheet/Column/Value Config: overlay live layout,
+ * sync the live config sheets, one flush, then emit all four generated
+ * files or none. Config maintenance is this Operator family, not Raw or Named.
  * npm run gen:configs is the only regeneration path.
  * docs/generated-data.md
  */
@@ -29,6 +33,9 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
+  get spreadsheetConfigOperator() {
+    return new SpreadsheetConfigOperator(this.spreadsheetNamedProps);
+  }
   get columnConfigOperator() {
     return new ColumnConfigOperator(this.spreadsheetNamedProps);
   }
@@ -40,6 +47,39 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   }
   // Returns the run status an endpoint should report, if there's one to make.
   syncConfigSheetRows(): string | undefined {
+    return this._withLiveSpreadsheetConfig(() => this._syncConfigSheetRows());
+  }
+  syncAndFlushConfigSheets(): string | undefined {
+    return this._withLiveSpreadsheetConfig(() => {
+      const summary = this._syncConfigSheetRows();
+      this.ss.batchUpdateGSheets();
+      return summary;
+    });
+  }
+  generateConfigFiles(): ConfigRegeneration {
+    return this._withLiveSpreadsheetConfig(() => {
+      const untypedColumnsSummary = this._syncConfigSheetRows();
+      this.ss.batchUpdateGSheets();
+      this.valueConfigOperator.fetchAfterColumnConfigSynced();
+      return {
+        spreadsheetConfig: this.spreadsheetConfigOperator.toFileSource(),
+        sheetConfigs: this.sheetConfigOperator.toFileSource(),
+        columnConfigs: this.columnConfigOperator.toFileSource(),
+        valueConfigs: this.valueConfigOperator.toFileSource(),
+        untypedColumnsSummary,
+      };
+    });
+  }
+  private _withLiveSpreadsheetConfig<T>(body: () => T): T {
+    const liveConfig = this.spreadsheetConfigOperator.fetchLiveConfig();
+    overlaySpreadsheetConfig(liveConfig);
+    try {
+      return body();
+    } finally {
+      clearSpreadsheetConfigOverlay();
+    }
+  }
+  private _syncConfigSheetRows(): string | undefined {
     this.ss.fetchAllSheetProperties();
     this.sheetConfigOperator.prepFetchForSync();
     this.columnConfigOperator.prepFetchWithSheetConfig();
@@ -48,21 +88,5 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
     this.columnConfigOperator.fetchAfterSheetConfigSynced();
     this.columnConfigOperator.syncToSpreadsheet();
     return this.columnConfigOperator.untypedColumnsSummary();
-  }
-  syncAndFlushConfigSheets(): string | undefined {
-    const summary = this.syncConfigSheetRows();
-    this.ss.batchUpdateGSheets();
-    return summary;
-  }
-  generateConfigFiles(): ConfigRegeneration {
-    const untypedColumnsSummary = this.syncConfigSheetRows();
-    this.ss.batchUpdateGSheets();
-    this.valueConfigOperator.fetchAfterColumnConfigSynced();
-    return {
-      sheetConfigs: this.sheetConfigOperator.toFileSource(),
-      columnConfigs: this.columnConfigOperator.toFileSource(),
-      valueConfigs: this.valueConfigOperator.toFileSource(),
-      untypedColumnsSummary,
-    };
   }
 }

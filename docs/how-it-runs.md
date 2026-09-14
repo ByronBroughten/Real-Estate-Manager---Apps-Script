@@ -24,7 +24,7 @@ Map fragment disclosed from `README.md`. Read the heading the task needs.
 
 `npm run tsc` (type-checking only) is always safe to run freely, and so is `npm run chore <name>` without `--send`, which cannot write (see "The chore and its dry run").
 
-`npm run gen:configs` **writes** to the live Sheet Config/Column Config sheets and to business sheets' header rows (adding missing column IDs) before it regenerates the local files, and it has **standing permission** under four conditions, all of which must hold:
+`npm run gen:configs` **writes** to the live Sheet Config/Column Config sheets and to business sheets' header rows (adding missing column IDs) before it regenerates the four local config files from live Spreadsheet Config plus the other config sheets (floor vs generated: [`docs/generated-data.md`](./generated-data.md)), and it has **standing permission** under four conditions, all of which must hold:
 
 - no uncommitted changes in `src/01_generatedConfigs/`;
 - no uncommitted changes in `src/05_Operators/`, because the command now executes local, possibly unreviewed operator code against the live config sheets;

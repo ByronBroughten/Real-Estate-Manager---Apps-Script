@@ -1,5 +1,6 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
+import type { LiveSpreadsheetConfig } from "../../01_generatedConfigs/spreadsheetConfigTypes";
 import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";
@@ -21,6 +22,9 @@ export type SpreadsheetNamedState = {
     untypedHeadersBySheetTitle: UntypedHeadersBySheetTitle;
   };
   valueConfigSync: { activeHeaders: Set<string> };
+  spreadsheetConfigSync: {
+    liveConfig: LiveSpreadsheetConfig | null;
+  };
 };
 
 type SheetColumnNames<SN extends SheetName> = {
