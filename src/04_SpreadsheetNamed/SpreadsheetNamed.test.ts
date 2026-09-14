@@ -579,6 +579,9 @@ function fetchedTestSpreadsheet(): SpreadsheetNamed {
     "number",
     "dropdown",
     "sampledBoolean",
+    "columnCurrency",
+    "cellCurrency",
+    "cellNotCurrency",
   );
   ss.fetchAllPrepped();
   return ss;
@@ -592,6 +595,9 @@ const completeTestRow: CompleteAppendBag<"test"> = {
   number: 7,
   dropdown: "Yes",
   sampledBoolean: true,
+  columnCurrency: 8,
+  cellCurrency: 9,
+  cellNotCurrency: 10,
 };
 
 describe("SheetNamed.appendRowWithAllVals", () => {
@@ -620,7 +626,10 @@ describe("SheetNamed.appendRowWithAllVals", () => {
       row.value("number"),
       row.value("dropdown"),
       row.value("sampledBoolean"),
-    ]).toEqual([7, "Yes", true]);
+      row.value("columnCurrency"),
+      row.value("cellCurrency"),
+      row.value("cellNotCurrency"),
+    ]).toEqual([7, "Yes", true, 8, 9, 10]);
   });
 
   it("reuses the blank row the way the partial append does", () => {
@@ -698,7 +707,15 @@ describe("SheetNamed.appendRowWithAllVals", () => {
     };
 
     expect([Object.keys(withId), Object.keys(withFormula)]).toEqual([
-      ["number", "dropdown", "sampledBoolean", "id"],
+      [
+        "number",
+        "dropdown",
+        "sampledBoolean",
+        "columnCurrency",
+        "cellCurrency",
+        "cellNotCurrency",
+        "id",
+      ],
       [
         "sheetGid",
         "sheetTitle",

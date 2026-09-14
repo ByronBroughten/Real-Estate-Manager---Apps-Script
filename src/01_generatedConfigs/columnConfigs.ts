@@ -579,7 +579,10 @@ export const columnConfigs = makeColumnConfigs({
     "dropdown": { "columnId": "c:tst:cQEliR8", "header": "Dropdown", "valueName": "yesOrNo", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "date": { "columnId": "c:test:HL-G329", "header": "Date", "valueName": "date", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "sampledBoolean": { "columnId": "c:test:KLMZlb4", "header": "Sampled Boolean", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "formulaTest": { "columnId": "c:test:R8Vj_m9", "header": "Formula test", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
+    "formulaTest": { "columnId": "c:test:R8Vj_m9", "header": "Formula test", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
+    "columnCurrency": { "columnId": "c:test:__ygD9v", "header": "Column currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "cellCurrency": { "columnId": "c:test:hK_L4mn", "header": "Cell currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "cellNotCurrency": { "columnId": "c:test:clg5G1K", "header": "Cell not currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "unit": {
     "name": { "columnId": "c:unt:jC9vwrI", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
