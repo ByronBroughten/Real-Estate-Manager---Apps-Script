@@ -3,7 +3,9 @@ import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
   RawColumnCellFacts,
+  RawColumnDeclaredTypes,
   RawColumnPropertiesState,
+  RawColumnValidationValues,
   RawRowState,
   RawSheetState,
 } from "../ClassTypes/RawState";
@@ -123,12 +125,10 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get columnCellFacts(): RawColumnCellFacts {
     return this.sheetState.columnCellFacts;
   }
-  get activeTable(): NonNullable<RawSheetState["activeTable"]> {
-    if (!this.sheetState.rowIndexesAreValid) {
-      throw new Error(
-        `Row indexes are not valid for sheetGid ${this.sheetGid}.`,
-      );
-    }
+  get activeTable(): ActiveTableRaw {
+    return new ActiveTableRaw(this.sheetRawProps);
+  }
+  protected _fetchedTable(): NonNullable<RawSheetState["activeTable"]> {
     const activeTable = this.sheetState.activeTable;
     if (activeTable === null) {
       throw new Error(
@@ -148,5 +148,44 @@ export class SheetRawBase extends SpreadsheetRawBase {
       sheetGid: this.sheetGid,
       ...this.spreadsheetRawProps,
     };
+  }
+}
+
+export class ActiveTableRaw extends SheetRawBase {
+  get tableId(): string {
+    return this._fetchedTable().tableId;
+  }
+  get startRowIndex(): number {
+    return this._fetchedTable().startRowIndex;
+  }
+  get endRowIndex(): number {
+    this._validateRowIndexes();
+    return this._fetchedTable().endRowIndex;
+  }
+  set endRowIndex(endRowIndex: number) {
+    this._validateRowIndexes();
+    this._fetchedTable().endRowIndex = endRowIndex;
+  }
+  get startColumnIndex(): number {
+    return this._fetchedTable().startColumnIndex;
+  }
+  get endColumnIndex(): number {
+    return this._fetchedTable().endColumnIndex;
+  }
+  set endColumnIndex(endColumnIndex: number) {
+    this._fetchedTable().endColumnIndex = endColumnIndex;
+  }
+  get columnValidationValues(): RawColumnValidationValues {
+    return this._fetchedTable().columnValidationValues;
+  }
+  get columnDeclaredTypes(): RawColumnDeclaredTypes {
+    return this._fetchedTable().columnDeclaredTypes;
+  }
+  private _validateRowIndexes(): void {
+    if (!this.sheetState.rowIndexesAreValid) {
+      throw new Error(
+        `Row indexes are not valid for sheetGid ${this.sheetGid}.`,
+      );
+    }
   }
 }

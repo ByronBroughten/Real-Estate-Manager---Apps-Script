@@ -44,7 +44,7 @@ export class RowRawBase extends SheetRawBase {
         `Cannot write to row ${this.rowIndex} of sheetGid ${this.sheetGid} before its sheet properties have been fetched.`,
       );
     }
-    if (this.rowIndex >= activeTable.endRowIndex) {
+    if (this.rowIndex >= this.activeTable.endRowIndex) {
       throw new Error(
         `Cannot write to row ${this.rowIndex} because it is past the last row of sheetGid ${this.sheetGid}'s table. Append the row first.`,
       );

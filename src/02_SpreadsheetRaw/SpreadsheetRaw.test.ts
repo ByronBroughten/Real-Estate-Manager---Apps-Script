@@ -733,6 +733,38 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(raw.sheet(111).rowIndexesAreValid).toBe(false);
   });
 
+  it("still reads table column properties after a flushed row delete, and throws only for the table end", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          table: {
+            endRowIndex: 11,
+            columnDeclaredTypes: { 0: "TEXT" },
+            columnValidationValues: { 0: ["=valueConfig[Notes]"] },
+          },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).delete();
+    raw.batchUpdateGSheets();
+
+    const table = raw.sheet(111).activeTable;
+    expect(table.tableId).toBe("fake-table-111");
+    expect(table.startColumnIndex).toBe(START_TABLE_COL_INDEX);
+    expect(table.columnDeclaredTypes.get(0)).toBe("TEXT");
+    expect(table.columnValidationValues.get(0)).toEqual([
+      "=valueConfig[Notes]",
+    ]);
+    expect(() => table.endRowIndex).toThrow(
+      "Row indexes are not valid for sheetGid 111.",
+    );
+  });
+
   it("sends same-sheet row deletions in descending startIndex order so an earlier deletion can't shift a later one out from under it", () => {
     const { batchUpdateCalls } = stubSheetsService({
       sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],

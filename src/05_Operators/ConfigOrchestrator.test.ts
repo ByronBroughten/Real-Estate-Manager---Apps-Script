@@ -219,6 +219,75 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
       ConfigOrchestrator.init().generateConfigFiles().untypedColumnsSummary,
     ).toContain("1 column(s) across 1 sheet(s)");
   });
+
+  it("still catalogs value titles after Column Config pruned a stale row of its own", () => {
+    const columnIdRow = [
+      cc.sheetGid.columnId,
+      cc.columnId.columnId,
+      cc.sheetTitle.columnId,
+      cc.header.columnId,
+      cc.isFormula.columnId,
+      cc.valueTitle.columnId,
+      cc.emptyValueAllowed.columnId,
+      cc.customDefaultValue.columnId,
+    ];
+    stubSheetsService({
+      sheets: [
+        spreadsheetConfigSheet(":"),
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: [
+              sc.sheetGid.columnId,
+              sc.sheetTitle.columnId,
+              sc.hasIdColumn.columnId,
+              sc.letApiAccess.columnId,
+              sc.idPrefix.columnId,
+            ],
+            4: [COLUMN_CONFIG_GID, "Column Config", false, true, "ccf"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: COLUMN_CONFIG_GID,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnIdRow,
+            3: [
+              cc.sheetGid.header,
+              cc.columnId.header,
+              cc.sheetTitle.header,
+              cc.header.header,
+              cc.isFormula.header,
+              cc.valueTitle.header,
+              cc.emptyValueAllowed.header,
+              cc.customDefaultValue.header,
+            ],
+            4: [
+              COLUMN_CONFIG_GID,
+              cc.sheetGid.columnId,
+              "Column Config",
+              cc.sheetGid.header,
+              false,
+              "number",
+            ],
+            5: [
+              COLUMN_CONFIG_GID,
+              "c:ccf:stale-gone",
+              "Column Config",
+              "Gone",
+              false,
+              "string",
+            ],
+          }),
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+
+    expect(() => ConfigOrchestrator.init().generateConfigFiles()).not.toThrow();
+  });
 });
 
 describe("ConfigOrchestrator.syncConfigSheetRows Spreadsheet Config Table", () => {
