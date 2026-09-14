@@ -14,7 +14,7 @@ export abstract class SheetCommonRaw extends SheetRawBase {
   abstract get ss(): SpreadsheetRaw;
   get fullTableColIndexes(): number[] {
     return Arr.indexesFromUntil(
-      this.schema.startTableColIndex,
+      this.activeTable.startColumnIndex,
       this.activeTable.endColumnIndex,
     );
   }

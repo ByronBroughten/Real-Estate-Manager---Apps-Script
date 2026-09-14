@@ -167,10 +167,10 @@ export class SheetRaw extends SheetCommonRaw {
     );
   }
   gatherFetchProperties(): this {
-    // getByDataFilter only returns a sheet's `tables` metadata for filters whose
-    // gridRange overlaps the table. The table always starts at the header row,
-    // so pre-activate it and request one of its cells to reliably pull properties.
-    this.meta.headerRow.firstTableCell().gatherFetchRange();
+    // The live start is unknown until this probe comes back, so aim the layout constant.
+    this.meta.headerRow
+      .cell(this.schema.startTableColIndex)
+      .gatherFetchRange();
     return this;
   }
   hasQueuedFullRowFetch(rowIndex: number): boolean {

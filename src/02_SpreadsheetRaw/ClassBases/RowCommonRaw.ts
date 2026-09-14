@@ -29,9 +29,6 @@ export abstract class RowCommonRaw extends RowRawBase {
       colIndex: colIndex,
     });
   }
-  firstTableCell(): CellRaw {
-    return this.cell(this.schema.startTableColIndex);
-  }
   abstract get activeValueArr(): CellValue[];
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
@@ -53,7 +50,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     this.sheet.gatherFetchRange({
       startRowIndex: this.rowIndex,
       endRowIndex: this.rowIndex + 1,
-      startColumnIndex: this.schema.startTableColIndex,
+      startColumnIndex: this.sheet.activeTable.startColumnIndex,
     });
     this.sheetState.rowIndexesToFinalize.add(this.rowIndex);
     return this;

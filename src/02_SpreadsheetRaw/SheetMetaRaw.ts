@@ -82,7 +82,11 @@ export class SheetMetaRaw extends SheetCommonRaw {
     });
   }
   gatherFetchColumnIds(): this {
-    this.colIdRow.gatherFetchFull();
+    this.gatherFetchRange({
+      startRowIndex: this.schema.colIdRowIndex,
+      endRowIndex: this.schema.colIdRowIndex + 1,
+    });
+    this.sheetState.rowIndexesToFinalize.add(this.schema.colIdRowIndex);
     return this;
   }
 }
