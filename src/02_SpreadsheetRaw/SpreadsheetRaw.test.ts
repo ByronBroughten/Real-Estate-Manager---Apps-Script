@@ -132,10 +132,10 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).gatherFetchProperties();
-    raw.sheetMeta(111).gatherFetchColumnIds();
-    raw.sheet(222).gatherFetchProperties();
-    raw.sheetMeta(222).gatherFetchColumnIds();
+    raw.sheet(111).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheetMeta(111).gatherFetchColumnIdsInit(START_TABLE_COL_INDEX);
+    raw.sheet(222).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheetMeta(222).gatherFetchColumnIdsInit(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Task Generic" \(gid 111\).*"Task Material" \(gid 222\)/,
@@ -155,7 +155,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(111).gatherFetchProperties();
+    raw.sheet(111).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -166,7 +166,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -183,7 +183,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Property".*starts at row 3, column A.*must start at row 4, column A/,
@@ -202,7 +202,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Property".*starts at row 4, column B.*must start at row 4, column A/,
@@ -221,7 +221,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(SCRATCH_GID).gatherFetchProperties();
+    raw.sheet(SCRATCH_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -243,7 +243,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
   });
@@ -263,8 +263,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIdsInit(START_TABLE_COL_INDEX);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(
@@ -279,7 +279,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(
@@ -297,8 +297,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheet(UNIT_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheet(UNIT_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
   });
@@ -314,7 +314,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(SCRATCH_GID).gatherFetchProperties();
+    raw.sheet(SCRATCH_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -328,9 +328,9 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheet(UNIT_GID).gatherFetchProperties();
-    raw.sheetMeta(UNIT_GID).gatherFetchColumnIds();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheet(UNIT_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheetMeta(UNIT_GID).gatherFetchColumnIdsInit(START_TABLE_COL_INDEX);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(/more than one Table.*"Property"/);
@@ -350,8 +350,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheet(UNIT_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheet(UNIT_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(/more than one Table.*"Property"/);
@@ -369,8 +369,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
+    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIdsInit(START_TABLE_COL_INDEX);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(/more than one Table.*"Property"/);
@@ -402,7 +402,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
     raw.fetchAllGathered();
 
     expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
@@ -416,13 +416,13 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     ]);
   });
 
-  it("omits the start column from the column-id filter", () => {
+  it("aims the column-id filter at the layout start column", () => {
     const { getByDataFilterCalls } = stubSheetsService({
       sheets: [placedTableSheet({ sheetId: PROPERTY_GID, title: "Property" })],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
+    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIdsInit(START_TABLE_COL_INDEX);
     raw.fetchAllGathered();
 
     expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
@@ -430,6 +430,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
         sheetId: PROPERTY_GID,
         startRowIndex: COL_ID_ROW_INDEX,
         endRowIndex: COL_ID_ROW_INDEX + 1,
+        startColumnIndex: START_TABLE_COL_INDEX,
       },
     ]);
   });
@@ -546,7 +547,7 @@ describe("ColumnMetaRaw active facts", () => {
     stubSheetWithTopDataRow([], "rowsWithNoGridData");
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
     raw.fetchAllGathered();
     raw.sheet(PROPERTY_GID).column(1).gatherFetchFull();
     raw.fetchAllGathered(true);
@@ -558,7 +559,7 @@ describe("ColumnMetaRaw active facts", () => {
     stubSheetWithTopDataRow([], "rowsWithNoGridData");
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
     raw.fetchAllGathered();
     const cell = raw.sheet(PROPERTY_GID).row(TOP_DATA_ROW_INDEX).cell(0);
     cell.gatherFetchRange();
@@ -580,7 +581,7 @@ describe("ColumnMetaRaw active facts", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties(START_TABLE_COL_INDEX);
     raw.fetchAllGathered();
 
     const message = thrownMessage(

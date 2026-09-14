@@ -81,10 +81,11 @@ export class SheetMetaRaw extends SheetCommonRaw {
       this.column(colIndex).ensureActiveFacts();
     });
   }
-  gatherFetchColumnIds(): this {
+  gatherFetchColumnIdsInit(startTableColIndex: number): this {
     this.gatherFetchRange({
       startRowIndex: this.schema.colIdRowIndex,
       endRowIndex: this.schema.colIdRowIndex + 1,
+      startColumnIndex: startTableColIndex,
     });
     this.sheetState.rowIndexesToFinalize.add(this.schema.colIdRowIndex);
     return this;

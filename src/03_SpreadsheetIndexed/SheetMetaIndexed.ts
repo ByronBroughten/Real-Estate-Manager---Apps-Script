@@ -51,15 +51,16 @@ export class SheetMetaIndexed extends SheetCommon {
   _gatherDataPrerequisites({
     skipFetchingProperties,
   }: GatherDataPrerequisitesProps = {}): void {
+    const startTableColIndex = this.schema.startTableColIndex;
     if (!skipFetchingProperties && !this.raw.primary.hasFetchedProperties) {
-      this.raw.primary.gatherFetchProperties();
+      this.raw.primary.gatherFetchProperties(startTableColIndex);
     }
-    // Skip if a prior prepFetchFull() on the columnId row already covers this identical fetch.
+    // Skip if a prior full-row fetch on the columnId row already covers this row.
     if (
       !this.raw.hasFetchedColumnIds &&
       !this.raw.primary.hasQueuedFullRowFetch(this.schema.colIdRowIndex)
     ) {
-      this.raw.gatherFetchColumnIds();
+      this.raw.gatherFetchColumnIdsInit(startTableColIndex);
     }
   }
   gatherFetchDataPrepped() {

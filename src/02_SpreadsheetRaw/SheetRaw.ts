@@ -166,11 +166,9 @@ export class SheetRaw extends SheetCommonRaw {
       {} as Record<HD, ColumnRaw>,
     );
   }
-  gatherFetchProperties(): this {
+  gatherFetchProperties(startTableColIndex: number): this {
     // The live start is unknown until this probe comes back, so aim the layout constant.
-    this.meta.headerRow
-      .cell(this.schema.startTableColIndex)
-      .gatherFetchRange();
+    this.meta.headerRow.cell(startTableColIndex).gatherFetchRange();
     return this;
   }
   hasQueuedFullRowFetch(rowIndex: number): boolean {
