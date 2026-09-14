@@ -10,17 +10,33 @@ A Google Sheets spreadsheet that a person operates directly, with an Apps Script
 The Google Table (Insert > Table) laid over a sheet's data. Every sheet the app knows about must have exactly one, and it must start on the Table header row, in the first column. Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet it knows, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
 _Avoid_: range, data range, grid
 
-**Table header row**:
-The row of column titles you read across the top of a sheet's data, directly above the first data row, and the row the Table starts on. The first data row is always the next row; that index is not stored separately. Three bookkeeping rows sit above it that you never edit by hand.
-_Avoid_: header row, title row, top row, row 1
+**Column ID row**:
+The bookkeeping row of generated column identifiers, above the other two bookkeeping rows. You never edit it by hand; the app fills a blank when a Table column has none.
+_Avoid_: ID row, metadata row, row 1
+
+**Column-group heading**:
+The bookkeeping row of group names, between the column ID row and the action row. You never edit it by hand.
+_Avoid_: group row, section header
 
 **Action row**:
 The row above the Table header row where an endpoint is triggered. Most of its cells are empty, and a cell may hold text used as a label. Only the cells wired to an endpoint hold a checkbox, and ticking one of those is what asks the spreadsheet to do something, one endpoint per column.
 _Avoid_: control row, button row, trigger row
 
+**Table header row**:
+The row of column titles you read across the top of a sheet's data, directly above the first data row, and the row the Table starts on. Three bookkeeping rows sit above it that you never edit by hand: the column ID row, the column-group heading, and the action row.
+_Avoid_: header row, title row, top row, row 1
+
+**First data row**:
+The first row of the Table's data, always the row immediately below the Table header row. That index is not stored separately.
+_Avoid_: data start, top data row, row 5
+
 **Blank row**:
 A data row with nothing in any of the columns you fill in yourself. It is what the app leaves when it deletes everything on a sheet: emptying the sheet completely would take the formulas, number formats, validation and colours with it, since a new row copies those from the rows already there. The formula cells still show whatever their formulas make of an empty row, so the row reads as a live row rather than a gap. The next row the app adds to that sheet goes into the blank row rather than beneath it, so it never sits stranded above your data.
 _Avoid_: empty row, placeholder row, spare row
+
+**ID prefix**:
+The short code on Sheet Config that every row ID and column ID on that sheet begins with. Two sheets must not share a non-empty one; a sheet that does not mint IDs may leave it blank.
+_Avoid_: sheet prefix, ID code
 
 ### Endpoints
 
