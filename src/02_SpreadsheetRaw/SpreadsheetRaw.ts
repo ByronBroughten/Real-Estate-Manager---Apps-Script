@@ -68,20 +68,16 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.rawState.allSheetPropertiesAreFetched) {
-      this._fetchAndIntegrateAllSheetProperties();
+      this.fetchAllSheetProperties();
     }
   }
   fetchAllSheetProperties() {
-    this._fetchAndIntegrateAllSheetProperties();
-    this._reportTablePlacement([], []);
-    return { activeSheetGids: this.activeSheetGids };
-  }
-  private _fetchAndIntegrateAllSheetProperties() {
     const data = this.sheetsService.Spreadsheets.get(this.spreadsheetId, {
       fields: "sheets(properties(sheetId,title),tables(tableId,range))",
     });
     this._addDataToState(data);
     this.rawState.allSheetPropertiesAreFetched = true;
+    return { activeSheetGids: this.activeSheetGids };
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
     // An empty dataFilters list would fetch the whole spreadsheet's grid data.
@@ -102,9 +98,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       const misplacedTable = this._misplacedTable(sheetGid);
       if (misplacedTable !== null) {
         misplacedTables.push(misplacedTable);
-        return;
-      }
-      if (state.hasExtraTables) {
         return;
       }
       const sheet = this.sheet(sheetGid);
@@ -174,14 +167,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     misplacedTables: MisplacedTable[],
     absentTables: SheetIdentity[],
   ): void {
-    const extraTables = this._sheetsWithExtraTables();
-    if (
-      misplacedTables.length === 0 &&
-      absentTables.length === 0 &&
-      extraTables.length === 0
-    ) {
-      return;
-    }
+    if (misplacedTables.length === 0 && absentTables.length === 0) return;
     if (absentTables.length > 0) {
       // The probe is built from the constants under test, so a moved Table looks absent.
       this.ensureAllSheetPropertiesAreFetched();
@@ -189,9 +175,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const allMisplaced = [...misplacedTables];
     const stillAbsent: SheetIdentity[] = [];
     absentTables.forEach((absentTable) => {
-      if (this.rawState.sheets.get(absentTable.sheetGid)?.hasExtraTables) {
-        return;
-      }
       const movedTable = this._misplacedTable(absentTable.sheetGid);
       if (movedTable === null) {
         stillAbsent.push(absentTable);
@@ -206,27 +189,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (stillAbsent.length > 0) {
       sentences.push(this._absentTableSentence(stillAbsent));
     }
-    const sheetsWithExtraTables = this._sheetsWithExtraTables();
-    if (sheetsWithExtraTables.length > 0) {
-      sentences.push(this._extraTablesSentence(sheetsWithExtraTables));
-    }
     throw new Error(sentences.join(" "));
-  }
-  private _sheetsWithExtraTables(): SheetIdentity[] {
-    const extraTables: SheetIdentity[] = [];
-    this.rawState.sheets.forEach((state, sheetGid) => {
-      if (!state.hasExtraTables || !this.schema.isInSheetGids(sheetGid)) {
-        return;
-      }
-      extraTables.push({ sheetGid });
-    });
-    return extraTables;
-  }
-  private _extraTablesSentence(extraTables: SheetIdentity[]): string {
-    const names = extraTables
-      .map((extraTable) => this._sheetLabel(extraTable))
-      .join(", ");
-    return `${extraTables.length} sheet(s) have more than one Table — delete the extras so each sheet has exactly one: ${names}`;
   }
   private _misplacedTableSentence(misplacedTables: MisplacedTable[]): string {
     const positions = misplacedTables

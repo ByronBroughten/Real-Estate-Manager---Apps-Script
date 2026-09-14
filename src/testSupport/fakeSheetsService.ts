@@ -81,12 +81,6 @@ export interface FakeSheetProperties {
      */
     columnDeclaredTypes?: Record<number, string>;
   };
-  extraTables?: readonly {
-    endRowIndex: number;
-    endColumnIndex?: number;
-    startRowIndex?: number;
-    startColumnIndex?: number;
-  }[]; // Extra Tables besides `table`; the filter hatch still withholds every Table.
   /**
    * Row indices that come back as a grid-data block describing every column
    * but carrying no `rowData` at all — the real API's shape, measured
@@ -270,26 +264,11 @@ function fakeTableColumnProperties(
   });
 }
 
-function fakeTableRange(
-  sheet: FakeSheetProperties,
-  table: NonNullable<FakeSheetProperties["table"]>,
-): GoogleAppsScript.Sheets.Schema.GridRange {
-  return {
-    startRowIndex: table.startRowIndex ?? ssConfigGet("headerRowIndexBase0"),
-    endRowIndex: table.endRowIndex,
-    startColumnIndex:
-      table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),
-    endColumnIndex:
-      table.endColumnIndex ??
-      Math.max(0, ...(sheet.rows ?? []).map((row) => row.length)),
-  };
-}
-
 function fakeSheetTables(
   sheet: FakeSheetProperties,
   isFilteredFetch: boolean,
 ): GoogleAppsScript.Sheets.Schema.Table[] | undefined {
-  const { table, extraTables = [] } = sheet;
+  const { table } = sheet;
   if (!table) {
     return undefined;
   }
@@ -299,13 +278,18 @@ function fakeSheetTables(
   return [
     {
       tableId: `fake-table-${sheet.sheetId}`,
-      range: fakeTableRange(sheet, table),
+      range: {
+        startRowIndex:
+          table.startRowIndex ?? ssConfigGet("headerRowIndexBase0"),
+        endRowIndex: table.endRowIndex,
+        startColumnIndex:
+          table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),
+        endColumnIndex:
+          table.endColumnIndex ??
+          Math.max(0, ...(sheet.rows ?? []).map((row) => row.length)),
+      },
       columnProperties: fakeTableColumnProperties(table),
     },
-    ...extraTables.map((extraTable, extraIndex) => ({
-      tableId: `fake-table-${sheet.sheetId}-extra-${extraIndex}`,
-      range: fakeTableRange(sheet, extraTable),
-    })),
   ];
 }
 
