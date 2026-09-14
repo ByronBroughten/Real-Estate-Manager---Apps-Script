@@ -3380,22 +3380,6 @@ export const columnConfigs = makeColumnConfigs({
       "emptyValueAllowed": false,
       "customDefaultValue": null
     },
-    "selectorEndpointSuffix": {
-      "columnId": "c:sscf:YODUzqy",
-      "header": "Selector endpoint suffix",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    },
-    "runnerEndpointSuffix": {
-      "columnId": "c:sscf:1nbfnw6",
-      "header": "Runner endpoint suffix",
-      "valueName": "string",
-      "isFormula": false,
-      "emptyValueAllowed": false,
-      "customDefaultValue": null
-    }
   },
   "spreadsheetControls": {
     "fillRowIdsRunStatus": {
