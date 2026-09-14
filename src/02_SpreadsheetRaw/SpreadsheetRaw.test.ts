@@ -358,6 +358,25 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     expect(message).toMatch(/does not start where the layout requires.*"Unit"/);
   });
 
+  it("reports extra Tables the filtered fetch could not see as extras rather than absent", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          ...extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
+          isTableHiddenFromFilteredFetch: true,
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
+
+    const message = thrownMessage(() => raw.fetchAllGathered());
+    expect(message).toMatch(/more than one Table.*"Property"/);
+    expect(message).not.toMatch(/Insert > Table/);
+  });
+
   it("sends no request when no ranges were gathered, since empty dataFilters would fetch the whole spreadsheet", () => {
     const { getByDataFilterCalls } = stubSheetsService({
       sheets: [

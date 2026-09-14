@@ -39,7 +39,7 @@ import { Str } from "../utils/Str";
 
 const uniformRowIndexes = {
   columnId: ssConfigGet("columnIdRowIdxBase0"),
-  colGroupName: ssConfigGet("columnGroupRowIdxBase0"),
+  colGroupName: ssConfigGet("columnGroupHeadingRowIndexBase0"),
   action: ssConfigGet("actionRowIndexBase0"),
   header: ssConfigGet("headerRowIndexBase0"),
 };

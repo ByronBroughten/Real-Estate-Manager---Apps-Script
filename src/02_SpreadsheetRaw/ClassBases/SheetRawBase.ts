@@ -34,6 +34,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
       this.rawState.sheets.set(this.sheetGid, {
         title: null,
         activeTable: null,
+        hasExtraTables: false,
         rowIndexesAreValid: true,
         cellStateIsStale: false,
         hasFetchedColumnIds: false,
@@ -53,24 +54,34 @@ export class SheetRawBase extends SpreadsheetRawBase {
       this.sheetState.title = sheet.properties.title;
     }
     const tables = sheet.tables;
-    if (tables && tables.length > 0) {
-      const table = Val.assert(tables[0], "table");
-      const range = Obj.validatePick(
-        table.range,
-        "number",
-        "startRowIndex",
-        "endRowIndex",
-        "startColumnIndex",
-        "endColumnIndex",
-      );
-      this.sheetState.activeTable = {
-        tableId: Val.assert(table.tableId, "tableId"),
-        ...range,
-        ...this._parseColumnProperties(
-          table.columnProperties,
-          range.startColumnIndex,
-        ),
-      };
+    if (!tables) {
+      return;
+    }
+    if (tables.length > 1) {
+      this.sheetState.hasExtraTables = true;
+      this.sheetState.activeTable = null;
+      return;
+    }
+    this.sheetState.hasExtraTables = false;
+    if (tables.length === 0) {
+      return;
+    }
+    const table = Val.assert(tables[0], "table");
+    const range = Obj.validatePick(
+      table.range,
+      "number",
+      "startRowIndex",
+      "endRowIndex",
+      "startColumnIndex",
+      "endColumnIndex",
+    );
+    this.sheetState.activeTable = {
+      tableId: Val.assert(table.tableId, "tableId"),
+      ...range,
+      ...this._parseColumnProperties(
+        table.columnProperties,
+        range.startColumnIndex,
+      ),
     }
   }
   private _parseColumnProperties(
