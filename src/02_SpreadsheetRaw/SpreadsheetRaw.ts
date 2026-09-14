@@ -21,6 +21,15 @@ interface MisplacedTable extends SheetIdentity {
   startRowIndex: number;
   startColumnIndex: number;
 }
+interface TablePlacementObservations {
+  misplacedTables: MisplacedTable[];
+  absentTables: SheetIdentity[];
+}
+type TablePlacement =
+  | { kind: "extra" }
+  | (MisplacedTable & { kind: "misplaced" })
+  | { kind: "none" }
+  | { kind: "well-placed" };
 
 /**
  * Spreadsheet-level Raw: GID+index fetch and the two Sheets chokepoints
@@ -73,7 +82,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   fetchAllSheetProperties() {
     this._fetchAndIntegrateAllSheetProperties();
-    this._reportTablePlacement([], []);
+    this._reportTablePlacement({ misplacedTables: [], absentTables: [] });
     return { activeSheetGids: this.activeSheetGids };
   }
   private _fetchAndIntegrateAllSheetProperties() {
@@ -91,6 +100,25 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this._finalizeGatheredFetches();
     this.rawState.fetcherGridRanges = [];
   }
+  // A sheet outside the config never promised to follow the layout.
+  private _tablePlacement(sheetGid: number): TablePlacement {
+    const state = this.rawState.sheets.get(sheetGid);
+    if (!state) {
+      return { kind: "none" };
+    }
+    if (state.hasExtraTables) {
+      return { kind: "extra" };
+    }
+    const table = state.activeTable;
+    if (!table || !this.schema.isInSheetGids(sheetGid)) {
+      return { kind: "none" };
+    }
+    const { startRowIndex, startColumnIndex } = table;
+    if (this.schema.isTableStart(startRowIndex, startColumnIndex)) {
+      return { kind: "well-placed" };
+    }
+    return { kind: "misplaced", sheetGid, startRowIndex, startColumnIndex };
+  }
   // Backfills cells for every range fetched this cycle so a Sheets
   // response that omits empty cells (or whole blank rows) never leaves
   // them looking merely "not yet fetched" to callers.
@@ -99,12 +127,12 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const absentTables: SheetIdentity[] = [];
     this.rawState.sheets.forEach((state, sheetGid) => {
       // Above the early return, so a range that arrived incidentally is still judged.
-      const misplacedTable = this._misplacedTable(sheetGid);
-      if (misplacedTable !== null) {
-        misplacedTables.push(misplacedTable);
+      const placement = this._tablePlacement(sheetGid);
+      if (placement.kind === "extra") {
         return;
       }
-      if (state.hasExtraTables) {
+      if (placement.kind === "misplaced") {
+        misplacedTables.push(placement);
         return;
       }
       const sheet = this.sheet(sheetGid);
@@ -132,7 +160,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       state.rowIndexesToFinalize.clear();
       state.colIndexesToFinalize.clear();
     });
-    this._reportTablePlacement(misplacedTables, absentTables);
+    this._reportTablePlacement({ misplacedTables, absentTables });
   }
   private _finalizeFetchedCells(sheet: SheetRaw, state: RawSheetState): void {
     state.cellsToFinalize.forEach((colIndexes, rowIndex) => {
@@ -157,60 +185,56 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       sheet.meta.column(colIndex).ensureActiveFacts();
     });
   }
-  // A sheet outside the config never promised to follow the layout.
-  private _misplacedTable(sheetGid: number): MisplacedTable | null {
-    const state = this.rawState.sheets.get(sheetGid);
-    const table = state?.activeTable;
-    if (!state || !table || !this.schema.isInSheetGids(sheetGid)) {
-      return null;
-    }
-    const { startRowIndex, startColumnIndex } = table;
-    if (this.schema.isTableStart(startRowIndex, startColumnIndex)) {
-      return null;
-    }
-    return { sheetGid, startRowIndex, startColumnIndex };
-  }
-  private _reportTablePlacement(
-    misplacedTables: MisplacedTable[],
-    absentTables: SheetIdentity[],
-  ): void {
-    const extraTables = this._sheetsWithExtraTables();
-    if (
-      misplacedTables.length === 0 &&
-      absentTables.length === 0 &&
-      extraTables.length === 0
-    ) {
-      return;
-    }
+  private _reportTablePlacement({
+    misplacedTables,
+    absentTables,
+  }: TablePlacementObservations): void {
     if (absentTables.length > 0) {
       // The probe is built from the constants under test, so a moved Table looks absent.
       this.ensureAllSheetPropertiesAreFetched();
     }
-    const allMisplaced = [...misplacedTables];
-    const stillAbsent: SheetIdentity[] = [];
-    absentTables.forEach((absentTable) => {
-      if (this.rawState.sheets.get(absentTable.sheetGid)?.hasExtraTables) {
-        return;
-      }
-      const movedTable = this._misplacedTable(absentTable.sheetGid);
-      if (movedTable === null) {
-        stillAbsent.push(absentTable);
-      } else {
-        allMisplaced.push(movedTable);
-      }
+    const reclassified = this._reclassifyAbsentTables({
+      misplacedTables,
+      absentTables,
     });
+    const extraTables = this._sheetsWithExtraTables();
+    if (
+      reclassified.misplacedTables.length === 0 &&
+      reclassified.absentTables.length === 0 &&
+      extraTables.length === 0
+    ) {
+      return;
+    }
     const sentences: string[] = [];
-    if (allMisplaced.length > 0) {
-      sentences.push(this._misplacedTableSentence(allMisplaced));
+    if (reclassified.misplacedTables.length > 0) {
+      sentences.push(this._misplacedTableSentence(reclassified.misplacedTables));
     }
-    if (stillAbsent.length > 0) {
-      sentences.push(this._absentTableSentence(stillAbsent));
+    if (reclassified.absentTables.length > 0) {
+      sentences.push(this._absentTableSentence(reclassified.absentTables));
     }
-    const sheetsWithExtraTables = this._sheetsWithExtraTables();
-    if (sheetsWithExtraTables.length > 0) {
-      sentences.push(this._extraTablesSentence(sheetsWithExtraTables));
+    if (extraTables.length > 0) {
+      sentences.push(this._extraTablesSentence(extraTables));
     }
     throw new Error(sentences.join(" "));
+  }
+  private _reclassifyAbsentTables({
+    misplacedTables,
+    absentTables,
+  }: TablePlacementObservations): TablePlacementObservations {
+    const stillMisplaced = [...misplacedTables];
+    const stillAbsent: SheetIdentity[] = [];
+    absentTables.forEach((absentTable) => {
+      const placement = this._tablePlacement(absentTable.sheetGid);
+      if (placement.kind === "extra") {
+        return;
+      }
+      if (placement.kind === "misplaced") {
+        stillMisplaced.push(placement);
+        return;
+      }
+      stillAbsent.push(absentTable);
+    });
+    return { misplacedTables: stillMisplaced, absentTables: stillAbsent };
   }
   private _sheetsWithExtraTables(): SheetIdentity[] {
     const extraTables: SheetIdentity[] = [];
