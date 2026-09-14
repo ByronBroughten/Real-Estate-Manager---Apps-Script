@@ -153,7 +153,7 @@ export class SheetRaw extends SheetCommonRaw {
   columnByHeader<VN extends CellValueName = CellValueName>(
     header: string,
   ): ColumnRaw<VN> {
-    return this.column<VN>(this.meta.headerRow.colIndexOfValue(header));
+    return this.column<VN>(this.meta.tableHeaderRow.colIndexOfValue(header));
   }
   gatherFetchDataColumnsUsingHeaders<HD extends string>(
     ...headers: HD[]
@@ -168,7 +168,7 @@ export class SheetRaw extends SheetCommonRaw {
   }
   gatherFetchProperties(startTableColIndex: number): this {
     // The live start is unknown until this probe comes back, so aim the layout constant.
-    this.meta.headerRow.cell(startTableColIndex).gatherFetchRange();
+    this.meta.tableHeaderRow.cell(startTableColIndex).gatherFetchRange();
     return this;
   }
   hasQueuedFullRowFetch(rowIndex: number): boolean {

@@ -43,7 +43,7 @@ function getUniformRowIndexes(): Record<UniformRowName, number> {
     columnId: ssConfigGet("columnIdRowIdxBase0"),
     colGroupName: ssConfigGet("columnGroupHeadingRowIndexBase0"),
     action: ssConfigGet("actionRowIndexBase0"),
-    header: ssConfigGet("headerRowIndexBase0"),
+    tableHeader: ssConfigGet("tableHeaderRowIndexBase0"),
   };
 }
 export function getUniformRowIndex(name: UniformRowName): number {
@@ -128,7 +128,7 @@ export class SpreadsheetSchema {
   }
   isTableStart(startRowIndex: number, startColumnIndex: number): boolean {
     return (
-      startRowIndex === this.headerRowIndex &&
+      startRowIndex === this.tableHeaderRowIndex &&
       startColumnIndex === this.startTableColIndex
     );
   }
@@ -143,7 +143,7 @@ export class SpreadsheetSchema {
     }
   }
   get tableStartLabel(): string {
-    return this.positionLabel(this.headerRowIndex, this.startTableColIndex);
+    return this.positionLabel(this.tableHeaderRowIndex, this.startTableColIndex);
   }
   positionLabel(rowIndex: number, colIndex: number): string {
     return `row ${rowIndex + 1}, column ${this._columnLetter(colIndex)}`;
@@ -166,14 +166,14 @@ export class SpreadsheetSchema {
   get colIdRowIndex(): number {
     return getUniformRowIndexes().columnId;
   }
-  get headerRowIndex(): number {
-    return getUniformRowIndexes().header;
+  get tableHeaderRowIndex(): number {
+    return getUniformRowIndexes().tableHeader;
   }
   get actionRowIndex(): number {
     return getUniformRowIndexes().action;
   }
   get topDataRowIdx(): number {
-    return this.ssConfig("topDataRowIdxBase0");
+    return this.tableHeaderRowIndex + 1;
   }
   get idDelimiter(): string {
     return this.ssConfig("idDelimiter");

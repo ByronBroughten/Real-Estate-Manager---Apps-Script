@@ -33,7 +33,7 @@ export interface RawSheetState {
   activeTable:
     | ({
         tableId: string;
-        startRowIndex: number; // headerRowIndex
+        startRowIndex: number; // tableHeaderRowIndex
         endRowIndex: number; // lastRowIndex + 1
         startColumnIndex: number;
         endColumnIndex: number; // lastColumnIndex + 1

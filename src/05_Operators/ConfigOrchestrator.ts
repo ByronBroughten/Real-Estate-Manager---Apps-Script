@@ -81,6 +81,7 @@ export class ConfigOrchestrator extends SpreadsheetNamedBase {
   }
   private _syncConfigSheetRows(): string | undefined {
     this.ss.fetchAllSheetProperties();
+    this.spreadsheetConfigOperator.validateExactlyOneDataRow();
     this.sheetConfigOperator.prepFetchForSync();
     this.columnConfigOperator.prepFetchWithSheetConfig();
     this.ss.fetchAllPrepped({ skipFetchingProperties: true });

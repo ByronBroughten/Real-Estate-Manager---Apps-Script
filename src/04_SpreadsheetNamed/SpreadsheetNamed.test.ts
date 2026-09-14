@@ -72,7 +72,7 @@ describe("SpreadsheetNamed navigation", () => {
   });
 });
 
-const TOP_DATA_ROW_INDEX = ssConfigGet("topDataRowIdxBase0");
+const TOP_DATA_ROW_INDEX = ssConfigGet("tableHeaderRowIndexBase0") + 1;
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
 const SELECT_COLUMN_ID = columnConfigs.occupancy.updateTermsSelect.columnId;

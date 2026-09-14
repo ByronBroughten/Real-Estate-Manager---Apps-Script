@@ -169,10 +169,10 @@ export class SpreadsheetNamed extends SpreadsheetNamedBase {
         column.cell(schema.colIdRowIndex).prepFetch();
         break;
       case "headers":
-        column.cell(schema.headerRowIndex).prepFetch();
+        column.cell(schema.tableHeaderRowIndex).prepFetch();
         break;
       case "all":
-        column.cell(schema.headerRowIndex).prepFetch();
+        column.cell(schema.tableHeaderRowIndex).prepFetch();
         column.cell(schema.actionRowIndex).prepFetch();
         column.cell(schema.colIdRowIndex).prepFetch();
         column.prepFetchFull();

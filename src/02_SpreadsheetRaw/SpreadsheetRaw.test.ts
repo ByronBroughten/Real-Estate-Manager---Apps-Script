@@ -24,12 +24,12 @@ const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
 
 const PROPERTY_GID = getSheetTraitByName("property", "sheetGid");
 const UNIT_GID = getSheetTraitByName("unit", "sheetGid");
-const HEADER_ROW_INDEX = ssConfigGet("headerRowIndexBase0");
+const TABLE_HEADER_ROW_INDEX = ssConfigGet("tableHeaderRowIndexBase0");
 const COL_ID_ROW_INDEX = ssConfigGet("columnIdRowIdxBase0");
 const START_TABLE_COL_INDEX = ssConfigGet("startTableColIndexBase0");
-const TOP_DATA_ROW_INDEX = ssConfigGet("topDataRowIdxBase0");
+const TOP_DATA_ROW_INDEX = TABLE_HEADER_ROW_INDEX + 1;
 const SCRATCH_GID = 999999;
-const TABLE_END_ROW_INDEX = HEADER_ROW_INDEX + 3;
+const TABLE_END_ROW_INDEX = TABLE_HEADER_ROW_INDEX + 3;
 
 function placedTableSheet(sheet: {
   sheetId: number;
@@ -37,13 +37,13 @@ function placedTableSheet(sheet: {
 }): FakeSheetProperties {
   return {
     ...sheet,
-    rows: buildGridRows({ [HEADER_ROW_INDEX]: ["ID"] }),
+    rows: buildGridRows({ [TABLE_HEADER_ROW_INDEX]: ["ID"] }),
     table: { endRowIndex: TABLE_END_ROW_INDEX },
   };
 }
 
 function misplacedTableSheet({
-  startRowIndex = HEADER_ROW_INDEX,
+  startRowIndex = TABLE_HEADER_ROW_INDEX,
   startColumnIndex = START_TABLE_COL_INDEX,
   ...sheet
 }: {
@@ -70,8 +70,8 @@ function extraTablesSheet(sheet: {
     ...placedTableSheet(sheet),
     extraTables: [
       {
-        startRowIndex: HEADER_ROW_INDEX + 10,
-        endRowIndex: HEADER_ROW_INDEX + 12,
+        startRowIndex: TABLE_HEADER_ROW_INDEX + 10,
+        endRowIndex: TABLE_HEADER_ROW_INDEX + 12,
       },
     ],
   };
@@ -177,7 +177,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
         misplacedTableSheet({
           sheetId: PROPERTY_GID,
           title: "Property",
-          startRowIndex: HEADER_ROW_INDEX - 1,
+          startRowIndex: TABLE_HEADER_ROW_INDEX - 1,
         }),
       ],
     });
@@ -215,7 +215,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
         misplacedTableSheet({
           sheetId: SCRATCH_GID,
           title: "Byron's Scratch Sheet",
-          startRowIndex: HEADER_ROW_INDEX - 1,
+          startRowIndex: TABLE_HEADER_ROW_INDEX - 1,
         }),
       ],
     });
@@ -232,7 +232,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
         misplacedTableSheet({
           sheetId: PROPERTY_GID,
           title: "Property",
-          startRowIndex: HEADER_ROW_INDEX - 1,
+          startRowIndex: TABLE_HEADER_ROW_INDEX - 1,
         }),
         misplacedTableSheet({
           sheetId: UNIT_GID,
@@ -255,7 +255,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
           ...misplacedTableSheet({
             sheetId: PROPERTY_GID,
             title: "Property",
-            startRowIndex: HEADER_ROW_INDEX + 2,
+            startRowIndex: TABLE_HEADER_ROW_INDEX + 2,
           }),
           isTableHiddenFromFilteredFetch: true,
         },
@@ -344,7 +344,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
         misplacedTableSheet({
           sheetId: UNIT_GID,
           title: "Unit",
-          startRowIndex: HEADER_ROW_INDEX - 1,
+          startRowIndex: TABLE_HEADER_ROW_INDEX - 1,
         }),
       ],
     });
@@ -408,8 +408,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
       {
         sheetId: PROPERTY_GID,
-        startRowIndex: HEADER_ROW_INDEX,
-        endRowIndex: HEADER_ROW_INDEX + 1,
+        startRowIndex: TABLE_HEADER_ROW_INDEX,
+        endRowIndex: TABLE_HEADER_ROW_INDEX + 1,
         startColumnIndex: START_TABLE_COL_INDEX,
         endColumnIndex: START_TABLE_COL_INDEX + 1,
       },
@@ -489,7 +489,7 @@ describe("ColumnMetaRaw active facts", () => {
           title: "Property",
           rows: buildGridRows({
             0: ["c:prp:aaa", "c:prp:bbb"],
-            [HEADER_ROW_INDEX]: ["Purchase Price", "Notes"],
+            [TABLE_HEADER_ROW_INDEX]: ["Purchase Price", "Notes"],
             [TOP_DATA_ROW_INDEX]: topDataRow,
           }),
           ...(absence ? { [absence]: [TOP_DATA_ROW_INDEX] } : {}),
@@ -574,7 +574,7 @@ describe("ColumnMetaRaw active facts", () => {
         {
           sheetId: PROPERTY_GID,
           title: "Property",
-          rows: buildGridRows({ [HEADER_ROW_INDEX]: ["Purchase Price"] }),
+          rows: buildGridRows({ [TABLE_HEADER_ROW_INDEX]: ["Purchase Price"] }),
           table: { endRowIndex: TABLE_END_ROW },
         },
       ],
@@ -599,7 +599,7 @@ describe("ColumnMetaRaw active facts", () => {
           title: "Property",
           rows: buildGridRows({
             0: ["c:prp:aaa"],
-            [HEADER_ROW_INDEX]: ["Purchase Price"],
+            [TABLE_HEADER_ROW_INDEX]: ["Purchase Price"],
             [TOP_DATA_ROW_INDEX]: [100000, "outside the table"],
           }),
           table: { endRowIndex: TABLE_END_ROW, endColumnIndex: 1 },

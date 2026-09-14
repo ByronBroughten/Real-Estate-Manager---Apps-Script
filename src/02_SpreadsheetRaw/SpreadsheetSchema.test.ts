@@ -92,7 +92,7 @@ describe("SpreadsheetSchema", () => {
       expect(schema.isUniformRowIndex(schema.colIdRowIndex, "columnId")).toBe(
         true,
       );
-      expect(schema.isUniformRowIndex(schema.colIdRowIndex, "header")).toBe(
+      expect(schema.isUniformRowIndex(schema.colIdRowIndex, "tableHeader")).toBe(
         false,
       );
       expect(schema.isUniformRowIndex(9999)).toBe(false);
@@ -102,8 +102,8 @@ describe("SpreadsheetSchema", () => {
       expect(schema.uniformRowNameByIndex(schema.colIdRowIndex)).toBe(
         "columnId",
       );
-      expect(schema.uniformRowNameByIndex(schema.headerRowIndex)).toBe(
-        "header",
+      expect(schema.uniformRowNameByIndex(schema.tableHeaderRowIndex)).toBe(
+        "tableHeader",
       );
     });
 
@@ -113,33 +113,33 @@ describe("SpreadsheetSchema", () => {
 
     it("validateUniformRowIndex only throws for non-uniform rows", () => {
       expect(() =>
-        schema.validateUniformRowIndex(schema.headerRowIndex, "header"),
+        schema.validateUniformRowIndex(schema.tableHeaderRowIndex, "tableHeader"),
       ).not.toThrow();
       expect(() => schema.validateUniformRowIndex(9999)).toThrow();
     });
   });
 
   describe("table placement", () => {
-    it("accepts only the configured header row and start column as a Table's start", () => {
-      const { headerRowIndex, startTableColIndex } = schema;
-      expect(schema.isTableStart(headerRowIndex, startTableColIndex)).toBe(
+    it("accepts only the configured Table header row and start column as a Table's start", () => {
+      const { tableHeaderRowIndex, startTableColIndex } = schema;
+      expect(schema.isTableStart(tableHeaderRowIndex, startTableColIndex)).toBe(
         true,
       );
-      expect(schema.isTableStart(headerRowIndex - 1, startTableColIndex)).toBe(
+      expect(schema.isTableStart(tableHeaderRowIndex - 1, startTableColIndex)).toBe(
         false,
       );
-      expect(schema.isTableStart(headerRowIndex, startTableColIndex + 1)).toBe(
+      expect(schema.isTableStart(tableHeaderRowIndex, startTableColIndex + 1)).toBe(
         false,
       );
     });
 
     it("validateTableStart only throws for a start the layout does not allow", () => {
-      const { headerRowIndex, startTableColIndex } = schema;
+      const { tableHeaderRowIndex, startTableColIndex } = schema;
       expect(() =>
-        schema.validateTableStart(headerRowIndex, startTableColIndex),
+        schema.validateTableStart(tableHeaderRowIndex, startTableColIndex),
       ).not.toThrow();
       expect(() =>
-        schema.validateTableStart(headerRowIndex - 1, startTableColIndex),
+        schema.validateTableStart(tableHeaderRowIndex - 1, startTableColIndex),
       ).toThrowError(/row 3, column A.*row 4, column A/);
     });
 
@@ -151,10 +151,11 @@ describe("SpreadsheetSchema", () => {
   });
 
   describe("isDataRowIndex", () => {
-    it("is false above the header row and true at/after the top data row", () => {
+    it("is false above the Table header row and true at/after the first data row", () => {
       const topDataRowIdx = schema.topDataRowIdx;
       expect(schema.isDataRowIndex(topDataRowIdx - 1)).toBe(false);
       expect(schema.isDataRowIndex(topDataRowIdx)).toBe(true);
+      expect(schema.topDataRowIdx).toBe(schema.tableHeaderRowIndex + 1);
     });
   });
 
@@ -173,7 +174,7 @@ describe("SpreadsheetSchema", () => {
       expect(schema.startTableColIndex).toBe(0);
       expect(schema.colIdRowIndex).toBe(0);
       expect(schema.actionRowIndex).toBe(2);
-      expect(schema.headerRowIndex).toBe(3);
+      expect(schema.tableHeaderRowIndex).toBe(3);
       expect(schema.topDataRowIdx).toBe(4);
     });
   });
