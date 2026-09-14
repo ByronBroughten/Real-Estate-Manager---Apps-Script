@@ -167,15 +167,10 @@ export class SheetRaw extends SheetCommonRaw {
     );
   }
   gatherFetchProperties(): this {
-    // getByDataFilter only returns a sheet's `tables` for a filter that
-    // overlaps the table. Aim the cheapest overlapping cell at the layout
-    // start — the live start is unknown until this probe comes back.
-    this.gatherFetchRange({
-      startRowIndex: this.schema.headerRowIndex,
-      endRowIndex: this.schema.headerRowIndex + 1,
-      startColumnIndex: this.schema.startTableColIndex,
-      endColumnIndex: this.schema.startTableColIndex + 1,
-    });
+    // The live start is unknown until this probe comes back, so aim the layout constant.
+    this.meta.headerRow
+      .cell(this.schema.startTableColIndex)
+      .gatherFetchRange();
     return this;
   }
   hasQueuedFullRowFetch(rowIndex: number): boolean {

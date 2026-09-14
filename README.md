@@ -80,7 +80,7 @@ If you're renaming or relocating something and unsure which word applies, ask ra
 
 ## Generated data — do not hand-edit
 
-**Never read `columnConfigs.ts` whole** (~5k lines). `sheetConfigs.ts` is the sheet list — one labeled sheet record per line. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only: the key opens a multi-line block, and each column config is one labeled line inside it.
+**Never read `columnConfigs.ts` whole** (~5k lines). `sheetConfigs.ts` is the sheet list. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only.
 
 Regeneration, the config-sheet floor, and how `valueName` is declared vs sampled: [`docs/generated-data.md`](./docs/generated-data.md).
 
@@ -91,5 +91,4 @@ Vitest, always safe: `npm test`. Co-located `Foo.test.ts`. Fakes, exemplars, and
 ## Known rough edges
 
 - **The properties probe is blind to a Table that moved down or right.** On the trigger path, a sheet's table metadata arrives only because `SheetRaw.gatherFetchProperties` requests the single cell at the configured header row and start column, and the Sheets API returns a sheet's `tables` only for a filter whose range overlaps the table. That probe is the only production fetch that aims at the layout constant; later row fetches use the live Table start once `tables.range` is in state. A table that moved down or right still returns no metadata and looks identical to a table that was never created. That is why `SpreadsheetRaw`'s placement reporter pays for one full sheet-properties read before throwing, to tell "no Table here" from "Table somewhere else" — only on a path that is already aborting (#9).
-- **The same probe is blind to a second Table that does not overlap that cell.** Extra Tables are judged from what the payload returned, so a successful trigger does not pay a census round trip to find them. `fetchAllSheetProperties` will see them. If the trigger did not see the extra Table, that is this limit, not a bug in the check (#28).
 - **Table column properties are keyed absolutely but read table-relatively.** `SheetRawBase._parseColumnProperties` stores `columnValidationValues` and `columnDeclaredTypes` by absolute column index, falling back to `startColumnIndex + offset` when the API omits `columnIndex`. The API states that index table-relative, so the two branches agree only while the table starts at column 0. Nothing is wrong today because it always does, but a table starting elsewhere would silently mis-key every declared column type.

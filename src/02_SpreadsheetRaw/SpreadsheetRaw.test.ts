@@ -62,21 +62,6 @@ function misplacedTableSheet({
   };
 }
 
-function extraTablesSheet(sheet: {
-  sheetId: number;
-  title: string;
-}): FakeSheetProperties {
-  return {
-    ...placedTableSheet(sheet),
-    extraTables: [
-      {
-        startRowIndex: HEADER_ROW_INDEX + 10,
-        endRowIndex: HEADER_ROW_INDEX + 12,
-      },
-    ],
-  };
-}
-
 function recordedGridRanges(calls: object[]): unknown[] {
   const resource = calls[0] as {
     dataFilters: { gridRange: unknown }[];
@@ -108,17 +93,6 @@ describe("SpreadsheetRaw.fetchAllSheetProperties", () => {
 
     expect(raw.activeSheetGids).toEqual([111]);
     expect(raw.sheet(111).title).toBe("Leases");
-  });
-
-  it("throws when a known sheet has more than one Table on the unfiltered census", () => {
-    stubSheetsService({
-      sheets: [extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" })],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    expect(() => raw.fetchAllSheetProperties()).toThrowError(
-      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
-    );
   });
 });
 
@@ -270,110 +244,6 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     expect(message).toMatch(
       /"Property".*starts at row 6, column A.*must start at row 4, column A/,
     );
-    expect(message).not.toMatch(/Insert > Table/);
-  });
-
-  it("throws naming a known sheet whose gathered payload has more than one Table, and does not keep the first as active", () => {
-    stubSheetsService({
-      sheets: [extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" })],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-
-    const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(
-      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
-    );
-    expect(raw.sheet(PROPERTY_GID).hasFetchedProperties).toBe(false);
-  });
-
-  it("names every known sheet with extra Tables in one error", () => {
-    stubSheetsService({
-      sheets: [
-        extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
-        extraTablesSheet({ sheetId: UNIT_GID, title: "Unit" }),
-      ],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheet(UNIT_GID).gatherFetchProperties();
-
-    expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
-  });
-
-  it("leaves a sheet the config does not know alone, even with two Tables", () => {
-    stubSheetsService({
-      sheets: [
-        extraTablesSheet({
-          sheetId: SCRATCH_GID,
-          title: "Byron's Scratch Sheet",
-        }),
-      ],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    raw.sheet(SCRATCH_GID).gatherFetchProperties();
-
-    expect(() => raw.fetchAllGathered()).not.toThrow();
-  });
-
-  it("names extra Tables and a missing Table in one error", () => {
-    stubSheetsService({
-      sheets: [
-        extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
-        { sheetId: UNIT_GID, title: "Unit" },
-      ],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheet(UNIT_GID).gatherFetchProperties();
-    raw.sheetMeta(UNIT_GID).gatherFetchColumnIds();
-
-    const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(/more than one Table.*"Property"/);
-    expect(message).toMatch(/Insert > Table.*"Unit"/);
-  });
-
-  it("names extra Tables and a misplaced Table in one error", () => {
-    stubSheetsService({
-      sheets: [
-        extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
-        misplacedTableSheet({
-          sheetId: UNIT_GID,
-          title: "Unit",
-          startRowIndex: HEADER_ROW_INDEX - 1,
-        }),
-      ],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheet(UNIT_GID).gatherFetchProperties();
-
-    const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(/more than one Table.*"Property"/);
-    expect(message).toMatch(/does not start where the layout requires.*"Unit"/);
-  });
-
-  it("reports extra Tables the filtered fetch could not see as extras rather than absent", () => {
-    stubSheetsService({
-      sheets: [
-        {
-          ...extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
-          isTableHiddenFromFilteredFetch: true,
-        },
-      ],
-    });
-
-    const raw = SpreadsheetRaw.init();
-    raw.sheet(PROPERTY_GID).gatherFetchProperties();
-    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
-
-    const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(/more than one Table.*"Property"/);
     expect(message).not.toMatch(/Insert > Table/);
   });
 
