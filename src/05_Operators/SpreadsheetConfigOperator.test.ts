@@ -187,4 +187,26 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
       /Spreadsheet Config/,
     );
   });
+
+  it("throws when two uniform-row indexes share a number", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: [":", "ID", 1, 1, 2, 1, 4],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Column ID row index base 1.*Action row index base 1/,
+    );
+  });
+
+  it("throws when a uniform-row index lands on the first data row", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: [":", "ID", 1, 5, 2, 3, 4],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      /Column ID row index base 1.*first data row/,
+    );
+  });
 });

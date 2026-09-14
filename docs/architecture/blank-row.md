@@ -3,7 +3,7 @@
 Map fragment. Sibling headings live in this folder.
 
 
-**The invariant: a delete that would take a sheet's data rows to zero clears that row in place instead.** A Sheets table recovers a new row's formulas, number formats, validation and colours from the rows it already has, so a sheet emptied completely loses all of them for every row added afterwards. The surviving row is the **blank row** — see [`CONTEXT.md`](../../CONTEXT.md) for the operator-facing word. The rule is last-one-standing rather than positional: deleting a row while other data rows survive stays an ordinary delete.
+**The invariant: a delete that would take a sheet's data rows to zero clears that row in place instead.** A Sheets table recovers a new row's formulas, number formats, validation and colours from the rows it already has, so a sheet emptied completely loses all of them for every row added afterwards. The surviving row is the **blank row** — see [`CONTEXT.md`](../../CONTEXT.md) for the operator-facing word. The rule is last-one-standing rather than positional: deleting a row while other data rows survive stays an ordinary delete. Reading the active Table is the read-side twin: if the Table's exclusive end row is not strictly past the first data row, the sheet has no data row at all and the read throws, naming the tab. A legal Table whose only data row is the blank row still has an extent of one.
 
 The tiers split the rule between enforcing it and upholding it:
 

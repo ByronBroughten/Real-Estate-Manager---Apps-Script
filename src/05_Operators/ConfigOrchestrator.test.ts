@@ -120,7 +120,7 @@ function seedFixture(
             cc.customDefaultValue.columnId,
           ],
         }),
-        table: { endRowIndex: 4 },
+        table: { endRowIndex: 5 },
       },
       {
         sheetId: TEST_SHEET_GID,

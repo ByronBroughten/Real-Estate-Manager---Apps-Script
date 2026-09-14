@@ -18,6 +18,7 @@ const sc = columnConfigs.sheetConfig;
 const SHEET_CONFIG_GID = 210603630;
 const PROPERTY_GID = 999001;
 const NEW_SHEET_GID = 999002;
+const UNIT_GID = 999003;
 
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
@@ -83,14 +84,14 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: PROPERTY_GID,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
         // Present in the spreadsheet but with NO existing Sheet Config row.
         {
           sheetId: NEW_SHEET_GID,
           title: "Brand New Sheet",
           rows: buildGridRows({ 3: [] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -131,7 +132,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: NEW_SHEET_GID,
           title: "Brand New Sheet",
           rows: buildGridRows({ 3: [] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -162,7 +163,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: PROPERTY_GID,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -215,7 +216,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: PROPERTY_GID,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -246,7 +247,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: PROPERTY_GID,
           title: "Property",
           rows: buildGridRows({ 3: ["Name"] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -275,7 +276,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           sheetId: PROPERTY_GID,
           title: "Property",
           rows: buildGridRows({ 3: ["ID", "Name"] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -285,5 +286,39 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(operator.sheet.column("hasIdColumn").value(4)).toBe(false);
     expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(true);
+  });
+
+  it("throws when two sheets share a non-empty ID prefix, named by sheet title", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", false, true, "prp"],
+            5: [UNIT_GID, "Unit", false, true, "prp"],
+          }),
+          table: { endRowIndex: 6 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: UNIT_GID,
+          title: "Unit",
+          rows: buildGridRows({ 3: [] }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+    syncSheetConfigOperator(operator);
+
+    expect(() => operator.toFileSource()).toThrow(/Property.*Unit.*"prp"/);
   });
 });
