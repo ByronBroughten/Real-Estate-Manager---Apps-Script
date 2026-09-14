@@ -88,6 +88,58 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
   return columnConfigOperator;
 }
 
+function stubGroupedColumnConfigSheets(): void {
+  stubSheetsService({
+    sheets: [
+      {
+        sheetId: SHEET_CONFIG_GID,
+        title: "Sheet Config",
+        rows: buildGridRows({
+          0: sheetConfigColumnIdRow,
+          4: [PROPERTY_GID, "Property", false, true, ""],
+          5: [NEW_SHEET_GID, "Brand New Sheet", false, true, ""],
+        }),
+        table: { endRowIndex: 6 },
+      },
+      {
+        sheetId: COLUMN_CONFIG_GID,
+        title: "Column Config",
+        rows: buildGridRows({
+          0: columnConfigColumnIdRow,
+          4: [
+            PROPERTY_GID,
+            "c:prp:aaa",
+            "Property",
+            "Rent Amount",
+            false,
+            "number",
+          ],
+          5: [PROPERTY_GID, "c:prp:bbb", "Property", "Notes", false, "string"],
+          6: [
+            NEW_SHEET_GID,
+            "c:999002:ccc",
+            "Brand New Sheet",
+            "Some Field",
+            false,
+            "string",
+          ],
+        }),
+        table: { endRowIndex: 7 },
+      },
+      {
+        sheetId: PROPERTY_GID,
+        title: "Property",
+        rows: buildGridRows({ 3: [] }),
+      },
+      {
+        sheetId: NEW_SHEET_GID,
+        title: "Brand New Sheet",
+        rows: buildGridRows({ 3: [] }),
+      },
+    ],
+  });
+}
+
 // Mirrors ConfigOrchestrator.syncAndFlushConfigSheets's own sequence (see
 // CLAUDE.md/README on why Sheet Config and Column Config sync together),
 // stopping short of the final batchUpdateGSheets flush these tests don't
@@ -105,62 +157,7 @@ function syncColumnConfigOperator(operator: ColumnConfigOperator): void {
 
 describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
   it("groups columns by resolved sheet name", () => {
-    stubSheetsService({
-      sheets: [
-        {
-          sheetId: SHEET_CONFIG_GID,
-          title: "Sheet Config",
-          rows: buildGridRows({
-            0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", false, true, ""],
-            5: [NEW_SHEET_GID, "Brand New Sheet", false, true, ""],
-          }),
-          table: { endRowIndex: 6 },
-        },
-        {
-          sheetId: COLUMN_CONFIG_GID,
-          title: "Column Config",
-          rows: buildGridRows({
-            0: columnConfigColumnIdRow,
-            4: [
-              PROPERTY_GID,
-              "c:prp:aaa",
-              "Property",
-              "Rent Amount",
-              false,
-              "number",
-            ],
-            5: [
-              PROPERTY_GID,
-              "c:prp:bbb",
-              "Property",
-              "Notes",
-              false,
-              "string",
-            ],
-            6: [
-              NEW_SHEET_GID,
-              "c:999002:ccc",
-              "Brand New Sheet",
-              "Some Field",
-              false,
-              "string",
-            ],
-          }),
-          table: { endRowIndex: 7 },
-        },
-        {
-          sheetId: PROPERTY_GID,
-          title: "Property",
-          rows: buildGridRows({ 3: [] }),
-        },
-        {
-          sheetId: NEW_SHEET_GID,
-          title: "Brand New Sheet",
-          rows: buildGridRows({ 3: [] }),
-        },
-      ],
-    });
+    stubGroupedColumnConfigSheets();
 
     const entries = initSyncedColumnConfigOperator().newColumnConfigs();
 
@@ -192,6 +189,30 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         customDefaultValue: null,
       },
     });
+  });
+
+  it("emits one labeled column-config record per line", () => {
+    stubGroupedColumnConfigSheets();
+
+    const sourceLines = initSyncedColumnConfigOperator()
+      .toFileSource()
+      .split("\n");
+
+    expect(sourceLines).toContain(
+      '    "rentAmount": { "columnId": "c:prp:aaa", "header": "Rent Amount", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },',
+    );
+    expect(
+      sourceLines.find((line) => line.includes('"property":')),
+    ).not.toContain('"columnId"');
+    sourceLines
+      .filter((line) => line.includes('"columnId"'))
+      .forEach((line) => {
+        expect(line).toContain('"header"');
+        expect(line).toContain('"valueName"');
+        expect(line).toContain('"isFormula"');
+        expect(line).toContain('"emptyValueAllowed"');
+        expect(line).toContain('"customDefaultValue"');
+      });
   });
 
   it("emits the empty-value-allowed trait each column's own box declares", () => {
@@ -1069,6 +1090,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     expect(operator.sheet.rowIndexesActive).toEqual([5]);
     expect(operator.sheet.row(5).isBlank).toBe(true);
     expect(operator.newColumnConfigs()).toEqual({});
+    expect(operator.toFileSource()).toContain("makeColumnConfigs({})");
   });
 
   it("still resolves programmatic values for a sheet whose own top data row it pruned", () => {

@@ -134,7 +134,9 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     syncSheetConfigOperator(operator);
 
     expect(operator.sheetNamesByGid().get(NEW_SHEET_GID)).toBe("brandNewSheet");
-    expect(operator.toFileSource()).toContain('"brandNewSheet"');
+    expect(operator.toFileSource().split("\n")).toContain(
+      '  "brandNewSheet": { "sheetGid": 999002, "idPrefix": "", "hasIdColumn": false }',
+    );
   });
 
   // A checkbox nobody has ever touched reads blank, not false.
@@ -188,6 +190,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     expect(() => syncSheetConfigOperator(operator)).not.toThrow();
     expect(operator.sheet.row(5).isBlank).toBe(true);
     expect(operator.newSheetConfigs()).toEqual({});
+    expect(operator.toFileSource()).toContain("makeSheetConfigs({})");
   });
 
   it("generates a config for an API-access sheet whose id prefix has never been filled in", () => {

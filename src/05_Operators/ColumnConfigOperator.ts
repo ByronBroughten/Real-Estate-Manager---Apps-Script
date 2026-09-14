@@ -9,6 +9,7 @@ import type {
   UntypedHeadersBySheetTitle,
 } from "../04_SpreadsheetNamed/Types/NamedState";
 import { Str } from "../utils/Str";
+import { columnConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
@@ -297,10 +298,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return [
       `${makeImportLine("makeColumnConfigs")}`,
       ``,
-      `export const columnConfigs = makeColumnConfigs(${JSON.stringify(
+      `export const columnConfigs = makeColumnConfigs(${columnConfigsFileSource(
         this.newColumnConfigs(),
-        null,
-        2,
       )});`,
       ``,
     ].join("\n");

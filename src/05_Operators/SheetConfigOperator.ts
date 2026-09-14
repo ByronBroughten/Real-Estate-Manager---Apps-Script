@@ -4,6 +4,7 @@ import {
 } from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
+import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
@@ -136,10 +137,8 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     return [
       `${makeImportLine("makeSheetConfigs")}`,
       ``,
-      `export const sheetConfigs = makeSheetConfigs(${JSON.stringify(
+      `export const sheetConfigs = makeSheetConfigs(${sheetConfigsFileSource(
         this.newSheetConfigs(),
-        null,
-        2,
       )});`,
       ``,
     ].join("\n");

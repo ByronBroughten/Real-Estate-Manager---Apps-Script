@@ -2,7 +2,7 @@
 
 Map fragment disclosed from `README.md`.
 
-**Never read `columnConfigs.ts` whole** (~5k lines). `sheetConfigs.ts` is the sheet list. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only. Same for a single column: grep its `columnId` or name.
+**Never read `columnConfigs.ts` whole.** `sheetConfigs.ts` is the sheet list — one labeled sheet record per line. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only: the key opens a multi-line block, and each column config is one labeled line inside it (`columnId`, `header`, `valueName`, `isFormula`, `emptyValueAllowed`, `customDefaultValue`). Same for a single column: grep its `columnId` or name. `valueConfigs.ts` stays a pretty-printed map of member arrays.
 
 `src/01_generatedConfigs/` holds four config constants, each split across two files: an `xConfigs.ts` file with the literal data plus a `makeXConfigs` validating constructor, and a sibling `xConfigsTypes.ts` file with the derived types and accessor functions built on top of it (`spreadsheetConfig`/`spreadsheetConfigTypes`, `sheetConfigs`/`sheetConfigsTypes`, `columnConfigs`/`columnConfigsTypes`, `valueConfigs`/`valueConfigsTypes`). `sheetConfigs` and `columnConfigs` additionally have a `sheetConfigBuilder.ts`/`columnConfigBuilder.ts` file holding their per-entry record type and constructor (`SheetConfig`/`msc`, `ColumnConfig`/`mcc`) — split out from the main pair specifically to avoid a circular import between the data file (which needs the per-entry constructor to build itself) and the types file (which needs the finished data to derive things like the by-GID lookup map).
 

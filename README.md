@@ -80,7 +80,7 @@ If you're renaming or relocating something and unsure which word applies, ask ra
 
 ## Generated data — do not hand-edit
 
-**Never read `columnConfigs.ts` whole** (~5k lines). `sheetConfigs.ts` is the sheet list. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only.
+**Never read `columnConfigs.ts` whole.** `sheetConfigs.ts` is the sheet list — one labeled sheet record per line. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only: the key opens a multi-line block, and each column config is one labeled line inside it.
 
 Regeneration, the config-sheet floor, and how `valueName` is declared vs sampled: [`docs/generated-data.md`](./docs/generated-data.md).
 
