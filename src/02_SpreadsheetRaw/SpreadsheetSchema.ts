@@ -1,7 +1,7 @@
 import {
   getUniformRowValueName,
-  nameDelimiter,
-  type NameDelimiter,
+  codebaseNameDelimiter,
+  type CodebaseNameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
 } from "../00_base/base";
@@ -52,14 +52,14 @@ const rowIndexToUniformName = new Map(
 ) as Map<number, UniformRowName>;
 
 export class SpreadsheetSchema {
-  get nameDelimiter(): NameDelimiter {
-    return nameDelimiter;
+  get codebaseNameDelimiter(): CodebaseNameDelimiter {
+    return codebaseNameDelimiter;
   }
   combineNames<S1 extends string, S2 extends string>(
     name1: S1,
     name2: S2,
-  ): `${S1}${NameDelimiter}${S2}` {
-    return `${name1}${this.nameDelimiter}${name2}`;
+  ): `${S1}${CodebaseNameDelimiter}${S2}` {
+    return `${name1}${this.codebaseNameDelimiter}${name2}`;
   }
   isInSheetGids(sheetGid: number): boolean {
     return configSheetGids.includes(sheetGid);

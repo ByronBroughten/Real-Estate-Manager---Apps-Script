@@ -16,8 +16,8 @@ export type CellValue<VN extends CellValueName = CellValueName> =
 // The blank removed, whether or not this value type ever had one.
 export type NotEmpty<V> = Exclude<V, "">;
 
-export const nameDelimiter = "_";
-export type NameDelimiter = typeof nameDelimiter;
+export const codebaseNameDelimiter = "_";
+export type CodebaseNameDelimiter = typeof codebaseNameDelimiter;
 
 const uniformRowValueNames = {
   header: "string",

@@ -1,6 +1,6 @@
 import {
-  nameDelimiter,
-  type NameDelimiter,
+  codebaseNameDelimiter,
+  type CodebaseNameDelimiter,
   type NotEmpty,
 } from "../00_base/base";
 import { Obj, type KeyedMap } from "../utils/Obj";
@@ -163,10 +163,10 @@ export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
 export type MakeColumnFullName<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
-> = `${SN}${NameDelimiter}${CN & string}`;
+> = `${SN}${CodebaseNameDelimiter}${CN & string}`;
 
 const columnConfigsFlat = Obj.flattenTwoLevels(columnConfigs, {
-  keyDelimiter: nameDelimiter,
+  keyDelimiter: codebaseNameDelimiter,
   outerKeyName: "sheetName",
   innerKeyName: "columnName",
 });
