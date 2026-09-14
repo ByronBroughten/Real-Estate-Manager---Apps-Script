@@ -62,7 +62,7 @@ export class ColumnRaw<
   }
   // State is still mirrored row by row; only the queued request collapses.
   updateAllCells(change: RowCellChange<VN>): this {
-    this.validateIndexNotStale();
+    this.validateColIndexNotStale();
     this.sheet.validateNotPrunedToSelection();
     const { endRowIndex } = this.activeTable;
     const { value } = change;
@@ -83,7 +83,7 @@ export class ColumnRaw<
     return this;
   }
   updateActiveCells(change: RowCellChange<VN>): this {
-    this.validateIndexNotStale();
+    this.validateColIndexNotStale();
     const rowIndexes = this.cellIndexesActive;
     const { value } = change;
     if (value !== undefined) {
@@ -104,7 +104,7 @@ export class ColumnRaw<
   }
   // Reaches every data row like a whole-column fill, so it takes the same guards.
   findReplace(terms: FindReplaceTerms): this {
-    this.validateIndexNotStale();
+    this.validateColIndexNotStale();
     this.sheet.validateNotPrunedToSelection();
     this.ss.findReplace({ ...terms, scope: { range: this.dataGridRange } });
     return this;
