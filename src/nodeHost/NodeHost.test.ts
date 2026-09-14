@@ -15,7 +15,7 @@ const leasesPayload = {
         {
           tableId: "fake-table",
           range: {
-            startRowIndex: ssConfigGet("headerRowIndexBase0"),
+            startRowIndex: ssConfigGet("tableHeaderRowIndexBase0"),
             endRowIndex: 11,
             startColumnIndex: ssConfigGet("startTableColIndexBase0"),
             endColumnIndex: 5,

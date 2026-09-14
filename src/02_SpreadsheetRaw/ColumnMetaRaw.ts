@@ -24,7 +24,7 @@ export class ColumnMetaRaw<
     return new ColumnRaw<VN>(this.columnRawProps);
   }
   get activeHeader() {
-    return this.uniformCell("header").valueOrEmpty();
+    return this.uniformCell("tableHeader").valueOrEmpty();
   }
   get activeIsFormula(): boolean {
     return this._activeFacts.isFormula;
@@ -69,7 +69,7 @@ export class ColumnMetaRaw<
   }): this {
     const columnId = this.sheet.makeColumnId(idPrefix);
     this.uniformCell("columnId").updateValue(columnId);
-    this.uniformCell("header").updateValue(header);
+    this.uniformCell("tableHeader").updateValue(header);
     return this;
   }
   updateUniformCell<UN extends UniformRowName>(

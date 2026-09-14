@@ -33,8 +33,7 @@ const spreadsheetConfigHeaders = [
   ssc.columnIdRowIndexBase1.header,
   ssc.columnGroupHeadingRowIndexBase1.header,
   ssc.actionRowIndexBase1.header,
-  ssc.headerRowIndexBase1.header,
-  ssc.topBodyRowIndexBase5.header,
+  ssc.tableHeaderRowIndexBase1.header,
 ];
 
 const testSheetConfigRowWithApiAccess = [
@@ -50,26 +49,44 @@ beforeEach(() => {
   stubLogger();
 });
 
-function spreadsheetConfigSheet(idDelimiter: string) {
+function spreadsheetConfigSheet(
+  idDelimiter: string,
+  options: {
+    tableEndRowIndex?: number;
+    extraRows?: Record<number, readonly (string | number | boolean | null)[]>;
+  } = {},
+) {
   return {
     sheetId: SPREADSHEET_CONFIG_GID,
     title: "Spreadsheet Config",
     rows: buildGridRows({
       3: spreadsheetConfigHeaders,
-      4: [idDelimiter, "`", "ID", 1, 1, 2, 3, 4, 5],
+      4: [idDelimiter, "`", "ID", 1, 1, 2, 3, 4],
+      ...options.extraRows,
     }),
-    table: { endRowIndex: 5 },
+    table: { endRowIndex: options.tableEndRowIndex ?? 5 },
   };
 }
 
 function seedFixture(
-  options: { idDelimiter?: string; testColumnId?: string } = {},
+  options: {
+    idDelimiter?: string;
+    testColumnId?: string;
+    spreadsheetConfigTableEndRowIndex?: number;
+    spreadsheetConfigExtraRows?: Record<
+      number,
+      readonly (string | number | boolean | null)[]
+    >;
+  } = {},
 ) {
   const idDelimiter = options.idDelimiter ?? ":";
   const testColumnId = options.testColumnId ?? "c:test:xyz123";
   return stubSheetsService({
     sheets: [
-      spreadsheetConfigSheet(idDelimiter),
+      spreadsheetConfigSheet(idDelimiter, {
+        tableEndRowIndex: options.spreadsheetConfigTableEndRowIndex,
+        extraRows: options.spreadsheetConfigExtraRows,
+      }),
       {
         sheetId: SHEET_CONFIG_GID,
         title: "Sheet Config",
@@ -202,5 +219,49 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     expect(
       ConfigOrchestrator.init().generateConfigFiles().untypedColumnsSummary,
     ).toContain("1 column(s) across 1 sheet(s)");
+  });
+});
+
+describe("ConfigOrchestrator.syncConfigSheetRows Spreadsheet Config Table", () => {
+  it("proceeds when Spreadsheet Config's Table has exactly one data row", () => {
+    seedFixture();
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).not.toThrow();
+  });
+
+  it("throws when Spreadsheet Config's Table has two data rows", () => {
+    seedFixture({ spreadsheetConfigTableEndRowIndex: 6 });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("throws when Spreadsheet Config's Table has no data row", () => {
+    seedFixture({ spreadsheetConfigTableEndRowIndex: 4 });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).toThrow(
+      /Spreadsheet Config/,
+    );
+  });
+
+  it("ignores a filled row below Spreadsheet Config's Table", () => {
+    seedFixture({
+      spreadsheetConfigExtraRows: {
+        5: ["junk", "", "", "", "", "", "", ""],
+      },
+    });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).not.toThrow();
+  });
+});
+
+describe("ConfigOrchestrator.generateConfigFiles Spreadsheet Config Table", () => {
+  it("throws when Spreadsheet Config's Table has two data rows", () => {
+    seedFixture({ spreadsheetConfigTableEndRowIndex: 6 });
+
+    expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow(
+      /Spreadsheet Config/,
+    );
   });
 });

@@ -450,8 +450,7 @@ export const columnConfigs = makeColumnConfigs({
     "nameDelimiter": { "columnId": "c:scf:JI6_3tB", "header": "Name delimiter", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "columnIdRowIndexBase1": { "columnId": "c:scf:Kt9oKSY", "header": "Column ID row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "actionRowIndexBase1": { "columnId": "c:scf:GKSJHu0", "header": "Action row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "headerRowIndexBase1": { "columnId": "c:scf:58r8zkF", "header": "Header row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "topBodyRowIndexBase5": { "columnId": "c:scf:U4WFNA4", "header": "Top body row index base 5", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "tableHeaderRowIndexBase1": { "columnId": "c:scf:58r8zkF", "header": "Table header row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "idHeader": { "columnId": "c:sscf:XOpXA8U", "header": "ID header", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "startTableColumnIndexBase1": { "columnId": "c:sscf:RtBaCIb", "header": "Start table column index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "columnGroupHeadingRowIndexBase1": { "columnId": "c:sscf:Tm9zOUP", "header": "Column group heading row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }

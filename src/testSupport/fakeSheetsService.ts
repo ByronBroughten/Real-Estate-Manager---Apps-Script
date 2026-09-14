@@ -57,7 +57,7 @@ export interface FakeSheetProperties {
     endColumnIndex?: number;
     /**
      * Where the Table's range starts, defaulting to the layout every sheet
-     * is required to follow (`headerRowIndexBase0`/`startTableColIndexBase0`).
+     * is required to follow (`tableHeaderRowIndexBase0`/`startTableColIndexBase0`).
      * Override either one only to build a deliberately misplaced Table, which
      * `SpreadsheetRaw`'s post-fetch placement check refuses.
      */
@@ -275,7 +275,7 @@ function fakeTableRange(
   table: NonNullable<FakeSheetProperties["table"]>,
 ): GoogleAppsScript.Sheets.Schema.GridRange {
   return {
-    startRowIndex: table.startRowIndex ?? ssConfigGet("headerRowIndexBase0"),
+    startRowIndex: table.startRowIndex ?? ssConfigGet("tableHeaderRowIndexBase0"),
     endRowIndex: table.endRowIndex,
     startColumnIndex:
       table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),

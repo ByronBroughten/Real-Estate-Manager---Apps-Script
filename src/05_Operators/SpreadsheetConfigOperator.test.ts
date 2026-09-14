@@ -25,8 +25,7 @@ const spreadsheetConfigHeaders = [
   ssc.columnIdRowIndexBase1.header,
   ssc.columnGroupHeadingRowIndexBase1.header,
   ssc.actionRowIndexBase1.header,
-  ssc.headerRowIndexBase1.header,
-  ssc.topBodyRowIndexBase5.header,
+  ssc.tableHeaderRowIndexBase1.header,
 ];
 
 const matchingCommittedFileValues = [
@@ -38,7 +37,6 @@ const matchingCommittedFileValues = [
   2,
   3,
   4,
-  5,
 ] as const;
 
 function stubSpreadsheetConfigSheet(
@@ -70,7 +68,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
   it("emits makeSpreadsheetConfig of the live row with base-1 indexes minus one", () => {
     const { getByDataFilterCalls } = stubSpreadsheetConfigSheet({
       3: spreadsheetConfigHeaders,
-      4: ["|", "`", "ID", 1, 1, 2, 3, 4, 5],
+      4: ["|", "`", "ID", 1, 1, 2, 3, 4],
     });
 
     expect(fetchedOperator().toFileSource()).toBe(
@@ -85,8 +83,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
         `  columnIdRowIdxBase0: 0,`,
         `  columnGroupHeadingRowIndexBase0: 1,`,
         `  actionRowIndexBase0: 2,`,
-        `  headerRowIndexBase0: 3,`,
-        `  topDataRowIdxBase0: 4,`,
+        `  tableHeaderRowIndexBase0: 3,`,
         `} as const);`,
         ``,
       ].join("\n"),
@@ -129,11 +126,10 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
     );
   });
 
-  it("throws when a second row below the header still holds guaranteed-column values", () => {
+  it("reads the first data row as the Table header row plus one, not a later filled row", () => {
     stubSpreadsheetConfigSheet({
       3: spreadsheetConfigHeaders,
-      4: [...matchingCommittedFileValues],
-      5: ["x", "", "", "", "", "", "", "", ""],
+      5: [...matchingCommittedFileValues],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -141,10 +137,20 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
     );
   });
 
+  it("does not treat a second filled row as a fetch-time error", () => {
+    stubSpreadsheetConfigSheet({
+      3: spreadsheetConfigHeaders,
+      4: [...matchingCommittedFileValues],
+      5: ["x", "", "", "", "", "", "", ""],
+    });
+
+    expect(fetchedOperator().toFileSource()).toContain('idDelimiter: ":"');
+  });
+
   it("throws when a guaranteed header is missing", () => {
     stubSpreadsheetConfigSheet({
       3: spreadsheetConfigHeaders.slice(1),
-      4: ["`", "ID", 1, 1, 2, 3, 4, 5],
+      4: ["`", "ID", 1, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -155,7 +161,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
   it("throws when a guaranteed cell is blank", () => {
     stubSpreadsheetConfigSheet({
       3: spreadsheetConfigHeaders,
-      4: ["", "`", "ID", 1, 1, 2, 3, 4, 5],
+      4: ["", "`", "ID", 1, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -166,7 +172,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
   it("throws when an index is not an integer ≥ 1", () => {
     stubSpreadsheetConfigSheet({
       3: spreadsheetConfigHeaders,
-      4: [":", "`", "ID", 0, 1, 2, 3, 4, 5],
+      4: [":", "`", "ID", 0, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -177,7 +183,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
   it("throws when an index is not an integer", () => {
     stubSpreadsheetConfigSheet({
       3: spreadsheetConfigHeaders,
-      4: [":", "`", "ID", 1.5, 1, 2, 3, 4, 5],
+      4: [":", "`", "ID", 1.5, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(

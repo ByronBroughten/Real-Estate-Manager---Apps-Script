@@ -20,8 +20,7 @@ const guaranteedColumns: readonly SpreadsheetConfigColumnName[] = [
   "columnIdRowIndexBase1",
   "columnGroupHeadingRowIndexBase1",
   "actionRowIndexBase1",
-  "headerRowIndexBase1",
-  "topBodyRowIndexBase5",
+  "tableHeaderRowIndexBase1",
 ];
 
 export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheetConfig"> {
@@ -61,19 +60,26 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
       ``,
     ].join("\n");
   }
+  validateExactlyOneDataRow(): void {
+    const dataRowCount = this.sheet.raw.dataRowCountAfterFlush;
+    if (dataRowCount !== 1) {
+      throw new Error(
+        `Spreadsheet Config Table must have exactly one data row; found ${dataRowCount}.`,
+      );
+    }
+  }
   private _translateFetchedGrid(): LiveSpreadsheetConfig {
     const guaranteedHeaders = guaranteedColumns.map((columnName) =>
       this._header(columnName),
     );
-    const headerRowIndex = this._uniqueHeaderRowIndex(guaranteedHeaders);
-    const colIndexByHeader = this._colIndexByHeader(
-      headerRowIndex,
+    const tableHeaderRowIndex = this._uniqueTableHeaderRowIndex(
       guaranteedHeaders,
     );
-    const dataRowIndex = this._uniqueDataRowIndex(
-      headerRowIndex,
-      colIndexByHeader,
+    const colIndexByHeader = this._colIndexByHeader(
+      tableHeaderRowIndex,
+      guaranteedHeaders,
     );
+    const dataRowIndex = tableHeaderRowIndex + 1;
     return {
       idDelimiter: this._stringCell(
         dataRowIndex,
@@ -106,19 +112,14 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
         colIndexByHeader,
         "actionRowIndexBase1",
       ),
-      headerRowIndexBase0: this._indexCell(
+      tableHeaderRowIndexBase0: this._indexCell(
         dataRowIndex,
         colIndexByHeader,
-        "headerRowIndexBase1",
-      ),
-      topDataRowIdxBase0: this._indexCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "topBodyRowIndexBase5",
+        "tableHeaderRowIndexBase1",
       ),
     };
   }
-  private _uniqueHeaderRowIndex(guaranteedHeaders: string[]): number {
+  private _uniqueTableHeaderRowIndex(guaranteedHeaders: string[]): number {
     const matchingRowIndexes = this.sheet.raw.activeRowIndexes.filter(
       (rowIndex) =>
         guaranteedHeaders.every((header) =>
@@ -127,7 +128,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     );
     if (matchingRowIndexes.length !== 1) {
       throw new Error(
-        `Spreadsheet Config header row must be the unique row that contains every guaranteed header; found ${matchingRowIndexes.length}.`,
+        `Spreadsheet Config Table header row must be the unique row that contains every guaranteed header; found ${matchingRowIndexes.length}.`,
       );
     }
     return matchingRowIndexes[0]!;
@@ -137,13 +138,13 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     return rowState ? [...rowState.values()] : [];
   }
   private _colIndexByHeader(
-    headerRowIndex: number,
+    tableHeaderRowIndex: number,
     guaranteedHeaders: string[],
   ): Map<string, number> {
     const colIndexByHeader = new Map<string, number>();
-    const rowState = this.sheet.raw.rowStates.get(headerRowIndex);
+    const rowState = this.sheet.raw.rowStates.get(tableHeaderRowIndex);
     if (!rowState) {
-      throw new Error("Spreadsheet Config header row is not active.");
+      throw new Error("Spreadsheet Config Table header row is not active.");
     }
     for (const [colIndex, value] of rowState.entries()) {
       if (typeof value === "string" && guaranteedHeaders.includes(value)) {
@@ -151,26 +152,6 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
       }
     }
     return colIndexByHeader;
-  }
-  private _uniqueDataRowIndex(
-    headerRowIndex: number,
-    colIndexByHeader: Map<string, number>,
-  ): number {
-    const guaranteedColIndexes = [...colIndexByHeader.values()];
-    const dataRowIndexes = this.sheet.raw.activeRowIndexes.filter(
-      (rowIndex) => {
-        if (rowIndex <= headerRowIndex) return false;
-        return guaranteedColIndexes.some((colIndex) => {
-          return this._cellValueOrEmpty(rowIndex, colIndex) !== "";
-        });
-      },
-    );
-    if (dataRowIndexes.length !== 1) {
-      throw new Error(
-        `Spreadsheet Config must have exactly one data row below the header; found ${dataRowIndexes.length}.`,
-      );
-    }
-    return dataRowIndexes[0]!;
   }
   private _stringCell(
     dataRowIndex: number,

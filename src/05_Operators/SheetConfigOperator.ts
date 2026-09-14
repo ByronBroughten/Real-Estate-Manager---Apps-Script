@@ -38,7 +38,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   }
   prepFetchForSync() {
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
-      this.ss.raw.sheetMeta(sheetGid).headerRow.gatherFetchFull();
+      this.ss.raw.sheetMeta(sheetGid).tableHeaderRow.gatherFetchFull();
     });
     this.sheet.prepFetchColumnsFull(
       "sheetGid",
@@ -116,7 +116,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
         idPrefix: col.idPrefix.valueOrEmpty(rowIndex),
         hasIdColumn: this.ss.raw
           .sheetMeta(sheetGid)
-          .headerRow.hasValue(this.schema.idHeader),
+          .tableHeaderRow.hasValue(this.schema.idHeader),
       };
     });
     return sheetConfigs;

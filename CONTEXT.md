@@ -7,15 +7,15 @@ A Google Sheets spreadsheet that a person operates directly, with an Apps Script
 ### Sheet layout
 
 **Table**:
-The Google Table (Insert > Table) laid over a sheet's data. Every sheet the app knows about must have exactly one, and it must start on the header row, in the first column. Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet it knows, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
+The Google Table (Insert > Table) laid over a sheet's data. Every sheet the app knows about must have exactly one, and it must start on the Table header row, in the first column. Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet it knows, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
 _Avoid_: range, data range, grid
 
-**Header row**:
-The row of column titles you read across the top of a sheet's data, directly above the first data row, and the row the Table starts on. Three bookkeeping rows sit above it that you never edit by hand.
-_Avoid_: title row, top row, row 1
+**Table header row**:
+The row of column titles you read across the top of a sheet's data, directly above the first data row, and the row the Table starts on. The first data row is always the next row; that index is not stored separately. Three bookkeeping rows sit above it that you never edit by hand.
+_Avoid_: header row, title row, top row, row 1
 
 **Action row**:
-The row above the header row where an endpoint is triggered. Most of its cells are empty, and a cell may hold text used as a label. Only the cells wired to an endpoint hold a checkbox, and ticking one of those is what asks the spreadsheet to do something, one endpoint per column.
+The row above the Table header row where an endpoint is triggered. Most of its cells are empty, and a cell may hold text used as a label. Only the cells wired to an endpoint hold a checkbox, and ticking one of those is what asks the spreadsheet to do something, one endpoint per column.
 _Avoid_: control row, button row, trigger row
 
 **Blank row**:
@@ -115,7 +115,7 @@ What the household still owes as you read down the page, a running Charge minus 
 _Avoid_: balance due, outstanding, running total
 
 **Letterhead**:
-The block above the ledger's header row naming the tenant, the address and the day the page was built. Its cells are formulas, and they read the occupancy and the date that building the ledger writes into the Variable sheet. Building a ledger is what makes the letterhead say the right household.
+The block above the ledger's Table header row naming the tenant, the address and the day the page was built. Its cells are formulas, and they read the occupancy and the date that building the ledger writes into the Variable sheet. Building a ledger is what makes the letterhead say the right household.
 _Avoid_: header, title block
 
 **Issuer**:

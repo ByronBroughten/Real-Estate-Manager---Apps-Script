@@ -8,6 +8,5 @@ export const spreadsheetConfig = makeSpreadsheetConfig({
   columnIdRowIdxBase0: 0,
   columnGroupHeadingRowIndexBase0: 1,
   actionRowIndexBase0: 2,
-  headerRowIndexBase0: 3,
-  topDataRowIdxBase0: 4,
+  tableHeaderRowIndexBase0: 3,
 } as const);
