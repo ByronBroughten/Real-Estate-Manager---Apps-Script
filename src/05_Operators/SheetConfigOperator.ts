@@ -115,8 +115,8 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
         sheetGid,
         idPrefix: col.idPrefix.valueOrEmpty(rowIndex),
         hasIdColumn: this.ss.raw
-          .sheet(sheetGid)
-          .meta.headerRow.hasValue(this.schema.idHeader),
+          .sheetMeta(sheetGid)
+          .headerRow.hasValue(this.schema.idHeader),
       };
     });
     return sheetConfigs;

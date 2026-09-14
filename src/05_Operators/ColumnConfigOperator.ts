@@ -41,6 +41,11 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   get sheetConfigSheet(): SheetConfigOperator["sheet"] {
     return this.sheetConfigOperator.sheet;
   }
+  // Derived fresh each call, not cached — a stored field goes stale across
+  // this coordinator's per-access getter rebuilds.
+  private get sheetGidsApiAccesses(): Set<number> {
+    return new Set(this.sheetConfigOperator.sheetGidsApiAccesses());
+  }
   activeValueTitles(): string[] {
     const col = this.sheet.columns("sheetGid", "columnId");
     return this.sheet.rowIndexesActiveWithData.map((rowIndex) =>
@@ -49,14 +54,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         col.columnId.value(rowIndex),
       ).activeValueTitle(),
     );
-  }
-  private _describedColumn(sheetGid: number, columnId: string) {
-    return this.ss.raw.sheet(sheetGid).meta.columnByActiveId(columnId);
-  }
-  // Derived fresh each call, not cached — a stored field goes stale across
-  // this coordinator's per-access getter rebuilds.
-  private get sheetGidsApiAccesses(): Set<number> {
-    return new Set(this.sheetConfigOperator.sheetGidsApiAccesses());
   }
   assertSyncedToSpreadsheet() {
     if (!this.columnConfigSync.syncedToSpreadsheet) {
@@ -197,6 +194,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     Logger.log(`_appendColumnRows: added ${appendedCount} new row(s).`);
     return this;
   }
+  private _describedColumn(sheetGid: number, columnId: string) {
+    return this.ss.raw.sheetMeta(sheetGid).columnByActiveId(columnId);
+  }
   private _updateProgrammaticValues() {
     const col = this.sheet.columns(
       "sheetGid",
@@ -217,14 +217,14 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
-      const columnRaw = this._describedColumn(sheetGid, columnId);
-      const actualHeader = columnRaw.activeHeader;
+      const describedColumn = this._describedColumn(sheetGid, columnId);
+      const actualHeader = describedColumn.activeHeader;
       if (col.header.valueOrEmpty(rowIndex) !== actualHeader) {
         col.header.cell(rowIndex).updateValue(actualHeader);
         updatedValues++;
       }
 
-      if (columnRaw.activeDeclaredValueTitle() === null) {
+      if (describedColumn.activeDeclaredValueTitle() === null) {
         this._recordUntypedColumn(actualSheetTitle, actualHeader);
       }
     });

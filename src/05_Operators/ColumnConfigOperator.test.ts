@@ -440,6 +440,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
               "Stale Header",
               true,
               "string",
+              true,
             ],
             5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID", true, "string"],
           }),
@@ -471,7 +472,9 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     expect(emitted?.amount).toMatchObject({
       valueName: "number",
       isFormula: false,
+      emptyValueAllowed: true,
     });
+    expect(operator.sheet.column("emptyValueAllowed").value(4)).toBe(true);
 
     expect(identity.sheetTitle.value(5)).toBe("Test");
     expect(identity.header.value(5)).toBe("ID");
