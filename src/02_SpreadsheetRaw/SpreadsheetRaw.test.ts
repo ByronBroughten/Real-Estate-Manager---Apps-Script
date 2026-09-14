@@ -25,6 +25,7 @@ const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
 const PROPERTY_GID = getSheetTraitByName("property", "sheetGid");
 const UNIT_GID = getSheetTraitByName("unit", "sheetGid");
 const HEADER_ROW_INDEX = ssConfigGet("headerRowIndexBase0");
+const COL_ID_ROW_INDEX = ssConfigGet("columnIdRowIdxBase0");
 const START_TABLE_COL_INDEX = ssConfigGet("startTableColIndexBase0");
 const TOP_DATA_ROW_INDEX = ssConfigGet("topDataRowIdxBase0");
 const SCRATCH_GID = 999999;
@@ -61,6 +62,28 @@ function misplacedTableSheet({
   };
 }
 
+function extraTablesSheet(sheet: {
+  sheetId: number;
+  title: string;
+}): FakeSheetProperties {
+  return {
+    ...placedTableSheet(sheet),
+    extraTables: [
+      {
+        startRowIndex: HEADER_ROW_INDEX + 10,
+        endRowIndex: HEADER_ROW_INDEX + 12,
+      },
+    ],
+  };
+}
+
+function recordedGridRanges(calls: object[]): unknown[] {
+  const resource = calls[0] as {
+    dataFilters: { gridRange: unknown }[];
+  };
+  return resource.dataFilters.map((filter) => filter.gridRange);
+}
+
 function thrownMessage(fn: () => void): string {
   try {
     fn();
@@ -86,6 +109,17 @@ describe("SpreadsheetRaw.fetchAllSheetProperties", () => {
     expect(raw.activeSheetGids).toEqual([111]);
     expect(raw.sheet(111).title).toBe("Leases");
   });
+
+  it("throws when a known sheet has more than one Table on the unfiltered census", () => {
+    stubSheetsService({
+      sheets: [extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" })],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    expect(() => raw.fetchAllSheetProperties()).toThrowError(
+      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
+    );
+  });
 });
 
 describe("SpreadsheetRaw.fetchAllGathered", () => {
@@ -98,8 +132,10 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(111).headerRow.gatherFetchFull();
-    raw.sheetMeta(222).headerRow.gatherFetchFull();
+    raw.sheet(111).gatherFetchProperties();
+    raw.sheetMeta(111).gatherFetchColumnIds();
+    raw.sheet(222).gatherFetchProperties();
+    raw.sheetMeta(222).gatherFetchColumnIds();
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Task Generic" \(gid 111\).*"Task Material" \(gid 222\)/,
@@ -119,7 +155,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(111).headerRow.gatherFetchFull();
+    raw.sheet(111).gatherFetchProperties();
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -130,7 +166,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -147,7 +183,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Property".*starts at row 3, column A.*must start at row 4, column A/,
@@ -166,7 +202,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
 
     expect(() => raw.fetchAllGathered()).toThrowError(
       /"Property".*starts at row 4, column B.*must start at row 4, column A/,
@@ -185,7 +221,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(SCRATCH_GID).headerRow.gatherFetchFull();
+    raw.sheet(SCRATCH_GID).gatherFetchProperties();
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -207,7 +243,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
 
     expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
   });
@@ -227,13 +263,99 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(PROPERTY_GID).headerRow.gatherFetchFull();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(
       /"Property".*starts at row 6, column A.*must start at row 4, column A/,
     );
     expect(message).not.toMatch(/Insert > Table/);
+  });
+
+  it("throws naming a known sheet whose gathered payload has more than one Table, and does not keep the first as active", () => {
+    stubSheetsService({
+      sheets: [extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" })],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+
+    const message = thrownMessage(() => raw.fetchAllGathered());
+    expect(message).toMatch(
+      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
+    );
+    expect(raw.sheet(PROPERTY_GID).hasFetchedProperties).toBe(false);
+  });
+
+  it("names every known sheet with extra Tables in one error", () => {
+    stubSheetsService({
+      sheets: [
+        extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
+        extraTablesSheet({ sheetId: UNIT_GID, title: "Unit" }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(UNIT_GID).gatherFetchProperties();
+
+    expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
+  });
+
+  it("leaves a sheet the config does not know alone, even with two Tables", () => {
+    stubSheetsService({
+      sheets: [
+        extraTablesSheet({
+          sheetId: SCRATCH_GID,
+          title: "Byron's Scratch Sheet",
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(SCRATCH_GID).gatherFetchProperties();
+
+    expect(() => raw.fetchAllGathered()).not.toThrow();
+  });
+
+  it("names extra Tables and a missing Table in one error", () => {
+    stubSheetsService({
+      sheets: [
+        extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
+        { sheetId: UNIT_GID, title: "Unit" },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(UNIT_GID).gatherFetchProperties();
+    raw.sheetMeta(UNIT_GID).gatherFetchColumnIds();
+
+    const message = thrownMessage(() => raw.fetchAllGathered());
+    expect(message).toMatch(/more than one Table.*"Property"/);
+    expect(message).toMatch(/Insert > Table.*"Unit"/);
+  });
+
+  it("names extra Tables and a misplaced Table in one error", () => {
+    stubSheetsService({
+      sheets: [
+        extraTablesSheet({ sheetId: PROPERTY_GID, title: "Property" }),
+        misplacedTableSheet({
+          sheetId: UNIT_GID,
+          title: "Unit",
+          startRowIndex: HEADER_ROW_INDEX - 1,
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.sheet(UNIT_GID).gatherFetchProperties();
+
+    const message = thrownMessage(() => raw.fetchAllGathered());
+    expect(message).toMatch(/more than one Table.*"Property"/);
+    expect(message).toMatch(/does not start where the layout requires.*"Unit"/);
   });
 
   it("sends no request when no ranges were gathered, since empty dataFilters would fetch the whole spreadsheet", () => {
@@ -253,6 +375,83 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
     expect(getByDataFilterCalls).toEqual([]);
     expect(raw.activeSheetGids).toEqual([]);
+  });
+
+  it("aims the properties probe at one header cell on the layout start column", () => {
+    const { getByDataFilterCalls } = stubSheetsService({
+      sheets: [placedTableSheet({ sheetId: PROPERTY_GID, title: "Property" })],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(PROPERTY_GID).gatherFetchProperties();
+    raw.fetchAllGathered();
+
+    expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
+      {
+        sheetId: PROPERTY_GID,
+        startRowIndex: HEADER_ROW_INDEX,
+        endRowIndex: HEADER_ROW_INDEX + 1,
+        startColumnIndex: START_TABLE_COL_INDEX,
+        endColumnIndex: START_TABLE_COL_INDEX + 1,
+      },
+    ]);
+  });
+
+  it("omits the start column from the column-id filter", () => {
+    const { getByDataFilterCalls } = stubSheetsService({
+      sheets: [placedTableSheet({ sheetId: PROPERTY_GID, title: "Property" })],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheetMeta(PROPERTY_GID).gatherFetchColumnIds();
+    raw.fetchAllGathered();
+
+    expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
+      {
+        sheetId: PROPERTY_GID,
+        startRowIndex: COL_ID_ROW_INDEX,
+        endRowIndex: COL_ID_ROW_INDEX + 1,
+      },
+    ]);
+  });
+
+  it("refuses a full-row fetch before the sheet has a Table in state", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases" }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+
+    expect(() => raw.sheet(111).topRow.gatherFetchFull()).toThrowError(
+      /Active table is null for sheetGid 111/,
+    );
+  });
+
+  it("aims a full-row fetch at the live Table start after properties, not the layout constant", () => {
+    const liveStart = START_TABLE_COL_INDEX + 1;
+    const { getByDataFilterCalls } = stubSheetsService({
+      sheets: [
+        misplacedTableSheet({
+          sheetId: SCRATCH_GID,
+          title: "Byron's Scratch Sheet",
+          startColumnIndex: liveStart,
+        }),
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(SCRATCH_GID).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
+      {
+        sheetId: SCRATCH_GID,
+        startRowIndex: TOP_DATA_ROW_INDEX,
+        endRowIndex: TOP_DATA_ROW_INDEX + 1,
+        startColumnIndex: liveStart,
+      },
+    ]);
   });
 });
 
@@ -282,6 +481,7 @@ describe("ColumnMetaRaw active facts", () => {
 
   function fetchedPropertyColumnMeta(colIndex: number): ColumnMetaRaw {
     const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
     raw.sheet(PROPERTY_GID).topRow.gatherFetchFull();
     raw.fetchAllGathered(true);
     return raw.sheetMeta(PROPERTY_GID).column(colIndex);
@@ -388,6 +588,7 @@ describe("ColumnMetaRaw active facts", () => {
     });
 
     const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
     raw.sheet(PROPERTY_GID).topRow.gatherFetchFull();
     raw.fetchAllGathered(true);
 
@@ -729,6 +930,7 @@ describe("CellRaw.updateValue", () => {
     });
 
     const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
     raw.sheet(111).row(4).gatherFetchFull();
     raw.fetchAllGathered();
     const cell = raw.sheet(111).row(4).cell(1);
@@ -950,6 +1152,7 @@ describe("ColumnRaw.updateActiveCells", () => {
   }
   function fetchedSelectionSheet() {
     const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
     raw.sheetMeta(111).colIdRow.gatherFetchFull();
     raw.sheet(111).column(1).gatherFetchFull();
     raw.fetchAllGathered();
@@ -1083,6 +1286,7 @@ describe("SheetRaw.removeRowsExcept", () => {
   }
   function fetchedPrunableSheet() {
     const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
     raw.sheetMeta(111).colIdRow.gatherFetchFull();
     raw.sheet(111).column(1).gatherFetchFull();
     raw.fetchAllGathered();
