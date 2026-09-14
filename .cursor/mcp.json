@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "gsheets": {
+      "command": "npx",
+      "args": ["-y", "mcp-google-sheets"],
+      "env": {
+        "SERVICE_ACCOUNT_PATH": "/Users/byronbroughten/.config/mcp-google-sheets/service-account.json"
+      }
+    }
+  }
+}

@@ -1,5 +1,5 @@
 ---
-description: Live spreadsheet, chores, and Node-host scripts. Open docs/how-it-runs.md.
+description: gsheets MCP, chores, and Node-host live sheet. Read spreadsheetId from nodeHost.config.json. Open docs/how-it-runs.md.
 globs:
   - src/chores/**
   - scripts/**
@@ -7,5 +7,7 @@ alwaysApply: false
 ---
 
 Hosts, chore dry run, MCP, and live-sheet command rules: [`docs/how-it-runs.md`](../../docs/how-it-runs.md).
+
+gsheets MCP: `spreadsheetId` from `nodeHost.config.json`.
 
 A send needs a yes naming that chore. Chore homes and the raw-request opening: [`docs/architecture/chores.md`](../../docs/architecture/chores.md).
