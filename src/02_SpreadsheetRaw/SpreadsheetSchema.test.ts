@@ -335,7 +335,7 @@ describe("ColumnFullName, absolute column addressing", () => {
     assertType<
       IsExactly<
         ColumnNameFiltered<"sheetConfig", "checkbox", false>,
-        "hasIdColumn" | "letApiAccess"
+        "letApiAccess"
       >
     >(true);
     assertType<

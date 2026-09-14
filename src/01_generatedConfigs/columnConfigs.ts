@@ -48,8 +48,6 @@ export const columnConfigs = makeColumnConfigs({
     "columnId": { "columnId": "c:ccf:vj9_rre", "header": "Column ID", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "sheetTitle": { "columnId": "c:ccf:949GjdB", "header": "Sheet title", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "header": { "columnId": "c:ccf:kqA31oK", "header": "Header", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "isFormula": { "columnId": "c:ccf:-99iXjo", "header": "Is formula", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "valueTitle": { "columnId": "c:ccf:0mh_HUU", "header": "Value title", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "customDefaultValue": { "columnId": "c:ccf:1msMno3", "header": "Custom default value", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "emptyValueAllowed": { "columnId": "c:ccf:volkLl6", "header": "Empty value allowed", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
@@ -432,7 +430,6 @@ export const columnConfigs = makeColumnConfigs({
   "sheetConfig": {
     "sheetGid": { "columnId": "c:scf:WgnoW8d", "header": "Sheet GID", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "sheetTitle": { "columnId": "c:scf:0Ctj9xZ", "header": "Sheet title", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "hasIdColumn": { "columnId": "c:scf:Z3g5nmg", "header": "Has ID column", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "letApiAccess": { "columnId": "c:scf:GOJ0ixi", "header": "Let api access", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "idPrefix": { "columnId": "c:scf:3dZ5h-J", "header": "ID prefix", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "idPrefixIsUniqueOrEmpty": { "columnId": "c:scf:cK5WM0v", "header": "ID prefix Is unique or empty", "valueName": "boolean", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
@@ -581,7 +578,8 @@ export const columnConfigs = makeColumnConfigs({
     "number": { "columnId": "c:tst:VzKaUqz", "header": "Number", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "dropdown": { "columnId": "c:tst:cQEliR8", "header": "Dropdown", "valueName": "yesOrNo", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "date": { "columnId": "c:test:HL-G329", "header": "Date", "valueName": "date", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "sampledBoolean": { "columnId": "c:test:KLMZlb4", "header": "Sampled Boolean", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "sampledBoolean": { "columnId": "c:test:KLMZlb4", "header": "Sampled Boolean", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "formulaTest": { "columnId": "c:test:R8Vj_m9", "header": "Formula test", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "unit": {
     "name": { "columnId": "c:unt:jC9vwrI", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -622,10 +620,9 @@ export const columnConfigs = makeColumnConfigs({
     "areaAddress": { "columnId": "c:unt:N71Gdxg", "header": "Area address", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "valueConfig": {
-    "tableControlsSpace": { "columnId": "c:vcf:_ocORnq", "header": "Table controls space", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "yesOrNo": { "columnId": "c:vcf:x5cyAIy", "header": "Yes or no", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "transactionDescription": { "columnId": "c:vcf:kfDc8M2", "header": "Transaction description", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "chargeDescription": { "columnId": "c:vcf:TZgwSb6", "header": "Charge description", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
+    "chargeDescription": { "columnId": "c:vcf:TZgwSb6", "header": "Charge description", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "chargeRecurringDescription": { "columnId": "c:vcf:yaVnd_N", "header": "Charge recurring description", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "chargeOnetimeDescription": { "columnId": "c:vcf:cr1CbP0", "header": "Charge onetime description", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "chargeReduceDescription": { "columnId": "c:vcf:CTSfi2I", "header": "Charge reduce description", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -657,6 +654,7 @@ export const columnConfigs = makeColumnConfigs({
     "occupancyLedgerDateRan": { "columnId": "c:vrb:l9m6nOV", "header": "Occupancy ledger date ran", "valueName": "date", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "occLedgerUnitId": { "columnId": "c:vrb:Gm5hqCo", "header": "Occ ledger unit ID", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "occLedgerHouseholdId": { "columnId": "c:vrb:Jx-ItJS", "header": "Occ ledger household ID", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "samplePropertyValue": { "columnId": "c:vrb:CBRPGqg", "header": "Sample property value", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "samplePropertyValue": { "columnId": "c:vrb:CBRPGqg", "header": "Sample property value", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "nameDelimiter": { "columnId": "c:vrb:RZ61R7w", "header": "Name delimiter", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   }
 });

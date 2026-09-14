@@ -341,7 +341,6 @@ function fetchedSheetConfig(): SpreadsheetNamed {
   ss.sheet("sheetConfig").prepFetchColumnsFull(
     "sheetGid",
     "sheetTitle",
-    "hasIdColumn",
     "letApiAccess",
     "idPrefix",
   );
@@ -675,7 +674,6 @@ describe("SheetNamed.appendRowWithAllVals", () => {
         {
           sheetGid: number | "";
           sheetTitle: string;
-          hasIdColumn: boolean;
           letApiAccess: boolean;
           idPrefix: string;
         }
@@ -693,7 +691,6 @@ describe("SheetNamed.appendRowWithAllVals", () => {
     const withFormula: CompleteAppendBag<"sheetConfig"> = {
       sheetGid: 999001,
       sheetTitle: "Property",
-      hasIdColumn: true,
       letApiAccess: true,
       idPrefix: "prp",
       // @ts-expect-error a formula column cannot be written to
@@ -705,7 +702,6 @@ describe("SheetNamed.appendRowWithAllVals", () => {
       [
         "sheetGid",
         "sheetTitle",
-        "hasIdColumn",
         "letApiAccess",
         "idPrefix",
         "idPrefixIsUniqueOrEmpty",

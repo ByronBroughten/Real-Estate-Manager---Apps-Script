@@ -26,7 +26,6 @@ export const SHEET_CONFIG_FORMULA_COLUMN_ID =
 export const sheetConfigColumnIdRow = [
   sheetConfigColumns.sheetGid.columnId,
   sheetConfigColumns.sheetTitle.columnId,
-  sheetConfigColumns.hasIdColumn.columnId,
   sheetConfigColumns.letApiAccess.columnId,
   sheetConfigColumns.idPrefix.columnId,
   SHEET_CONFIG_FORMULA_COLUMN_ID,
@@ -36,7 +35,6 @@ export const sheetConfigColumnIdRow = [
 export const filledSheetConfigRow: FakeCell[] = [
   999001,
   "Property",
-  false,
   true,
   "prp",
   true,
@@ -44,7 +42,6 @@ export const filledSheetConfigRow: FakeCell[] = [
 
 /** The blank row: nothing in any non-formula column, formula cell still live. */
 export const blankSheetConfigRow: FakeCell[] = [
-  null,
   null,
   null,
   null,

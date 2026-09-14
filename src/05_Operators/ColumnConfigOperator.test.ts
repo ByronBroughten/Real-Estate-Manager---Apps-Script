@@ -27,7 +27,6 @@ const TEST_SHEET_GID = 2089200354;
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
   sc.sheetTitle.columnId,
-  sc.hasIdColumn.columnId,
   sc.letApiAccess.columnId,
   sc.idPrefix.columnId,
 ];
@@ -36,10 +35,8 @@ const columnConfigColumnIdRow = [
   cc.columnId.columnId,
   cc.sheetTitle.columnId,
   cc.header.columnId,
-  cc.isFormula.columnId,
-  cc.valueTitle.columnId,
-  cc.emptyValueAllowed.columnId,
   cc.customDefaultValue.columnId,
+  cc.emptyValueAllowed.columnId,
 ];
 
 const freshlyAppendedRowMissingHeaderAndValueName = [
@@ -47,16 +44,12 @@ const freshlyAppendedRowMissingHeaderAndValueName = [
   "c:prp:ddd",
   "Property",
   "",
-  false,
-  "",
 ];
 const rowReferencingUnresolvableSheet = [
   UNRESOLVABLE_GID,
   "c:???:eee",
   "",
   "Orphan Field",
-  false,
-  "string",
 ];
 
 beforeEach(() => {
@@ -94,8 +87,8 @@ function stubGroupedColumnConfigSheets(): void {
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
-          4: [PROPERTY_GID, "Property", false, true, ""],
-          5: [NEW_SHEET_GID, "Brand New Sheet", false, true, ""],
+          4: [PROPERTY_GID, "Property", true, ""],
+          5: [NEW_SHEET_GID, "Brand New Sheet", true, ""],
         }),
         table: { endRowIndex: 6 },
       },
@@ -109,17 +102,13 @@ function stubGroupedColumnConfigSheets(): void {
             "c:prp:aaa",
             "Property",
             "Rent Amount",
-            false,
-            "number",
           ],
-          5: [PROPERTY_GID, "c:prp:bbb", "Property", "Notes", false, "string"],
+          5: [PROPERTY_GID, "c:prp:bbb", "Property", "Notes"],
           6: [
             NEW_SHEET_GID,
             "c:999002:ccc",
             "Brand New Sheet",
             "Some Field",
-            false,
-            "string",
           ],
         }),
         table: { endRowIndex: 7 },
@@ -152,17 +141,11 @@ function stubGroupedColumnConfigSheets(): void {
 // CLAUDE.md/README on why Sheet Config and Column Config sync together),
 // stopping short of the final batchUpdateGSheets flush these tests don't
 // need.
-function syncColumnConfigOperator(
-  operator: ColumnConfigOperator,
-  leftoverColumns: ("isFormula" | "valueTitle")[] = [],
-): void {
+function syncColumnConfigOperator(operator: ColumnConfigOperator): void {
   operator.ss.fetchAllSheetProperties();
   const sheetConfigOperator = operator.sheetConfigOperator;
   sheetConfigOperator.prepFetchForSync();
   operator.prepFetchWithSheetConfig();
-  if (leftoverColumns.length > 0) {
-    operator.sheet.prepFetchColumnsFull(...leftoverColumns);
-  }
   operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
   sheetConfigOperator.syncToSpreadsheet();
   operator.fetchAfterSheetConfigSynced();
@@ -237,7 +220,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", false, true, ""],
+            4: [PROPERTY_GID, "Property", true, ""],
           }),
           table: { endRowIndex: 5 },
         },
@@ -251,8 +234,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               "c:prp:aaa",
               "Property",
               "Rent Amount",
-              false,
-              "number",
+              null,
               true,
             ],
             5: [
@@ -260,8 +242,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               "c:prp:bbb",
               "Property",
               "Notes",
-              false,
-              "string",
+              null,
               false,
             ],
           }),
@@ -356,7 +337,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", false, true, ""],
+            4: [PROPERTY_GID, "Property", true, ""],
           }),
           table: { endRowIndex: 5 },
         },
@@ -370,16 +351,12 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               "c:prp:aaa",
               "Property",
               "Rent Amount",
-              false,
-              "number",
             ],
             5: [
               PROPERTY_GID,
               "c:prp:bbb",
               "Property",
               "Rent  Amount",
-              false,
-              "number",
             ],
           }),
           table: { endRowIndex: 6 },
@@ -408,7 +385,6 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     TEST_SHEET_GID,
     "Test",
     true,
-    true,
     "test",
   ];
 
@@ -424,7 +400,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     };
   }
 
-  it("corrects sheetTitle and header, emitting live samples even when leftover cells disagree", () => {
+  it("corrects sheetTitle and header, emitting live samples", () => {
     stubSheetsService({
       sheets: [
         seedSheetConfigFixture(),
@@ -438,11 +414,10 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
               "c:test:corr01",
               "Stale Title",
               "Stale Header",
-              true,
-              "string",
+              null,
               true,
             ],
-            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID", true, "string"],
+            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -460,15 +435,12 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator, ["isFormula", "valueTitle"]);
+    syncColumnConfigOperator(operator);
     const identity = operator.sheet.columns("sheetTitle", "header");
-    const leftover = operator.sheet.columns("isFormula", "valueTitle");
     const emitted = operator.newColumnConfigs().test;
 
     expect(identity.sheetTitle.value(4)).toBe("Test");
     expect(identity.header.value(4)).toBe("Amount");
-    expect(leftover.isFormula.value(4)).toBe(true);
-    expect(leftover.valueTitle.value(4)).toBe("string");
     expect(emitted?.amount).toMatchObject({
       valueName: "number",
       isFormula: false,
@@ -478,8 +450,6 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
     expect(identity.sheetTitle.value(5)).toBe("Test");
     expect(identity.header.value(5)).toBe("ID");
-    expect(leftover.isFormula.value(5)).toBe(true);
-    expect(leftover.valueTitle.value(5)).toBe("string");
     expect(emitted?.id).toMatchObject({
       valueName: "id",
       isFormula: false,
@@ -495,7 +465,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr05", null, null, true, "string"],
+            4: [TEST_SHEET_GID, "c:test:corr05", null, null],
           }),
           table: { endRowIndex: 5 },
         },
@@ -513,14 +483,11 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator, ["isFormula", "valueTitle"]);
+    syncColumnConfigOperator(operator);
     const identity = operator.sheet.columns("sheetTitle", "header");
-    const leftover = operator.sheet.columns("isFormula", "valueTitle");
 
     expect(identity.sheetTitle.value(4)).toBe("Test");
     expect(identity.header.value(4)).toBe("Amount");
-    expect(leftover.isFormula.value(4)).toBe(true);
-    expect(leftover.valueTitle.value(4)).toBe("string");
     expect(operator.newColumnConfigs().test?.amount).toMatchObject({
       valueName: "number",
       isFormula: false,
@@ -536,14 +503,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [
-              TEST_SHEET_GID,
-              "c:test:corr03",
-              "Test",
-              "Description",
-              false,
-              "string",
-            ],
+            4: [TEST_SHEET_GID, "c:test:corr03", "Test", "Description"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -566,10 +526,9 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator, ["valueTitle"]);
+    syncColumnConfigOperator(operator);
     const identity = operator.sheet.columns("sheetTitle", "header");
 
-    expect(operator.sheet.column("valueTitle").value(4)).toBe("string");
     expect(operator.activeValueTitles()).toEqual(["Transaction Description"]);
     expect(operator.newColumnConfigs().test?.description?.valueName).toBe(
       "transactionDescription",
@@ -587,14 +546,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [
-              TEST_SHEET_GID,
-              "c:test:corr04",
-              "Test",
-              "Move-in Date",
-              false,
-              "string",
-            ],
+            4: [TEST_SHEET_GID, "c:test:corr04", "Test", "Move-in Date"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -612,11 +564,8 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator, ["isFormula", "valueTitle"]);
-    const leftover = operator.sheet.columns("isFormula", "valueTitle");
+    syncColumnConfigOperator(operator);
 
-    expect(leftover.isFormula.value(4)).toBe(false);
-    expect(leftover.valueTitle.value(4)).toBe("string");
     expect(operator.newColumnConfigs().test?.moveInDate).toMatchObject({
       valueName: "date",
       isFormula: true,
@@ -649,8 +598,6 @@ function syncColumnsUnderTest({
       columnId,
       "Test",
       "",
-      false,
-      "",
     ];
   });
   stubSheetsService({
@@ -660,7 +607,7 @@ function syncColumnsUnderTest({
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
-          4: [TEST_SHEET_GID, "Test", true, true, "test"],
+          4: [TEST_SHEET_GID, "Test", true, "test"],
         }),
         table: { endRowIndex: 5 },
       },
@@ -967,9 +914,9 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
             // Api-access sheet: gets a missing column ID filled in.
-            4: [TEST_SHEET_GID, "Test", true, true, "tst"],
+            4: [TEST_SHEET_GID, "Test", true, "tst"],
 
-            5: [UNRESOLVABLE_GID, "Ghost", true, false, "gho"],
+            5: [UNRESOLVABLE_GID, "Ghost", false, "gho"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -1008,7 +955,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "Test", true, true, "tst"],
+            4: [TEST_SHEET_GID, "Test", true, "tst"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -1049,10 +996,8 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     "Column ID",
     "Sheet title",
     "Header",
-    "Is formula",
-    "Value title",
-    "Empty allowed",
     "Custom default value",
+    "Empty value allowed",
   ];
 
   function seedColumnConfigDescribingItselfBelowABlankTopDataRow() {
@@ -1063,7 +1008,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [COLUMN_CONFIG_GID, "Column Config", false, true, "ccf"],
+            4: [COLUMN_CONFIG_GID, "Column Config", true, "ccf"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -1079,8 +1024,6 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
               cc.sheetGid.columnId,
               "Stale Title",
               "Stale Header",
-              true,
-              "number",
             ],
           }),
           table: { endRowIndex: 6 },
@@ -1098,7 +1041,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [COLUMN_CONFIG_GID, "Column Config", false, false, "ccf"],
+            4: [COLUMN_CONFIG_GID, "Column Config", false, "ccf"],
           }),
           table: { endRowIndex: 5 },
         },

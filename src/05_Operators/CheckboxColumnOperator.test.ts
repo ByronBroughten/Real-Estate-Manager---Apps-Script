@@ -169,7 +169,7 @@ describe("CheckboxColumnOperator, column constraint", () => {
     assertType<
       IsExactly<
         CheckboxColumnName<"sheetConfig">,
-        "hasIdColumn" | "letApiAccess"
+        "letApiAccess"
       >
     >(true);
   });

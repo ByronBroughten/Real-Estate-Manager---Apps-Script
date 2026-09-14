@@ -315,7 +315,6 @@ describe("RowIndexed.clearValues", () => {
       [1, ""],
       [2, ""],
       [3, ""],
-      [4, ""],
     ]);
     expect(sheet.topRow.isBlank).toBe(true);
   });
@@ -361,7 +360,7 @@ describe("SheetIndexed.appendRowDefault", () => {
   });
 
   it("skips a configured column missing from the column-ID row and writes the rest", () => {
-    const omittedColumnId = columnConfigs.sheetConfig.hasIdColumn.columnId;
+    const omittedColumnId = columnConfigs.sheetConfig.letApiAccess.columnId;
     const columnIdRow = sheetConfigColumnIdRow.filter(
       (columnId) => columnId !== omittedColumnId,
     );
@@ -372,7 +371,7 @@ describe("SheetIndexed.appendRowDefault", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: columnIdRow,
-            4: [null, null, null, null, true],
+            4: [null, null, null, true],
           }),
           table: { endRowIndex: 5 },
         },
@@ -391,8 +390,7 @@ describe("SheetIndexed.appendRowDefault", () => {
     expect(writtenValuesByColIndex(batchUpdateCalls)).toEqual([
       [0, ""],
       [1, ""],
-      [2, false],
-      [3, ""],
+      [2, ""],
     ]);
   });
 });

@@ -22,7 +22,6 @@ const NEW_SHEET_GID = 999002;
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
   sc.sheetTitle.columnId,
-  sc.hasIdColumn.columnId,
   sc.letApiAccess.columnId,
   sc.idPrefix.columnId,
 ];
@@ -30,7 +29,6 @@ const sheetConfigColumnIdRow = [
 const existingPropertyConfigRow = [
   PROPERTY_GID,
   "Property",
-  false,
   true,
   "prp",
 ];
@@ -50,16 +48,10 @@ beforeEach(() => {
 // ss.raw.activeSheetGids (prepFetchForSync's own loop, and hence
 // skipFetchingProperties below) with every live sheet, including ones with
 // no Sheet Config row yet.
-function syncSheetConfigOperator(
-  operator: SheetConfigOperator,
-  leftoverColumns: "hasIdColumn"[] = [],
-): void {
+function syncSheetConfigOperator(operator: SheetConfigOperator): void {
   operator.ss.raw.fetchAllSheetProperties();
   operator.sheet.prepFetchColumnsFull("letApiAccess");
   operator.prepFetchForSync();
-  if (leftoverColumns.length > 0) {
-    operator.sheet.prepFetchColumnsFull(...leftoverColumns);
-  }
   operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
   operator.syncToSpreadsheet();
 }
@@ -123,7 +115,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
             // A human already turned on API access for this sheet, but no
             // deploy has run since — this run's own live sync is the only
             // place the mapping exists.
-            4: [NEW_SHEET_GID, "Brand New Sheet", false, true, ""],
+            4: [NEW_SHEET_GID, "Brand New Sheet", true, ""],
           }),
           table: { endRowIndex: 5 },
         },
@@ -154,7 +146,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", null, null, "prp"],
+            4: [PROPERTY_GID, "Property", null, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -184,7 +176,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
             4: existingPropertyConfigRow,
-            5: [NEW_SHEET_GID, "Gone", false, true, "gon"],
+            5: [NEW_SHEET_GID, "Gone", true, "gon"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -207,7 +199,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", null, true, null],
+            4: [PROPERTY_GID, "Property", true, null],
           }),
           table: { endRowIndex: 5 },
         },
@@ -230,7 +222,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     });
   });
 
-  it("emits has-ID from the header row even when the leftover checkbox disagrees, and leaves that cell alone", () => {
+  it("emits has-ID from the described sheet's header row and still corrects the sheet title", () => {
     stubSheetsService({
       sheets: [
         {
@@ -238,7 +230,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Stale Title", true, true, "prp"],
+            4: [PROPERTY_GID, "Stale Title", true, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -252,10 +244,9 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     });
 
     const operator = SheetConfigOperator.init();
-    syncSheetConfigOperator(operator, ["hasIdColumn"]);
+    syncSheetConfigOperator(operator);
 
     expect(operator.sheet.column("sheetTitle").value(4)).toBe("Property");
-    expect(operator.sheet.column("hasIdColumn").value(4)).toBe(true);
     expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(false);
   });
 
@@ -267,7 +258,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", false, true, "prp"],
+            4: [PROPERTY_GID, "Property", true, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -281,9 +272,8 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     });
 
     const operator = SheetConfigOperator.init();
-    syncSheetConfigOperator(operator, ["hasIdColumn"]);
+    syncSheetConfigOperator(operator);
 
-    expect(operator.sheet.column("hasIdColumn").value(4)).toBe(false);
     expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(true);
   });
 });
