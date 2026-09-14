@@ -43,7 +43,6 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     this.sheet.prepFetchColumnsFull(
       "sheetGid",
       "sheetTitle",
-      "hasIdColumn",
       "idPrefix",
       "letApiAccess",
     );
@@ -72,7 +71,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
   }
   private _updateProgrammaticValues(): void {
-    const col = this.sheet.columns("sheetGid", "sheetTitle", "hasIdColumn");
+    const col = this.sheet.columns("sheetGid", "sheetTitle");
     let updatedValues = 0;
     this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       const sheetTitle = col.sheetTitle.valueOrEmpty(rowIndex);
@@ -80,12 +79,6 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       const activeSheet = this.ss.raw.sheet(sheetGid);
       if (sheetTitle !== activeSheet.title) {
         col.sheetTitle.cell(rowIndex).updateValue(activeSheet.title);
-        updatedValues++;
-      }
-      const hasIdCol = col.hasIdColumn.valueOrEmpty(rowIndex);
-      const actualHasIdCol = activeSheet.meta.headerRow.hasValue("ID");
-      if (hasIdCol !== actualHasIdCol) {
-        col.hasIdColumn.cell(rowIndex).updateValue(actualHasIdCol);
         updatedValues++;
       }
     });
@@ -108,7 +101,6 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     const col = this.sheet.columns(
       "sheetGid",
       "sheetTitle",
-      "hasIdColumn",
       "idPrefix",
       "letApiAccess",
     );
@@ -118,10 +110,13 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       if (!col.letApiAccess.valueOrEmpty(rowIndex)) return;
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.titleToName(title);
+      const sheetGid = col.sheetGid.value(rowIndex);
       sheetConfigs[sheetName] = {
-        sheetGid: col.sheetGid.value(rowIndex),
+        sheetGid,
         idPrefix: col.idPrefix.valueOrEmpty(rowIndex),
-        hasIdColumn: col.hasIdColumn.value(rowIndex),
+        hasIdColumn: this.ss.raw
+          .sheet(sheetGid)
+          .meta.headerRow.hasValue(this.schema.idHeader),
       };
     });
     return sheetConfigs;

@@ -41,8 +41,17 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   get sheetConfigSheet(): SheetConfigOperator["sheet"] {
     return this.sheetConfigOperator.sheet;
   }
-  get activeValueTitles(): string[] {
-    return this.sheet.column("valueTitle").valueArrFilterEmpty;
+  activeValueTitles(): string[] {
+    const col = this.sheet.columns("sheetGid", "columnId");
+    return this.sheet.rowIndexesActiveWithData.map((rowIndex) =>
+      this._describedColumn(
+        col.sheetGid.value(rowIndex),
+        col.columnId.value(rowIndex),
+      ).activeValueTitle(),
+    );
+  }
+  private _describedColumn(sheetGid: number, columnId: string) {
+    return this.ss.raw.sheet(sheetGid).meta.columnByActiveId(columnId);
   }
   // Derived fresh each call, not cached — a stored field goes stale across
   // this coordinator's per-access getter rebuilds.
@@ -63,8 +72,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "columnId",
       "sheetTitle",
       "header",
-      "isFormula",
-      "valueTitle",
       "emptyValueAllowed",
     );
   }
@@ -196,8 +203,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "columnId",
       "sheetTitle",
       "header",
-      "isFormula",
-      "valueTitle",
     );
     let updatedValues = 0;
     this.untypedHeadersBySheetTitle.clear();
@@ -212,22 +217,10 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
-      const columnRaw = sheetRaw.meta.columnByActiveId(columnId);
+      const columnRaw = this._describedColumn(sheetGid, columnId);
       const actualHeader = columnRaw.activeHeader;
       if (col.header.valueOrEmpty(rowIndex) !== actualHeader) {
         col.header.cell(rowIndex).updateValue(actualHeader);
-        updatedValues++;
-      }
-
-      const actualIsFormula = columnRaw.activeIsFormula;
-      if (col.isFormula.valueOrEmpty(rowIndex) !== actualIsFormula) {
-        col.isFormula.cell(rowIndex).updateValue(actualIsFormula);
-        updatedValues++;
-      }
-
-      const actualValueTitle = columnRaw.activeValueTitle();
-      if (col.valueTitle.valueOrEmpty(rowIndex) !== actualValueTitle) {
-        col.valueTitle.cell(rowIndex).updateValue(actualValueTitle);
         updatedValues++;
       }
 
@@ -255,8 +248,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "sheetGid",
       "columnId",
       "header",
-      "isFormula",
-      "valueTitle",
       "emptyValueAllowed",
     );
     const columnConfigs: ColumnConfigsGeneric = {};
@@ -264,7 +255,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       const columnId = col.columnId.value(rowIndex);
       const sheetGid = col.sheetGid.value(rowIndex);
       const header = col.header.value(rowIndex);
-      const valueTitle = col.valueTitle.value(rowIndex);
       const sheetName = sheetNamesByGid.get(sheetGid);
       if (!sheetName) {
         throw new Error(
@@ -283,11 +273,14 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
             `derived from header "${header}" on sheet "${sheetName}".`,
         );
       }
+      const describedColumn = this._describedColumn(sheetGid, columnId);
       tableColumnConfigs[columnName] = {
         columnId,
         header,
-        valueName: this.schema.titleToName(valueTitle) as ValueName,
-        isFormula: col.isFormula.value(rowIndex),
+        valueName: this.schema.titleToName(
+          describedColumn.activeValueTitle(),
+        ) as ValueName,
+        isFormula: describedColumn.activeIsFormula,
         emptyValueAllowed: col.emptyValueAllowed.value(rowIndex),
         customDefaultValue: null,
       };

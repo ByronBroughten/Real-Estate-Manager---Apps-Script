@@ -78,12 +78,11 @@ function initSyncedColumnConfigOperator(): ColumnConfigOperator {
     "sheetGid",
     "columnId",
     "header",
-    "isFormula",
-    "valueTitle",
     "emptyValueAllowed",
   );
   columnConfigOperator.ss.fetchAllPrepped();
   sheetConfigOperator.syncToSpreadsheet();
+  columnConfigOperator.fetchAfterSheetConfigSynced();
   return columnConfigOperator;
 }
 
@@ -128,12 +127,22 @@ function stubGroupedColumnConfigSheets(): void {
       {
         sheetId: PROPERTY_GID,
         title: "Property",
-        rows: buildGridRows({ 3: [] }),
+        rows: buildGridRows({
+          0: ["c:prp:aaa", "c:prp:bbb"],
+          3: ["Rent Amount", "Notes"],
+          4: [42, "a note"],
+        }),
+        table: { endRowIndex: 5 },
       },
       {
         sheetId: NEW_SHEET_GID,
         title: "Brand New Sheet",
-        rows: buildGridRows({ 3: [] }),
+        rows: buildGridRows({
+          0: ["c:999002:ccc"],
+          3: ["Some Field"],
+          4: ["x"],
+        }),
+        table: { endRowIndex: 5 },
       },
     ],
   });
@@ -143,11 +152,17 @@ function stubGroupedColumnConfigSheets(): void {
 // CLAUDE.md/README on why Sheet Config and Column Config sync together),
 // stopping short of the final batchUpdateGSheets flush these tests don't
 // need.
-function syncColumnConfigOperator(operator: ColumnConfigOperator): void {
+function syncColumnConfigOperator(
+  operator: ColumnConfigOperator,
+  leftoverColumns: ("isFormula" | "valueTitle")[] = [],
+): void {
   operator.ss.fetchAllSheetProperties();
   const sheetConfigOperator = operator.sheetConfigOperator;
   sheetConfigOperator.prepFetchForSync();
   operator.prepFetchWithSheetConfig();
+  if (leftoverColumns.length > 0) {
+    operator.sheet.prepFetchColumnsFull(...leftoverColumns);
+  }
   operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
   sheetConfigOperator.syncToSpreadsheet();
   operator.fetchAfterSheetConfigSynced();
@@ -255,7 +270,12 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         {
           sheetId: PROPERTY_GID,
           title: "Property",
-          rows: buildGridRows({ 3: [] }),
+          rows: buildGridRows({
+            0: ["c:prp:aaa", "c:prp:bbb"],
+            3: ["Rent Amount", "Notes"],
+            4: [42, "a note"],
+          }),
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -367,7 +387,12 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
         {
           sheetId: PROPERTY_GID,
           title: "Property",
-          rows: buildGridRows({ 3: [] }),
+          rows: buildGridRows({
+            0: ["c:prp:aaa", "c:prp:bbb"],
+            3: ["Rent Amount", "Rent  Amount"],
+            4: [1, 2],
+          }),
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -399,7 +424,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     };
   }
 
-  it("corrects sheetTitle/header/isFormula and infers a primitive or Base-ID valueName", () => {
+  it("corrects sheetTitle and header, emitting live samples even when leftover cells disagree", () => {
     stubSheetsService({
       sheets: [
         seedSheetConfigFixture(),
@@ -416,7 +441,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
               true,
               "string",
             ],
-            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID", false, "string"],
+            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID", true, "string"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -434,28 +459,31 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator);
-    const col = operator.sheet.columns(
-      "sheetTitle",
-      "header",
-      "isFormula",
-      "valueTitle",
-    );
+    syncColumnConfigOperator(operator, ["isFormula", "valueTitle"]);
+    const identity = operator.sheet.columns("sheetTitle", "header");
+    const leftover = operator.sheet.columns("isFormula", "valueTitle");
+    const emitted = operator.newColumnConfigs().test;
 
-    expect(col.sheetTitle.value(4)).toBe("Test");
-    expect(col.header.value(4)).toBe("Amount");
-    expect(col.isFormula.value(4)).toBe(false);
-    expect(col.valueTitle.value(4)).toBe("number");
+    expect(identity.sheetTitle.value(4)).toBe("Test");
+    expect(identity.header.value(4)).toBe("Amount");
+    expect(leftover.isFormula.value(4)).toBe(true);
+    expect(leftover.valueTitle.value(4)).toBe("string");
+    expect(emitted?.amount).toMatchObject({
+      valueName: "number",
+      isFormula: false,
+    });
 
-    // Already-correct fields stay untouched; only valueName (stale
-    // "string") gets the "ID" -> "id" special case applied.
-    expect(col.sheetTitle.value(5)).toBe("Test");
-    expect(col.header.value(5)).toBe("ID");
-    expect(col.isFormula.value(5)).toBe(false);
-    expect(col.valueTitle.value(5)).toBe("id");
+    expect(identity.sheetTitle.value(5)).toBe("Test");
+    expect(identity.header.value(5)).toBe("ID");
+    expect(leftover.isFormula.value(5)).toBe(true);
+    expect(leftover.valueTitle.value(5)).toBe("string");
+    expect(emitted?.id).toMatchObject({
+      valueName: "id",
+      isFormula: false,
+    });
   });
 
-  it("fills in a row whose every programmatic cell has never been filled in", () => {
+  it("fills in a row whose identity cells have never been filled in", () => {
     stubSheetsService({
       sheets: [
         seedSheetConfigFixture(),
@@ -464,7 +492,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr05", null, null, null, null],
+            4: [TEST_SHEET_GID, "c:test:corr05", null, null, true, "string"],
           }),
           table: { endRowIndex: 5 },
         },
@@ -482,18 +510,18 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator);
-    const col = operator.sheet.columns(
-      "sheetTitle",
-      "header",
-      "isFormula",
-      "valueTitle",
-    );
+    syncColumnConfigOperator(operator, ["isFormula", "valueTitle"]);
+    const identity = operator.sheet.columns("sheetTitle", "header");
+    const leftover = operator.sheet.columns("isFormula", "valueTitle");
 
-    expect(col.sheetTitle.value(4)).toBe("Test");
-    expect(col.header.value(4)).toBe("Amount");
-    expect(col.isFormula.value(4)).toBe(false);
-    expect(col.valueTitle.value(4)).toBe("number");
+    expect(identity.sheetTitle.value(4)).toBe("Test");
+    expect(identity.header.value(4)).toBe("Amount");
+    expect(leftover.isFormula.value(4)).toBe(true);
+    expect(leftover.valueTitle.value(4)).toBe("string");
+    expect(operator.newColumnConfigs().test?.amount).toMatchObject({
+      valueName: "number",
+      isFormula: false,
+    });
   });
 
   it("detects a named valueConfig from the column's live data-validation formula", () => {
@@ -535,13 +563,16 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator);
-    const col = operator.sheet.columns("sheetTitle", "header", "valueTitle");
+    syncColumnConfigOperator(operator, ["valueTitle"]);
+    const identity = operator.sheet.columns("sheetTitle", "header");
 
-    expect(col.valueTitle.value(4)).toBe("Transaction Description");
-    // Already-correct fields are left alone.
-    expect(col.sheetTitle.value(4)).toBe("Test");
-    expect(col.header.value(4)).toBe("Description");
+    expect(operator.sheet.column("valueTitle").value(4)).toBe("string");
+    expect(operator.activeValueTitles()).toEqual(["Transaction Description"]);
+    expect(operator.newColumnConfigs().test?.description?.valueName).toBe(
+      "transactionDescription",
+    );
+    expect(identity.sheetTitle.value(4)).toBe("Test");
+    expect(identity.header.value(4)).toBe("Description");
   });
 
   it("detects a live formula and a date-formatted number", () => {
@@ -578,11 +609,15 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
 
     const operator = ColumnConfigOperator.init();
-    syncColumnConfigOperator(operator);
-    const col = operator.sheet.columns("isFormula", "valueTitle");
+    syncColumnConfigOperator(operator, ["isFormula", "valueTitle"]);
+    const leftover = operator.sheet.columns("isFormula", "valueTitle");
 
-    expect(col.isFormula.value(4)).toBe(true);
-    expect(col.valueTitle.value(4)).toBe("date");
+    expect(leftover.isFormula.value(4)).toBe(false);
+    expect(leftover.valueTitle.value(4)).toBe("string");
+    expect(operator.newColumnConfigs().test?.moveInDate).toMatchObject({
+      valueName: "date",
+      isFormula: true,
+    });
   });
 });
 
@@ -651,10 +686,9 @@ function syncColumnsUnderTest({
 }
 
 function valueTitles(operator: ColumnConfigOperator, count: number) {
-  const col = operator.sheet.columns("valueTitle");
-  return Array.from({ length: count }, (_, index) =>
-    col.valueTitle.value(4 + index),
-  );
+  const titles = operator.activeValueTitles();
+  expect(titles).toHaveLength(count);
+  return titles;
 }
 
 // The reported bug's shape: a sheet emptied by a run that consumed its input.
@@ -826,7 +860,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
       topDataRow: [{ value: 42, isFormula: true }],
     });
 
-    expect(operator.sheet.column("isFormula").value(4)).toBe(true);
+    expect(operator.newColumnConfigs().test?.balance?.isFormula).toBe(true);
     expect(operator.untypedColumnsSummary()).toContain(
       "1 column(s) across 1 sheet(s)",
     );
@@ -856,24 +890,25 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
 });
 
 describe("ColumnConfigOperator.syncToSpreadsheet -> a sheet whose only data row is blank", () => {
-  it("completes the sync and fills in every programmatic cell", () => {
+  it("completes the sync and fills in every identity cell", () => {
     const operator = syncBlankSheetUnderTest({
       headers: ["Biller Name", "Amount"],
       columnDeclaredTypes: { 1: "CURRENCY" },
     });
-    const col = operator.sheet.columns("sheetTitle", "header", "valueTitle");
+    const col = operator.sheet.columns("sheetTitle", "header");
+    const emitted = operator.newColumnConfigs().test;
 
     expect(col.sheetTitle.value(4)).toBe("Test");
     expect(col.header.value(4)).toBe("Biller Name");
-    expect(col.valueTitle.value(4)).toBe("string");
+    expect(emitted?.billerName?.valueName).toBe("string");
     expect(col.header.value(5)).toBe("Amount");
-    expect(col.valueTitle.value(5)).toBe("number");
+    expect(emitted?.amount?.valueName).toBe("number");
   });
 
   it("records a column as no formula when the blank row proves nothing", () => {
     const operator = syncBlankSheetUnderTest({ headers: ["Amount"] });
 
-    expect(operator.sheet.column("isFormula").value(4)).toBe(false);
+    expect(operator.newColumnConfigs().test?.amount?.isFormula).toBe(false);
   });
 
   it("notes the sheets whose guesses had no sample row behind them", () => {
@@ -901,10 +936,12 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> a sheet whose only data row 
       headers: ["Biller Name"],
       topDataRowAbsence: "rowsWithNoGridBlock",
     });
-    const col = operator.sheet.columns("header", "valueTitle");
+    const col = operator.sheet.columns("header");
 
     expect(col.header.value(4)).toBe("Biller Name");
-    expect(col.valueTitle.value(4)).toBe("string");
+    expect(operator.newColumnConfigs().test?.billerName?.valueName).toBe(
+      "string",
+    );
   });
 
   it("says nothing about a sample row that holds data", () => {
@@ -1094,17 +1131,15 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
 
     const operator = ColumnConfigOperator.init();
     syncColumnConfigOperator(operator);
-    const col = operator.sheet.columns(
-      "sheetTitle",
-      "header",
-      "isFormula",
-      "valueTitle",
-    );
+    const col = operator.sheet.columns("sheetTitle", "header");
+    const emitted = operator.newColumnConfigs().columnConfig;
 
     expect(operator.sheet.rowIndexesActive).not.toContain(4);
     expect(col.sheetTitle.value(5)).toBe("Column Config");
     expect(col.header.value(5)).toBe("Sheet GID");
-    expect(col.isFormula.value(5)).toBe(false);
-    expect(col.valueTitle.value(5)).toBe("string");
+    expect(emitted?.sheetGid).toMatchObject({
+      valueName: "string",
+      isFormula: false,
+    });
   });
 });

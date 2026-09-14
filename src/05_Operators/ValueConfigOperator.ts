@@ -32,7 +32,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   fetchAfterColumnConfigSynced() {
     this.columnConfigOperator.assertSyncedToSpreadsheet();
     this.valueConfigSync.activeHeaders = new Set(
-      this.columnConfigOperator.activeValueTitles.filter(
+      this.columnConfigOperator.activeValueTitles().filter(
         (valueName) => !isBaseValueName(valueName),
       ),
     );

@@ -111,7 +111,7 @@ function seedFixture(
         title: "Test",
         // Row 4 (the top data row) must be present, even blank, and a table
         // range declared, now that
-        // ColumnConfigOperator._updateProgrammaticValues reads both (for
+        // ColumnConfigOperator emit samples both (for
         // the live isFormula/valueName facts, the latter via the table's
         // column data-validation rules) for every api-access sheet. The
         // header row (3) needs real text — newColumnConfigs() now throws
@@ -141,7 +141,7 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
     expect(orchestrator.sheetConfigOperator.newSheetConfigs().test).toEqual({
       sheetGid: TEST_SHEET_GID,
       idPrefix: "test",
-      hasIdColumn: true,
+      hasIdColumn: false,
     });
   });
 
@@ -166,8 +166,8 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     expect(parsed.sheetConfigs).toContain('"test"');
     expect(typeof parsed.valueConfigs).toBe("string");
     // The "test" sheet's column ID was gathered and appended to Column
-    // Config as part of the sync, then given its real header/valueName by
-    // _updateProgrammaticValues before toFileSource read it back out.
+    // Config as part of the sync, then given its real header by
+    // _updateProgrammaticValues; emit samples valueName from the live column.
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
   });
 

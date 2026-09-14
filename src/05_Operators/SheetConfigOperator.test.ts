@@ -50,10 +50,16 @@ beforeEach(() => {
 // ss.raw.activeSheetGids (prepFetchForSync's own loop, and hence
 // skipFetchingProperties below) with every live sheet, including ones with
 // no Sheet Config row yet.
-function syncSheetConfigOperator(operator: SheetConfigOperator): void {
+function syncSheetConfigOperator(
+  operator: SheetConfigOperator,
+  leftoverColumns: "hasIdColumn"[] = [],
+): void {
   operator.ss.raw.fetchAllSheetProperties();
   operator.sheet.prepFetchColumnsFull("letApiAccess");
   operator.prepFetchForSync();
+  if (leftoverColumns.length > 0) {
+    operator.sheet.prepFetchColumnsFull(...leftoverColumns);
+  }
   operator.ss.fetchAllPrepped({ skipFetchingProperties: true });
   operator.syncToSpreadsheet();
 }
@@ -72,7 +78,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           table: { endRowIndex: 5 },
         },
         // Referenced by the existing row above; no "ID" header, so
-        // hasIdColumn should stay false (a no-op correction).
+        // hasIdColumn is emitted false from the header-row sample.
         {
           sheetId: PROPERTY_GID,
           title: "Property",
@@ -222,5 +228,62 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       idPrefix: "",
       hasIdColumn: false,
     });
+  });
+
+  it("emits has-ID from the header row even when the leftover checkbox disagrees, and leaves that cell alone", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Stale Title", true, true, "prp"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: ["Name"] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+    syncSheetConfigOperator(operator, ["hasIdColumn"]);
+
+    expect(operator.sheet.column("sheetTitle").value(4)).toBe("Property");
+    expect(operator.sheet.column("hasIdColumn").value(4)).toBe(true);
+    expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(false);
+  });
+
+  it("emits has-ID true when the described sheet's header row has the ID header", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Property", false, true, "prp"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: ["ID", "Name"] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+    syncSheetConfigOperator(operator, ["hasIdColumn"]);
+
+    expect(operator.sheet.column("hasIdColumn").value(4)).toBe(false);
+    expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(true);
   });
 });
