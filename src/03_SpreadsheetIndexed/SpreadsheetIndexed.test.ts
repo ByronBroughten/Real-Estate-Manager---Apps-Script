@@ -7,6 +7,7 @@ import {
   blankSheetConfigRow,
   filledSheetConfigRow,
   SHEET_CONFIG_GID,
+  sheetConfigColumnIdRow,
   stubSheetConfigSheet,
 } from "../testSupport/fakeSheetConfigSheet";
 import {
@@ -358,6 +359,42 @@ describe("SheetIndexed.appendRowDefault", () => {
       /never fetched.*Prefetch that row first/,
     );
   });
+
+  it("skips a configured column missing from the column-ID row and writes the rest", () => {
+    const omittedColumnId = columnConfigs.sheetConfig.hasIdColumn.columnId;
+    const columnIdRow = sheetConfigColumnIdRow.filter(
+      (columnId) => columnId !== omittedColumnId,
+    );
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: columnIdRow,
+            4: [null, null, null, null, true],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    const sheet = ssi.sheet(SHEET_CONFIG_GID);
+    sheet.topRow.prepFetchFull();
+    ssi.fetchAllPrepped();
+    sheet.appendRowDefault();
+    ssi.raw.batchUpdateGSheets();
+
+    expect(writtenValuesByColIndex(batchUpdateCalls)).toEqual([
+      [0, ""],
+      [1, ""],
+      [2, false],
+      [3, ""],
+    ]);
+  });
 });
 
 function writtenValuesByColIndex(
@@ -366,9 +403,14 @@ function writtenValuesByColIndex(
   return calls
     .flatMap((call) => call.requests ?? [])
     .filter((request) => request.updateCells)
-    .map((request) => [
-      request.updateCells?.range?.startColumnIndex,
-      request.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue
-        ?.stringValue,
-    ]);
+    .map((request) => {
+      const userEnteredValue =
+        request.updateCells?.rows?.[0]?.values?.[0]?.userEnteredValue;
+      return [
+        request.updateCells?.range?.startColumnIndex,
+        userEnteredValue?.stringValue ??
+          userEnteredValue?.boolValue ??
+          userEnteredValue?.numberValue,
+      ];
+    });
 }

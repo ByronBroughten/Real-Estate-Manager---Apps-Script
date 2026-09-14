@@ -14,9 +14,8 @@ import {
  * (`idPrefixIsUniqueOrEmpty`), so a test can assert that a formula cell was
  * left alone without asserting over thirty columns.
  *
- * The column ids are the real committed ones, and the columnId row lists every
- * column the config declares — anything reading a row by its configured
- * columns resolves each against this row, so a partial one would throw.
+ * The column ids are the real committed ones, and the default columnId row
+ * lists every column the config declares so clear / blank / wipe resolve each.
  */
 const sheetConfigColumns = columnConfigs.sheetConfig;
 

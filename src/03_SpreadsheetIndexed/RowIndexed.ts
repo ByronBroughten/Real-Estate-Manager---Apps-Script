@@ -65,7 +65,7 @@ export class RowIndexed extends RowCommonIndexed {
   // A blank row needs no writes, but its reservation must lift either way.
   clearValues(): this {
     if (!this.isBlank) {
-      this._nonFormulaColumnIdsOnSheet.forEach((columnId) => {
+      this.sheet._nonFormulaColumnIdsOnSheet.forEach((columnId) => {
         this.updateValue(columnId, "");
       });
     }
@@ -80,14 +80,8 @@ export class RowIndexed extends RowCommonIndexed {
     }
   }
   private get _nonFormulaCellsActive(): CellIndexed[] {
-    return this._nonFormulaColumnIdsOnSheet
+    return this.sheet._nonFormulaColumnIdsOnSheet
       .map((columnId) => this.cell(columnId))
       .filter((cell) => cell.isActive);
-  }
-  // A configured column the sheet doesn't have holds nothing to read or clear.
-  private get _nonFormulaColumnIdsOnSheet(): string[] {
-    return this.schema.nonFormulaColumnIds.filter((columnId) =>
-      this.sheet.meta.isActiveColumnId(columnId),
-    );
   }
 }
