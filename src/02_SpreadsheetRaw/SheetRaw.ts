@@ -28,10 +28,12 @@ export class SheetRaw extends SheetCommonRaw {
     return new SheetMetaRaw(this.sheetRawProps);
   }
   get rowIndexesAreValid(): boolean {
-    return this.sheetState.rowIndexesAreValid;
+    return (
+      this.sheetState.knownTable === null || this.activeTable.rowIndexesAreValid
+    );
   }
   get hasFetchedProperties(): boolean {
-    return this.sheetState.activeTable !== null;
+    return this.sheetState.knownTable !== null;
   }
   get title(): string {
     if (this.sheetState.title === null) {
@@ -103,7 +105,7 @@ export class SheetRaw extends SheetCommonRaw {
     return this.sheetState.cellStateIsStale;
   }
   invalidateRowIndexes(): void {
-    this.sheetState.rowIndexesAreValid = false;
+    this.activeTable.invalidateRowIndexes();
   }
   invalidateCellState(): void {
     this.sheetState.rowStates.clear();
@@ -114,13 +116,10 @@ export class SheetRaw extends SheetCommonRaw {
     return this;
   }
   validateRowIndexes(): void {
-    this.sheetState.rowIndexesAreValid = true;
+    this.activeTable.validateRowIndexes();
   }
   ensureColIndexIsStale(colIndex: number): void {
-    this.sheetState.firstStaleColIndex = Math.min(
-      this.sheetState.firstStaleColIndex ?? Infinity,
-      colIndex,
-    );
+    this.activeTable.ensureColIndexIsStale(colIndex);
   }
   row(rowIndex: number): RowRaw {
     return new RowRaw({
@@ -270,7 +269,7 @@ export class SheetRaw extends SheetCommonRaw {
       },
     });
     if (startColumnIndex === this.activeTable.endColumnIndex) {
-      this.activeTable.endColumnIndex++;
+      this.activeTable.growEndColumnIndex();
     } else {
       this.ensureColIndexIsStale(startColumnIndex);
     }

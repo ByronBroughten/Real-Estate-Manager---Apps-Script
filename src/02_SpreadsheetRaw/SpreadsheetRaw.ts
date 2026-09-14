@@ -124,11 +124,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (state.hasExtraTables) {
       return { kind: "extra" };
     }
-    const table = state.activeTable;
-    if (!table || !this.schema.isInSheetGids(sheetGid)) {
+    if (state.knownTable === null || !this.schema.isInSheetGids(sheetGid)) {
       return { kind: "none" };
     }
-    const { startRowIndex, startColumnIndex } = table;
+    const { startRowIndex, startColumnIndex } = this.sheet(sheetGid).activeTable;
     if (this.schema.isTableStart(startRowIndex, startColumnIndex)) {
       return { kind: "well-placed" };
     }
@@ -158,7 +157,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ) {
         return;
       }
-      if (state.activeTable === null) {
+      if (state.knownTable === null) {
         absentTables.push({ sheetGid });
         return;
       }

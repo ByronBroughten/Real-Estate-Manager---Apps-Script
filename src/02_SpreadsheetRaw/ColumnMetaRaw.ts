@@ -47,10 +47,10 @@ export class ColumnMetaRaw<
     return facts;
   }
   get valueValidationStrings(): string[] {
-    return this.activeTable.columnValidationValues.get(this.colIndex) ?? [];
+    return this.sheet.activeTable.columnValidationValues.get(this.colIndex) ?? [];
   }
   get activeDeclaredColumnType(): string | undefined {
-    return this.activeTable.columnDeclaredTypes.get(this.colIndex);
+    return this.sheet.activeTable.columnDeclaredTypes.get(this.colIndex);
   }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,

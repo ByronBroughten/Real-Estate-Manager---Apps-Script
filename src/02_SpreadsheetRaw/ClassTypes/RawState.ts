@@ -30,22 +30,12 @@ export type RawSheetsState = Map<SheetId, RawSheetState>;
 
 export interface RawSheetState {
   title: string | null;
-  activeTable:
-    | ({
-        tableId: string;
-        startRowIndex: number; // tableHeaderRowIndex
-        endRowIndex: number; // lastRowIndex + 1
-        startColumnIndex: number;
-        endColumnIndex: number; // lastColumnIndex + 1
-      } & RawColumnPropertiesState)
-    | null;
+  knownTable: RawKnownTable | null;
   hasExtraTables: boolean;
-  rowIndexesAreValid: boolean;
   // A findReplace matches by content, so what it changed is unknowable locally.
   cellStateIsStale: boolean;
   hasFetchedColumnIds: boolean;
   isPrunedToSelection: boolean;
-  firstStaleColIndex: number | null;
   rowStates: RawRowStates;
   // A row an append has handed out, so a second append can't reuse it.
   reservedRowIndexes: Set<RowIndex>;
@@ -68,6 +58,15 @@ export interface RawCellFacts {
 export interface RawColumnPropertiesState {
   columnValidationValues: RawColumnValidationValues;
   columnDeclaredTypes: RawColumnDeclaredTypes;
+}
+export interface RawKnownTable extends RawColumnPropertiesState {
+  tableId: string;
+  startRowIndex: number; // tableHeaderRowIndex
+  endRowIndex: number; // lastRowIndex + 1
+  startColumnIndex: number;
+  endColumnIndex: number; // lastColumnIndex + 1
+  rowIndexesAreValid: boolean;
+  firstStaleColIndex: number | null;
 }
 export type RawColumnValidationValues = Map<ColIndex, string[]>;
 // Absent for a column left on Automatic, which is what makes it "untyped".

@@ -1,5 +1,6 @@
 import { Arr } from "../../utils/Arr";
 import { Obj } from "../../utils/Obj";
+import { ActiveTableRaw } from "../ActiveTableRaw";
 import type { SheetGridRangeProps } from "../ClassTypes/AccessorsRaw";
 import type {
   SheetChangeProps,
@@ -12,6 +13,9 @@ import { SheetRawBase } from "./SheetRawBase";
 export abstract class SheetCommonRaw extends SheetRawBase {
   // Abstract: importing SpreadsheetRaw here would close an init-time cycle.
   abstract get ss(): SpreadsheetRaw;
+  get activeTable(): ActiveTableRaw {
+    return new ActiveTableRaw(this.sheetRawProps);
+  }
   get fullTableColIndexes(): number[] {
     return Arr.indexesFromUntil(
       this.activeTable.startColumnIndex,
@@ -36,11 +40,9 @@ export abstract class SheetCommonRaw extends SheetRawBase {
   }
   // The table's own range, not the layout's: no table means no table columns.
   isTableColIndex(colIndex: number): boolean {
-    const table = this.sheetState.activeTable;
-    if (table === null) return false;
-    return (
-      colIndex >= table.startColumnIndex && colIndex < table.endColumnIndex
-    );
+    if (this.sheetState.knownTable === null) return false;
+    const { startColumnIndex, endColumnIndex } = this.activeTable;
+    return colIndex >= startColumnIndex && colIndex < endColumnIndex;
   }
   gatherFetchRange(gr: SheetGridRangeProps): this {
     this.rawState.fetcherGridRanges.push({

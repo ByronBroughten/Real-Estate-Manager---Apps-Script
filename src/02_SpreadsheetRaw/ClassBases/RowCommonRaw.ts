@@ -14,6 +14,16 @@ export abstract class RowCommonRaw extends RowRawBase {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
+  // A data row past the table's last row doesn't exist yet — append it instead.
+  validateIsWritable(): void {
+    super.validateIsWritable();
+    if (!this.isDataRow || this.rowIsActive()) return;
+    if (this.rowIndex >= this.sheet.activeTable.endRowIndex) {
+      throw new Error(
+        `Cannot write to row ${this.rowIndex} because it is past the last row of sheetGid ${this.sheetGid}'s table. Append the row first.`,
+      );
+    }
+  }
   ensureFullActiveDataCells() {
     this.ensureStateExists();
     this.sheet.fullTableColIndexes.forEach((colIndex) => {
@@ -117,7 +127,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     if (existing) return existing;
     const appendCells: GoogleAppsScript.Sheets.Schema.AppendCellsRequest = {
       sheetId: this.sheetGid,
-      tableId: `${this.activeTable.tableId}`,
+      tableId: `${this.sheet.activeTable.tableId}`,
       rows: [],
       fields: "userEnteredValue",
     };
