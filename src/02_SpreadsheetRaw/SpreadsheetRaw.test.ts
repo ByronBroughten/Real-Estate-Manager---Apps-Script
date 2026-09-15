@@ -741,6 +741,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
           title: "Leases",
           table: {
             endRowIndex: 11,
+            endColumnIndex: 3,
             columnDeclaredTypes: { 0: "TEXT" },
             columnValidationValues: { 0: ["=valueConfig[Notes]"] },
           },
@@ -755,14 +756,52 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
     const table = raw.sheet(111).activeTable;
     expect(table.tableId).toBe("fake-table-111");
+    expect(table.startRowIndex).toBe(TABLE_HEADER_ROW_INDEX);
     expect(table.startColumnIndex).toBe(START_TABLE_COL_INDEX);
+    expect(table.endColumnIndex).toBeGreaterThan(START_TABLE_COL_INDEX);
     expect(table.columnDeclaredTypes.get(0)).toBe("TEXT");
     expect(table.columnValidationValues.get(0)).toEqual([
       "=valueConfig[Notes]",
     ]);
+    expect(raw.sheet(111).isTableColIndex(START_TABLE_COL_INDEX)).toBe(true);
     expect(() => table.endRowIndex).toThrow(
       "Row indexes are not valid for sheetGid 111.",
     );
+    expect(() => {
+      table.endRowIndex = 12;
+    }).toThrow("Row indexes are not valid for sheetGid 111.");
+  });
+
+  it("leaves row indexes invalid after a properties fetch that follows a flushed row delete", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).delete();
+    raw.batchUpdateGSheets();
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(111).rowIndexesAreValid).toBe(false);
+    expect(() => raw.sheet(111).activeTable.endRowIndex).toThrow(
+      "Row indexes are not valid for sheetGid 111.",
+    );
+  });
+
+  it("restores row-index validity only when validateRowIndexes is called", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).delete();
+    raw.batchUpdateGSheets();
+    raw.sheet(111).validateRowIndexes();
+
+    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
   });
 
   it("sends same-sheet row deletions in descending startIndex order so an earlier deletion can't shift a later one out from under it", () => {
@@ -992,6 +1031,88 @@ describe("CellRaw.updateValue", () => {
   });
 });
 
+describe("SheetRaw column insert", () => {
+  function stubThreeColumnTable() {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb", "c:lse:ccc"],
+            4: ["r:lse:1", "left", "right"],
+          }),
+          table: { endRowIndex: 11, endColumnIndex: 3 },
+        },
+      ],
+    });
+  }
+
+  it("grows the exclusive end column for an insert at the Table end and does not mark columns stale", () => {
+    stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const insertedIndex = raw.sheetMeta(111).insertColumnAtEnd({
+      idPrefix: "lse",
+      header: "New",
+    });
+    raw.batchUpdateGSheets();
+
+    expect(insertedIndex).toBe(3);
+    expect(raw.sheet(111).activeTable.endColumnIndex).toBe(4);
+    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
+    expect(() =>
+      raw.sheet(111).row(5).cell(2).updateValue("kept"),
+    ).not.toThrow();
+    expect(() =>
+      raw.sheet(111).row(5).cell(insertedIndex).updateValue("new"),
+    ).not.toThrow();
+  });
+
+  it("marks column indexes at and to the right of a mid-Table insert stale, and leaves indexes to the left writable", () => {
+    stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).addSheetChangeToSave({
+      action: "insertColumn",
+      startColumnIndex: 1,
+    });
+    raw.batchUpdateGSheets();
+
+    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
+    expect(raw.sheet(111).activeTable.endColumnIndex).toBe(3);
+    expect(() =>
+      raw.sheet(111).row(5).cell(0).updateValue("left"),
+    ).not.toThrow();
+    expect(() => raw.sheet(111).row(5).cell(1).updateValue("mid")).toThrow(
+      "Column index 1 is stale. First stale column index is 1.",
+    );
+    expect(() => raw.sheet(111).row(5).cell(2).updateValue("right")).toThrow(
+      "Column index 2 is stale. First stale column index is 1.",
+    );
+  });
+
+  it("still reads a cell whose column index became stale, because reads do not consult the watermark", () => {
+    stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(4).gatherFetchFull();
+    raw.fetchAllGathered();
+    raw.sheet(111).addSheetChangeToSave({
+      action: "insertColumn",
+      startColumnIndex: 1,
+    });
+    raw.batchUpdateGSheets();
+
+    expect(raw.sheet(111).row(4).valueOrEmpty(1)).toBe("left");
+  });
+});
+
 describe("SpreadsheetRaw.discardQueuedChanges", () => {
   it("sends nothing for changes queued before the discard", () => {
     const { batchUpdateCalls } = stubSheetsService({
@@ -1006,6 +1127,7 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
 
     expect(batchUpdateCalls).toEqual([]);
     expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
   });
 
   it("still sends changes queued after the discard, so a failure handler can report status", () => {

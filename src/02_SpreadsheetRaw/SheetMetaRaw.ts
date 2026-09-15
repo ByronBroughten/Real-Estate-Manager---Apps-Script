@@ -1,5 +1,4 @@
 import { type CellValueName, type UniformRowName } from "../00_base/base";
-import { Arr } from "../utils/Arr";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
@@ -61,7 +60,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
     return this._tableColumnIds().includes(columnId);
   }
   colIndexOfActiveColumnId(columnId: string): number {
-    const tableColIndexes = this._tableColIndexes();
+    const tableColIndexes = this.fullTableColIndexes;
     const colIndex = this._tableColumnIds().findIndex((id) => id === columnId);
     if (colIndex === -1) {
       throw new Error(
@@ -72,7 +71,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
   }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;
-    this._tableColIndexes().forEach((colIndex) => {
+    this.fullTableColIndexes.forEach((colIndex) => {
       const colIdValue = this._columnIdInTable(colIndex);
       if (!colIdValue) {
         this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
@@ -118,17 +117,8 @@ export class SheetMetaRaw extends SheetCommonRaw {
     return value;
   }
   private _tableColumnIds(): string[] {
-    return this._tableColIndexes().map((colIndex) =>
+    return this.fullTableColIndexes.map((colIndex) =>
       this._columnIdInTable(colIndex),
     );
-  }
-  private _tableColIndexes(): number[] {
-    const table = this.sheetState.activeTable;
-    if (table === null) {
-      throw new Error(
-        `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
-      );
-    }
-    return Arr.indexesFromUntil(table.startColumnIndex, table.endColumnIndex);
   }
 }

@@ -36,7 +36,7 @@ export class ColumnRaw<
     return {
       sheetId: this.sheetGid,
       startRowIndex: this.schema.topDataRowIdx,
-      endRowIndex: this.activeTable.endRowIndex,
+      endRowIndex: this.sheet.activeTable.endRowIndex,
       startColumnIndex: this.colIndex,
       endColumnIndex: this.colIndex + 1,
     };
@@ -62,9 +62,9 @@ export class ColumnRaw<
   }
   // State is still mirrored row by row; only the queued request collapses.
   updateAllCells(change: RowCellChange<VN>): this {
-    this.validateColIndexNotStale();
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.sheet.validateNotPrunedToSelection();
-    const { endRowIndex } = this.activeTable;
+    const { endRowIndex } = this.sheet.activeTable;
     const { value } = change;
     this.sheet.rowIndexesFull.forEach((rowIndex) => {
       const row = this.sheet.row(rowIndex);
@@ -83,7 +83,7 @@ export class ColumnRaw<
     return this;
   }
   updateActiveCells(change: RowCellChange<VN>): this {
-    this.validateColIndexNotStale();
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     const rowIndexes = this.cellIndexesActive;
     const { value } = change;
     if (value !== undefined) {
@@ -104,7 +104,7 @@ export class ColumnRaw<
   }
   // Reaches every data row like a whole-column fill, so it takes the same guards.
   findReplace(terms: FindReplaceTerms): this {
-    this.validateColIndexNotStale();
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.sheet.validateNotPrunedToSelection();
     this.ss.findReplace({ ...terms, scope: { range: this.dataGridRange } });
     return this;

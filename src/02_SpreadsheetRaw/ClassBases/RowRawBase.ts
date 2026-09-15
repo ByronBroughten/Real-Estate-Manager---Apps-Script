@@ -35,18 +35,11 @@ export class RowRawBase extends SheetRawBase {
   release(): void {
     this.sheetState.reservedRowIndexes.delete(this.rowIndex);
   }
-  // A data row past the table's last row doesn't exist yet — append it instead.
   validateIsWritable(): void {
     if (!this.isDataRow || this.rowIsActive()) return;
-    const activeTable = this.sheetState.activeTable;
-    if (activeTable === null) {
+    if (this.sheetState.knownTable === null) {
       throw new Error(
         `Cannot write to row ${this.rowIndex} of sheetGid ${this.sheetGid} before its sheet properties have been fetched.`,
-      );
-    }
-    if (this.rowIndex >= this.activeTable.endRowIndex) {
-      throw new Error(
-        `Cannot write to row ${this.rowIndex} because it is past the last row of sheetGid ${this.sheetGid}'s table. Append the row first.`,
       );
     }
   }

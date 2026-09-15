@@ -286,8 +286,8 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", false, true, "prp"],
-            5: [UNIT_GID, "Unit", false, true, "prp"],
+            4: [PROPERTY_GID, "Property", true, "prp"],
+            5: [UNIT_GID, "Unit", true, "prp"],
           }),
           table: { endRowIndex: 6 },
         },

@@ -16,12 +16,4 @@ export class ColumnRawBase extends SheetRawBase {
       ...this.sheetRawProps,
     };
   }
-  validateColIndexNotStale(): void {
-    const { firstStaleColIndex } = this.sheetState;
-    if (firstStaleColIndex !== null && this.colIndex >= firstStaleColIndex) {
-      throw new Error(
-        `Column index ${this.colIndex} is stale. First stale column index is ${firstStaleColIndex}.`,
-      );
-    }
-  }
 }

@@ -3,9 +3,7 @@ import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
   RawColumnCellFacts,
-  RawColumnDeclaredTypes,
   RawColumnPropertiesState,
-  RawColumnValidationValues,
   RawRowState,
   RawSheetState,
 } from "../ClassTypes/RawState";
@@ -35,13 +33,11 @@ export class SheetRawBase extends SpreadsheetRawBase {
     if (!this.rawState.sheets.has(this.sheetGid)) {
       this.rawState.sheets.set(this.sheetGid, {
         title: null,
-        activeTable: null,
+        knownTable: null,
         hasExtraTables: false,
-        rowIndexesAreValid: true,
         cellStateIsStale: false,
         hasFetchedColumnIds: false,
         isPrunedToSelection: false,
-        firstStaleColIndex: null,
         rowStates: new Map(),
         reservedRowIndexes: new Set(),
         columnCellFacts: new Map(),
@@ -61,7 +57,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     if (tables.length > 1) {
       this.sheetState.hasExtraTables = true;
-      this.sheetState.activeTable = null;
+      this.sheetState.knownTable = null;
       return;
     }
     this.sheetState.hasExtraTables = false;
@@ -77,14 +73,17 @@ export class SheetRawBase extends SpreadsheetRawBase {
       "startColumnIndex",
       "endColumnIndex",
     );
-    this.sheetState.activeTable = {
+    const previous = this.sheetState.knownTable;
+    this.sheetState.knownTable = {
       tableId: Val.assert(table.tableId, "tableId"),
       ...range,
       ...this._parseColumnProperties(
         table.columnProperties,
         range.startColumnIndex,
       ),
-    }
+      rowIndexesAreValid: previous?.rowIndexesAreValid ?? true,
+      firstStaleColIndex: previous?.firstStaleColIndex ?? null,
+    };
   }
   private _parseColumnProperties(
     columnProperties:
@@ -125,23 +124,6 @@ export class SheetRawBase extends SpreadsheetRawBase {
   get columnCellFacts(): RawColumnCellFacts {
     return this.sheetState.columnCellFacts;
   }
-  get activeTable(): ActiveTableRaw {
-    return new ActiveTableRaw(this.sheetRawProps);
-  }
-  protected _fetchedTable(): NonNullable<RawSheetState["activeTable"]> {
-    const activeTable = this.sheetState.activeTable;
-    if (activeTable === null) {
-      throw new Error(
-        `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
-      );
-    }
-    if (activeTable.endRowIndex <= this.schema.topDataRowIdx) {
-      throw new Error(
-        `Sheet ${this.sheetLabel} Table must have at least one data row.`,
-      );
-    }
-    return activeTable;
-  }
   get sheetLabel(): string {
     return `"${this.sheetState.title ?? "(untitled)"}" (gid ${this.sheetGid})`;
   }
@@ -153,44 +135,5 @@ export class SheetRawBase extends SpreadsheetRawBase {
       sheetGid: this.sheetGid,
       ...this.spreadsheetRawProps,
     };
-  }
-}
-
-export class ActiveTableRaw extends SheetRawBase {
-  get tableId(): string {
-    return this._fetchedTable().tableId;
-  }
-  get startRowIndex(): number {
-    return this._fetchedTable().startRowIndex;
-  }
-  get endRowIndex(): number {
-    this._validateRowIndexes();
-    return this._fetchedTable().endRowIndex;
-  }
-  set endRowIndex(endRowIndex: number) {
-    this._validateRowIndexes();
-    this._fetchedTable().endRowIndex = endRowIndex;
-  }
-  get startColumnIndex(): number {
-    return this._fetchedTable().startColumnIndex;
-  }
-  get endColumnIndex(): number {
-    return this._fetchedTable().endColumnIndex;
-  }
-  set endColumnIndex(endColumnIndex: number) {
-    this._fetchedTable().endColumnIndex = endColumnIndex;
-  }
-  get columnValidationValues(): RawColumnValidationValues {
-    return this._fetchedTable().columnValidationValues;
-  }
-  get columnDeclaredTypes(): RawColumnDeclaredTypes {
-    return this._fetchedTable().columnDeclaredTypes;
-  }
-  private _validateRowIndexes(): void {
-    if (!this.sheetState.rowIndexesAreValid) {
-      throw new Error(
-        `Row indexes are not valid for sheetGid ${this.sheetGid}.`,
-      );
-    }
   }
 }

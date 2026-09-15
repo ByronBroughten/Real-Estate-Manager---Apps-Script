@@ -37,7 +37,7 @@ export class RowRaw extends RowCommonRaw {
     }
     this.sheetState.rowStates.set(this.rowIndex, new Map());
     this.addRowChangeToSave({ action: "append" });
-    this.activeTable.endRowIndex++;
+    this.sheet.activeTable.growEndRowIndex();
     return this;
   }
   // A new row copies its formulas from the rows already there, so one must survive.
