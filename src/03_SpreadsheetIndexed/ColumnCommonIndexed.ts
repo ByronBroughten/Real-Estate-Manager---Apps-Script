@@ -6,7 +6,7 @@ export abstract class ColumnCommonIndexed<
   VN extends ValueName = ValueName,
 > extends ColumnIndexedBase<VN> {
   get colIndex() {
-    return new SheetMetaRaw(this.sheetIndexedProps).colIdRow.colIndexOfValue(
+    return new SheetMetaRaw(this.sheetIndexedProps).colIndexOfActiveColumnId(
       this.columnId,
     );
   }

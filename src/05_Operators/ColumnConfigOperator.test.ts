@@ -274,7 +274,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           sheetId: SHEET_CONFIG_GID,
           title: "Sheet Config",
           rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
         {
           sheetId: COLUMN_CONFIG_GID,
@@ -305,7 +305,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           sheetId: SHEET_CONFIG_GID,
           title: "Sheet Config",
           rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
         {
           sheetId: COLUMN_CONFIG_GID,
@@ -615,7 +615,7 @@ function syncColumnsUnderTest({
         sheetId: COLUMN_CONFIG_GID,
         title: "Column Config",
         rows: buildGridRows(columnConfigRows),
-        table: { endRowIndex: 4 + columnIds.length },
+        table: { endRowIndex: Math.max(5, 4 + columnIds.length) },
       },
       {
         sheetId: TEST_SHEET_GID,
@@ -924,7 +924,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
           sheetId: COLUMN_CONFIG_GID,
           title: "Column Config",
           rows: buildGridRows({ 0: columnConfigColumnIdRow }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
         {
           sheetId: TEST_SHEET_GID,
@@ -963,7 +963,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
           sheetId: COLUMN_CONFIG_GID,
           title: "Column Config",
           rows: buildGridRows({ 0: columnConfigColumnIdRow }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
         {
           sheetId: TEST_SHEET_GID,

@@ -1,5 +1,7 @@
 import {
   makeImportLine,
+  validateIdPrefixesAreUnique,
+  type IdPrefixLabel,
   type SheetConfigsBase,
 } from "../01_generatedConfigs/makeConfigs";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
@@ -105,20 +107,24 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       "letApiAccess",
     );
     const sheetConfigs: SheetConfigsBase = {};
+    const idPrefixLabels: IdPrefixLabel[] = [];
     this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
       // Defaults false on a freshly-appended row — excluded until a human sets it true in the sheet.
       if (!col.letApiAccess.valueOrEmpty(rowIndex)) return;
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.titleToName(title);
       const sheetGid = col.sheetGid.value(rowIndex);
+      const idPrefix = col.idPrefix.valueOrEmpty(rowIndex);
       sheetConfigs[sheetName] = {
         sheetGid,
-        idPrefix: col.idPrefix.valueOrEmpty(rowIndex),
+        idPrefix,
         hasIdColumn: this.ss.raw
           .sheetMeta(sheetGid)
           .tableHeaderRow.hasValue(this.schema.idHeader),
       };
+      idPrefixLabels.push({ label: title, idPrefix });
     });
+    validateIdPrefixesAreUnique(idPrefixLabels);
     return sheetConfigs;
   }
   sheetNamesByGid(): Map<number, string> {

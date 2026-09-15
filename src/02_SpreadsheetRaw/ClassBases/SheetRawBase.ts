@@ -135,6 +135,11 @@ export class SheetRawBase extends SpreadsheetRawBase {
         `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
       );
     }
+    if (activeTable.endRowIndex <= this.schema.topDataRowIdx) {
+      throw new Error(
+        `Sheet ${this.sheetLabel} Table must have at least one data row.`,
+      );
+    }
     return activeTable;
   }
   get sheetLabel(): string {

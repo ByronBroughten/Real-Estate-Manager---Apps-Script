@@ -149,7 +149,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
           sheetId: 111,
           title: "Leases",
           rows: buildGridRows({ 0: ["ID"] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -384,7 +384,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
           sheetId: 111,
           title: "Leases",
           rows: buildGridRows({ 0: ["ID"] }),
-          table: { endRowIndex: 4 },
+          table: { endRowIndex: 5 },
         },
       ],
     });
@@ -1725,5 +1725,94 @@ describe("SpreadsheetRaw.findReplace", () => {
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls).toEqual([]);
+  });
+});
+
+describe("SheetMetaRaw.activeColumnIds", () => {
+  function fetchedColumnIdSheet(columnIdRow: FakeCell[]) {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: columnIdRow,
+            4: [],
+          }),
+          table: { endRowIndex: TOP_DATA_ROW_INDEX + 1, endColumnIndex: 2 },
+        },
+      ],
+    });
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheetMeta(111).colIdRow.gatherFetchFull();
+    raw.fetchAllGathered();
+    return raw.sheetMeta(111);
+  }
+
+  it("throws when a Table column-ID cell is a number, boolean, or date", () => {
+    expect(() => fetchedColumnIdSheet(["c:lse:aaa", 42]).activeColumnIds).toThrow(
+      /Leases.*column index 1/,
+    );
+    expect(() => fetchedColumnIdSheet(["c:lse:aaa", true]).activeColumnIds).toThrow(
+      /Leases.*column index 1/,
+    );
+    expect(() =>
+      fetchedColumnIdSheet(["c:lse:aaa", 44927]).activeColumnIds,
+    ).toThrow(/Leases.*column index 1/);
+  });
+
+  it("treats a blank Table column-ID cell as missing rather than a type error", () => {
+    expect(fetchedColumnIdSheet(["c:lse:aaa", ""]).activeColumnIds).toEqual([
+      "c:lse:aaa",
+    ]);
+  });
+
+  it("ignores a non-string past the Table", () => {
+    expect(
+      fetchedColumnIdSheet(["c:lse:aaa", "c:lse:bbb", 42]).activeColumnIds,
+    ).toEqual(["c:lse:aaa", "c:lse:bbb"]);
+  });
+
+  it("throws from lookup by ID when a sibling Table cell is not text", () => {
+    const sheet = fetchedColumnIdSheet(["c:lse:aaa", false]);
+    expect(() => sheet.columnByActiveId("c:lse:aaa")).toThrow(
+      /Leases.*column index 1/,
+    );
+  });
+
+  it("throws from fill-missing when a Table column-ID cell is not text", () => {
+    expect(() =>
+      fetchedColumnIdSheet(["", 42]).addMissingColumnIds("lse"),
+    ).toThrow(/Leases.*column index 1/);
+  });
+});
+
+describe("SheetRaw.activeTable", () => {
+  function fetchedSheet(endRowIndex: number) {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          table: { endRowIndex },
+        },
+      ],
+    });
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    return raw.sheet(111);
+  }
+
+  it("throws when the exclusive end row is the first data row", () => {
+    expect(() => fetchedSheet(TOP_DATA_ROW_INDEX).activeTable).toThrow(
+      /Leases.*at least one data row/,
+    );
+  });
+
+  it("accepts a Table whose exclusive end is one past the first data row", () => {
+    expect(fetchedSheet(TOP_DATA_ROW_INDEX + 1).activeTable.endRowIndex).toBe(
+      TOP_DATA_ROW_INDEX + 1,
+    );
   });
 });

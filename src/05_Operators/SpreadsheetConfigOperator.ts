@@ -3,7 +3,11 @@ import {
   getColumnTraitByName,
   type ColumnName,
 } from "../01_generatedConfigs/columnConfigsTypes";
-import { makeImportLine } from "../01_generatedConfigs/makeConfigs";
+import {
+  makeImportLine,
+  validateSpreadsheetLayoutIndexes,
+  type UniformRowLayoutKey,
+} from "../01_generatedConfigs/makeConfigs";
 import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
@@ -79,7 +83,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
       guaranteedHeaders,
     );
     const dataRowIndex = tableHeaderRowIndex + 1;
-    return {
+    const liveConfig = {
       idDelimiter: this._stringCell(
         dataRowIndex,
         colIndexByHeader,
@@ -111,6 +115,16 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
         colIndexByHeader,
         "tableHeaderRowIndexBase1",
       ),
+    };
+    validateSpreadsheetLayoutIndexes(liveConfig, this._uniformRowLayoutLabels());
+    return liveConfig;
+  }
+  private _uniformRowLayoutLabels(): Record<UniformRowLayoutKey, string> {
+    return {
+      columnIdRowIdxBase0: `Spreadsheet Config column "${this._header("columnIdRowIndexBase1")}"`,
+      columnGroupHeadingRowIndexBase0: `Spreadsheet Config column "${this._header("columnGroupHeadingRowIndexBase1")}"`,
+      actionRowIndexBase0: `Spreadsheet Config column "${this._header("actionRowIndexBase1")}"`,
+      tableHeaderRowIndexBase0: `Spreadsheet Config column "${this._header("tableHeaderRowIndexBase1")}"`,
     };
   }
   private _uniqueTableHeaderRowIndex(guaranteedHeaders: string[]): number {

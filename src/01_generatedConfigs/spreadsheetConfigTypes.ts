@@ -1,3 +1,4 @@
+import { validateSpreadsheetLayoutIndexes } from "./makeConfigs";
 import { spreadsheetConfig } from "./spreadsheetConfig";
 
 export type SpreadsheetConfig = typeof spreadsheetConfig;
@@ -12,6 +13,7 @@ let liveSpreadsheetConfig: LiveSpreadsheetConfig | null = null;
 export function overlaySpreadsheetConfig(
   spreadsheetConfigLive: LiveSpreadsheetConfig,
 ): void {
+  validateSpreadsheetLayoutIndexes(spreadsheetConfigLive);
   liveSpreadsheetConfig = spreadsheetConfigLive;
 }
 
