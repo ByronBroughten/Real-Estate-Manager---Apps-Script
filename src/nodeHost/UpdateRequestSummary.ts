@@ -1,11 +1,14 @@
-import type {
-  GoogleGridRange,
-  GoogleUpdateRequest,
-  UserEnteredValue,
-} from "../00_base/AppsScriptTypes";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import { sheetConfigsIndexed } from "../01_generatedConfigs/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 
+type GoogleUpdateRequest = OpaqueRawRequest;
+type GoogleGridRange = GoogleAppsScript.Sheets.Schema.GridRange;
+type UserEnteredValue = NonNullable<
+  NonNullable<
+    GoogleAppsScript.Sheets.Schema.UpdateCellsRequest["rows"]
+  >[number]["values"]
+>[number]["userEnteredValue"];
 type RowData = GoogleAppsScript.Sheets.Schema.RowData;
 type DimensionRange = GoogleAppsScript.Sheets.Schema.DimensionRange;
 

@@ -1,4 +1,4 @@
-import type { GoogleColor } from "../00_base/AppsScriptTypes";
+import type { RgbColor } from "../00_base/RgbColor";
 import type { NotEmpty } from "../00_base/base";
 import type {
   ColumnIsFormula,
@@ -65,7 +65,7 @@ export class CellNamed<
     this.indexed.updateFormula(formula);
     return this;
   }
-  updateBackgroundColor(backgroundColor: GoogleColor): this {
+  updateBackgroundColor(backgroundColor: RgbColor): this {
     this.indexed.updateBackgroundColor(backgroundColor);
     return this;
   }

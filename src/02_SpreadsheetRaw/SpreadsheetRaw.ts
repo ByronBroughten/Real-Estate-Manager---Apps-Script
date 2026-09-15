@@ -1,9 +1,5 @@
-import type {
-  GoogleGridRange,
-  GoogleSpreadsheet,
-  GoogleUpdateRequest,
-} from "../00_base/AppsScriptTypes";
-import { Val } from "../utils/Val";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
+import type { GridFetchRange, SpreadsheetSnapshot } from "../00_base/RawSource";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
   FindReplaceProps,
@@ -34,8 +30,9 @@ type TablePlacement =
 
 /**
  * Spreadsheet-level Raw: GID+index fetch and the two Sheets chokepoints
- * (`fetchAllGathered` / `fetchSheetUsedGrid` via `_fetchByDataFilter`,
- * `_fetchByDataFilter`, `_sendUpdateRequests`). Sheet/row/column by index
+ * (`fetchAllGathered` / `fetchSheetUsedGrid` via RawSource.fetchGrid,
+ * `fetchAllSheetProperties` via RawSource.fetchSheetProperties,
+ * `_sendUpdateRequests` via RawSource.applyWrites). Sheet/row/column by index
  * live on SheetRaw / RowRaw / ColumnRaw in this folder.
  * Column-by-name and columnId resolution are Indexed/Named.
  * Schema classes that resolve columns share SpreadsheetSchema.ts here
@@ -45,9 +42,6 @@ type TablePlacement =
 export class SpreadsheetRaw extends SpreadsheetRawBase {
   static init(): SpreadsheetRaw {
     return new SpreadsheetRaw(SpreadsheetRawBase.initSpreadsheetRawProps());
-  }
-  private get sheetsService(): GoogleAppsScript.Sheets {
-    return Val.assert(Sheets, "Sheets (enable the Advanced Sheets Service)");
   }
   gidIsActive(sheetGid: number): boolean {
     return this.activeSheetGids.includes(sheetGid);
@@ -88,26 +82,22 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return { activeSheetGids: this.activeSheetGids };
   }
   private _fetchAndIntegrateAllSheetProperties() {
-    const data = this.sheetsService.Spreadsheets.get(this.spreadsheetId, {
-      fields: "sheets(properties(sheetId,title),tables(tableId,range))",
-    });
+    const data = this.rawState.rawSource.fetchSheetProperties(this.spreadsheetId);
     this._addDataToState(data);
     this.rawState.allSheetPropertiesAreFetched = true;
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
     // An empty dataFilters list would fetch the whole spreadsheet's grid data.
     if (this.fetcherGridRanges.length === 0) return;
-    const data = this._fetchByDataFilter(includeProgrammaticFacts);
+    const data = this._fetchByGridRanges(includeProgrammaticFacts);
     this._addDataToState(data);
     this._finalizeGatheredFetches();
     this.rawState.fetcherGridRanges = [];
   }
   // One sheet by GID without Table-placement finalize, so a moved Table can wait for overlay.
   fetchSheetUsedGrid(sheetGid: number): void {
-    const data = this._fetchByDataFilter(false, [{ sheetId: sheetGid }]);
-    const sheets = Val.assert(data.sheets, "data.sheets").filter(
-      (sheet) => sheet.properties?.sheetId === sheetGid,
-    );
+    const data = this._fetchByGridRanges(false, [{ sheetId: sheetGid }]);
+    const sheets = data.sheets.filter((sheet) => sheet.sheetGid === sheetGid);
     if (sheets.length === 0) {
       throw new Error(
         `Sheet gid ${sheetGid} was missing from the Sheets get.`,
@@ -294,48 +284,18 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // those fields are left out of the default fetch to avoid fetching them
   // (and, for dataValidationRule, an unbounded list of validation values)
   // wastefully on every ordinary read.
-  private _fetchByDataFilter(
+  private _fetchByGridRanges(
     includeProgrammaticFacts: boolean,
-    gridRanges: GoogleGridRange[] = this.fetcherGridRanges,
-  ): GoogleSpreadsheet {
-    const withProgrammaticFacts =
-      "sheets(" +
-      "properties(sheetId,title)," +
-      "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
-      "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
-      ")";
-    const withoutProgrammaticFacts =
-      "sheets(" +
-      "properties(sheetId,title)," +
-      "tables(tableId,range)," +
-      "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
-      ")";
-    return this.sheetsService.Spreadsheets.getByDataFilter(
-      this._makeFetchResource(gridRanges),
-      this.spreadsheetId,
-      {
-        fields: includeProgrammaticFacts
-          ? withProgrammaticFacts
-          : withoutProgrammaticFacts,
-      },
-    );
+    gridRanges: GridFetchRange[] = this.fetcherGridRanges,
+  ): SpreadsheetSnapshot {
+    return this.rawState.rawSource.fetchGrid(this.spreadsheetId, gridRanges, {
+      includeProgrammaticFacts,
+    });
   }
-  private _makeFetchResource(
-    gridRanges: GoogleGridRange[] = this.fetcherGridRanges,
-  ) {
-    return {
-      dataFilters: gridRanges.map((gr) => ({
-        gridRange: gr,
-      })),
-      includeGridData: true,
-    };
-  }
-  private _addDataToState(gss: GoogleSpreadsheet) {
-    Val.assert(gss.sheets, "gss.sheets").forEach((gSheet) => {
-      const properties = Val.assert(gSheet.properties, "gSheet.properties");
-      const sheetGid = Val.assert(properties.sheetId, "sheetId");
-      const sheet = this.sheet(sheetGid);
-      sheet.integrateSheetState(gSheet);
+  private _addDataToState(snapshot: SpreadsheetSnapshot) {
+    snapshot.sheets.forEach((sheetSnapshot) => {
+      const sheet = this.sheet(sheetSnapshot.sheetGid);
+      sheet.integrateSheetState(sheetSnapshot);
     });
   }
   batchUpdateGSheets() {
@@ -352,8 +312,15 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // Matches by content rather than by coordinate, so no local mirror is possible.
   findReplace({ scope, ...terms }: FindReplaceProps): this {
     this.updateRequests.findReplace.push({
-      findReplace: { ...terms, ...scope },
+      kind: "findReplace",
+      terms,
+      scope,
     });
+    return this;
+  }
+  // The one bypass of the type layer; using it obliges filing an issue (README).
+  gatherRawRequest(request: OpaqueRawRequest): this {
+    this.updateRequests.raw.push({ kind: "raw", request });
     return this;
   }
   // Scope can be allSheets, so one rule: every sheet's fetched cells go stale.
@@ -361,11 +328,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this.rawSheetsState.forEach((_, sheetGid) =>
       this.sheet(sheetGid).invalidateCellState(),
     );
-  }
-  // The one bypass of the type layer; using it obliges filing an issue (README).
-  gatherRawRequest(request: GoogleUpdateRequest): this {
-    this.updateRequests.raw.push(request);
-    return this;
   }
   // Abandons queued writes while local state still reflects them — terminal step only.
   discardQueuedChanges(): this {
@@ -375,12 +337,12 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _sheetGidsWithRowDeletes(): Set<number> {
     return new Set(
-      this.updateRequests.delete.map((request) =>
-        Val.assert(
-          request.deleteDimension?.range?.sheetId,
-          "deleteDimension.range.sheetId",
-        ),
-      ),
+      this.updateRequests.delete.map((operation) => {
+        if (operation.kind !== "deleteRows") {
+          throw new Error("Queued delete is not a deleteRows operation.");
+        }
+        return operation.sheetId;
+      }),
     );
   }
   private _gatherUpdateRequests() {
@@ -402,7 +364,13 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (change.append && change.delete) {
       return;
     } else if (change.delete) {
-      this.updateRequests.delete.push(change.delete);
+      const { sheetGid, rowIndex } = this.schema.idsFromSheetRowId(sheetRowId);
+      this.updateRequests.delete.push({
+        kind: "deleteRows",
+        sheetId: sheetGid,
+        startIndex: rowIndex,
+        endIndex: rowIndex + 1,
+      });
     } else {
       const row = this.rowBySheetRowId(sheetRowId);
       if (change.append) {
@@ -426,7 +394,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _sendUpdateRequests() {
     const surs = this.rawState.updateRequests;
-    const requests = [
+    const operations = [
       ...surs.append,
       ...surs.insertColumn,
       // Fills go before updates, so a per-cell write on a filled column wins.
@@ -434,32 +402,23 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ...surs.update,
       // Reads the text as it stands mid-batch, so it must follow what writes it.
       ...surs.findReplace,
-      ...this._deleteRequestsDescending(),
+      ...this._deleteOperationsDescending(),
       ...surs.sort,
       // Outside the ordering rules the queue was built around, so last.
       ...surs.raw,
     ];
-    if (requests.length > 0) {
-      this.sheetsService.Spreadsheets.batchUpdate(
-        { requests },
-        this.spreadsheetId,
-      );
-    }
+    this.rawState.rawSource.applyWrites(this.spreadsheetId, operations);
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
   // or a later request's pre-computed startIndex lands on the wrong row.
-  private _deleteRequestsDescending(): GoogleUpdateRequest[] {
-    return [...this.rawState.updateRequests.delete].sort(
-      (a, b) =>
-        this._deleteRequestStartIndex(b) - this._deleteRequestStartIndex(a),
-    );
-  }
-  private _deleteRequestStartIndex(request: GoogleUpdateRequest): number {
-    return Val.assert(
-      request.deleteDimension?.range?.startIndex,
-      "deleteDimension.range.startIndex",
-    );
+  private _deleteOperationsDescending() {
+    return [...this.rawState.updateRequests.delete].sort((a, b) => {
+      if (a.kind !== "deleteRows" || b.kind !== "deleteRows") {
+        throw new Error("Queued delete is not a deleteRows operation.");
+      }
+      return b.startIndex - a.startIndex;
+    });
   }
 }

@@ -31,6 +31,7 @@ import { SpreadsheetNamed } from "./SpreadsheetNamed";
 // A mis-wired accessor still type-checks; the instance checks catch it.
 describe("SpreadsheetNamed navigation", () => {
   it("gives each accessor the class its return type names", () => {
+    stubSheetsService();
     const ss = SpreadsheetNamed.init();
     const sheet = ss.sheet("occupancy");
     const sheetMeta = ss.sheetMeta("occupancy");

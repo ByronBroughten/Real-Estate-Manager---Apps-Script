@@ -1,4 +1,4 @@
-import type { GoogleColor } from "../00_base/AppsScriptTypes";
+import type { RgbColor } from "../00_base/RgbColor";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
@@ -24,7 +24,7 @@ import type {
 
 interface RunState {
   message: string;
-  backgroundColor: GoogleColor;
+  backgroundColor: RgbColor;
 }
 
 // Paired here so no path can show one state's colour beside another's message.

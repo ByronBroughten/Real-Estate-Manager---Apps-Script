@@ -1,4 +1,4 @@
-import type { GoogleColor } from "../00_base/AppsScriptTypes";
+import type { RgbColor } from "../00_base/RgbColor";
 import type { NotEmpty } from "../00_base/base";
 import {
   toWireValue,
@@ -67,7 +67,7 @@ export class CellIndexed<
     this.raw.updateFormula(formula);
     return this;
   }
-  updateBackgroundColor(backgroundColor: GoogleColor): this {
+  updateBackgroundColor(backgroundColor: RgbColor): this {
     this.raw.updateBackgroundColor(backgroundColor);
     return this;
   }

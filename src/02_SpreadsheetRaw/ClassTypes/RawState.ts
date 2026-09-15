@@ -1,16 +1,20 @@
 import type {
-  GoogleColor,
-  GoogleUpdateRequest,
-} from "../../00_base/AppsScriptTypes";
+  FindReplaceScope as BaseFindReplaceScope,
+  FindReplaceTerms as BaseFindReplaceTerms,
+  LocalWriteOperation,
+  RawSource,
+} from "../../00_base/RawSource";
+import type { RgbColor } from "../../00_base/RgbColor";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface RawState {
   allSheetPropertiesAreFetched: boolean;
   spreadsheetId: string | null;
+  rawSource: RawSource;
   changesToSave: ChangesToSave;
   fetcherGridRanges: GridRangeProps[];
-  updateRequests: Record<UpdateRequestName, GoogleUpdateRequest[]>;
+  updateRequests: Record<UpdateRequestName, LocalWriteOperation[]>;
   sheets: RawSheetsState;
 }
 
@@ -92,7 +96,7 @@ export type ChangesToSave = Map<
 export type RowChangesToSave = {
   level: "row";
   append: boolean;
-  delete: null | GoogleAppsScript.Sheets.Schema.Request;
+  delete: boolean;
   // Values, not indexes, so a queued write never depends on fetched row state.
   update: Map<ColIndex, RowCellChange>;
 };
@@ -100,7 +104,7 @@ export type RowChangesToSave = {
 export interface RowCellChange<VN extends CellValueName = CellValueName> {
   value?: CellValue<VN>;
   formula?: string;
-  backgroundColor?: GoogleColor;
+  backgroundColor?: RgbColor;
 }
 export type SheetChangesToSave = {
   level: "sheet";
@@ -120,17 +124,8 @@ export interface SheetChangeSortProps extends SortParameters {
   action: "sort";
 }
 
-export type FindReplaceScope =
-  { range: GridRangeProps } | { sheetId: number } | { allSheets: true };
-// Google's own field names, so Google's own semantics are what they mean.
-export interface FindReplaceTerms {
-  find: string;
-  replacement: string;
-  matchCase?: boolean;
-  matchEntireCell?: boolean;
-  searchByRegex?: boolean;
-  includeFormulas?: boolean;
-}
+export type FindReplaceScope = BaseFindReplaceScope;
+export interface FindReplaceTerms extends BaseFindReplaceTerms {}
 export interface FindReplaceProps extends FindReplaceTerms {
   scope: FindReplaceScope;
 }
@@ -151,7 +146,7 @@ export type RowChangeUpdateProps = {
 } & (
   | { value: CellValue }
   | { formula: string }
-  | { backgroundColor: GoogleColor }
+  | { backgroundColor: RgbColor }
 );
 export type RowChangeProps =
   { action: "append" | "delete" } | RowChangeUpdateProps;

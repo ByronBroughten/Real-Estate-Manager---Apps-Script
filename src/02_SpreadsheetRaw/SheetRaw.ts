@@ -1,19 +1,8 @@
-import type {
-  GoogleCellValue,
-  GoogleSheet,
-  GoogleSheetData,
-} from "../00_base/AppsScriptTypes";
+import type { SheetSnapshot } from "../00_base/RawSource";
 import type { CellValueName } from "../00_base/base";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
-import { Val } from "../utils/Val";
-import {
-  assertValueAndFormulaExclusive,
-  cellChangeFieldMask,
-  cellChangeHasCellData,
-  cellChangeToCellData,
-  formulaPasteDataRequest,
-} from "./CellRaw";
+import { assertValueAndFormulaExclusive } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import {
@@ -97,7 +86,7 @@ export class SheetRaw extends SheetCommonRaw {
     let count = 0;
     this.allChangesToSave.forEach((change, sheetRowId) => {
       if (change.level !== "row" || typeof sheetRowId !== "string") return;
-      if (change.delete === null) return;
+      if (!change.delete) return;
       if (
         this.schema.idsFromSheetRowId(sheetRowId).sheetGid !== this.sheetGid
       ) {
@@ -179,38 +168,33 @@ export class SheetRaw extends SheetCommonRaw {
   hasQueuedFullRowFetch(rowIndex: number): boolean {
     return this.sheetState.rowIndexesToFinalize.has(rowIndex);
   }
-  integrateSheetState(sheet: GoogleSheet): void {
+  integrateSheetState(sheet: SheetSnapshot): void {
     this._initSheetState(sheet);
     this.sheetState.cellStateIsStale = false;
-    if (sheet.data) {
-      this._integrateSheetData(sheet.data);
+    if (sheet.gridBlocks) {
+      this._integrateSheetData(sheet.gridBlocks);
     }
   }
-  private _integrateSheetData(sheetData: GoogleSheetData): void {
-    const colsData = Val.assert(sheetData, "sheetData");
-    colsData.forEach((colData) => {
-      // Payload doesn't include default values of 0
-      const colIdxBase = colData.startColumn ?? 0;
-      const columns = colData.columnMetadata || [];
-      (colData.rowData || []).forEach((colCell, rowIdxBase) => {
-        const rowIndex = rowIdxBase + (colData.startRow ?? 0);
+  private _integrateSheetData(
+    gridBlocks: NonNullable<SheetSnapshot["gridBlocks"]>,
+  ): void {
+    gridBlocks.forEach((block) => {
+      const colIdxBase = block.startColumn;
+      block.rows.forEach((rowSnapshot, rowIdxBase) => {
+        const rowIndex = rowIdxBase + block.startRow;
         const row = this.rowCommon(rowIndex);
         row.ensureStateExists();
-        columns.forEach((_, colIdxOffset) => {
+        for (let colIdxOffset = 0; colIdxOffset < block.columnCount; colIdxOffset++) {
           const colIndex = colIdxBase + colIdxOffset;
-          const cellData = colCell?.values?.[colIdxOffset] as
-            GoogleCellValue | undefined;
-          // Undefined is allowed because it means the cell is empty, and Google's API doesn't send empty cells.
-          row.cell(colIndex).integrateGState(cellData);
-          // The column's live isFormula/numberFormatType facts are
-          // sampled from this one representative row, not tracked per row.
+          const cellData = rowSnapshot.cells[colIdxOffset];
+          row.cell(colIndex).integrateSnapshot(cellData);
           if (
             rowIndex === this.schema.topDataRowIdx &&
             this.isTableColIndex(colIndex)
           ) {
             this.meta.column(colIndex).integrateActiveFacts(cellData);
           }
-        });
+        }
       });
     });
   }
@@ -249,44 +233,21 @@ export class SheetRaw extends SheetCommonRaw {
     ...change
   }: ColumnFill): void {
     assertValueAndFormulaExclusive(change.value, formula);
-    if (formula !== undefined) {
-      this.updateRequests.fill.push(
-        formulaPasteDataRequest({
-          sheetId: this.sheetGid,
-          rowIndex: startRowIndex,
-          columnIndex: colIndex,
-          formula,
-          rowCount: endRowIndex - startRowIndex,
-        }),
-      );
-    }
-    if (!cellChangeHasCellData(change)) return;
     this.updateRequests.fill.push({
-      repeatCell: {
-        range: {
-          sheetId: this.sheetGid,
-          startRowIndex,
-          endRowIndex,
-          startColumnIndex: colIndex,
-          endColumnIndex: colIndex + 1,
-        },
-        cell: cellChangeToCellData(change),
-        // Anything the mask covers but `cell` omits gets cleared, so keep it narrow.
-        fields: cellChangeFieldMask(change),
-      },
+      kind: "fill",
+      sheetId: this.sheetGid,
+      colIndex,
+      startRowIndex,
+      endRowIndex,
+      ...change,
+      ...(formula !== undefined ? { formula } : {}),
     });
   }
   gatherInsertColumnRequest(startColumnIndex: number): void {
     this.updateRequests.insertColumn.push({
-      insertDimension: {
-        range: {
-          sheetId: this.sheetGid,
-          dimension: "COLUMNS",
-          startIndex: startColumnIndex,
-          endIndex: startColumnIndex + 1,
-        },
-        inheritFromBefore: false, // Let the formatting and column header colors be natural.
-      },
+      kind: "insertColumn",
+      sheetId: this.sheetGid,
+      startColumnIndex,
     });
     if (startColumnIndex === this.activeTable.endColumnIndex) {
       this.activeTable.growEndColumnIndex();
@@ -296,14 +257,12 @@ export class SheetRaw extends SheetCommonRaw {
   }
   gatherSortRequest({ colIdxToSortBy, sortOrder }: SortParameters): void {
     this.updateRequests.sort.push({
-      sortRange: {
-        range: {
-          sheetId: this.sheetGid,
-          startRowIndex: this.schema.topDataRowIdx,
-          startColumnIndex: 0,
-        }, // skip header, unbounded end = rest of sheet
-        sortSpecs: [{ dimensionIndex: colIdxToSortBy, sortOrder }],
-      },
+      kind: "sort",
+      sheetId: this.sheetGid,
+      startRowIndex: this.schema.topDataRowIdx,
+      startColumnIndex: 0,
+      colIdxToSortBy,
+      sortOrder,
     });
   }
   appendDataRow(): RowRaw {

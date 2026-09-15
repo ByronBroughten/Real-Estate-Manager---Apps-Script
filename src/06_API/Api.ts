@@ -1,3 +1,8 @@
+import { GoogleSheetsAPI } from "../00_base/GoogleSheetsAPI";
+import {
+  hasInstalledRawSource,
+  installRawSource,
+} from "../00_base/RawSource";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import type { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
@@ -27,6 +32,9 @@ export class Api extends SpreadsheetNamedBase {
     };
   }
   static init(endpoints: Endpoints): Api {
+    if (!hasInstalledRawSource()) {
+      installRawSource(GoogleSheetsAPI.forAppsScript());
+    }
     return new Api({
       endpoints,
       ...SpreadsheetNamedBase.initSpreadsheetNamedProps(),

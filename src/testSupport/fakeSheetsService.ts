@@ -1,4 +1,5 @@
-import { vi } from "vitest";
+import { GoogleSheetsAPI } from "../00_base/GoogleSheetsAPI";
+import { installRawSource } from "../00_base/RawSource";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 
 type BatchUpdateRequest =
@@ -337,15 +338,16 @@ function fakeSheetTables(
 }
 
 /**
- * Stubs the `Sheets` Advanced Service global.
+ * Installs a GoogleSheetsAPI whose transport is backed by an in-memory
+ * fixture. Tests inject a RawSource this way rather than a `Sheets` global.
  *
- * Covers the read path (`Spreadsheets.get`/`getByDataFilter`, backed by the
+ * Covers the read path (`fetchSheetProperties` / `fetchGrid`, backed by the
  * `sheets` fixture, including each sheet's `rows` grid data when given)
  * faithfully — real requested dataFilters/gridRanges are ignored and the
  * fixture's full grid is always returned, which is harmless here since
  * `SpreadsheetRaw` only ever integrates whatever grid data comes back, and
- * over-returning can't produce incorrect state. `batchUpdate` is a spy
- * only — it records the exact requests SpreadsheetRaw sends but does not
+ * over-returning can't produce incorrect state. `applyWrites` is a spy
+ * only — it records the exact Google requests the adapter maps but does not
  * (yet) replay them onto the fixture, since the Sheets request grammar
  * (appendCells/updateCells/insertDimension/sortRange/...) is large. Extend
  * this fake's `batchUpdate` handling as tests come to need particular
@@ -391,7 +393,7 @@ export function stubSheetsService(
     },
   };
 
-  vi.stubGlobal("Sheets", service);
+  installRawSource(GoogleSheetsAPI.init(service));
 
   return { batchUpdateCalls, getByDataFilterCalls };
 }

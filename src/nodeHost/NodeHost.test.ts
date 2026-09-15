@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { NodeHost } from "./NodeHost";
-import type { SheetsHttpRequest } from "./SheetsServiceNode";
+import type { SheetsHttpRequest } from "../00_base/GoogleSheetsAPI";
 
 const SPREADSHEET_ID = "spreadsheet-under-test";
 const LEASES_GID = 111;
@@ -84,5 +84,11 @@ describe("NodeHost.ensureGlobals", () => {
     seedHost(true);
 
     expect(SpreadsheetRaw.init().spreadsheetId).toBe(SPREADSHEET_ID);
+  });
+
+  it("installs PropertiesService and Logger only, not a Sheets global", () => {
+    seedHost(true);
+
+    expect((globalThis as { Sheets?: unknown }).Sheets).toBeUndefined();
   });
 });

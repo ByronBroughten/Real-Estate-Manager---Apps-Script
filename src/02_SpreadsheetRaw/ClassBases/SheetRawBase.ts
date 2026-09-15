@@ -1,4 +1,7 @@
-import type { GoogleSheet } from "../../00_base/AppsScriptTypes";
+import type {
+  SheetSnapshot,
+  TableSnapshot,
+} from "../../00_base/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
@@ -47,9 +50,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
       });
     }
   }
-  protected _initSheetState(sheet: GoogleSheet): void {
-    if (sheet?.properties?.title) {
-      this.sheetState.title = sheet.properties.title;
+  protected _initSheetState(sheet: SheetSnapshot): void {
+    if (sheet.title) {
+      this.sheetState.title = sheet.title;
     }
     const tables = sheet.tables;
     if (!tables) {
@@ -66,7 +69,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
     }
     const table = Val.assert(tables[0], "table");
     const range = Obj.validatePick(
-      table.range,
+      table,
       "number",
       "startRowIndex",
       "endRowIndex",
@@ -75,10 +78,10 @@ export class SheetRawBase extends SpreadsheetRawBase {
     );
     const previous = this.sheetState.knownTable;
     this.sheetState.knownTable = {
-      tableId: Val.assert(table.tableId, "tableId"),
+      tableId: table.tableId,
       ...range,
       ...this._parseColumnProperties(
-        table.columnProperties,
+        table,
         range.startColumnIndex,
       ),
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
@@ -86,8 +89,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
     };
   }
   private _parseColumnProperties(
-    columnProperties:
-      GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined,
+    table: TableSnapshot,
     startColumnIndex: number,
   ): RawColumnPropertiesState {
     const state: RawColumnPropertiesState = {
@@ -95,18 +97,20 @@ export class SheetRawBase extends SpreadsheetRawBase {
       columnValidationConditionTypes: new Map(),
       columnDeclaredTypes: new Map(),
     };
-    (columnProperties ?? []).forEach((colProps, offset) => {
+    table.columnProperties.forEach((colProps, offset) => {
       // The API omits columnIndex when it's zero, and states it table-relative.
       const colIndex = colProps.columnIndex ?? startColumnIndex + offset;
-      const values = (colProps.dataValidationRule?.condition?.values ?? [])
-        .map((conditionValue) => conditionValue.userEnteredValue)
-        .filter((value): value is string => value !== undefined);
-      if (values.length > 0) {
-        state.columnValidationValues.set(colIndex, values);
+      if (colProps.dataValidationValues.length > 0) {
+        state.columnValidationValues.set(
+          colIndex,
+          colProps.dataValidationValues,
+        );
       }
-      const conditionType = colProps.dataValidationRule?.condition?.type;
-      if (conditionType !== undefined) {
-        state.columnValidationConditionTypes.set(colIndex, conditionType);
+      if (colProps.dataValidationConditionType !== undefined) {
+        state.columnValidationConditionTypes.set(
+          colIndex,
+          colProps.dataValidationConditionType,
+        );
       }
       if (colProps.columnType !== undefined) {
         state.columnDeclaredTypes.set(colIndex, colProps.columnType);

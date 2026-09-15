@@ -30,6 +30,7 @@ const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
 // A mis-wired accessor still type-checks; the instance checks catch it.
 describe("SpreadsheetIndexed navigation", () => {
   it("gives each accessor the class its return type names", () => {
+    stubSheetsService();
     const ssi = new SpreadsheetIndexed(
       SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
     );

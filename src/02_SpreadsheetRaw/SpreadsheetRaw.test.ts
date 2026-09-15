@@ -12,6 +12,8 @@ import {
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { CellRaw } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
+import type { RowCellChange } from "./ClassTypes/RawState";
+import type { RgbColor } from "../00_base/RgbColor";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
@@ -1862,6 +1864,9 @@ describe("Raw value types", () => {
         boolean | ""
       >
     >(true);
+    assertType<IsExactly<RowCellChange["backgroundColor"], RgbColor | undefined>>(
+      true,
+    );
   });
 });
 

@@ -1,4 +1,5 @@
 import { AppsScript } from "../../00_base/AppsScript";
+import { installedRawSource } from "../../00_base/RawSource";
 import { SpreadsheetSchema } from "../SpreadsheetSchema";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
@@ -53,6 +54,7 @@ export class SpreadsheetRawBase {
       rawState: {
         allSheetPropertiesAreFetched: false,
         spreadsheetId: null,
+        rawSource: installedRawSource(),
         fetcherGridRanges: [],
         changesToSave: new Map(),
         updateRequests: this.initSortedUpdateRequests(),

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { GoogleUpdateRequest } from "../00_base/AppsScriptTypes";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
 const OCCUPANCY_GID = getSheetTraitByName("occupancy", "sheetGid");
 const UNKNOWN_GID = 999999;
 
-function onlyLine(request: GoogleUpdateRequest): string {
+function onlyLine(request: OpaqueRawRequest): string {
   const [line] = UpdateRequestSummary.init([request]).lines;
   return (line ?? "").replace(/\s+/g, " ").trim();
 }
@@ -208,7 +208,7 @@ describe("UpdateRequestSummary.lines", () => {
         index: 3,
         rule: { ranges: [{ sheetId: OCCUPANCY_GID }] },
       },
-    } as GoogleUpdateRequest);
+    } as OpaqueRawRequest);
 
     expect(line).toContain("addConditionalFormatRule");
     expect(line).toContain('"index":3');

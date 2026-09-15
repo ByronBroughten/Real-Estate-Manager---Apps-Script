@@ -1,4 +1,3 @@
-import type { GoogleUpdateRequest } from "../../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import { Obj } from "../../utils/Obj";
 import type {
@@ -67,7 +66,7 @@ export abstract class RowCommonRaw extends RowRawBase {
   }
   get isQueuedForDelete(): boolean {
     const changes = this.allChangesToSave.get(this.sheetRowId);
-    return changes?.level === "row" && changes.delete !== null;
+    return changes?.level === "row" && changes.delete;
   }
   get changesToSave(): RowChangesToSave {
     this._ensureChangesToSaveExists();
@@ -80,7 +79,7 @@ export abstract class RowCommonRaw extends RowRawBase {
       sheetChangesToSave.set(sheetRowId, {
         level: "row",
         append: false,
-        delete: null,
+        delete: false,
         update: new Map(),
       });
     }
@@ -90,7 +89,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     if (changes.delete) return this;
     const actions = {
       append: (_: RowChangeProps) => (changes.append = true),
-      delete: (_: RowChangeProps) => (changes.delete = this.deleteRequest),
+      delete: (_: RowChangeProps) => (changes.delete = true),
       update: (props: RowChangeProps) => {
         const { colIndex, ...rest } = props as RowChangeUpdateProps;
         const incoming = Obj.strictOmit(rest, "action");
@@ -106,36 +105,22 @@ export abstract class RowCommonRaw extends RowRawBase {
     actions[props.action](props);
     return this;
   }
-  get deleteRequest(): GoogleUpdateRequest {
-    return {
-      deleteDimension: {
-        range: {
-          sheetId: this.sheetGid,
-          dimension: "ROWS",
-          startIndex: this.rowIndex,
-          endIndex: this.rowIndex + 1,
-        },
-      },
-    };
-  }
   gatherAppendRequest(): void {
-    const appendCells = this._appendCellsRequest();
-    appendCells.rows = [...(appendCells.rows ?? []), {}];
-  }
-  // One request per table: Sheets treats each appendCells as targeting the
-  // same first free row, so N one-row requests only grow the table by one.
-  private _appendCellsRequest(): GoogleAppsScript.Sheets.Schema.AppendCellsRequest {
+    // One request per table: Sheets treats each appendCells as targeting the
+    // same first free row, so N one-row requests only grow the table by one.
     const existing = this.updateRequests.append.find(
-      (request) => request.appendCells?.sheetId === this.sheetGid,
-    )?.appendCells;
-    if (existing) return existing;
-    const appendCells: GoogleAppsScript.Sheets.Schema.AppendCellsRequest = {
+      (operation) =>
+        operation.kind === "appendRows" && operation.sheetId === this.sheetGid,
+    );
+    if (existing && existing.kind === "appendRows") {
+      existing.emptyRowCount += 1;
+      return;
+    }
+    this.updateRequests.append.push({
+      kind: "appendRows",
       sheetId: this.sheetGid,
       tableId: `${this.sheet.activeTable.tableId}`,
-      rows: [],
-      fields: "userEnteredValue",
-    };
-    this.updateRequests.append.push({ appendCells });
-    return appendCells;
+      emptyRowCount: 1,
+    });
   }
 }

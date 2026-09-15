@@ -1,12 +1,7 @@
 import type { StrictOmit, StrictPick } from "../../utils/Obj";
+import type { GridRangeProps as BaseGridRangeProps } from "../../00_base/RawSource";
 
-export type GridRangeProps = {
-  sheetId: number;
-  startRowIndex: number;
-  endRowIndex?: number;
-  startColumnIndex?: number;
-  endColumnIndex?: number;
-};
+export type GridRangeProps = BaseGridRangeProps;
 
 export type SheetGridRangeProps = StrictOmit<GridRangeProps, "sheetId">;
 export type ColumnGridRangeProps = StrictOmit<

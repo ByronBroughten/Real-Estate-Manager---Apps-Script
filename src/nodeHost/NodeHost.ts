@@ -1,8 +1,9 @@
-import type { GoogleUpdateRequest } from "../00_base/AppsScriptTypes";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import {
-  SheetsServiceNode,
+  GoogleSheetsAPI,
   type SheetsHttpTransport,
-} from "./SheetsServiceNode";
+} from "../00_base/GoogleSheetsAPI";
+import { installRawSource } from "../00_base/RawSource";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
 const SPREADSHEET_ID_PROPERTY = "realEstateSpreadsheetId";
@@ -20,7 +21,7 @@ export class NodeHost {
   readonly isDryRun: boolean;
   private transport: SheetsHttpTransport;
   private log: (message: string) => void;
-  private sentRequests: GoogleUpdateRequest[];
+  private sentRequests: OpaqueRawRequest[];
   constructor(props: NodeHostProps) {
     this.spreadsheetId = props.spreadsheetId;
     this.isDryRun = props.isDryRun;
@@ -31,8 +32,8 @@ export class NodeHost {
   static init(props: NodeHostProps): NodeHost {
     return new NodeHost(props);
   }
-  get sheetsService(): SheetsServiceNode {
-    return new SheetsServiceNode({
+  get googleSheetsAPI(): GoogleSheetsAPI {
+    return GoogleSheetsAPI.initHttp({
       spreadsheetId: this.spreadsheetId,
       transport: this.transport,
       isDryRun: this.isDryRun,
@@ -45,9 +46,9 @@ export class NodeHost {
   }
   ensureGlobals(): this {
     const globals = globalThis as Record<string, unknown>;
-    globals.Sheets = this.sheetsService;
     globals.PropertiesService = this._makePropertiesService();
     globals.Logger = { log: this.log };
+    installRawSource(this.googleSheetsAPI);
     return this;
   }
   private _makePropertiesService() {

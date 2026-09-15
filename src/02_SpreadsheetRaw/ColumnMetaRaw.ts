@@ -1,4 +1,4 @@
-import type { GoogleCellValue } from "../00_base/AppsScriptTypes";
+import type { GridCellSnapshot } from "../00_base/RawSource";
 import type {
   CellValue,
   CellValueName,
@@ -87,11 +87,11 @@ export class ColumnMetaRaw<
     this.uniformCell(rowName).updateValue(newValue);
     return this;
   }
-  integrateActiveFacts(cellValue: GoogleCellValue | undefined): void {
+  integrateActiveFacts(cell: GridCellSnapshot | undefined): void {
     this.columnCellFacts.set(this.colIndex, {
-      isFormula: cellValue?.userEnteredValue?.formulaValue !== undefined,
-      numberFormatType: cellValue?.effectiveFormat?.numberFormat?.type,
-      dataValidationConditionType: cellValue?.dataValidation?.condition?.type,
+      isFormula: cell?.isFormula ?? false,
+      numberFormatType: cell?.numberFormatType,
+      dataValidationConditionType: cell?.dataValidationConditionType,
       topValue: this.primary.topCell.valueOrEmpty(), // sampled now; the row can be pruned later
     });
   }
