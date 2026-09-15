@@ -583,7 +583,7 @@ function fetchedTestSpreadsheet(): SpreadsheetNamed {
     "sampledBoolean",
     "columnCurrency",
     "cellCurrency",
-    "cellNotCurrency",
+    "cellNumber",
   );
   ss.fetchAllPrepped();
   return ss;
@@ -599,7 +599,7 @@ const completeTestRow: CompleteAppendBag<"test"> = {
   sampledBoolean: true,
   columnCurrency: 8,
   cellCurrency: 9,
-  cellNotCurrency: 10,
+  cellNumber: 10,
 };
 
 describe("SheetNamed.appendRowWithAllVals", () => {
@@ -630,7 +630,7 @@ describe("SheetNamed.appendRowWithAllVals", () => {
       row.value("sampledBoolean"),
       row.value("columnCurrency"),
       row.value("cellCurrency"),
-      row.value("cellNotCurrency"),
+      row.value("cellNumber"),
     ]).toEqual([7, "Yes", true, 8, 9, 10]);
   });
 
@@ -715,7 +715,7 @@ describe("SheetNamed.appendRowWithAllVals", () => {
         "sampledBoolean",
         "columnCurrency",
         "cellCurrency",
-        "cellNotCurrency",
+        "cellNumber",
         "id",
       ],
       [
