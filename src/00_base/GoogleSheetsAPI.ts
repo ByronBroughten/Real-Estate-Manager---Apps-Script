@@ -2,7 +2,6 @@ import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import type { CellValue } from "./base";
 import type {
-  FillOperation,
   GridCellSnapshot,
   GridFetchRange,
   LocalWriteOperation,
@@ -11,7 +10,6 @@ import type {
   SpreadsheetSnapshot,
   TableColumnSnapshot,
   TableSnapshot,
-  UpdateCellOperation,
 } from "./RawSource";
 import type { RgbColor } from "./RgbColor";
 
@@ -33,7 +31,7 @@ type UserEnteredValue = NonNullable<
   >[number]["values"]
 >[number]["userEnteredValue"];
 
-interface OptionalArgs {
+interface FieldsArg {
   fields?: string;
 }
 
@@ -73,12 +71,12 @@ export interface SheetsAdvancedTransport {
   Spreadsheets: {
     get: (
       spreadsheetId: string,
-      optionalArgs?: OptionalArgs,
+      optionalArgs?: FieldsArg,
     ) => GoogleSpreadsheet;
     getByDataFilter: (
       resource: GetByDataFilterRequest,
       spreadsheetId: string,
-      optionalArgs?: OptionalArgs,
+      optionalArgs?: FieldsArg,
     ) => GoogleSpreadsheet;
     batchUpdate: (
       resource: BatchUpdateRequest,
@@ -137,7 +135,7 @@ export class GoogleSheetsAPI implements RawSource {
       ),
     );
   }
-  applyWrites(spreadsheetId: string, operations: LocalWriteOperation[]): void {
+  flush(spreadsheetId: string, operations: LocalWriteOperation[]): void {
     const requests = operations.flatMap(localOperationToGoogleRequests);
     if (requests.length === 0) return;
     this.sheets.Spreadsheets.batchUpdate({ requests }, spreadsheetId);
@@ -147,6 +145,7 @@ export class GoogleSheetsAPI implements RawSource {
 function httpSheetsTransport(
   props: GoogleSheetsAPIHttpProps,
 ): SheetsAdvancedTransport {
+  // The one place the wire is trusted, as Apps Script's own declaration trusts it.
   const send = <T>(request: SheetsHttpRequest): T =>
     props.transport(request) as T;
   const url = (spreadsheetId: string, suffix: string, fields?: string) => {
@@ -310,9 +309,43 @@ function localOperationToGoogleRequests(
         },
       ];
     case "fill":
-      return fillRequests(operation);
+      return formulaAndCellDataRequests(operation, {
+        sheetId: operation.sheetId,
+        rowIndex: operation.startRowIndex,
+        columnIndex: operation.colIndex,
+        rowCount: operation.endRowIndex - operation.startRowIndex,
+      }, (cell, fields) => ({
+        repeatCell: {
+          range: {
+            sheetId: operation.sheetId,
+            startRowIndex: operation.startRowIndex,
+            endRowIndex: operation.endRowIndex,
+            startColumnIndex: operation.colIndex,
+            endColumnIndex: operation.colIndex + 1,
+          },
+          cell,
+          fields,
+        },
+      }));
     case "updateCell":
-      return updateCellRequests(operation);
+      return formulaAndCellDataRequests(operation, {
+        sheetId: operation.sheetId,
+        rowIndex: operation.rowIndex,
+        columnIndex: operation.colIndex,
+        rowCount: 1,
+      }, (cell, fields) => ({
+        updateCells: {
+          range: {
+            sheetId: operation.sheetId,
+            startRowIndex: operation.rowIndex,
+            endRowIndex: operation.rowIndex + 1,
+            startColumnIndex: operation.colIndex,
+            endColumnIndex: operation.colIndex + 1,
+          },
+          rows: [{ values: [cell] }],
+          fields,
+        },
+      }));
     case "findReplace":
       return [
         {
@@ -359,63 +392,26 @@ function localOperationToGoogleRequests(
   }
 }
 
-function fillRequests(operation: FillOperation): OpaqueRawRequest[] {
+function formulaAndCellDataRequests(
+  change: CellDataChange & { formula?: string },
+  pasteProps: {
+    sheetId: number;
+    rowIndex: number;
+    columnIndex: number;
+    rowCount: number;
+  },
+  cellRequest: (cell: GoogleCellData, fields: string) => OpaqueRawRequest,
+): OpaqueRawRequest[] {
   const requests: OpaqueRawRequest[] = [];
-  if (operation.formula !== undefined) {
+  if (change.formula !== undefined) {
     requests.push(
-      formulaPasteDataRequest({
-        sheetId: operation.sheetId,
-        rowIndex: operation.startRowIndex,
-        columnIndex: operation.colIndex,
-        formula: operation.formula,
-        rowCount: operation.endRowIndex - operation.startRowIndex,
-      }),
+      formulaPasteDataRequest({ ...pasteProps, formula: change.formula }),
     );
   }
-  if (!cellChangeHasCellData(operation)) return requests;
-  requests.push({
-    repeatCell: {
-      range: {
-        sheetId: operation.sheetId,
-        startRowIndex: operation.startRowIndex,
-        endRowIndex: operation.endRowIndex,
-        startColumnIndex: operation.colIndex,
-        endColumnIndex: operation.colIndex + 1,
-      },
-      cell: cellChangeToCellData(operation),
-      fields: cellChangeFieldMask(operation),
-    },
-  });
-  return requests;
-}
-
-function updateCellRequests(operation: UpdateCellOperation): OpaqueRawRequest[] {
-  const requests: OpaqueRawRequest[] = [];
-  if (operation.formula !== undefined) {
-    requests.push(
-      formulaPasteDataRequest({
-        sheetId: operation.sheetId,
-        rowIndex: operation.rowIndex,
-        columnIndex: operation.colIndex,
-        formula: operation.formula,
-        rowCount: 1,
-      }),
-    );
-  }
-  if (!cellChangeHasCellData(operation)) return requests;
-  requests.push({
-    updateCells: {
-      range: {
-        sheetId: operation.sheetId,
-        startRowIndex: operation.rowIndex,
-        endRowIndex: operation.rowIndex + 1,
-        startColumnIndex: operation.colIndex,
-        endColumnIndex: operation.colIndex + 1,
-      },
-      rows: [{ values: [cellChangeToCellData(operation)] }],
-      fields: cellChangeFieldMask(operation),
-    },
-  });
+  if (!cellChangeHasCellData(change)) return requests;
+  requests.push(
+    cellRequest(cellChangeToCellData(change), cellChangeFieldMask(change)),
+  );
   return requests;
 }
 

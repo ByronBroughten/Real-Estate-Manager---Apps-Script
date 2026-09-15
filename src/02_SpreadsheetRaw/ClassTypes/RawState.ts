@@ -125,7 +125,7 @@ export interface SheetChangeSortProps extends SortParameters {
 }
 
 export type FindReplaceScope = BaseFindReplaceScope;
-export interface FindReplaceTerms extends BaseFindReplaceTerms {}
+export type FindReplaceTerms = BaseFindReplaceTerms;
 export interface FindReplaceProps extends FindReplaceTerms {
   scope: FindReplaceScope;
 }

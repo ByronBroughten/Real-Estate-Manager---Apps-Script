@@ -105,7 +105,7 @@ describe("GoogleSheetsAPI write mapping", () => {
       { kind: "raw", request: { updateTable: { table: { tableId: "t" } } } },
     ];
 
-    api.applyWrites(SPREADSHEET_ID, operations);
+    api.flush(SPREADSHEET_ID, operations);
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
@@ -215,7 +215,7 @@ describe("GoogleSheetsAPI write mapping", () => {
   it("sends no batchUpdate when the write list is empty", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.applyWrites(SPREADSHEET_ID, []);
+    api.flush(SPREADSHEET_ID, []);
 
     expect(batchUpdateCalls).toEqual([]);
   });
@@ -223,7 +223,7 @@ describe("GoogleSheetsAPI write mapping", () => {
   it("passes an ordered raw request through last", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.applyWrites(SPREADSHEET_ID, [
+    api.flush(SPREADSHEET_ID, [
       {
         kind: "updateCell",
         sheetId: 111,
@@ -350,7 +350,7 @@ describe("GoogleSheetsAPI colour mapping", () => {
   it("maps the RGB record onto Google Color on the way out", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.applyWrites(SPREADSHEET_ID, [
+    api.flush(SPREADSHEET_ID, [
       {
         kind: "updateCell",
         sheetId: 1,
@@ -450,7 +450,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("posts mapped writes to batchUpdate when the run is not a dry run", () => {
     const { api, transport } = seedApi();
 
-    api.applyWrites(SPREADSHEET_ID, [
+    api.flush(SPREADSHEET_ID, [
       {
         kind: "updateCell",
         sheetId: 111,
@@ -469,7 +469,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("sends nothing at all on a dry run, and reports what it withheld", () => {
     const { api, transport, reported } = seedApi({ isDryRun: true });
 
-    api.applyWrites(SPREADSHEET_ID, [
+    api.flush(SPREADSHEET_ID, [
       {
         kind: "updateCell",
         sheetId: 111,

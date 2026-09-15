@@ -1,6 +1,6 @@
-import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import {
   GoogleSheetsAPI,
+  type OpaqueRawRequest,
   type SheetsHttpTransport,
 } from "../00_base/GoogleSheetsAPI";
 import { installRawSource } from "../00_base/RawSource";

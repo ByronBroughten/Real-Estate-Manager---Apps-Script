@@ -32,7 +32,7 @@ type TablePlacement =
  * Spreadsheet-level Raw: GID+index fetch and the two Sheets chokepoints
  * (`fetchAllGathered` / `fetchSheetUsedGrid` via RawSource.fetchGrid,
  * `fetchAllSheetProperties` via RawSource.fetchSheetProperties,
- * `_sendUpdateRequests` via RawSource.applyWrites). Sheet/row/column by index
+ * `_sendUpdateRequests` via RawSource.flush). Sheet/row/column by index
  * live on SheetRaw / RowRaw / ColumnRaw in this folder.
  * Column-by-name and columnId resolution are Indexed/Named.
  * Schema classes that resolve columns share SpreadsheetSchema.ts here
@@ -407,7 +407,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       // Outside the ordering rules the queue was built around, so last.
       ...surs.raw,
     ];
-    this.rawState.rawSource.applyWrites(this.spreadsheetId, operations);
+    this.rawState.rawSource.flush(this.spreadsheetId, operations);
     this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the

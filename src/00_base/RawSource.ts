@@ -1,15 +1,17 @@
 import type { CellValue } from "./base";
 import type { RgbColor } from "./RgbColor";
 
-export type GridRangeProps = {
+export interface GridRangeProps {
   sheetId: number;
   startRowIndex: number;
   endRowIndex?: number;
   startColumnIndex?: number;
   endColumnIndex?: number;
-};
+}
 
-export type UsedGridRange = { sheetId: number };
+export interface UsedGridRange {
+  sheetId: number;
+}
 
 export type GridFetchRange = GridRangeProps | UsedGridRange;
 
@@ -157,7 +159,7 @@ export interface RawSource {
     gridRanges: GridFetchRange[],
     options: GridFetchOptions,
   ): SpreadsheetSnapshot;
-  applyWrites(spreadsheetId: string, operations: LocalWriteOperation[]): void;
+  flush(spreadsheetId: string, operations: LocalWriteOperation[]): void;
 }
 
 let installed: RawSource | null = null;
