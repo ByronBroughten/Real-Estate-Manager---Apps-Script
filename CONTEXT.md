@@ -87,11 +87,15 @@ _Avoid_: finished at, completion time, duration
 ### Columns
 
 **Column type**:
-What a column holds, as the operator declares it in the column's own type menu in Sheets — currency, date, checkbox, text, and the rest. The app trusts it over anything it could work out for itself from the data.
+What a column holds, as the operator declares it in the column's own type menu in Sheets — currency, date, checkbox, text, and the rest. The app trusts it over anything it could work out for itself from the data, including the column's number format.
 _Avoid_: data type, format, value type
 
+**Number format**:
+What Format > Number says on a column's first data row — currency, date, number, plain text, and the rest. When the type menu is silent, a format the app knows counts as a declaration only if that row's value is **compatible** with it: blank, or a value the app would already guess as the name that format maps to. A value that is not compatible stays a guess, and the column stays untyped. The type menu is left alone.
+_Avoid_: column type, value type, cell type, permissible
+
 **Checkbox column**:
-A column whose type menu says Checkbox. Every one of its rows draws a box, so a row nobody has touched counts as unchecked rather than as blank, and only such a column can be an endpoint's selector. A column that merely holds TRUE and FALSE without saying so is untyped, not a checkbox column.
+A column the operator made a checkbox: the type menu says Checkbox, or Insert > Checkbox put BOOLEAN data validation on the Table column or the first data row. Every one of its rows draws a box, so a row nobody has touched counts as unchecked rather than as blank, and only such a column can be an endpoint's selector. A column that merely holds TRUE and FALSE without that declaration is untyped, not a checkbox column.
 _Avoid_: boolean column, tickbox column, flag column
 
 **Empty value allowed**:
@@ -99,7 +103,7 @@ A box you tick against a column in Column Config to say that a blank in it is a 
 _Avoid_: nullable, optional column, blank allowed
 
 **Untyped**:
-Said of a column whose type menu tells the app nothing about what it holds — left on Automatic, or a dropdown that no Value Config rule backs. The app then guesses from the column's top row, and says how many such columns are left every time the config sheets sync.
+Said of a column whose type menu, checkbox validation, and first-data-row number format all tell the app nothing about what it holds — left on Automatic with no format the app maps and no Insert > Checkbox, or a dropdown that no Value Config rule backs. The app then guesses from the column's top value, and says how many such columns are left every time the config sheets sync.
 _Avoid_: unset, automatic, missing type
 
 ### Units

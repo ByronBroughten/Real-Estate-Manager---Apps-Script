@@ -302,8 +302,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const withProgrammaticFacts =
       "sheets(" +
       "properties(sheetId,title)," +
-      "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(values(userEnteredValue)))))," +
-      "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)))))" +
+      "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
+      "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
       ")";
     const withoutProgrammaticFacts =
       "sheets(" +
