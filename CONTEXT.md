@@ -7,7 +7,7 @@ A Google Sheets spreadsheet that a person operates directly, with an Apps Script
 ### Sheet layout
 
 **Table**:
-The Google Table (Insert > Table) laid over a sheet's data. Every sheet the app knows about must have exactly one, and it must start on the Table header row, in the first column. Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet it knows, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
+The Google Table (Insert > Table) laid over a sheet's data. Every sheet with **Let api access** must have exactly one, starting on the Table header row in the first column, with at least one data row (a **blank row** counts). Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet with **Let api access**, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
 _Avoid_: range, data range, grid
 
 **Table reference**:
@@ -41,6 +41,10 @@ _Avoid_: empty row, placeholder row, spare row
 **ID prefix**:
 The short code on Sheet Config that every row ID and column ID on that sheet begins with. Two sheets must not share a non-empty one; a sheet that does not mint IDs may leave it blank.
 _Avoid_: sheet prefix, ID code
+
+**Let api access**:
+The Sheet Config checkbox that says this tab is one the app knows about — not every tab, and not every catalogue row on Sheet Config.
+_Avoid_: enabled sheet, API sheet, known sheet
 
 ### Endpoints
 

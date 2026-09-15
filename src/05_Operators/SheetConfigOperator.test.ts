@@ -46,7 +46,7 @@ beforeEach(() => {
 //
 // fetchAllSheetProperties() has to run first, matching
 // ConfigOrchestrator.syncAndFlushConfigSheets's order — it's what populates
-// ss.raw.activeSheetGids (prepFetchForSync's own loop, and hence
+// ss.raw.activeSheetGids (the catalogue walk, and hence
 // skipFetchingProperties below) with every live sheet, including ones with
 // no Sheet Config row yet.
 function syncSheetConfigOperator(operator: SheetConfigOperator): void {
@@ -249,6 +249,34 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(operator.sheet.column("sheetTitle").value(4)).toBe("Property");
     expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(false);
+  });
+
+  it("corrects a draft tab's title from the live tab name without reading its Table", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: SHEET_CONFIG_GID,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            4: [PROPERTY_GID, "Stale Title", false, "prp"],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: PROPERTY_GID,
+          title: "Property",
+          rows: buildGridRows({ 3: ["Name"] }),
+          table: { endRowIndex: 4 },
+        },
+      ],
+    });
+
+    const operator = SheetConfigOperator.init();
+    syncSheetConfigOperator(operator);
+
+    expect(operator.sheet.column("sheetTitle").value(4)).toBe("Property");
+    expect(operator.newSheetConfigs().property).toBeUndefined();
   });
 
   it("emits has-ID true when the described sheet's header row has the ID header", () => {

@@ -10,12 +10,17 @@ import {
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
 import { ConfigOrchestrator } from "./ConfigOrchestrator";
 
 const TEST_SHEET_GID = 2089200354;
 const SHEET_CONFIG_GID = 210603630;
 const COLUMN_CONFIG_GID = 2034522667;
+const DRAFT_GID = 777000111;
+const DRAFT_TITLE = "Add Occ Payment Intention";
+const HEADER_ONLY_TABLE_END_ROW_INDEX =
+  ssConfigGet("tableHeaderRowIndexBase0") + 1;
 const SPREADSHEET_CONFIG_GID = getSheetTraitByName(
   "spreadsheetConfig",
   "sheetGid",
@@ -66,6 +71,39 @@ function spreadsheetConfigSheet(
   };
 }
 
+function headerOnlyDraftSheet(
+  options: {
+    sheetId?: number;
+    title?: string;
+    table?: "header-only" | "with-data-row" | "missing";
+    hasIdHeader?: boolean;
+  } = {},
+): FakeSheetProperties {
+  const table = options.table ?? "header-only";
+  const headers = options.hasIdHeader ? ["ID", "Name"] : ["Name"];
+  const rows: Record<number, readonly (string | number | boolean | null)[]> = {
+    3: headers,
+  };
+  if (table === "with-data-row") {
+    rows[4] = [];
+  }
+  const sheet: FakeSheetProperties = {
+    sheetId: options.sheetId ?? DRAFT_GID,
+    title: options.title ?? DRAFT_TITLE,
+    rows: buildGridRows(rows),
+  };
+  if (table === "missing") {
+    return sheet;
+  }
+  return {
+    ...sheet,
+    table: {
+      endRowIndex:
+        table === "header-only" ? HEADER_ONLY_TABLE_END_ROW_INDEX : 5,
+    },
+  };
+}
+
 function seedFixture(
   options: {
     idDelimiter?: string;
@@ -75,6 +113,12 @@ function seedFixture(
       number,
       readonly (string | number | boolean | null)[]
     >;
+    extraSheets?: FakeSheetProperties[];
+    extraSheetConfigDataRows?: Record<
+      number,
+      readonly (string | number | boolean | null)[]
+    >;
+    sheetConfigTableEndRowIndex?: number;
   } = {},
 ) {
   const idDelimiter = options.idDelimiter ?? ":";
@@ -96,8 +140,9 @@ function seedFixture(
             sc.idPrefix.columnId,
           ],
           4: testSheetConfigRowWithApiAccess,
+          ...options.extraSheetConfigDataRows,
         }),
-        table: { endRowIndex: 5 },
+        table: { endRowIndex: options.sheetConfigTableEndRowIndex ?? 5 },
       },
       {
         sheetId: COLUMN_CONFIG_GID,
@@ -135,6 +180,7 @@ function seedFixture(
         }),
         table: { endRowIndex: 5 },
       },
+      ...(options.extraSheets ?? []),
     ],
   });
 }
@@ -318,5 +364,166 @@ describe("ConfigOrchestrator.generateConfigFiles Spreadsheet Config Table", () =
     expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow(
       /Spreadsheet Config/,
     );
+  });
+});
+
+describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
+  it("syncs when Let api access is off and the Table has no data row, cataloguing the tab without emitting it", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet()],
+      extraSheetConfigDataRows: {
+        5: [DRAFT_GID, DRAFT_TITLE, false, ""],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const orchestrator = ConfigOrchestrator.init();
+    expect(() => orchestrator.syncConfigSheetRows()).not.toThrow();
+    expect(
+      orchestrator.sheetConfigOperator.newSheetConfigs().addOccPaymentIntention,
+    ).toBeUndefined();
+    expect(
+      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(DRAFT_GID),
+    ).toBe(true);
+  });
+
+  it("aborts and names the tab when Let api access is on and the Table has no data row", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet()],
+      extraSheetConfigDataRows: {
+        5: [DRAFT_GID, DRAFT_TITLE, true, ""],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).toThrow(
+      /Add Occ Payment Intention.*at least one data row/,
+    );
+  });
+
+  it("samples hasIdColumn from the Table header row of a Let api access sheet", () => {
+    seedFixture({
+      extraSheets: [
+        headerOnlyDraftSheet({
+          table: "with-data-row",
+          hasIdHeader: true,
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: [DRAFT_GID, DRAFT_TITLE, true, "aopi"],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain(
+      `"addOccPaymentIntention": { "sheetGid": ${DRAFT_GID}, "idPrefix": "aopi", "hasIdColumn": true }`,
+    );
+  });
+
+  it("treats a never-ticked Let api access box as off", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet()],
+      extraSheetConfigDataRows: {
+        5: [DRAFT_GID, DRAFT_TITLE, null, ""],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const orchestrator = ConfigOrchestrator.init();
+    expect(() => orchestrator.syncConfigSheetRows()).not.toThrow();
+    expect(
+      orchestrator.sheetConfigOperator.newSheetConfigs().addOccPaymentIntention,
+    ).toBeUndefined();
+  });
+
+  it("catalogues a brand-new header-only tab with Let api access off", () => {
+    seedFixture({ extraSheets: [headerOnlyDraftSheet()] });
+
+    const orchestrator = ConfigOrchestrator.init();
+    const parsed = orchestrator.generateConfigFiles();
+    expect(
+      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(DRAFT_GID),
+    ).toBe(true);
+    expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
+  });
+
+  it("omits a draft that has data rows until Let api access is ticked", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet({ table: "with-data-row" })],
+      extraSheetConfigDataRows: {
+        5: [DRAFT_GID, DRAFT_TITLE, false, "aopi"],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain('"test"');
+    expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
+    expect(parsed.columnConfigs).toContain("c:test:xyz123");
+    expect(parsed.columnConfigs).not.toMatch(/c:aopi:/);
+  });
+
+  it("syncs several header-only drafts in one run", () => {
+    const secondDraftGid = DRAFT_GID + 1;
+    const secondTitle = "Add Occ Charge Intention";
+    seedFixture({
+      extraSheets: [
+        headerOnlyDraftSheet(),
+        headerOnlyDraftSheet({
+          sheetId: secondDraftGid,
+          title: secondTitle,
+        }),
+      ],
+    });
+
+    const orchestrator = ConfigOrchestrator.init();
+    expect(() => orchestrator.syncConfigSheetRows()).not.toThrow();
+    const gids = orchestrator.sheetConfigOperator.sheet.column("sheetGid");
+    expect(gids.hasValue(DRAFT_GID)).toBe(true);
+    expect(gids.hasValue(secondDraftGid)).toBe(true);
+  });
+
+  it("regens a healthy Let api access sheet while cataloguing an empty draft", () => {
+    seedFixture({ extraSheets: [headerOnlyDraftSheet()] });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain('"test"');
+    expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
+    expect(parsed.columnConfigs).toContain("c:test:xyz123");
+  });
+
+  it("still syncs the config-describing sheets when they have Let api access", () => {
+    seedFixture({
+      extraSheetConfigDataRows: {
+        5: [SHEET_CONFIG_GID, "Sheet Config", true, "scf"],
+        6: [COLUMN_CONFIG_GID, "Column Config", true, "ccf"],
+      },
+      sheetConfigTableEndRowIndex: 7,
+    });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).not.toThrow();
+  });
+
+  it("fails when a Let api access sheet has no Table", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet({ table: "missing" })],
+      extraSheetConfigDataRows: {
+        5: [DRAFT_GID, DRAFT_TITLE, true, "aopi"],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).toThrow(
+      /Active table is null/,
+    );
+  });
+
+  it("syncs when a draft tab has no Table", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet({ table: "missing" })],
+    });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).not.toThrow();
   });
 });

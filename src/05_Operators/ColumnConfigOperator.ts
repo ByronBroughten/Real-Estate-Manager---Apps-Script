@@ -76,6 +76,8 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     this.sheetConfigOperator.assertSyncedToSpreadsheet();
     this.sheetGidsApiAccesses.forEach((sheetGid) => {
       const sheet = this.ss.raw.sheet(sheetGid);
+      // hasIdColumn samples this row after Let api access is known.
+      sheet.meta.tableHeaderRow.gatherFetchFull();
       sheet.meta.colIdRow.gatherFetchFull();
       sheet.topRow.gatherFetchFull();
     });
