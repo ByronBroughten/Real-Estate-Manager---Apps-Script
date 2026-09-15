@@ -92,6 +92,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
   ): RawColumnPropertiesState {
     const state: RawColumnPropertiesState = {
       columnValidationValues: new Map(),
+      columnValidationConditionTypes: new Map(),
       columnDeclaredTypes: new Map(),
     };
     (columnProperties ?? []).forEach((colProps, offset) => {
@@ -102,6 +103,10 @@ export class SheetRawBase extends SpreadsheetRawBase {
         .filter((value): value is string => value !== undefined);
       if (values.length > 0) {
         state.columnValidationValues.set(colIndex, values);
+      }
+      const conditionType = colProps.dataValidationRule?.condition?.type;
+      if (conditionType !== undefined) {
+        state.columnValidationConditionTypes.set(colIndex, conditionType);
       }
       if (colProps.columnType !== undefined) {
         state.columnDeclaredTypes.set(colIndex, colProps.columnType);

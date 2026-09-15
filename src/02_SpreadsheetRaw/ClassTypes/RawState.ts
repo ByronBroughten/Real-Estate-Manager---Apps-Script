@@ -52,11 +52,13 @@ export type RawColumnCellFacts = Map<ColIndex, RawCellFacts>;
 export interface RawCellFacts {
   isFormula: boolean;
   numberFormatType: string | undefined;
+  dataValidationConditionType: string | undefined;
   topValue: CellValue;
 }
 
 export interface RawColumnPropertiesState {
   columnValidationValues: RawColumnValidationValues;
+  columnValidationConditionTypes: RawColumnValidationConditionTypes;
   columnDeclaredTypes: RawColumnDeclaredTypes;
 }
 export interface RawKnownTable extends RawColumnPropertiesState {
@@ -69,6 +71,7 @@ export interface RawKnownTable extends RawColumnPropertiesState {
   firstStaleColIndex: number | null;
 }
 export type RawColumnValidationValues = Map<ColIndex, string[]>;
+export type RawColumnValidationConditionTypes = Map<ColIndex, string>;
 // Absent for a column left on Automatic, which is what makes it "untyped".
 export type RawColumnDeclaredTypes = Map<ColIndex, string>;
 

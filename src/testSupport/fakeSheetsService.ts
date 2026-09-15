@@ -22,6 +22,7 @@ export interface FakeRichCellValue {
   value: FakeCellValue;
   isFormula?: boolean;
   numberFormatType?: string;
+  dataValidationConditionType?: string;
 }
 export type FakeCell = FakeCellValue | FakeRichCellValue;
 
@@ -72,6 +73,13 @@ export interface FakeSheetProperties {
      * validated columns.
      */
     columnValidationValues?: Record<number, string[]>;
+    /**
+     * A column's live data-validation condition type (e.g. `"BOOLEAN"`
+     * from Insert > Checkbox), keyed by absolute column index. A BOOLEAN
+     * rule typically has no `values`, so this is independent of
+     * `columnValidationValues`.
+     */
+    columnValidationConditionTypes?: Record<number, string>;
     /**
      * A column's declared Sheets column type (e.g. `"CURRENCY"`, `"DATE"`,
      * `"BOOLEAN"`), keyed by absolute column index — read by
@@ -160,6 +168,11 @@ function fakeCellToGoogleCellData(cell: FakeCell): GoogleCellData {
       numberFormat: { type: rich.numberFormatType },
     };
   }
+  if (rich.dataValidationConditionType) {
+    data.dataValidation = {
+      condition: { type: rich.dataValidationConditionType },
+    };
+  }
   return data;
 }
 
@@ -240,10 +253,15 @@ function fakeRowsToGoogleSheetData({
 function fakeTableColumnProperties(
   table: NonNullable<FakeSheetProperties["table"]>,
 ): GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined {
-  const { columnValidationValues = {}, columnDeclaredTypes = {} } = table;
+  const {
+    columnValidationValues = {},
+    columnValidationConditionTypes = {},
+    columnDeclaredTypes = {},
+  } = table;
   const colIndexes = Array.from(
     new Set([
       ...Object.keys(columnValidationValues),
+      ...Object.keys(columnValidationConditionTypes),
       ...Object.keys(columnDeclaredTypes),
     ]),
     Number,
@@ -260,10 +278,18 @@ function fakeTableColumnProperties(
       colProps.columnType = columnType;
     }
     const values = columnValidationValues[colIndex];
-    if (values) {
+    const conditionType = columnValidationConditionTypes[colIndex];
+    if (values || conditionType) {
       colProps.dataValidationRule = {
         condition: {
-          values: values.map((userEnteredValue) => ({ userEnteredValue })),
+          ...(conditionType ? { type: conditionType } : {}),
+          ...(values
+            ? {
+                values: values.map((userEnteredValue) => ({
+                  userEnteredValue,
+                })),
+              }
+            : {}),
         },
       };
     }

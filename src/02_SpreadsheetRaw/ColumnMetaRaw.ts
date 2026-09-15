@@ -32,6 +32,9 @@ export class ColumnMetaRaw<
   get activeNumberFormatType(): string | undefined {
     return this._activeFacts.numberFormatType;
   }
+  get activeDataValidationConditionType(): string | undefined {
+    return this._activeFacts.dataValidationConditionType;
+  }
   get activeTopValue(): CellValue {
     return this._activeFacts.topValue;
   }
@@ -48,6 +51,11 @@ export class ColumnMetaRaw<
   }
   get valueValidationStrings(): string[] {
     return this.sheet.activeTable.columnValidationValues.get(this.colIndex) ?? [];
+  }
+  get validationConditionType(): string | undefined {
+    return this.sheet.activeTable.columnValidationConditionTypes.get(
+      this.colIndex,
+    );
   }
   get activeDeclaredColumnType(): string | undefined {
     return this.sheet.activeTable.columnDeclaredTypes.get(this.colIndex);
@@ -83,6 +91,7 @@ export class ColumnMetaRaw<
     this.columnCellFacts.set(this.colIndex, {
       isFormula: cellValue?.userEnteredValue?.formulaValue !== undefined,
       numberFormatType: cellValue?.effectiveFormat?.numberFormat?.type,
+      dataValidationConditionType: cellValue?.dataValidation?.condition?.type,
       topValue: this.primary.topCell.valueOrEmpty(), // sampled now; the row can be pruned later
     });
   }
@@ -100,7 +109,12 @@ export class ColumnMetaRaw<
     if (this.activeHeader === this.schema.idHeader) {
       return "id";
     }
-    return this.activeValidationValueTitle() ?? this._declaredValueName();
+    return (
+      this.activeValidationValueTitle() ??
+      this._declaredColumnTypeValueName() ??
+      this._booleanValidationValueName() ??
+      this._compatibleNumberFormatValueName()
+    );
   }
   activeValidationValueTitle(): string | null {
     for (const rawValue of this.valueValidationStrings) {
@@ -110,12 +124,28 @@ export class ColumnMetaRaw<
     }
     return null;
   }
-  private _declaredValueName(): BaseValueName | null {
+  private _declaredColumnTypeValueName(): BaseValueName | null {
     const columnType = this.activeDeclaredColumnType;
     if (columnType === undefined) {
       return null;
     }
     return columnTypeValueNames[columnType] ?? null;
+  }
+  private _booleanValidationValueName(): "checkbox" | null {
+    if (this.validationConditionType === "BOOLEAN") {
+      return "checkbox";
+    }
+    if (this.activeDataValidationConditionType === "BOOLEAN") {
+      return "checkbox";
+    }
+    return null;
+  }
+  private _compatibleNumberFormatValueName(): PrimitiveValueName | null {
+    const formatName = this._numberFormatValueName();
+    if (formatName === null) {
+      return null;
+    }
+    return this._actualPrimitiveValueName() === formatName ? formatName : null;
   }
   private _actualPrimitiveValueName(): PrimitiveValueName {
     const value = this.activeTopValue;
@@ -132,7 +162,10 @@ export class ColumnMetaRaw<
   }
   private _numberFormatValueName(): PrimitiveValueName | null {
     const formatType = this.activeNumberFormatType;
-    if (formatType === undefined) {
+    if (
+      formatType === undefined ||
+      formatType === "NUMBER_FORMAT_TYPE_UNSPECIFIED"
+    ) {
       return null;
     }
     return numberFormatValueNames[formatType] ?? null;
@@ -164,4 +197,6 @@ const numberFormatValueNames: Record<string, PrimitiveValueName> = {
   NUMBER: "number",
   CURRENCY: "number",
   PERCENT: "number",
+  SCIENTIFIC: "number",
+  TEXT: "string",
 };

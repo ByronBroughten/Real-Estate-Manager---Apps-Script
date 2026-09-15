@@ -2,6 +2,7 @@ import { Val } from "../utils/Val";
 import type { SheetRawProps } from "./ClassBases/SheetRawBase";
 import type {
   RawColumnDeclaredTypes,
+  RawColumnValidationConditionTypes,
   RawColumnValidationValues,
   RawKnownTable,
   RawSheetState,
@@ -40,6 +41,9 @@ export class ActiveTableRaw {
   }
   get columnValidationValues(): RawColumnValidationValues {
     return this._knownTable().columnValidationValues;
+  }
+  get columnValidationConditionTypes(): RawColumnValidationConditionTypes {
+    return this._knownTable().columnValidationConditionTypes;
   }
   get columnDeclaredTypes(): RawColumnDeclaredTypes {
     return this._knownTable().columnDeclaredTypes;

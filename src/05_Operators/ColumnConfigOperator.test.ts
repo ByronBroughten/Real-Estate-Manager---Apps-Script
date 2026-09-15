@@ -579,6 +579,7 @@ interface ColumnsUnderTest {
   topDataRowAbsence?: "rowsWithNoGridData" | "rowsWithNoGridBlock";
   columnDeclaredTypes?: Record<number, string>;
   columnValidationValues?: Record<number, string[]>;
+  columnValidationConditionTypes?: Record<number, string>;
 }
 
 function syncColumnsUnderTest({
@@ -587,6 +588,7 @@ function syncColumnsUnderTest({
   topDataRowAbsence,
   columnDeclaredTypes,
   columnValidationValues,
+  columnValidationConditionTypes,
 }: ColumnsUnderTest): ColumnConfigOperator {
   const columnIds = headers.map((_, index) => `c:test:col${index}`);
   const columnConfigRows: Record<number, FakeCell[]> = {
@@ -626,6 +628,7 @@ function syncColumnsUnderTest({
           endRowIndex: 5,
           columnDeclaredTypes,
           columnValidationValues,
+          columnValidationConditionTypes,
         },
       },
     ],
@@ -703,6 +706,54 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     );
   });
 
+  it("treats BOOLEAN Table validation with no values as declared checkbox, not untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Active"],
+      columnValidationConditionTypes: { 0: "BOOLEAN" },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["checkbox"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("treats BOOLEAN validation on the first data row as declared checkbox", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Active"],
+      topDataRow: [{ value: null, dataValidationConditionType: "BOOLEAN" }],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["checkbox"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("keeps a Value Config rule winning over BOOLEAN validation", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Description"],
+      topDataRow: ["Rent (base)"],
+      columnValidationValues: {
+        0: ["=valueConfig[Transaction Description]"],
+      },
+      columnValidationConditionTypes: { 0: "BOOLEAN" },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["Transaction Description"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("ignores a non-BOOLEAN data validation condition for value-name declaration", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Status"],
+      topDataRow: ["open"],
+      columnValidationConditionTypes: { 0: "ONE_OF_LIST" },
+      columnValidationValues: { 0: ["open", "closed"] },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["string"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
   it("prefers the declared type over what the top data row samples to", () => {
     const operator = syncColumnsUnderTest({
       headers: ["Amount"],
@@ -774,7 +825,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     );
   });
 
-  it("falls back to an empty top cell's number format rather than to text", () => {
+  it("treats a compatible empty first data row's number format as declared, not untyped", () => {
     const operator = syncColumnsUnderTest({
       headers: ["Payment", "Closing Date", "Closing Time", "Closed At"],
       topDataRow: [
@@ -791,6 +842,74 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
       "number",
       "number",
     ]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("keeps an incompatible text sample in a Currency-formatted column guessed string and untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Notes"],
+      topDataRow: [{ value: "a note", numberFormatType: "CURRENCY" }],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["string"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("treats a compatible Plain text format as declared string, not untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Notes"],
+      topDataRow: [{ value: "a note", numberFormatType: "TEXT" }],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["string"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("treats a compatible Scientific format as declared number, not untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Amount"],
+      topDataRow: [{ value: 1.2e3, numberFormatType: "SCIENTIFIC" }],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["number"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
+  });
+
+  it("keeps a number in a Plain text-formatted column guessed number and untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Notes"],
+      topDataRow: [{ value: 42, numberFormatType: "TEXT" }],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["number"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("keeps TRUE with only a number format guessed boolean and untyped", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Active"],
+      topDataRow: [{ value: true, numberFormatType: "CURRENCY" }],
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["boolean"]);
+    expect(operator.untypedColumnsSummary()).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
+  it("declares from a compatible format when the type menu is DROPDOWN with no Value Config rule", () => {
+    const operator = syncColumnsUnderTest({
+      headers: ["Amount"],
+      topDataRow: [{ value: 42, numberFormatType: "NUMBER" }],
+      columnDeclaredTypes: { 0: "DROPDOWN" },
+    });
+
+    expect(valueTitles(operator, 1)).toEqual(["number"]);
+    expect(operator.untypedColumnsSummary()).toBeUndefined();
   });
 
   it("falls back to text for an empty top cell with no number format", () => {
