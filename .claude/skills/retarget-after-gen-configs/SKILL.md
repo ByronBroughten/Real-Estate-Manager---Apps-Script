@@ -9,13 +9,13 @@ Open [`docs/generated-data.md`](../../../docs/generated-data.md) now (grep the b
 
 ## Guardrails
 
-**Retarget** identity literals: tests, sheet-name groups, named sheet/column calls, operators, endpoints, chores. Names only.
+**Retarget** identity literals: tests, sheet-name groups, named sheet/column calls, operators, endpoints, chores. Names only. Leave the live spreadsheet as it is. Leave generated literals as regen wrote them (floor included). Leave `gen:configs` unrun — the last successful regen is the cache.
 
-Keep generated literals as regen wrote them (floor included). The last successful regen is the cache — leave `gen:configs` unrun. Sheet-shape bugs stay on the sheet. Operator, endpoint, and chore logic stay as they are. Type-level claims stay `IsExactly` / `assertType` / `assertNotType`.
+Operator, endpoint, and chore logic stay as they are. A leftover pin stays a leftover `tsc` error: keep `IsExactly` / `assertType` / `assertNotType`.
 
 ## 1. Diff the cache
 
-`git diff` the four generated config files from the regen that just ran. For every changed entry record column ID or sheet GID, old key, new key, and which traits moved.
+`git diff` the four generated config files from the regen that just ran. For every changed entry record column ID or sheet GID, old key, new key, and which traits moved. When you need the regenerated object, grep the sheet key and read that object only.
 
 Done when every generated hunk is attributed to an identity (same ID/GID, new key), a trait-only change (same key), an add/remove, or "cannot classify."
 
@@ -32,7 +32,7 @@ One tag per error: **identity** / **incidental trait** / **skipped pin** / **ask
 | Kind | Action |
 | --- | --- |
 | Same column ID, new key (header rename); same GID, new sheet key (tab title) | **identity** — always retarget, including type-equality unions and `Object.keys` lists |
-| New or vanished column ID on Test-sheet fetch lists or complete-row bags | follow regen (identity of the sandbox sheet's shape) |
+| New or vanished column ID on Test-sheet fetch lists or complete-row bags | **identity** — follow regen |
 | New or vanished key on a business-sheet writable-key snapshot (e.g. Occupancy Terms `CompleteAppendBag` keyof) | **ask** |
 | New sheet added to a name group | **ask** |
 | Same key, sampled trait changed | pin detector below |
@@ -46,7 +46,7 @@ One tag per error: **identity** / **incidental trait** / **skipped pin** / **ask
 3. Else read the test title and comments: would this spec still read the same if the trait flipped? Yes → **incidental trait**. No → **skipped pin**.
 4. Unsure → **ask**. No third category.
 
-Done when every paired error has exactly one tag, with column ID or sheet GID when the cache has one.
+Done when every paired error has exactly one tag, with column ID or sheet GID when the cache has one. Regenerated entries were grepped by sheet key, not read as a whole file.
 
 ## 4. Retarget
 
@@ -58,7 +58,7 @@ Done when every allowed retarget is in the working tree and no pin, ask, unclass
 
 **Clean exit** when every error is classified, every allowed retarget is applied, and no pin/ask/unclassified remains: `npm run tsc`, then `npm test`, then the report.
 
-**Stop exit** when any pin, ask, or unclassified remains: leave leftover `tsc` red; skip `npm test` as a reason to absorb a pin. Classification succeeded. Report each leftover with the regenerated entry (header, column ID or sheet GID, trait that moved) so the developer can decide sheet vs wait.
+**Stop exit** when any pin, ask, or unclassified remains: leave leftover `tsc` red. `npm test` is the clean-exit bar only. Classification succeeded. Report each leftover with the regenerated entry (header, column ID or sheet GID, trait that moved) so the developer can decide sheet vs wait.
 
 ## Report
 
