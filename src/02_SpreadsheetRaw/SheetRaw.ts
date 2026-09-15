@@ -33,9 +33,9 @@ export class SheetRaw extends SheetCommonRaw {
   get meta(): SheetMetaRaw {
     return new SheetMetaRaw(this.sheetRawProps);
   }
-  get rowIndexesAreValid(): boolean {
+  get rowIndexesAreStale(): boolean {
     return (
-      this.sheetState.knownTable === null || this.activeTable.rowIndexesAreValid
+      this.sheetState.knownTable !== null && this.activeTable.rowIndexesAreStale
     );
   }
   get hasFetchedProperties(): boolean {
@@ -110,8 +110,8 @@ export class SheetRaw extends SheetCommonRaw {
   get cellStateIsStale(): boolean {
     return this.sheetState.cellStateIsStale;
   }
-  invalidateRowIndexes(): void {
-    this.activeTable.invalidateRowIndexes();
+  markRowIndexesStale(): void {
+    this.activeTable.markRowIndexesStale();
   }
   invalidateCellState(): void {
     this.sheetState.rowStates.clear();
@@ -121,8 +121,8 @@ export class SheetRaw extends SheetCommonRaw {
     this.ss.findReplace({ ...terms, scope: { sheetId: this.sheetGid } });
     return this;
   }
-  validateRowIndexes(): void {
-    this.activeTable.validateRowIndexes();
+  clearRowIndexStale(): void {
+    this.activeTable.clearRowIndexStale();
   }
   ensureColIndexIsStale(colIndex: number): void {
     this.activeTable.ensureColIndexIsStale(colIndex);

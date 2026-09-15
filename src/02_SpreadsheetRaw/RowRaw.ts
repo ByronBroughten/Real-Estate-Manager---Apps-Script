@@ -23,6 +23,7 @@ export class RowRaw extends RowCommonRaw {
     }
   }
   delete(): void {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     this.validateSheetKeepsADataRow();
     this.remove();
     this.addRowChangeToSave({ action: "delete" });

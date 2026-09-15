@@ -730,29 +730,45 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
         fields: "userEnteredValue",
       },
     });
-    expect(raw.sheet(111).rowIndexesAreValid).toBe(false);
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(true);
   });
 
-  it("still reads table column properties after a flushed row delete, and throws only for the table end", () => {
+  const STALE_ROW_INDEXES = "Row indexes are stale for sheetGid 111.";
+
+  function sheetAfterFlushedDataRowDelete(fetchKeptRow = false) {
     stubSheetsService({
       sheets: [
         {
           sheetId: 111,
           title: "Leases",
+          rows: buildGridRows({
+            4: ["kept"],
+            5: ["deleted"],
+            6: ["later"],
+          }),
           table: {
             endRowIndex: 11,
             endColumnIndex: 3,
             columnDeclaredTypes: { 0: "TEXT" },
             columnValidationValues: { 0: ["=valueConfig[Notes]"] },
+            columnValidationConditionTypes: { 0: "BOOLEAN" },
           },
         },
       ],
     });
-
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
+    if (fetchKeptRow) {
+      raw.sheet(111).row(4).gatherFetchFull();
+      raw.fetchAllGathered();
+    }
     raw.sheet(111).row(5).delete();
     raw.batchUpdateGSheets();
+    return raw;
+  }
+
+  it("still reads table column properties after a flushed row delete, while the table end throws", () => {
+    const raw = sheetAfterFlushedDataRowDelete();
 
     const table = raw.sheet(111).activeTable;
     expect(table.tableId).toBe("fake-table-111");
@@ -763,33 +779,74 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(table.columnValidationValues.get(0)).toEqual([
       "=valueConfig[Notes]",
     ]);
+    expect(table.columnValidationConditionTypes.get(0)).toBe("BOOLEAN");
     expect(raw.sheet(111).isTableColIndex(START_TABLE_COL_INDEX)).toBe(true);
-    expect(() => table.endRowIndex).toThrow(
-      "Row indexes are not valid for sheetGid 111.",
-    );
+    expect(() => table.endRowIndex).toThrow(STALE_ROW_INDEXES);
     expect(() => {
       table.endRowIndex = 12;
-    }).toThrow("Row indexes are not valid for sheetGid 111.");
+    }).toThrow(STALE_ROW_INDEXES);
   });
 
-  it("leaves row indexes invalid after a properties fetch that follows a flushed row delete", () => {
-    stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
-    });
+  it("throws on per-cell value, formula, and colour writes after a flushed row delete", () => {
+    const raw = sheetAfterFlushedDataRowDelete(true);
+    const cell = raw.sheet(111).row(4).cell(0);
 
-    const raw = SpreadsheetRaw.init();
-    raw.fetchAllSheetProperties();
-    raw.sheet(111).row(5).delete();
-    raw.batchUpdateGSheets();
-    raw.fetchAllSheetProperties();
-
-    expect(raw.sheet(111).rowIndexesAreValid).toBe(false);
-    expect(() => raw.sheet(111).activeTable.endRowIndex).toThrow(
-      "Row indexes are not valid for sheetGid 111.",
+    expect(() => cell.updateValue("painted")).toThrow(STALE_ROW_INDEXES);
+    expect(() => cell.updateFormula("=1")).toThrow(STALE_ROW_INDEXES);
+    expect(() => cell.updateBackgroundColor(LIGHT_GREEN)).toThrow(
+      STALE_ROW_INDEXES,
     );
   });
 
-  it("restores row-index validity only when validateRowIndexes is called", () => {
+  it("throws on active-row and whole-column fills after a flushed row delete", () => {
+    const raw = sheetAfterFlushedDataRowDelete(true);
+    const column = raw.sheet(111).column(0);
+
+    expect(() => column.updateActiveCells({ value: "fill" })).toThrow(
+      STALE_ROW_INDEXES,
+    );
+    expect(() => column.updateActiveFormulas("=1")).toThrow(STALE_ROW_INDEXES);
+    expect(() => column.updateAllCells({ value: "fill" })).toThrow(
+      STALE_ROW_INDEXES,
+    );
+    expect(() => column.updateAllFormulas("=1")).toThrow(STALE_ROW_INDEXES);
+  });
+
+  it("throws on a further data-row delete after a flushed row delete", () => {
+    const raw = sheetAfterFlushedDataRowDelete();
+
+    expect(() => raw.sheet(111).row(6).delete()).toThrow(STALE_ROW_INDEXES);
+  });
+
+  it("still reads an already-fetched cell after a flushed row delete", () => {
+    const raw = sheetAfterFlushedDataRowDelete(true);
+
+    expect(raw.sheet(111).row(4).cell(0).valueOrEmpty()).toBe("kept");
+  });
+
+  it("leaves row indexes stale after a properties fetch that follows a flushed row delete", () => {
+    const raw = sheetAfterFlushedDataRowDelete();
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(true);
+    expect(() => raw.sheet(111).activeTable.endRowIndex).toThrow(
+      STALE_ROW_INDEXES,
+    );
+  });
+
+  it("clears row-index stale only when clearRowIndexStale is called, and then a write is allowed again", () => {
+    const raw = sheetAfterFlushedDataRowDelete(true);
+    const cell = raw.sheet(111).row(4).cell(0);
+    expect(() => cell.updateValue("painted")).toThrow(STALE_ROW_INDEXES);
+
+    raw.sheet(111).clearRowIndexStale();
+
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(false);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
+    expect(() => cell.updateValue("painted")).not.toThrow();
+  });
+
+  it("does not mark row indexes stale when a queued delete is discarded before flush", () => {
     stubSheetsService({
       sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
     });
@@ -797,11 +854,10 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
     raw.sheet(111).row(5).delete();
-    raw.batchUpdateGSheets();
-    raw.sheet(111).validateRowIndexes();
+    raw.discardQueuedChanges();
 
-    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
-    expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(false);
+    expect(() => raw.sheet(111).row(4).cell(0).updateValue("ok")).not.toThrow();
   });
 
   it("sends same-sheet row deletions in descending startIndex order so an earlier deletion can't shift a later one out from under it", () => {
@@ -1061,7 +1117,7 @@ describe("SheetRaw column insert", () => {
 
     expect(insertedIndex).toBe(3);
     expect(raw.sheet(111).activeTable.endColumnIndex).toBe(4);
-    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(false);
     expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
     expect(() =>
       raw.sheet(111).row(5).cell(2).updateValue("kept"),
@@ -1082,7 +1138,7 @@ describe("SheetRaw column insert", () => {
     });
     raw.batchUpdateGSheets();
 
-    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(false);
     expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
     expect(raw.sheet(111).activeTable.endColumnIndex).toBe(3);
     expect(() =>
@@ -1126,7 +1182,7 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls).toEqual([]);
-    expect(raw.sheet(111).rowIndexesAreValid).toBe(true);
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(false);
     expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
   });
 

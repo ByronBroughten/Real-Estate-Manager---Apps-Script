@@ -62,6 +62,7 @@ export class ColumnRaw<
   }
   // State is still mirrored row by row; only the queued request collapses.
   updateAllCells(change: Omit<RowCellChange<VN>, "formula">): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.sheet.validateNotPrunedToSelection();
     const { endRowIndex } = this.sheet.activeTable;
@@ -83,6 +84,7 @@ export class ColumnRaw<
     return this;
   }
   updateAllFormulas(formula: string): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     validateFormulaString(formula);
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.sheet.validateNotPrunedToSelection();
@@ -100,6 +102,7 @@ export class ColumnRaw<
     return this;
   }
   updateActiveCells(change: Omit<RowCellChange<VN>, "formula">): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     const rowIndexes = this.cellIndexesActive;
     const { value } = change;
@@ -120,6 +123,7 @@ export class ColumnRaw<
     return this;
   }
   updateActiveFormulas(formula: string): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     validateFormulaString(formula);
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     Arr.contiguousRanges(this.cellIndexesActive).forEach(

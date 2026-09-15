@@ -100,6 +100,7 @@ export class CellRaw<
     return this.rowState.get(this.colIndex) as CellValue<VN> | "";
   }
   updateValue(value: CellValue<VN>): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.row.validateIsWritable();
     // A row that was never fetched has no state to mirror the write into.
@@ -115,6 +116,7 @@ export class CellRaw<
   }
   // No state mirror: the next read still sees the old effective value.
   updateFormula(formula: string): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     validateFormulaString(formula);
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.row.validateIsWritable();
@@ -127,6 +129,7 @@ export class CellRaw<
   }
   // No state mirror: the read path never fetches colour, so there's none to mirror.
   updateBackgroundColor(backgroundColor: GoogleColor): this {
+    this.sheet.activeTable.assertRowIndexesNotStale();
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.row.validateIsWritable();
     this.row.addRowChangeToSave({

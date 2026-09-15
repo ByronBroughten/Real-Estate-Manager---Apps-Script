@@ -81,7 +81,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         table.columnProperties,
         range.startColumnIndex,
       ),
-      rowIndexesAreValid: previous?.rowIndexesAreValid ?? true,
+      rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
       firstStaleColIndex: previous?.firstStaleColIndex ?? null,
     };
   }

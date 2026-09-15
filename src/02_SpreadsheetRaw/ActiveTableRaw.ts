@@ -23,11 +23,11 @@ export class ActiveTableRaw {
     return this._knownTable().startRowIndex;
   }
   get endRowIndex(): number {
-    this._assertRowIndexesAreValid();
+    this.assertRowIndexesNotStale();
     return this._knownTable().endRowIndex;
   }
   set endRowIndex(endRowIndex: number) {
-    this._assertRowIndexesAreValid();
+    this.assertRowIndexesNotStale();
     this._knownTable().endRowIndex = endRowIndex;
   }
   get startColumnIndex(): number {
@@ -48,8 +48,8 @@ export class ActiveTableRaw {
   get columnDeclaredTypes(): RawColumnDeclaredTypes {
     return this._knownTable().columnDeclaredTypes;
   }
-  get rowIndexesAreValid(): boolean {
-    return this._knownTable().rowIndexesAreValid;
+  get rowIndexesAreStale(): boolean {
+    return this._knownTable().rowIndexesAreStale;
   }
   growEndRowIndex(): void {
     this.endRowIndex++;
@@ -57,11 +57,15 @@ export class ActiveTableRaw {
   growEndColumnIndex(): void {
     this.endColumnIndex++;
   }
-  invalidateRowIndexes(): void {
-    this._knownTable().rowIndexesAreValid = false;
+  markRowIndexesStale(): void {
+    this._knownTable().rowIndexesAreStale = true;
   }
-  validateRowIndexes(): void {
-    this._knownTable().rowIndexesAreValid = true;
+  clearRowIndexStale(): void {
+    this._knownTable().rowIndexesAreStale = false;
+  }
+  assertRowIndexesNotStale(): void {
+    if (!this._knownTable().rowIndexesAreStale) return;
+    throw new Error(`Row indexes are stale for sheetGid ${this.sheetGid}.`);
   }
   ensureColIndexIsStale(colIndex: number): void {
     const knownTable = this._knownTable();
@@ -92,12 +96,5 @@ export class ActiveTableRaw {
       );
     }
     return knownTable;
-  }
-  private _assertRowIndexesAreValid(): void {
-    if (!this._knownTable().rowIndexesAreValid) {
-      throw new Error(
-        `Row indexes are not valid for sheetGid ${this.sheetGid}.`,
-      );
-    }
   }
 }

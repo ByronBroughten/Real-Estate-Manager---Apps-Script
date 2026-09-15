@@ -67,7 +67,7 @@ export interface RawKnownTable extends RawColumnPropertiesState {
   endRowIndex: number; // lastRowIndex + 1
   startColumnIndex: number;
   endColumnIndex: number; // lastColumnIndex + 1
-  rowIndexesAreValid: boolean;
+  rowIndexesAreStale: boolean;
   firstStaleColIndex: number | null;
 }
 export type RawColumnValidationValues = Map<ColIndex, string[]>;

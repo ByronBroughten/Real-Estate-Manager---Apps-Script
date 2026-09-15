@@ -345,7 +345,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this._sendUpdateRequests();
     // Row indexes only actually shift once the deletes have been sent.
     sheetGidsWithRowDeletes.forEach((sheetGid) =>
-      this.sheet(sheetGid).invalidateRowIndexes(),
+      this.sheet(sheetGid).markRowIndexesStale(),
     );
     if (hasFindReplace) this._invalidateFetchedCellState();
   }
