@@ -108,7 +108,7 @@ export type SheetChangesToSave = {
   insertColumn: null | ColIndex;
   fills: ColumnFill[];
 };
-// One contiguous run of a column's cells, flushed as a single repeatCell.
+// One contiguous run of a column's cells: value/colour as repeatCell, formula as pasteData.
 export interface ColumnFill extends RowCellChange {
   colIndex: ColIndex;
   startRowIndex: number;

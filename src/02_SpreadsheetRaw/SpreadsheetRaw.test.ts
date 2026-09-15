@@ -1516,7 +1516,7 @@ describe("ColumnRaw.updateAllFormulas", () => {
     });
   }
 
-  it("serializes formulaValue on one repeatCell and does not mirror into row state", () => {
+  it("serializes pasteData PASTE_FORMULA once per fill and does not mirror into row state", () => {
     const { batchUpdateCalls } = stubFilledSheet();
 
     const raw = SpreadsheetRaw.init();
@@ -1527,6 +1527,75 @@ describe("ColumnRaw.updateAllFormulas", () => {
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
+        pasteData: {
+          coordinate: { sheetId: 111, rowIndex: 4, columnIndex: 1 },
+          data: '"=2+1"\n"=2+1"\n"=2+1"',
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      },
+    ]);
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
+      "old",
+      "old",
+      "old",
+    ]);
+  });
+
+  it("quotes commas and quotes so a FILTER formula stays in one cell", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+    const formula = '=FILTER(A:A,A:A<>"")';
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(4).cell(1).updateFormula(formula);
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        pasteData: {
+          coordinate: { sheetId: 111, rowIndex: 4, columnIndex: 1 },
+          data: '"=FILTER(A:A,A:A<>"""")"',
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      },
+    ]);
+  });
+
+  it("keeps a pretty-printed formula in one quoted field", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+    const formula = "=2+SINGLE(\ntest[Number])";
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(4).cell(1).updateFormula(formula);
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests?.[0]?.pasteData?.data).toBe(
+      `"${formula}"`,
+    );
+  });
+
+  it("sends pasteData then a colour repeatCell in the same batchUpdate", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).column(1).updateAllFormulas("=2+1");
+    raw.sheet(111).column(1).updateAllCells({ backgroundColor: LIGHT_GREEN });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        pasteData: {
+          coordinate: { sheetId: 111, rowIndex: 4, columnIndex: 1 },
+          data: '"=2+1"\n"=2+1"\n"=2+1"',
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      },
+      {
         repeatCell: {
           range: {
             sheetId: 111,
@@ -1535,15 +1604,10 @@ describe("ColumnRaw.updateAllFormulas", () => {
             startColumnIndex: 1,
             endColumnIndex: 2,
           },
-          cell: { userEnteredValue: { formulaValue: "=2+1" } },
-          fields: "userEnteredValue",
+          cell: { userEnteredFormat: { backgroundColor: LIGHT_GREEN } },
+          fields: "userEnteredFormat.backgroundColor",
         },
       },
-    ]);
-    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
-      "old",
-      "old",
-      "old",
     ]);
   });
 
@@ -1557,10 +1621,35 @@ describe("ColumnRaw.updateAllFormulas", () => {
     cell.updateFormula("=2+1");
     raw.batchUpdateGSheets();
 
-    expect(
-      batchUpdateCalls[0]?.requests?.[0]?.updateCells?.rows?.[0]?.values?.[0],
-    ).toEqual({
-      userEnteredValue: { formulaValue: "=2+1" },
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        pasteData: {
+          coordinate: { sheetId: 111, rowIndex: 4, columnIndex: 1 },
+          data: '"=2+1"',
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      },
+    ]);
+  });
+
+  it("orders a per-cell formula paste after the fill paste, so the cell wins", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).column(1).updateAllFormulas("=2+1");
+    raw.sheet(111).row(5).cell(1).updateFormula("=9");
+    raw.batchUpdateGSheets();
+
+    const requests = batchUpdateCalls[0]?.requests ?? [];
+    expect(requests[0]?.pasteData?.coordinate?.rowIndex).toBe(4);
+    expect(requests[0]?.pasteData?.data).toBe('"=2+1"\n"=2+1"\n"=2+1"');
+    expect(requests[1]?.pasteData).toEqual({
+      coordinate: { sheetId: 111, rowIndex: 5, columnIndex: 1 },
+      data: '"=9"',
+      delimiter: "\t",
+      type: "PASTE_FORMULA",
     });
   });
 });

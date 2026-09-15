@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import type { ColumnIsFormula } from "../01_generatedConfigs/columnConfigsTypes";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
@@ -14,7 +15,6 @@ import {
   stubSheetsService,
   type FakeCell,
 } from "../testSupport/fakeSheetsService";
-import type { ColumnIsFormula } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   assertNotType,
   assertType,
@@ -824,7 +824,7 @@ describe("Named formula writes", () => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
 
-  it("sends one repeatCell with formulaValue for every Test Formula test data row", () => {
+  it("sends one pasteData PASTE_FORMULA for every Test Formula test data row", () => {
     const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
@@ -834,22 +834,21 @@ describe("Named formula writes", () => {
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
-        repeatCell: {
-          range: {
+        pasteData: {
+          coordinate: {
             sheetId: TEST_SHEET_GID,
-            startRowIndex: TOP_DATA_ROW_INDEX,
-            endRowIndex: 6,
-            startColumnIndex: FORMULA_TEST_COL_INDEX,
-            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+            rowIndex: TOP_DATA_ROW_INDEX,
+            columnIndex: FORMULA_TEST_COL_INDEX,
           },
-          cell: { userEnteredValue: { formulaValue: TEST_FORMULA } },
-          fields: "userEnteredValue",
+          data: `"${TEST_FORMULA}"\n"${TEST_FORMULA}"`,
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
         },
       },
     ]);
   });
 
-  it("sends one updateCells with formulaValue for a single Formula test cell", () => {
+  it("sends one pasteData PASTE_FORMULA for a single Formula test cell", () => {
     const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
@@ -862,26 +861,21 @@ describe("Named formula writes", () => {
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
-        updateCells: {
-          range: {
+        pasteData: {
+          coordinate: {
             sheetId: TEST_SHEET_GID,
-            startRowIndex: TOP_DATA_ROW_INDEX,
-            endRowIndex: TOP_DATA_ROW_INDEX + 1,
-            startColumnIndex: FORMULA_TEST_COL_INDEX,
-            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+            rowIndex: TOP_DATA_ROW_INDEX,
+            columnIndex: FORMULA_TEST_COL_INDEX,
           },
-          rows: [
-            {
-              values: [{ userEnteredValue: { formulaValue: TEST_FORMULA } }],
-            },
-          ],
-          fields: "userEnteredValue",
+          data: `"${TEST_FORMULA}"`,
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
         },
       },
     ]);
   });
 
-  it("sends one repeatCell per contiguous active run for updateActiveFormulas", () => {
+  it("sends one pasteData per contiguous active run for updateActiveFormulas", () => {
     const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
@@ -893,16 +887,15 @@ describe("Named formula writes", () => {
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
-        repeatCell: {
-          range: {
+        pasteData: {
+          coordinate: {
             sheetId: TEST_SHEET_GID,
-            startRowIndex: TOP_DATA_ROW_INDEX,
-            endRowIndex: TOP_DATA_ROW_INDEX + 1,
-            startColumnIndex: FORMULA_TEST_COL_INDEX,
-            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+            rowIndex: TOP_DATA_ROW_INDEX,
+            columnIndex: FORMULA_TEST_COL_INDEX,
           },
-          cell: { userEnteredValue: { formulaValue: TEST_FORMULA } },
-          fields: "userEnteredValue",
+          data: `"${TEST_FORMULA}"`,
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
         },
       },
     ]);
@@ -964,6 +957,18 @@ describe("Named formula writes", () => {
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
+        pasteData: {
+          coordinate: {
+            sheetId: TEST_SHEET_GID,
+            rowIndex: TOP_DATA_ROW_INDEX,
+            columnIndex: FORMULA_TEST_COL_INDEX,
+          },
+          data: `"${TEST_FORMULA}"`,
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      },
+      {
         updateCells: {
           range: {
             sheetId: TEST_SHEET_GID,
@@ -974,15 +979,10 @@ describe("Named formula writes", () => {
           },
           rows: [
             {
-              values: [
-                {
-                  userEnteredValue: { formulaValue: TEST_FORMULA },
-                  userEnteredFormat: { backgroundColor },
-                },
-              ],
+              values: [{ userEnteredFormat: { backgroundColor } }],
             },
           ],
-          fields: "userEnteredValue,userEnteredFormat.backgroundColor",
+          fields: "userEnteredFormat.backgroundColor",
         },
       },
     ]);

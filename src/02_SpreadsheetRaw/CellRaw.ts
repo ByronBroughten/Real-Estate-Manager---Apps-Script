@@ -1,6 +1,7 @@
 import type {
   GoogleCellValue,
   GoogleColor,
+  GoogleUpdateRequest,
   UserEnteredValue,
 } from "../00_base/AppsScriptTypes";
 import type { CellValue, CellValueName } from "../00_base/base";
@@ -39,11 +40,25 @@ export class CellRaw<
     return this;
   }
   gatherUpdateRequest(change: RowCellChange): void {
+    const { formula, ...cellDataChange } = change;
+    assertValueAndFormulaExclusive(cellDataChange.value, formula);
+    if (formula !== undefined) {
+      this.updateRequests.update.push(
+        formulaPasteDataRequest({
+          sheetId: this.sheetGid,
+          rowIndex: this.rowIndex,
+          columnIndex: this.colIndex,
+          formula,
+          rowCount: 1,
+        }),
+      );
+    }
+    if (!cellChangeHasCellData(cellDataChange)) return;
     this.updateRequests.update.push({
       updateCells: {
         range: this.gridRange,
-        rows: [{ values: [cellChangeToCellData(change)] }],
-        fields: cellChangeFieldMask(change),
+        rows: [{ values: [cellChangeToCellData(cellDataChange)] }],
+        fields: cellChangeFieldMask(cellDataChange),
       },
     });
   }
@@ -152,6 +167,41 @@ export function validateFormulaString(formula: string): void {
   throw new Error(`Formula must start with "=". Got "${formula}".`);
 }
 
+export interface FormulaPasteDataProps {
+  sheetId: number;
+  rowIndex: number;
+  columnIndex: number;
+  formula: string;
+  rowCount: number;
+}
+
+export function formulaPasteDataRequest({
+  sheetId,
+  rowIndex,
+  columnIndex,
+  formula,
+  rowCount,
+}: FormulaPasteDataProps): GoogleUpdateRequest {
+  const field = `"${formula.replaceAll('"', '""')}"`;
+  return {
+    pasteData: {
+      coordinate: { sheetId, rowIndex, columnIndex },
+      data: Array.from({ length: rowCount }, () => field).join("\n"),
+      delimiter: "\t",
+      type: "PASTE_FORMULA",
+    },
+  };
+}
+
+export function assertValueAndFormulaExclusive(
+  value: unknown,
+  formula: string | undefined,
+): void {
+  if (formula !== undefined && value !== undefined) {
+    throw new Error("A queued change cannot hold both a value and a formula.");
+  }
+}
+
 export function cellValueToUserEntered(value: CellValue): UserEnteredValue {
   if (typeof value === "string") {
     return { stringValue: value };
@@ -167,27 +217,27 @@ export function cellValueToUserEntered(value: CellValue): UserEnteredValue {
 }
 
 // Assembled from what was queued, so a colour-only write can't blank the value.
+type CellDataChange = Omit<RowCellChange, "formula">;
+
 const cellChangeFields = {
   value: "userEnteredValue",
-  formula: "userEnteredValue",
   backgroundColor: "userEnteredFormat.backgroundColor",
-} as const satisfies Record<keyof RowCellChange, string>;
+} as const satisfies Record<keyof CellDataChange, string>;
 
-export function cellChangeFieldMask(change: RowCellChange): string {
+export function cellChangeHasCellData(change: CellDataChange): boolean {
+  return change.value !== undefined || change.backgroundColor !== undefined;
+}
+
+export function cellChangeFieldMask(change: CellDataChange): string {
   return Obj.keys(cellChangeFields)
     .filter((key) => change[key] !== undefined)
     .map((key) => cellChangeFields[key])
     .join(",");
 }
 
-export function cellChangeToCellData(change: RowCellChange): GoogleCellValue {
+export function cellChangeToCellData(change: CellDataChange): GoogleCellValue {
   const data: GoogleCellValue = {};
-  if (change.value !== undefined && change.formula !== undefined) {
-    throw new Error("A queued change cannot hold both a value and a formula.");
-  }
-  if (change.formula !== undefined) {
-    data.userEnteredValue = { formulaValue: change.formula };
-  } else if (change.value !== undefined) {
+  if (change.value !== undefined) {
     data.userEnteredValue = cellValueToUserEntered(change.value);
   }
   if (change.backgroundColor !== undefined) {

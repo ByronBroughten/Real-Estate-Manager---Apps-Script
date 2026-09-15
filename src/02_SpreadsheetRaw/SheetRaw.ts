@@ -7,7 +7,13 @@ import type { CellValueName } from "../00_base/base";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
 import { Val } from "../utils/Val";
-import { cellChangeFieldMask, cellChangeToCellData } from "./CellRaw";
+import {
+  assertValueAndFormulaExclusive,
+  cellChangeFieldMask,
+  cellChangeHasCellData,
+  cellChangeToCellData,
+  formulaPasteDataRequest,
+} from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import {
@@ -234,13 +240,27 @@ export class SheetRaw extends SheetCommonRaw {
       sortOrder,
     });
   }
-  // One repeatCell per contiguous run, so a fill costs one request, not one per row.
+  // Value/colour fills stay one repeatCell; a formula fill is pasteData so Sheets parses it.
   gatherFillRequest({
     colIndex,
     startRowIndex,
     endRowIndex,
+    formula,
     ...change
   }: ColumnFill): void {
+    assertValueAndFormulaExclusive(change.value, formula);
+    if (formula !== undefined) {
+      this.updateRequests.fill.push(
+        formulaPasteDataRequest({
+          sheetId: this.sheetGid,
+          rowIndex: startRowIndex,
+          columnIndex: colIndex,
+          formula,
+          rowCount: endRowIndex - startRowIndex,
+        }),
+      );
+    }
+    if (!cellChangeHasCellData(change)) return;
     this.updateRequests.fill.push({
       repeatCell: {
         range: {

@@ -166,6 +166,42 @@ describe("UpdateRequestSummary.lines", () => {
     );
   });
 
+  it("names the sheet, coordinate, formula text and PASTE_FORMULA of a formula paste", () => {
+    expect(
+      onlyLine({
+        pasteData: {
+          coordinate: {
+            sheetId: OCCUPANCY_GID,
+            rowIndex: 4,
+            columnIndex: 6,
+          },
+          data: '"=2+SINGLE(test[Number])"',
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      }),
+    ).toBe(
+      "pasteData occupancy!G5:G5 1 row(s) =2+SINGLE(test[Number]) PASTE_FORMULA",
+    );
+  });
+
+  it("spans the quoted records of a column formula fill", () => {
+    expect(
+      onlyLine({
+        pasteData: {
+          coordinate: {
+            sheetId: OCCUPANCY_GID,
+            rowIndex: 4,
+            columnIndex: 6,
+          },
+          data: '"=2+1"\n"=2+1"\n"=2+1"',
+          delimiter: "\t",
+          type: "PASTE_FORMULA",
+        },
+      }),
+    ).toBe("pasteData occupancy!G5:G7 3 row(s) =2+1 PASTE_FORMULA");
+  });
+
   it("renders a request the framework does not model as its own verb and JSON", () => {
     const line = onlyLine({
       addConditionalFormatRule: {

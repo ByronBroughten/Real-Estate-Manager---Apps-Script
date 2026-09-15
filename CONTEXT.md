@@ -10,6 +10,10 @@ A Google Sheets spreadsheet that a person operates directly, with an Apps Script
 The Google Table (Insert > Table) laid over a sheet's data. Every sheet the app knows about must have exactly one, and it must start on the Table header row, in the first column. Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet it knows, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
 _Avoid_: range, data range, grid
 
+**Table reference**:
+A formula that names a Table column by the Table's name and the column header — `test[Number]`, usually wrapped in `SINGLE(...)` when one cell is wanted — so the formula stays readable when columns move. It is not an A1 address like `$C5`.
+_Avoid_: structured reference, A1, cell address
+
 **Column ID row**:
 The bookkeeping row of generated column identifiers, above the other two bookkeeping rows. You never edit it by hand; the app fills a blank when a Table column has none.
 _Avoid_: ID row, metadata row, row 1
