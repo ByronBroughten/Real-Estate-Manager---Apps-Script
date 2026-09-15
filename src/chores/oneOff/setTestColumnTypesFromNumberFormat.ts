@@ -13,15 +13,7 @@ const NUMBER_FORMAT_TO_COLUMN_TYPE: Record<string, string> = {
   DATE_TIME: "DATE_TIME",
 };
 
-const COLUMN_TYPES_THIS_CHORE_SKIPS = new Set([
-  "DROPDOWN",
-  "BOOLEAN",
-  "FILES_CHIP",
-  "PEOPLE_CHIP",
-  "FINANCE_CHIP",
-  "PLACE_CHIP",
-  "RATINGS_CHIP",
-]);
+const COLUMN_TYPES_THIS_CHORE_SKIPS = new Set(["DROPDOWN"]);
 
 export const setTestColumnTypesFromNumberFormat: Chore = {
   description:
@@ -48,11 +40,11 @@ export const setTestColumnTypesFromNumberFormat: Chore = {
 
 function fetchTestWithProgrammaticFacts(ss: SpreadsheetNamed): SheetMetaRaw {
   ss.fetchAllSheetProperties();
-  const test = ss.sheet("test").raw;
-  test.meta.tableHeaderRow.gatherFetchFull();
-  test.topRow.gatherFetchFull();
+  const testRaw = ss.sheet("test").raw;
+  testRaw.meta.tableHeaderRow.gatherFetchFull();
+  testRaw.topRow.gatherFetchFull();
   ss.raw.fetchAllGathered(true);
-  return test.meta;
+  return testRaw.meta;
 }
 
 interface ColumnPromotion {
@@ -76,7 +68,7 @@ function promotionsAndSkips(test: SheetMetaRaw): {
   test.fullTableColIndexes.forEach((colIndex) => {
     const column = test.column(colIndex);
     const promotion = promotionForColumn(column);
-    if (promotion === "skip-typed-or-dropdown") return;
+    if (promotion === "alreadyDeclared") return;
     if (promotion === null) {
       skipped.push({
         header: column.activeHeader,
@@ -91,16 +83,16 @@ function promotionsAndSkips(test: SheetMetaRaw): {
 
 function promotionForColumn(
   column: ColumnMetaRaw,
-): ColumnPromotion | "skip-typed-or-dropdown" | null {
+): ColumnPromotion | "alreadyDeclared" | null {
   if (column.activeDeclaredValueTitle() !== null) {
-    return "skip-typed-or-dropdown";
+    return "alreadyDeclared";
   }
   const declaredColumnType = column.activeDeclaredColumnType;
   if (
     declaredColumnType !== undefined &&
     COLUMN_TYPES_THIS_CHORE_SKIPS.has(declaredColumnType)
   ) {
-    return "skip-typed-or-dropdown";
+    return "alreadyDeclared";
   }
   const numberFormatType = column.activeNumberFormatType;
   if (numberFormatType === undefined) return null;
@@ -134,11 +126,14 @@ function columnPropertiesWithPromotions(
     if (columnType !== undefined) {
       columnProperties.columnType = columnType;
     }
-    const values = column.valueValidationStrings;
-    if (values.length > 0) {
+    const validationStrings = column.valueValidationStrings;
+    if (validationStrings.length > 0) {
       columnProperties.dataValidationRule = {
         condition: {
-          values: values.map((userEnteredValue) => ({ userEnteredValue })),
+          type: "ONE_OF_LIST",
+          values: validationStrings.map((userEnteredValue) => ({
+            userEnteredValue,
+          })),
         },
       };
     }
@@ -150,15 +145,17 @@ function promotionSummary(
   promotions: ColumnPromotion[],
   skipped: SkippedUntypedColumn[],
 ): string {
-  const promotionLines =
-    promotions.length === 0
-      ? "Nothing to promote on Test."
-      : `Promote ${promotions.length} Test column(s):\n${promotions
-          .map(
-            (promotion) =>
-              `  ${promotion.header}: ${promotion.numberFormatType} → ${promotion.columnType}`,
-          )
-          .join("\n")}`;
+  let promotionLines: string;
+  if (promotions.length === 0) {
+    promotionLines = "Nothing to promote on Test.";
+  } else {
+    promotionLines = `Promote ${promotions.length} Test column(s):\n${promotions
+      .map(
+        (promotion) =>
+          `  ${promotion.header}: ${promotion.numberFormatType} → ${promotion.columnType}`,
+      )
+      .join("\n")}`;
+  }
   if (skipped.length === 0) return promotionLines;
   const skipLines = skipped
     .map(
