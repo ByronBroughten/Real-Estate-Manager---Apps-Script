@@ -14,6 +14,7 @@ import {
   stubSheetsService,
   type FakeCell,
 } from "../testSupport/fakeSheetsService";
+import type { ColumnIsFormula } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   assertNotType,
   assertType,
@@ -793,5 +794,232 @@ describe("RowNamed.blankRequiredColumnNames", () => {
     expect(fetchedAddExpenseRow().blankRequiredColumnNames()).toEqual([
       "amount",
     ]);
+  });
+});
+
+const TEST_FORMULA = "=2+SINGLE(test[Number])";
+const FORMULA_TEST_COL_INDEX = Object.keys(columnConfigs.test).indexOf(
+  "formulaTest",
+);
+
+function stubTestSheetForFormulaWrite() {
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: TEST_SHEET_GID,
+        title: "Test",
+        rows: buildGridRows({
+          0: testColumnIdRow,
+          4: [null, "r:test:1", 10, null, null, null, 11],
+          5: [null, "r:test:2", 20, null, null, null, 21],
+        }),
+        table: { endRowIndex: 6 },
+      },
+    ],
+  });
+}
+
+describe("Named formula writes", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("sends one repeatCell with formulaValue for every Test Formula test data row", () => {
+    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.fetchAllSheetProperties();
+    ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA);
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        repeatCell: {
+          range: {
+            sheetId: TEST_SHEET_GID,
+            startRowIndex: TOP_DATA_ROW_INDEX,
+            endRowIndex: 6,
+            startColumnIndex: FORMULA_TEST_COL_INDEX,
+            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+          },
+          cell: { userEnteredValue: { formulaValue: TEST_FORMULA } },
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("sends one updateCells with formulaValue for a single Formula test cell", () => {
+    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.fetchAllSheetProperties();
+    ss.sheet("test")
+      .column("formulaTest")
+      .cell(TOP_DATA_ROW_INDEX)
+      .updateFormula(TEST_FORMULA);
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        updateCells: {
+          range: {
+            sheetId: TEST_SHEET_GID,
+            startRowIndex: TOP_DATA_ROW_INDEX,
+            endRowIndex: TOP_DATA_ROW_INDEX + 1,
+            startColumnIndex: FORMULA_TEST_COL_INDEX,
+            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+          },
+          rows: [
+            {
+              values: [{ userEnteredValue: { formulaValue: TEST_FORMULA } }],
+            },
+          ],
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("sends one repeatCell per contiguous active run for updateActiveFormulas", () => {
+    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.sheet("test").prepFetchColumnsFull("formulaTest");
+    ss.fetchAllPrepped();
+    ss.sheet("test").raw.removeRowsExcept(TOP_DATA_ROW_INDEX);
+    ss.sheet("test").column("formulaTest").updateActiveFormulas(TEST_FORMULA);
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        repeatCell: {
+          range: {
+            sheetId: TEST_SHEET_GID,
+            startRowIndex: TOP_DATA_ROW_INDEX,
+            endRowIndex: TOP_DATA_ROW_INDEX + 1,
+            startColumnIndex: FORMULA_TEST_COL_INDEX,
+            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+          },
+          cell: { userEnteredValue: { formulaValue: TEST_FORMULA } },
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("throws before queueing when the formula does not start with =", () => {
+    stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.fetchAllSheetProperties();
+
+    expect(() =>
+      ss.sheet("test").column("formulaTest").updateAllFormulas("2+1"),
+    ).toThrowError('Formula must start with "=". Got "2+1".');
+  });
+
+  it("leaves local cell values unchanged after a formula write", () => {
+    stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.sheet("test").prepFetchColumnsFull("formulaTest", "number");
+    ss.fetchAllPrepped();
+    ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA);
+
+    expect(ss.sheet("test").column("formulaTest").valueArrOrEmpty).toEqual([
+      11, 21,
+    ]);
+    expect(ss.sheet("test").column("number").valueArrOrEmpty).toEqual([10, 20]);
+  });
+
+  it("still refuses a value write on Formula test", () => {
+    stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.fetchAllSheetProperties();
+
+    expect(() =>
+      ss
+        .sheet("test")
+        .column("formulaTest")
+        .cell(TOP_DATA_ROW_INDEX)
+        .updateValue(99),
+    ).toThrowError(/formula column/);
+  });
+
+  it("merges a colour onto the same cell as a formula write", () => {
+    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+    const backgroundColor = { red: 0.851, green: 0.918, blue: 0.827 };
+
+    const ss = SpreadsheetNamed.init();
+    ss.fetchAllSheetProperties();
+    const cell = ss
+      .sheet("test")
+      .column("formulaTest")
+      .cell(TOP_DATA_ROW_INDEX);
+    cell.updateFormula(TEST_FORMULA);
+    cell.updateBackgroundColor(backgroundColor);
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        updateCells: {
+          range: {
+            sheetId: TEST_SHEET_GID,
+            startRowIndex: TOP_DATA_ROW_INDEX,
+            endRowIndex: TOP_DATA_ROW_INDEX + 1,
+            startColumnIndex: FORMULA_TEST_COL_INDEX,
+            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+          },
+          rows: [
+            {
+              values: [
+                {
+                  userEnteredValue: { formulaValue: TEST_FORMULA },
+                  userEnteredFormat: { backgroundColor },
+                },
+              ],
+            },
+          ],
+          fields: "userEnteredValue,userEnteredFormat.backgroundColor",
+        },
+      },
+    ]);
+  });
+
+  it("refuses a whole-column formula fill on a sheet pruned to a selection", () => {
+    stubTestSheetForFormulaWrite();
+
+    const ss = SpreadsheetNamed.init();
+    ss.sheet("test").prepFetchColumnsFull("formulaTest");
+    ss.fetchAllPrepped();
+    ss.sheet("test").raw.removeRowsExcept(TOP_DATA_ROW_INDEX);
+
+    expect(() =>
+      ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA),
+    ).toThrowError(/pruned to a selection/);
+  });
+
+  it("accepts Formula test and rejects Number at the type level", () => {
+    assertType<IsExactly<ColumnIsFormula<"test", "formulaTest">, true>>(true);
+    assertType<IsExactly<ColumnIsFormula<"test", "number">, false>>(true);
+
+    function formulaWriteTypeGate(
+      formulaColumn: ColumnNamed<"test", "formulaTest">,
+      numberColumn: ColumnNamed<"test", "number">,
+    ) {
+      formulaColumn.updateAllFormulas(TEST_FORMULA);
+      formulaColumn.updateActiveFormulas(TEST_FORMULA);
+      formulaColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
+      // @ts-expect-error Number is not a formula column
+      numberColumn.updateAllFormulas(TEST_FORMULA);
+      // @ts-expect-error Number is not a formula column
+      numberColumn.updateActiveFormulas(TEST_FORMULA);
+      // @ts-expect-error Number is not a formula column
+      numberColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
+    }
+
+    expect(formulaWriteTypeGate).toEqual(expect.any(Function));
   });
 });

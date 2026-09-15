@@ -395,6 +395,53 @@ describe("SheetIndexed.appendRowDefault", () => {
   });
 });
 
+const TEST_GID = sheetConfigs.test.sheetGid;
+const TEST_NUMBER_COLUMN_ID = columnConfigs.test.number.columnId;
+const TEST_FORMULA_COLUMN_ID = columnConfigs.test.formulaTest.columnId;
+
+describe("Indexed formula writes", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: TEST_GID,
+          title: "Test",
+          rows: buildGridRows({
+            0: Object.values(columnConfigs.test).map((column) => column.columnId),
+          }),
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+  });
+
+  it("refuses a formula write on a non-formula column", () => {
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    ssi.raw.fetchAllSheetProperties();
+
+    expect(() =>
+      ssi.sheet(TEST_GID).column(TEST_NUMBER_COLUMN_ID).updateAllFormulas("=1"),
+    ).toThrowError(/not a formula column/);
+  });
+
+  it("queues a formula write on Formula test", () => {
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    ssi.raw.fetchAllSheetProperties();
+
+    expect(() =>
+      ssi
+        .sheet(TEST_GID)
+        .column(TEST_FORMULA_COLUMN_ID)
+        .updateAllFormulas("=2+SINGLE(test[Number])"),
+    ).not.toThrow();
+  });
+});
+
 function writtenValuesByColIndex(
   calls: GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest[],
 ): [number | undefined, unknown][] {

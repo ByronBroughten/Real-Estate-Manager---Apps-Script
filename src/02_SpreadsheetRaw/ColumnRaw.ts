@@ -1,6 +1,6 @@
 import type { CellValue, CellValueName } from "../00_base/base";
 import { Arr } from "../utils/Arr";
-import { CellRaw } from "./CellRaw";
+import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
 import type { FindReplaceTerms, RowCellChange } from "./ClassTypes/RawState";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
@@ -61,7 +61,7 @@ export class ColumnRaw<
     return this;
   }
   // State is still mirrored row by row; only the queued request collapses.
-  updateAllCells(change: RowCellChange<VN>): this {
+  updateAllCells(change: Omit<RowCellChange<VN>, "formula">): this {
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.sheet.validateNotPrunedToSelection();
     const { endRowIndex } = this.sheet.activeTable;
@@ -82,7 +82,24 @@ export class ColumnRaw<
     });
     return this;
   }
-  updateActiveCells(change: RowCellChange<VN>): this {
+  updateAllFormulas(formula: string): this {
+    validateFormulaString(formula);
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
+    this.sheet.validateNotPrunedToSelection();
+    const { endRowIndex } = this.sheet.activeTable;
+    this.sheet.rowIndexesFull.forEach((rowIndex) => {
+      this.sheet.row(rowIndex).validateIsWritable();
+    });
+    this.sheet.addSheetChangeToSave({
+      action: "fill",
+      colIndex: this.colIndex,
+      startRowIndex: this.schema.topDataRowIdx,
+      endRowIndex,
+      formula,
+    });
+    return this;
+  }
+  updateActiveCells(change: Omit<RowCellChange<VN>, "formula">): this {
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     const rowIndexes = this.cellIndexesActive;
     const { value } = change;
@@ -100,6 +117,22 @@ export class ColumnRaw<
         ...change,
       });
     });
+    return this;
+  }
+  updateActiveFormulas(formula: string): this {
+    validateFormulaString(formula);
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
+    Arr.contiguousRanges(this.cellIndexesActive).forEach(
+      ({ startIndex, endIndex }) => {
+        this.sheet.addSheetChangeToSave({
+          action: "fill",
+          colIndex: this.colIndex,
+          startRowIndex: startIndex,
+          endRowIndex: endIndex,
+          formula,
+        });
+      },
+    );
     return this;
   }
   // Reaches every data row like a whole-column fill, so it takes the same guards.

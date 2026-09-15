@@ -105,6 +105,16 @@ export class ColumnIndexed<
     this.raw.updateActiveCells(this._rawChange(change));
     return this;
   }
+  updateAllFormulas(formula: string): this {
+    this.schema.validateIsFormula();
+    this.raw.updateAllFormulas(formula);
+    return this;
+  }
+  updateActiveFormulas(formula: string): this {
+    this.schema.validateIsFormula();
+    this.raw.updateActiveFormulas(formula);
+    return this;
+  }
   // Google matches the text, so neither string is checked against the value config.
   findReplace(terms: FindReplaceTerms): this {
     this.raw.findReplace(terms);

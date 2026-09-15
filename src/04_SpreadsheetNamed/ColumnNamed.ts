@@ -1,5 +1,6 @@
 import type { NotEmpty } from "../00_base/base";
 import type {
+  ColumnIsFormula,
   ColumnName,
   ColumnValue,
   ColumnValueDeclared,
@@ -75,6 +76,18 @@ export class ColumnNamed<
   }
   updateActiveCells(change: CellChange<ColumnValueName<SN, CN>>): this {
     this.indexed.updateActiveCells(change);
+    return this;
+  }
+  updateAllFormulas(
+    formula: ColumnIsFormula<SN, CN> extends true ? string : never,
+  ): this {
+    this.indexed.updateAllFormulas(formula);
+    return this;
+  }
+  updateActiveFormulas(
+    formula: ColumnIsFormula<SN, CN> extends true ? string : never,
+  ): this {
+    this.indexed.updateActiveFormulas(formula);
     return this;
   }
   // Plain strings, unlike every other write here: Google matches the cell's text.

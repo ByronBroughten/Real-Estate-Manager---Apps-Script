@@ -62,6 +62,11 @@ export class CellIndexed<
     this.raw.updateValue(toWireValue(value));
     return this;
   }
+  updateFormula(formula: string): this {
+    this.schema.validateIsFormula();
+    this.raw.updateFormula(formula);
+    return this;
+  }
   updateBackgroundColor(backgroundColor: GoogleColor): this {
     this.raw.updateBackgroundColor(backgroundColor);
     return this;

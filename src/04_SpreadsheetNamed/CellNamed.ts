@@ -1,6 +1,7 @@
 import type { GoogleColor } from "../00_base/AppsScriptTypes";
 import type { NotEmpty } from "../00_base/base";
 import type {
+  ColumnIsFormula,
   ColumnName,
   ColumnValue,
   ColumnValueDeclared,
@@ -56,6 +57,12 @@ export class CellNamed<
   }
   updateValue(value: ColumnValue<SN, CN>): this {
     this.indexed.updateValue(value);
+    return this;
+  }
+  updateFormula(
+    formula: ColumnIsFormula<SN, CN> extends true ? string : never,
+  ): this {
+    this.indexed.updateFormula(formula);
     return this;
   }
   updateBackgroundColor(backgroundColor: GoogleColor): this {

@@ -96,9 +96,10 @@ export type RowChangesToSave = {
   // Values, not indexes, so a queued write never depends on fetched row state.
   update: Map<ColIndex, RowCellChange>;
 };
-// One entry per cell, merged across writes, so a colour never cancels a value.
+// One entry per cell, merged across writes, so a colour never cancels a value or a formula.
 export interface RowCellChange<VN extends CellValueName = CellValueName> {
   value?: CellValue<VN>;
+  formula?: string;
   backgroundColor?: GoogleColor;
 }
 export type SheetChangesToSave = {
@@ -147,7 +148,11 @@ export type SheetChangeProps = SheetChangePropsObj[keyof SheetChangePropsObj];
 export type RowChangeUpdateProps = {
   action: "update";
   colIndex: ColIndex;
-} & ({ value: CellValue } | { backgroundColor: GoogleColor });
+} & (
+  | { value: CellValue }
+  | { formula: string }
+  | { backgroundColor: GoogleColor }
+);
 export type RowChangeProps =
   { action: "append" | "delete" } | RowChangeUpdateProps;
 

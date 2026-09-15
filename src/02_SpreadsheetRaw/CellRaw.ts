@@ -98,6 +98,18 @@ export class CellRaw<
     });
     return this;
   }
+  // No state mirror: the next read still sees the old effective value.
+  updateFormula(formula: string): this {
+    validateFormulaString(formula);
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
+    this.row.validateIsWritable();
+    this.row.addRowChangeToSave({
+      action: "update",
+      colIndex: this.colIndex,
+      formula,
+    });
+    return this;
+  }
   // No state mirror: the read path never fetches colour, so there's none to mirror.
   updateBackgroundColor(backgroundColor: GoogleColor): this {
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
@@ -135,6 +147,11 @@ export class CellRaw<
   }
 }
 
+export function validateFormulaString(formula: string): void {
+  if (formula.startsWith("=")) return;
+  throw new Error(`Formula must start with "=". Got "${formula}".`);
+}
+
 export function cellValueToUserEntered(value: CellValue): UserEnteredValue {
   if (typeof value === "string") {
     return { stringValue: value };
@@ -152,6 +169,7 @@ export function cellValueToUserEntered(value: CellValue): UserEnteredValue {
 // Assembled from what was queued, so a colour-only write can't blank the value.
 const cellChangeFields = {
   value: "userEnteredValue",
+  formula: "userEnteredValue",
   backgroundColor: "userEnteredFormat.backgroundColor",
 } as const satisfies Record<keyof RowCellChange, string>;
 
@@ -164,7 +182,12 @@ export function cellChangeFieldMask(change: RowCellChange): string {
 
 export function cellChangeToCellData(change: RowCellChange): GoogleCellValue {
   const data: GoogleCellValue = {};
-  if (change.value !== undefined) {
+  if (change.value !== undefined && change.formula !== undefined) {
+    throw new Error("A queued change cannot hold both a value and a formula.");
+  }
+  if (change.formula !== undefined) {
+    data.userEnteredValue = { formulaValue: change.formula };
+  } else if (change.value !== undefined) {
     data.userEnteredValue = cellValueToUserEntered(change.value);
   }
   if (change.backgroundColor !== undefined) {

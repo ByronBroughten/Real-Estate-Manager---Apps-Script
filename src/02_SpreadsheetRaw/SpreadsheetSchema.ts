@@ -448,4 +448,10 @@ export class ColumnSchema<
       );
     }
   }
+  validateIsFormula(): void {
+    if (this.isFormula) return;
+    throw new Error(
+      `Column with id "${this.columnId}" is not a formula column and cannot be used for this operation.`,
+    );
+  }
 }

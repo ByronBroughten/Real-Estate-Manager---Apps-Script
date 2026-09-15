@@ -1497,6 +1497,74 @@ describe("SheetRaw.removeRowsExcept", () => {
   });
 });
 
+describe("ColumnRaw.updateAllFormulas", () => {
+  function stubFilledSheet() {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            4: ["r:lse:1", "old"],
+            5: ["r:lse:2", "old"],
+            6: ["r:lse:3", "old"],
+          }),
+          table: { endRowIndex: 7 },
+        },
+      ],
+    });
+  }
+
+  it("serializes formulaValue on one repeatCell and does not mirror into row state", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.sheet(111).column(1).gatherFetchFull();
+    raw.fetchAllGathered();
+    raw.sheet(111).column(1).updateAllFormulas("=2+1");
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        repeatCell: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 7,
+            startColumnIndex: 1,
+            endColumnIndex: 2,
+          },
+          cell: { userEnteredValue: { formulaValue: "=2+1" } },
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+    expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
+      "old",
+      "old",
+      "old",
+    ]);
+  });
+
+  it("drops a previously queued value when a formula is written on the same cell", () => {
+    const { batchUpdateCalls } = stubFilledSheet();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const cell = raw.sheet(111).row(4).cell(1);
+    cell.updateValue("new");
+    cell.updateFormula("=2+1");
+    raw.batchUpdateGSheets();
+
+    expect(
+      batchUpdateCalls[0]?.requests?.[0]?.updateCells?.rows?.[0]?.values?.[0],
+    ).toEqual({
+      userEnteredValue: { formulaValue: "=2+1" },
+    });
+  });
+});
+
 describe("CellRaw.updateBackgroundColor", () => {
   it("sends one updateCells request masking only the background colour, with no value", () => {
     const { batchUpdateCalls } = stubSheetsService({

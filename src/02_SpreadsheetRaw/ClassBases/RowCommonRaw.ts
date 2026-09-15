@@ -93,10 +93,14 @@ export abstract class RowCommonRaw extends RowRawBase {
       delete: (_: RowChangeProps) => (changes.delete = this.deleteRequest),
       update: (props: RowChangeProps) => {
         const { colIndex, ...rest } = props as RowChangeUpdateProps;
-        changes.update.set(colIndex, {
+        const incoming = Obj.strictOmit(rest, "action");
+        const merged = {
           ...changes.update.get(colIndex),
-          ...Obj.strictOmit(rest, "action"),
-        });
+          ...incoming,
+        };
+        if ("formula" in incoming) delete merged.value;
+        if ("value" in incoming) delete merged.formula;
+        changes.update.set(colIndex, merged);
       },
     };
     actions[props.action](props);
