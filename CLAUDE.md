@@ -8,7 +8,7 @@ Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./R
 
 - Never `clasp push` / `clasp run` / `clasp deploy`, `npm run build`, or `npm run chore <name> -- --send` without asking. A send needs a yes **naming that chore**.
 - `npm run tsc` and a chore dry run (`npm run chore <name>`, no `--send`) are always safe. Dry-run writes cannot reach Google: suppression is in the Node host adapter.
-- `npm run gen:configs` has standing permission only when **all four** hold: no uncommitted changes in `src/01_generatedConfigs/`; none in `src/05_Operators/`; report what changed **and the untyped-column count**; never a blind fix for an unidentified type error. One regeneration path. Sheet-shape bugs are fixed on the sheet, then regenerated. After any sheet change, read the regenerated entry before building on it. [`docs/generated-data.md`](./docs/generated-data.md).
+- `npm run gen:configs` has standing permission only when **all four** hold: no uncommitted changes in `src/01_generatedConfigs/`; none in `src/05_Operators/`; report what changed **and the untyped-column count**; never a blind fix for an unidentified type error. Identified identity and incidental retargets go through [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md); unidentified still means no patch. One regeneration path. Sheet-shape bugs are fixed on the sheet, then regenerated. After any sheet change, read the regenerated entry before building on it. [`docs/generated-data.md`](./docs/generated-data.md).
 - Don't hand-edit `spreadsheetConfig` / `sheetConfigs` / `columnConfigs` / `valueConfigs`. Exception: the config-sheet floor (`sheetConfig`, `columnConfig`, `spreadsheetConfig`, `valueConfig` entries in sheet and column configs).
 - **Read the block, not the file.** Reading `columnConfigs.ts` is denied in `.claude/settings.json`: grep it for the sheet key (`"occupancy":`) and read that object only, with `sheetConfigs.ts` as the sheet list. A long test file is the same — open the `describe` block you are changing.
 - Understand a class from its implementation. Open the sibling `Foo.test.ts` when changing tests.
@@ -48,6 +48,7 @@ A dispatched agent starts **cold**: it re-pays this file plus every doc it opens
 | Round trips | `docs/architecture/round-trips.md` |
 | Type-check cost | `docs/architecture/type-check-cost.md` |
 | Hosts, chore dry run, MCP | `docs/how-it-runs.md` |
+| Regen `tsc` fails, or hand-written sheet/column keys disagree with generated configs | [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md) |
 | A slash-named skill not in the listing | `.claude/skills/<name>/SKILL.md` — never a similarly-named substitute. `grill-with-docs` is grilling + domain-modeling. |
 
 ## Agent skills
