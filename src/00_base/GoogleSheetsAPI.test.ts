@@ -835,6 +835,44 @@ describe("GoogleSheetsAPI protected range read", () => {
     );
   });
 
+  it("reads a warning's editors as none, since Google lists them but a warning ignores them", () => {
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 111 },
+          protectedRanges: [
+            {
+              protectedRangeId: 5,
+              range: {
+                sheetId: 111,
+                startRowIndex: 4,
+                endRowIndex: 16,
+                startColumnIndex: 1,
+                endColumnIndex: 2,
+              },
+              warningOnly: true,
+              editors: {
+                users: [
+                  "service@example.iam.gserviceaccount.com",
+                  "owner@example.com",
+                ],
+                groups: ["team@example.com"],
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const protection =
+      api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0];
+    expect(protection).toMatchObject({
+      kind: "warning",
+      users: [],
+      groups: [],
+    });
+  });
+
   it("reads a named-range-backed protection as unmodelable and still carries its id", () => {
     const { api } = recordingSheets({
       sheets: [

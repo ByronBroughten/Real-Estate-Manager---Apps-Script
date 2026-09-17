@@ -876,13 +876,16 @@ function toProtectedRange(
   if (protection.editors?.domainUsersCanEdit === true) {
     return { kind: "unmodelable", id };
   }
+  const isWarning = protection.warningOnly === true;
+  // Google lists editors on a warning too, but a warning never uses them.
+  const editors = isWarning ? undefined : protection.editors;
   return {
-    kind: protection.warningOnly === true ? "warning" : "lock",
+    kind: isWarning ? "warning" : "lock",
     id,
     range: toProtectionGridRange(protection.range),
     description: protection.description ?? "",
-    users: protection.editors?.users ?? [],
-    groups: protection.editors?.groups ?? [],
+    users: editors?.users ?? [],
+    groups: editors?.groups ?? [],
     unprotectedRanges: (protection.unprotectedRanges ?? []).map(
       toProtectionGridRange,
     ),

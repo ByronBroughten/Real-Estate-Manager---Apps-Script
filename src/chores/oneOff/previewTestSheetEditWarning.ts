@@ -10,6 +10,7 @@ export const previewTestSheetEditWarning: Chore = {
     sheet.column("id").addEditWarning({
       description: "Framework preview · test · ID · warning",
     });
-    return "Queued an edit warning on test ID unless an identical protection was already present.";
+    ss.batchUpdateGSheets();
+    return "Asked for an edit warning on test ID; an empty report means an identical protection already exists.";
   },
 };
