@@ -438,13 +438,6 @@ export const columnConfigs = makeColumnConfigs({
     "syncConfigSheetRowsTimeLastRan": { "columnId": "c:sscf:pLBSdae", "header": "Sync config sheet rows, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "syncConfigSheetRowsRunStatus": { "columnId": "c:sscf:W-JABu_", "header": "Sync config sheet rows, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
-  "spreadsheetControls": {
-    "fillRowIdsRunStatus": { "columnId": "c:sct:ry4RjGc", "header": "Fill row IDs, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "syncConfigSheetRowsTimeLastRan": { "columnId": "c:sct:9SE5ZSP", "header": "Sync config sheet rows, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "syncConfigSheetRowsRunStatus": { "columnId": "c:sct:M2bLafa", "header": "Sync config sheet rows, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "tableControlsSpace": { "columnId": "c:sct:jIYLttI", "header": "Table controls space", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "fillRowIdsTimeLastRan": { "columnId": "c:sct:9C6CjOp", "header": "Fill row IDs, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
-  },
   "subPayAllocation": {
     "name": { "columnId": "c:spa:BS1Efgp", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "id": { "columnId": "c:spa:m3PZSvz", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },

@@ -21,12 +21,14 @@ describe("Endpoint's column parameters", () => {
     >(true);
     assertType<
       IsExactly<
-        TimeLastRanOf<"spreadsheetControls">,
+        TimeLastRanOf<"spreadsheetConfig">,
+        | "idDelimiter"
+        | "idHeader"
+        | "tableMenuSpace"
         | "fillRowIdsTimeLastRan"
         | "fillRowIdsRunStatus"
         | "syncConfigSheetRowsTimeLastRan"
         | "syncConfigSheetRowsRunStatus"
-        | "tableControlsSpace"
       >
     >(true);
   });

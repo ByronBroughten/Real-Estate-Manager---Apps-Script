@@ -8,12 +8,12 @@ describe("SheetNameWithIdColumn", () => {
       IsExactly<Extract<SheetNameWithIdColumn, "occupancy">, "occupancy">
     >(true);
     assertType<
-      IsExactly<Extract<SheetNameWithIdColumn, "spreadsheetControls">, never>
+      IsExactly<Extract<SheetNameWithIdColumn, "spreadsheetConfig">, never>
     >(true);
   });
 
   it("agrees at runtime with the type it is derived from", () => {
     expect(isInTnGroup("hasIdColumn", "occupancy")).toBe(true);
-    expect(isInTnGroup("hasIdColumn", "spreadsheetControls")).toBe(false);
+    expect(isInTnGroup("hasIdColumn", "spreadsheetConfig")).toBe(false);
   });
 });

@@ -1,7 +1,6 @@
 import { makeSheetConfigs } from "./makeConfigs";
 
 export const sheetConfigs = makeSheetConfigs({
-  "spreadsheetControls": { "sheetGid": 1971630928, "idPrefix": "sct", "hasIdColumn": false },
   "valueConfig": { "sheetGid": 2119236084, "idPrefix": "vcf", "hasIdColumn": false },
   "sheetConfig": { "sheetGid": 210603630, "idPrefix": "scf", "hasIdColumn": false },
   "columnConfig": { "sheetGid": 2034522667, "idPrefix": "ccf", "hasIdColumn": false },
