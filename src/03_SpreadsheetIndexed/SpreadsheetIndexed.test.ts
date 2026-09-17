@@ -397,7 +397,7 @@ describe("SheetIndexed.appendRowDefault", () => {
 });
 
 const TEST_GID = sheetConfigs.test.sheetGid;
-const TEST_NUMBER_COLUMN_ID = columnConfigs.test.number.columnId;
+const TEST_NUMBER_COLUMN_ID = columnConfigs.test.num.columnId;
 const TEST_FORMULA_COLUMN_ID = columnConfigs.test.formulaTest.columnId;
 
 describe("Indexed formula writes", () => {

@@ -2,13 +2,13 @@ import { ConfigOrchestrator } from "../05_Operators/ConfigOrchestrator";
 import type { Endpoints } from "./Endpoints";
 
 export const baseEndpoints: Endpoints = {
-  spreadsheetControls_syncConfigSheetRowsTimeLastRan: {
+  spreadsheetConfig_syncConfigSheetRowsTimeLastRan: {
     action: (ss) =>
       new ConfigOrchestrator(ss.spreadsheetNamedProps).syncConfigSheetRows(),
     timeLastRan: "syncConfigSheetRowsTimeLastRan",
     runStatus: "syncConfigSheetRowsRunStatus",
   },
-  spreadsheetControls_fillRowIdsTimeLastRan: {
+  spreadsheetConfig_fillRowIdsTimeLastRan: {
     action: (ss) => {
       ss.fillMissingRowIds();
     },

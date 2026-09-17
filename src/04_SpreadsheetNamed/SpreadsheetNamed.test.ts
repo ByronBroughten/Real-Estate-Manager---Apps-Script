@@ -578,12 +578,11 @@ function fetchedTestSpreadsheet(): SpreadsheetNamed {
   const ss = SpreadsheetNamed.init();
   ss.sheet("test").prepFetchColumnsFull(
     "id",
-    "number",
+    "num",
     "dropdown",
-    "sampledBoolean",
+    "conditionalFormatting",
     "columnCurrency",
-    "cellCurrency",
-    "cellNumber",
+    "active",
   );
   ss.fetchAllPrepped();
   return ss;
@@ -594,12 +593,11 @@ type CompleteAppendBag<SN extends SheetName> = Parameters<
 >[0];
 
 const completeTestRow: CompleteAppendBag<"test"> = {
-  number: 7,
+  num: 7,
   dropdown: "Yes",
-  sampledBoolean: true,
+  conditionalFormatting: true,
   columnCurrency: 8,
-  cellCurrency: 9,
-  cellNumber: 10,
+  active: true,
 };
 
 describe("SheetNamed.appendRowWithAllVals", () => {
@@ -625,13 +623,12 @@ describe("SheetNamed.appendRowWithAllVals", () => {
       .appendRowWithAllVals(completeTestRow);
 
     expect([
-      row.value("number"),
+      row.value("num"),
       row.value("dropdown"),
-      row.value("sampledBoolean"),
+      row.value("conditionalFormatting"),
       row.value("columnCurrency"),
-      row.value("cellCurrency"),
-      row.value("cellNumber"),
-    ]).toEqual([7, "Yes", true, 8, 9, 10]);
+      row.value("active"),
+    ]).toEqual([7, "Yes", true, 8, true]);
   });
 
   it("reuses the blank row the way the partial append does", () => {
@@ -710,12 +707,11 @@ describe("SheetNamed.appendRowWithAllVals", () => {
 
     expect([Object.keys(withId), Object.keys(withFormula)]).toEqual([
       [
-        "number",
+        "num",
         "dropdown",
-        "sampledBoolean",
+        "conditionalFormatting",
         "columnCurrency",
-        "cellCurrency",
-        "cellNumber",
+        "active",
         "id",
       ],
       [
@@ -917,14 +913,14 @@ describe("Named formula writes", () => {
     stubTestSheetForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
-    ss.sheet("test").prepFetchColumnsFull("formulaTest", "number");
+    ss.sheet("test").prepFetchColumnsFull("formulaTest", "num");
     ss.fetchAllPrepped();
     ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA);
 
     expect(ss.sheet("test").column("formulaTest").valueArrOrEmpty).toEqual([
       11, 21,
     ]);
-    expect(ss.sheet("test").column("number").valueArrOrEmpty).toEqual([10, 20]);
+    expect(ss.sheet("test").column("num").valueArrOrEmpty).toEqual([10, 20]);
   });
 
   it("still refuses a value write on Formula test", () => {
@@ -1002,23 +998,23 @@ describe("Named formula writes", () => {
     ).toThrowError(/pruned to a selection/);
   });
 
-  it("accepts Formula test and rejects Number at the type level", () => {
+  it("accepts Formula test and rejects Num at the type level", () => {
     assertType<IsExactly<ColumnIsFormula<"test", "formulaTest">, true>>(true);
-    assertType<IsExactly<ColumnIsFormula<"test", "number">, false>>(true);
+    assertType<IsExactly<ColumnIsFormula<"test", "num">, false>>(true);
 
     function formulaWriteTypeGate(
       formulaColumn: ColumnNamed<"test", "formulaTest">,
-      numberColumn: ColumnNamed<"test", "number">,
+      numColumn: ColumnNamed<"test", "num">,
     ) {
       formulaColumn.updateAllFormulas(TEST_FORMULA);
       formulaColumn.updateActiveFormulas(TEST_FORMULA);
       formulaColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
-      // @ts-expect-error Number is not a formula column
-      numberColumn.updateAllFormulas(TEST_FORMULA);
-      // @ts-expect-error Number is not a formula column
-      numberColumn.updateActiveFormulas(TEST_FORMULA);
-      // @ts-expect-error Number is not a formula column
-      numberColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
+      // @ts-expect-error Num is not a formula column
+      numColumn.updateAllFormulas(TEST_FORMULA);
+      // @ts-expect-error Num is not a formula column
+      numColumn.updateActiveFormulas(TEST_FORMULA);
+      // @ts-expect-error Num is not a formula column
+      numColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
     }
 
     expect(formulaWriteTypeGate).toEqual(expect.any(Function));

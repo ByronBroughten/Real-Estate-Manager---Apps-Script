@@ -336,25 +336,6 @@ export const columnConfigs = makeColumnConfigs({
     "discretionaryIncomeMonthlyAvg": { "columnId": "c:prp:WjyBYiQ", "header": "Discretionary income monthly avg", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "flexibleIncomeMonthlyAvg": { "columnId": "c:prp:Bw_yFS5", "header": "Flexible income monthly avg", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "grossIncomeMonthly": { "columnId": "c:prp:mNr7ACJ", "header": "Gross income monthly", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "mortgagePaymentMonthly": { "columnId": "c:prp:skHszKf", "header": "Mortgage payment monthly", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "principalPaymentMonthlyAvg": { "columnId": "c:prp:q8hslVY", "header": "Principal payment monthly avg", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "mortgageBalanceOriginal": { "columnId": "c:prp:lbUBnZ8", "header": "Mortgage balance original", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "mortgageHolder": { "columnId": "c:prp:KP3HQLO", "header": "Mortgage holder", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "ltv": { "columnId": "c:prp:62Diwje", "header": "LTV %", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "pmi": { "columnId": "c:prp:wGDVmaa", "header": "PMI", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "mortgageBalance": { "columnId": "c:prp:stoZHgc", "header": "Mortgage balance", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "mortgageNumber": { "columnId": "c:prp:iVE7JVT", "header": "Mortgage number", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocPaymentMonthly": { "columnId": "c:prp:FkVIy2m", "header": "Heloc payment monthly", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocPaymentOverride": { "columnId": "c:prp:rBRm2ld", "header": "HELOC payment override", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocInterestPayment": { "columnId": "c:prp:cCJLDxB", "header": "HELOC interest payment", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocSpent": { "columnId": "c:prp:nnLXmUC", "header": "HELOC spent", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocLimit": { "columnId": "c:prp:_78P1ZP", "header": "HELOC limit", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocAvailable": { "columnId": "c:prp:P9Cr_WO", "header": "HELOC available", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocHolder": { "columnId": "c:prp:meUQd3R", "header": "HELOC holder", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocInterestRate": { "columnId": "c:prp:TTia0fY", "header": "HELOC interest rate", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocPaymentDay": { "columnId": "c:prp:FEj8Pm9", "header": "HELOC payment day", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocNumber": { "columnId": "c:prp:74MZ90i", "header": "HELOC number", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "helocStartDate": { "columnId": "c:prp:3SbJEog", "header": "HELOC start date", "valueName": "date", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "utilityPaymentMonthlyAvg": { "columnId": "c:prp:1WbhZg8", "header": "Utility payment monthly avg", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "energyPaymentMonthlyAvg": { "columnId": "c:prp:fVpVhoW", "header": "Energy payment monthly avg", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "waterPaymentMonthlyAvg": { "columnId": "c:prp:GSgndCR", "header": "Water payment monthly avg", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -406,7 +387,8 @@ export const columnConfigs = makeColumnConfigs({
     "toSeed": { "columnId": "c:prp:L7aly_3", "header": "To Seed", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "lawnMowSqft": { "columnId": "c:prp:BIXtc6o", "header": "Lawn mow sqft", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "totalYardSqft": { "columnId": "c:prp:o6ndDOR", "header": "Total yard sqft", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "lockboxCode": { "columnId": "c:prp:BxZaWcU", "header": "Lockbox code", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "lockboxCode": { "columnId": "c:prp:BxZaWcU", "header": "Lockbox code", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "currentValueEstimate": { "columnId": "c:prp:6P7vGVV", "header": "Current value estimate", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "propertyExpense": {
     "expenseName": { "columnId": "c:pex:AWBDank", "header": "Expense name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -449,7 +431,12 @@ export const columnConfigs = makeColumnConfigs({
     "tableHeaderRowIndexBase1": { "columnId": "c:scf:58r8zkF", "header": "Table header row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "idHeader": { "columnId": "c:sscf:XOpXA8U", "header": "ID header", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "startTableColumnIndexBase1": { "columnId": "c:sscf:RtBaCIb", "header": "Start table column index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "columnGroupHeadingRowIndexBase1": { "columnId": "c:sscf:Tm9zOUP", "header": "Column group heading row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "columnGroupHeadingRowIndexBase1": { "columnId": "c:sscf:Tm9zOUP", "header": "Column group heading row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "tableMenuSpace": { "columnId": "c:sscf:0xzKfv_", "header": "Table menu space", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "fillRowIdsTimeLastRan": { "columnId": "c:sscf:eV73Th5", "header": "Fill row IDs, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "fillRowIdsRunStatus": { "columnId": "c:sscf:ebB4-9S", "header": "Fill row IDs, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "syncConfigSheetRowsTimeLastRan": { "columnId": "c:sscf:pLBSdae", "header": "Sync config sheet rows, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "syncConfigSheetRowsRunStatus": { "columnId": "c:sscf:W-JABu_", "header": "Sync config sheet rows, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "spreadsheetControls": {
     "fillRowIdsRunStatus": { "columnId": "c:sct:ry4RjGc", "header": "Fill row IDs, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -575,14 +562,13 @@ export const columnConfigs = makeColumnConfigs({
   "test": {
     "name": { "columnId": "c:tst:Xr9XZGV", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "id": { "columnId": "c:tst:-uGn8dY", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "number": { "columnId": "c:tst:VzKaUqz", "header": "Number", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "num": { "columnId": "c:tst:VzKaUqz", "header": "Num", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "dropdown": { "columnId": "c:tst:cQEliR8", "header": "Dropdown", "valueName": "yesOrNo", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "date": { "columnId": "c:test:HL-G329", "header": "Date", "valueName": "date", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "sampledBoolean": { "columnId": "c:test:KLMZlb4", "header": "Sampled Boolean", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "dateFormula": { "columnId": "c:test:HL-G329", "header": "Date Formula", "valueName": "date", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
+    "conditionalFormatting": { "columnId": "c:test:KLMZlb4", "header": "Conditional Formatting", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "formulaTest": { "columnId": "c:test:R8Vj_m9", "header": "Formula test", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "columnCurrency": { "columnId": "c:test:__ygD9v", "header": "Column currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "cellCurrency": { "columnId": "c:test:hK_L4mn", "header": "Cell currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "cellNumber": { "columnId": "c:test:clg5G1K", "header": "Cell number", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "active": { "columnId": "c:test:l7FWcC_", "header": "Active", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "unit": {
     "name": { "columnId": "c:unt:jC9vwrI", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
