@@ -124,8 +124,14 @@ export class SheetRaw extends SheetCommonRaw {
   }
   // Every guess this sheet's columns made from a sample had none behind it.
   topDataRowIsBlank(): boolean {
+    if (this.topRow.rowIsActive()) {
+      return this.fullTableColIndexes.every(
+        (colIndex) => this.topRow.valueOrEmpty(colIndex) === "",
+      );
+    }
+    // A queued-delete top row has no cells; column facts still describe the live sheet.
     return this.fullTableColIndexes.every(
-      (colIndex) => this.topRow.valueOrEmpty(colIndex) === "",
+      (colIndex) => this.meta.column(colIndex).activeTopValue === "",
     );
   }
   // Either kind of row, for callers that only touch what the two share.

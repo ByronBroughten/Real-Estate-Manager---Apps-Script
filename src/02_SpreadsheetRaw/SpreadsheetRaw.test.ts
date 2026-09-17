@@ -1084,6 +1084,17 @@ describe("queued writes outlive a same-run re-fetch", () => {
     expect(column.activeTopValue).toBe(42);
   });
 
+  it("still answers whether the top data row is blank from those facts", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.delete();
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topDataRowIsBlank()).toBe(false);
+  });
+
   it("keeps a queued value update after a re-fetch of that cell", () => {
     stubTwoDataRows();
 
