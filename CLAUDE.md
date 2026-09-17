@@ -19,7 +19,7 @@ Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./R
 - Tests: `npm test` is always safe. Co-locate `Foo.test.ts`; GAS fakes live in `src/testSupport/`. Run `tsc` and tests before calling a change done. [`docs/testing.md`](./docs/testing.md).
 - Type-level claims: `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts` — never assignment, never a probe that needed `any`. See STYLE.md "Type modeling".
 - Adding a deletion path: a sheet never ends a run with zero data rows — [`docs/architecture/blank-row.md`](./docs/architecture/blank-row.md).
-- A one-off against the live sheet is a chore — no scratch `src/index.ts` function, no ad-hoc `scripts/` Sheets client, no deploy-to-run. `gatherRawRequest` obliges an issue naming the missing capability. [`docs/architecture/chores.md`](./docs/architecture/chores.md), [`docs/architecture/raw-request-opening.md`](./docs/architecture/raw-request-opening.md).
+- A one-off against the live sheet is a chore — no scratch `src/index.ts` function, no ad-hoc `scripts/` Sheets client (exception: a read-only probe that wraps the dry-run Node host's transport to print raw JSON, deleted in the same turn — [`docs/how-it-runs.md`](./docs/how-it-runs.md)), no deploy-to-run. `gatherRawRequest` obliges an issue naming the missing capability. [`docs/architecture/chores.md`](./docs/architecture/chores.md), [`docs/architecture/raw-request-opening.md`](./docs/architecture/raw-request-opening.md).
 - During design or grilling, write nothing until the user invokes the skill that files it.
 - Don't create `docs/adr/`.
 
