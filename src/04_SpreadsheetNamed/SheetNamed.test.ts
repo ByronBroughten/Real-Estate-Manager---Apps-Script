@@ -421,6 +421,52 @@ describe("SheetNamed edit warnings and edit locks", () => {
     expect(batchUpdateCalls).toEqual([]);
   });
 
+  it("queues nothing when a present lock has every declared editor plus ones Google added", () => {
+    const googleAdded = ["service@example.com", "owner@example.com"];
+    const fetchedLock = (users: string[]) =>
+      fetchedOccupancyProtections([
+        googleProtection(ID_COLUMN_RANGE, {
+          protectedRangeId: 6,
+          description: "id lock",
+          warningOnly: false,
+          editors: { users, groups: ["editors@example.com"] },
+        }),
+      ]);
+
+    const unnamed = fetchedLock(googleAdded);
+    unnamed.sheet.column("id").addEditLock({ description: "id lock" });
+    unnamed.ss.batchUpdateGSheets();
+    expect(unnamed.batchUpdateCalls).toEqual([]);
+
+    const named = fetchedLock([...googleAdded, "editor@example.com"]);
+    named.sheet.column("id").addEditLock({
+      description: "id lock",
+      users: ["editor@example.com"],
+      groups: ["editors@example.com"],
+    });
+    named.ss.batchUpdateGSheets();
+    expect(named.batchUpdateCalls).toEqual([]);
+  });
+
+  it("adds a lock when a present lock lacks a declared editor", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+      googleProtection(ID_COLUMN_RANGE, {
+        protectedRangeId: 6,
+        description: "id lock",
+        warningOnly: false,
+        editors: { users: ["service@example.com", "owner@example.com"] },
+      }),
+    ]);
+
+    sheet.column("id").addEditLock({
+      description: "id lock",
+      users: ["editor@example.com"],
+    });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toHaveLength(1);
+  });
+
   it("removes a hand-set protection by exact range, content, description and id", () => {
     const handSet = googleProtection(ID_COLUMN_RANGE, {
       protectedRangeId: 11,

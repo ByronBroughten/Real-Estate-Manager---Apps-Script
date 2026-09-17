@@ -90,6 +90,21 @@ export function protectedRangeContentsEqual(
   );
 }
 
+// Google adds its own editors to a lock, so a present lock need only include the declared ones.
+export function protectedRangeContentSatisfies(
+  present: ProtectedRangeContent,
+  declared: ProtectedRangeContent,
+): boolean {
+  return (
+    present.kind === declared.kind &&
+    protectionRangeEqual(present.range, declared.range) &&
+    present.description === declared.description &&
+    stringListIncludesAll(present.users, declared.users) &&
+    stringListIncludesAll(present.groups, declared.groups) &&
+    protectionRangesEqual(present.unprotectedRanges, declared.unprotectedRanges)
+  );
+}
+
 export function protectedRangesEqual(
   left: ProtectedRange,
   right: ProtectedRange,
@@ -106,6 +121,10 @@ function protectionRangesEqual(
   return left.every((range, index) =>
     protectionRangeEqual(range, right[index]),
   );
+}
+
+function stringListIncludesAll(list: string[], required: string[]): boolean {
+  return required.every((value) => list.includes(value));
 }
 
 function stringListsEqual(left: string[], right: string[]): boolean {

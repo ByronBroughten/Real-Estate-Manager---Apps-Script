@@ -6,7 +6,7 @@ import {
   type ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
 import {
-  protectedRangeContentsEqual,
+  protectedRangeContentSatisfies,
   protectedRangesEqual,
   protectionRangeEqual,
   protectionRangeHasRowCoordinates,
@@ -398,7 +398,7 @@ export class SheetRaw extends SheetCommonRaw {
     this.assertProtectedRangesNotStale();
     if (
       this._pendingProtectedRangeContents().some((pending) =>
-        protectedRangeContentsEqual(pending, protection),
+        protectedRangeContentSatisfies(pending, protection),
       )
     ) {
       return this;
