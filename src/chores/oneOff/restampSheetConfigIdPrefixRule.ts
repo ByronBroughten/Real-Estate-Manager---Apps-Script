@@ -3,10 +3,10 @@ import {
   rangeEqual,
   type ConditionalFormatDeclaration,
   type ConditionalFormatRule,
-} from "../00_base/ConditionalFormat";
-import type { GridRangeProps } from "../00_base/RawSource";
-import { Val } from "../utils/Val";
-import type { Chore } from "./Chore";
+} from "../../00_base/ConditionalFormat";
+import type { GridRangeProps } from "../../00_base/RawSource";
+import { Val } from "../../utils/Val";
+import type { Chore } from "../Chore";
 
 const PINK = { red: 244 / 255, green: 204 / 255, blue: 204 / 255 };
 
