@@ -16,6 +16,6 @@ package-lock.json
 .DS_Store
 
 # Local Claude permission dumps — not skill files
-# (.claude/skills/ and .agents/skills/ must stay readable on invoke)
+# (.claude/skills/ must stay readable on invoke)
 
 .claude/settings.local.json

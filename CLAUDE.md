@@ -49,7 +49,7 @@ A dispatched agent starts **cold**: it re-pays this file plus every doc it opens
 | Type-check cost | `docs/architecture/type-check-cost.md` |
 | Hosts, chore dry run, MCP | `docs/how-it-runs.md` |
 | Regen `tsc` fails, or hand-written sheet/column keys disagree with generated configs | [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md) |
-| A slash-named skill not in the listing | `.claude/skills/<name>/SKILL.md` — never a similarly-named substitute. `grill-with-docs` is grilling + domain-modeling. |
+| A slash-named skill not in the listing | `.claude/skills/<name>/SKILL.md` (this repo's own), else the `mattpocock-skills` plugin (`mattpocock-skills:<name>`) — never a similarly-named substitute. `grill-with-docs` is grilling + domain-modeling. |
 
 ## Agent skills
 
