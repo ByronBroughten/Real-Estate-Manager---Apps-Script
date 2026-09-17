@@ -522,7 +522,11 @@ describe("GoogleSheetsAPI payload mapping", () => {
                 },
                 format: {
                   backgroundColor: pink,
-                  textFormat: { foregroundColor: { red: 0.4 } },
+                  backgroundColorStyle: { rgbColor: pink },
+                  textFormat: {
+                    foregroundColor: { red: 0.4 },
+                    foregroundColorStyle: { rgbColor: { red: 0.4 } },
+                  },
                 },
               },
             },
@@ -571,10 +575,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
       ],
     });
 
-    const rules = api.fetchGrid(SPREADSHEET_ID, [{ sheetId: 111 }], {
-      includeProgrammaticFacts: false,
-      includeConditionalFormats: true,
-    }).sheets[0]?.conditionalFormatRules;
+    const rules = api.fetchConditionalFormatRules(SPREADSHEET_ID)[0]?.rules;
 
     expect(rules).toHaveLength(3);
     expect(rules?.[0]).toEqual({
@@ -632,6 +633,96 @@ describe("GoogleSheetsAPI payload mapping", () => {
         },
       ],
     });
+  });
+});
+
+describe("GoogleSheetsAPI conditional format read", () => {
+  it("reads rules with a plain get, never getByDataFilter", () => {
+    const { api, getCalls, getByDataFilterCalls } = recordingSheets({
+      sheets: [{ properties: { sheetId: 111 } }],
+    });
+
+    api.fetchConditionalFormatRules(SPREADSHEET_ID);
+
+    expect(getCalls).toEqual([
+      {
+        spreadsheetId: SPREADSHEET_ID,
+        fields: "sheets(properties(sheetId),conditionalFormats)",
+      },
+    ]);
+    expect(getByDataFilterCalls).toHaveLength(0);
+  });
+
+  it("reads omitted zero fields in a rule range as zero", () => {
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 0 },
+          conditionalFormats: [
+            {
+              ranges: [{ endRowIndex: 11, endColumnIndex: 1 }],
+              gradientRule: {},
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(
+      api.fetchConditionalFormatRules(SPREADSHEET_ID)[0]?.rules[0]?.ranges,
+    ).toEqual([
+      {
+        sheetId: 0,
+        startRowIndex: 0,
+        endRowIndex: 11,
+        startColumnIndex: 0,
+        endColumnIndex: 1,
+      },
+    ]);
+  });
+
+  it("reads a theme colour style, or one that disagrees with its colour, as unmodelable", () => {
+    const green = { red: 0, green: 1, blue: 0 };
+    const rule = (format: GoogleAppsScript.Sheets.Schema.CellFormat) => ({
+      ranges: [{ sheetId: 111, startRowIndex: 4 }],
+      booleanRule: {
+        condition: { type: "NUMBER_EQ", values: [{ userEnteredValue: "TRUE" }] },
+        format,
+      },
+    });
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 111 },
+          conditionalFormats: [
+            rule({
+              backgroundColor: green,
+              backgroundColorStyle: { themeColor: "ACCENT1" },
+            }),
+            rule({
+              backgroundColor: green,
+              backgroundColorStyle: { rgbColor: { red: 1 } },
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(
+      api
+        .fetchConditionalFormatRules(SPREADSHEET_ID)[0]
+        ?.rules.map((read) => read.kind),
+    ).toEqual(["unmodelable", "unmodelable"]);
+  });
+
+  it("reads a sheet whose rule list Google omitted as having no rules", () => {
+    const { api } = recordingSheets({
+      sheets: [{ properties: { sheetId: 111 } }],
+    });
+
+    expect(api.fetchConditionalFormatRules(SPREADSHEET_ID)).toEqual([
+      { sheetGid: 111, rules: [] },
+    ]);
   });
 });
 

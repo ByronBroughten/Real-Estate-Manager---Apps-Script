@@ -85,6 +85,13 @@ describe("SheetNamed conditional format rules", () => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
 
+  it("reads a sheet with no rules as an empty list", () => {
+    stubOccupancyWithRules([]);
+    const { sheet } = fetchedOccupancy();
+
+    expect(sheet.conditionalFormatRules()).toEqual([]);
+  });
+
   it("prepends a column rule so it takes precedence over rules already on the sheet", () => {
     const { batchUpdateCalls } = stubOccupancyWithRules([
       googleBooleanRule(SHEET_RANGE, "NUMBER_EQ", "TRUE", GREY),

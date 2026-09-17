@@ -354,14 +354,16 @@ export function stubSheetsService(
     isFilteredFetch: boolean,
     fields?: string,
   ): GoogleAppsScript.Sheets.Schema.Spreadsheet {
+    // Like Google: getByDataFilter drops rules, and an empty list is omitted.
     const includeConditionalFormats =
-      fields === undefined || fields.includes("conditionalFormats");
+      !isFilteredFetch &&
+      (fields === undefined || fields.includes("conditionalFormats"));
     return {
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
         data: fakeRowsToGoogleSheetData(s),
         tables: fakeSheetTables(s, isFilteredFetch),
-        ...(includeConditionalFormats && s.conditionalFormats !== undefined
+        ...(includeConditionalFormats && s.conditionalFormats?.length
           ? { conditionalFormats: s.conditionalFormats }
           : {}),
       })),

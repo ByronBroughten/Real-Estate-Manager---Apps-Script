@@ -87,6 +87,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     this.rawState.allSheetPropertiesAreFetched = true;
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
+    this._fetchGatheredConditionalFormatRules();
     // An empty dataFilters list would fetch the whole spreadsheet's grid data.
     if (this.fetcherGridRanges.length === 0) return;
     const data = this._fetchByGridRanges(includeProgrammaticFacts);
@@ -290,13 +291,19 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   ): SpreadsheetSnapshot {
     return this.rawState.rawSource.fetchGrid(this.spreadsheetId, gridRanges, {
       includeProgrammaticFacts,
-      includeConditionalFormats: this._isGatheringConditionalFormats(),
     });
   }
-  private _isGatheringConditionalFormats(): boolean {
-    return Array.from(this.rawSheetsState.values()).some(
-      (state) => state.gatherConditionalFormats,
-    );
+  private _fetchGatheredConditionalFormatRules(): void {
+    const gatheringGids = Array.from(this.rawSheetsState.entries())
+      .filter(([, state]) => state.gatherConditionalFormats)
+      .map(([sheetGid]) => sheetGid);
+    if (gatheringGids.length === 0) return;
+    this.rawState.rawSource
+      .fetchConditionalFormatRules(this.spreadsheetId)
+      .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
+      .forEach(({ sheetGid, rules }) =>
+        this.sheet(sheetGid).integrateConditionalFormatRules(rules),
+      );
   }
   private _addDataToState(snapshot: SpreadsheetSnapshot) {
     snapshot.sheets.forEach((sheetSnapshot) => {

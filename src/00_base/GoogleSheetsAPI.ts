@@ -17,6 +17,7 @@ import type {
   GridRangeProps,
   LocalWriteOperation,
   RawSource,
+  SheetConditionalFormatSnapshot,
   SheetSnapshot,
   SpreadsheetSnapshot,
   TableColumnSnapshot,
@@ -50,6 +51,8 @@ const SHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 
 const SHEET_PROPERTIES_FIELDS =
   "sheets(properties(sheetId,title),tables(tableId,range))";
+const CONDITIONAL_FORMAT_FIELDS =
+  "sheets(properties(sheetId),conditionalFormats)";
 const GRID_FIELDS_WITH_PROGRAMMATIC_FACTS =
   "sheets(" +
   "properties(sheetId,title)," +
@@ -144,6 +147,23 @@ export class GoogleSheetsAPI implements RawSource {
       ),
     );
   }
+  // getByDataFilter never returns conditionalFormats, so rules take a plain get.
+  fetchConditionalFormatRules(
+    spreadsheetId: string,
+  ): SheetConditionalFormatSnapshot[] {
+    const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
+      fields: CONDITIONAL_FORMAT_FIELDS,
+    });
+    return Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
+      (sheet) => ({
+        sheetGid: Val.assert(sheet.properties?.sheetId, "sheetId"),
+        // Google omits an empty list.
+        rules: (sheet.conditionalFormats ?? []).map((rule, index) =>
+          toConditionalFormatRule(rule, index),
+        ),
+      }),
+    );
+  }
   flush(spreadsheetId: string, operations: LocalWriteOperation[]): void {
     const requests = operations.flatMap(localOperationToGoogleRequests);
     if (requests.length === 0) return;
@@ -206,11 +226,9 @@ function toSpreadsheetSnapshot(
 }
 
 function gridFields(options: GridFetchOptions): string {
-  const fields = options.includeProgrammaticFacts
+  return options.includeProgrammaticFacts
     ? GRID_FIELDS_WITH_PROGRAMMATIC_FACTS
     : GRID_FIELDS_WITHOUT_PROGRAMMATIC_FACTS;
-  if (!options.includeConditionalFormats) return fields;
-  return `${fields.slice(0, -1)},conditionalFormats)`;
 }
 
 function toSheetSnapshot(sheet: GoogleSheet): SheetSnapshot {
@@ -230,13 +248,6 @@ function toSheetSnapshot(sheet: GoogleSheet): SheetSnapshot {
         ) => toGridCell(row.values?.[colOffset])),
       })),
     })),
-    ...(sheet.conditionalFormats !== undefined
-      ? {
-          conditionalFormatRules: sheet.conditionalFormats.map(
-            (rule, index) => toConditionalFormatRule(rule, index),
-          ),
-        }
-      : {}),
   };
 }
 
@@ -684,11 +695,42 @@ function cellFormatHasUnmodelledFields(
   format: GoogleAppsScript.Sheets.Schema.CellFormat | undefined,
 ): boolean {
   if (format === undefined) return false;
-  if (objectHasDefinedKeysBesides(format, ["backgroundColor", "textFormat"])) {
+  if (
+    objectHasDefinedKeysBesides(format, [
+      "backgroundColor",
+      "backgroundColorStyle",
+      "textFormat",
+    ]) ||
+    !colorStyleMirrors(format.backgroundColorStyle, format.backgroundColor)
+  ) {
     return true;
   }
-  if (format.textFormat === undefined) return false;
-  return objectHasDefinedKeysBesides(format.textFormat, ["foregroundColor"]);
+  const textFormat = format.textFormat;
+  if (textFormat === undefined) return false;
+  return (
+    objectHasDefinedKeysBesides(textFormat, [
+      "foregroundColor",
+      "foregroundColorStyle",
+    ]) ||
+    !colorStyleMirrors(
+      textFormat.foregroundColorStyle,
+      textFormat.foregroundColor,
+    )
+  );
+}
+
+// Google echoes each colour as a style; only an rgb copy of the plain colour is modelled.
+function colorStyleMirrors(
+  style: GoogleAppsScript.Sheets.Schema.ColorStyle | undefined,
+  color: GoogleColor | undefined,
+): boolean {
+  if (style === undefined) return true;
+  const rgb = style.rgbColor;
+  if (style.themeColor !== undefined || rgb === undefined) return false;
+  if (color === undefined) return false;
+  return (["red", "green", "blue", "alpha"] as const).every(
+    (channel) => (rgb[channel] ?? 0) === (color[channel] ?? 0),
+  );
 }
 
 function objectHasDefinedKeysBesides(
@@ -703,15 +745,14 @@ function objectHasDefinedKeysBesides(
 function toGridRangeProps(
   range: GoogleAppsScript.Sheets.Schema.GridRange,
 ): GridRangeProps {
+  // Google omits zero-valued fields, so a gid-0 sheet or column A arrives absent.
   return {
-    sheetId: Val.assert(range.sheetId, "conditional format range sheetId"),
+    sheetId: range.sheetId ?? 0,
     startRowIndex: range.startRowIndex ?? 0,
     ...(range.endRowIndex !== undefined
       ? { endRowIndex: range.endRowIndex }
       : {}),
-    ...(range.startColumnIndex !== undefined
-      ? { startColumnIndex: range.startColumnIndex }
-      : {}),
+    startColumnIndex: range.startColumnIndex ?? 0,
     ...(range.endColumnIndex !== undefined
       ? { endColumnIndex: range.endColumnIndex }
       : {}),

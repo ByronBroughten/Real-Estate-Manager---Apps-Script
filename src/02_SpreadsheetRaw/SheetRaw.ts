@@ -188,11 +188,6 @@ export class SheetRaw extends SheetCommonRaw {
   }
   gatherFetchConditionalFormatRules(): this {
     this.sheetState.gatherConditionalFormats = true;
-    if (
-      !this.fetcherGridRanges.some((range) => range.sheetId === this.sheetGid)
-    ) {
-      this.gatherFetchProperties(this.schema.startTableColIndex);
-    }
     return this;
   }
   conditionalFormatRules(): ConditionalFormatRule[] {
@@ -298,11 +293,11 @@ export class SheetRaw extends SheetCommonRaw {
     if (sheet.gridBlocks) {
       this._integrateSheetData(sheet.gridBlocks);
     }
-    if (sheet.conditionalFormatRules !== undefined) {
-      this.sheetState.conditionalFormatRules = sheet.conditionalFormatRules;
-      this.sheetState.gatherConditionalFormats = false;
-      this.sheetState.conditionalFormatIndexesAreStale = false;
-    }
+  }
+  integrateConditionalFormatRules(rules: ConditionalFormatRule[]): void {
+    this.sheetState.conditionalFormatRules = rules;
+    this.sheetState.gatherConditionalFormats = false;
+    this.sheetState.conditionalFormatIndexesAreStale = false;
   }
   private _integrateSheetData(
     gridBlocks: NonNullable<SheetSnapshot["gridBlocks"]>,

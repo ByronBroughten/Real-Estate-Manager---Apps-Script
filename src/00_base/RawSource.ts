@@ -37,7 +37,6 @@ export interface FindReplaceTerms {
 
 export interface GridFetchOptions {
   includeProgrammaticFacts: boolean;
-  includeConditionalFormats?: boolean;
 }
 
 export interface SpreadsheetSnapshot {
@@ -49,7 +48,11 @@ export interface SheetSnapshot {
   title: string | null;
   tables: TableSnapshot[] | undefined;
   gridBlocks: GridBlockSnapshot[] | undefined;
-  conditionalFormatRules?: ConditionalFormatRule[];
+}
+
+export interface SheetConditionalFormatSnapshot {
+  sheetGid: number;
+  rules: ConditionalFormatRule[];
 }
 
 export interface TableSnapshot {
@@ -179,6 +182,9 @@ export interface RawSource {
     gridRanges: GridFetchRange[],
     options: GridFetchOptions,
   ): SpreadsheetSnapshot;
+  fetchConditionalFormatRules(
+    spreadsheetId: string,
+  ): SheetConditionalFormatSnapshot[];
   flush(spreadsheetId: string, operations: LocalWriteOperation[]): void;
 }
 
