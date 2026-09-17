@@ -104,6 +104,11 @@ export interface FakeSheetProperties {
    */
   conditionalFormats?: GoogleAppsScript.Sheets.Schema.ConditionalFormatRule[];
   /**
+   * The sheet's protected ranges. Omitted from `getByDataFilter` and from
+   * a `get` that does not ask for them; an empty list is omitted, like Google.
+   */
+  protectedRanges?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+  /**
    * Row indices that come back as a grid-data block describing every column
    * but carrying no `rowData` at all — the real API's shape, measured
    * against the live spreadsheet, for a row inside the grid whose every
@@ -309,7 +314,8 @@ function fakeTableRange(
   table: NonNullable<FakeSheetProperties["table"]>,
 ): GoogleAppsScript.Sheets.Schema.GridRange {
   return {
-    startRowIndex: table.startRowIndex ?? ssConfigGet("tableHeaderRowIndexBase0"),
+    startRowIndex:
+      table.startRowIndex ?? ssConfigGet("tableHeaderRowIndexBase0"),
     endRowIndex: table.endRowIndex,
     startColumnIndex:
       table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),
@@ -349,6 +355,15 @@ export function stubSheetsService(
   const sheets = options.sheets ?? [];
   const batchUpdateCalls: BatchUpdateRequest[] = [];
   const getByDataFilterCalls: object[] = [];
+  let nextProtectedRangeId =
+    Math.max(
+      0,
+      ...sheets.flatMap((sheet) =>
+        (sheet.protectedRanges ?? []).map(
+          (protection) => protection.protectedRangeId ?? 0,
+        ),
+      ),
+    ) + 1;
 
   function sheetsResponse(
     isFilteredFetch: boolean,
@@ -358,6 +373,9 @@ export function stubSheetsService(
     const includeConditionalFormats =
       !isFilteredFetch &&
       (fields === undefined || fields.includes("conditionalFormats"));
+    const includeProtectedRanges =
+      !isFilteredFetch &&
+      (fields === undefined || fields.includes("protectedRanges"));
     return {
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
@@ -365,6 +383,9 @@ export function stubSheetsService(
         tables: fakeSheetTables(s, isFilteredFetch),
         ...(includeConditionalFormats && s.conditionalFormats?.length
           ? { conditionalFormats: s.conditionalFormats }
+          : {}),
+        ...(includeProtectedRanges && s.protectedRanges?.length
+          ? { protectedRanges: s.protectedRanges }
           : {}),
       })),
     };
@@ -387,10 +408,10 @@ export function stubSheetsService(
         _spreadsheetId: string,
       ): BatchUpdateResponse => {
         batchUpdateCalls.push(resource);
-        (resource.requests ?? []).forEach((request) => {
-          replayConditionalFormatRequest(sheets, request);
-        });
-        return {};
+        const replies = (resource.requests ?? []).map((request) =>
+          replaySheetRequest(sheets, request, () => nextProtectedRangeId++),
+        );
+        return { replies };
       },
     },
   };
@@ -398,6 +419,44 @@ export function stubSheetsService(
   installRawSource(GoogleSheetsAPI.init(service));
 
   return { batchUpdateCalls, getByDataFilterCalls };
+}
+
+function replaySheetRequest(
+  sheets: FakeSheetProperties[],
+  request: GoogleAppsScript.Sheets.Schema.Request,
+  nextProtectedRangeId: () => number,
+): GoogleAppsScript.Sheets.Schema.Response {
+  replayConditionalFormatRequest(sheets, request);
+  return replayProtectedRangeRequest(sheets, request, nextProtectedRangeId);
+}
+
+function replayProtectedRangeRequest(
+  sheets: FakeSheetProperties[],
+  request: GoogleAppsScript.Sheets.Schema.Request,
+  nextProtectedRangeId: () => number,
+): GoogleAppsScript.Sheets.Schema.Response {
+  const add = request.addProtectedRange?.protectedRange;
+  if (add !== undefined) {
+    const sheetId = add.range?.sheetId;
+    const sheet = sheets.find((candidate) => candidate.sheetId === sheetId);
+    if (sheet === undefined) return {};
+    const stored = {
+      ...add,
+      protectedRangeId: nextProtectedRangeId(),
+    };
+    sheet.protectedRanges ??= [];
+    sheet.protectedRanges.push(stored);
+    return { addProtectedRange: { protectedRange: stored } };
+  }
+  const removeId = request.deleteProtectedRange?.protectedRangeId;
+  if (removeId === undefined) return {};
+  sheets.forEach((sheet) => {
+    if (sheet.protectedRanges === undefined) return;
+    sheet.protectedRanges = sheet.protectedRanges.filter(
+      (protection) => protection.protectedRangeId !== removeId,
+    );
+  });
+  return {};
 }
 
 function replayConditionalFormatRequest(
@@ -415,7 +474,9 @@ function replayConditionalFormatRequest(
   }
   const remove = request.deleteConditionalFormatRule;
   if (remove?.index === undefined) return;
-  const sheet = sheets.find((candidate) => candidate.sheetId === remove.sheetId);
+  const sheet = sheets.find(
+    (candidate) => candidate.sheetId === remove.sheetId,
+  );
   if (sheet?.conditionalFormats === undefined) return;
   sheet.conditionalFormats.splice(remove.index, 1);
 }

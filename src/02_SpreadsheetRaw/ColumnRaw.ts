@@ -3,6 +3,11 @@ import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
+import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+} from "../00_base/ProtectedRange";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
@@ -150,9 +155,7 @@ export class ColumnRaw<
     this.ss.findReplace({ ...terms, scope: { range: this.dataGridRange } });
     return this;
   }
-  addConditionalFormatRule(
-    declaration: ConditionalFormatDeclaration,
-  ): this {
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
     this.sheet.addConditionalFormatRuleAt(this.dataGridRange, declaration);
     return this;
   }
@@ -162,6 +165,22 @@ export class ColumnRaw<
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
     this.sheet.removeConditionalFormatRule(rule);
+    return this;
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.sheet.addEditWarningAt(this.dataGridRange, declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.sheet.addEditLockAt(this.dataGridRange, declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.sheet.removeEditProtectionsAt(this.dataGridRange);
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.sheet.removeEditProtection(protection);
     return this;
   }
   gatherFetchActive(): this {

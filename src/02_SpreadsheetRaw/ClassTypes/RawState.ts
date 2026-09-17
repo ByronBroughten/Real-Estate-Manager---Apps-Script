@@ -1,4 +1,5 @@
 import type { ConditionalFormatRule } from "../../00_base/ConditionalFormat";
+import type { ProtectedRange } from "../../00_base/ProtectedRange";
 import type {
   FindReplaceScope as BaseFindReplaceScope,
   FindReplaceTerms as BaseFindReplaceTerms,
@@ -29,6 +30,8 @@ const updateRequestNames = [
   "findReplace",
   "deleteConditionalFormat",
   "addConditionalFormat",
+  "deleteProtectedRange",
+  "addProtectedRange",
   "raw",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
@@ -53,6 +56,9 @@ export interface RawSheetState {
   gatherConditionalFormats: boolean;
   conditionalFormatRules: ConditionalFormatRule[] | null;
   conditionalFormatIndexesAreStale: boolean;
+  gatherProtectedRanges: boolean;
+  protectedRanges: ProtectedRange[] | null;
+  protectedRangesAreStale: boolean;
 }
 
 export type RawRowStates = Map<RowIndex, RawRowState>;
@@ -150,9 +156,7 @@ export type RowChangeUpdateProps = {
   action: "update";
   colIndex: ColIndex;
 } & (
-  | { value: CellValue }
-  | { formula: string }
-  | { backgroundColor: RgbColor }
+  { value: CellValue } | { formula: string } | { backgroundColor: RgbColor }
 );
 export type RowChangeProps =
   { action: "append" | "delete" } | RowChangeUpdateProps;

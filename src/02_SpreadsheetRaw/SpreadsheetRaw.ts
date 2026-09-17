@@ -82,12 +82,15 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return { activeSheetGids: this.activeSheetGids };
   }
   private _fetchAndIntegrateAllSheetProperties() {
-    const data = this.rawState.rawSource.fetchSheetProperties(this.spreadsheetId);
+    const data = this.rawState.rawSource.fetchSheetProperties(
+      this.spreadsheetId,
+    );
     this._addDataToState(data);
     this.rawState.allSheetPropertiesAreFetched = true;
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
     this._fetchGatheredConditionalFormatRules();
+    this._fetchGatheredProtectedRanges();
     // An empty dataFilters list would fetch the whole spreadsheet's grid data.
     if (this.fetcherGridRanges.length === 0) return;
     const data = this._fetchByGridRanges(includeProgrammaticFacts);
@@ -100,9 +103,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const data = this._fetchByGridRanges(false, [{ sheetId: sheetGid }]);
     const sheets = data.sheets.filter((sheet) => sheet.sheetGid === sheetGid);
     if (sheets.length === 0) {
-      throw new Error(
-        `Sheet gid ${sheetGid} was missing from the Sheets get.`,
-      );
+      throw new Error(`Sheet gid ${sheetGid} was missing from the Sheets get.`);
     }
     this._addDataToState({ sheets });
   }
@@ -118,7 +119,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (state.knownTable === null || !this.schema.isInSheetGids(sheetGid)) {
       return { kind: "none" };
     }
-    const { startRowIndex, startColumnIndex } = this.sheet(sheetGid).activeTable;
+    const { startRowIndex, startColumnIndex } =
+      this.sheet(sheetGid).activeTable;
     if (this.schema.isTableStart(startRowIndex, startColumnIndex)) {
       return { kind: "well-placed" };
     }
@@ -212,7 +214,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     }
     const sentences: string[] = [];
     if (reclassified.misplacedTables.length > 0) {
-      sentences.push(this._misplacedTableSentence(reclassified.misplacedTables));
+      sentences.push(
+        this._misplacedTableSentence(reclassified.misplacedTables),
+      );
     }
     if (reclassified.absentTables.length > 0) {
       sentences.push(this._absentTableSentence(reclassified.absentTables));
@@ -305,6 +309,18 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         this.sheet(sheetGid).integrateConditionalFormatRules(rules),
       );
   }
+  private _fetchGatheredProtectedRanges(): void {
+    const gatheringGids = Array.from(this.rawSheetsState.entries())
+      .filter(([, state]) => state.gatherProtectedRanges)
+      .map(([sheetGid]) => sheetGid);
+    if (gatheringGids.length === 0) return;
+    this.rawState.rawSource
+      .fetchProtectedRanges(this.spreadsheetId)
+      .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
+      .forEach(({ sheetGid, protections }) =>
+        this.sheet(sheetGid).integrateProtectedRanges(protections),
+      );
+  }
   private _addDataToState(snapshot: SpreadsheetSnapshot) {
     snapshot.sheets.forEach((sheetSnapshot) => {
       const sheet = this.sheet(sheetSnapshot.sheetGid);
@@ -316,6 +332,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const sheetGidsWithRowDeletes = this._sheetGidsWithRowDeletes();
     const sheetGidsWithConditionalFormatMutations =
       this._sheetGidsWithConditionalFormatMutations();
+    const sheetGidsWithProtectedRangeMutations =
+      this._sheetGidsWithProtectedRangeMutations();
     const hasFindReplace = this.updateRequests.findReplace.length > 0;
     this._sendUpdateRequests();
     // Row indexes only actually shift once the deletes have been sent.
@@ -324,6 +342,9 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     );
     sheetGidsWithConditionalFormatMutations.forEach((sheetGid) =>
       this.sheet(sheetGid).markConditionalFormatIndexesStale(),
+    );
+    sheetGidsWithProtectedRangeMutations.forEach((sheetGid) =>
+      this.sheet(sheetGid).markProtectedRangesStale(),
     );
     if (hasFindReplace) this._invalidateFetchedCellState();
   }
@@ -428,9 +449,31 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       }
       const sheetId = operation.rule.ranges[0]?.sheetId;
       if (sheetId === undefined) {
-        throw new Error("Queued addConditionalFormatRule has no range sheetId.");
+        throw new Error(
+          "Queued addConditionalFormatRule has no range sheetId.",
+        );
       }
       sheetGids.add(sheetId);
+    });
+    return sheetGids;
+  }
+  private _sheetGidsWithProtectedRangeMutations(): Set<number> {
+    const sheetGids = new Set<number>();
+    this.updateRequests.deleteProtectedRange.forEach((operation) => {
+      if (operation.kind !== "deleteProtectedRange") {
+        throw new Error(
+          "Queued deleteProtectedRange is not a deleteProtectedRange operation.",
+        );
+      }
+      sheetGids.add(operation.sheetId);
+    });
+    this.updateRequests.addProtectedRange.forEach((operation) => {
+      if (operation.kind !== "addProtectedRange") {
+        throw new Error(
+          "Queued addProtectedRange is not an addProtectedRange operation.",
+        );
+      }
+      sheetGids.add(operation.protection.range.sheetId);
     });
     return sheetGids;
   }
@@ -448,6 +491,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ...surs.sort,
       ...this._deleteConditionalFormatOperationsDescending(),
       ...surs.addConditionalFormat,
+      ...surs.deleteProtectedRange,
+      ...surs.addProtectedRange,
       // Outside the ordering rules the queue was built around, so last.
       ...surs.raw,
     ];

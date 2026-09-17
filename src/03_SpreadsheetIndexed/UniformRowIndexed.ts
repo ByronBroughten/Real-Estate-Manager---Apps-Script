@@ -3,6 +3,11 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../00_base/base";
+import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+} from "../00_base/ProtectedRange";
 import { getUniformRowIndex } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
@@ -48,6 +53,22 @@ export class UniformRowIndexed<
   }
   updateValue(columnId: string, value: UniformRowValue<UN>): this {
     this.raw.updateValue(this.sheet.column(columnId).colIndex, value);
+    return this;
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.raw.addEditWarning(declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.raw.addEditLock(declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.raw.removeEditProtections();
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.raw.removeEditProtection(protection);
     return this;
   }
 }

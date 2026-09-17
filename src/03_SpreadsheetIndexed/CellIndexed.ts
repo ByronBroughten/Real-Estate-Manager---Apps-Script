@@ -3,6 +3,11 @@ import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
+import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+} from "../00_base/ProtectedRange";
 import type { RgbColor } from "../00_base/RgbColor";
 import {
   toWireValue,
@@ -85,6 +90,22 @@ export class CellIndexed<
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
     this.raw.removeConditionalFormatRule(rule);
+    return this;
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.raw.addEditWarning(declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.raw.addEditLock(declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.raw.removeEditProtections();
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.raw.removeEditProtection(protection);
     return this;
   }
   anchoredA1(colIndex = this.column.colIndex): string {

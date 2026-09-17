@@ -10,6 +10,12 @@ import {
   type ModelableConditionalFormatRule,
   type ModelledConditionType,
 } from "./ConditionalFormat";
+import {
+  isWholeSheetGridRange,
+  type ProtectedRange,
+  type ProtectedRangeContent,
+  type ProtectionGridRange,
+} from "./ProtectedRange";
 import type {
   GridCellSnapshot,
   GridFetchOptions,
@@ -18,12 +24,17 @@ import type {
   LocalWriteOperation,
   RawSource,
   SheetConditionalFormatSnapshot,
+  SheetProtectedRangeSnapshot,
   SheetSnapshot,
   SpreadsheetSnapshot,
   TableColumnSnapshot,
   TableSnapshot,
 } from "./RawSource";
-import { quantizeRgbChannels, type RgbChannels, type RgbColor } from "./RgbColor";
+import {
+  quantizeRgbChannels,
+  type RgbChannels,
+  type RgbColor,
+} from "./RgbColor";
 
 export type OpaqueRawRequest = GoogleAppsScript.Sheets.Schema.Request;
 
@@ -53,6 +64,7 @@ const SHEET_PROPERTIES_FIELDS =
   "sheets(properties(sheetId,title),tables(tableId,range))";
 const CONDITIONAL_FORMAT_FIELDS =
   "sheets(properties(sheetId),conditionalFormats)";
+const PROTECTED_RANGE_FIELDS = "sheets(properties(sheetId),protectedRanges)";
 const GRID_FIELDS_WITH_PROGRAMMATIC_FACTS =
   "sheets(" +
   "properties(sheetId,title)," +
@@ -83,10 +95,7 @@ export interface GoogleSheetsAPIHttpProps {
 
 export interface SheetsAdvancedTransport {
   Spreadsheets: {
-    get: (
-      spreadsheetId: string,
-      optionalArgs?: FieldsArg,
-    ) => GoogleSpreadsheet;
+    get: (spreadsheetId: string, optionalArgs?: FieldsArg) => GoogleSpreadsheet;
     getByDataFilter: (
       resource: GetByDataFilterRequest,
       spreadsheetId: string,
@@ -164,10 +173,26 @@ export class GoogleSheetsAPI implements RawSource {
       }),
     );
   }
+  // Assumed to drop protectedRanges the same way until the probe says otherwise.
+  fetchProtectedRanges(spreadsheetId: string): SheetProtectedRangeSnapshot[] {
+    const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
+      fields: PROTECTED_RANGE_FIELDS,
+    });
+    return Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
+      (sheet) => ({
+        sheetGid: Val.assert(sheet.properties?.sheetId, "sheetId"),
+        protections: (sheet.protectedRanges ?? []).map(toProtectedRange),
+      }),
+    );
+  }
   flush(spreadsheetId: string, operations: LocalWriteOperation[]): void {
     const requests = operations.flatMap(localOperationToGoogleRequests);
     if (requests.length === 0) return;
-    this.sheets.Spreadsheets.batchUpdate({ requests }, spreadsheetId);
+    const response = this.sheets.Spreadsheets.batchUpdate(
+      { requests },
+      spreadsheetId,
+    );
+    readAddProtectedRangeIds(response, requests);
   }
 }
 
@@ -242,10 +267,10 @@ function toSheetSnapshot(sheet: GoogleSheet): SheetSnapshot {
       startRow: block.startRow ?? 0,
       columnCount: (block.columnMetadata || []).length,
       rows: (block.rowData || []).map((row) => ({
-        cells: Array.from({ length: (block.columnMetadata || []).length }, (
-          _,
-          colOffset,
-        ) => toGridCell(row.values?.[colOffset])),
+        cells: Array.from(
+          { length: (block.columnMetadata || []).length },
+          (_, colOffset) => toGridCell(row.values?.[colOffset]),
+        ),
       })),
     })),
   };
@@ -344,43 +369,51 @@ function localOperationToGoogleRequests(
         },
       ];
     case "fill":
-      return formulaAndCellDataRequests(operation, {
-        sheetId: operation.sheetId,
-        rowIndex: operation.startRowIndex,
-        columnIndex: operation.colIndex,
-        rowCount: operation.endRowIndex - operation.startRowIndex,
-      }, (cell, fields) => ({
-        repeatCell: {
-          range: {
-            sheetId: operation.sheetId,
-            startRowIndex: operation.startRowIndex,
-            endRowIndex: operation.endRowIndex,
-            startColumnIndex: operation.colIndex,
-            endColumnIndex: operation.colIndex + 1,
-          },
-          cell,
-          fields,
+      return formulaAndCellDataRequests(
+        operation,
+        {
+          sheetId: operation.sheetId,
+          rowIndex: operation.startRowIndex,
+          columnIndex: operation.colIndex,
+          rowCount: operation.endRowIndex - operation.startRowIndex,
         },
-      }));
+        (cell, fields) => ({
+          repeatCell: {
+            range: {
+              sheetId: operation.sheetId,
+              startRowIndex: operation.startRowIndex,
+              endRowIndex: operation.endRowIndex,
+              startColumnIndex: operation.colIndex,
+              endColumnIndex: operation.colIndex + 1,
+            },
+            cell,
+            fields,
+          },
+        }),
+      );
     case "updateCell":
-      return formulaAndCellDataRequests(operation, {
-        sheetId: operation.sheetId,
-        rowIndex: operation.rowIndex,
-        columnIndex: operation.colIndex,
-        rowCount: 1,
-      }, (cell, fields) => ({
-        updateCells: {
-          range: {
-            sheetId: operation.sheetId,
-            startRowIndex: operation.rowIndex,
-            endRowIndex: operation.rowIndex + 1,
-            startColumnIndex: operation.colIndex,
-            endColumnIndex: operation.colIndex + 1,
-          },
-          rows: [{ values: [cell] }],
-          fields,
+      return formulaAndCellDataRequests(
+        operation,
+        {
+          sheetId: operation.sheetId,
+          rowIndex: operation.rowIndex,
+          columnIndex: operation.colIndex,
+          rowCount: 1,
         },
-      }));
+        (cell, fields) => ({
+          updateCells: {
+            range: {
+              sheetId: operation.sheetId,
+              startRowIndex: operation.rowIndex,
+              endRowIndex: operation.rowIndex + 1,
+              startColumnIndex: operation.colIndex,
+              endColumnIndex: operation.colIndex + 1,
+            },
+            rows: [{ values: [cell] }],
+            fields,
+          },
+        }),
+      );
     case "findReplace":
       return [
         {
@@ -436,11 +469,29 @@ function localOperationToGoogleRequests(
           },
         },
       ];
+    case "addProtectedRange":
+      return [
+        {
+          addProtectedRange: {
+            protectedRange: protectedRangeContentToGoogle(operation.protection),
+          },
+        },
+      ];
+    case "deleteProtectedRange":
+      return [
+        {
+          deleteProtectedRange: {
+            protectedRangeId: operation.protectedRangeId,
+          },
+        },
+      ];
     case "raw":
       return [operation.request as OpaqueRawRequest];
     default: {
       const exhaustive: never = operation;
-      throw new Error(`Unknown local write operation: ${JSON.stringify(exhaustive)}`);
+      throw new Error(
+        `Unknown local write operation: ${JSON.stringify(exhaustive)}`,
+      );
     }
   }
 }
@@ -580,7 +631,9 @@ function booleanConditionToGoogle(
   }
   return {
     type: condition.type,
-    values: [{ userEnteredValue: cellValueToConditionLiteral(condition.value) }],
+    values: [
+      { userEnteredValue: cellValueToConditionLiteral(condition.value) },
+    ],
   };
 }
 
@@ -759,3 +812,98 @@ function toGridRangeProps(
   };
 }
 
+function toProtectionGridRange(
+  range: GoogleAppsScript.Sheets.Schema.GridRange,
+): ProtectionGridRange {
+  const hasBound =
+    range.startRowIndex !== undefined ||
+    range.endRowIndex !== undefined ||
+    range.startColumnIndex !== undefined ||
+    range.endColumnIndex !== undefined;
+  if (!hasBound) {
+    return { sheetId: range.sheetId ?? 0 };
+  }
+  return toGridRangeProps(range);
+}
+
+function protectionGridRangeToGoogle(
+  range: ProtectionGridRange,
+): GoogleAppsScript.Sheets.Schema.GridRange {
+  if (isWholeSheetGridRange(range)) return { sheetId: range.sheetId };
+  return range;
+}
+
+function protectedRangeContentToGoogle(
+  protection: ProtectedRangeContent,
+): GoogleAppsScript.Sheets.Schema.ProtectedRange {
+  const editors =
+    protection.kind === "lock" &&
+    (protection.users.length > 0 || protection.groups.length > 0)
+      ? {
+          ...(protection.users.length > 0 ? { users: protection.users } : {}),
+          ...(protection.groups.length > 0
+            ? { groups: protection.groups }
+            : {}),
+        }
+      : undefined;
+  return {
+    range: protectionGridRangeToGoogle(protection.range),
+    ...(protection.description !== ""
+      ? { description: protection.description }
+      : {}),
+    ...(protection.kind === "warning" ? { warningOnly: true } : {}),
+    ...(protection.unprotectedRanges.length > 0
+      ? {
+          unprotectedRanges: protection.unprotectedRanges.map(
+            protectionGridRangeToGoogle,
+          ),
+        }
+      : {}),
+    ...(editors !== undefined ? { editors } : {}),
+  };
+}
+
+function toProtectedRange(
+  protection: GoogleAppsScript.Sheets.Schema.ProtectedRange,
+): ProtectedRange {
+  const id = Val.assert(protection.protectedRangeId, "protectedRangeId");
+  if (protection.namedRangeId !== undefined) {
+    return { kind: "unmodelable", id };
+  }
+  if (protection.range === undefined) {
+    return { kind: "unmodelable", id };
+  }
+  if (protection.editors?.domainUsersCanEdit === true) {
+    return { kind: "unmodelable", id };
+  }
+  return {
+    kind: protection.warningOnly === true ? "warning" : "lock",
+    id,
+    range: toProtectionGridRange(protection.range),
+    description: protection.description ?? "",
+    users: protection.editors?.users ?? [],
+    groups: protection.editors?.groups ?? [],
+    unprotectedRanges: (protection.unprotectedRanges ?? []).map(
+      toProtectionGridRange,
+    ),
+    requestingUserCanEdit: protection.requestingUserCanEdit ?? false,
+  };
+}
+
+function readAddProtectedRangeIds(
+  response: BatchUpdateResponse,
+  requests: OpaqueRawRequest[],
+): void {
+  const replies = response.replies;
+  if (replies === undefined) return;
+  requests.forEach((request, index) => {
+    if (request.addProtectedRange === undefined) return;
+    const id =
+      replies[index]?.addProtectedRange?.protectedRange?.protectedRangeId;
+    if (id === undefined) {
+      throw new Error(
+        "Add protected range reply did not include a protectedRangeId.",
+      );
+    }
+  });
+}

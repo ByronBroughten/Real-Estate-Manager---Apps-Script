@@ -46,11 +46,27 @@ _Avoid_: sheet prefix, ID code
 The Sheet Config checkbox that says this tab is one the app knows about — not every tab, and not every catalogue row on Sheet Config.
 _Avoid_: enabled sheet, API sheet, known sheet
 
+**Edit warning**:
+A prompt Sheets shows anyone, the owner included, before they change a cell the app depends on; the edit still goes through if they confirm.
+_Avoid_: warning (that is a run state), protection
+
+**Edit lock**:
+A cell only the owner and named editors can change. It never stops the owner, so a cell nobody should edit gets both an edit lock and an edit warning.
+_Avoid_: protection, lock
+
+**Config-sheet floor**:
+The cells on Spreadsheet Config, Sheet Config and Column Config that the app depends on and nobody edits by hand. The generated config entries for the config sheets mirror it.
+_Avoid_: minimum headers, floor sheet
+
 ### Endpoints
 
 **Endpoint**:
 A unit of work the spreadsheet can be asked to do, wired to one column and triggered by a checkbox in that column's action row. Any column can be the one; it declares for itself which other columns the framework should manage on its behalf.
 _Avoid_: handler, command, action
+
+**Base endpoint**:
+An endpoint the framework itself provides on Spreadsheet Config, present in every spreadsheet whatever business endpoints it adds.
+_Avoid_: built-in endpoint, core endpoint, system endpoint
 
 **Runner**:
 An endpoint whose entry checkbox is a run button: ticking it starts the work, and the box clears itself immediately. An endpoint is one unless it says it also runs on unticking.

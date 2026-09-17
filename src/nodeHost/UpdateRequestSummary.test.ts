@@ -223,9 +223,7 @@ describe("UpdateRequestSummary.lines", () => {
           },
         },
       }),
-    ).toBe(
-      "addConditionalFormatRule occupancy!A5:A11 prepend CUSTOM_FORMULA",
-    );
+    ).toBe("addConditionalFormatRule occupancy!A5:A11 prepend CUSTOM_FORMULA");
   });
 
   it("names the sheet and index of a deleted conditional format rule", () => {
@@ -237,6 +235,34 @@ describe("UpdateRequestSummary.lines", () => {
         },
       }),
     ).toBe("deleteConditionalFormatRule occupancy index 3");
+  });
+
+  it("names the range and kind of an added protected range", () => {
+    expect(
+      onlyLine({
+        addProtectedRange: {
+          protectedRange: {
+            range: {
+              sheetId: OCCUPANCY_GID,
+              startRowIndex: 4,
+              endRowIndex: 11,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+            warningOnly: true,
+            description: "id warning",
+          },
+        },
+      }),
+    ).toBe("addProtectedRange occupancy!A5:A11 warning id warning");
+  });
+
+  it("names the id of a deleted protected range", () => {
+    expect(
+      onlyLine({
+        deleteProtectedRange: { protectedRangeId: 11 },
+      }),
+    ).toBe("deleteProtectedRange (no sheet) id 11");
   });
 
   it("renders a request the framework does not model as its own verb and JSON", () => {

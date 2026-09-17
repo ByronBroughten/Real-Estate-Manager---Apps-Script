@@ -3,6 +3,11 @@ import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
+import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+} from "../00_base/ProtectedRange";
 import type { GridCellSnapshot } from "../00_base/RawSource";
 import type { RgbColor } from "../00_base/RgbColor";
 import { CellRawBase } from "./ClassBases/CellRawBase";
@@ -139,6 +144,22 @@ export class CellRaw<
     this.sheet.removeConditionalFormatRule(rule);
     return this;
   }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.sheet.addEditWarningAt(this.gridRange, declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.sheet.addEditLockAt(this.gridRange, declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.sheet.removeEditProtectionsAt(this.gridRange);
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.sheet.removeEditProtection(protection);
+    return this;
+  }
   integrateSnapshot(cell: GridCellSnapshot | undefined): void {
     if (!this.row.rowIsActive()) return;
     this.setValueState(this._queuedValue() ?? cell?.value ?? "");
@@ -181,4 +202,3 @@ export function assertValueAndFormulaExclusive(
     throw new Error("A queued change cannot hold both a value and a formula.");
   }
 }
-

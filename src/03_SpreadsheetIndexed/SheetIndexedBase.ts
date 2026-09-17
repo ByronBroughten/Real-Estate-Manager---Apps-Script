@@ -29,6 +29,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
       this.indexedSheetsState.set(this.sheetGid, {
         preFetchGridRanges: [],
         prepFetchConditionalFormats: false,
+        prepFetchProtectedRanges: false,
       });
     }
   }
@@ -44,11 +45,13 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   get isPreppedToFetch(): boolean {
     return (
       this.preFetchGridRanges.length > 0 ||
-      this.sheetState.prepFetchConditionalFormats
+      this.sheetState.prepFetchConditionalFormats ||
+      this.sheetState.prepFetchProtectedRanges
     );
   }
   clearPreFetchGridRanges(): void {
     this.sheetState.preFetchGridRanges = [];
     this.sheetState.prepFetchConditionalFormats = false;
+    this.sheetState.prepFetchProtectedRanges = false;
   }
 }

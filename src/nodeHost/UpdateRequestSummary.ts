@@ -83,6 +83,10 @@ export class UpdateRequestSummary {
         return this._deleteConditionalFormatBody(
           request.deleteConditionalFormatRule,
         );
+      case "addProtectedRange":
+        return this._addProtectedRangeBody(request.addProtectedRange);
+      case "deleteProtectedRange":
+        return this._deleteProtectedRangeBody(request.deleteProtectedRange);
       default:
         return this._rawBody(request, verb);
     }
@@ -211,12 +215,7 @@ export class UpdateRequestSummary {
   ): string {
     const range = add?.rule?.ranges?.[0];
     const conditionType = add?.rule?.booleanRule?.condition?.type ?? "";
-    return this._columns(
-      this._rangeLabel(range),
-      "prepend",
-      conditionType,
-      "",
-    );
+    return this._columns(this._rangeLabel(range), "prepend", conditionType, "");
   }
   private _deleteConditionalFormatBody(
     remove:
@@ -226,6 +225,29 @@ export class UpdateRequestSummary {
     return this._columns(
       this._sheetLabel(remove?.sheetId),
       `index ${remove?.index ?? ""}`,
+      "",
+      "",
+    );
+  }
+  private _addProtectedRangeBody(
+    add: GoogleAppsScript.Sheets.Schema.AddProtectedRangeRequest | undefined,
+  ): string {
+    const protection = add?.protectedRange;
+    const kind = protection?.warningOnly === true ? "warning" : "lock";
+    return this._columns(
+      this._rangeLabel(protection?.range),
+      kind,
+      protection?.description ?? "",
+      "",
+    );
+  }
+  private _deleteProtectedRangeBody(
+    remove:
+      GoogleAppsScript.Sheets.Schema.DeleteProtectedRangeRequest | undefined,
+  ): string {
+    return this._columns(
+      "(no sheet)",
+      `id ${remove?.protectedRangeId ?? ""}`,
       "",
       "",
     );
@@ -264,6 +286,14 @@ export class UpdateRequestSummary {
   }
   private _rangeLabel(range: GoogleGridRange | undefined): string {
     if (!range) return "(no range)";
+    const hasBound =
+      range.startRowIndex !== undefined ||
+      range.endRowIndex !== undefined ||
+      range.startColumnIndex !== undefined ||
+      range.endColumnIndex !== undefined;
+    if (!hasBound) {
+      return `${this._sheetLabel(range.sheetId)}!sheet`;
+    }
     const { startRowIndex = 0, endRowIndex, endColumnIndex } = range;
     const startCell = `${colLetters(range.startColumnIndex ?? 0)}${startRowIndex + 1}`;
     const endColumn =

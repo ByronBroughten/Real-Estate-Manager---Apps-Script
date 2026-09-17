@@ -1,5 +1,9 @@
 import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+} from "../00_base/ProtectedRange";
+import type {
   ColumnFullName,
   ColumnName,
   ColumnValueName,
@@ -50,6 +54,20 @@ export class ColumnMetaNamed<
   }
   actionRowToDefault(): ColumnMetaNamed<SN, CN> {
     this.uniformCell("action").updateValue(false);
+    return this;
+  }
+  addEditWarningOn(
+    rowName: UniformRowName,
+    declaration: EditWarningDeclaration = {},
+  ): this {
+    this.uniformCell(rowName).addEditWarning(declaration);
+    return this;
+  }
+  addEditLockOn(
+    rowName: UniformRowName,
+    declaration: EditLockDeclaration = {},
+  ): this {
+    this.uniformCell(rowName).addEditLock(declaration);
     return this;
   }
 }

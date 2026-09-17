@@ -3,6 +3,13 @@ import type {
   ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
 import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+  WholeSheetEditLockDeclaration,
+  WholeSheetEditWarningDeclaration,
+} from "../00_base/ProtectedRange";
+import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
@@ -143,6 +150,47 @@ export class SheetNamed<
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
     this.indexed.removeConditionalFormatRule(rule);
+    return this;
+  }
+  prepFetchProtectedRanges(): this {
+    this.indexed.prepFetchProtectedRanges();
+    return this;
+  }
+  protectedRanges(): ProtectedRange[] {
+    return this.indexed.protectedRanges();
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.indexed.addEditWarning(declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.indexed.addEditLock(declaration);
+    return this;
+  }
+  addEditWarningWholeSheet(
+    declaration: WholeSheetEditWarningDeclaration = {},
+  ): this {
+    this.indexed.addEditWarningWholeSheet(declaration);
+    return this;
+  }
+  addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
+    this.indexed.addEditLockWholeSheet(declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.indexed.removeEditProtections();
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.indexed.removeEditProtection(protection);
+    return this;
+  }
+  removeEditProtectionByDescription(description: string): this {
+    this.indexed.removeEditProtectionByDescription(description);
+    return this;
+  }
+  removeEditProtectionById(protectedRangeId: number): this {
+    this.indexed.removeEditProtectionById(protectedRangeId);
     return this;
   }
   anchoredA1(columnName: ColumnName<SN>): string {

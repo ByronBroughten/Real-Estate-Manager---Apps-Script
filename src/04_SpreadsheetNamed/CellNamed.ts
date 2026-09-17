@@ -3,6 +3,11 @@ import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
+import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+} from "../00_base/ProtectedRange";
 import type { RgbColor } from "../00_base/RgbColor";
 import type {
   ColumnIsFormula,
@@ -97,6 +102,22 @@ export class CellNamed<
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
     this.indexed.removeConditionalFormatRule(rule);
+    return this;
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.indexed.addEditWarning(declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.indexed.addEditLock(declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.indexed.removeEditProtections();
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.indexed.removeEditProtection(protection);
     return this;
   }
   anchoredA1(columnName: ColumnName<SN> = this.columnName): string {

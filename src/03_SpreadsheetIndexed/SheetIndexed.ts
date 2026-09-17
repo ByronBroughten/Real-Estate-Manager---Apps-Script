@@ -2,6 +2,13 @@ import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
+import type {
+  EditLockDeclaration,
+  EditWarningDeclaration,
+  ProtectedRange,
+  WholeSheetEditLockDeclaration,
+  WholeSheetEditWarningDeclaration,
+} from "../00_base/ProtectedRange";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
@@ -73,6 +80,47 @@ export class SheetIndexed extends SheetCommon {
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
     this.raw.removeConditionalFormatRule(rule);
+    return this;
+  }
+  prepFetchProtectedRanges(): this {
+    this.sheetState.prepFetchProtectedRanges = true;
+    return this;
+  }
+  protectedRanges(): ProtectedRange[] {
+    return this.raw.protectedRanges();
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.raw.addEditWarning(declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.raw.addEditLock(declaration);
+    return this;
+  }
+  addEditWarningWholeSheet(
+    declaration: WholeSheetEditWarningDeclaration = {},
+  ): this {
+    this.raw.addEditWarningWholeSheet(declaration);
+    return this;
+  }
+  addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
+    this.raw.addEditLockWholeSheet(declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.raw.removeEditProtections();
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.raw.removeEditProtection(protection);
+    return this;
+  }
+  removeEditProtectionByDescription(description: string): this {
+    this.raw.removeEditProtectionByDescription(description);
+    return this;
+  }
+  removeEditProtectionById(protectedRangeId: number): this {
+    this.raw.removeEditProtectionById(protectedRangeId);
     return this;
   }
   anchoredA1(colIndex: number): string {

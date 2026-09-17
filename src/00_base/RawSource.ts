@@ -3,6 +3,7 @@ import type {
   ConditionalFormatRule,
   ModelableConditionalFormatRule,
 } from "./ConditionalFormat";
+import type { ProtectedRange, ProtectedRangeContent } from "./ProtectedRange";
 import type { RgbColor } from "./RgbColor";
 
 export interface GridRangeProps {
@@ -22,9 +23,7 @@ export type GridFetchRange = GridRangeProps | UsedGridRange;
 export type SortOrder = "ASCENDING" | "DESCENDING";
 
 export type FindReplaceScope =
-  | { range: GridRangeProps }
-  | { sheetId: number }
-  | { allSheets: true };
+  { range: GridRangeProps } | { sheetId: number } | { allSheets: true };
 
 export interface FindReplaceTerms {
   find: string;
@@ -53,6 +52,11 @@ export interface SheetSnapshot {
 export interface SheetConditionalFormatSnapshot {
   sheetGid: number;
   rules: ConditionalFormatRule[];
+}
+
+export interface SheetProtectedRangeSnapshot {
+  sheetGid: number;
+  protections: ProtectedRange[];
 }
 
 export interface TableSnapshot {
@@ -100,6 +104,8 @@ export type LocalWriteOperation =
   | SortOperation
   | AddConditionalFormatRuleOperation
   | DeleteConditionalFormatRuleOperation
+  | AddProtectedRangeOperation
+  | DeleteProtectedRangeOperation
   | OpaqueRawWriteOperation;
 
 export interface AppendRowsOperation {
@@ -170,6 +176,17 @@ export interface DeleteConditionalFormatRuleOperation {
   index: number;
 }
 
+export interface AddProtectedRangeOperation {
+  kind: "addProtectedRange";
+  protection: ProtectedRangeContent;
+}
+
+export interface DeleteProtectedRangeOperation {
+  kind: "deleteProtectedRange";
+  sheetId: number;
+  protectedRangeId: number;
+}
+
 export interface OpaqueRawWriteOperation {
   kind: "raw";
   request: unknown;
@@ -185,6 +202,7 @@ export interface RawSource {
   fetchConditionalFormatRules(
     spreadsheetId: string,
   ): SheetConditionalFormatSnapshot[];
+  fetchProtectedRanges(spreadsheetId: string): SheetProtectedRangeSnapshot[];
   flush(spreadsheetId: string, operations: LocalWriteOperation[]): void;
 }
 

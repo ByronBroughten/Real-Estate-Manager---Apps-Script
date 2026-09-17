@@ -258,7 +258,10 @@ describe("SheetNamed conditional format rules", () => {
     expect(sheet.column("id").anchoredA1()).toBe("$A5");
     expect(sheet.column("id").anchoredA1("updateTermsSelect")).toBe("$B5");
     expect(
-      sheet.column("id").cell(TOP_DATA_ROW_INDEX + 1).anchoredA1("id"),
+      sheet
+        .column("id")
+        .cell(TOP_DATA_ROW_INDEX + 1)
+        .anchoredA1("id"),
     ).toBe("$A6");
   });
 
@@ -270,10 +273,16 @@ describe("SheetNamed conditional format rules", () => {
       condition: { type: "NUMBER_EQ", value: true },
       format: { backgroundColor: GREY, foregroundColor: GREY },
     });
-    sheet.column("id").cell(TOP_DATA_ROW_INDEX).addConditionalFormatRule({
-      condition: { type: "CUSTOM_FORMULA", formula: `=${sheet.column("id").cell(TOP_DATA_ROW_INDEX).anchoredA1()}=FALSE` },
-      format: { backgroundColor: PINK },
-    });
+    sheet
+      .column("id")
+      .cell(TOP_DATA_ROW_INDEX)
+      .addConditionalFormatRule({
+        condition: {
+          type: "CUSTOM_FORMULA",
+          formula: `=${sheet.column("id").cell(TOP_DATA_ROW_INDEX).anchoredA1()}=FALSE`,
+        },
+        format: { backgroundColor: PINK },
+      });
     ss.batchUpdateGSheets();
 
     const requests = batchUpdateCalls[0]?.requests ?? [];
@@ -310,9 +319,277 @@ describe("SheetNamed conditional format rules", () => {
     });
     ss.batchUpdateGSheets();
 
-    expect(batchUpdateCalls[0]?.requests?.map((request) => Object.keys(request)[0])).toEqual([
-      "deleteConditionalFormatRule",
-      "addConditionalFormatRule",
+    expect(
+      batchUpdateCalls[0]?.requests?.map((request) => Object.keys(request)[0]),
+    ).toEqual(["deleteConditionalFormatRule", "addConditionalFormatRule"]);
+  });
+});
+
+function googleProtection(
+  range: GoogleAppsScript.Sheets.Schema.GridRange,
+  extras: Partial<GoogleAppsScript.Sheets.Schema.ProtectedRange> = {},
+): GoogleAppsScript.Sheets.Schema.ProtectedRange {
+  return {
+    protectedRangeId: extras.protectedRangeId ?? 1,
+    range,
+    warningOnly: extras.warningOnly ?? true,
+    ...extras,
+  };
+}
+
+function stubOccupancyWithProtections(
+  protectedRanges: GoogleAppsScript.Sheets.Schema.ProtectedRange[],
+) {
+  return stubSheetsService({
+    sheets: [
+      {
+        sheetId: OCCUPANCY_GID,
+        title: "Occupancy",
+        rows: buildGridRows({
+          0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+          3: ["ID", "Update terms, select"],
+          4: ["r:occ:row4", true],
+          5: [null, null],
+        }),
+        table: { endRowIndex: 6, endColumnIndex: 2 },
+        protectedRanges,
+      },
+    ],
+  });
+}
+
+function fetchedOccupancyProtections(
+  protectedRanges: GoogleAppsScript.Sheets.Schema.ProtectedRange[] = [],
+) {
+  const service = stubOccupancyWithProtections(protectedRanges);
+  const ss = SpreadsheetNamed.init();
+  const sheet = ss.sheet("occupancy");
+  sheet.prepFetchProtectedRanges();
+  ss.fetchAllPrepped();
+  return { ss, sheet, ...service };
+}
+
+const WHOLE_SHEET_RANGE = { sheetId: OCCUPANCY_GID };
+const COLUMN_ID_ROW_RANGE = {
+  sheetId: OCCUPANCY_GID,
+  startRowIndex: 0,
+  endRowIndex: 1,
+};
+const ID_HEADER_CELL_RANGE = {
+  sheetId: OCCUPANCY_GID,
+  startRowIndex: 3,
+  endRowIndex: 4,
+  startColumnIndex: 0,
+  endColumnIndex: 1,
+};
+const ID_COLUMN_ID_CELL_RANGE = {
+  sheetId: OCCUPANCY_GID,
+  startRowIndex: 0,
+  endRowIndex: 1,
+  startColumnIndex: 0,
+  endColumnIndex: 1,
+};
+const ID_GROUP_HEADING_CELL_RANGE = {
+  sheetId: OCCUPANCY_GID,
+  startRowIndex: 1,
+  endRowIndex: 2,
+  startColumnIndex: 0,
+  endColumnIndex: 1,
+};
+const TOP_ID_CELL_RANGE = {
+  ...ID_COLUMN_RANGE,
+  endRowIndex: TOP_DATA_ROW_INDEX + 1,
+};
+
+describe("SheetNamed edit warnings and edit locks", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  it("queues nothing when adding a warning identical to one already present", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+      googleProtection(ID_COLUMN_RANGE, {
+        protectedRangeId: 4,
+        description: "id warning",
+        warningOnly: true,
+      }),
+    ]);
+
+    sheet.column("id").addEditWarning({ description: "id warning" });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+  });
+
+  it("removes a hand-set protection by exact range, content, description and id", () => {
+    const handSet = googleProtection(ID_COLUMN_RANGE, {
+      protectedRangeId: 11,
+      description: "hand-set",
+      warningOnly: true,
+    });
+    const other = googleProtection(SELECT_COLUMN_RANGE, {
+      protectedRangeId: 12,
+      description: "other",
+      warningOnly: true,
+    });
+
+    const byRange = fetchedOccupancyProtections([handSet, other]);
+    byRange.sheet.column("id").removeEditProtections();
+    byRange.ss.batchUpdateGSheets();
+    expect(byRange.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 11 } },
+    ]);
+
+    const byContent = fetchedOccupancyProtections([handSet, other]);
+    const named = Val.assert(
+      byContent.sheet.protectedRanges()[0],
+      "hand-set protection",
+    );
+    byContent.sheet.removeEditProtection(named);
+    byContent.ss.batchUpdateGSheets();
+    expect(byContent.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 11 } },
+    ]);
+
+    const byDescription = fetchedOccupancyProtections([handSet, other]);
+    byDescription.sheet.removeEditProtectionByDescription("hand-set");
+    byDescription.ss.batchUpdateGSheets();
+    expect(byDescription.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 11 } },
+    ]);
+
+    const byId = fetchedOccupancyProtections([handSet, other]);
+    byId.sheet.removeEditProtectionById(11);
+    byId.ss.batchUpdateGSheets();
+    expect(byId.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 11 } },
+    ]);
+  });
+
+  it("adds a whole-sheet warning with unprotected ranges", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const unprotected = {
+      sheetId: OCCUPANCY_GID,
+      startRowIndex: 2,
+      endRowIndex: 3,
+      startColumnIndex: 1,
+      endColumnIndex: 2,
+    };
+
+    sheet.addEditWarningWholeSheet({
+      description: "sheet warning",
+      unprotectedRanges: [unprotected],
+    });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: WHOLE_SHEET_RANGE,
+            description: "sheet warning",
+            warningOnly: true,
+            unprotectedRanges: [unprotected],
+          },
+        },
+      },
+    ]);
+  });
+
+  it("refuses a coordinate-bearing protection write while row indexes are stale", () => {
+    const { ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.row(TOP_DATA_ROW_INDEX + 1).delete();
+    ss.batchUpdateGSheets();
+
+    expect(() => sheet.column("id").addEditWarning()).toThrowError(
+      /Row indexes are stale/,
+    );
+    expect(() =>
+      sheet.addEditWarningWholeSheet({
+        unprotectedRanges: [TOP_ID_CELL_RANGE],
+      }),
+    ).toThrowError(/Row indexes are stale/);
+    expect(() => sheet.addEditLockWholeSheet()).not.toThrow();
+  });
+
+  it("refuses a read or mutation after a protection flush until protections are re-fetched", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.column("id").addEditWarning({ description: "id warning" });
+    ss.batchUpdateGSheets();
+
+    expect(() => sheet.protectedRanges()).toThrowError(/Protections are stale/);
+    expect(() =>
+      sheet.column("id").addEditLock({ description: "id lock" }),
+    ).toThrowError(/Protections are stale/);
+
+    sheet.prepFetchProtectedRanges();
+    ss.fetchAllPrepped({ skipFetchingProperties: true });
+    expect(sheet.protectedRanges()[0]).toMatchObject({
+      kind: "warning",
+      description: "id warning",
+    });
+    sheet.column("id").addEditLock({ description: "id lock" });
+    ss.batchUpdateGSheets();
+    expect(batchUpdateCalls).toHaveLength(2);
+  });
+
+  it("adds a lock with named editors", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.column("id").addEditLock({
+      description: "id lock",
+      users: ["editor@example.com"],
+      groups: ["editors@example.com"],
+    });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: ID_COLUMN_RANGE,
+            description: "id lock",
+            editors: {
+              users: ["editor@example.com"],
+              groups: ["editors@example.com"],
+            },
+          },
+        },
+      },
+    ]);
+  });
+
+  it("adds warnings over a bookkeeping row, header cells, a column-group heading cell and a single cell", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.meta.uniformRow("columnId").addEditWarning({
+      description: "column id row",
+    });
+    sheet.meta.column("id").addEditWarningOn("tableHeader", {
+      description: "id header",
+    });
+    sheet.meta.column("id").addEditWarningOn("columnId", {
+      description: "id column id",
+    });
+    sheet.meta.column("id").addEditWarningOn("colGroupName", {
+      description: "id group heading",
+    });
+    sheet.column("id").cell(TOP_DATA_ROW_INDEX).addEditWarning({
+      description: "id cell",
+    });
+    ss.batchUpdateGSheets();
+
+    const ranges = (batchUpdateCalls[0]?.requests ?? []).map(
+      (request) => request.addProtectedRange?.protectedRange?.range,
+    );
+    expect(ranges).toEqual([
+      COLUMN_ID_ROW_RANGE,
+      ID_HEADER_CELL_RANGE,
+      ID_COLUMN_ID_CELL_RANGE,
+      ID_GROUP_HEADING_CELL_RANGE,
+      TOP_ID_CELL_RANGE,
     ]);
   });
 });

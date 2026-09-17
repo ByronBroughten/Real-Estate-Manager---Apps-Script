@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import { GoogleSheetsAPI, type OpaqueRawRequest, type SheetsHttpRequest } from "./GoogleSheetsAPI";
+import {
+  GoogleSheetsAPI,
+  type OpaqueRawRequest,
+  type SheetsHttpRequest,
+} from "./GoogleSheetsAPI";
 import type { LocalWriteOperation } from "./RawSource";
 import type { RgbColor } from "./RgbColor";
 
@@ -10,9 +14,14 @@ const LIGHT_GREEN: RgbColor = { red: 0.851, green: 0.918, blue: 0.827 };
 type BatchUpdateRequest =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
 
-function recordingSheets(payload: GoogleAppsScript.Sheets.Schema.Spreadsheet = {
-  sheets: [],
-}) {
+function recordingSheets(
+  payload: GoogleAppsScript.Sheets.Schema.Spreadsheet = {
+    sheets: [],
+  },
+  batchUpdateResponse: (
+    resource: BatchUpdateRequest,
+  ) => GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetResponse = () => ({}),
+) {
   const batchUpdateCalls: BatchUpdateRequest[] = [];
   const getByDataFilterCalls: object[] = [];
   const getCalls: { spreadsheetId: string; fields?: string }[] = [];
@@ -32,7 +41,7 @@ function recordingSheets(payload: GoogleAppsScript.Sheets.Schema.Spreadsheet = {
       },
       batchUpdate: (resource: BatchUpdateRequest) => {
         batchUpdateCalls.push(resource);
-        return {};
+        return batchUpdateResponse(resource);
       },
     },
   };
@@ -102,6 +111,24 @@ describe("GoogleSheetsAPI write mapping", () => {
         colIdxToSortBy: 1,
         sortOrder: "ASCENDING",
       },
+      {
+        kind: "addProtectedRange",
+        protection: {
+          kind: "warning",
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 5,
+            startColumnIndex: 0,
+            endColumnIndex: 1,
+          },
+          description: "floor",
+          users: [],
+          groups: [],
+          unprotectedRanges: [],
+        },
+      },
+      { kind: "deleteProtectedRange", sheetId: 111, protectedRangeId: 7 },
       { kind: "raw", request: { updateTable: { table: { tableId: "t" } } } },
     ];
 
@@ -183,9 +210,7 @@ describe("GoogleSheetsAPI write mapping", () => {
           },
           rows: [
             {
-              values: [
-                { userEnteredFormat: { backgroundColor: LIGHT_GREEN } },
-              ],
+              values: [{ userEnteredFormat: { backgroundColor: LIGHT_GREEN } }],
             },
           ],
           fields: "userEnteredFormat.backgroundColor",
@@ -208,6 +233,22 @@ describe("GoogleSheetsAPI write mapping", () => {
           sortSpecs: [{ dimensionIndex: 1, sortOrder: "ASCENDING" }],
         },
       },
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: {
+              sheetId: 111,
+              startRowIndex: 4,
+              endRowIndex: 5,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+            description: "floor",
+            warningOnly: true,
+          },
+        },
+      },
+      { deleteProtectedRange: { protectedRangeId: 7 } },
       { updateTable: { table: { tableId: "t" } } },
     ]);
   });
@@ -388,7 +429,9 @@ describe("GoogleSheetsAPI write mapping", () => {
     ]);
 
     expect(
-      (batchUpdateCalls[0]?.requests ?? []).map((request) => Object.keys(request)[0]),
+      (batchUpdateCalls[0]?.requests ?? []).map(
+        (request) => Object.keys(request)[0],
+      ),
     ).toEqual(["updateCells", "updateTable"]);
   });
 });
@@ -686,7 +729,10 @@ describe("GoogleSheetsAPI conditional format read", () => {
     const rule = (format: GoogleAppsScript.Sheets.Schema.CellFormat) => ({
       ranges: [{ sheetId: 111, startRowIndex: 4 }],
       booleanRule: {
-        condition: { type: "NUMBER_EQ", values: [{ userEnteredValue: "TRUE" }] },
+        condition: {
+          type: "NUMBER_EQ",
+          values: [{ userEnteredValue: "TRUE" }],
+        },
         format,
       },
     });
@@ -723,6 +769,229 @@ describe("GoogleSheetsAPI conditional format read", () => {
     expect(api.fetchConditionalFormatRules(SPREADSHEET_ID)).toEqual([
       { sheetGid: 111, rules: [] },
     ]);
+  });
+});
+
+describe("GoogleSheetsAPI protected range read", () => {
+  it("reads protections with a plain get, never getByDataFilter", () => {
+    const { api, getCalls, getByDataFilterCalls } = recordingSheets({
+      sheets: [{ properties: { sheetId: 111 } }],
+    });
+
+    api.fetchProtectedRanges(SPREADSHEET_ID);
+
+    expect(getCalls).toEqual([
+      {
+        spreadsheetId: SPREADSHEET_ID,
+        fields: "sheets(properties(sheetId),protectedRanges)",
+      },
+    ]);
+    expect(getByDataFilterCalls).toHaveLength(0);
+  });
+
+  it("reads a sheet whose protection list Google omitted as having none", () => {
+    const { api } = recordingSheets({
+      sheets: [{ properties: { sheetId: 111 } }],
+    });
+
+    expect(api.fetchProtectedRanges(SPREADSHEET_ID)).toEqual([
+      { sheetGid: 111, protections: [] },
+    ]);
+  });
+
+  it("reads omitted zero fields in a protection range as zero", () => {
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 0 },
+          protectedRanges: [
+            {
+              protectedRangeId: 3,
+              range: { endRowIndex: 11, endColumnIndex: 1 },
+              warningOnly: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0]).toEqual(
+      {
+        kind: "warning",
+        id: 3,
+        range: {
+          sheetId: 0,
+          startRowIndex: 0,
+          endRowIndex: 11,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+        description: "",
+        users: [],
+        groups: [],
+        unprotectedRanges: [],
+        requestingUserCanEdit: false,
+      },
+    );
+  });
+
+  it("reads a named-range-backed protection as unmodelable and still carries its id", () => {
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 111 },
+          protectedRanges: [
+            {
+              protectedRangeId: 9,
+              namedRangeId: "named-1",
+              range: { sheetId: 111, startRowIndex: 4, endRowIndex: 11 },
+              warningOnly: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0]).toEqual(
+      {
+        kind: "unmodelable",
+        id: 9,
+      },
+    );
+  });
+});
+
+describe("GoogleSheetsAPI protected range write", () => {
+  it("maps a lock with named editors and a whole-sheet warning with unprotected ranges", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(SPREADSHEET_ID, [
+      {
+        kind: "addProtectedRange",
+        protection: {
+          kind: "lock",
+          range: {
+            sheetId: 111,
+            startRowIndex: 4,
+            endRowIndex: 5,
+            startColumnIndex: 0,
+            endColumnIndex: 1,
+          },
+          description: "cell lock",
+          users: ["editor@example.com"],
+          groups: ["group@example.com"],
+          unprotectedRanges: [],
+        },
+      },
+      {
+        kind: "addProtectedRange",
+        protection: {
+          kind: "warning",
+          range: { sheetId: 111 },
+          description: "sheet warning",
+          users: [],
+          groups: [],
+          unprotectedRanges: [
+            {
+              sheetId: 111,
+              startRowIndex: 4,
+              endRowIndex: 5,
+              startColumnIndex: 1,
+              endColumnIndex: 2,
+            },
+          ],
+        },
+      },
+    ]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: {
+              sheetId: 111,
+              startRowIndex: 4,
+              endRowIndex: 5,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+            description: "cell lock",
+            editors: {
+              users: ["editor@example.com"],
+              groups: ["group@example.com"],
+            },
+          },
+        },
+      },
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: { sheetId: 111 },
+            description: "sheet warning",
+            warningOnly: true,
+            unprotectedRanges: [
+              {
+                sheetId: 111,
+                startRowIndex: 4,
+                endRowIndex: 5,
+                startColumnIndex: 1,
+                endColumnIndex: 2,
+              },
+            ],
+          },
+        },
+      },
+    ]);
+  });
+
+  it("reads the new protected range id from the add reply", () => {
+    const { api } = recordingSheets({ sheets: [] }, () => ({
+      replies: [
+        {
+          addProtectedRange: {
+            protectedRange: { protectedRangeId: 42 },
+          },
+        },
+      ],
+    }));
+
+    expect(() =>
+      api.flush(SPREADSHEET_ID, [
+        {
+          kind: "addProtectedRange",
+          protection: {
+            kind: "warning",
+            range: { sheetId: 111 },
+            description: "",
+            users: [],
+            groups: [],
+            unprotectedRanges: [],
+          },
+        },
+      ]),
+    ).not.toThrow();
+  });
+
+  it("throws when an add reply omits the id", () => {
+    const { api } = recordingSheets({ sheets: [] }, () => ({
+      replies: [{ addProtectedRange: { protectedRange: {} } }],
+    }));
+
+    expect(() =>
+      api.flush(SPREADSHEET_ID, [
+        {
+          kind: "addProtectedRange",
+          protection: {
+            kind: "warning",
+            range: { sheetId: 111 },
+            description: "",
+            users: [],
+            groups: [],
+            unprotectedRanges: [],
+          },
+        },
+      ]),
+    ).toThrowError(/protectedRangeId/);
   });
 });
 
@@ -797,8 +1066,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
 
   it("sends one GET for sheet properties, carrying the field mask", () => {
     const { api, transport } = seedApi();
-    const fields =
-      "sheets(properties(sheetId,title),tables(tableId,range))";
+    const fields = "sheets(properties(sheetId,title),tables(tableId,range))";
 
     api.fetchSheetProperties(SPREADSHEET_ID);
 
@@ -841,9 +1109,9 @@ describe("GoogleSheetsAPI HTTP transport", () => {
     ]);
 
     expect(transport.mock.calls[0]?.[0].url).toContain(":batchUpdate");
-    expect(JSON.parse(transport.mock.calls[0]?.[0].body ?? "").requests).toHaveLength(
-      1,
-    );
+    expect(
+      JSON.parse(transport.mock.calls[0]?.[0].body ?? "").requests,
+    ).toHaveLength(1);
   });
 
   it("sends nothing at all on a dry run, and reports what it withheld", () => {
@@ -878,9 +1146,9 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("refuses a spreadsheet id the host was not bound to", () => {
     const { api } = seedApi();
 
-    expect(() => api.fetchSheetProperties("some-other-spreadsheet")).toThrowError(
-      /bound to spreadsheet/,
-    );
+    expect(() =>
+      api.fetchSheetProperties("some-other-spreadsheet"),
+    ).toThrowError(/bound to spreadsheet/);
   });
 });
 

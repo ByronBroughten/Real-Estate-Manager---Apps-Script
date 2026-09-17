@@ -1,7 +1,4 @@
-import type {
-  SheetSnapshot,
-  TableSnapshot,
-} from "../../00_base/RawSource";
+import type { SheetSnapshot, TableSnapshot } from "../../00_base/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
@@ -50,6 +47,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
         gatherConditionalFormats: false,
         conditionalFormatRules: null,
         conditionalFormatIndexesAreStale: false,
+        gatherProtectedRanges: false,
+        protectedRanges: null,
+        protectedRangesAreStale: false,
       });
     }
   }
@@ -83,10 +83,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
     this.sheetState.knownTable = {
       tableId: table.tableId,
       ...range,
-      ...this._parseColumnProperties(
-        table,
-        range.startColumnIndex,
-      ),
+      ...this._parseColumnProperties(table, range.startColumnIndex),
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
       firstStaleColIndex: previous?.firstStaleColIndex ?? null,
     };

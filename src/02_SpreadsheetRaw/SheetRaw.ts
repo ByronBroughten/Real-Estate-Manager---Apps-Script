@@ -5,6 +5,19 @@ import {
   type ConditionalFormatDeclaration,
   type ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
+import {
+  protectedRangeContentsEqual,
+  protectedRangesEqual,
+  protectionRangeEqual,
+  protectionRangeHasRowCoordinates,
+  type EditLockDeclaration,
+  type EditWarningDeclaration,
+  type ProtectedRange,
+  type ProtectedRangeContent,
+  type ProtectionGridRange,
+  type WholeSheetEditLockDeclaration,
+  type WholeSheetEditWarningDeclaration,
+} from "../00_base/ProtectedRange";
 import type { GridRangeProps, SheetSnapshot } from "../00_base/RawSource";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
@@ -43,6 +56,16 @@ export class SheetRaw extends SheetCommonRaw {
       endRowIndex: this.activeTable.endRowIndex,
       startColumnIndex: this.activeTable.startColumnIndex,
       endColumnIndex: this.activeTable.endColumnIndex,
+    };
+  }
+  get wholeSheetGridRange(): ProtectionGridRange {
+    return { sheetId: this.sheetGid };
+  }
+  rowGridRange(rowIndex: number): GridRangeProps {
+    return {
+      sheetId: this.sheetGid,
+      startRowIndex: rowIndex,
+      endRowIndex: rowIndex + 1,
     };
   }
   get title(): string {
@@ -299,6 +322,203 @@ export class SheetRaw extends SheetCommonRaw {
     this.sheetState.gatherConditionalFormats = false;
     this.sheetState.conditionalFormatIndexesAreStale = false;
   }
+  gatherFetchProtectedRanges(): this {
+    this.sheetState.gatherProtectedRanges = true;
+    return this;
+  }
+  protectedRanges(): ProtectedRange[] {
+    this.assertProtectedRangesNotStale();
+    const protections = this.sheetState.protectedRanges;
+    if (protections === null) {
+      throw new Error(
+        `Protected ranges have not been fetched for sheetGid ${this.sheetGid}.`,
+      );
+    }
+    return protections;
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    return this.addEditWarningAt(this.dataGridRange, declaration);
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    return this.addEditLockAt(this.dataGridRange, declaration);
+  }
+  addEditWarningWholeSheet(
+    declaration: WholeSheetEditWarningDeclaration = {},
+  ): this {
+    return this._queueProtection({
+      kind: "warning",
+      range: this.wholeSheetGridRange,
+      description: declaration.description ?? "",
+      users: [],
+      groups: [],
+      unprotectedRanges: declaration.unprotectedRanges ?? [],
+    });
+  }
+  addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
+    return this._queueProtection({
+      kind: "lock",
+      range: this.wholeSheetGridRange,
+      description: declaration.description ?? "",
+      users: declaration.users ?? [],
+      groups: declaration.groups ?? [],
+      unprotectedRanges: declaration.unprotectedRanges ?? [],
+    });
+  }
+  addEditWarningAt(
+    range: ProtectionGridRange,
+    declaration: EditWarningDeclaration = {},
+  ): this {
+    return this._queueProtection({
+      kind: "warning",
+      range,
+      description: declaration.description ?? "",
+      users: [],
+      groups: [],
+      unprotectedRanges: [],
+    });
+  }
+  addEditLockAt(
+    range: ProtectionGridRange,
+    declaration: EditLockDeclaration = {},
+  ): this {
+    return this._queueProtection({
+      kind: "lock",
+      range,
+      description: declaration.description ?? "",
+      users: declaration.users ?? [],
+      groups: declaration.groups ?? [],
+      unprotectedRanges: [],
+    });
+  }
+  private _queueProtection(protection: ProtectedRangeContent): this {
+    this._assertProtectionWriteCoordinatesNotStale(
+      protection.range,
+      protection.unprotectedRanges,
+    );
+    this.assertProtectedRangesNotStale();
+    if (
+      this._pendingProtectedRangeContents().some((pending) =>
+        protectedRangeContentsEqual(pending, protection),
+      )
+    ) {
+      return this;
+    }
+    this.updateRequests.addProtectedRange.push({
+      kind: "addProtectedRange",
+      protection,
+    });
+    return this;
+  }
+  private _pendingProtectedRangeContents(): ProtectedRangeContent[] {
+    const fetched = this.sheetState.protectedRanges;
+    const protections: ProtectedRange[] = fetched === null ? [] : [...fetched];
+    const deletedIds = new Set(
+      this.updateRequests.deleteProtectedRange
+        .filter((operation) => operation.kind === "deleteProtectedRange")
+        .filter((operation) => operation.sheetId === this.sheetGid)
+        .map((operation) => operation.protectedRangeId),
+    );
+    const remaining = protections.filter(
+      (protection) => !deletedIds.has(protection.id),
+    );
+    const queued = this.updateRequests.addProtectedRange
+      .filter((operation) => operation.kind === "addProtectedRange")
+      .filter(
+        (operation) => operation.protection.range.sheetId === this.sheetGid,
+      )
+      .map((operation) => operation.protection);
+    return [
+      ...remaining.flatMap((protection) =>
+        protection.kind === "unmodelable" ? [] : [protection],
+      ),
+      ...queued,
+    ];
+  }
+  removeEditProtections(): this {
+    return this.removeEditProtectionsAt(this.dataGridRange);
+  }
+  removeEditProtectionsAt(range: ProtectionGridRange): this {
+    this._assertProtectionWriteCoordinatesNotStale(range, []);
+    this.assertProtectedRangesNotStale();
+    this.protectedRanges().forEach((protection) => {
+      if (protection.kind === "unmodelable") return;
+      if (!protectionRangeEqual(range, protection.range)) return;
+      this._queueDeleteProtectedRange(protection.id);
+    });
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.assertProtectedRangesNotStale();
+    this.protectedRanges().forEach((existing) => {
+      if (!protectedRangesEqual(existing, protection)) return;
+      if (existing.kind !== "unmodelable") {
+        this._assertProtectionWriteCoordinatesNotStale(
+          existing.range,
+          existing.unprotectedRanges,
+        );
+      }
+      this._queueDeleteProtectedRange(existing.id);
+    });
+    return this;
+  }
+  removeEditProtectionByDescription(description: string): this {
+    this.assertProtectedRangesNotStale();
+    this.protectedRanges().forEach((existing) => {
+      if (existing.kind === "unmodelable") return;
+      if (existing.description !== description) return;
+      this._assertProtectionWriteCoordinatesNotStale(
+        existing.range,
+        existing.unprotectedRanges,
+      );
+      this._queueDeleteProtectedRange(existing.id);
+    });
+    return this;
+  }
+  removeEditProtectionById(protectedRangeId: number): this {
+    this.assertProtectedRangesNotStale();
+    this.protectedRanges().forEach((existing) => {
+      if (existing.id !== protectedRangeId) return;
+      if (existing.kind !== "unmodelable") {
+        this._assertProtectionWriteCoordinatesNotStale(
+          existing.range,
+          existing.unprotectedRanges,
+        );
+      }
+      this._queueDeleteProtectedRange(existing.id);
+    });
+    return this;
+  }
+  private _queueDeleteProtectedRange(protectedRangeId: number): void {
+    this.updateRequests.deleteProtectedRange.push({
+      kind: "deleteProtectedRange",
+      sheetId: this.sheetGid,
+      protectedRangeId,
+    });
+  }
+  private _assertProtectionWriteCoordinatesNotStale(
+    range: ProtectionGridRange,
+    unprotectedRanges: ProtectionGridRange[],
+  ): void {
+    const hasRowCoordinates =
+      protectionRangeHasRowCoordinates(range) ||
+      unprotectedRanges.some(protectionRangeHasRowCoordinates);
+    if (!hasRowCoordinates) return;
+    this.activeTable.assertRowIndexesNotStale();
+  }
+  markProtectedRangesStale(): void {
+    this.sheetState.protectedRangesAreStale = true;
+  }
+  assertProtectedRangesNotStale(): void {
+    if (!this.sheetState.protectedRangesAreStale) return;
+    throw new Error(
+      `Protections are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's protections before reading or mutating them again.`,
+    );
+  }
+  integrateProtectedRanges(protections: ProtectedRange[]): void {
+    this.sheetState.protectedRanges = protections;
+    this.sheetState.gatherProtectedRanges = false;
+    this.sheetState.protectedRangesAreStale = false;
+  }
   private _integrateSheetData(
     gridBlocks: NonNullable<SheetSnapshot["gridBlocks"]>,
   ): void {
@@ -308,7 +528,11 @@ export class SheetRaw extends SheetCommonRaw {
         const rowIndex = rowIdxBase + block.startRow;
         const row = this.rowCommon(rowIndex);
         row.ensureStateExists();
-        for (let colIdxOffset = 0; colIdxOffset < block.columnCount; colIdxOffset++) {
+        for (
+          let colIdxOffset = 0;
+          colIdxOffset < block.columnCount;
+          colIdxOffset++
+        ) {
           const colIndex = colIdxBase + colIdxOffset;
           const cellData = rowSnapshot.cells[colIdxOffset];
           if (row.rowIsActive()) {
