@@ -202,16 +202,52 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("pasteData occupancy!G5:G7 3 row(s) =2+1 PASTE_FORMULA");
   });
 
+  it("names the sheet, range and condition of an added conditional format rule", () => {
+    expect(
+      onlyLine({
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [
+              {
+                sheetId: OCCUPANCY_GID,
+                startRowIndex: 4,
+                endRowIndex: 11,
+                startColumnIndex: 0,
+                endColumnIndex: 1,
+              },
+            ],
+            booleanRule: {
+              condition: { type: "CUSTOM_FORMULA" },
+            },
+          },
+        },
+      }),
+    ).toBe(
+      "addConditionalFormatRule occupancy!A5:A11 prepend CUSTOM_FORMULA",
+    );
+  });
+
+  it("names the sheet and index of a deleted conditional format rule", () => {
+    expect(
+      onlyLine({
+        deleteConditionalFormatRule: {
+          sheetId: OCCUPANCY_GID,
+          index: 3,
+        },
+      }),
+    ).toBe("deleteConditionalFormatRule occupancy index 3");
+  });
+
   it("renders a request the framework does not model as its own verb and JSON", () => {
     const line = onlyLine({
-      addConditionalFormatRule: {
-        index: 3,
-        rule: { ranges: [{ sheetId: OCCUPANCY_GID }] },
+      updateTable: {
+        table: { tableId: "t" },
       },
     } as OpaqueRawRequest);
 
-    expect(line).toContain("addConditionalFormatRule");
-    expect(line).toContain('"index":3');
+    expect(line).toContain("updateTable");
+    expect(line).toContain('"tableId":"t"');
   });
 
   it("is empty when nothing was queued", () => {

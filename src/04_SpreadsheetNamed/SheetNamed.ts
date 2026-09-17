@@ -1,4 +1,8 @@
 import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
+import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
@@ -121,6 +125,28 @@ export class SheetNamed<
   findReplace(terms: FindReplaceTerms): this {
     this.indexed.findReplace(terms);
     return this;
+  }
+  prepFetchConditionalFormatRules(): this {
+    this.indexed.prepFetchConditionalFormatRules();
+    return this;
+  }
+  conditionalFormatRules(): ConditionalFormatRule[] {
+    return this.indexed.conditionalFormatRules();
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.indexed.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.indexed.removeConditionalFormatRules();
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.indexed.removeConditionalFormatRule(rule);
+    return this;
+  }
+  anchoredA1(columnName: ColumnName<SN>): string {
+    return this.column(columnName).anchoredA1();
   }
   rowsFiltered(values: Partial<SheetDataValues<SN>>): RowNamed<SN>[] {
     return this.rows.filter((row) => {

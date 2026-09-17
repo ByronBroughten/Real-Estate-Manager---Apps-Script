@@ -15,6 +15,7 @@ export type IndexedSheetsState = Map<SheetId, IndexedSheetState>;
 
 export interface IndexedSheetState {
   preFetchGridRanges: PreFetchGridRange[];
+  prepFetchConditionalFormats: boolean;
 }
 
 type SheetId = number;

@@ -1,6 +1,10 @@
+import type { CellValue, CellValueName } from "../00_base/base";
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
 import type { GridCellSnapshot } from "../00_base/RawSource";
 import type { RgbColor } from "../00_base/RgbColor";
-import type { CellValue, CellValueName } from "../00_base/base";
 import { CellRawBase } from "./ClassBases/CellRawBase";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import type { RowCellChange } from "./ClassTypes/RawState";
@@ -121,6 +125,18 @@ export class CellRaw<
       colIndex: this.colIndex,
       backgroundColor,
     });
+    return this;
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.sheet.addConditionalFormatRuleAt(this.gridRange, declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.sheet.removeConditionalFormatRulesAt(this.gridRange);
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.sheet.removeConditionalFormatRule(rule);
     return this;
   }
   integrateSnapshot(cell: GridCellSnapshot | undefined): void {

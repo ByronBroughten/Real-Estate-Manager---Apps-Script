@@ -1,9 +1,20 @@
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import type { CellValue } from "./base";
+import {
+  isModelledConditionType,
+  quantizeConditionalFormat,
+  type BooleanCondition,
+  type ConditionalFormat,
+  type ConditionalFormatRule,
+  type ModelableConditionalFormatRule,
+  type ModelledConditionType,
+} from "./ConditionalFormat";
 import type {
   GridCellSnapshot,
+  GridFetchOptions,
   GridFetchRange,
+  GridRangeProps,
   LocalWriteOperation,
   RawSource,
   SheetSnapshot,
@@ -11,7 +22,7 @@ import type {
   TableColumnSnapshot,
   TableSnapshot,
 } from "./RawSource";
-import type { RgbColor } from "./RgbColor";
+import { quantizeRgbChannels, type RgbChannels, type RgbColor } from "./RgbColor";
 
 export type OpaqueRawRequest = GoogleAppsScript.Sheets.Schema.Request;
 
@@ -118,7 +129,7 @@ export class GoogleSheetsAPI implements RawSource {
   fetchGrid(
     spreadsheetId: string,
     gridRanges: GridFetchRange[],
-    options: { includeProgrammaticFacts: boolean },
+    options: GridFetchOptions,
   ): SpreadsheetSnapshot {
     return toSpreadsheetSnapshot(
       this.sheets.Spreadsheets.getByDataFilter(
@@ -128,9 +139,7 @@ export class GoogleSheetsAPI implements RawSource {
         },
         spreadsheetId,
         {
-          fields: options.includeProgrammaticFacts
-            ? GRID_FIELDS_WITH_PROGRAMMATIC_FACTS
-            : GRID_FIELDS_WITHOUT_PROGRAMMATIC_FACTS,
+          fields: gridFields(options),
         },
       ),
     );
@@ -196,6 +205,14 @@ function toSpreadsheetSnapshot(
   };
 }
 
+function gridFields(options: GridFetchOptions): string {
+  const fields = options.includeProgrammaticFacts
+    ? GRID_FIELDS_WITH_PROGRAMMATIC_FACTS
+    : GRID_FIELDS_WITHOUT_PROGRAMMATIC_FACTS;
+  if (!options.includeConditionalFormats) return fields;
+  return `${fields.slice(0, -1)},conditionalFormats)`;
+}
+
 function toSheetSnapshot(sheet: GoogleSheet): SheetSnapshot {
   const properties = Val.assert(sheet.properties, "sheet.properties");
   return {
@@ -213,6 +230,13 @@ function toSheetSnapshot(sheet: GoogleSheet): SheetSnapshot {
         ) => toGridCell(row.values?.[colOffset])),
       })),
     })),
+    ...(sheet.conditionalFormats !== undefined
+      ? {
+          conditionalFormatRules: sheet.conditionalFormats.map(
+            (rule, index) => toConditionalFormatRule(rule, index),
+          ),
+        }
+      : {}),
   };
 }
 
@@ -383,6 +407,24 @@ function localOperationToGoogleRequests(
           },
         },
       ];
+    case "addConditionalFormatRule":
+      return [
+        {
+          addConditionalFormatRule: {
+            index: operation.index,
+            rule: modelableRuleToGoogle(operation.rule),
+          },
+        },
+      ];
+    case "deleteConditionalFormatRule":
+      return [
+        {
+          deleteConditionalFormatRule: {
+            sheetId: operation.sheetId,
+            index: operation.index,
+          },
+        },
+      ];
     case "raw":
       return [operation.request as OpaqueRawRequest];
     default: {
@@ -503,3 +545,176 @@ function cellValueToUserEntered(value: CellValue): UserEnteredValue {
     `Cannot make user entered value for unsupported type "${typeof value}".`,
   );
 }
+
+function modelableRuleToGoogle(
+  rule: ModelableConditionalFormatRule,
+): GoogleAppsScript.Sheets.Schema.ConditionalFormatRule {
+  return {
+    ranges: rule.ranges,
+    booleanRule: {
+      condition: booleanConditionToGoogle(rule.condition),
+      format: conditionalFormatToGoogle(rule.format),
+    },
+  };
+}
+
+function booleanConditionToGoogle(
+  condition: BooleanCondition,
+): GoogleAppsScript.Sheets.Schema.BooleanCondition {
+  if (condition.type === "CUSTOM_FORMULA") {
+    return {
+      type: "CUSTOM_FORMULA",
+      values: [{ userEnteredValue: condition.formula }],
+    };
+  }
+  return {
+    type: condition.type,
+    values: [{ userEnteredValue: cellValueToConditionLiteral(condition.value) }],
+  };
+}
+
+function cellValueToConditionLiteral(value: CellValue): string {
+  if (value === true) return "TRUE";
+  if (value === false) return "FALSE";
+  return String(value);
+}
+
+function conditionLiteralToCellValue(text: string): CellValue {
+  if (text === "TRUE") return true;
+  if (text === "FALSE") return false;
+  if (text !== "" && Number(text).toString() === text) return Number(text);
+  return text;
+}
+
+function conditionalFormatToGoogle(
+  format: ConditionalFormat,
+): GoogleAppsScript.Sheets.Schema.CellFormat {
+  return {
+    ...(format.backgroundColor !== undefined
+      ? { backgroundColor: rgbChannelsToGoogleColor(format.backgroundColor) }
+      : {}),
+    ...(format.foregroundColor !== undefined
+      ? {
+          textFormat: {
+            foregroundColor: rgbChannelsToGoogleColor(format.foregroundColor),
+          },
+        }
+      : {}),
+  };
+}
+
+function rgbChannelsToGoogleColor(color: RgbChannels): GoogleColor {
+  return {
+    ...(color.red !== undefined ? { red: color.red } : {}),
+    ...(color.green !== undefined ? { green: color.green } : {}),
+    ...(color.blue !== undefined ? { blue: color.blue } : {}),
+  };
+}
+
+function toConditionalFormatRule(
+  rule: GoogleAppsScript.Sheets.Schema.ConditionalFormatRule,
+  index: number,
+): ConditionalFormatRule {
+  const ranges = (rule.ranges ?? []).map(toGridRangeProps);
+  const modelled = toModelableRule(rule, ranges);
+  if (modelled === null) {
+    return { kind: "unmodelable", ranges, index };
+  }
+  return modelled;
+}
+
+function toModelableRule(
+  rule: GoogleAppsScript.Sheets.Schema.ConditionalFormatRule,
+  ranges: GridRangeProps[],
+): ModelableConditionalFormatRule | null {
+  if (rule.gradientRule !== undefined) return null;
+  const booleanRule = rule.booleanRule;
+  if (booleanRule === undefined) return null;
+  if (cellFormatHasUnmodelledFields(booleanRule.format)) return null;
+  const type = booleanRule.condition?.type;
+  if (type === undefined || !isModelledConditionType(type)) return null;
+  const userEnteredValue = booleanRule.condition?.values?.[0]?.userEnteredValue;
+  if (userEnteredValue === undefined) return null;
+  const condition = toBooleanCondition(type, userEnteredValue);
+  return {
+    kind: "boolean",
+    ranges,
+    condition,
+    format: quantizeConditionalFormat(toConditionalFormat(booleanRule.format)),
+  };
+}
+
+function toBooleanCondition(
+  type: ModelledConditionType,
+  userEnteredValue: string,
+): BooleanCondition {
+  if (type === "CUSTOM_FORMULA") {
+    return { type, formula: userEnteredValue };
+  }
+  return {
+    type,
+    value: conditionLiteralToCellValue(userEnteredValue),
+  };
+}
+
+function toConditionalFormat(
+  format: GoogleAppsScript.Sheets.Schema.CellFormat | undefined,
+): ConditionalFormat {
+  const backgroundColor = format?.backgroundColor;
+  const foregroundColor = format?.textFormat?.foregroundColor;
+  return {
+    ...(backgroundColor !== undefined
+      ? { backgroundColor: googleColorToRgbChannels(backgroundColor) }
+      : {}),
+    ...(foregroundColor !== undefined
+      ? { foregroundColor: googleColorToRgbChannels(foregroundColor) }
+      : {}),
+  };
+}
+
+function googleColorToRgbChannels(color: GoogleColor): RgbChannels {
+  return quantizeRgbChannels({
+    ...(color.red !== undefined ? { red: color.red } : {}),
+    ...(color.green !== undefined ? { green: color.green } : {}),
+    ...(color.blue !== undefined ? { blue: color.blue } : {}),
+  });
+}
+
+function cellFormatHasUnmodelledFields(
+  format: GoogleAppsScript.Sheets.Schema.CellFormat | undefined,
+): boolean {
+  if (format === undefined) return false;
+  if (objectHasDefinedKeysBesides(format, ["backgroundColor", "textFormat"])) {
+    return true;
+  }
+  if (format.textFormat === undefined) return false;
+  return objectHasDefinedKeysBesides(format.textFormat, ["foregroundColor"]);
+}
+
+function objectHasDefinedKeysBesides(
+  object: object,
+  allowed: string[],
+): boolean {
+  return Object.entries(object).some(
+    ([key, value]) => value !== undefined && !allowed.includes(key),
+  );
+}
+
+function toGridRangeProps(
+  range: GoogleAppsScript.Sheets.Schema.GridRange,
+): GridRangeProps {
+  return {
+    sheetId: Val.assert(range.sheetId, "conditional format range sheetId"),
+    startRowIndex: range.startRowIndex ?? 0,
+    ...(range.endRowIndex !== undefined
+      ? { endRowIndex: range.endRowIndex }
+      : {}),
+    ...(range.startColumnIndex !== undefined
+      ? { startColumnIndex: range.startColumnIndex }
+      : {}),
+    ...(range.endColumnIndex !== undefined
+      ? { endColumnIndex: range.endColumnIndex }
+      : {}),
+  };
+}
+

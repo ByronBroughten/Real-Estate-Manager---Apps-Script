@@ -1,4 +1,8 @@
 import type { NotEmpty } from "../00_base/base";
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
 import {
   toWireValue,
   type Value,
@@ -119,6 +123,21 @@ export class ColumnIndexed<
   findReplace(terms: FindReplaceTerms): this {
     this.raw.findReplace(terms);
     return this;
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.raw.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.raw.removeConditionalFormatRules();
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.raw.removeConditionalFormatRule(rule);
+    return this;
+  }
+  anchoredA1(colIndex = this.colIndex): string {
+    return this.sheet.anchoredA1(colIndex);
   }
   // A colour-only write is legitimate on a formula column; a value is not.
   private _rawChange({

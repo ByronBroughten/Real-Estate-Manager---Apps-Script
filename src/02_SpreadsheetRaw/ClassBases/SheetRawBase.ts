@@ -47,6 +47,9 @@ export class SheetRawBase extends SpreadsheetRawBase {
         rowIndexesToFinalize: new Set(),
         colIndexesToFinalize: new Set(),
         cellsToFinalize: new Map(),
+        gatherConditionalFormats: false,
+        conditionalFormatRules: null,
+        conditionalFormatIndexesAreStale: false,
       });
     }
   }

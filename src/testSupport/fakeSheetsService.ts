@@ -98,6 +98,12 @@ export interface FakeSheetProperties {
     startColumnIndex?: number;
   }[]; // Extra Tables besides `table`; the filter hatch still withholds every Table.
   /**
+   * The sheet's conditional format rules, in Sheets order. Returned by both
+   * `get` and `getByDataFilter`. Adds insert at the requested index and
+   * deletes remove-and-renumber, so a later read sees the list a flush left.
+   */
+  conditionalFormats?: GoogleAppsScript.Sheets.Schema.ConditionalFormatRule[];
+  /**
    * Row indices that come back as a grid-data block describing every column
    * but carrying no `rowData` at all — the real API's shape, measured
    * against the live spreadsheet, for a row inside the grid whose every
@@ -346,32 +352,42 @@ export function stubSheetsService(
 
   function sheetsResponse(
     isFilteredFetch: boolean,
+    fields?: string,
   ): GoogleAppsScript.Sheets.Schema.Spreadsheet {
+    const includeConditionalFormats =
+      fields === undefined || fields.includes("conditionalFormats");
     return {
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
         data: fakeRowsToGoogleSheetData(s),
         tables: fakeSheetTables(s, isFilteredFetch),
+        ...(includeConditionalFormats && s.conditionalFormats !== undefined
+          ? { conditionalFormats: s.conditionalFormats }
+          : {}),
       })),
     };
   }
 
   const service = {
     Spreadsheets: {
-      get: (_spreadsheetId: string, _params?: object) => sheetsResponse(false),
+      get: (_spreadsheetId: string, params?: { fields?: string }) =>
+        sheetsResponse(false, params?.fields),
       getByDataFilter: (
         resource: object,
         _spreadsheetId: string,
-        _params?: object,
+        params?: { fields?: string },
       ) => {
         getByDataFilterCalls.push(resource);
-        return sheetsResponse(true);
+        return sheetsResponse(true, params?.fields);
       },
       batchUpdate: (
         resource: BatchUpdateRequest,
         _spreadsheetId: string,
       ): BatchUpdateResponse => {
         batchUpdateCalls.push(resource);
+        (resource.requests ?? []).forEach((request) => {
+          replayConditionalFormatRequest(sheets, request);
+        });
         return {};
       },
     },
@@ -380,4 +396,24 @@ export function stubSheetsService(
   installRawSource(GoogleSheetsAPI.init(service));
 
   return { batchUpdateCalls, getByDataFilterCalls };
+}
+
+function replayConditionalFormatRequest(
+  sheets: FakeSheetProperties[],
+  request: GoogleAppsScript.Sheets.Schema.Request,
+): void {
+  const add = request.addConditionalFormatRule;
+  if (add?.rule !== undefined) {
+    const sheetId = add.rule.ranges?.[0]?.sheetId;
+    const sheet = sheets.find((candidate) => candidate.sheetId === sheetId);
+    if (sheet === undefined) return;
+    sheet.conditionalFormats ??= [];
+    sheet.conditionalFormats.splice(add.index ?? 0, 0, add.rule);
+    return;
+  }
+  const remove = request.deleteConditionalFormatRule;
+  if (remove?.index === undefined) return;
+  const sheet = sheets.find((candidate) => candidate.sheetId === remove.sheetId);
+  if (sheet?.conditionalFormats === undefined) return;
+  sheet.conditionalFormats.splice(remove.index, 1);
 }

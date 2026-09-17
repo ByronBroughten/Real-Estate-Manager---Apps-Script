@@ -220,6 +220,159 @@ describe("GoogleSheetsAPI write mapping", () => {
     expect(batchUpdateCalls).toEqual([]);
   });
 
+  it("maps a boolean rule onto addConditionalFormatRule without alpha", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+    const pink = { red: 244 / 255, green: 204 / 255, blue: 204 / 255 };
+
+    api.flush(SPREADSHEET_ID, [
+      {
+        kind: "addConditionalFormatRule",
+        index: 0,
+        rule: {
+          kind: "boolean",
+          ranges: [
+            {
+              sheetId: 111,
+              startRowIndex: 4,
+              endRowIndex: 11,
+              startColumnIndex: 2,
+              endColumnIndex: 3,
+            },
+          ],
+          condition: { type: "NUMBER_EQ", value: true },
+          format: {
+            backgroundColor: pink,
+            foregroundColor: { red: 0.4, green: 0.4, blue: 0.4 },
+          },
+        },
+      },
+    ]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [
+              {
+                sheetId: 111,
+                startRowIndex: 4,
+                endRowIndex: 11,
+                startColumnIndex: 2,
+                endColumnIndex: 3,
+              },
+            ],
+            booleanRule: {
+              condition: {
+                type: "NUMBER_EQ",
+                values: [{ userEnteredValue: "TRUE" }],
+              },
+              format: {
+                backgroundColor: pink,
+                textFormat: {
+                  foregroundColor: { red: 0.4, green: 0.4, blue: 0.4 },
+                },
+              },
+            },
+          },
+        },
+      },
+    ]);
+    expect(
+      batchUpdateCalls[0]?.requests?.[0]?.addConditionalFormatRule?.rule
+        ?.booleanRule?.format?.backgroundColor,
+    ).not.toHaveProperty("alpha");
+  });
+
+  it("stringifies a false condition value as Sheets' FALSE literal", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(SPREADSHEET_ID, [
+      {
+        kind: "addConditionalFormatRule",
+        index: 0,
+        rule: {
+          kind: "boolean",
+          ranges: [
+            {
+              sheetId: 111,
+              startRowIndex: 4,
+              endRowIndex: 5,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+          ],
+          condition: { type: "NUMBER_EQ", value: false },
+          format: { backgroundColor: { red: 1 } },
+        },
+      },
+    ]);
+
+    expect(
+      batchUpdateCalls[0]?.requests?.[0]?.addConditionalFormatRule?.rule
+        ?.booleanRule?.condition?.values,
+    ).toEqual([{ userEnteredValue: "FALSE" }]);
+  });
+
+  it("passes a custom formula through unchanged and maps a delete by sheet and index", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(SPREADSHEET_ID, [
+      {
+        kind: "deleteConditionalFormatRule",
+        sheetId: 111,
+        index: 3,
+      },
+      {
+        kind: "addConditionalFormatRule",
+        index: 0,
+        rule: {
+          kind: "boolean",
+          ranges: [
+            {
+              sheetId: 111,
+              startRowIndex: 4,
+              endRowIndex: 5,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+          ],
+          condition: { type: "CUSTOM_FORMULA", formula: "=$B5=FALSE" },
+          format: { backgroundColor: { red: 1 } },
+        },
+      },
+    ]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        deleteConditionalFormatRule: { sheetId: 111, index: 3 },
+      },
+      {
+        addConditionalFormatRule: {
+          index: 0,
+          rule: {
+            ranges: [
+              {
+                sheetId: 111,
+                startRowIndex: 4,
+                endRowIndex: 5,
+                startColumnIndex: 0,
+                endColumnIndex: 1,
+              },
+            ],
+            booleanRule: {
+              condition: {
+                type: "CUSTOM_FORMULA",
+                values: [{ userEnteredValue: "=$B5=FALSE" }],
+              },
+              format: { backgroundColor: { red: 1 } },
+            },
+          },
+        },
+      },
+    ]);
+  });
+
   it("passes an ordered raw request through last", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
@@ -340,6 +493,142 @@ describe("GoogleSheetsAPI payload mapping", () => {
               ],
             },
           ],
+        },
+      ],
+    });
+  });
+
+  it("maps a boolean rule, a multi-range rule and an unmodelable rule in list order", () => {
+    const pink = { red: 0.95686275, green: 0.8, blue: 0.8 };
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 111, title: "Leases" },
+          conditionalFormats: [
+            {
+              ranges: [
+                {
+                  sheetId: 111,
+                  startRowIndex: 4,
+                  endRowIndex: 11,
+                  startColumnIndex: 0,
+                  endColumnIndex: 5,
+                },
+              ],
+              booleanRule: {
+                condition: {
+                  type: "CUSTOM_FORMULA",
+                  values: [{ userEnteredValue: "=$A5" }],
+                },
+                format: {
+                  backgroundColor: pink,
+                  textFormat: { foregroundColor: { red: 0.4 } },
+                },
+              },
+            },
+            {
+              ranges: [
+                {
+                  sheetId: 111,
+                  startRowIndex: 4,
+                  endRowIndex: 6,
+                  startColumnIndex: 0,
+                  endColumnIndex: 1,
+                },
+                {
+                  sheetId: 111,
+                  startRowIndex: 4,
+                  endRowIndex: 6,
+                  startColumnIndex: 3,
+                  endColumnIndex: 4,
+                },
+              ],
+              booleanRule: {
+                condition: {
+                  type: "NUMBER_EQ",
+                  values: [{ userEnteredValue: "TRUE" }],
+                },
+                format: { backgroundColor: { red: 0, green: 1, blue: 0 } },
+              },
+            },
+            {
+              ranges: [
+                {
+                  sheetId: 111,
+                  startRowIndex: 4,
+                  endRowIndex: 11,
+                  startColumnIndex: 2,
+                  endColumnIndex: 3,
+                },
+              ],
+              gradientRule: {
+                minpoint: { color: { red: 1 }, type: "MIN" },
+                maxpoint: { color: { red: 0 }, type: "MAX" },
+              },
+            },
+          ],
+        },
+      ],
+    });
+
+    const rules = api.fetchGrid(SPREADSHEET_ID, [{ sheetId: 111 }], {
+      includeProgrammaticFacts: false,
+      includeConditionalFormats: true,
+    }).sheets[0]?.conditionalFormatRules;
+
+    expect(rules).toHaveLength(3);
+    expect(rules?.[0]).toEqual({
+      kind: "boolean",
+      ranges: [
+        {
+          sheetId: 111,
+          startRowIndex: 4,
+          endRowIndex: 11,
+          startColumnIndex: 0,
+          endColumnIndex: 5,
+        },
+      ],
+      condition: { type: "CUSTOM_FORMULA", formula: "=$A5" },
+      format: {
+        backgroundColor: {
+          red: 244 / 255,
+          green: 204 / 255,
+          blue: 204 / 255,
+        },
+        foregroundColor: { red: 102 / 255 },
+      },
+    });
+    expect(rules?.[1]).toEqual({
+      kind: "boolean",
+      ranges: [
+        {
+          sheetId: 111,
+          startRowIndex: 4,
+          endRowIndex: 6,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+        {
+          sheetId: 111,
+          startRowIndex: 4,
+          endRowIndex: 6,
+          startColumnIndex: 3,
+          endColumnIndex: 4,
+        },
+      ],
+      condition: { type: "NUMBER_EQ", value: true },
+      format: { backgroundColor: { red: 0, green: 1, blue: 0 } },
+    });
+    expect(rules?.[2]).toEqual({
+      kind: "unmodelable",
+      index: 2,
+      ranges: [
+        {
+          sheetId: 111,
+          startRowIndex: 4,
+          endRowIndex: 11,
+          startColumnIndex: 2,
+          endColumnIndex: 3,
         },
       ],
     });

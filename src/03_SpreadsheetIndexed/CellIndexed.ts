@@ -1,5 +1,9 @@
-import type { RgbColor } from "../00_base/RgbColor";
 import type { NotEmpty } from "../00_base/base";
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
+import type { RgbColor } from "../00_base/RgbColor";
 import {
   toWireValue,
   type Value,
@@ -70,6 +74,21 @@ export class CellIndexed<
   updateBackgroundColor(backgroundColor: RgbColor): this {
     this.raw.updateBackgroundColor(backgroundColor);
     return this;
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.raw.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.raw.removeConditionalFormatRules();
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.raw.removeConditionalFormatRule(rule);
+    return this;
+  }
+  anchoredA1(colIndex = this.column.colIndex): string {
+    return this.schema.anchoredA1(colIndex, this.rowIndex);
   }
   updateToDefault(): this {
     if (!this.schema.isFormula) {

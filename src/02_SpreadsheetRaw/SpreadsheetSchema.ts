@@ -146,9 +146,9 @@ export class SpreadsheetSchema {
     return this.positionLabel(this.tableHeaderRowIndex, this.startTableColIndex);
   }
   positionLabel(rowIndex: number, colIndex: number): string {
-    return `row ${rowIndex + 1}, column ${this._columnLetter(colIndex)}`;
+    return `row ${rowIndex + 1}, column ${this.columnLetter(colIndex)}`;
   }
-  private _columnLetter(colIndex: number): string {
+  columnLetter(colIndex: number): string {
     let letters = "";
     let remaining = colIndex;
     while (remaining >= 0) {
@@ -156,6 +156,9 @@ export class SpreadsheetSchema {
       remaining = Math.floor(remaining / 26) - 1;
     }
     return letters;
+  }
+  anchoredA1(colIndex: number, rowIndex: number): string {
+    return `$${this.columnLetter(colIndex)}${rowIndex + 1}`;
   }
   isDataRowIndex(rowIndex: number): boolean {
     return rowIndex >= this.topDataRowIdx;

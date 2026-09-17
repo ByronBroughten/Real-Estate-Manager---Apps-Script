@@ -290,7 +290,13 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   ): SpreadsheetSnapshot {
     return this.rawState.rawSource.fetchGrid(this.spreadsheetId, gridRanges, {
       includeProgrammaticFacts,
+      includeConditionalFormats: this._isGatheringConditionalFormats(),
     });
+  }
+  private _isGatheringConditionalFormats(): boolean {
+    return Array.from(this.rawSheetsState.values()).some(
+      (state) => state.gatherConditionalFormats,
+    );
   }
   private _addDataToState(snapshot: SpreadsheetSnapshot) {
     snapshot.sheets.forEach((sheetSnapshot) => {
@@ -301,11 +307,16 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   batchUpdateGSheets() {
     this._gatherUpdateRequests();
     const sheetGidsWithRowDeletes = this._sheetGidsWithRowDeletes();
+    const sheetGidsWithConditionalFormatMutations =
+      this._sheetGidsWithConditionalFormatMutations();
     const hasFindReplace = this.updateRequests.findReplace.length > 0;
     this._sendUpdateRequests();
     // Row indexes only actually shift once the deletes have been sent.
     sheetGidsWithRowDeletes.forEach((sheetGid) =>
       this.sheet(sheetGid).markRowIndexesStale(),
+    );
+    sheetGidsWithConditionalFormatMutations.forEach((sheetGid) =>
+      this.sheet(sheetGid).markConditionalFormatIndexesStale(),
     );
     if (hasFindReplace) this._invalidateFetchedCellState();
   }
@@ -392,6 +403,30 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       this.sheet(sheetRowId).gatherFillRequest(fill);
     });
   }
+  private _sheetGidsWithConditionalFormatMutations(): Set<number> {
+    const sheetGids = new Set<number>();
+    this.updateRequests.deleteConditionalFormat.forEach((operation) => {
+      if (operation.kind !== "deleteConditionalFormatRule") {
+        throw new Error(
+          "Queued deleteConditionalFormat is not a deleteConditionalFormatRule operation.",
+        );
+      }
+      sheetGids.add(operation.sheetId);
+    });
+    this.updateRequests.addConditionalFormat.forEach((operation) => {
+      if (operation.kind !== "addConditionalFormatRule") {
+        throw new Error(
+          "Queued addConditionalFormat is not an addConditionalFormatRule operation.",
+        );
+      }
+      const sheetId = operation.rule.ranges[0]?.sheetId;
+      if (sheetId === undefined) {
+        throw new Error("Queued addConditionalFormatRule has no range sheetId.");
+      }
+      sheetGids.add(sheetId);
+    });
+    return sheetGids;
+  }
   private _sendUpdateRequests() {
     const surs = this.rawState.updateRequests;
     const operations = [
@@ -404,6 +439,8 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ...surs.findReplace,
       ...this._deleteOperationsDescending(),
       ...surs.sort,
+      ...this._deleteConditionalFormatOperationsDescending(),
+      ...surs.addConditionalFormat,
       // Outside the ordering rules the queue was built around, so last.
       ...surs.raw,
     ];
@@ -420,5 +457,21 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       }
       return b.startIndex - a.startIndex;
     });
+  }
+  private _deleteConditionalFormatOperationsDescending() {
+    return [...this.rawState.updateRequests.deleteConditionalFormat].sort(
+      (a, b) => {
+        if (
+          a.kind !== "deleteConditionalFormatRule" ||
+          b.kind !== "deleteConditionalFormatRule"
+        ) {
+          throw new Error(
+            "Queued deleteConditionalFormat is not a deleteConditionalFormatRule operation.",
+          );
+        }
+        if (a.sheetId !== b.sheetId) return a.sheetId - b.sheetId;
+        return b.index - a.index;
+      },
+    );
   }
 }

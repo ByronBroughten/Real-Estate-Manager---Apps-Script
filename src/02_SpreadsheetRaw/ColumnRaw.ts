@@ -1,4 +1,8 @@
 import type { CellValue, CellValueName } from "../00_base/base";
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
@@ -144,6 +148,20 @@ export class ColumnRaw<
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.sheet.validateNotPrunedToSelection();
     this.ss.findReplace({ ...terms, scope: { range: this.dataGridRange } });
+    return this;
+  }
+  addConditionalFormatRule(
+    declaration: ConditionalFormatDeclaration,
+  ): this {
+    this.sheet.addConditionalFormatRuleAt(this.dataGridRange, declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.sheet.removeConditionalFormatRulesAt(this.dataGridRange);
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.sheet.removeConditionalFormatRule(rule);
     return this;
   }
   gatherFetchActive(): this {

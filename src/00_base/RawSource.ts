@@ -1,4 +1,8 @@
 import type { CellValue } from "./base";
+import type {
+  ConditionalFormatRule,
+  ModelableConditionalFormatRule,
+} from "./ConditionalFormat";
 import type { RgbColor } from "./RgbColor";
 
 export interface GridRangeProps {
@@ -33,6 +37,7 @@ export interface FindReplaceTerms {
 
 export interface GridFetchOptions {
   includeProgrammaticFacts: boolean;
+  includeConditionalFormats?: boolean;
 }
 
 export interface SpreadsheetSnapshot {
@@ -44,6 +49,7 @@ export interface SheetSnapshot {
   title: string | null;
   tables: TableSnapshot[] | undefined;
   gridBlocks: GridBlockSnapshot[] | undefined;
+  conditionalFormatRules?: ConditionalFormatRule[];
 }
 
 export interface TableSnapshot {
@@ -89,6 +95,8 @@ export type LocalWriteOperation =
   | FindReplaceOperation
   | DeleteRowsOperation
   | SortOperation
+  | AddConditionalFormatRuleOperation
+  | DeleteConditionalFormatRuleOperation
   | OpaqueRawWriteOperation;
 
 export interface AppendRowsOperation {
@@ -145,6 +153,18 @@ export interface SortOperation {
   startColumnIndex: number;
   colIdxToSortBy: number;
   sortOrder: SortOrder;
+}
+
+export interface AddConditionalFormatRuleOperation {
+  kind: "addConditionalFormatRule";
+  index: number;
+  rule: ModelableConditionalFormatRule;
+}
+
+export interface DeleteConditionalFormatRuleOperation {
+  kind: "deleteConditionalFormatRule";
+  sheetId: number;
+  index: number;
 }
 
 export interface OpaqueRawWriteOperation {

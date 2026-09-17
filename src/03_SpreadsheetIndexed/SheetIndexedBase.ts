@@ -28,6 +28,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
     if (!this.indexedSheetsState.has(this.sheetGid)) {
       this.indexedSheetsState.set(this.sheetGid, {
         preFetchGridRanges: [],
+        prepFetchConditionalFormats: false,
       });
     }
   }
@@ -41,9 +42,13 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
     return this.sheetState.preFetchGridRanges;
   }
   get isPreppedToFetch(): boolean {
-    return this.preFetchGridRanges.length > 0;
+    return (
+      this.preFetchGridRanges.length > 0 ||
+      this.sheetState.prepFetchConditionalFormats
+    );
   }
   clearPreFetchGridRanges(): void {
     this.sheetState.preFetchGridRanges = [];
+    this.sheetState.prepFetchConditionalFormats = false;
   }
 }

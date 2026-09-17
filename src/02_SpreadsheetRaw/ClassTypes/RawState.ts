@@ -1,3 +1,4 @@
+import type { ConditionalFormatRule } from "../../00_base/ConditionalFormat";
 import type {
   FindReplaceScope as BaseFindReplaceScope,
   FindReplaceTerms as BaseFindReplaceTerms,
@@ -26,6 +27,8 @@ const updateRequestNames = [
   "insertColumn",
   "fill",
   "findReplace",
+  "deleteConditionalFormat",
+  "addConditionalFormat",
   "raw",
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
@@ -47,6 +50,9 @@ export interface RawSheetState {
   rowIndexesToFinalize: Set<RowIndex>;
   colIndexesToFinalize: Set<ColIndex>;
   cellsToFinalize: Map<RowIndex, Set<ColIndex>>;
+  gatherConditionalFormats: boolean;
+  conditionalFormatRules: ConditionalFormatRule[] | null;
+  conditionalFormatIndexesAreStale: boolean;
 }
 
 export type RawRowStates = Map<RowIndex, RawRowState>;

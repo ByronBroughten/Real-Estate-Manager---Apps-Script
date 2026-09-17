@@ -77,6 +77,12 @@ export class UpdateRequestSummary {
         return this._findReplaceBody(request.findReplace);
       case "pasteData":
         return this._pasteDataBody(request.pasteData);
+      case "addConditionalFormatRule":
+        return this._addConditionalFormatBody(request.addConditionalFormatRule);
+      case "deleteConditionalFormatRule":
+        return this._deleteConditionalFormatBody(
+          request.deleteConditionalFormatRule,
+        );
       default:
         return this._rawBody(request, verb);
     }
@@ -196,6 +202,32 @@ export class UpdateRequestSummary {
       `${rowCount} row(s)`,
       firstRfc4180Field(pasteData?.data ?? "").replaceAll("\n", " "),
       pasteData?.type ?? "",
+    );
+  }
+  private _addConditionalFormatBody(
+    add:
+      | GoogleAppsScript.Sheets.Schema.AddConditionalFormatRuleRequest
+      | undefined,
+  ): string {
+    const range = add?.rule?.ranges?.[0];
+    const conditionType = add?.rule?.booleanRule?.condition?.type ?? "";
+    return this._columns(
+      this._rangeLabel(range),
+      "prepend",
+      conditionType,
+      "",
+    );
+  }
+  private _deleteConditionalFormatBody(
+    remove:
+      | GoogleAppsScript.Sheets.Schema.DeleteConditionalFormatRuleRequest
+      | undefined,
+  ): string {
+    return this._columns(
+      this._sheetLabel(remove?.sheetId),
+      `index ${remove?.index ?? ""}`,
+      "",
+      "",
     );
   }
   // The opening's own line format: no type layer to read it through.

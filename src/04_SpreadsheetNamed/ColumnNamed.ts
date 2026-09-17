@@ -1,5 +1,9 @@
 import type { NotEmpty } from "../00_base/base";
 import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
+import type {
   ColumnIsFormula,
   ColumnName,
   ColumnValue,
@@ -94,6 +98,21 @@ export class ColumnNamed<
   findReplace(terms: FindReplaceTerms): this {
     this.indexed.findReplace(terms);
     return this;
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.indexed.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.indexed.removeConditionalFormatRules();
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.indexed.removeConditionalFormatRule(rule);
+    return this;
+  }
+  anchoredA1(columnName: ColumnName<SN> = this.columnName): string {
+    return this.sheet.column(columnName).indexed.anchoredA1();
   }
   prepFetchSpecific(rowIndexes: number[]): this {
     this.indexed.prepFetchSpecific(rowIndexes);

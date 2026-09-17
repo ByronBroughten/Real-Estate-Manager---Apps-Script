@@ -69,9 +69,11 @@ export class SpreadsheetRawBase {
       delete: [],
       sort: [],
       insertColumn: [],
-      fill: [],
-      findReplace: [],
-      raw: [],
+        fill: [],
+        findReplace: [],
+        deleteConditionalFormat: [],
+        addConditionalFormat: [],
+        raw: [],
     };
   }
 }

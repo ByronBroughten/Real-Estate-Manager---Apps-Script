@@ -1,3 +1,7 @@
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
@@ -51,6 +55,28 @@ export class SheetIndexed extends SheetCommon {
   findReplace(terms: FindReplaceTerms): this {
     this.raw.findReplace(terms);
     return this;
+  }
+  prepFetchConditionalFormatRules(): this {
+    this.sheetState.prepFetchConditionalFormats = true;
+    return this;
+  }
+  conditionalFormatRules(): ConditionalFormatRule[] {
+    return this.raw.conditionalFormatRules();
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.raw.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.raw.removeConditionalFormatRules();
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.raw.removeConditionalFormatRule(rule);
+    return this;
+  }
+  anchoredA1(colIndex: number): string {
+    return this.schema.anchoredA1(colIndex, this.schema.topDataRowIdx);
   }
   row(rowIndex: number): RowIndexed {
     return new RowIndexed({

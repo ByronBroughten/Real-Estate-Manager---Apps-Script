@@ -1,5 +1,11 @@
-import type { SheetSnapshot } from "../00_base/RawSource";
 import type { CellValueName } from "../00_base/base";
+import {
+  conditionalFormatRulesEqual,
+  rangeEqual,
+  type ConditionalFormatDeclaration,
+  type ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
+import type { GridRangeProps, SheetSnapshot } from "../00_base/RawSource";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
 import { assertValueAndFormulaExclusive } from "./CellRaw";
@@ -29,6 +35,15 @@ export class SheetRaw extends SheetCommonRaw {
   }
   get hasFetchedProperties(): boolean {
     return this.sheetState.knownTable !== null;
+  }
+  get dataGridRange(): GridRangeProps {
+    return {
+      sheetId: this.sheetGid,
+      startRowIndex: this.schema.topDataRowIdx,
+      endRowIndex: this.activeTable.endRowIndex,
+      startColumnIndex: this.activeTable.startColumnIndex,
+      endColumnIndex: this.activeTable.endColumnIndex,
+    };
   }
   get title(): string {
     if (this.sheetState.title === null) {
@@ -171,6 +186,109 @@ export class SheetRaw extends SheetCommonRaw {
     this.meta.tableHeaderRow.cell(startTableColIndex).gatherFetchRange();
     return this;
   }
+  gatherFetchConditionalFormatRules(): this {
+    this.sheetState.gatherConditionalFormats = true;
+    if (
+      !this.fetcherGridRanges.some((range) => range.sheetId === this.sheetGid)
+    ) {
+      this.gatherFetchProperties(this.schema.startTableColIndex);
+    }
+    return this;
+  }
+  conditionalFormatRules(): ConditionalFormatRule[] {
+    const rules = this.sheetState.conditionalFormatRules;
+    if (rules === null) {
+      throw new Error(
+        `Conditional format rules have not been fetched for sheetGid ${this.sheetGid}.`,
+      );
+    }
+    return rules;
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    return this.addConditionalFormatRuleAt(this.dataGridRange, declaration);
+  }
+  removeConditionalFormatRules(): this {
+    return this.removeConditionalFormatRulesAt(this.dataGridRange);
+  }
+  addConditionalFormatRuleAt(
+    range: GridRangeProps,
+    declaration: ConditionalFormatDeclaration,
+  ): this {
+    this.activeTable.assertRowIndexesNotStale();
+    this.assertConditionalFormatIndexesNotStale();
+    const rule: Extract<ConditionalFormatRule, { kind: "boolean" }> = {
+      kind: "boolean",
+      ranges: [range],
+      condition: declaration.condition,
+      format: declaration.format,
+    };
+    if (
+      this._pendingConditionalFormatRules().some((pending) =>
+        conditionalFormatRulesEqual(pending, rule),
+      )
+    ) {
+      return this;
+    }
+    this.updateRequests.addConditionalFormat.push({
+      kind: "addConditionalFormatRule",
+      index: 0,
+      rule,
+    });
+    return this;
+  }
+  private _pendingConditionalFormatRules(): ConditionalFormatRule[] {
+    const fetched = this.sheetState.conditionalFormatRules;
+    const rules = fetched === null ? [] : [...fetched];
+    const deletes = [...this.updateRequests.deleteConditionalFormat]
+      .filter((operation) => operation.kind === "deleteConditionalFormatRule")
+      .filter((operation) => operation.sheetId === this.sheetGid)
+      .sort((left, right) => right.index - left.index);
+    deletes.forEach((operation) => {
+      rules.splice(operation.index, 1);
+    });
+    this.updateRequests.addConditionalFormat.forEach((operation) => {
+      if (operation.kind !== "addConditionalFormatRule") return;
+      if (operation.rule.ranges[0]?.sheetId !== this.sheetGid) return;
+      rules.splice(operation.index, 0, operation.rule);
+    });
+    return rules;
+  }
+  removeConditionalFormatRulesAt(range: GridRangeProps): this {
+    this.activeTable.assertRowIndexesNotStale();
+    this.assertConditionalFormatIndexesNotStale();
+    this.conditionalFormatRules().forEach((rule, index) => {
+      if (rule.ranges.length !== 1) return;
+      if (!rangeEqual(range, rule.ranges[0])) return;
+      this.updateRequests.deleteConditionalFormat.push({
+        kind: "deleteConditionalFormatRule",
+        sheetId: this.sheetGid,
+        index,
+      });
+    });
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.activeTable.assertRowIndexesNotStale();
+    this.assertConditionalFormatIndexesNotStale();
+    this.conditionalFormatRules().forEach((existing, index) => {
+      if (!conditionalFormatRulesEqual(existing, rule)) return;
+      this.updateRequests.deleteConditionalFormat.push({
+        kind: "deleteConditionalFormatRule",
+        sheetId: this.sheetGid,
+        index,
+      });
+    });
+    return this;
+  }
+  markConditionalFormatIndexesStale(): void {
+    this.sheetState.conditionalFormatIndexesAreStale = true;
+  }
+  assertConditionalFormatIndexesNotStale(): void {
+    if (!this.sheetState.conditionalFormatIndexesAreStale) return;
+    throw new Error(
+      `Conditional format indexes are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's rules before mutating them again.`,
+    );
+  }
   hasQueuedFullRowFetch(rowIndex: number): boolean {
     return this.sheetState.rowIndexesToFinalize.has(rowIndex);
   }
@@ -179,6 +297,11 @@ export class SheetRaw extends SheetCommonRaw {
     this.sheetState.cellStateIsStale = false;
     if (sheet.gridBlocks) {
       this._integrateSheetData(sheet.gridBlocks);
+    }
+    if (sheet.conditionalFormatRules !== undefined) {
+      this.sheetState.conditionalFormatRules = sheet.conditionalFormatRules;
+      this.sheetState.gatherConditionalFormats = false;
+      this.sheetState.conditionalFormatIndexesAreStale = false;
     }
   }
   private _integrateSheetData(

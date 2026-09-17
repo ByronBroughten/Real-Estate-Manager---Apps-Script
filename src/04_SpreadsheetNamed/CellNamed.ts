@@ -1,5 +1,9 @@
-import type { RgbColor } from "../00_base/RgbColor";
 import type { NotEmpty } from "../00_base/base";
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
+} from "../00_base/ConditionalFormat";
+import type { RgbColor } from "../00_base/RgbColor";
 import type {
   ColumnIsFormula,
   ColumnName,
@@ -82,5 +86,21 @@ export class CellNamed<
     const validated = this.schema.validate(value);
     this.updateValue(validated as ColumnValue<SN, CN>);
     return this;
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.indexed.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.indexed.removeConditionalFormatRules();
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.indexed.removeConditionalFormatRule(rule);
+    return this;
+  }
+  anchoredA1(columnName: ColumnName<SN> = this.columnName): string {
+    const colIndex = this.column.sheet.column(columnName).indexed.colIndex;
+    return this.indexed.anchoredA1(colIndex);
   }
 }

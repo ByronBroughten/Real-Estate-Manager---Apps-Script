@@ -62,6 +62,9 @@ export class SheetMetaIndexed extends SheetCommon {
     ) {
       this.raw.gatherFetchColumnIdsInit(startTableColIndex);
     }
+    if (this.sheetState.prepFetchConditionalFormats) {
+      this.raw.primary.gatherFetchConditionalFormatRules();
+    }
   }
   gatherFetchDataPrepped() {
     // This is so that table dimensions and columnIndexes can be guaranteed
