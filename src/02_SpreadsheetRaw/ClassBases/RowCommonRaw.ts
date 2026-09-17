@@ -23,6 +23,11 @@ export abstract class RowCommonRaw extends RowRawBase {
       );
     }
   }
+  // A queued delete outlives a same-run re-fetch; recreating the row would undo it.
+  ensureStateExists() {
+    if (this.isQueuedForDelete) return;
+    super.ensureStateExists();
+  }
   ensureFullActiveDataCells() {
     this.ensureStateExists();
     this.sheet.fullTableColIndexes.forEach((colIndex) => {

@@ -187,7 +187,9 @@ export class SheetRaw extends SheetCommonRaw {
         for (let colIdxOffset = 0; colIdxOffset < block.columnCount; colIdxOffset++) {
           const colIndex = colIdxBase + colIdxOffset;
           const cellData = rowSnapshot.cells[colIdxOffset];
-          row.cell(colIndex).integrateSnapshot(cellData);
+          if (row.rowIsActive()) {
+            row.cell(colIndex).integrateSnapshot(cellData);
+          }
           if (
             rowIndex === this.schema.topDataRowIdx &&
             this.isTableColIndex(colIndex)

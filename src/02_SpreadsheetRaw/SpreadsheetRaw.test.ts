@@ -1005,6 +1005,86 @@ describe("RowRaw.delete", () => {
   });
 });
 
+describe("queued writes outlive a same-run re-fetch", () => {
+  function stubTwoDataRows(topDataRow: FakeCell[] = ["r:lse:1", "live"]) {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            [TABLE_HEADER_ROW_INDEX]: ["ID", "Status"],
+            [TOP_DATA_ROW_INDEX]: topDataRow,
+            [TOP_DATA_ROW_INDEX + 1]: ["r:lse:2", "other"],
+          }),
+          table: { endRowIndex: TOP_DATA_ROW_INDEX + 2 },
+        },
+      ],
+    });
+  }
+
+  function fetchedSpreadsheet() {
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.sheet(111).row(TOP_DATA_ROW_INDEX + 1).gatherFetchFull();
+    raw.fetchAllGathered();
+    return raw;
+  }
+
+  it("leaves a row queued for delete inactive after a re-fetch that returns it", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.delete();
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.rowIsActive()).toBe(false);
+  });
+
+  it("leaves the same row inactive when the re-fetch was a full row, so finalize backfilled", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.delete();
+    raw.sheet(111).topRow.gatherFetchFull();
+    expect(() => raw.fetchAllGathered()).not.toThrow();
+    expect(raw.sheet(111).topRow.rowIsActive()).toBe(false);
+  });
+
+  it("leaves the same row inactive after a full-column fetch that covers it", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.delete();
+    raw.sheet(111).column(1).gatherFetchFull();
+    expect(() => raw.fetchAllGathered()).not.toThrow();
+    expect(raw.sheet(111).topRow.rowIsActive()).toBe(false);
+  });
+
+  it("still supplies Table column facts from a top data row queued for delete", () => {
+    stubTwoDataRows([
+      "r:lse:1",
+      { value: 42, isFormula: true, numberFormatType: "CURRENCY" },
+    ]);
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered(true);
+    raw.sheet(111).topRow.delete();
+    raw.sheet(111).topRow.gatherFetchFull();
+    expect(() => raw.fetchAllGathered(true)).not.toThrow();
+
+    const column = raw.sheetMeta(111).column(1);
+    expect(column.activeIsFormula).toBe(true);
+    expect(column.activeNumberFormatType).toBe("CURRENCY");
+    expect(column.activeTopValue).toBe(42);
+  });
+});
+
 describe("CellRaw.updateValue", () => {
   it("sends a write to a row that was never fetched, since a write needs no fetched state", () => {
     const { batchUpdateCalls } = stubSheetsService({

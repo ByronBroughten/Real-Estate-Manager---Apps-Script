@@ -73,6 +73,7 @@ export class CellRaw<
     return this.row.rowIsActive() && this.rowState.has(this.colIndex);
   }
   ensureActive() {
+    if (!this.row.rowIsActive()) return;
     if (!this.isActive) {
       this.setValueState("");
     }

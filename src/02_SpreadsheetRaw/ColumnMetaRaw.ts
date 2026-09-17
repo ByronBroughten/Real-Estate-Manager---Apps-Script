@@ -92,7 +92,7 @@ export class ColumnMetaRaw<
       isFormula: cell?.isFormula ?? false,
       numberFormatType: cell?.numberFormatType,
       dataValidationConditionType: cell?.dataValidationConditionType,
-      topValue: this.primary.topCell.valueOrEmpty(), // sampled now; the row can be pruned later
+      topValue: cell?.value ?? "", // from the payload, so a deleted top data row still describes the column
     });
   }
   // Gap-filling only, so a fact the payload described always wins.
