@@ -124,7 +124,31 @@ export class CellRaw<
     return this;
   }
   integrateSnapshot(cell: GridCellSnapshot | undefined): void {
-    this.setValueState(cell?.value ?? "");
+    if (!this.row.rowIsActive()) return;
+    this.setValueState(this._queuedValue() ?? cell?.value ?? "");
+  }
+  // Fills go before per-cell updates in a flush, so a cell's own value wins.
+  private _queuedValue(): CellValue | "" | undefined {
+    const rowChange = this.allChangesToSave.get(this.row.sheetRowId);
+    if (rowChange?.level === "row") {
+      const cellChange = rowChange.update.get(this.colIndex);
+      if (cellChange?.value !== undefined) return cellChange.value;
+    }
+    const sheetChange = this.allChangesToSave.get(this.sheetGid);
+    if (sheetChange?.level !== "sheet") return undefined;
+    for (let i = sheetChange.fills.length - 1; i >= 0; i--) {
+      const fill = sheetChange.fills[i];
+      if (fill === undefined || fill.value === undefined) continue;
+      if (fill.colIndex !== this.colIndex) continue;
+      if (
+        this.rowIndex < fill.startRowIndex ||
+        this.rowIndex >= fill.endRowIndex
+      ) {
+        continue;
+      }
+      return fill.value;
+    }
+    return undefined;
   }
 }
 

@@ -1083,6 +1083,110 @@ describe("queued writes outlive a same-run re-fetch", () => {
     expect(column.activeNumberFormatType).toBe("CURRENCY");
     expect(column.activeTopValue).toBe(42);
   });
+
+  it("keeps a queued value update after a re-fetch of that cell", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.cell(1).updateValue("queued");
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("queued");
+  });
+
+  it("keeps a queued value fill after a re-fetch of a covered cell", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).column(1).updateAllCells({ value: "filled" });
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("filled");
+  });
+
+  it("lets the most recently queued value fill win when several cover one cell", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).column(1).updateAllCells({ value: "first" });
+    raw.sheet(111).column(1).updateAllCells({ value: "second" });
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("second");
+  });
+
+  it("lets the cell's own queued value win over a covering fill", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).column(1).updateAllCells({ value: "filled" });
+    raw.sheet(111).topRow.cell(1).updateValue("queued");
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("queued");
+  });
+
+  it("takes the live value when the cell has no queued value", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.cell(1).updateValue("stale local");
+    raw.discardQueuedChanges();
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("live");
+  });
+
+  it("takes the live value when only a formula update is queued", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.cell(1).updateFormula("=A1");
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("live");
+  });
+
+  it("takes the live value when only a formula fill is queued", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).column(1).updateAllFormulas("=A1");
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("live");
+  });
+
+  it("integrates live values after the flush has cleared the queue", () => {
+    stubTwoDataRows();
+
+    const raw = fetchedSpreadsheet();
+    raw.sheet(111).topRow.cell(1).updateValue("queued");
+    raw.batchUpdateGSheets();
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("live");
+  });
+
+  it("applies a value queued before the row was fetched once that row is fetched", () => {
+    stubTwoDataRows();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).topRow.cell(1).updateValue("queued");
+    raw.sheet(111).topRow.gatherFetchFull();
+    raw.fetchAllGathered();
+
+    expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("queued");
+  });
 });
 
 describe("CellRaw.updateValue", () => {

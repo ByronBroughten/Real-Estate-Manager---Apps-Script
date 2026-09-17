@@ -15,6 +15,8 @@ That `rawState` is threaded **by reference** through `spreadsheetNamedProps` int
 
 **A write does not require the row to have been fetched.** `update` queues its request either way and mirrors the value into local cell state only when the row is active; `validateIsWritable` needs nothing but the sheet properties. Feedback can therefore be written to every data row of a column without reading one of them.
 
+**A queued write outlives a re-fetch in the same run.** Between a fetch and the flush, local state is the live sheet plus the queued writes: a row queued for delete stays gone however it is re-fetched or backfilled, and a cell with a queued value — its own update, else the most recently queued value fill that covers it — keeps that value once the row is fetched. Formula writes stay out of local state, so a re-fetch still shows the old effective value. The flush clears the queue, so a fetch after it integrates the live sheet only.
+
 The corollary is the trap: **"active" means "fetched into local state", not "exists on the sheet".** On the `triggerOnEdit` path only the columnId row is ever fetched, so *no data row is active* — anything working from `rowIndexesActive` writes nothing at all there. `rowIndexesFull`, derived from the table bounds, is what names every data row.
 
 **A read does require it.** `value`/`valueOrEmpty` throw when the row was never fetched, so any decision that _branches_ on a cell's current value carries a prefetch prerequisite the equivalent write doesn't. Queue the fetch in the same cycle, or decide at the call site what an unfetched row means.
