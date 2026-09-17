@@ -21,7 +21,7 @@ Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./R
 - Adding a deletion path: a sheet never ends a run with zero data rows — [`docs/architecture/blank-row.md`](./docs/architecture/blank-row.md).
 - A one-off against the live sheet is a chore — no scratch `src/index.ts` function, no ad-hoc `scripts/` Sheets client (exception: a read-only probe that wraps the dry-run Node host's transport to print raw JSON, deleted in the same turn — [`docs/how-it-runs.md`](./docs/how-it-runs.md)), no deploy-to-run. `gatherRawRequest` obliges an issue naming the missing capability. [`docs/architecture/chores.md`](./docs/architecture/chores.md), [`docs/architecture/raw-request-opening.md`](./docs/architecture/raw-request-opening.md).
 - During design or grilling, write nothing until the user invokes the skill that files it.
-- Don't create `docs/adr/`.
+- Don't create `docs/adr/`. When a skill offers an ADR, propose a DESIGN.md entry (a new principle's instance, or a parked candidate) instead.
 
 ## Delegating
 
