@@ -1,9 +1,5 @@
-import {
-  codebaseNameDelimiter,
-  type CodebaseNameDelimiter,
-  type NotEmpty,
-} from "../00_base/base";
-import { Obj, type KeyedMap } from "../utils/Obj";
+import type { CodebaseNameDelimiter, NotEmpty } from "../00_base/base";
+import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./columnConfigs";
 import type { ColumnConfigStored } from "./makeConfigs";
@@ -165,12 +161,12 @@ export type MakeColumnFullName<
   CN extends ColumnName<SN>,
 > = `${SN}${CodebaseNameDelimiter}${CN & string}`;
 
-const columnConfigsFlat = Obj.flattenTwoLevels(columnConfigs, {
-  keyDelimiter: codebaseNameDelimiter,
-  outerKeyName: "sheetName",
-  innerKeyName: "columnName",
-});
-type ColumnConfigsFlat = typeof columnConfigsFlat;
+type ColumnConfigsFlat = FlattenTwoLevels<
+  ColumnConfigs,
+  CodebaseNameDelimiter,
+  "sheetName",
+  "columnName"
+>;
 type ColumnFullNameAll = keyof ColumnConfigsFlat & string;
 
 // Absolute addressing: one correlated key, so a filtered subset of columns is expressible.

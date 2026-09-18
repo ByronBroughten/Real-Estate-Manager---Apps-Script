@@ -1,6 +1,6 @@
 import type { Merge } from "./merge";
 
-export type Spread<A extends readonly [...any]> = A extends [
+export type Spread<A extends readonly unknown[]> = A extends [
   infer L,
   ...infer R,
 ]

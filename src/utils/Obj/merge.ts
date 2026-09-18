@@ -1,4 +1,5 @@
 type OptionalPropertyNames<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type -- `{}` is the optional-property test
   [K in keyof T]-?: {} extends { [P in K]: T[K] } ? K : never;
 }[keyof T];
 
@@ -16,5 +17,5 @@ export type Merge<L, R> = IdS<
 >;
 
 export function merge<A extends object, B extends object>(a: A, b: B) {
-  return { ...a, ...b } as any as Merge<A, B>;
+  return { ...a, ...b } as unknown as Merge<A, B>;
 }

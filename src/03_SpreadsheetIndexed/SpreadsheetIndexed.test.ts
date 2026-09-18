@@ -13,7 +13,6 @@ import {
 import {
   buildGridRows,
   stubSheetsService,
-  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { FetchTargetIndexed } from "./ClassTypes/StateIndexed";

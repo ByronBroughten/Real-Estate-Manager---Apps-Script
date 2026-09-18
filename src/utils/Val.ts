@@ -2,8 +2,6 @@ import { Dat, type DateSerial } from "./Dat";
 
 class ValidationError extends Error {}
 
-function _emptyTest(): void {}
-
 export function validationError(
   value: unknown,
   notAWhat: string,

@@ -13,7 +13,6 @@ import {
 import {
   buildGridRows,
   stubSheetsService,
-  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import {
   assertNotType,
@@ -253,7 +252,9 @@ describe("Named value accessors", () => {
 
   it("keeps the blank out of the unmarked read's type on a column whose box is unticked", () => {
     const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const cell = column.cell(FILLED_ROW_INDEX);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const row = fetchedOccupancySheet().row(FILLED_ROW_INDEX);
 
     assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial>>(true);
@@ -274,7 +275,9 @@ describe("Named value accessors", () => {
 
   // A plain number would pass an assignment check against DateSerial's supertype.
   it("gives a date column a value type no rent or count can be handed to", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const numberColumn = fetchedOccupancySheet().column("residentCount");
 
     assertNotType<IsExactly<ReturnType<typeof column.value>, number>>(false);
@@ -306,7 +309,9 @@ describe("Named value accessors", () => {
 
   it("keeps the blank in the unmarked read's type on a column whose box is ticked", () => {
     const column = fetchedOccupancySheet().column("nextTermsEndDate");
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const cell = column.cell(BLANK_ROW_INDEX);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
 
     assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial | "">>(true);

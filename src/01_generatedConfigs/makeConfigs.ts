@@ -11,7 +11,7 @@ export function makeImportLine(
   return `import { ${configMagerName} } from "./makeConfigs";`;
 }
 
-export function makeStructuredConfig<S extends unknown, const T extends S>(
+export function makeStructuredConfig<S, const T extends S>(
   _structure: S,
   t: T,
 ): T {

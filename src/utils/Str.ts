@@ -1,21 +1,21 @@
 export type RemoveFirstN<
   T extends string,
   N extends number,
-  ARR extends any[] = [],
+  ARR extends unknown[] = [],
 > = ARR["length"] extends N
   ? T
   : T extends `${string}${infer Rest}`
-    ? RemoveFirstN<Rest, N, [...ARR, any]>
+    ? RemoveFirstN<Rest, N, [...ARR, unknown]>
     : T;
 
 export type TakeFirstN<
   S extends string,
   N extends number,
-  Acc extends any[] = [],
+  Acc extends unknown[] = [],
 > = Acc["length"] extends N
   ? ""
   : S extends `${infer First}${infer Rest}`
-    ? `${First}${TakeFirstN<Rest, N, [...Acc, any]>}`
+    ? `${First}${TakeFirstN<Rest, N, [...Acc, unknown]>}`
     : S;
 
 export type CombineStrings<S1 extends string, S2 extends string> = `${S1}${S2}`;

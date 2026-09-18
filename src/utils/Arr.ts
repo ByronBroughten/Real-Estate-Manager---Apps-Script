@@ -44,33 +44,33 @@ export const Arr = {
     const stringB = String(b);
     return stringA.localeCompare(stringB);
   },
-  sortAscending<A extends unknown>(arr: A[]): A[] {
+  sortAscending<A>(arr: A[]): A[] {
     return [...arr].sort((a, b) => {
       return this.compareForSort(a, b);
     });
   },
-  sortDescending<A extends unknown>(arr: A[]): A[] {
+  sortDescending<A>(arr: A[]): A[] {
     return [...arr].sort((a, b) => {
       return this.compareForSort(b, a);
     });
   },
-  oneOrThrow<V extends any>(arr: readonly V[]): V {
+  oneOrThrow<V>(arr: readonly V[]): V {
     if (arr.length !== 1) {
       throw new Error("There is more than one item in this array.");
     } else return arr[0]!;
   },
-  firstOrThrow<V extends any>(arr: readonly V[]): V {
+  firstOrThrow<V>(arr: readonly V[]): V {
     if (arr.length < 1) {
       throw new Error("This array is empty.");
     } else return arr[0]!;
   },
-  lastOrThrow<V extends any>(arr: readonly V[]): V {
+  lastOrThrow<V>(arr: readonly V[]): V {
     const idx = this.lastIdx(arr);
     if (idx < 0) {
       throw new Error("This array has no last value—it has no value.");
     } else return arr[idx]!;
   },
-  getOnlyItem<T extends any>(arr: T[], arrayOf?: string): T {
+  getOnlyItem<T>(arr: T[], arrayOf?: string): T {
     const strArrayOf = arrayOf ?? "items";
     if (arr.length < 1) {
       throw new ValueNotFoundError(`The array does not have any ${strArrayOf}`);
@@ -89,7 +89,7 @@ export const Arr = {
     if (arr.length === 0) {
       throw new Error("Cannot get next rotating value of an empty array.");
     }
-    const currentIdx = arr.indexOf(currentValue as any);
+    const currentIdx = arr.indexOf(currentValue);
     const nextIdx = (currentIdx + 1) % arr.length;
     return arr[nextIdx]!;
   },
@@ -98,7 +98,7 @@ export const Arr = {
     nextArr[idx] = value;
     return nextArr;
   },
-  rmFirstMatchOrThrow<T extends any>(arr: T[], value: T): T[] {
+  rmFirstMatchOrThrow<T>(arr: T[], value: T): T[] {
     const index = arr.indexOf(value);
     if (index < 0) {
       throw new ValueNotFoundError(`No value in the array matches "${value}".`);
@@ -107,7 +107,7 @@ export const Arr = {
     nextArr.splice(index, 1);
     return nextArr;
   },
-  rmFirstMatchFastMUTATE(arr: any[], value: any): void {
+  rmFirstMatchFastMUTATE(arr: unknown[], value: unknown): void {
     const index = arr.indexOf(value);
     arr.splice(index, 1);
   },
@@ -117,7 +117,7 @@ export const Arr = {
     nextArr.splice(idx, 1);
     return nextArr;
   },
-  replaceValue(arr: any[], value: any, nextValue: any): any[] {
+  replaceValue<T>(arr: T[], value: T, nextValue: T): T[] {
     const nextArr = [...arr];
     while (true) {
       const index = arr.indexOf(value);
@@ -126,7 +126,7 @@ export const Arr = {
     }
     return nextArr;
   },
-  upOneDimension<T extends any>(arr: T[], innerArrsLength: number): T[][] {
+  upOneDimension<T>(arr: T[], innerArrsLength: number): T[][] {
     return arr.reduce(
       (arrOfArrs, item) => {
         if (arrOfArrs.length > 0) {
@@ -139,22 +139,22 @@ export const Arr = {
       [[]] as T[][],
     );
   },
-  indicesOf(arr: any[], value: any): number[] {
+  indicesOf(arr: readonly unknown[], value: unknown): number[] {
     const indices: number[] = [];
     for (const idx in arr) {
       if (arr[idx] === value) indices.push(parseInt(idx));
     }
     return indices;
   },
-  lastIdx(arr: readonly any[]): number {
+  lastIdx(arr: readonly unknown[]): number {
     return arr.length - 1;
   },
-  isLastIdx(arr: readonly any[], idx: number): boolean {
+  isLastIdx(arr: readonly unknown[], idx: number): boolean {
     return this.lastIdx(arr) === idx;
   },
 
   includes<T, U extends T>(arr: readonly U[], elem: T): elem is U {
-    return arr.includes(elem as any);
+    return (arr as readonly T[]).includes(elem);
   },
   numsInOffsetLength(offset: number, length: number) {
     return Array.from({ length }, (_, k) => k + offset);
@@ -191,36 +191,37 @@ export const Arr = {
     if (value === undefined) return false;
     else return true;
   },
-  exclude<A extends any, B extends any>(
-    a: readonly A[],
-    b: readonly B[],
-  ): Exclude<A, B>[] {
-    return a.filter((str) => !b.includes(str as any)) as Exclude<A, B>[];
+  exclude<A, B>(a: readonly A[], b: readonly B[]): Exclude<A, B>[] {
+    return a.filter(
+      (str) => !(b as readonly unknown[]).includes(str),
+    ) as Exclude<A, B>[];
   },
-  excludeStrict<A extends any, B extends A>(
+  excludeStrict<A, B extends A>(
     a: readonly A[],
     ...b: readonly B[]
   ): Exclude<A, B>[] {
-    return a.filter((str) => !b.includes(str as any)) as Exclude<A, B>[];
+    return a.filter((str) => !(b as readonly A[]).includes(str)) as Exclude<
+      A,
+      B
+    >[];
   },
-  extractStrict<A extends any, B extends A>(
+  extractStrict<A, B extends A>(
     a: readonly A[],
     ...b: readonly B[]
   ): Extract<A, B>[] {
     return a.filter((str) => b.includes(str as B)) as Extract<A, B>[];
   },
-  extractOrder<A extends any, B extends A>(
+  extractOrder<A, B extends A>(
     // is this useful?
     a: readonly A[],
     b: readonly B[],
   ): Extract<A, B>[] {
-    return b.filter((str) => a.includes(str as any)) as Extract<A, B>[];
+    return b.filter((str) => a.includes(str)) as Extract<A, B>[];
   },
-  extract<A extends any, B extends any>(
-    a: readonly A[],
-    b: readonly B[],
-  ): Extract<A, B>[] {
-    return a.filter((str) => b.includes(str as any)) as Extract<A, B>[];
+  extract<A, B>(a: readonly A[], b: readonly B[]): Extract<A, B>[] {
+    return a.filter((str) =>
+      (b as readonly unknown[]).includes(str),
+    ) as Extract<A, B>[];
   },
   idxOrThrow<T>(arr: readonly T[], finder: (val: T) => boolean): number {
     const idx = arr.findIndex(finder);
@@ -229,7 +230,7 @@ export const Arr = {
     }
     return idx;
   },
-  validateIdxOrThrow(arr: readonly any[], idx: number): true {
+  validateIdxOrThrow(arr: readonly unknown[], idx: number): true {
     const highestIdx = arr.length - 1;
     if (idx > highestIdx) {
       throw new ValueNotFoundError(
@@ -238,10 +239,7 @@ export const Arr = {
     }
     return true;
   },
-  combineWithoutIdenticals<A extends any, B extends any>(
-    a: A[],
-    b: B[],
-  ): (A | B)[] {
+  combineWithoutIdenticals<A, B>(a: A[], b: B[]): (A | B)[] {
     return [...new Set([...a, ...b])];
   },
 } as const;

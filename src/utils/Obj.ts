@@ -4,7 +4,7 @@ import { Str, type RemoveFirstN, type TextJoin } from "./Str";
 import { Val, type PrimitiveValueName, type PureValue } from "./Val";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
-export type DistributiveOmit<T, K extends keyof T> = T extends any
+export type DistributiveOmit<T, K extends keyof T> = T extends unknown
   ? Omit<T, K>
   : never;
 
@@ -12,7 +12,7 @@ export type StrictPick<T, K extends keyof T> = Pick<T, K>;
 export type StrictPickPartial<T, K extends keyof T> = Partial<Pick<T, K>>;
 export type StrictOmitPartial<T, K extends keyof T> = Partial<Omit<T, K>>;
 export type PickStartsWith<T extends object, S extends string> = {
-  [K in keyof T as K extends `${S}${infer R}` ? K : never]: T[K];
+  [K in keyof T as K extends `${S}${string}` ? K : never]: T[K];
 };
 
 type UnionToIntersection<U> = (
@@ -23,7 +23,7 @@ type UnionToIntersection<U> = (
 
 // Each entry carries its own outer/inner key, so indexing the flat map by a
 // generic key resolves them without a side lookup that would degrade to `any`.
-type FlattenTwoLevels<
+export type FlattenTwoLevels<
   T extends Record<string, Record<string, object>>,
   D extends string,
   ON extends PropertyKey,
@@ -42,38 +42,6 @@ type FlattenTwoLevels<
   }[keyof T]
 >;
 
-export interface FlattenKeys<
-  D extends string,
-  ON extends PropertyKey,
-  IN extends PropertyKey,
-> {
-  keyDelimiter: D;
-  outerKeyName: ON;
-  innerKeyName: IN;
-}
-
-function flattenTwoLevels<
-  T extends Record<string, Record<string, object>>,
-  D extends string,
-  ON extends PropertyKey,
-  IN extends PropertyKey,
->(
-  obj: T,
-  { keyDelimiter, outerKeyName, innerKeyName }: FlattenKeys<D, ON, IN>,
-): FlattenTwoLevels<T, D, ON, IN> {
-  const result: Record<string, unknown> = {};
-  for (const outerKey in obj) {
-    const inner = obj[outerKey];
-    for (const innerKey in inner) {
-      result[`${outerKey}${keyDelimiter}${innerKey}`] = {
-        ...inner[innerKey],
-        [outerKeyName]: outerKey,
-        [innerKeyName]: innerKey,
-      };
-    }
-  }
-  return result as FlattenTwoLevels<T, D, ON, IN>;
-}
 export type InvertObj<O extends Record<string | number, string | number>> = {
   [K in O[keyof O]]: keyof O;
 };
@@ -117,11 +85,11 @@ function toKeyedMap<
   for (const outerKey of Object.keys(obj) as (keyof T)[]) {
     const entry = obj[outerKey] as Record<PropertyKey, unknown>;
     map.set(
-      entry[idField as PropertyKey] as any,
+      entry[idField as PropertyKey] as T[keyof T][F],
       {
         ...entry,
         [nameField]: outerKey,
-      } as any,
+      } as unknown as { [K in keyof T]: T[K] & { [P in N]: K } }[keyof T],
     );
   }
 
@@ -129,9 +97,8 @@ function toKeyedMap<
 }
 export const Obj = {
   toKeyedMap,
-  flattenTwoLevels,
   pushByKey<
-    O extends Record<string, any[]>,
+    O extends Record<string, unknown[]>,
     K extends keyof O,
     V extends O[K][number],
   >(obj: O, key: K, value: V) {
@@ -150,20 +117,23 @@ export const Obj = {
     }
     return key as keyof O;
   },
-  isEmpty(obj: any): boolean {
+  isEmpty(obj: object): boolean {
     return Object.keys(obj).length === 0;
   },
-  isKey<O extends Record<string, any>>(obj: O, value: any): value is keyof O {
-    return this.keys(obj).includes(value);
+  isKey<O extends Record<string, unknown>>(
+    obj: O,
+    value: unknown,
+  ): value is keyof O {
+    return Object.keys(obj).includes(value as string);
   },
-  stringifyEqual(a: any, b: any): boolean {
+  stringifyEqual(a: unknown, b: unknown): boolean {
     return JSON.stringify(a) === JSON.stringify(b);
   },
-  isObjToAny(value: any): value is any {
+  isObjToAny(value: unknown): value is object {
     if (value && typeof value === "object") return true;
     else return false;
   },
-  isObjToRecord(value: any): value is Record<string, any> {
+  isObjToRecord(value: unknown): value is Record<string, unknown> {
     if (value && typeof value === "object") return true;
     else return false;
   },
@@ -232,7 +202,10 @@ export const Obj = {
         key,
         n,
       ) as unknown as keyof RemoveFirstNFromKeys<T, N>;
-      result[newKey] = obj[key] as any;
+      result[newKey] = obj[key] as unknown as RemoveFirstNFromKeys<
+        T,
+        N
+      >[typeof newKey];
     }
     return result;
   },
@@ -251,16 +224,16 @@ export const Obj = {
     );
   },
   keys<O extends object>(obj: O): Keys<O> {
-    return Object.keys(obj) as any;
+    return Object.keys(obj) as unknown as Keys<O>;
   },
   keysDepreciated<O extends object>(obj: O): (keyof O & string)[] {
-    return Object.keys(obj) as any;
+    return Object.keys(obj) as (keyof O & string)[];
   },
   values<T extends object>(t: T): Values<Full<T>> {
-    return Object.values(t) as any;
+    return Object.values(t) as unknown as Values<Full<T>>;
   },
   entries<O extends object>(obj: O): Entries<Full<O>> {
-    return Object.entries(obj) as any;
+    return Object.entries(obj) as unknown as Entries<Full<O>>;
   },
   propKeysOfValue<O extends object, V extends O[keyof O]>(
     obj: O,

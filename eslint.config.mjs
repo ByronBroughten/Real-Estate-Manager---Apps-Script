@@ -5,4 +5,18 @@ import tseslint from "typescript-eslint";
 export default defineConfig(
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  {
+    rules: {
+      // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
+      // Props bags chain as interfaces, so an empty one can name a tier.
+      "@typescript-eslint/no-empty-object-type": [
+        "error",
+        { allowInterfaces: "with-single-extends" },
+      ],
+    },
+  },
 );

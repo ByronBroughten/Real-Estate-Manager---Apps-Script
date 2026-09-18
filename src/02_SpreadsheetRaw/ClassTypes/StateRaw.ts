@@ -27,21 +27,19 @@ export interface SpreadsheetWriteQueueRaw {
   updateRequests: Record<UpdateRequestName, LocalWriteOperation[]>;
 }
 
-const updateRequestNames = [
-  "append",
-  "update",
-  "delete",
-  "sort",
-  "insertColumn",
-  "fill",
-  "findReplace",
-  "deleteConditionalFormat",
-  "addConditionalFormat",
-  "deleteProtectedRange",
-  "addProtectedRange",
-  "raw",
-] as const;
-export type UpdateRequestName = (typeof updateRequestNames)[number];
+export type UpdateRequestName =
+  | "append"
+  | "update"
+  | "delete"
+  | "sort"
+  | "insertColumn"
+  | "fill"
+  | "findReplace"
+  | "deleteConditionalFormat"
+  | "addConditionalFormat"
+  | "deleteProtectedRange"
+  | "addProtectedRange"
+  | "raw";
 
 export type SheetsStateRaw = Map<SheetId, SheetStateRaw>;
 

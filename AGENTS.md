@@ -6,7 +6,7 @@ Open only the section or disclosed doc the task needs.
 
 ## Commands
 
-- `npm run tsc` and `npm test`: always safe. Run both before calling a change done.
+- `npm run tsc`, `npm test` and `npm run lint`: always safe. Run all three before calling a change done.
 - `npm run chore <name>`: a dry run, always safe. The Node host adapter suppresses its writes. `npm run chore <name> -- --send` applies it and needs a yes **naming that chore**.
 - `npm run probe`: read-only raw Sheets JSON. Stdout gets a summary and the full response goes to `.probe/last.json`.
 - `npm run gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/how-it-runs.md`](./docs/how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).

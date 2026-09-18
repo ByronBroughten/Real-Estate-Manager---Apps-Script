@@ -1,6 +1,5 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
-import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";
 
@@ -50,8 +49,7 @@ export type FetchPropsStandardNamed<SN extends SheetName = SheetName> = {
 };
 
 type RowSpecifier = RowSpecifierName | RowSpecifierName[];
-export type RowSpecifierBySchemaName =
-  (typeof rowSpecifierBySchemaNames)[number];
+export type RowSpecifierBySchemaName = Exclude<RowSpecifierName, "activeRows">;
 
 export const rowSpecifierNames = [
   "all",
@@ -64,19 +62,6 @@ export const rowSpecifierNames = [
 ] as const;
 export type RowSpecifierName = (typeof rowSpecifierNames)[number];
 export function isRowName(value: unknown): value is RowSpecifierName {
-  return (
-    typeof value === "string" &&
-    rowSpecifierNames.includes(value as RowSpecifierName)
-  );
-}
-
-const rowSpecifierBySchemaNames = Arr.excludeStrict(
-  rowSpecifierNames,
-  "activeRows" as "activeRows",
-);
-export function isRowSpecifierBySchemaName(
-  value: unknown,
-): value is RowSpecifierName {
   return (
     typeof value === "string" &&
     rowSpecifierNames.includes(value as RowSpecifierName)

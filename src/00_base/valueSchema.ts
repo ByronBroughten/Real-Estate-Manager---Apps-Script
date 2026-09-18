@@ -1,6 +1,6 @@
 import type { NotEmpty } from "./base";
 
-export type ValueSchemaBase<V extends unknown = unknown> = {
+export type ValueSchemaBase<V = unknown> = {
   type: V;
   makeDefault: MakeDefaultValueBase<V>;
   strictValidate: ValidateValueBase<V>;
@@ -10,11 +10,9 @@ export type ValueSchemaBase<V extends unknown = unknown> = {
 
 export type ValueSchemaKey = keyof ValueSchemaBase;
 
-type MakeDefaultValueBase<V extends unknown> = () => V;
-type ValidateValueBase<V extends unknown> = (value: unknown) => NotEmpty<V>;
+type MakeDefaultValueBase<V> = () => V;
+type ValidateValueBase<V> = (value: unknown) => NotEmpty<V>;
 
-export function vsc<V extends unknown>(
-  props: ValueSchemaBase<V>,
-): ValueSchemaBase<V> {
+export function vsc<V>(props: ValueSchemaBase<V>): ValueSchemaBase<V> {
   return props;
 }

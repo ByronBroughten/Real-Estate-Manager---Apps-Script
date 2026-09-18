@@ -1,4 +1,3 @@
-import type { SheetDataValuesAll } from "../../01_generatedConfigs/columnConfigsTypes";
 import { SheetNamedBase } from "../../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
 import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import type { RowNamed } from "../../04_SpreadsheetNamed/RowNamed";
@@ -162,7 +161,9 @@ export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
     }
     const property = this._rowIdsByName("property").rowIdByName(propertyName);
     if (property.found !== "one") {
-      return emptyPlace(this._nameComplaints(property, "property", propertyName));
+      return emptyPlace(
+        this._nameComplaints(property, "property", propertyName),
+      );
     }
     return { propertyId: property.rowId, unitId: "", complaints: [] };
   }

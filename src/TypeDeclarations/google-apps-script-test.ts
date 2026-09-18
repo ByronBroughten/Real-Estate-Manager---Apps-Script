@@ -7,8 +7,6 @@ export function _testCustomTableTypes(spreadsheetId: string) {
   const sheets = Val.assert(ss.sheets, "ss.sheets");
   const firstSheet = Val.assert(sheets[0], "sheets[0]");
 
-  firstSheet.properties?.title;
-
   // Fully typed access to sheet tables array!
   const tables: GoogleAppsScript.Sheets.Schema.Table[] | undefined =
     firstSheet.tables;
