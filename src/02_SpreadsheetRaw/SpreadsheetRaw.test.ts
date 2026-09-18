@@ -12,7 +12,7 @@ import {
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { CellRaw } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
-import type { RowCellChange } from "./ClassTypes/StateRaw";
+import type { CellStateRaw, RowCellChange } from "./ClassTypes/StateRaw";
 import type { RgbColor } from "../00_base/RgbColor";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { ColumnRaw } from "./ColumnRaw";
@@ -2046,6 +2046,10 @@ describe("SpreadsheetRaw navigation", () => {
 });
 
 describe("Raw value types", () => {
+  it("declares CellStateRaw as the cell value and nothing else", () => {
+    assertType<IsExactly<CellStateRaw, { value: CellValue }>>(true);
+  });
+
   it("declares the blank the wire can hold, with nothing validating it away", () => {
     assertType<
       IsExactly<ReturnType<CellRaw<"boolean">["valueOrEmpty"]>, boolean | "">

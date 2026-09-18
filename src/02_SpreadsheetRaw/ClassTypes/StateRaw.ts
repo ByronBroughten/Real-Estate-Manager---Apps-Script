@@ -49,7 +49,7 @@ export interface SheetStateRaw {
   rowStates: RowStatesRaw;
   // A row an append has handed out, so a second append can't reuse it.
   reservedRowIndexes: Set<RowIndex>;
-  columnActiveFacts: ColumnActiveFactsRaw;
+  columnStates: ColumnStatesRaw;
   rowIndexesToFinalize: Set<RowIndex>;
   colIndexesToFinalize: Set<ColIndex>;
   cellsToFinalize: Map<RowIndex, Set<ColIndex>>;
@@ -62,9 +62,19 @@ export interface SheetStateRaw {
 }
 
 export type RowStatesRaw = Map<RowIndex, RowStateRaw>;
-export type RowStateRaw = Map<ColIndex, CellValue>;
+export type RowStateRaw = Map<ColIndex, CellStateRaw>;
+export interface CellStateRaw {
+  value: CellValue;
+}
 
-export type ColumnActiveFactsRaw = Map<ColIndex, ActiveFactsRaw>;
+export type ColumnStatesRaw = Map<ColIndex, ColumnStateRaw>;
+export interface ColumnStateRaw {
+  activeFacts?: ActiveFactsRaw;
+  validationValues?: string[];
+  validationConditionType?: string;
+  // Absent for a column left on Automatic, which is what makes it "untyped".
+  declaredType?: string;
+}
 export interface ActiveFactsRaw {
   isFormula: boolean;
   numberFormatType: string | undefined;
@@ -72,12 +82,7 @@ export interface ActiveFactsRaw {
   topValue: CellValue;
 }
 
-export interface ColumnPropertiesStateRaw {
-  columnValidationValues: ColumnValidationValuesRaw;
-  columnValidationConditionTypes: ColumnValidationConditionTypesRaw;
-  columnDeclaredTypes: ColumnDeclaredTypesRaw;
-}
-export interface KnownTableRaw extends ColumnPropertiesStateRaw {
+export interface KnownTableRaw {
   tableId: string;
   startRowIndex: number; // tableHeaderRowIndex
   endRowIndex: number; // lastRowIndex + 1
@@ -86,10 +91,6 @@ export interface KnownTableRaw extends ColumnPropertiesStateRaw {
   rowIndexesAreStale: boolean;
   firstStaleColIndex: number | null;
 }
-export type ColumnValidationValuesRaw = Map<ColIndex, string[]>;
-export type ColumnValidationConditionTypesRaw = Map<ColIndex, string>;
-// Absent for a column left on Automatic, which is what makes it "untyped".
-export type ColumnDeclaredTypesRaw = Map<ColIndex, string>;
 
 type SheetId = number;
 type RowIndex = number;

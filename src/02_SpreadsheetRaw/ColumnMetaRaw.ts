@@ -39,7 +39,7 @@ export class ColumnMetaRaw<
     return this._activeFacts.topValue;
   }
   private get _activeFacts(): ActiveFactsRaw {
-    const facts = this.columnActiveFacts.get(this.colIndex);
+    const facts = this.columnStates.get(this.colIndex)?.activeFacts;
     if (facts === undefined) {
       throw new Error(
         `No active facts for column index ${this.colIndex} of sheet ${this.sheetLabel}: ` +
@@ -50,7 +50,9 @@ export class ColumnMetaRaw<
     return facts;
   }
   get valueValidationStrings(): string[] {
-    return this.sheet.activeTable.columnValidationValues.get(this.colIndex) ?? [];
+    return (
+      this.sheet.activeTable.columnValidationValues.get(this.colIndex) ?? []
+    );
   }
   get validationConditionType(): string | undefined {
     return this.sheet.activeTable.columnValidationConditionTypes.get(
@@ -88,16 +90,18 @@ export class ColumnMetaRaw<
     return this;
   }
   integrateActiveFacts(cell: GridCellSnapshot | undefined): void {
-    this.columnActiveFacts.set(this.colIndex, {
+    this._ensureColumnState(this.colIndex).activeFacts = {
       isFormula: cell?.isFormula ?? false,
       numberFormatType: cell?.numberFormatType,
       dataValidationConditionType: cell?.dataValidationConditionType,
       topValue: cell?.value ?? "", // from the payload, so a deleted top data row still describes the column
-    });
+    };
   }
   // Gap-filling only, so a fact the payload described always wins.
   ensureActiveFacts(): void {
-    if (this.columnActiveFacts.has(this.colIndex)) return;
+    if (this.columnStates.get(this.colIndex)?.activeFacts !== undefined) {
+      return;
+    }
     if (!this.primary.topCell.isActive) return; // no top data row to sample
     this.integrateActiveFacts(undefined);
   }

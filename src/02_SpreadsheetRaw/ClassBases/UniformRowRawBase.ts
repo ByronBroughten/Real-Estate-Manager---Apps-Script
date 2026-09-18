@@ -32,7 +32,9 @@ export class UniformRowRawBase<
     return this.schema.uniformValueName(this.uniformRowName) as VN;
   }
   get activeValueArr(): (UniformRowValue<UN> | "")[] {
-    return [...this.rowState.values()] as (UniformRowValue<UN> | "")[];
+    return [...this.rowState.values()].map((cellState) => cellState.value) as (
+      UniformRowValue<UN> | ""
+    )[];
   }
   validateUniformState() {
     this.validateUniformRowIndex();

@@ -2,8 +2,7 @@ import type { SheetSnapshot, TableSnapshot } from "../../00_base/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
-  ColumnActiveFactsRaw,
-  ColumnPropertiesStateRaw,
+  ColumnStateRaw,
   RowStateRaw,
   SheetStateRaw,
 } from "../ClassTypes/StateRaw";
@@ -40,7 +39,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         isPrunedToSelection: false,
         rowStates: new Map(),
         reservedRowIndexes: new Set(),
-        columnActiveFacts: new Map(),
+        columnStates: new Map(),
         rowIndexesToFinalize: new Set(),
         colIndexesToFinalize: new Set(),
         cellsToFinalize: new Map(),
@@ -64,6 +63,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
     if (tables.length > 1) {
       this.sheetState.hasExtraTables = true;
       this.sheetState.knownTable = null;
+      this._clearColumnPropertyFields();
       return;
     }
     this.sheetState.hasExtraTables = false;
@@ -83,40 +83,45 @@ export class SheetRawBase extends SpreadsheetRawBase {
     this.sheetState.knownTable = {
       tableId: table.tableId,
       ...range,
-      ...this._parseColumnProperties(table, range.startColumnIndex),
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
       firstStaleColIndex: previous?.firstStaleColIndex ?? null,
     };
+    this._parseColumnProperties(table, range.startColumnIndex);
+  }
+  private _clearColumnPropertyFields(): void {
+    this.sheetState.columnStates.forEach((columnState) => {
+      delete columnState.validationValues;
+      delete columnState.validationConditionType;
+      delete columnState.declaredType;
+    });
   }
   private _parseColumnProperties(
     table: TableSnapshot,
     startColumnIndex: number,
-  ): ColumnPropertiesStateRaw {
-    const state: ColumnPropertiesStateRaw = {
-      columnValidationValues: new Map(),
-      columnValidationConditionTypes: new Map(),
-      columnDeclaredTypes: new Map(),
-    };
+  ): void {
+    this._clearColumnPropertyFields();
     table.columnProperties.forEach((colProps, offset) => {
       // The API omits columnIndex when it's zero, and states it table-relative.
       const colIndex = colProps.columnIndex ?? startColumnIndex + offset;
+      const columnState = this._ensureColumnState(colIndex);
       if (colProps.dataValidationValues.length > 0) {
-        state.columnValidationValues.set(
-          colIndex,
-          colProps.dataValidationValues,
-        );
+        columnState.validationValues = colProps.dataValidationValues;
       }
       if (colProps.dataValidationConditionType !== undefined) {
-        state.columnValidationConditionTypes.set(
-          colIndex,
-          colProps.dataValidationConditionType,
-        );
+        columnState.validationConditionType =
+          colProps.dataValidationConditionType;
       }
       if (colProps.columnType !== undefined) {
-        state.columnDeclaredTypes.set(colIndex, colProps.columnType);
+        columnState.declaredType = colProps.columnType;
       }
     });
-    return state;
+  }
+  protected _ensureColumnState(colIndex: number): ColumnStateRaw {
+    const existing = this.sheetState.columnStates.get(colIndex);
+    if (existing !== undefined) return existing;
+    const created: ColumnStateRaw = {};
+    this.sheetState.columnStates.set(colIndex, created);
+    return created;
   }
   protected get sheetState(): SheetStateRaw {
     return Val.assert(
@@ -130,8 +135,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
       `rowState for row ${rowIndex} on sheetGid ${this.sheetGid}`,
     );
   }
-  get columnActiveFacts(): ColumnActiveFactsRaw {
-    return this.sheetState.columnActiveFacts;
+  get columnStates(): SheetStateRaw["columnStates"] {
+    return this.sheetState.columnStates;
   }
   get sheetLabel(): string {
     return `"${this.sheetState.title ?? "(untitled)"}" (gid ${this.sheetGid})`;

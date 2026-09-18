@@ -146,7 +146,9 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
   }
   private _rowValues(rowIndex: number): CellValue[] {
     const rowState = this.sheet.raw.rowStates.get(rowIndex);
-    return rowState ? [...rowState.values()] : [];
+    return rowState
+      ? [...rowState.values()].map((cellState) => cellState.value)
+      : [];
   }
   private _colIndexByHeader(
     tableHeaderRowIndex: number,
@@ -157,9 +159,12 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     if (!rowState) {
       throw new Error("Spreadsheet Config Table header row is not active.");
     }
-    for (const [colIndex, value] of rowState.entries()) {
-      if (typeof value === "string" && guaranteedHeaders.includes(value)) {
-        colIndexByHeader.set(value, colIndex);
+    for (const [colIndex, cellState] of rowState.entries()) {
+      if (
+        typeof cellState.value === "string" &&
+        guaranteedHeaders.includes(cellState.value)
+      ) {
+        colIndexByHeader.set(cellState.value, colIndex);
       }
     }
     return colIndexByHeader;
@@ -220,6 +225,6 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     if (!rowState || !rowState.has(colIndex)) {
       return "";
     }
-    return rowState.get(colIndex) ?? "";
+    return rowState.get(colIndex)?.value ?? "";
   }
 }

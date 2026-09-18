@@ -60,12 +60,11 @@ export class CellRaw<
         `Cannot set value for row ${this.rowIndex} because it is not active.`,
       );
     }
-    this.rowState.set(this.colIndex, value);
+    this.rowState.set(this.colIndex, { value });
   }
   get isEmpty(): boolean {
     this.validateIsActive();
-    const value = this.rowState.get(this.colIndex);
-    return value === "";
+    return this.cellState.value === "";
   }
   validateIsActive(): void {
     if (this.isActive) return;
@@ -90,7 +89,7 @@ export class CellRaw<
   // An untouched cell holds nothing; Raw reports that rather than judging it.
   valueOrEmpty(): CellValue<VN> | "" {
     this.validateIsActive();
-    return this.rowState.get(this.colIndex) as CellValue<VN> | "";
+    return this.cellState.value as CellValue<VN> | "";
   }
   updateValue(value: CellValue<VN>): this {
     this.sheet.activeTable.assertRowIndexesNotStale();

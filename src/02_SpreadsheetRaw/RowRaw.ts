@@ -13,7 +13,7 @@ export class RowRaw extends RowCommonRaw {
     return this.cell<VN>(colIndex).valueOrEmpty();
   }
   get activeValueArr(): CellValue[] {
-    return [...this.rowState.values()];
+    return [...this.rowState.values()].map((cellState) => cellState.value);
   }
   private validateIsDataRow(): void {
     if (!this.isDataRow) {

@@ -1,9 +1,7 @@
 import { Val } from "../utils/Val";
 import type { SheetRawProps } from "./ClassBases/SheetRawBase";
 import type {
-  ColumnDeclaredTypesRaw,
-  ColumnValidationConditionTypesRaw,
-  ColumnValidationValuesRaw,
+  ColumnStateRaw,
   KnownTableRaw,
   SheetStateRaw,
   StateRaw,
@@ -39,14 +37,14 @@ export class ActiveTableRaw {
   set endColumnIndex(endColumnIndex: number) {
     this._knownTable().endColumnIndex = endColumnIndex;
   }
-  get columnValidationValues(): ColumnValidationValuesRaw {
-    return this._knownTable().columnValidationValues;
+  get columnValidationValues(): Map<number, string[]> {
+    return this._columnFieldMap("validationValues");
   }
-  get columnValidationConditionTypes(): ColumnValidationConditionTypesRaw {
-    return this._knownTable().columnValidationConditionTypes;
+  get columnValidationConditionTypes(): Map<number, string> {
+    return this._columnFieldMap("validationConditionType");
   }
-  get columnDeclaredTypes(): ColumnDeclaredTypesRaw {
-    return this._knownTable().columnDeclaredTypes;
+  get columnDeclaredTypes(): Map<number, string> {
+    return this._columnFieldMap("declaredType");
   }
   get rowIndexesAreStale(): boolean {
     return this._knownTable().rowIndexesAreStale;
@@ -87,6 +85,19 @@ export class ActiveTableRaw {
       this.spreadsheetStateRaw.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
+  }
+  private _columnFieldMap<
+    K extends "validationValues" | "validationConditionType" | "declaredType",
+  >(field: K): Map<number, NonNullable<ColumnStateRaw[K]>> {
+    this._knownTable();
+    const columnFieldMap = new Map<number, NonNullable<ColumnStateRaw[K]>>();
+    this.sheetState.columnStates.forEach((columnState, colIndex) => {
+      const value = columnState[field];
+      if (value !== undefined) {
+        columnFieldMap.set(colIndex, value);
+      }
+    });
+    return columnFieldMap;
   }
   private _knownTable(): KnownTableRaw {
     const knownTable = this.sheetState.knownTable;
