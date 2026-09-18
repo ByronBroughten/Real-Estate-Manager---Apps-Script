@@ -10,7 +10,7 @@ const THRESHOLDS = [
     operator: "This session's context is past ~1M tokens. End it after a written handoff.",
     claude:
       "Context-size nudge: this session is past ~1M tokens. Finish the current step, write a handoff " +
-      "(CLAUDE.md, Handoffs: conclusion, files and line ranges to open, hypotheses ruled out), and tell the operator " +
+      "(docs/agents/planning.md, Handoffs: conclusion, files and line ranges to open, hypotheses ruled out), and tell the operator " +
       "to start a fresh session from it. Do not start new investigation or implementation here.",
   },
   {
@@ -18,7 +18,7 @@ const THRESHOLDS = [
     operator: "This session's context is past ~400k tokens. Consider writing the conclusion down and starting fresh.",
     claude:
       "Context-size nudge: this session is past ~400k tokens. Write down the conclusion so far with file:line. " +
-      "If a diagnosis is finishing, write a handoff (CLAUDE.md, Handoffs) before implementing and recommend a fresh session.",
+      "If a diagnosis is finishing, write a handoff (docs/agents/planning.md, Handoffs) before implementing and recommend a fresh session.",
   },
 ];
 

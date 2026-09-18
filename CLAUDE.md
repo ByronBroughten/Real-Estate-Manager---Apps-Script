@@ -1,58 +1,6 @@
-# Claude instructions for this repo
+@AGENTS.md
 
-Open only the section or disclosed doc the task needs.
+## Claude Code
 
-Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./README.md#naming-vocabulary)); **STYLE.md** is code shape; **CONTEXT.md** is operator-facing words; **DESIGN.md** is why, including deliberate absences. Why the agent tooling (hooks, gates, delegation) is shaped as it is goes in [`docs/agent-behavior-design.md`](./docs/agent-behavior-design.md), never DESIGN.md. Architecture mechanics: [`docs/architecture.md`](./docs/architecture.md) index, then one file. Hosts, MCP, live-sheet commands: [`docs/how-it-runs.md`](./docs/how-it-runs.md). A plan or spec includes the matching prose-file edit in its own scope.
-
-## Guardrails
-
-- Never `clasp push` / `clasp run` / `clasp deploy`, `npm run build`, or `npm run chore <name> -- --send` without asking. A send needs a yes **naming that chore**.
-- `npm run tsc` and a chore dry run (`npm run chore <name>`, no `--send`) are always safe. Dry-run writes cannot reach Google: suppression is in the Node host adapter.
-- `npm run gen:configs` has standing permission only when **all four** hold: no uncommitted changes in `src/01_generatedConfigs/`; none in `src/05_Operators/`; report what changed **and the untyped-column count**; never a blind fix for an unidentified type error. Identified identity and incidental retargets go through [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md); unidentified still means no patch. One regeneration path. Sheet-shape bugs are fixed on the sheet, then regenerated. After any sheet change, read the regenerated entry before building on it. [`docs/generated-data.md`](./docs/generated-data.md).
-- Don't hand-edit `spreadsheetConfig` / `sheetConfigs` / `columnConfigs` / `valueConfigs`. Exception: the config-sheet floor (`sheetConfig`, `columnConfig`, `spreadsheetConfig`, `valueConfig` entries in sheet and column configs).
-- **Read the block, not the file.** Reading `columnConfigs.ts` is denied in `.claude/settings.json`: grep it for the sheet key (`"occupancy":`) and read that object only, with `sheetConfigs.ts` as the sheet list. A long test file is the same — open the `describe` block you are changing. A Bash-read guard enforces this for Bash too: it blocks any `columnConfigs.ts` read except a grep or a range of at most 150 lines, and whole-file dumps of repo files over 150 lines.
-- Understand a class from its implementation. Open the sibling `Foo.test.ts` when changing tests.
-- gsheets MCP reads (`list_spreadsheets`, `list_sheets`, `get_sheet_data`) are always fine; take `spreadsheetId` from `nodeHost.config.json`. Writes need an exact plan (sheet/range/values or new sheet) and a yes. `share_spreadsheet` needs its own yes: who, and at what permission.
-- Implement a spec on a branch named for it (`issue-<n>-<short-slug>`). If other work is already in flight, ask which branch to use. Commit or push only when asked. After a spec is implemented, ask whether to land that branch on `master` (merge and push), and whether to close the implemented issue or sub-issue (`gh issue close <n>`), naming the number.
-- A `backup/*` branch is single-session scaffolding: take one before a history rewrite, retire it once verified, and say so. Surface a stale one with its ahead/behind counts before other git work.
-- No Node/DOM APIs in `src/` (`nodeHost/` included). Node-specific half is `scripts/*.mjs`.
-- Tests: `npm test` is always safe. Co-locate `Foo.test.ts`; GAS fakes live in `src/testSupport/`. Run `tsc` and tests before calling a change done. [`docs/testing.md`](./docs/testing.md).
-- Type-level claims: `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts` — never assignment, never a probe that needed `any`. See STYLE.md "Type modeling".
-- Adding a deletion path: a sheet never ends a run with zero data rows — [`docs/architecture/blank-row.md`](./docs/architecture/blank-row.md).
-- A one-off against the live sheet is a chore — no scratch `src/index.ts` function, no ad-hoc `scripts/` Sheets client (raw Sheets JSON comes from `npm run probe`, which prints a summary and saves the full response to `.probe/last.json` — [`docs/how-it-runs.md`](./docs/how-it-runs.md)), no deploy-to-run. `gatherRawRequest` obliges an issue naming the missing capability. [`docs/architecture/chores.md`](./docs/architecture/chores.md), [`docs/architecture/raw-request-opening.md`](./docs/architecture/raw-request-opening.md).
-- **Handoffs.** Hooks nudge after 15 reads in one turn (write findings down with `file:line`) and once each at ~400k and ~1M context tokens. When a diagnosis finishes in a session that got a size nudge, write a handoff before implementing: the conclusion, the files and line ranges to open, and the hypotheses already ruled out. Post it as an issue comment, or as a file if there is no issue, then recommend a fresh session. A small diagnosis in a lean session doesn't need one.
-- During design or grilling, write nothing until the user invokes the skill that files it.
-- Don't create `docs/adr/`. When a skill offers an ADR, propose a DESIGN.md entry (a new principle's instance, or a parked candidate) instead.
-
-## Delegating
-
-A dispatched agent starts **cold**: it re-pays this file plus every doc it opens. Delegation pays when an agent reads a lot and returns a little — a sweep across many files, a review, research. Handle single-file edits and anything already in context inline.
-
-- **Sweeps go to `repo-explorer`.** It is a read-only project agent on Sonnet that returns `file:line` plus verbatim quotes and locates without diagnosing. Use it when finding the answer means opening about 5+ files. A single lookup stays inline, because each spawn starts cold.
-- **The gates stay in the main session.** A dispatched agent has no one to ask, so it reports the command it would run and the plan behind it; this session gets the yes and runs it. Commits and `gh` writes the same.
-- **Name the doc in the prompt.** Quote the Read-by-task row and the exact file and block; a cold agent handed a topic re-reads the map. Tell it to grep `columnConfigs.ts` by sheet key (`repo-explorer` already knows to).
-- **Cite what comes back.** Require `file:line` and verbatim quotes in the report. A paraphrase has to be re-read to trust, which spends more than the delegation saved.
-- **Parallel agents read; one agent edits.** They share one working tree. `tsc` and tests run once here, after the edits land.
-- **During design or grilling, dispatch reads.** Findings come back in the report; filing waits for the skill the user invokes, `/research` included.
-
-## Read by task
-
-| When | Open |
-| --- | --- |
-| Placing a file, import, or member | README tier table + Naming vocabulary |
-| Writing TypeScript | `STYLE.md` |
-| Endpoint / selector / run state / blank row (operator words) | `CONTEXT.md` |
-| Arguing a gap is missing | `DESIGN.md` |
-| Dispatch | `docs/architecture/endpoint-dispatch.md` |
-| Schema classes | `docs/architecture/schema-classes.md` |
-| Meta / class chains | `docs/architecture/class-chains.md` |
-| Queued writes | `docs/architecture/queued-writes.md` |
-| Round trips | `docs/architecture/round-trips.md` |
-| Type-check cost | `docs/architecture/type-check-cost.md` |
-| Hosts, chore dry run, Sheets probe, MCP, Claude Code hooks | `docs/how-it-runs.md` |
-| Regen `tsc` fails, or hand-written sheet/column keys disagree with generated configs | [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md) |
-| A slash-named skill not in the listing | `.claude/skills/<name>/SKILL.md` (this repo's own), else the `mattpocock-skills` plugin (`mattpocock-skills:<name>`) — never a similarly-named substitute. `grill-with-docs` is grilling + domain-modeling. |
-
-## Agent skills
-
-Issues and specs: GitHub repo `ByronBroughten/Real-Estate-Manager---Apps-Script` via `gh`. See `docs/agents/issue-tracker.md`. Triage labels: `docs/agents/triage-labels.md`. Domain vs architecture vocabulary: `docs/agents/domain.md`.
+- **Delegating** to a subagent, `repo-explorer` included: [`docs/agents/delegation.md`](./docs/agents/delegation.md).
+- **A hook nudge about read count or context size**: write findings down with `file:line`. A finished diagnosis gets a handoff before implementation starts ([`docs/agents/planning.md`](./docs/agents/planning.md#handoffs)).

@@ -69,7 +69,7 @@ export class BashReads {
       return (
         `Bash-read guard: \`${name}\` would read columnConfigs.ts beyond one block. ` +
         `Grep it for the sheet key (e.g. \`"occupancy":\`) with -A to read that object, ` +
-        `or \`sed -n 'a,bp'\` a range of at most ${LARGE_FILE_LINES} lines. (CLAUDE.md, "Read the block, not the file".)`
+        `or \`sed -n 'a,bp'\` a range of at most ${LARGE_FILE_LINES} lines. (AGENTS.md, "Read the block, not the file".)`
       );
     }
     if (read.kind !== "whole" || !this._isGuarded(path)) return null;

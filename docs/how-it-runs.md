@@ -16,7 +16,7 @@ Map fragment disclosed from `README.md`. Read the heading the task needs.
 
 ## ⚠️ Before touching the live spreadsheet or deployment
 
-**Never run these without asking the user first** — they affect a live Apps Script deployment and/or read the user's real Google Sheet:
+**Never run these without asking the user first** — they change a live Apps Script deployment or write to the user's real Google Sheet. Reading the live sheet needs no yes:
 
 - `npm run build` (runs `clasp push`)
 - `clasp push`, `clasp run <anything>`, `clasp deploy`
@@ -29,7 +29,7 @@ Map fragment disclosed from `README.md`. Read the heading the task needs.
 - no uncommitted changes in `src/01_generatedConfigs/`;
 - no uncommitted changes in `src/05_Operators/`, because the command now executes local, possibly unreviewed operator code against the live config sheets;
 - the agent reports what changed and the untyped-column count it returned;
-- it is never a blind fix for a type error whose cause has not been identified.
+- it is never a blind fix for a type error whose cause has not been identified. An identified identity or incidental retarget goes through [retarget-after-gen-configs](../.claude/skills/retarget-after-gen-configs/SKILL.md); an unidentified one still means no patch.
 
 ### The chore and its dry run
 
@@ -70,7 +70,7 @@ npm run probe -- --path sheets.title=Occupancy.protectedRanges   # re-read the l
 
 This project also has a `gsheets` MCP server available, which can read and write the user's real Google Sheet directly — separately from `clasp`/Apps Script.
 
-- **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`.
+- **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`. Take `spreadsheetId` from `nodeHost.config.json`.
 - **They return cell values only, so they cannot see a table's declared column types.** `tables[].columnProperties` — a column's `columnType`, its table-column name, its validation rule — is invisible to `get_sheet_data`, and `include_grid_data` reaches cell formats but not tables. Reading those means calling the Sheets REST API with the `clasp` credential, and `npm run probe` (above) is how to do it. It is read-only and on the allow-list, like a chore dry run. **Ask before running any other script that opens that credential.** The chore runner and `gen:configs` are exempt, because they open it as a routine step and the permissions above cover them.
 - **Any tool that writes — `create_spreadsheet`, `create_sheet`, `update_cells`, `batch_update_cells` — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.
 - **`share_spreadsheet` needs its own, separate confirmation** — it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.
@@ -81,7 +81,7 @@ This project also has a `gsheets` MCP server available, which can read and write
 
 - **`bashReadGuard.mjs`** (PreToolUse, Bash) denies a Bash read of `columnConfigs.ts`, unless it is a grep or a `sed -n` range of at most 150 lines. It also denies a whole-file dump (`cat`, unbounded `head`/`tail`, `sed` without `-n`, `sed -n '1,$p'`) of a repo file over 150 lines. The deny message names the alternative. Piped input, small files, and anything under `.probe/`, `node_modules/` or outside the repo are not guarded. The classifier (`lib/bashReads.mjs`) is shared with the next hook.
 - **`readCountNudge.mjs`** (PostToolUse on Read/Grep/Glob/Bash; reset on UserPromptSubmit) counts reads per turn: Read, Grep, Glob, and Bash calls the classifier calls reads. Edits, `tsc` and test runs are not counted. At 15 reads, and every 10 after, it reminds Claude to write findings down with `file:line`. Each subagent has its own count, and `repo-explorer` is exempt.
-- **`contextSizeNudge.mjs`** (UserPromptSubmit) estimates context from the transcript's last main-thread usage figures, falling back to bytes ÷ 4. It warns once past ~400k and once past ~1M; the second warning asks for a handoff (CLAUDE.md, Handoffs) and a fresh session.
+- **`contextSizeNudge.mjs`** (UserPromptSubmit) estimates context from the transcript's last main-thread usage figures, falling back to bytes ÷ 4. It warns once past ~400k and once past ~1M; the second warning asks for a handoff ([`docs/agents/planning.md`](./agents/planning.md#handoffs)) and a fresh session.
 - **`.claude/agents/repo-explorer.md`** is a read-only (Read/Grep/Glob) Sonnet agent for sweeps of about 5+ files. It returns `file:line` plus verbatim quotes.
 
 Per-session state (the read log and which size warnings have fired) lives in `$TMPDIR/claude-guardrails/`, keyed by session id.

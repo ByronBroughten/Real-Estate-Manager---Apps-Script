@@ -1,6 +1,6 @@
 # Agent-behavior design
 
-Why the agent tooling around this repo is shaped the way it is: the hooks, gates, delegation rules and helper commands that decide how Claude works here. [DESIGN.md](../DESIGN.md) holds the arguments for the codebase itself; this file holds the arguments for how agents work on it. The mechanics live in [`docs/how-it-runs.md`](./how-it-runs.md) ("Claude Code guardrails") and the rules in [CLAUDE.md](../CLAUDE.md).
+Why the agent tooling around this repo is shaped the way it is: the hooks, gates, delegation rules and helper commands that decide how agents work here. [DESIGN.md](../DESIGN.md) holds the arguments for the codebase itself; this file holds the arguments for how agents work on it. The mechanics live in [`docs/how-it-runs.md`](./how-it-runs.md) ("Claude Code guardrails") and the rules in [AGENTS.md](../AGENTS.md) and [`docs/agents/`](./agents/).
 
 The citation rule is the same as DESIGN.md's. Every principle cites the decisions that produced it, by issue where one exists and by commit otherwise. A candidate with only one citation is parked at the bottom until a second decision makes the same argument.
 
@@ -22,13 +22,13 @@ _Instances:_ a chore dry run prints one rendered line per request, and `-- --jso
 
 A dispatched agent starts cold and sees only what it is handed, so it is good at finding things and poor at deciding what they mean. Send out work that reads a lot and returns a little. Keep the diagnosis, and any action that needs the operator's yes, in the session that holds the task context.
 
-_Instances:_ dispatched agents report the command they would run rather than running a gate, and must return `file:line` with verbatim quotes (CLAUDE.md, "Delegating", `d6b8ae3`). `repo-explorer` runs on Sonnet with read-only tools, and it locates code without diagnosing (#53).
+_Instances:_ dispatched agents report the command they would run rather than running a gate, and must return `file:line` with verbatim quotes ([`docs/agents/delegation.md`](./agents/delegation.md), `d6b8ae3`). `repo-explorer` runs on Sonnet with read-only tools, and it locates code without diagnosing (#53).
 
 ### Approval covers what was named, and nothing next to it
 
 A yes is scoped to the specific thing the operator saw. A general go-ahead, or approval of a neighbouring step, is not consent to an action whose effects they didn't see named.
 
-_Instances:_ a `--send` needs a yes that names that chore, and a gsheets write needs an exact sheet, range and values (CLAUDE.md, "Guardrails"). During design or grilling, nothing is written until the operator invokes the skill that files it: approving a design is not approving its publication (`5d5c77c`).
+_Instances:_ a `--send` needs a yes that names that chore, and a gsheets write needs an exact sheet, range and values (AGENTS.md, "Commands"). During design or grilling, nothing is written until the operator invokes the skill that files it: approving a design is not approving its publication (`5d5c77c`).
 
 ## Not yet promoted
 
