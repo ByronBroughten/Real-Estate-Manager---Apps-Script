@@ -14,7 +14,7 @@ The converse is worth knowing, because it looks like the same hazard and isn't: 
 | `SheetSchema<SN>`       | A sheet's traits, its column IDs and names              | Sheet-level and row-level classes   |
 | `ColumnSchema<SN,CN>`   | A column's value name, validation, default, full name   | Column-level and cell-level classes |
 
-`SheetSchema` and `ColumnSchema` are **siblings**, both extending `SpreadsheetBaseSchema`, as does `SpreadsheetSchema`. `ColumnSchema` does *not* extend `SheetSchema` — it reaches its sheet through a `sheet` accessor. That's forced: one accessor named `schema` declared at the Raw root means every narrowing override must be assignable to what the root declares, and the consuming class tree branches (the sheet class, the row base and the column base are siblings under a shared sheet-scoped base), so the two need only be assignable to `SpreadsheetBaseSchema`, never to each other. The Raw root declares `schema` as `SpreadsheetBaseSchema`, and each concrete spreadsheet class (`SpreadsheetRaw`, `SpreadsheetIndexed`, `SpreadsheetNamed`, `Api`) narrows it to `SpreadsheetSchema`.
+`SheetSchema` and `ColumnSchema` are **siblings**, both extending `SpreadsheetBaseSchema`, as does `SpreadsheetSchema`. `ColumnSchema` does *not* extend `SheetSchema` — it reaches its sheet through a `sheet` accessor. That's forced: one accessor named `schema` declared at the Raw root means every narrowing override must be assignable to what the root declares, and the consuming class tree branches (the sheet class, the row base and the column base are siblings under a shared sheet-scoped base), so the two need only be assignable to `SpreadsheetBaseSchema`, never to each other. The Raw root declares `schema` as `SpreadsheetBaseSchema`, and each concrete spreadsheet class (`SpreadsheetRaw`, `SpreadsheetIdentified`, `SpreadsheetNamed`, `Api`) narrows it to `SpreadsheetSchema`.
 
 **One accessor.** Every class that has a schema exposes it as `schema`, narrowed to its level. There is no `baseSchema`, `ssSchema`, `columnSchema` or `sheetSchema` — if you find one, it's a leftover.
 
@@ -23,7 +23,7 @@ The converse is worth knowing, because it looks like the same hazard and isn't: 
 | Built from | Entry point                                | Types                                              |
 | ---------- | ------------------------------------------ | -------------------------------------------------- |
 | Sheet name | `SheetSchema.fromSheetName(sheetName)`     | Full literal precision — column names autocomplete |
-| Sheet GID  | `SheetSchema.fromSheetGid(sheetGid)`       | Widened defaults, as Indexed-tier callers expect   |
+| Sheet GID  | `SheetSchema.fromSheetGid(sheetGid)`       | Widened defaults, as Identified-tier callers expect   |
 | Both names | `ColumnSchema.fromColumnName(sn, cn)`      | Value name resolves to its exact literal           |
 | GID + ID   | `ColumnSchema.fromColumnId(gid, columnId)` | Value name is the full union                       |
 
