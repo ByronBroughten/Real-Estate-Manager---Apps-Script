@@ -141,8 +141,18 @@ export class ColumnIndexed<
     this.raw.removeConditionalFormatRule(rule);
     return this;
   }
+  gridRangeFromRow(startRowIndex: number) {
+    return this.raw.gridRangeFromRow(startRowIndex);
+  }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
     this.raw.addEditWarning(declaration);
+    return this;
+  }
+  addEditWarningFromRow(
+    startRowIndex: number,
+    declaration: EditWarningDeclaration = {},
+  ): this {
+    this.raw.addEditWarningFromRow(startRowIndex, declaration);
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {

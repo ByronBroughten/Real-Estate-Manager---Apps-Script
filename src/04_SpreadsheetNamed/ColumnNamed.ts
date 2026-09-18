@@ -116,8 +116,18 @@ export class ColumnNamed<
     this.indexed.removeConditionalFormatRule(rule);
     return this;
   }
+  gridRangeFromRow(startRowIndex: number) {
+    return this.indexed.gridRangeFromRow(startRowIndex);
+  }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
     this.indexed.addEditWarning(declaration);
+    return this;
+  }
+  addEditWarningFromRow(
+    startRowIndex: number,
+    declaration: EditWarningDeclaration = {},
+  ): this {
+    this.indexed.addEditWarningFromRow(startRowIndex, declaration);
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {

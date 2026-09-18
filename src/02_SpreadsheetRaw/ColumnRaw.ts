@@ -50,6 +50,14 @@ export class ColumnRaw<
       endColumnIndex: this.colIndex + 1,
     };
   }
+  gridRangeFromRow(startRowIndex: number) {
+    return {
+      sheetId: this.sheetGid,
+      startRowIndex,
+      startColumnIndex: this.colIndex,
+      endColumnIndex: this.colIndex + 1,
+    };
+  }
   get cellIndexesActive(): number[] {
     return this.sheet.rowIndexesActive;
   }
@@ -169,6 +177,16 @@ export class ColumnRaw<
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
     this.sheet.addEditWarningAt(this.dataGridRange, declaration);
+    return this;
+  }
+  addEditWarningFromRow(
+    startRowIndex: number,
+    declaration: EditWarningDeclaration = {},
+  ): this {
+    this.sheet.addEditWarningAt(
+      this.gridRangeFromRow(startRowIndex),
+      declaration,
+    );
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {

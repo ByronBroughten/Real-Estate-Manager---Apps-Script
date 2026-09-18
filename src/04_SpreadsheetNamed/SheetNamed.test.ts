@@ -638,4 +638,30 @@ describe("SheetNamed edit warnings and edit locks", () => {
       TOP_ID_CELL_RANGE,
     ]);
   });
+
+  it("adds an open-ended column warning from a start row with no end row", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.column("id").addEditWarningFromRow(TOP_DATA_ROW_INDEX, {
+      description: "open-ended id",
+    });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: {
+              sheetId: OCCUPANCY_GID,
+              startRowIndex: TOP_DATA_ROW_INDEX,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+            description: "open-ended id",
+            warningOnly: true,
+          },
+        },
+      },
+    ]);
+  });
 });
