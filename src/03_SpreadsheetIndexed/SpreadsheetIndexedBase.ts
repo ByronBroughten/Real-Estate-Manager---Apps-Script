@@ -5,30 +5,30 @@ import {
 import type { StateIndexed } from "./ClassTypes/StateIndexed";
 
 export interface SpreadsheetIndexedProps extends SpreadsheetRawProps {
-  indexedState: StateIndexed;
+  spreadsheetStateIndexed: StateIndexed;
 }
 
 export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
-  protected indexedState: StateIndexed;
-  constructor({ indexedState, ...rest }: SpreadsheetIndexedProps) {
+  protected spreadsheetStateIndexed: StateIndexed;
+  constructor({ spreadsheetStateIndexed, ...rest }: SpreadsheetIndexedProps) {
     super(rest);
-    this.indexedState = indexedState;
+    this.spreadsheetStateIndexed = spreadsheetStateIndexed;
   }
   get spreadsheetIndexedProps(): SpreadsheetIndexedProps {
     return {
       ...this.spreadsheetRawProps,
-      indexedState: this.indexedState,
+      spreadsheetStateIndexed: this.spreadsheetStateIndexed,
     };
   }
   static initSpreadsheetIndexedProps(): SpreadsheetIndexedProps {
     return {
       ...SpreadsheetRawBase.initSpreadsheetRawProps(),
-      indexedState: {
+      spreadsheetStateIndexed: {
         sheets: new Map(),
       },
     };
   }
-  get indexedSheetsState(): StateIndexed["sheets"] {
-    return this.indexedState.sheets;
+  get sheetsStateIndexed(): StateIndexed["sheets"] {
+    return this.spreadsheetStateIndexed.sheets;
   }
 }

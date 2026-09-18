@@ -78,7 +78,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     return this.allChangesToSave.get(this.sheetRowId) as RowChangesToSave;
   }
   private _ensureChangesToSaveExists(): void {
-    const sheetChangesToSave = this.spreadsheetState.changesToSave;
+    const sheetChangesToSave = this.spreadsheetStateRaw.changesToSave;
     const sheetRowId = this.sheetRowId;
     if (!sheetChangesToSave.has(sheetRowId)) {
       sheetChangesToSave.set(sheetRowId, {

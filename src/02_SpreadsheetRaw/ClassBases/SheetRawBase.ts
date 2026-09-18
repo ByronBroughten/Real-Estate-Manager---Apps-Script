@@ -30,8 +30,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
     this._ensureSheetState();
   }
   private _ensureSheetState() {
-    if (!this.spreadsheetState.sheets.has(this.sheetGid)) {
-      this.spreadsheetState.sheets.set(this.sheetGid, {
+    if (!this.spreadsheetStateRaw.sheets.has(this.sheetGid)) {
+      this.spreadsheetStateRaw.sheets.set(this.sheetGid, {
         title: null,
         knownTable: null,
         hasExtraTables: false,
@@ -120,7 +120,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
   }
   protected get sheetState(): SheetStateRaw {
     return Val.assert(
-      this.spreadsheetState.sheets.get(this.sheetGid),
+      this.spreadsheetStateRaw.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }

@@ -18,6 +18,7 @@
       "Bash(npx prettier --check *)",
       "Bash(npx eslint *)",
       "Bash(gh label list *)",
+      "Bash(gh issue edit *)",
       "mcp__gsheets__get_sheet_data",
       "mcp__gsheets__list_sheets"
     ],

@@ -9,22 +9,22 @@ import {
 } from "../ClassTypes/StateRaw";
 
 export interface SpreadsheetRawProps {
-  spreadsheetState: StateRaw;
+  spreadsheetStateRaw: StateRaw;
 }
 
 export class SpreadsheetRawBase {
-  protected spreadsheetState: StateRaw;
+  protected spreadsheetStateRaw: StateRaw;
   constructor(props: SpreadsheetRawProps) {
-    this.spreadsheetState = props.spreadsheetState;
+    this.spreadsheetStateRaw = props.spreadsheetStateRaw;
   }
-  protected get sheetsState(): SheetsStateRaw {
-    return this.spreadsheetState.sheets;
+  protected get sheetsStateRaw(): SheetsStateRaw {
+    return this.spreadsheetStateRaw.sheets;
   }
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
   get spreadsheetId(): string {
-    const cached = this.spreadsheetState.spreadsheetId;
+    const cached = this.spreadsheetStateRaw.spreadsheetId;
     if (cached !== null) return cached;
     const ssId = AppsScript.projectProperties("realEstateSpreadsheetId");
     if (!ssId) {
@@ -32,26 +32,26 @@ export class SpreadsheetRawBase {
         "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
       );
     }
-    this.spreadsheetState.spreadsheetId = ssId;
+    this.spreadsheetStateRaw.spreadsheetId = ssId;
     return ssId;
   }
   get fetcherGridRanges(): GridRangeProps[] {
-    return this.spreadsheetState.fetcherGridRanges;
+    return this.spreadsheetStateRaw.fetcherGridRanges;
   }
   get allChangesToSave(): ChangesToSave {
-    return this.spreadsheetState.changesToSave;
+    return this.spreadsheetStateRaw.changesToSave;
   }
   get updateRequests(): StateRaw["updateRequests"] {
-    return this.spreadsheetState.updateRequests;
+    return this.spreadsheetStateRaw.updateRequests;
   }
   get spreadsheetRawProps(): SpreadsheetRawProps {
     return {
-      spreadsheetState: this.spreadsheetState,
+      spreadsheetStateRaw: this.spreadsheetStateRaw,
     };
   }
   static initSpreadsheetRawProps(): SpreadsheetRawProps {
     return {
-      spreadsheetState: {
+      spreadsheetStateRaw: {
         allSheetPropertiesAreFetched: false,
         spreadsheetId: null,
         rawSource: installedRawSource(),

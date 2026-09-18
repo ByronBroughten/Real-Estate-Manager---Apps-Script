@@ -30,7 +30,7 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
     return this.raw.activeSheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
   get sheetsPreppedForFetch(): SheetMetaIndexed[] {
-    return Array.from(this.indexedSheetsState.keys())
+    return Array.from(this.sheetsStateIndexed.keys())
       .map((sheetGid) => this.sheetMeta(sheetGid))
       .filter((sheet) => sheet.isPreppedToFetch);
   }

@@ -25,8 +25,8 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
     };
   }
   private _ensureSheetState() {
-    if (!this.indexedSheetsState.has(this.sheetGid)) {
-      this.indexedSheetsState.set(this.sheetGid, {
+    if (!this.sheetsStateIndexed.has(this.sheetGid)) {
+      this.sheetsStateIndexed.set(this.sheetGid, {
         fetchTargets: [],
         prepFetchConditionalFormats: false,
         prepFetchProtectedRanges: false,
@@ -35,7 +35,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   }
   protected get sheetState(): SheetStateIndexed {
     return Val.assert(
-      this.indexedSheetsState.get(this.sheetGid),
+      this.sheetsStateIndexed.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }

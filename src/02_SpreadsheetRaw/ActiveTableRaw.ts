@@ -11,10 +11,10 @@ import type {
 
 export class ActiveTableRaw {
   readonly sheetGid: number;
-  private readonly spreadsheetState: StateRaw;
-  constructor({ sheetGid, spreadsheetState }: SheetRawProps) {
+  private readonly spreadsheetStateRaw: StateRaw;
+  constructor({ sheetGid, spreadsheetStateRaw }: SheetRawProps) {
     this.sheetGid = sheetGid;
-    this.spreadsheetState = spreadsheetState;
+    this.spreadsheetStateRaw = spreadsheetStateRaw;
   }
   get tableId(): string {
     return this._knownTable().tableId;
@@ -84,7 +84,7 @@ export class ActiveTableRaw {
   }
   private get sheetState(): SheetStateRaw {
     return Val.assert(
-      this.spreadsheetState.sheets.get(this.sheetGid),
+      this.spreadsheetStateRaw.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }
