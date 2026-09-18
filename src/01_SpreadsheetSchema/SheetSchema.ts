@@ -4,14 +4,14 @@ import {
   getSheetColumnIds,
   getSheetColumnNames,
   type ColumnName,
-} from "../../01_generatedConfigs/columnConfigsTypes";
+} from "./columnConfigsTypes";
 import {
   configSheetGids,
   getSheetTraitByGid,
   getSheetTraitByName,
   type SheetConfig,
   type SheetName,
-} from "../../01_generatedConfigs/sheetConfigsTypes";
+} from "./sheetConfigsTypes";
 import { ColumnSchema } from "./ColumnSchema";
 import { SchemaBase } from "./SchemaBase";
 

@@ -1,4 +1,4 @@
-import { makeSheetConfigs } from "./makeConfigs";
+import { makeSheetConfigs } from "../makeConfigs";
 
 export const sheetConfigs = makeSheetConfigs({
   "valueConfig": { "sheetGid": 2119236084, "idPrefix": "vcf", "hasIdColumn": false },

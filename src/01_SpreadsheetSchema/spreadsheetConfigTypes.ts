@@ -1,5 +1,5 @@
 import { validateSpreadsheetLayoutIndexes } from "./makeConfigs";
-import { spreadsheetConfig } from "./spreadsheetConfig";
+import { spreadsheetConfig } from "./generated/spreadsheetConfig";
 
 export type SpreadsheetConfig = typeof spreadsheetConfig;
 export type LiveSpreadsheetConfig = {

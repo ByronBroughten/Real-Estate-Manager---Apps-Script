@@ -1,18 +1,18 @@
 import type {
   UniformRowName,
   UniformRowValueName,
-} from "../00_base/CellValues/cellValues";
+} from "../00_Source/CellValues/cellValues";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-} from "../00_base/RawSource/EditProtection";
+} from "../00_Source/RawSource/EditProtection";
 import type {
   ColumnFullName,
   ColumnName,
   ColumnValueName,
   MakeColumnFullName,
-} from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { ColumnMetaIndexed } from "../03_SpreadsheetIndexed/ColumnMetaIndexed";
 import { ColumnCommonNamed } from "./ClassBases/ColumnCommonNamed";

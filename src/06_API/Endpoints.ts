@@ -2,8 +2,8 @@ import type {
   ColumnFullName,
   ColumnNameFiltered,
   SheetNameOf,
-} from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import type { CheckboxColumnName } from "../05_Operators/CheckboxColumnOperator";
 

@@ -1,6 +1,6 @@
 import { Obj } from "../utils/Obj";
 import type { SheetConfigStored } from "./makeConfigs";
-import { sheetConfigs } from "./sheetConfigs";
+import { sheetConfigs } from "./generated/sheetConfigs";
 
 // Post-sheetConfigs
 export type SheetConfigs = typeof sheetConfigs;

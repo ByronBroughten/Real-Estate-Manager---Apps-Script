@@ -8,7 +8,7 @@ export function makeImportLine(
     | "makeValueConfigs"
     | "makeSpreadsheetConfig",
 ) {
-  return `import { ${configMagerName} } from "./makeConfigs";`;
+  return `import { ${configMagerName} } from "../makeConfigs";`;
 }
 
 export function makeStructuredConfig<S, const T extends S>(

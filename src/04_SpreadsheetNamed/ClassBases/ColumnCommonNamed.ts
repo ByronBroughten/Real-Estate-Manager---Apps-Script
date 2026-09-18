@@ -1,5 +1,5 @@
-import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
+import type { ColumnName } from "../../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ColumnBaseNamed } from "./ColumnBaseNamed";
 
 export abstract class ColumnCommonNamed<

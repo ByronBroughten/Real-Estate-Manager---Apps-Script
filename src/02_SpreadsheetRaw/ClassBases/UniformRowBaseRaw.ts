@@ -2,9 +2,9 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../../00_base/CellValues/cellValues";
+} from "../../00_Source/CellValues/cellValues";
 import type { StrictOmit } from "../../utils/Obj";
-import { uniformRows } from "../Schema/uniformRows";
+import { uniformRows } from "../../01_SpreadsheetSchema/uniformRows";
 import type { RowRawProps } from "./RowBaseRaw";
 import { RowCommonRaw } from "./RowCommonRaw";
 

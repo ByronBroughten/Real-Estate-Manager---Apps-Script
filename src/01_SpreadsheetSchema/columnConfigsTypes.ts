@@ -1,10 +1,10 @@
 import type {
   CodebaseNameDelimiter,
   NotEmpty,
-} from "../00_base/CellValues/cellValues";
+} from "../00_Source/CellValues/cellValues";
 import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
-import { columnConfigs } from "./columnConfigs";
+import { columnConfigs } from "./generated/columnConfigs";
 import type { ColumnConfigStored } from "./makeConfigs";
 import {
   configSheetNames,

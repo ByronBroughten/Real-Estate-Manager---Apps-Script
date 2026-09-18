@@ -1,12 +1,12 @@
-import type { NotEmpty } from "../00_base/CellValues/cellValues";
+import type { NotEmpty } from "../00_Source/CellValues/cellValues";
 import type {
   ColumnName,
   ColumnValue,
   ColumnValueDeclared,
   SheetDataValues,
-} from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { Value, ValueName } from "../01_generatedConfigs/valueSchemas";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import type { Value, ValueName } from "../01_SpreadsheetSchema/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { RowIndexed } from "../03_SpreadsheetIndexed/RowIndexed";
 import { Obj } from "../utils/Obj";

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
-import { spreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfig";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
+import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import {
   stubLogger,
   stubPropertiesService,

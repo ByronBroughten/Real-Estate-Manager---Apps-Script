@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   stubLogger,
   stubPropertiesService,
@@ -71,7 +71,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
 
     expect(fetchedOperator().toFileSource()).toBe(
       [
-        `import { makeSpreadsheetConfig } from "./makeConfigs";`,
+        `import { makeSpreadsheetConfig } from "../makeConfigs";`,
         ``,
         `export const spreadsheetConfig = makeSpreadsheetConfig({`,
         `  idDelimiter: "|",`,

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import {
   stubLogger,
   stubPropertiesService,

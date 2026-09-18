@@ -1,8 +1,8 @@
 import type {
   ColumnConfigsGeneric,
   SheetConfigsBase,
-} from "../01_generatedConfigs/makeConfigs";
-import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
+} from "../01_SpreadsheetSchema/makeConfigs";
+import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 
 function oneLineJsonObject(record: object): string {
   const fields = Object.entries(record).map(

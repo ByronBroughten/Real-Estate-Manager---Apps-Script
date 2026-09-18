@@ -1,8 +1,8 @@
-import { isBaseValueName } from "../00_base/CellValues/baseValueSchemas";
+import { isBaseValueName } from "../00_Source/CellValues/baseValueSchemas";
 import {
   makeImportLine,
   type ValueConfigsBase,
-} from "../01_generatedConfigs/makeConfigs";
+} from "../01_SpreadsheetSchema/makeConfigs";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {

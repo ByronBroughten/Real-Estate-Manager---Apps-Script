@@ -1,8 +1,8 @@
-import type { CellValue } from "../00_base/CellValues/cellValues";
+import type { CellValue } from "../00_Source/CellValues/cellValues";
 import {
   getColumnTraitByName,
   type ColumnName,
-} from "../01_generatedConfigs/columnConfigsTypes";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
-import type { Value, VnToCvn } from "../01_generatedConfigs/valueSchemas";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
+import type { Value, VnToCvn } from "../01_SpreadsheetSchema/valueSchemas";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   blankSheetConfigRow,

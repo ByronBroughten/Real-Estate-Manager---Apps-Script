@@ -3,8 +3,8 @@ import {
   rangeEqual,
   type ConditionalFormatDeclaration,
   type ConditionalFormatRule,
-} from "../../00_base/RawSource/ConditionalFormat";
-import type { GridRangeProps } from "../../00_base/RawSource/RawSource";
+} from "../../00_Source/RawSource/ConditionalFormat";
+import type { GridRangeProps } from "../../00_Source/RawSource/RawSource";
 import { Val } from "../../utils/Val";
 import type { Chore } from "../Chore";
 

@@ -1,8 +1,8 @@
-import type { CellValueName } from "../00_base/CellValues/cellValues";
+import type { CellValueName } from "../00_Source/CellValues/cellValues";
 import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
-} from "../00_base/RawSource/ConditionalFormat";
+} from "../00_Source/RawSource/ConditionalFormat";
 import {
   type EditLockDeclaration,
   type EditWarningDeclaration,
@@ -10,12 +10,12 @@ import {
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
-} from "../00_base/RawSource/EditProtection";
+} from "../00_Source/RawSource/EditProtection";
 import type {
   GridRangeProps,
   SheetSnapshot,
-} from "../00_base/RawSource/RawSource";
-import type { Value } from "../01_generatedConfigs/valueSchemas";
+} from "../00_Source/RawSource/RawSource";
+import type { Value } from "../01_SpreadsheetSchema/valueSchemas";
 import { Arr } from "../utils/Arr";
 import { assertValueAndFormulaExclusive } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";

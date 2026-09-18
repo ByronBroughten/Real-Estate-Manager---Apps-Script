@@ -1,4 +1,4 @@
-import { makeValueConfigs } from "./makeConfigs";
+import { makeValueConfigs } from "../makeConfigs";
 
 export const valueConfigs = makeValueConfigs({
   "chargeOnetimeDescription": [

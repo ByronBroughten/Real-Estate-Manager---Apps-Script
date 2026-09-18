@@ -1,27 +1,27 @@
-import type { NotEmpty } from "../00_base/CellValues/cellValues";
+import type { NotEmpty } from "../00_Source/CellValues/cellValues";
 import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
-} from "../00_base/RawSource/ConditionalFormat";
+} from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   EditProtection,
-} from "../00_base/RawSource/EditProtection";
-import type { RgbColor } from "../00_base/RawSource/RgbColor";
+} from "../00_Source/RawSource/EditProtection";
+import type { RgbColor } from "../00_Source/RawSource/RgbColor";
 import type {
   ColumnIsFormula,
   ColumnName,
   ColumnValue,
   ColumnValueDeclared,
   ColumnValueName,
-} from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type {
   Value,
   ValueName,
   VnToCvn,
-} from "../01_generatedConfigs/valueSchemas";
+} from "../01_SpreadsheetSchema/valueSchemas";
 import type { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { CellBaseNamed } from "./ClassBases/CellBaseNamed";

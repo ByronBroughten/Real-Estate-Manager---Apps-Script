@@ -1,11 +1,11 @@
-import type { OpaqueRawRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
+import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetWriteQueue,
   emptySpreadsheetWriteQueue,
   type FindReplaceProps,
 } from "./ClassTypes/StateRaw";
-import { SpreadsheetSchema } from "./Schema/SpreadsheetSchema";
+import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetFetcherRaw } from "./SpreadsheetRaw/SpreadsheetFetcherRaw";

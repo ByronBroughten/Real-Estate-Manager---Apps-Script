@@ -1,21 +1,21 @@
 import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
-} from "../00_base/RawSource/ConditionalFormat";
+} from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   EditProtection,
   WholeSheetEditLockDeclaration,
   WholeSheetEditWarningDeclaration,
-} from "../00_base/RawSource/EditProtection";
+} from "../00_Source/RawSource/EditProtection";
 import type {
   ColumnName,
   ColumnValue,
   SheetDataValues,
   SheetDataValuesAll,
-} from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";

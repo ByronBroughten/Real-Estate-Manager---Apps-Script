@@ -1,5 +1,5 @@
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import {
   buildGridRows,
   stubSheetsService,

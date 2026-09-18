@@ -1,9 +1,9 @@
 import type {
   GridFetchRange,
   SpreadsheetSnapshot,
-} from "../../00_base/RawSource/RawSource";
+} from "../../00_Source/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
-import { SpreadsheetSchema } from "../Schema/SpreadsheetSchema";
+import { SpreadsheetSchema } from "../../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
 import {
   type MisplacedTable,

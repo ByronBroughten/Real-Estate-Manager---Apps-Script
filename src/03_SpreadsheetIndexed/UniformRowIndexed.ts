@@ -2,13 +2,13 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../00_base/CellValues/cellValues";
+} from "../00_Source/CellValues/cellValues";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   EditProtection,
-} from "../00_base/RawSource/EditProtection";
-import { uniformRows } from "../02_SpreadsheetRaw/Schema/uniformRows";
+} from "../00_Source/RawSource/EditProtection";
+import { uniformRows } from "../01_SpreadsheetSchema/uniformRows";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
 import type { RowIndexedProps } from "./ClassBases/RowBaseIndexed";

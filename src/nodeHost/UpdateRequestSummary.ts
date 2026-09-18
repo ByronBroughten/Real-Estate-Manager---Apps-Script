@@ -1,5 +1,5 @@
-import type { OpaqueRawRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
-import { sheetConfigsIndexed } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
+import { sheetConfigsIndexed } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 
 type GoogleUpdateRequest = OpaqueRawRequest;

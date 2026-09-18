@@ -3,7 +3,7 @@ import {
   validateIdPrefixesAreUnique,
   type IdPrefixLabel,
   type SheetConfigsBase,
-} from "../01_generatedConfigs/makeConfigs";
+} from "../01_SpreadsheetSchema/makeConfigs";
 import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {

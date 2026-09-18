@@ -1,4 +1,4 @@
-import type { ValueName } from "../../01_generatedConfigs/valueSchemas";
+import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
 import { SheetMetaRaw } from "../../02_SpreadsheetRaw/SheetMetaRaw";
 import { ColumnBaseIndexed } from "./ColumnBaseIndexed";
 

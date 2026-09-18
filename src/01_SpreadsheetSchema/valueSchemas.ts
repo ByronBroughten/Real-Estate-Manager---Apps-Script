@@ -3,15 +3,15 @@ import {
   type BaseValueName,
   type BaseValues,
   type BlankOf,
-} from "../00_base/CellValues/baseValueSchemas";
+} from "../00_Source/CellValues/baseValueSchemas";
 import type {
   CellValue,
   CellValueName,
-} from "../00_base/CellValues/cellValues";
+} from "../00_Source/CellValues/cellValues";
 import type {
   ValueSchemaBase,
   ValueSchemaKey,
-} from "../00_base/CellValues/valueSchema";
+} from "../00_Source/CellValues/valueSchema";
 import type { Merge } from "../utils/Obj/merge";
 import type { ValueConfigName, ValueConfigValues } from "./valueConfigsTypes";
 import { makeSchemasFromValueConfig } from "./valueConfigSchemas";

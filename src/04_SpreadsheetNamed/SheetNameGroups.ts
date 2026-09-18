@@ -2,7 +2,7 @@ import {
   configSheetNames,
   getSheetTraitByName,
   type SheetConfigs,
-} from "../01_generatedConfigs/sheetConfigsTypes";
+} from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { type SubType } from "../utils/Obj";
 
 export type SheetNameWithIdColumn = keyof SubType<

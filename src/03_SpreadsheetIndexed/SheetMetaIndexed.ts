@@ -1,4 +1,4 @@
-import type { UniformRowName } from "../00_base/CellValues/cellValues";
+import type { UniformRowName } from "../00_Source/CellValues/cellValues";
 import { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
 import { SheetCommonIndexed } from "./ClassBases/SheetCommonIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";

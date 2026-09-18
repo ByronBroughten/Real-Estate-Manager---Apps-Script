@@ -1,4 +1,4 @@
-import type { ValueName } from "../../01_generatedConfigs/valueSchemas";
+import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
 import type { ColumnIndexedProps } from "./ColumnBaseIndexed";
 import { ColumnBaseIndexed } from "./ColumnBaseIndexed";
 

@@ -1,9 +1,9 @@
 import type {
   CellValue,
   CellValueName,
-} from "../../00_base/CellValues/cellValues";
-import type { ConditionalFormatRule } from "../../00_base/RawSource/ConditionalFormat";
-import type { EditProtection } from "../../00_base/RawSource/EditProtection";
+} from "../../00_Source/CellValues/cellValues";
+import type { ConditionalFormatRule } from "../../00_Source/RawSource/ConditionalFormat";
+import type { EditProtection } from "../../00_Source/RawSource/EditProtection";
 import type {
   AddConditionalFormatRuleOperation,
   AddProtectedRangeOperation,
@@ -20,8 +20,8 @@ import type {
   RawSource,
   SortOperation,
   UpdateCellOperation,
-} from "../../00_base/RawSource/RawSource";
-import type { RgbColor } from "../../00_base/RawSource/RgbColor";
+} from "../../00_Source/RawSource/RawSource";
+import type { RgbColor } from "../../00_Source/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface StateRaw {

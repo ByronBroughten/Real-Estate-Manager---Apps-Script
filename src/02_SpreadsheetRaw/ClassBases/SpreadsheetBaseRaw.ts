@@ -1,5 +1,5 @@
-import { AppsScript } from "../../00_base/GoogleSheets/AppsScript";
-import { installedRawSource } from "../../00_base/RawSource/RawSource";
+import { AppsScript } from "../../00_Source/GoogleSheets/AppsScript";
+import { installedRawSource } from "../../00_Source/RawSource/RawSource";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   emptySpreadsheetFetchQueue,
@@ -7,7 +7,7 @@ import {
   type SheetsStateRaw,
   type StateRaw,
 } from "../ClassTypes/StateRaw";
-import { SchemaBase } from "../Schema/SchemaBase";
+import { SchemaBase } from "../../01_SpreadsheetSchema/SchemaBase";
 
 export interface SpreadsheetRawProps {
   spreadsheetStateRaw: StateRaw;

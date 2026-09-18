@@ -11,7 +11,7 @@ import {
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
-} from "../../00_base/RawSource/EditProtection";
+} from "../../00_Source/RawSource/EditProtection";
 import { SheetCommonRaw } from "../ClassBases/SheetCommonRaw";
 import { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";

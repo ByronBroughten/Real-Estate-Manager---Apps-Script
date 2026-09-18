@@ -1,19 +1,19 @@
-import type { NotEmpty } from "../00_base/CellValues/cellValues";
+import type { NotEmpty } from "../00_Source/CellValues/cellValues";
 import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
-} from "../00_base/RawSource/ConditionalFormat";
+} from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   EditProtection,
-} from "../00_base/RawSource/EditProtection";
+} from "../00_Source/RawSource/EditProtection";
 import {
   toWireValue,
   type Value,
   type ValueName,
   type VnToCvn,
-} from "../01_generatedConfigs/valueSchemas";
+} from "../01_SpreadsheetSchema/valueSchemas";
 import type {
   FindReplaceTerms,
   RowCellChange,

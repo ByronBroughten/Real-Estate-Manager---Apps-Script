@@ -1,5 +1,5 @@
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
-import { SpreadsheetSchema } from "../Schema/SpreadsheetSchema";
+import { SpreadsheetSchema } from "../../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
 
 export interface SheetIdentity {

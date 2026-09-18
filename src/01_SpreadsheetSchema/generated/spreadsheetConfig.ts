@@ -1,4 +1,4 @@
-import { makeSpreadsheetConfig } from "./makeConfigs";
+import { makeSpreadsheetConfig } from "../makeConfigs";
 
 export const spreadsheetConfig = makeSpreadsheetConfig({
   idDelimiter: ":",

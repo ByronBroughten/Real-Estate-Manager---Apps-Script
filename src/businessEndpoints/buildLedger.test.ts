@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { EndpointRun } from "../06_API/EndpointRun";
 import {

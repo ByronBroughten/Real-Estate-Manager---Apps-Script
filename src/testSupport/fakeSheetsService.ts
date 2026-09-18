@@ -1,6 +1,6 @@
-import { GoogleSheetsAPI } from "../00_base/GoogleSheets/GoogleSheetsAPI";
-import { installRawSource } from "../00_base/RawSource/RawSource";
-import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import { GoogleSheetsAPI } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
+import { installRawSource } from "../00_Source/RawSource/RawSource";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 
 type BatchUpdateRequest =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;

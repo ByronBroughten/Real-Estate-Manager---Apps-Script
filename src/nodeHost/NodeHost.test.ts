@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { NodeHost } from "./NodeHost";
-import type { SheetsHttpRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
+import type { SheetsHttpRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 
 const spreadsheetId = "spreadsheet-under-test";
 const leasesGid = 111;

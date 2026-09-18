@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { OpaqueRawRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
-import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
 const occupancyGid = getSheetTraitByName("occupancy", "sheetGid");

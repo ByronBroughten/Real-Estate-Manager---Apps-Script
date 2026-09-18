@@ -1,5 +1,5 @@
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import { ConfigSheetFloor } from "../05_Operators/ConfigSheetFloor";
 import { baseEndpoints } from "../06_API/baseEndpoints";
 import type { Chore } from "./Chore";

@@ -1,11 +1,11 @@
-import { GoogleSheetsAPI } from "../00_base/GoogleSheets/GoogleSheetsAPI";
+import { GoogleSheetsAPI } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import {
   hasInstalledRawSource,
   installRawSource,
-} from "../00_base/RawSource/RawSource";
-import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import type { ColumnSchema } from "../02_SpreadsheetRaw/Schema/ColumnSchema";
-import { SpreadsheetSchema } from "../02_SpreadsheetRaw/Schema/SpreadsheetSchema";
+} from "../00_Source/RawSource/RawSource";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import type { ColumnSchema } from "../01_SpreadsheetSchema/ColumnSchema";
+import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetBaseNamed,

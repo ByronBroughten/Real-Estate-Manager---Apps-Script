@@ -2,7 +2,7 @@ import {
   configSheetGids,
   configSheetNames,
   type SheetName,
-} from "../../01_generatedConfigs/sheetConfigsTypes";
+} from "./sheetConfigsTypes";
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchema } from "./SheetSchema";
 

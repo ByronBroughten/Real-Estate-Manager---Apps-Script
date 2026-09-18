@@ -1,4 +1,4 @@
-import type { ValueSchemaKey } from "../../00_base/CellValues/valueSchema";
+import type { ValueSchemaKey } from "../00_Source/CellValues/valueSchema";
 import {
   getColumnTraitByIndex,
   type ColumnConfig,
@@ -7,12 +7,12 @@ import {
   type ColumnName,
   type ColumnValue,
   type MakeColumnFullName,
-} from "../../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
+} from "./columnConfigsTypes";
+import type { SheetName } from "./sheetConfigsTypes";
 import {
   getValTrait,
   type ValueSchema,
-} from "../../01_generatedConfigs/valueSchemas";
+} from "./valueSchemas";
 import { SchemaBase } from "./SchemaBase";
 import { SheetSchema, type SheetSchemaProps } from "./SheetSchema";
 

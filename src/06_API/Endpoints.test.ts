@@ -2,8 +2,8 @@ import { describe, it } from "vitest";
 import type {
   ColumnFullName,
   ColumnNameFiltered,
-} from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { Endpoint, Endpoints } from "./Endpoints";
 

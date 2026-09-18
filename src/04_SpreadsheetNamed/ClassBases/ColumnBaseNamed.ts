@@ -1,6 +1,6 @@
-import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
-import { ColumnSchema } from "../../02_SpreadsheetRaw/Schema/ColumnSchema";
+import type { ColumnName } from "../../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
+import { ColumnSchema } from "../../01_SpreadsheetSchema/ColumnSchema";
 import {
   SheetBaseNamed,
   type SheetNamedProps,

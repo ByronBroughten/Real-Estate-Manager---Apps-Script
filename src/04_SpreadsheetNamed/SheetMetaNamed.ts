@@ -1,6 +1,6 @@
-import type { UniformRowName } from "../00_base/CellValues/cellValues";
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
+import type { UniformRowName } from "../00_Source/CellValues/cellValues";
+import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
 import { SheetMetaIndexed } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
 import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";

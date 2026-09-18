@@ -4,13 +4,13 @@ import {
   type CodebaseNameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
-} from "../../00_base/CellValues/cellValues";
+} from "../00_Source/CellValues/cellValues";
 import {
   ssConfigGet,
   type LiveSpreadsheetConfig,
-} from "../../01_generatedConfigs/spreadsheetConfigTypes";
-import { Obj } from "../../utils/Obj";
-import { Str } from "../../utils/Str";
+} from "./spreadsheetConfigTypes";
+import { Obj } from "../utils/Obj";
+import { Str } from "../utils/Str";
 import { uniformRows } from "./uniformRows";
 
 export class SchemaBase {

@@ -1,7 +1,7 @@
 import type {
   CellValue,
   CellValueName,
-} from "../../00_base/CellValues/cellValues";
+} from "../../00_Source/CellValues/cellValues";
 import { Obj } from "../../utils/Obj";
 import { CellRaw } from "../CellRaw";
 import {

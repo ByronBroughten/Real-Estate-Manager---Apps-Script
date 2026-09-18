@@ -1,7 +1,7 @@
 import {
   clearSpreadsheetConfigOverlay,
   overlaySpreadsheetConfig,
-} from "../01_generatedConfigs/spreadsheetConfigTypes";
+} from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,

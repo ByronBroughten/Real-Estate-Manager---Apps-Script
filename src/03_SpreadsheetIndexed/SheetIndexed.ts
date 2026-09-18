@@ -1,15 +1,15 @@
 import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
-} from "../00_base/RawSource/ConditionalFormat";
+} from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   EditProtection,
   WholeSheetEditLockDeclaration,
   WholeSheetEditWarningDeclaration,
-} from "../00_base/RawSource/EditProtection";
-import type { Value } from "../01_generatedConfigs/valueSchemas";
+} from "../00_Source/RawSource/EditProtection";
+import type { Value } from "../01_SpreadsheetSchema/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { SheetCommonIndexed } from "./ClassBases/SheetCommonIndexed";

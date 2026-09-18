@@ -1,4 +1,4 @@
-import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,

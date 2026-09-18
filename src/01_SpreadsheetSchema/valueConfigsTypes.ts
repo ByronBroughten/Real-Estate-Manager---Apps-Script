@@ -1,5 +1,5 @@
 import { Obj } from "../utils/Obj";
-import { valueConfigs } from "./valueConfigs";
+import { valueConfigs } from "./generated/valueConfigs";
 
 export type ValueConfigs = typeof valueConfigs;
 export type ValueConfigName = keyof ValueConfigs;

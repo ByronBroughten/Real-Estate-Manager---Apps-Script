@@ -1,4 +1,4 @@
-import type { CellValue } from "../../00_base/CellValues/cellValues";
+import type { CellValue } from "../../00_Source/CellValues/cellValues";
 import type { RowStateRaw } from "../ClassTypes/StateRaw";
 import { SheetBaseRaw, type SheetRawProps } from "./SheetBaseRaw";
 

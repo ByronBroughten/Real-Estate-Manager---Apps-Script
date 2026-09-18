@@ -2,10 +2,10 @@ import {
   protectionRangeEqual,
   type ModelableEditProtection,
   type ProtectionGridRange,
-} from "../00_base/RawSource/EditProtection";
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
-import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+} from "../00_Source/RawSource/EditProtection";
+import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";

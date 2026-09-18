@@ -1,11 +1,11 @@
-import type { CellValue } from "../00_base/CellValues/cellValues";
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
+import type { CellValue } from "../00_Source/CellValues/cellValues";
+import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   makeImportLine,
   validateSpreadsheetLayoutIndexes,
   type UniformRowLayoutKey,
-} from "../01_generatedConfigs/makeConfigs";
-import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
+} from "../01_SpreadsheetSchema/makeConfigs";
+import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {

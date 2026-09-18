@@ -1,6 +1,6 @@
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
-import { SheetSchema } from "../02_SpreadsheetRaw/Schema/SheetSchema";
+import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { SheetSchema } from "../01_SpreadsheetSchema/SheetSchema";
 import { SheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";

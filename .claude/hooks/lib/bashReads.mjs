@@ -4,7 +4,7 @@ import { homedir } from "node:os";
 import { isAbsolute, join, relative, resolve, sep } from "node:path";
 
 export const LARGE_FILE_LINES = 150;
-const COLUMN_CONFIGS = join("src", "01_generatedConfigs", "columnConfigs.ts");
+const COLUMN_CONFIGS = join("src", "01_SpreadsheetSchema", "generated", "columnConfigs.ts");
 const UNGUARDED_DIRS = ["node_modules", ".git", ".probe", "dist", "coverage"];
 const WRAPPERS = new Set(["sudo", "command", "env", "time", "nice", "nohup", "exec", "builtin"]);
 const WHOLE_FILE_COMMANDS = new Set(["cat", "nl", "bat", "less", "more", "tac"]);

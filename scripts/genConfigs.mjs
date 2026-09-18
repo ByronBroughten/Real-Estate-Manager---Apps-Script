@@ -69,7 +69,7 @@ class ConfigFilesGenerator {
 
 function configsPath(base) {
   return fileURLToPath(
-    new URL(`../src/01_generatedConfigs/${base}.ts`, import.meta.url),
+    new URL(`../src/01_SpreadsheetSchema/generated/${base}.ts`, import.meta.url),
   );
 }
 

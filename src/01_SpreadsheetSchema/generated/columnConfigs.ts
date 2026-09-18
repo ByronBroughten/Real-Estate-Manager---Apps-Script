@@ -1,4 +1,4 @@
-import { makeColumnConfigs } from "./makeConfigs";
+import { makeColumnConfigs } from "../makeConfigs";
 
 export const columnConfigs = makeColumnConfigs({
   "addOccCharge": {

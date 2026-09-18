@@ -1,8 +1,8 @@
 import {
   makeImportLine,
   type ColumnConfigsGeneric,
-} from "../01_generatedConfigs/makeConfigs";
-import { type ValueName } from "../01_generatedConfigs/valueSchemas";
+} from "../01_SpreadsheetSchema/makeConfigs";
+import { type ValueName } from "../01_SpreadsheetSchema/valueSchemas";
 import { Str } from "../utils/Str";
 import { columnConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";

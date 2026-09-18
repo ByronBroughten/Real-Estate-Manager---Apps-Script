@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
-import { spreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfig";
-import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
-import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   stubLogger,
   stubPropertiesService,

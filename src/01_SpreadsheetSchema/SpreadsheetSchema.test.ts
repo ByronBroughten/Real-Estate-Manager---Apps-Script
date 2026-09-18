@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { columnConfigs } from "../../01_generatedConfigs/columnConfigs";
+import { columnConfigs } from "./generated/columnConfigs";
 import type {
   ColumnFullName,
   ColumnName,
@@ -11,14 +11,14 @@ import type {
   SheetNameOf,
   ValueNameOf,
   ValueOf,
-} from "../../01_generatedConfigs/columnConfigsTypes";
+} from "./columnConfigsTypes";
 import {
   configSheetGids,
   getSheetTraitByName,
   type SheetName,
-} from "../../01_generatedConfigs/sheetConfigsTypes";
-import type { ValueName } from "../../01_generatedConfigs/valueSchemas";
-import { assertType, type IsExactly } from "../../testSupport/typeAssertions";
+} from "./sheetConfigsTypes";
+import type { ValueName } from "./valueSchemas";
+import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import { ColumnSchema } from "./ColumnSchema";
 import { SheetSchema } from "./SheetSchema";
 import { SpreadsheetSchema } from "./SpreadsheetSchema";

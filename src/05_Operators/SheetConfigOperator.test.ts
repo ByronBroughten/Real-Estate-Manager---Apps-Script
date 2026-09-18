@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
+import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import {
   stubLogger,
   stubPropertiesService,
@@ -11,7 +11,7 @@ import {
 import { SheetConfigOperator } from "./SheetConfigOperator";
 
 // Real committed columnId strings for the Sheet Config sheet's own columns
-// (src/01_generatedConfigs/columnConfigs.ts) — using these rather than
+// (src/01_SpreadsheetSchema/generated/columnConfigs.ts) — using these rather than
 // made-up ids means the fixture stays honest to what the production code
 // actually resolves column names through.
 const sc = columnConfigs.sheetConfig;

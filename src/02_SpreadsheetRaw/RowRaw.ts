@@ -1,7 +1,7 @@
 import type {
   CellValue,
   CellValueName,
-} from "../00_base/CellValues/cellValues";
+} from "../00_Source/CellValues/cellValues";
 import type { RowRawProps } from "./ClassBases/RowBaseRaw";
 import { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 
