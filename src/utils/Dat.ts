@@ -84,7 +84,7 @@ export const Dat = {
     });
   },
   fromYmd({ year, month, day }: Ymd): DateSerial {
-    const utcMs = this._utcMsFromYmd({ year, month, day });
+    const utcMs = utcMsFromYmd({ year, month, day });
     const serial = (utcMs - this.sheetsEpochUtcMs) / this.msPerDay;
     if (!isSerial(serial)) {
       throw new Error(`${year}-${month}-${day} is not a real date.`);
@@ -170,7 +170,7 @@ export const Dat = {
         current.month <= endMonthYear.month)
     ) {
       monthYears.push(current);
-      current = this._nextMonthYear(current);
+      current = nextMonthYear(current);
     }
     return monthYears;
   },
@@ -184,15 +184,13 @@ export const Dat = {
     return this.firstAndLastDayOfMonthYear(this.monthYear(date));
   },
   firstDayOfNextMonth(date: DateSerial): DateSerial {
-    return this.firstDayOfMonthYear(this._nextMonthYear(this.monthYear(date)));
+    return this.firstDayOfMonthYear(nextMonthYear(this.monthYear(date)));
   },
   firstDayOfMonthYear({ month, year }: MonthYear): DateSerial {
     return this.fromYmd({ month, year, day: 1 });
   },
   lastDayOfMonthYear(monthYear: MonthYear): DateSerial {
-    return this.dayBefore(
-      this.firstDayOfMonthYear(this._nextMonthYear(monthYear)),
-    );
+    return this.dayBefore(this.firstDayOfMonthYear(nextMonthYear(monthYear)));
   },
   firstAndLastDayOfMonthYear(monthYear: MonthYear): FirstAndLastOfMonth {
     return {
@@ -201,7 +199,7 @@ export const Dat = {
     };
   },
   monthRanges(term: DateRange): MonthRange[] {
-    this._validateDateOrder(term);
+    validateDateOrder(term);
     return this.monthYearsOnAndBetween({
       startMonthYear: this.monthYear(term.startDate),
       endMonthYear: this.monthYear(term.endDate),
@@ -225,14 +223,9 @@ export const Dat = {
   proratedMonthlyAmount(amount: number, range: DateRange): number {
     return this.proratedMonthlyProportion(range) * amount;
   },
-  _validateDateOrder({ startDate, endDate }: DateRange): void {
-    if (validate(startDate) > validate(endDate)) {
-      throw new Error("Start date cannot be after end date.");
-    }
-  },
   // Hands back the month it proved, so the caller doesn't derive it twice.
   _validateSingleMonth(range: DateRange): MonthYear {
-    this._validateDateOrder(range);
+    validateDateOrder(range);
     const start = this.monthYear(range.startDate);
     const end = this.monthYear(range.endDate);
     if (start.month !== end.month || start.year !== end.year) {
@@ -242,32 +235,40 @@ export const Dat = {
     }
     return start;
   },
-  _nextMonthYear({ month, year }: MonthYear): MonthYear {
-    if (month === 12) {
-      return { month: 1, year: year + 1 };
-    }
-    return { month: month + 1, year };
-  },
   _daysInMonthYear(monthYear: MonthYear): number {
     const { firstOfMonth, lastOfMonth } =
       this.firstAndLastDayOfMonthYear(monthYear);
     return lastOfMonth - firstOfMonth + 1;
   },
-  // NaN when the calendar has no such day, so fromYmd throws instead of overflowing.
-  _utcMsFromYmd({ year, month, day }: Ymd): number {
-    if (![year, month, day].every((part) => Number.isInteger(part))) {
-      return NaN;
-    }
-    const utc = new Date(0);
-    utc.setUTCFullYear(year, month - 1, day);
-    utc.setUTCHours(0, 0, 0, 0);
-    if (
-      utc.getUTCFullYear() !== year ||
-      utc.getUTCMonth() !== month - 1 ||
-      utc.getUTCDate() !== day
-    ) {
-      return NaN;
-    }
-    return utc.getTime();
-  },
 };
+
+// NaN when the calendar has no such day, so fromYmd throws instead of overflowing.
+function utcMsFromYmd({ year, month, day }: Ymd): number {
+  if (![year, month, day].every((part) => Number.isInteger(part))) {
+    return NaN;
+  }
+  const utc = new Date(0);
+  utc.setUTCFullYear(year, month - 1, day);
+  utc.setUTCHours(0, 0, 0, 0);
+  if (
+    utc.getUTCFullYear() !== year ||
+    utc.getUTCMonth() !== month - 1 ||
+    utc.getUTCDate() !== day
+  ) {
+    return NaN;
+  }
+  return utc.getTime();
+}
+
+function nextMonthYear({ month, year }: MonthYear): MonthYear {
+  if (month === 12) {
+    return { month: 1, year: year + 1 };
+  }
+  return { month: month + 1, year };
+}
+
+function validateDateOrder({ startDate, endDate }: DateRange): void {
+  if (validate(startDate) > validate(endDate)) {
+    throw new Error("Start date cannot be after end date.");
+  }
+}

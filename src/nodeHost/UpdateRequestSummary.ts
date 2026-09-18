@@ -50,146 +50,126 @@ export class UpdateRequestSummary {
     return JSON.stringify({ requests: this.requests }, null, 2);
   }
   get lines(): string[] {
-    return this.requests.map((request) => this._line(request));
+    return this.requests.map(line);
   }
-  private _line(request: GoogleUpdateRequest): string {
-    const verb = this._verb(request);
-    if (verb === null) return "(empty request)";
-    return [verb.padEnd(26), this._body(verb, request)].join(" ");
+}
+
+function line(request: GoogleUpdateRequest): string {
+  const verb = requestVerb(request);
+  if (verb === null) return "(empty request)";
+  return [verb.padEnd(26), body(verb, request)].join(" ");
+}
+
+function requestVerb(request: GoogleUpdateRequest): RequestVerb | null {
+  return Obj.keys(request)[0] ?? null;
+}
+
+// Every request kind the framework models owes this a line format.
+function body(verb: RequestVerb, request: GoogleUpdateRequest): string {
+  switch (verb) {
+    case "updateCells":
+      return requestBody.updateCells(request.updateCells);
+    case "repeatCell":
+      return requestBody.repeatCell(request.repeatCell);
+    case "appendCells":
+      return requestBody.appendCells(request.appendCells);
+    case "insertDimension":
+      return requestBody.dimension(request.insertDimension?.range, "insert");
+    case "deleteDimension":
+      return requestBody.dimension(request.deleteDimension?.range, "delete");
+    case "sortRange":
+      return requestBody.sortRange(request.sortRange);
+    case "findReplace":
+      return requestBody.findReplace(request.findReplace);
+    case "pasteData":
+      return requestBody.pasteData(request.pasteData);
+    case "addConditionalFormatRule":
+      return requestBody.addConditionalFormat(request.addConditionalFormatRule);
+    case "deleteConditionalFormatRule":
+      return requestBody.deleteConditionalFormat(
+        request.deleteConditionalFormatRule,
+      );
+    case "addProtectedRange":
+      return requestBody.addProtectedRange(request.addProtectedRange);
+    case "deleteProtectedRange":
+      return requestBody.deleteProtectedRange(request.deleteProtectedRange);
+    default:
+      return requestBody.raw(request, verb);
   }
-  private _verb(request: GoogleUpdateRequest): RequestVerb | null {
-    return Obj.keys(request)[0] ?? null;
-  }
-  // Every request kind the framework models owes this a line format.
-  private _body(verb: RequestVerb, request: GoogleUpdateRequest): string {
-    switch (verb) {
-      case "updateCells":
-        return this._updateCellsBody(request.updateCells);
-      case "repeatCell":
-        return this._repeatCellBody(request.repeatCell);
-      case "appendCells":
-        return this._appendCellsBody(request.appendCells);
-      case "insertDimension":
-        return this._dimensionBody(request.insertDimension?.range, "insert");
-      case "deleteDimension":
-        return this._dimensionBody(request.deleteDimension?.range, "delete");
-      case "sortRange":
-        return this._sortRangeBody(request.sortRange);
-      case "findReplace":
-        return this._findReplaceBody(request.findReplace);
-      case "pasteData":
-        return this._pasteDataBody(request.pasteData);
-      case "addConditionalFormatRule":
-        return this._addConditionalFormatBody(request.addConditionalFormatRule);
-      case "deleteConditionalFormatRule":
-        return this._deleteConditionalFormatBody(
-          request.deleteConditionalFormatRule,
-        );
-      case "addProtectedRange":
-        return this._addProtectedRangeBody(request.addProtectedRange);
-      case "deleteProtectedRange":
-        return this._deleteProtectedRangeBody(request.deleteProtectedRange);
-      default:
-        return this._rawBody(request, verb);
-    }
-  }
-  private _updateCellsBody(
+}
+
+const requestBody = {
+  updateCells(
     updateCells: GoogleAppsScript.Sheets.Schema.UpdateCellsRequest | undefined,
   ): string {
-    return this._columns(
-      this._rangeLabel(updateCells?.range),
-      `${this._cellCount(updateCells?.rows)} cell(s)`,
-      this._valuesLabel(updateCells?.rows),
-      this._fieldsLabel(updateCells?.fields),
+    return columns(
+      label.range(updateCells?.range),
+      `${cellCount(updateCells?.rows)} cell(s)`,
+      label.values(updateCells?.rows),
+      label.fields(updateCells?.fields),
     );
-  }
-  private _repeatCellBody(
+  },
+  repeatCell(
     repeatCell: GoogleAppsScript.Sheets.Schema.RepeatCellRequest | undefined,
   ): string {
     const range = repeatCell?.range;
-    return this._columns(
-      this._rangeLabel(range),
-      `${this._rangeCellCount(range)} cell(s)`,
-      this._valuesLabel([{ values: [repeatCell?.cell ?? {}] }]),
-      this._fieldsLabel(repeatCell?.fields),
+    return columns(
+      label.range(range),
+      `${rangeCellCount(range)} cell(s)`,
+      label.values([{ values: [repeatCell?.cell ?? {}] }]),
+      label.fields(repeatCell?.fields),
     );
-  }
-  private _appendCellsBody(
+  },
+  appendCells(
     appendCells: GoogleAppsScript.Sheets.Schema.AppendCellsRequest | undefined,
   ): string {
-    return this._columns(
-      this._sheetLabel(appendCells?.sheetId),
+    return columns(
+      label.sheet(appendCells?.sheetId),
       `${appendCells?.rows?.length ?? 0} row(s)`,
-      this._valuesLabel(appendCells?.rows),
-      this._fieldsLabel(appendCells?.fields),
+      label.values(appendCells?.rows),
+      label.fields(appendCells?.fields),
     );
-  }
-  private _dimensionBody(
+  },
+  dimension(
     range: DimensionRange | undefined,
     verb: "insert" | "delete",
   ): string {
     const dimension = (range?.dimension ?? "ROWS").toLowerCase();
     const startIndex = range?.startIndex ?? 0;
     const endIndex = range?.endIndex ?? startIndex;
-    const span = this._dimensionSpanLabel(dimension, startIndex, endIndex);
-    return this._columns(
-      `${this._sheetLabel(range?.sheetId)}!${span}`,
+    const span = label.dimensionSpan(dimension, startIndex, endIndex);
+    return columns(
+      `${label.sheet(range?.sheetId)}!${span}`,
       `${verb} ${endIndex - startIndex} ${dimension}`,
       "",
       "",
     );
-  }
-  private _dimensionSpanLabel(
-    dimension: string,
-    startIndex: number,
-    endIndex: number,
-  ): string {
-    if (dimension === "columns") {
-      return `${colLetters(startIndex)}:${colLetters(endIndex - 1)}`;
-    }
-    return `${startIndex + 1}:${endIndex}`;
-  }
-  private _sortRangeBody(
+  },
+  sortRange(
     sortRange: GoogleAppsScript.Sheets.Schema.SortRangeRequest | undefined,
   ): string {
     const spec = sortRange?.sortSpecs?.[0];
     const column = colLetters(spec?.dimensionIndex ?? 0);
     const order = (spec?.sortOrder ?? "ASCENDING").toLowerCase();
-    return this._columns(
-      this._rangeLabel(sortRange?.range),
+    return columns(
+      label.range(sortRange?.range),
       `by column ${column} ${order}`,
       "",
       "",
     );
-  }
+  },
   // The count lives in a response a dry run never gets, so the line can't claim one.
-  private _findReplaceBody(
+  findReplace(
     findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
   ): string {
-    return this._columns(
-      this._findReplaceScopeLabel(findReplace),
+    return columns(
+      label.findReplaceScope(findReplace),
       "matching cells",
       `"${findReplace?.find ?? ""}" → "${findReplace?.replacement ?? ""}"`,
-      this._findReplaceFlagsLabel(findReplace),
+      label.findReplaceFlags(findReplace),
     );
-  }
-  private _findReplaceScopeLabel(
-    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
-  ): string {
-    if (findReplace?.allSheets) return "every sheet";
-    if (findReplace?.sheetId !== undefined) {
-      return `${this._sheetLabel(findReplace.sheetId)}!all`;
-    }
-    return this._rangeLabel(findReplace?.range);
-  }
-  private _findReplaceFlagsLabel(
-    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
-  ): string {
-    const flags = findReplaceFlags.filter((flag) => findReplace?.[flag]);
-    if (flags.length === 0) return "(no flags)";
-    return flags.join(", ");
-  }
-  private _pasteDataBody(
+  },
+  pasteData(
     pasteData: GoogleAppsScript.Sheets.Schema.PasteDataRequest | undefined,
   ): string {
     const coordinate = pasteData?.coordinate;
@@ -203,92 +183,91 @@ export class UpdateRequestSummary {
       startColumnIndex,
       endColumnIndex: startColumnIndex + 1,
     };
-    return this._columns(
-      this._rangeLabel(range),
+    return columns(
+      label.range(range),
       `${rowCount} row(s)`,
       firstRfc4180Field(pasteData?.data ?? "").replaceAll("\n", " "),
       pasteData?.type ?? "",
     );
-  }
-  private _addConditionalFormatBody(
+  },
+  addConditionalFormat(
     add:
       | GoogleAppsScript.Sheets.Schema.AddConditionalFormatRuleRequest
       | undefined,
   ): string {
     const range = add?.rule?.ranges?.[0];
     const conditionType = add?.rule?.booleanRule?.condition?.type ?? "";
-    return this._columns(this._rangeLabel(range), "prepend", conditionType, "");
-  }
-  private _deleteConditionalFormatBody(
+    return columns(label.range(range), "prepend", conditionType, "");
+  },
+  deleteConditionalFormat(
     remove:
       | GoogleAppsScript.Sheets.Schema.DeleteConditionalFormatRuleRequest
       | undefined,
   ): string {
-    return this._columns(
-      this._sheetLabel(remove?.sheetId),
+    return columns(
+      label.sheet(remove?.sheetId),
       `index ${remove?.index ?? ""}`,
       "",
       "",
     );
-  }
-  private _addProtectedRangeBody(
+  },
+  addProtectedRange(
     add: GoogleAppsScript.Sheets.Schema.AddProtectedRangeRequest | undefined,
   ): string {
     const protection = add?.protectedRange;
     const kind = protection?.warningOnly === true ? "warning" : "lock";
-    return this._columns(
-      this._rangeLabel(protection?.range),
+    return columns(
+      label.range(protection?.range),
       kind,
       protection?.description ?? "",
       "",
     );
-  }
-  private _deleteProtectedRangeBody(
+  },
+  deleteProtectedRange(
     remove:
       GoogleAppsScript.Sheets.Schema.DeleteProtectedRangeRequest | undefined,
   ): string {
-    return this._columns(
+    return columns(
       "(no sheet)",
       `id ${remove?.protectedRangeId ?? ""}`,
       "",
       "",
     );
-  }
+  },
   // The opening's own line format: no type layer to read it through.
-  private _rawBody(request: GoogleUpdateRequest, verb: RequestVerb): string {
+  raw(request: GoogleUpdateRequest, verb: RequestVerb): string {
     const inner = request[verb];
     const json = JSON.stringify(inner ?? {});
-    return this._columns(
-      this._sheetLabel(this._sheetIdOf(inner)),
+    return columns(
+      label.sheet(sheetIdOf(inner)),
       "",
       json.length > layoutLimits.maxRawChars
         ? `${json.slice(0, layoutLimits.maxRawChars)}…`
         : json,
       "",
     );
-  }
+  },
+};
+
+function columns(
+  subject: string,
+  count: string,
+  values: string,
+  fields: string,
+): string {
+  return [
+    subject.padEnd(layoutLimits.subjectWidth),
+    count.padEnd(layoutLimits.countWidth),
+    values,
+    fields,
+  ]
+    .join(" ")
+    .trimEnd();
+}
+
+const label = {
   // An absent bound really is open-ended, so it renders open rather than as one cell.
-  private _columns(
-    subject: string,
-    count: string,
-    values: string,
-    fields: string,
-  ): string {
-    return [
-      subject.padEnd(layoutLimits.subjectWidth),
-      count.padEnd(layoutLimits.countWidth),
-      values,
-      fields,
-    ]
-      .join(" ")
-      .trimEnd();
-  }
-  // An unmodelled request may still name a sheet, and usually does.
-  private _sheetIdOf(inner: object | undefined): number | undefined {
-    const sheetId = (inner as { sheetId?: unknown } | undefined)?.sheetId;
-    return typeof sheetId === "number" ? sheetId : undefined;
-  }
-  private _rangeLabel(range: GoogleGridRange | undefined): string {
+  range(range: GoogleGridRange | undefined): string {
     if (!range) return "(no range)";
     const hasBound =
       range.startRowIndex !== undefined ||
@@ -296,44 +275,83 @@ export class UpdateRequestSummary {
       range.startColumnIndex !== undefined ||
       range.endColumnIndex !== undefined;
     if (!hasBound) {
-      return `${this._sheetLabel(range.sheetId)}!sheet`;
+      return `${label.sheet(range.sheetId)}!sheet`;
     }
     const { startRowIndex = 0, endRowIndex, endColumnIndex } = range;
     const startCell = `${colLetters(range.startColumnIndex ?? 0)}${startRowIndex + 1}`;
     const endColumn =
       endColumnIndex === undefined ? "" : colLetters(endColumnIndex - 1);
-    return `${this._sheetLabel(range.sheetId)}!${startCell}:${endColumn}${endRowIndex ?? ""}`;
-  }
-  private _sheetLabel(sheetGid: number | undefined): string {
-    if (sheetGid === undefined) return "(no sheet)";
-    return sheetConfigsIndexed.get(sheetGid)?.sheetName ?? `gid ${sheetGid}`;
-  }
-  private _rangeCellCount(range: GoogleGridRange | undefined): number {
-    const {
-      startRowIndex = 0,
-      endRowIndex = 0,
-      startColumnIndex = 0,
-    } = range ?? {};
-    const endColumnIndex = range?.endColumnIndex ?? startColumnIndex + 1;
-    return (endRowIndex - startRowIndex) * (endColumnIndex - startColumnIndex);
-  }
-  private _cellCount(rows: RowData[] | undefined): number {
-    return (rows ?? []).reduce(
-      (count, row) => count + (row.values?.length ?? 0),
-      0,
-    );
-  }
-  private _valuesLabel(rows: RowData[] | undefined): string {
+    return `${label.sheet(range.sheetId)}!${startCell}:${endColumn}${endRowIndex ?? ""}`;
+  },
+  values(rows: RowData[] | undefined): string {
     const values = (rows ?? []).flatMap((row) =>
       (row.values ?? []).map((cell) => valueLabel(cell.userEnteredValue)),
     );
     if (values.length === 0) return "(no values)";
     const shown = values.slice(0, layoutLimits.maxSampleValues).join(", ");
     return values.length > layoutLimits.maxSampleValues ? `${shown}, …` : shown;
-  }
-  private _fieldsLabel(fields: string | undefined): string {
+  },
+  fields(fields: string | undefined): string {
     return fields ? `[${fields}]` : "";
+  },
+  sheet(sheetGid: number | undefined): string {
+    if (sheetGid === undefined) return "(no sheet)";
+    return sheetConfigsIndexed.get(sheetGid)?.sheetName ?? `gid ${sheetGid}`;
+  },
+  dimensionSpan(
+    dimension: string,
+    startIndex: number,
+    endIndex: number,
+  ): string {
+    if (dimension === "columns") {
+      return `${colLetters(startIndex)}:${colLetters(endIndex - 1)}`;
+    }
+    return `${startIndex + 1}:${endIndex}`;
+  },
+  findReplaceScope(
+    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
+  ): string {
+    if (findReplace?.allSheets) return "every sheet";
+    if (findReplace?.sheetId !== undefined) {
+      return `${label.sheet(findReplace.sheetId)}!all`;
+    }
+    return label.range(findReplace?.range);
+  },
+  findReplaceFlags(
+    findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
+  ): string {
+    const flags = findReplaceFlags.filter((flag) => findReplace?.[flag]);
+    if (flags.length === 0) return "(no flags)";
+    return flags.join(", ");
+  },
+};
+
+function cellCount(rows: RowData[] | undefined): number {
+  return (rows ?? []).reduce(
+    (count, row) => count + (row.values?.length ?? 0),
+    0,
+  );
+}
+
+function rangeCellCount(range: GoogleGridRange | undefined): number {
+  const {
+    startRowIndex = 0,
+    endRowIndex = 0,
+    startColumnIndex = 0,
+  } = range ?? {};
+  const endColumnIndex = range?.endColumnIndex ?? startColumnIndex + 1;
+  return (endRowIndex - startRowIndex) * (endColumnIndex - startColumnIndex);
+}
+
+function colLetters(colIndex: number): string {
+  let remaining = colIndex + 1;
+  let letters = "";
+  while (remaining > 0) {
+    const rest = (remaining - 1) % 26;
+    letters = String.fromCharCode(65 + rest) + letters;
+    remaining = Math.floor((remaining - 1) / 26);
   }
+  return letters;
 }
 
 function rfc4180RecordCount(data: string): number {
@@ -381,6 +399,12 @@ function firstRfc4180Field(data: string): string {
   return field;
 }
 
+// An unmodelled request may still name a sheet, and usually does.
+function sheetIdOf(inner: object | undefined): number | undefined {
+  const sheetId = (inner as { sheetId?: unknown } | undefined)?.sheetId;
+  return typeof sheetId === "number" ? sheetId : undefined;
+}
+
 function valueLabel(userEnteredValue: UserEnteredValue): string {
   if (!userEnteredValue) return "(no value)";
   const { stringValue, numberValue, boolValue, formulaValue } =
@@ -390,15 +414,4 @@ function valueLabel(userEnteredValue: UserEnteredValue): string {
   if (boolValue !== undefined) return String(boolValue);
   if (formulaValue !== undefined) return formulaValue;
   return "(no value)";
-}
-
-function colLetters(colIndex: number): string {
-  let remaining = colIndex + 1;
-  let letters = "";
-  while (remaining > 0) {
-    const rest = (remaining - 1) % 26;
-    letters = String.fromCharCode(65 + rest) + letters;
-    remaining = Math.floor((remaining - 1) / 26);
-  }
-  return letters;
 }

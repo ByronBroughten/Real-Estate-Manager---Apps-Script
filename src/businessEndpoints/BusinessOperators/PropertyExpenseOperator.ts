@@ -90,7 +90,7 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
       }
     });
     converted.forEach((stagingRow) => stagingRow.delete());
-    return this._report({
+    return addReport({
       convertedCount: converted.length,
       entryCount: stagingRows.length,
       refusals,
@@ -118,7 +118,7 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
     const place = this._place(stagingRow);
     const splitReceipt = this._splitReceipt(stagingRow);
     const complaints = [
-      ...this._blankComplaints(stagingRow),
+      ...blankComplaints(stagingRow),
       ...place.complaints,
       ...splitReceipt.complaints,
     ];
@@ -138,15 +138,6 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
       notes: stagingRow.value("notes"),
     });
     return [];
-  }
-  // The sheet's own Empty value allowed ticks are the only record of what a row must hold.
-  private _blankComplaints(stagingRow: StagingRow): string[] {
-    return stagingRow
-      .blankRequiredColumnNames()
-      .map(
-        (columnName) =>
-          `${stagingRow.cell(columnName).schema.trait("header")} is blank`,
-      );
   }
   private _place(stagingRow: StagingRow): ExpensePlace {
     const unitName = stagingRow.value("unitName");
@@ -238,20 +229,6 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
     }
     return `no row of ${title} is named "${name}"`;
   }
-  private _report({
-    convertedCount,
-    entryCount,
-    refusals,
-  }: ExpenseReport): ActionReturn {
-    if (refusals.size === 0) {
-      return `Added ${countOfExpenses(convertedCount)}.`;
-    }
-    return {
-      runState: "warning",
-      message: `Added ${convertedCount} of ${entryCount} rows; the rest say why in their own cells.`,
-      rows: refusals,
-    };
-  }
   private _rowIdsByName(
     sheetName: NamedSheetName,
   ): RowIdByNameOperator<NamedSheetName, "name"> {
@@ -263,10 +240,6 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
   }
 }
 
-function emptyPlace(complaints: string[]): ExpensePlace {
-  return { propertyId: "", unitId: "", complaints };
-}
-
 // Every complaint about the row, in the row's own cell, so no run has to be repeated to find the next one.
 function refusalReport(complaints: string[]): RunReport {
   return {
@@ -275,7 +248,36 @@ function refusalReport(complaints: string[]): RunReport {
   };
 }
 
+function addReport({
+  convertedCount,
+  entryCount,
+  refusals,
+}: ExpenseReport): ActionReturn {
+  if (refusals.size === 0) {
+    return `Added ${countOfExpenses(convertedCount)}.`;
+  }
+  return {
+    runState: "warning",
+    message: `Added ${convertedCount} of ${entryCount} rows; the rest say why in their own cells.`,
+    rows: refusals,
+  };
+}
+
 function countOfExpenses(count: number): string {
   if (count === 1) return "1 expense";
   return `${count} expenses`;
+}
+
+// The sheet's own Empty value allowed ticks are the only record of what a row must hold.
+function blankComplaints(stagingRow: StagingRow): string[] {
+  return stagingRow
+    .blankRequiredColumnNames()
+    .map(
+      (columnName) =>
+        `${stagingRow.cell(columnName).schema.trait("header")} is blank`,
+    );
+}
+
+function emptyPlace(complaints: string[]): ExpensePlace {
+  return { propertyId: "", unitId: "", complaints };
 }

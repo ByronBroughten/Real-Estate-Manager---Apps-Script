@@ -71,7 +71,7 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
     ].sort(compareLines);
     const pageLines = cutPageLines(allLines, startDate);
     this._rebuildPage(pageLines);
-    return this._runStatusMessage(occupancyRow.value("name"), {
+    return runStatusMessage(occupancyRow.value("name"), {
       allLines,
       pageLines,
       startDate,
@@ -145,7 +145,7 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
       const charge = chargesById.get(reduction.value("chargeId"));
       // A reduction of another occupancy's charge belongs on another ledger.
       if (charge?.valueOrEmpty("occupancyId") !== occupancyId) return [];
-      return [this._reductionLine(reduction, charge)];
+      return [reductionLine(reduction, charge)];
     });
   }
   // Blank-tolerant, so a half-filled charge on another occupancy can't fail this build.
@@ -157,44 +157,11 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
       return byId;
     }, new Map<string, RowNamed<"occCharge">>());
   }
-  private _reductionLine(
-    reduction: RowNamed<"occChargeReduce">,
-    charge: RowNamed<"occCharge">,
-  ): LedgerLine {
-    const description = reduction.value("description");
-    const date = reduction.value("date");
-    const amount = reduction.value("amount");
-    if (description === "Forgiveness") {
-      return {
-        kind: "reduction",
-        date,
-        issuer: issuers.propertyManagement,
-        description,
-        charge: -amount,
-        payment: "",
-        notes: "",
-      };
-    } else if (description === "Security deposit") {
-      return {
-        kind: "reduction",
-        date,
-        issuer: issuers.securityDeposit,
-        description: charge.value("description"),
-        charge: "",
-        payment: amount,
-        notes: "",
-      };
-    } else {
-      throw new Error(
-        `Charge reduction description "${String(description)}" has no ledger line.`,
-      );
-    }
-  }
   private _paymentLines(occupancyId: string): LedgerLine[] {
     const allocations = this.ss
       .sheet("occPayAllocation")
       .rowsFiltered({ occupancyId, filledOut: "Yes" });
-    return this._payments(allocations).map((payment) => ({
+    return paymentsFromAllocations(allocations).map((payment) => ({
       kind: "payment",
       date: payment.date,
       issuer: payment.issuer,
@@ -203,25 +170,6 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
       payment: payment.amount,
       notes: "",
     }));
-  }
-  // One line per payment, so a tenant can check the page against one bank transaction.
-  private _payments(
-    allocations: RowNamed<"occPayAllocation">[],
-  ): PaymentFromAllocations[] {
-    const byPaymentId = allocations.reduce((payments, allocation) => {
-      const paymentId = allocation.value("paymentId");
-      const amount = allocation.value("amount");
-      const payment = payments.get(paymentId) ?? {
-        date: allocation.value("paymentDate"),
-        issuer: paymentIssuer(allocation),
-        description: allocation.value("formOfPayment"),
-        amount: 0,
-      };
-      payment.amount += amount;
-      payments.set(paymentId, payment);
-      return payments;
-    }, new Map<string, PaymentFromAllocations>());
-    return [...byPaymentId.values()];
   }
   private _rebuildPage(lines: LedgerLine[]): void {
     const { sheet } = this;
@@ -237,39 +185,6 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
       });
     });
   }
-  private _runStatusMessage(
-    occupancyName: string,
-    { allLines, pageLines, startDate }: RunStatusProps,
-  ): string {
-    if (allLines.length === 0) {
-      return `No charges or payments for ${occupancyName}.`;
-    }
-    const counts = `${countPhrase(countOfKind(pageLines, "charge"), "charge")}, ${countPhrase(countOfKind(pageLines, "payment"), "payment")}, ${countPhrase(countOfKind(pageLines, "reduction"), "reduction")}`;
-    if (startDate === "") {
-      return `Built ledger for ${occupancyName}: ${counts}.`;
-    }
-    return `Built ledger for ${occupancyName}, from ${Dat.toDayMonthYear(startDate)}: ${counts}.`;
-  }
-}
-
-function chargeLine(charge: RowNamed<"occCharge">): LedgerLine {
-  return {
-    kind: "charge",
-    date: charge.value("date"),
-    issuer: issuers.propertyManagement,
-    description: charge.value("description"),
-    charge: charge.value("amount"),
-    payment: "",
-    notes: charge.value("notes"),
-  };
-}
-
-// The tenant's own money says so plainly rather than repeating their name down the page.
-function paymentIssuer(allocation: RowNamed<"occPayAllocation">): string {
-  if (allocation.value("payerCategory") === "Household") {
-    return issuers.household;
-  }
-  return allocation.value("payerName");
 }
 
 function compareLines(a: LedgerLine, b: LedgerLine): number {
@@ -317,6 +232,20 @@ function netAmountOwed(lines: LedgerLine[]): number {
   }, 0);
 }
 
+function runStatusMessage(
+  occupancyName: string,
+  { allLines, pageLines, startDate }: RunStatusProps,
+): string {
+  if (allLines.length === 0) {
+    return `No charges or payments for ${occupancyName}.`;
+  }
+  const counts = `${countPhrase(countOfKind(pageLines, "charge"), "charge")}, ${countPhrase(countOfKind(pageLines, "payment"), "payment")}, ${countPhrase(countOfKind(pageLines, "reduction"), "reduction")}`;
+  if (startDate === "") {
+    return `Built ledger for ${occupancyName}: ${counts}.`;
+  }
+  return `Built ledger for ${occupancyName}, from ${Dat.toDayMonthYear(startDate)}: ${counts}.`;
+}
+
 function countOfKind(
   lines: LedgerLine[],
   kind: Exclude<LedgerLine["kind"], "priorBalance">,
@@ -326,4 +255,78 @@ function countOfKind(
 
 function countPhrase(count: number, singular: string): string {
   return `${count} ${singular}${count === 1 ? "" : "s"}`;
+}
+
+function chargeLine(charge: RowNamed<"occCharge">): LedgerLine {
+  return {
+    kind: "charge",
+    date: charge.value("date"),
+    issuer: issuers.propertyManagement,
+    description: charge.value("description"),
+    charge: charge.value("amount"),
+    payment: "",
+    notes: charge.value("notes"),
+  };
+}
+
+function reductionLine(
+  reduction: RowNamed<"occChargeReduce">,
+  charge: RowNamed<"occCharge">,
+): LedgerLine {
+  const description = reduction.value("description");
+  const date = reduction.value("date");
+  const amount = reduction.value("amount");
+  if (description === "Forgiveness") {
+    return {
+      kind: "reduction",
+      date,
+      issuer: issuers.propertyManagement,
+      description,
+      charge: -amount,
+      payment: "",
+      notes: "",
+    };
+  } else if (description === "Security deposit") {
+    return {
+      kind: "reduction",
+      date,
+      issuer: issuers.securityDeposit,
+      description: charge.value("description"),
+      charge: "",
+      payment: amount,
+      notes: "",
+    };
+  } else {
+    throw new Error(
+      `Charge reduction description "${String(description)}" has no ledger line.`,
+    );
+  }
+}
+
+// One line per payment, so a tenant can check the page against one bank transaction.
+function paymentsFromAllocations(
+  allocations: RowNamed<"occPayAllocation">[],
+): PaymentFromAllocations[] {
+  const byPaymentId = allocations.reduce((payments, allocation) => {
+    const paymentId = allocation.value("paymentId");
+    const amount = allocation.value("amount");
+    const payment = payments.get(paymentId) ?? {
+      date: allocation.value("paymentDate"),
+      issuer: paymentIssuer(allocation),
+      description: allocation.value("formOfPayment"),
+      amount: 0,
+    };
+    payment.amount += amount;
+    payments.set(paymentId, payment);
+    return payments;
+  }, new Map<string, PaymentFromAllocations>());
+  return [...byPaymentId.values()];
+}
+
+// The tenant's own money says so plainly rather than repeating their name down the page.
+function paymentIssuer(allocation: RowNamed<"occPayAllocation">): string {
+  if (allocation.value("payerCategory") === "Household") {
+    return issuers.household;
+  }
+  return allocation.value("payerName");
 }
