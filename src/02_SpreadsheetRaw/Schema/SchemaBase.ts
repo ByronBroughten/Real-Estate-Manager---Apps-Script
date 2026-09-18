@@ -8,7 +8,6 @@ import {
 import {
   ssConfigGet,
   type LiveSpreadsheetConfig,
-  type SpreadsheetConfig,
 } from "../../01_generatedConfigs/spreadsheetConfigTypes";
 import { Obj } from "../../utils/Obj";
 import { Str } from "../../utils/Str";
@@ -42,13 +41,8 @@ export class SchemaBase {
   ): `${S1}${CodebaseNameDelimiter}${S2}` {
     return `${name1}${this.codebaseNameDelimiter}${name2}`;
   }
-  private ssConfig<K extends keyof SpreadsheetConfig>(
-    key: K,
-  ): LiveSpreadsheetConfig[K] {
-    return ssConfigGet(key);
-  }
   get idHeader(): LiveSpreadsheetConfig["idHeader"] {
-    return this.ssConfig("idHeader");
+    return ssConfigGet("idHeader");
   }
   titleToName(sheetTitle: string): string {
     return Str.sentenceToCamelCase(sheetTitle);
@@ -106,7 +100,10 @@ export class SchemaBase {
     }
   }
   get tableStartLabel(): string {
-    return this.positionLabel(this.tableHeaderRowIndex, this.startTableColIndex);
+    return this.positionLabel(
+      this.tableHeaderRowIndex,
+      this.startTableColIndex,
+    );
   }
   positionLabel(rowIndex: number, colIndex: number): string {
     return `row ${rowIndex + 1}, column ${this.columnLetter(colIndex)}`;
@@ -127,7 +124,7 @@ export class SchemaBase {
     return rowIndex >= this.topDataRowIdx;
   }
   get startTableColIndex(): number {
-    return this.ssConfig("startTableColIndexBase0");
+    return ssConfigGet("startTableColIndexBase0");
   }
   get colIdRowIndex(): number {
     return getUniformRowIndexes().columnId;
@@ -142,7 +139,7 @@ export class SchemaBase {
     return this.tableHeaderRowIndex + 1;
   }
   get idDelimiter(): string {
-    return this.ssConfig("idDelimiter");
+    return ssConfigGet("idDelimiter");
   }
   makeColIdFromPrefix(idPrefix: string): string {
     return this.makeId("c", this._makeSheetDimensionId(idPrefix));
@@ -157,17 +154,17 @@ export class SchemaBase {
     return this.makeUniqueId(idPrefix);
   }
   makeId(prefix: unknown, suffix: unknown): string {
-    return `${prefix}${this.ssConfig("idDelimiter")}${suffix}`;
+    return `${prefix}${ssConfigGet("idDelimiter")}${suffix}`;
   }
   makeUniqueId(prefix: unknown): string {
-    const uniqueIdBase = this._makeUniqueIdBase();
+    const uniqueIdBase = makeUniqueIdBase();
     return this.makeId(prefix, uniqueIdBase);
   }
   splitId(id: string): { prefix: string; suffix: string } {
-    const arr = id.split(this.ssConfig("idDelimiter"));
+    const arr = id.split(ssConfigGet("idDelimiter"));
     if (arr.length !== 2) {
       throw new Error(
-        `Invalid id: ${id}. Must be in the format "prefix${this.ssConfig(
+        `Invalid id: ${id}. Must be in the format "prefix${ssConfigGet(
           "idDelimiter",
         )}suffix"`,
       );
@@ -175,21 +172,22 @@ export class SchemaBase {
     const [prefix, suffix] = arr;
     if (!prefix || !suffix) {
       throw new Error(
-        `Invalid id: ${id}. Must be in the format "prefix${this.ssConfig(
+        `Invalid id: ${id}. Must be in the format "prefix${ssConfigGet(
           "idDelimiter",
         )}suffix"`,
       );
     }
     return { prefix, suffix };
   }
-  private _makeUniqueIdBase(): string {
-    const length = 7;
-    const alphabet =
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-      result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-    }
-    return result;
+}
+
+function makeUniqueIdBase(): string {
+  const length = 7;
+  const alphabet =
+    "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_-";
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
   }
+  return result;
 }

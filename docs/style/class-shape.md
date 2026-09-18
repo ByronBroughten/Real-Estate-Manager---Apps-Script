@@ -86,6 +86,16 @@ The criterion bites on the derived fact, not on row or cell addressing: `topCell
 3. Public behavior methods
 4. Private helpers, `_`-prefixed — ordered so a helper used by only one caller sits immediately after that caller (detail follows the step that needs it); a helper reused by several later methods comes first, in the order of its first use. (`_initSheetGidsApiAccesses`/`_isSheetGidApiAccesses`, each used by multiple methods, sit first in `ColumnConfigOperator`; `_isActiveColumnId`, called only by `_pruneColumnRows`, sits directly after it.)
 
+## A helper that never reads `this` is a module function
+
+A private helper with zero references to `this` depends on nothing the instance holds, so it leaves the class: an unexported function below the class, with the moved functions ordered by their first use in the class. Every private helper left in the class body then depends on instance state, and a reader can tell the two kinds of helper apart without reading each body. Keeping it unexported means the move doesn't widen the module's interface. `SpreadsheetRaw`'s `finalizeFetchedCells` and `SchemaBase`'s `makeUniqueIdBase` are examples (#64).
+
+- **A helper that reads `this` only to reach a collaborator stays a method.** Moving it out would mean passing the collaborator in, which is the threading this file warns against.
+- **A public method that happens not to read `this` stays put.** It is part of the class's interface, not a helper.
+- **A helper that only renames a function already in scope is deleted**, and its callers call that function. `SchemaBase.ssConfig` wrapped the imported `ssConfigGet` with the same signature.
+- **Helpers that share a subject and pass nothing to each other become an object bundle** named for the subject and written with method shorthand, so the names shorten and the group reads as one unit (`googleColor.fromRgb`).
+- **Helpers that keep passing the same value to each other become a helper class** that holds the value, in its own file, so their signatures stop threading it. This is the #22 lesson at a smaller scale. If the class touches tier state, it is a collaborator and follows the coordinator rules above: it extends the tier's Base class and is reached through a lazy getter.
+
 ## Delete dead scaffolding you touch — with one exception
 
 Editing a file is the moment to remove, not preserve, a stub nothing calls, a placeholder function (`function triggerAuth(): void { return; }`), or a variable instantiated and discarded (`const columnConfig = ColumnConfigOperator.init();` with no use of `columnConfig`). An empty function body is better than a dead unused variable or an unreferenced helper kept "in case."

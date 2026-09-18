@@ -158,7 +158,7 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       }
       const sheet = this.sheet(sheetGid);
       const toFinalize = state.fetchQueue.toFinalize;
-      this._finalizeFetchedCells(sheet, state);
+      finalizeFetchedCells(sheet, state);
       if (toFinalize.rows.size === 0 && toFinalize.columns.size === 0) {
         return;
       }
@@ -180,16 +180,6 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       toFinalize.columns.clear();
     });
     this._reportTablePlacement({ misplacedTables, absentTables });
-  }
-  private _finalizeFetchedCells(sheet: SheetRaw, state: SheetStateRaw): void {
-    state.fetchQueue.toFinalize.cells.forEach((colIndexes, rowIndex) => {
-      const row = sheet.rowCommon(rowIndex);
-      row.ensureStateExists();
-      colIndexes.forEach((colIndex) => {
-        row.cell(colIndex).ensureActive();
-      });
-    });
-    state.fetchQueue.toFinalize.cells.clear();
   }
   // After the backfills above, so a blank fact is sampled rather than built.
   private _ensureFetchedActiveFacts(
@@ -547,4 +537,15 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       return b.index - a.index;
     });
   }
+}
+
+function finalizeFetchedCells(sheet: SheetRaw, state: SheetStateRaw): void {
+  state.fetchQueue.toFinalize.cells.forEach((colIndexes, rowIndex) => {
+    const row = sheet.rowCommon(rowIndex);
+    row.ensureStateExists();
+    colIndexes.forEach((colIndex) => {
+      row.cell(colIndex).ensureActive();
+    });
+  });
+  state.fetchQueue.toFinalize.cells.clear();
 }

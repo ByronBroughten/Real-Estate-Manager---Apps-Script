@@ -21,6 +21,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **Extract the shared piece when you can name the second caller**, not when it arrives.
 - **A member that samples the top data row for a column-wide fact belongs on the Meta column.** `topCell`/`topRow` stay primary.
 - **Member order:** `static init()`, then collaborator getters, then public behavior methods, then `_`-prefixed private helpers — a single-caller helper sits right after its caller.
+  - **A private helper that never reads `this` is an unexported module function below the class, not a `_` method**, ordered by first use. A helper that reads `this` only to reach a collaborator stays a method.
 - **Delete dead scaffolding in a file you touch** — a stub nothing calls, a placeholder, a variable instantiated and discarded. **Ask before deleting commented-out code.** Zero callers is a list of candidates, not a verdict.
 - **A "why" comment carries over verbatim across a restructure.**
 - **One class per file, custom `Error` subclasses included.** Lint enforces it.
