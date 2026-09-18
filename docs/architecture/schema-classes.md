@@ -20,12 +20,12 @@ The converse is worth knowing, because it looks like the same hazard and isn't: 
 
 **Two addressing modes, one class.** Both are entry points rather than separate hierarchies, and each resolves all of its coordinates eagerly at construction so later lookups use whichever index is cheapest:
 
-| Built from | Entry point                                | Types                                              |
-| ---------- | ------------------------------------------ | -------------------------------------------------- |
-| Sheet name | `SheetSchema.fromSheetName(sheetName)`     | Full literal precision — column names autocomplete |
-| Sheet GID  | `SheetSchema.fromSheetGid(sheetGid)`       | Widened defaults, as Identified-tier callers expect   |
-| Both names | `ColumnSchema.fromColumnName(sn, cn)`      | Value name resolves to its exact literal           |
-| GID + ID   | `ColumnSchema.fromColumnId(gid, columnId)` | Value name is the full union                       |
+| Built from | Entry point                                | Types                                               |
+| ---------- | ------------------------------------------ | --------------------------------------------------- |
+| Sheet name | `SheetSchema.fromSheetName(sheetName)`     | Full literal precision — column names autocomplete  |
+| Sheet GID  | `SheetSchema.fromSheetGid(sheetGid)`       | Widened defaults, as Identified-tier callers expect |
+| Both names | `ColumnSchema.fromColumnName(sn, cn)`      | Value name resolves to its exact literal            |
+| GID + ID   | `ColumnSchema.fromColumnId(gid, columnId)` | Value name is the full union                        |
 
 The statics are named distinctly per class because static members are inherited, so same-named helpers of different arities would collide. Navigation avoids the bare name `sheet` for the same reason it's reserved on `ColumnSchema`: `SpreadsheetSchema.sheetByName`/`.sheetByGid`, `SheetSchema.columnByName`/`.columnById`.
 

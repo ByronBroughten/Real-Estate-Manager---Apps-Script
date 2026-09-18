@@ -38,7 +38,7 @@ import { SpreadsheetRaw } from "./SpreadsheetRaw";
  * cells and Meta column facts. Conditional format rules and edit protections
  * live in SheetRaw/ and are reached through one-line delegations here.
  * Uniform rows and column facts are SheetMetaRaw; spreadsheet-wide fetch and
- * flush are SpreadsheetRaw. By-name resolution is Identified/Named.
+ * flush are SpreadsheetRaw. By-name and columnId resolution are Identified/Named.
  */
 export class SheetRaw extends SheetCommonRaw {
   get ss(): SpreadsheetRaw {

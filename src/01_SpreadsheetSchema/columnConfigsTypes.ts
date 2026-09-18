@@ -121,14 +121,14 @@ export function getColumnTraitByName<
   return (columnConfigs[sheetName][columnName] as ColumnConfigAt<TN, CN>)[key];
 }
 
-export type TableColumnConfigsIdentified = KeyedMap<
+export type TableColumnConfigsById = KeyedMap<
   Record<string, ColumnConfigStored>,
   "columnId",
   "columnName"
 >;
 
-type ColumnConfigsIdentified = Map<number, TableColumnConfigsIdentified>;
-function makeColumnConfigsByGidAndColId(): ColumnConfigsIdentified {
+type ColumnConfigsByGidAndColId = Map<number, TableColumnConfigsById>;
+function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
   return configSheetNames.reduce((attrs, sheetName) => {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
@@ -136,26 +136,26 @@ function makeColumnConfigsByGidAndColId(): ColumnConfigsIdentified {
       Obj.toKeyedMap(columnConfigs[sheetName], "columnId", "columnName"),
     );
     return attrs;
-  }, new Map() as ColumnConfigsIdentified);
+  }, new Map() as ColumnConfigsByGidAndColId);
 }
 
-const columnConfigsIdentified = makeColumnConfigsByGidAndColId();
+const columnConfigsByGidAndColId = makeColumnConfigsByGidAndColId();
 
 export function getColumnTraitById<K extends keyof ColumnConfig>(
-  sheetId: number,
+  sheetGid: number,
   columnId: string,
   key: K,
 ): ColumnConfig[K] {
   const colTraits = Val.assert(
-    columnConfigsIdentified.get(sheetId)?.get(columnId),
-    `column attributes for sheetId=${sheetId}, columnId=${columnId}`,
+    columnConfigsByGidAndColId.get(sheetGid)?.get(columnId),
+    `column attributes for sheetGid=${sheetGid}, columnId=${columnId}`,
   );
   return colTraits[key];
 }
 export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
   return Val.assert(
-    columnConfigsIdentified.get(sheetGid),
-    `column attributes for sheetId=${sheetGid}`,
+    columnConfigsByGidAndColId.get(sheetGid),
+    `column attributes for sheetGid=${sheetGid}`,
   ).keys();
 }
 

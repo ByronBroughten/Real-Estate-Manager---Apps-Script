@@ -29,11 +29,11 @@ type FrameworkValuesOrEmpty = {
   [VN in FrameworkValueName]: FrameworkValues[VN] | BlankOf<VN>;
 };
 
-export type CellValueSchemas = {
+export type FrameworkValueSchemas = {
   [VN in FrameworkValueName]: ValueSchemaBase<FrameworkValuesOrEmpty[VN]>;
 };
 
-export const frameworkValueSchemas: CellValueSchemas = {
+export const frameworkValueSchemas: FrameworkValueSchemas = {
   id: vsc({
     type: "" as string,
     makeDefault: () => {
