@@ -75,23 +75,22 @@ export class SheetConditionalFormatsRaw extends SheetCommonRaw {
     return rules;
   }
   removeConditionalFormatRulesAt(range: GridRangeProps): void {
-    this.activeTable.assertRowIndexesNotStale();
-    this.assertConditionalFormatIndexesNotStale();
-    this.conditionalFormatRules().forEach((rule, index) => {
-      if (rule.ranges.length !== 1) return;
-      if (!rangeEqual(range, rule.ranges[0])) return;
-      this.updateRequests.deleteConditionalFormat.push({
-        kind: "deleteConditionalFormatRule",
-        sheetId: this.sheetGid,
-        index,
-      });
-    });
+    this._removeRulesWhere(
+      (rule) => rule.ranges.length === 1 && rangeEqual(range, rule.ranges[0]),
+    );
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): void {
+    this._removeRulesWhere((existing) =>
+      conditionalFormatRulesEqual(existing, rule),
+    );
+  }
+  private _removeRulesWhere(
+    matches: (rule: ConditionalFormatRule) => boolean,
+  ): void {
     this.activeTable.assertRowIndexesNotStale();
     this.assertConditionalFormatIndexesNotStale();
     this.conditionalFormatRules().forEach((existing, index) => {
-      if (!conditionalFormatRulesEqual(existing, rule)) return;
+      if (!matches(existing)) return;
       this.updateRequests.deleteConditionalFormat.push({
         kind: "deleteConditionalFormatRule",
         sheetId: this.sheetGid,

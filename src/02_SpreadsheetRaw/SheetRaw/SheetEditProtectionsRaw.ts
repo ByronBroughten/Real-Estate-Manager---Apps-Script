@@ -144,34 +144,27 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
     });
   }
   removeEditProtection(protection: ProtectedRange): void {
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((existing) => {
-      if (!protectedRangesEqual(existing, protection)) return;
-      if (existing.kind !== "unmodelable") {
-        this._assertProtectionWriteCoordinatesNotStale(
-          existing.range,
-          existing.unprotectedRanges,
-        );
-      }
-      this._queueDeleteProtectedRange(existing.id);
-    });
+    this._removeProtectionsWhere((existing) =>
+      protectedRangesEqual(existing, protection),
+    );
   }
   removeEditProtectionByDescription(description: string): void {
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((existing) => {
-      if (existing.kind === "unmodelable") return;
-      if (existing.description !== description) return;
-      this._assertProtectionWriteCoordinatesNotStale(
-        existing.range,
-        existing.unprotectedRanges,
-      );
-      this._queueDeleteProtectedRange(existing.id);
-    });
+    this._removeProtectionsWhere(
+      (existing) =>
+        existing.kind !== "unmodelable" && existing.description === description,
+    );
   }
   removeEditProtectionById(protectedRangeId: number): void {
+    this._removeProtectionsWhere(
+      (existing) => existing.id === protectedRangeId,
+    );
+  }
+  private _removeProtectionsWhere(
+    matches: (protection: ProtectedRange) => boolean,
+  ): void {
     this.assertProtectedRangesNotStale();
     this.protectedRanges().forEach((existing) => {
-      if (existing.id !== protectedRangeId) return;
+      if (!matches(existing)) return;
       if (existing.kind !== "unmodelable") {
         this._assertProtectionWriteCoordinatesNotStale(
           existing.range,
