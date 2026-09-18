@@ -1,17 +1,17 @@
 import {
   isWholeColumnGridRange,
-  protectedRangeContentSatisfies,
-  protectedRangesEqual,
+  editProtectionContentSatisfies,
+  editProtectionsEqual,
   protectionRangeEqual,
   protectionRangeHasRowCoordinates,
   type EditLockDeclaration,
   type EditWarningDeclaration,
-  type ProtectedRange,
-  type ProtectedRangeContent,
+  type EditProtection,
+  type EditProtectionContent,
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
-} from "../../00_base/RawSource/ProtectedRange";
+} from "../../00_base/RawSource/EditProtection";
 import { SheetCommonRaw } from "../ClassBases/SheetCommonRaw";
 import { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
@@ -23,15 +23,15 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
-  gatherFetchProtectedRanges(): void {
-    this.sheetState.fetchQueue.gatherProtectedRanges = true;
+  gatherFetchEditProtections(): void {
+    this.sheetState.fetchQueue.gatherEditProtections = true;
   }
-  protectedRanges(): ProtectedRange[] {
-    this.assertProtectedRangesNotStale();
-    const protections = this.sheetState.working.protectedRanges.ranges;
+  editProtections(): EditProtection[] {
+    this.assertEditProtectionsNotStale();
+    const protections = this.sheetState.working.editProtections.protections;
     if (protections === null) {
       throw new Error(
-        `Protected ranges have not been fetched for sheetGid ${this.sheetGid}.`,
+        `Edit protections have not been fetched for sheetGid ${this.sheetGid}.`,
       );
     }
     return protections;
@@ -90,15 +90,15 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
       unprotectedRanges: [],
     });
   }
-  private _queueProtection(protection: ProtectedRangeContent): void {
+  private _queueProtection(protection: EditProtectionContent): void {
     this._assertProtectionWriteCoordinatesNotStale(
       protection.range,
       protection.unprotectedRanges,
     );
-    this.assertProtectedRangesNotStale();
+    this.assertEditProtectionsNotStale();
     if (
-      this._pendingProtectedRangeContents().some((pending) =>
-        protectedRangeContentSatisfies(pending, protection),
+      this._pendingEditProtectionContents().some((pending) =>
+        editProtectionContentSatisfies(pending, protection),
       )
     ) {
       return;
@@ -108,9 +108,9 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
       protection,
     });
   }
-  private _pendingProtectedRangeContents(): ProtectedRangeContent[] {
-    const fetched = this.sheetState.working.protectedRanges.ranges;
-    const protections: ProtectedRange[] = fetched === null ? [] : [...fetched];
+  private _pendingEditProtectionContents(): EditProtectionContent[] {
+    const fetched = this.sheetState.working.editProtections.protections;
+    const protections: EditProtection[] = fetched === null ? [] : [...fetched];
     const deletedIds = new Set(
       this.updateRequests.deleteProtectedRange
         .filter((operation) => operation.sheetId === this.sheetGid)
@@ -136,16 +136,16 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
   }
   removeEditProtectionsAt(range: ProtectionGridRange): void {
     this._assertProtectionWriteCoordinatesNotStale(range, []);
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((protection) => {
+    this.assertEditProtectionsNotStale();
+    this.editProtections().forEach((protection) => {
       if (protection.kind === "unmodelable") return;
       if (!protectionRangeEqual(range, protection.range)) return;
-      this._queueDeleteProtectedRange(protection.id);
+      this._queueDeleteEditProtection(protection.id);
     });
   }
-  removeEditProtection(protection: ProtectedRange): void {
+  removeEditProtection(protection: EditProtection): void {
     this._removeProtectionsWhere((existing) =>
-      protectedRangesEqual(existing, protection),
+      editProtectionsEqual(existing, protection),
     );
   }
   removeEditProtectionByDescription(description: string): void {
@@ -154,16 +154,14 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
         existing.kind !== "unmodelable" && existing.description === description,
     );
   }
-  removeEditProtectionById(protectedRangeId: number): void {
-    this._removeProtectionsWhere(
-      (existing) => existing.id === protectedRangeId,
-    );
+  removeEditProtectionById(protectionId: number): void {
+    this._removeProtectionsWhere((existing) => existing.id === protectionId);
   }
   private _removeProtectionsWhere(
-    matches: (protection: ProtectedRange) => boolean,
+    matches: (protection: EditProtection) => boolean,
   ): void {
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((existing) => {
+    this.assertEditProtectionsNotStale();
+    this.editProtections().forEach((existing) => {
       if (!matches(existing)) return;
       if (existing.kind !== "unmodelable") {
         this._assertProtectionWriteCoordinatesNotStale(
@@ -171,14 +169,14 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
           existing.unprotectedRanges,
         );
       }
-      this._queueDeleteProtectedRange(existing.id);
+      this._queueDeleteEditProtection(existing.id);
     });
   }
-  private _queueDeleteProtectedRange(protectedRangeId: number): void {
+  private _queueDeleteEditProtection(protectionId: number): void {
     this.updateRequests.deleteProtectedRange.push({
       kind: "deleteProtectedRange",
       sheetId: this.sheetGid,
-      protectedRangeId,
+      protectedRangeId: protectionId,
     });
   }
   private _assertProtectionWriteCoordinatesNotStale(
@@ -201,18 +199,18 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
     if (!protectionRangeHasRowCoordinates(range)) return;
     this.activeTable.assertRowIndexesNotStale();
   }
-  markProtectedRangesStale(): void {
-    this.sheetState.working.protectedRanges.isStale = true;
+  markEditProtectionsStale(): void {
+    this.sheetState.working.editProtections.isStale = true;
   }
-  assertProtectedRangesNotStale(): void {
-    if (!this.sheetState.working.protectedRanges.isStale) return;
+  assertEditProtectionsNotStale(): void {
+    if (!this.sheetState.working.editProtections.isStale) return;
     throw new Error(
-      `Protections are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's protections before reading or mutating them again.`,
+      `Edit protections are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's protections before reading or mutating them again.`,
     );
   }
-  integrateProtectedRanges(protections: ProtectedRange[]): void {
-    this.sheetState.working.protectedRanges.ranges = protections;
-    this.sheetState.fetchQueue.gatherProtectedRanges = false;
-    this.sheetState.working.protectedRanges.isStale = false;
+  integrateEditProtections(protections: EditProtection[]): void {
+    this.sheetState.working.editProtections.protections = protections;
+    this.sheetState.fetchQueue.gatherEditProtections = false;
+    this.sheetState.working.editProtections.isStale = false;
   }
 }

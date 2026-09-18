@@ -9,8 +9,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
@@ -212,7 +212,7 @@ export class ColumnRaw<
     this.sheet.removeEditProtectionsAt(this.gridRangeFromRow(0));
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.sheet.removeEditProtection(protection);
     return this;
   }

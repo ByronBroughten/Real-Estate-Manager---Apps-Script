@@ -10,13 +10,13 @@ import {
   type EditWarningDeclaration,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
-} from "./ProtectedRange";
+} from "./EditProtection";
 
 type HasUnprotectedRanges<T> = "unprotectedRanges" extends keyof T
   ? true
   : false;
 
-describe("ProtectedRange identity", () => {
+describe("EditProtection identity", () => {
   it("makes unprotected ranges unrepresentable on a non-whole-sheet declaration", () => {
     assertType<IsExactly<HasUnprotectedRanges<EditWarningDeclaration>, false>>(
       true,

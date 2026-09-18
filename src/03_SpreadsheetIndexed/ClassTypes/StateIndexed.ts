@@ -20,14 +20,14 @@ export interface SheetStateIndexed {
 export interface SheetFetchQueueIndexed {
   targets: FetchTargetIndexed[];
   gatherConditionalFormats: boolean;
-  gatherProtectedRanges: boolean;
+  gatherEditProtections: boolean;
 }
 
 export function emptySheetFetchQueueIndexed(): SheetFetchQueueIndexed {
   return {
     targets: [],
     gatherConditionalFormats: false,
-    gatherProtectedRanges: false,
+    gatherEditProtections: false,
   };
 }
 

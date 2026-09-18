@@ -9,8 +9,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import type { GridCellSnapshot } from "../00_base/RawSource/RawSource";
 import type { RgbColor } from "../00_base/RawSource/RgbColor";
 import { CellBaseRaw } from "./ClassBases/CellBaseRaw";
@@ -159,7 +159,7 @@ export class CellRaw<
     this.sheet.removeEditProtectionsAt(this.gridRange);
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.sheet.removeEditProtection(protection);
     return this;
   }

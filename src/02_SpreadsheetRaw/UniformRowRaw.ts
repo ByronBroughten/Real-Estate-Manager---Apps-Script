@@ -6,8 +6,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import { UniformRowBaseRaw } from "./ClassBases/UniformRowBaseRaw";
 
 export class UniformRowRaw<
@@ -38,7 +38,7 @@ export class UniformRowRaw<
     this.sheet.removeEditProtectionsAt(this.sheet.rowGridRange(this.rowIndex));
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.sheet.removeEditProtection(protection);
     return this;
   }

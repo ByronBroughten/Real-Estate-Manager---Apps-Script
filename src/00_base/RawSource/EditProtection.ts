@@ -25,10 +25,10 @@ export interface WholeSheetEditLockDeclaration extends EditLockDeclaration {
   unprotectedRanges?: ProtectionGridRange[];
 }
 
-export type ProtectedRange =
-  ModelableProtectedRange | UnmodelableProtectedRange;
+export type EditProtection =
+  ModelableEditProtection | UnmodelableEditProtection;
 
-export interface ModelableProtectedRange {
+export interface ModelableEditProtection {
   kind: "warning" | "lock";
   id: number;
   range: ProtectionGridRange;
@@ -39,13 +39,13 @@ export interface ModelableProtectedRange {
   requestingUserCanEdit: boolean;
 }
 
-export interface UnmodelableProtectedRange {
+export interface UnmodelableEditProtection {
   kind: "unmodelable";
   id: number;
 }
 
-export type ProtectedRangeContent = Omit<
-  ModelableProtectedRange,
+export type EditProtectionContent = Omit<
+  ModelableEditProtection,
   "id" | "requestingUserCanEdit"
 >;
 
@@ -87,9 +87,9 @@ export function protectionRangeEqual(
   return rangeEqual(left, right);
 }
 
-export function protectedRangeContentsEqual(
-  left: ProtectedRangeContent,
-  right: ProtectedRangeContent,
+export function editProtectionContentsEqual(
+  left: EditProtectionContent,
+  right: EditProtectionContent,
 ): boolean {
   return (
     left.kind === right.kind &&
@@ -102,9 +102,9 @@ export function protectedRangeContentsEqual(
 }
 
 // Google adds its own editors to a lock, so a present lock need only include the declared ones.
-export function protectedRangeContentSatisfies(
-  present: ProtectedRangeContent,
-  declared: ProtectedRangeContent,
+export function editProtectionContentSatisfies(
+  present: EditProtectionContent,
+  declared: EditProtectionContent,
 ): boolean {
   return (
     present.kind === declared.kind &&
@@ -116,12 +116,12 @@ export function protectedRangeContentSatisfies(
   );
 }
 
-export function protectedRangesEqual(
-  left: ProtectedRange,
-  right: ProtectedRange,
+export function editProtectionsEqual(
+  left: EditProtection,
+  right: EditProtection,
 ): boolean {
   if (left.kind === "unmodelable" || right.kind === "unmodelable") return false;
-  return protectedRangeContentsEqual(left, right);
+  return editProtectionContentsEqual(left, right);
 }
 
 function protectionRangesEqual(

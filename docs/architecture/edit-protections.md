@@ -1,9 +1,9 @@
-# Protected ranges (edit warnings and edit locks)
+# Edit protections (edit warnings and edit locks)
 
 Map fragment. Sibling headings live in this folder.
 
 
-A protection is an **edit warning** or an **edit lock**. The Google API type stays `ProtectedRange` at the adapter boundary, the way `ConditionalFormat` does. A warning prompts anyone, the owner included, and still lets the edit through. A lock takes optional `users` and `groups`. Unprotected ranges are representable only on a whole-sheet declaration.
+An **edit protection** (`EditProtection`) is an **edit warning**, an **edit lock**, or an unmodelable protection the framework leaves alone. The Google API type stays `ProtectedRange` at the adapter boundary, the way `ConditionalFormat` does. A warning prompts anyone, the owner included, and still lets the edit through. A lock takes optional `users` and `groups`. Unprotected ranges are representable only on a whole-sheet declaration.
 
 A lock that names no editors inherits the spreadsheet's editors (live 2026-09-17: two gmail users and a service account) and does not stop them, so it is not a fence. A lock that names users reads back with exactly those users — Google does not add the inherited set. One such lock left the spreadsheet owner unable to edit Column currency data cells on `test`, except the last row, which sat outside the bounded range. **Why is unresolved.** The likely cause is address form rather than a broken guarantee: Gmail treats dotted and undotted addresses as one mailbox for delivery, but Google account identity uses the address as registered, so a lock naming `byron.broughten@gmail.com` on a file whose editor is `byronbroughten@gmail.com` may name a stranger — in which case blocking the owner is correct. The probe chores were never committed, so neither the string sent nor the string read back is recoverable; settle this before building anything on a list of editor addresses. The stronger claim once recorded here — that Apps Script's "the owner can never be removed" fails for a REST write — is withdrawn as unsupported. Separately, the GUI refuses to create a lock that would lock the acting user out and the API does not, so a developer can fence themselves out through this framework in a way the GUI would have prevented; there is no guard, because the framework does not know which account it is acting as.
 

@@ -5,7 +5,7 @@ import type {
   LocalWriteOperation,
   RawSource,
   SheetConditionalFormatSnapshot,
-  SheetProtectedRangeSnapshot,
+  SheetEditProtectionSnapshot,
   SpreadsheetSnapshot,
 } from "../RawSource/RawSource";
 import { cellDataRequests } from "./GoogleSheetsAPI/cellData";
@@ -145,7 +145,7 @@ export class GoogleSheetsAPI implements RawSource {
     );
   }
   // Assumed to drop protectedRanges the same way until the probe says otherwise.
-  fetchProtectedRanges(spreadsheetId: string): SheetProtectedRangeSnapshot[] {
+  fetchEditProtections(spreadsheetId: string): SheetEditProtectionSnapshot[] {
     const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
       fields: fieldMasks.protectedRanges,
     });
@@ -153,7 +153,7 @@ export class GoogleSheetsAPI implements RawSource {
       (sheet) => ({
         sheetGid: Val.assert(sheet.properties?.sheetId, "sheetId"),
         protections: (sheet.protectedRanges ?? []).map(
-          googleProtectedRange.toProtectedRange,
+          googleProtectedRange.toEditProtection,
         ),
       }),
     );

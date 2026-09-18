@@ -6,8 +6,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import {
   toWireValue,
   type Value,
@@ -178,7 +178,7 @@ export class ColumnIndexed<
     this.raw.removeEditProtectionsWholeColumn();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.raw.removeEditProtection(protection);
     return this;
   }

@@ -3,7 +3,7 @@ import type {
   CellValueName,
 } from "../../00_base/CellValues/cellValues";
 import type { ConditionalFormatRule } from "../../00_base/RawSource/ConditionalFormat";
-import type { ProtectedRange } from "../../00_base/RawSource/ProtectedRange";
+import type { EditProtection } from "../../00_base/RawSource/EditProtection";
 import type {
   AddConditionalFormatRuleOperation,
   AddProtectedRangeOperation,
@@ -75,7 +75,7 @@ export interface SheetWorkingStateRaw {
   rowStates: RowStatesRaw;
   columnStates: ColumnStatesRaw;
   conditionalFormats: ConditionalFormatsStateRaw;
-  protectedRanges: ProtectedRangesStateRaw;
+  editProtections: EditProtectionsStateRaw;
 }
 
 export interface ConditionalFormatsStateRaw {
@@ -83,14 +83,14 @@ export interface ConditionalFormatsStateRaw {
   isStale: boolean;
 }
 
-export interface ProtectedRangesStateRaw {
-  ranges: ProtectedRange[] | null;
+export interface EditProtectionsStateRaw {
+  protections: EditProtection[] | null;
   isStale: boolean;
 }
 
 export interface SheetFetchQueueRaw {
   gatherConditionalFormats: boolean;
-  gatherProtectedRanges: boolean;
+  gatherEditProtections: boolean;
   toFinalize: SheetFinalizeQueueRaw;
 }
 
@@ -260,7 +260,7 @@ export function emptySheetWriteQueue(): SheetWriteQueueRaw {
 export function emptySheetFetchQueue(): SheetFetchQueueRaw {
   return {
     gatherConditionalFormats: false,
-    gatherProtectedRanges: false,
+    gatherEditProtections: false,
     toFinalize: {
       rows: new Set(),
       columns: new Set(),
@@ -280,7 +280,7 @@ export function emptySheetWorkingState(): SheetWorkingStateRaw {
     rowStates: new Map(),
     columnStates: new Map(),
     conditionalFormats: { rules: null, isStale: false },
-    protectedRanges: { ranges: null, isStale: false },
+    editProtections: { protections: null, isStale: false },
   };
 }
 

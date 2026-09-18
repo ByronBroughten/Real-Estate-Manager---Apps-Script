@@ -7,7 +7,7 @@ Map fragments, one file per heading. Open the file the task needs.
 | Chore homes, no registry, not tested | [chores.md](./architecture/chores.md) |
 | `gatherRawRequest` | [raw-request-opening.md](./architecture/raw-request-opening.md) |
 | Conditional format rules (order, prepend, identity, anchored formulas) | [conditional-format-rules.md](./architecture/conditional-format-rules.md) |
-| Protected ranges (edit warnings, edit locks, identity, stale refetch) | [protected-ranges.md](./architecture/protected-ranges.md) |
+| Edit protections (edit warnings, edit locks, identity, stale refetch) | [edit-protections.md](./architecture/edit-protections.md) |
 | Flush order, stale indexes, active vs fetched | [queued-writes.md](./architecture/queued-writes.md) |
 | Last data row, blank-row reuse | [blank-row.md](./architecture/blank-row.md) |
 | Endpoint entry, `EndpointRun`, run report | [endpoint-dispatch.md](./architecture/endpoint-dispatch.md) |

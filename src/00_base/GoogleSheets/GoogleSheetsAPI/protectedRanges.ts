@@ -1,10 +1,10 @@
 import { Val } from "../../../utils/Val";
 import {
   isWholeSheetGridRange,
-  type ProtectedRange,
-  type ProtectedRangeContent,
+  type EditProtection,
+  type EditProtectionContent,
   type ProtectionGridRange,
-} from "../../RawSource/ProtectedRange";
+} from "../../RawSource/EditProtection";
 import type { OpaqueRawRequest } from "../GoogleSheetsAPI";
 import { googleGrid } from "./gridSnapshots";
 
@@ -14,7 +14,7 @@ type BatchUpdateResponse =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetResponse;
 
 export const googleProtectedRange = {
-  fromContent(protection: ProtectedRangeContent): GoogleProtectedRange {
+  fromContent(protection: EditProtectionContent): GoogleProtectedRange {
     const editors =
       protection.kind === "lock" &&
       (protection.users.length > 0 || protection.groups.length > 0)
@@ -41,7 +41,7 @@ export const googleProtectedRange = {
       ...(editors !== undefined ? { editors } : {}),
     };
   },
-  toProtectedRange(protection: GoogleProtectedRange): ProtectedRange {
+  toEditProtection(protection: GoogleProtectedRange): EditProtection {
     const id = Val.assert(protection.protectedRangeId, "protectedRangeId");
     if (protection.namedRangeId !== undefined) {
       return { kind: "unmodelable", id };

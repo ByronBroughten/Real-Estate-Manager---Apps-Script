@@ -5,10 +5,10 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
+  EditProtection,
   WholeSheetEditLockDeclaration,
   WholeSheetEditWarningDeclaration,
-} from "../00_base/RawSource/ProtectedRange";
+} from "../00_base/RawSource/EditProtection";
 import type {
   ColumnName,
   ColumnValue,
@@ -152,12 +152,12 @@ export class SheetNamed<
     this.indexed.removeConditionalFormatRule(rule);
     return this;
   }
-  prepFetchProtectedRanges(): this {
-    this.indexed.prepFetchProtectedRanges();
+  prepFetchEditProtections(): this {
+    this.indexed.prepFetchEditProtections();
     return this;
   }
-  protectedRanges(): ProtectedRange[] {
-    return this.indexed.protectedRanges();
+  editProtections(): EditProtection[] {
+    return this.indexed.editProtections();
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
     this.indexed.addEditWarning(declaration);
@@ -181,7 +181,7 @@ export class SheetNamed<
     this.indexed.removeEditProtections();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.indexed.removeEditProtection(protection);
     return this;
   }
@@ -189,8 +189,8 @@ export class SheetNamed<
     this.indexed.removeEditProtectionByDescription(description);
     return this;
   }
-  removeEditProtectionById(protectedRangeId: number): this {
-    this.indexed.removeEditProtectionById(protectedRangeId);
+  removeEditProtectionById(protectionId: number): this {
+    this.indexed.removeEditProtectionById(protectionId);
     return this;
   }
   anchoredA1(columnName: ColumnName<SN>): string {

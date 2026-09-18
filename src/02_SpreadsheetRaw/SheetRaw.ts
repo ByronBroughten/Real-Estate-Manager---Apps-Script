@@ -6,11 +6,11 @@ import type {
 import {
   type EditLockDeclaration,
   type EditWarningDeclaration,
-  type ProtectedRange,
+  type EditProtection,
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
-} from "../00_base/RawSource/ProtectedRange";
+} from "../00_base/RawSource/EditProtection";
 import type {
   GridRangeProps,
   SheetSnapshot,
@@ -50,7 +50,7 @@ export class SheetRaw extends SheetCommonRaw {
   private get conditionalFormats(): SheetConditionalFormatsRaw {
     return new SheetConditionalFormatsRaw(this.sheetRawProps);
   }
-  private get editProtections(): SheetEditProtectionsRaw {
+  private get protections(): SheetEditProtectionsRaw {
     return new SheetEditProtectionsRaw(this.sheetRawProps);
   }
   get rowIndexesAreStale(): boolean {
@@ -316,73 +316,73 @@ export class SheetRaw extends SheetCommonRaw {
   integrateConditionalFormatRules(rules: ConditionalFormatRule[]): void {
     this.conditionalFormats.integrateConditionalFormatRules(rules);
   }
-  gatherFetchProtectedRanges(): this {
-    this.editProtections.gatherFetchProtectedRanges();
+  gatherFetchEditProtections(): this {
+    this.protections.gatherFetchEditProtections();
     return this;
   }
-  protectedRanges(): ProtectedRange[] {
-    return this.editProtections.protectedRanges();
+  editProtections(): EditProtection[] {
+    return this.protections.editProtections();
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
-    this.editProtections.addEditWarning(declaration);
+    this.protections.addEditWarning(declaration);
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {
-    this.editProtections.addEditLock(declaration);
+    this.protections.addEditLock(declaration);
     return this;
   }
   addEditWarningWholeSheet(
     declaration: WholeSheetEditWarningDeclaration = {},
   ): this {
-    this.editProtections.addEditWarningWholeSheet(declaration);
+    this.protections.addEditWarningWholeSheet(declaration);
     return this;
   }
   addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
-    this.editProtections.addEditLockWholeSheet(declaration);
+    this.protections.addEditLockWholeSheet(declaration);
     return this;
   }
   addEditWarningAt(
     range: ProtectionGridRange,
     declaration: EditWarningDeclaration = {},
   ): this {
-    this.editProtections.addEditWarningAt(range, declaration);
+    this.protections.addEditWarningAt(range, declaration);
     return this;
   }
   addEditLockAt(
     range: ProtectionGridRange,
     declaration: EditLockDeclaration = {},
   ): this {
-    this.editProtections.addEditLockAt(range, declaration);
+    this.protections.addEditLockAt(range, declaration);
     return this;
   }
   removeEditProtections(): this {
-    this.editProtections.removeEditProtections();
+    this.protections.removeEditProtections();
     return this;
   }
   removeEditProtectionsAt(range: ProtectionGridRange): this {
-    this.editProtections.removeEditProtectionsAt(range);
+    this.protections.removeEditProtectionsAt(range);
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
-    this.editProtections.removeEditProtection(protection);
+  removeEditProtection(protection: EditProtection): this {
+    this.protections.removeEditProtection(protection);
     return this;
   }
   removeEditProtectionByDescription(description: string): this {
-    this.editProtections.removeEditProtectionByDescription(description);
+    this.protections.removeEditProtectionByDescription(description);
     return this;
   }
-  removeEditProtectionById(protectedRangeId: number): this {
-    this.editProtections.removeEditProtectionById(protectedRangeId);
+  removeEditProtectionById(protectionId: number): this {
+    this.protections.removeEditProtectionById(protectionId);
     return this;
   }
-  markProtectedRangesStale(): void {
-    this.editProtections.markProtectedRangesStale();
+  markEditProtectionsStale(): void {
+    this.protections.markEditProtectionsStale();
   }
-  assertProtectedRangesNotStale(): void {
-    this.editProtections.assertProtectedRangesNotStale();
+  assertEditProtectionsNotStale(): void {
+    this.protections.assertEditProtectionsNotStale();
   }
-  integrateProtectedRanges(protections: ProtectedRange[]): void {
-    this.editProtections.integrateProtectedRanges(protections);
+  integrateEditProtections(protections: EditProtection[]): void {
+    this.protections.integrateEditProtections(protections);
   }
   // The uniform rows survive, or every later column-index resolution breaks.
   removeRowsExcept(...rowIdxesToKeep: number[]): void {

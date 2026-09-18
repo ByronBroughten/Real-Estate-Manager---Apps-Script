@@ -6,8 +6,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import { uniformRows } from "../02_SpreadsheetRaw/Schema/uniformRows";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
@@ -67,7 +67,7 @@ export class UniformRowIndexed<
     this.raw.removeEditProtections();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.raw.removeEditProtection(protection);
     return this;
   }

@@ -39,6 +39,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **A plural method name promises more of the same return, not a different container.**
 - **Trim a method name to what the return type doesn't already say** — `generateConfigFilesSources` → `generateConfigFiles`.
 - **A name has to read to someone who has never opened this codebase** — never jargon named after the mechanism that sets it.
+- **Google's API names stay at the wire; framework names follow the glossary** — Google's `ProtectedRange` and `addProtectedRange`, but the framework's `EditProtection` and `editProtections()`.
 - **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name**, and keeps it once a guard makes the operation safe.
 - **A constant is camelCase; two or more in one file that serve one purpose become one `as const` object named for that purpose** (`fieldMasks`, `layoutLimits`). Lint enforces the casing.
 - **A collaborator is named `<Subject><Role><Tier>`, the role the agent noun of a verb on the list below** (`SpreadsheetFlusherRaw`, `SpreadsheetTableValidatorRaw`). A job with no verb on the list gets a plain descriptive noun, never "Handler" or "Manager".

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ProtectedRange } from "../00_base/RawSource/ProtectedRange";
+import type { EditProtection } from "../00_base/RawSource/EditProtection";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
@@ -178,9 +178,9 @@ function protectionsOf(
   sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
 ) {
   const sheet = floor.ss.sheet(sheetName);
-  sheet.prepFetchProtectedRanges();
+  sheet.prepFetchEditProtections();
   floor.ss.fetchAllPrepped({ skipFetchingProperties: true });
-  return sheet.protectedRanges();
+  return sheet.editProtections();
 }
 
 function floorKey(description: string): string {
@@ -189,7 +189,7 @@ function floorKey(description: string): string {
   return `${columnId} · ${parts[3]} · ${parts[4]}`;
 }
 
-function keysOf(protections: ProtectedRange[]): string[] {
+function keysOf(protections: EditProtection[]): string[] {
   return protections.flatMap((protection) =>
     protection.kind === "unmodelable" ? [] : [floorKey(protection.description)],
   );

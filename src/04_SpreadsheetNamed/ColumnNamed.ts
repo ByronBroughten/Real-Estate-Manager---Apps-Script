@@ -6,8 +6,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import type {
   ColumnIsFormula,
   ColumnName,
@@ -150,7 +150,7 @@ export class ColumnNamed<
     this.indexed.removeEditProtectionsWholeColumn();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.indexed.removeEditProtection(protection);
     return this;
   }

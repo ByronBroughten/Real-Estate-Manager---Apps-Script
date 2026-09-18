@@ -21,8 +21,8 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     const sheetGidsWithRowDeletes = this._sheetGidsWithRowDeletes();
     const sheetGidsWithConditionalFormatMutations =
       this._sheetGidsWithConditionalFormatMutations();
-    const sheetGidsWithProtectedRangeMutations =
-      this._sheetGidsWithProtectedRangeMutations();
+    const sheetGidsWithEditProtectionMutations =
+      this._sheetGidsWithEditProtectionMutations();
     const hasFindReplace = this.updateRequests.findReplace.length > 0;
     this._sendUpdateRequests();
     // Row indexes only actually shift once the deletes have been sent.
@@ -32,8 +32,8 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     sheetGidsWithConditionalFormatMutations.forEach((sheetGid) =>
       this.ss.sheet(sheetGid).markConditionalFormatIndexesStale(),
     );
-    sheetGidsWithProtectedRangeMutations.forEach((sheetGid) =>
-      this.ss.sheet(sheetGid).markProtectedRangesStale(),
+    sheetGidsWithEditProtectionMutations.forEach((sheetGid) =>
+      this.ss.sheet(sheetGid).markEditProtectionsStale(),
     );
     if (hasFindReplace) this._invalidateFetchedCellState();
   }
@@ -100,7 +100,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     });
     return sheetGids;
   }
-  private _sheetGidsWithProtectedRangeMutations(): Set<number> {
+  private _sheetGidsWithEditProtectionMutations(): Set<number> {
     return new Set([
       ...this.updateRequests.deleteProtectedRange.map(({ sheetId }) => sheetId),
       ...this.updateRequests.addProtectedRange.map(

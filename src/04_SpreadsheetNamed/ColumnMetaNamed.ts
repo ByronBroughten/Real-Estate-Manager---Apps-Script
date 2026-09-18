@@ -5,7 +5,7 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-} from "../00_base/RawSource/ProtectedRange";
+} from "../00_base/RawSource/EditProtection";
 import type {
   ColumnFullName,
   ColumnName,

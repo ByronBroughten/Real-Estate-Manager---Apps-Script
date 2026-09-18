@@ -778,7 +778,7 @@ describe("GoogleSheetsAPI protected range read", () => {
       sheets: [{ properties: { sheetId: 111 } }],
     });
 
-    api.fetchProtectedRanges(spreadsheetId);
+    api.fetchEditProtections(spreadsheetId);
 
     expect(getCalls).toEqual([
       {
@@ -794,7 +794,7 @@ describe("GoogleSheetsAPI protected range read", () => {
       sheets: [{ properties: { sheetId: 111 } }],
     });
 
-    expect(api.fetchProtectedRanges(spreadsheetId)).toEqual([
+    expect(api.fetchEditProtections(spreadsheetId)).toEqual([
       { sheetGid: 111, protections: [] },
     ]);
   });
@@ -815,7 +815,7 @@ describe("GoogleSheetsAPI protected range read", () => {
       ],
     });
 
-    expect(api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0]).toEqual({
+    expect(api.fetchEditProtections(spreadsheetId)[0]?.protections[0]).toEqual({
       kind: "warning",
       id: 3,
       range: {
@@ -863,7 +863,7 @@ describe("GoogleSheetsAPI protected range read", () => {
     });
 
     const protection =
-      api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0];
+      api.fetchEditProtections(spreadsheetId)[0]?.protections[0];
     expect(protection).toMatchObject({
       kind: "warning",
       users: [],
@@ -888,7 +888,7 @@ describe("GoogleSheetsAPI protected range read", () => {
       ],
     });
 
-    expect(api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0]).toEqual({
+    expect(api.fetchEditProtections(spreadsheetId)[0]?.protections[0]).toEqual({
       kind: "unmodelable",
       id: 9,
     });
@@ -914,7 +914,7 @@ describe("GoogleSheetsAPI protected range read", () => {
       ],
     });
 
-    expect(api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0]).toEqual({
+    expect(api.fetchEditProtections(spreadsheetId)[0]?.protections[0]).toEqual({
       kind: "warning",
       id: 8,
       range: {

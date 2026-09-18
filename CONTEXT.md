@@ -47,7 +47,8 @@ The Sheet Config checkbox that says this tab is one the app knows about — not 
 _Avoid_: enabled sheet, API sheet, known sheet
 
 **Edit protection**:
-Either an edit warning or an edit lock.
+Any protection the app finds on a sheet: an edit warning, an edit lock, or one it can't read as either, which it leaves alone.
+_Avoid_: protected range (that is Google's name for the API object)
 
 **Edit warning**:
 A prompt Sheets shows anyone, the owner included, before they change a cell the app depends on; the edit still goes through if they confirm.

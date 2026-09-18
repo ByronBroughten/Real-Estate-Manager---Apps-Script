@@ -6,8 +6,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import type { RgbColor } from "../00_base/RawSource/RgbColor";
 import {
   toWireValue,
@@ -108,7 +108,7 @@ export class CellIndexed<
     this.raw.removeEditProtections();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.raw.removeEditProtection(protection);
     return this;
   }

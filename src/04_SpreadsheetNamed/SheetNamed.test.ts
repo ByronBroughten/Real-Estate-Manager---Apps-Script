@@ -364,7 +364,7 @@ function fetchedOccupancyProtections(
   const service = stubOccupancyWithProtections(protectedRanges);
   const ss = SpreadsheetNamed.init();
   const sheet = ss.sheet("occupancy");
-  sheet.prepFetchProtectedRanges();
+  sheet.prepFetchEditProtections();
   ss.fetchAllPrepped();
   return { ss, sheet, ...service };
 }
@@ -499,7 +499,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
 
     const byContent = fetchedOccupancyProtections([handSet, other]);
     const named = Val.assert(
-      byContent.sheet.protectedRanges()[0],
+      byContent.sheet.editProtections()[0],
       "hand-set protection",
     );
     byContent.sheet.removeEditProtection(named);
@@ -576,14 +576,16 @@ describe("SheetNamed edit warnings and edit locks", () => {
     sheet.column("id").addEditWarning({ description: "id warning" });
     ss.batchUpdateGSheets();
 
-    expect(() => sheet.protectedRanges()).toThrowError(/Protections are stale/);
+    expect(() => sheet.editProtections()).toThrowError(
+      /Edit protections are stale/,
+    );
     expect(() =>
       sheet.column("id").addEditLock({ description: "id lock" }),
-    ).toThrowError(/Protections are stale/);
+    ).toThrowError(/Edit protections are stale/);
 
-    sheet.prepFetchProtectedRanges();
+    sheet.prepFetchEditProtections();
     ss.fetchAllPrepped({ skipFetchingProperties: true });
-    expect(sheet.protectedRanges()[0]).toMatchObject({
+    expect(sheet.editProtections()[0]).toMatchObject({
       kind: "warning",
       description: "id warning",
     });
@@ -755,7 +757,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
 
     const byContent = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
     const named = Val.assert(
-      byContent.sheet.protectedRanges()[0],
+      byContent.sheet.editProtections()[0],
       "whole-column protection",
     );
     byContent.sheet.removeEditProtection(named);

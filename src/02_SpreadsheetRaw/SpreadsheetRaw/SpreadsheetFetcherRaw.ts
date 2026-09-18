@@ -33,7 +33,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
     this._fetchGatheredConditionalFormatRules();
-    this._fetchGatheredProtectedRanges();
+    this._fetchGatheredEditProtections();
     // An empty dataFilters list would fetch the whole spreadsheet's grid data.
     if (this.fetcherGridRanges.length === 0) return;
     const data = this._fetchByGridRanges(includeProgrammaticFacts);
@@ -134,18 +134,18 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
         this.ss.sheet(sheetGid).integrateConditionalFormatRules(rules),
       );
   }
-  private _fetchGatheredProtectedRanges(): void {
-    const gatheringGids = this._gatheringGids("gatherProtectedRanges");
+  private _fetchGatheredEditProtections(): void {
+    const gatheringGids = this._gatheringGids("gatherEditProtections");
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
-      .fetchProtectedRanges(this.spreadsheetId)
+      .fetchEditProtections(this.spreadsheetId)
       .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
       .forEach(({ sheetGid, protections }) =>
-        this.ss.sheet(sheetGid).integrateProtectedRanges(protections),
+        this.ss.sheet(sheetGid).integrateEditProtections(protections),
       );
   }
   private _gatheringGids(
-    flag: "gatherConditionalFormats" | "gatherProtectedRanges",
+    flag: "gatherConditionalFormats" | "gatherEditProtections",
   ): number[] {
     return Array.from(this.sheetsStateRaw.entries())
       .filter(([, state]) => state.fetchQueue[flag])

@@ -6,8 +6,8 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
-} from "../00_base/RawSource/ProtectedRange";
+  EditProtection,
+} from "../00_base/RawSource/EditProtection";
 import type { RgbColor } from "../00_base/RawSource/RgbColor";
 import type {
   ColumnIsFormula,
@@ -116,7 +116,7 @@ export class CellNamed<
     this.indexed.removeEditProtections();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.indexed.removeEditProtection(protection);
     return this;
   }

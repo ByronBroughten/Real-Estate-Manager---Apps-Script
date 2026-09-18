@@ -3,7 +3,7 @@ import type {
   ConditionalFormatRule,
   ModelableConditionalFormatRule,
 } from "./ConditionalFormat";
-import type { ProtectedRange, ProtectedRangeContent } from "./ProtectedRange";
+import type { EditProtection, EditProtectionContent } from "./EditProtection";
 import type { RgbColor } from "./RgbColor";
 
 export interface GridRangeProps {
@@ -54,9 +54,9 @@ export interface SheetConditionalFormatSnapshot {
   rules: ConditionalFormatRule[];
 }
 
-export interface SheetProtectedRangeSnapshot {
+export interface SheetEditProtectionSnapshot {
   sheetGid: number;
-  protections: ProtectedRange[];
+  protections: EditProtection[];
 }
 
 export interface TableSnapshot {
@@ -178,7 +178,7 @@ export interface DeleteConditionalFormatRuleOperation {
 
 export interface AddProtectedRangeOperation {
   kind: "addProtectedRange";
-  protection: ProtectedRangeContent;
+  protection: EditProtectionContent;
 }
 
 export interface DeleteProtectedRangeOperation {
@@ -202,7 +202,7 @@ export interface RawSource {
   fetchConditionalFormatRules(
     spreadsheetId: string,
   ): SheetConditionalFormatSnapshot[];
-  fetchProtectedRanges(spreadsheetId: string): SheetProtectedRangeSnapshot[];
+  fetchEditProtections(spreadsheetId: string): SheetEditProtectionSnapshot[];
   flush(spreadsheetId: string, operations: LocalWriteOperation[]): void;
 }
 

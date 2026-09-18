@@ -45,7 +45,7 @@ export class SheetBaseIndexed extends SpreadsheetBaseIndexed {
     return (
       this.fetchTargets.length > 0 ||
       this.sheetState.fetchQueue.gatherConditionalFormats ||
-      this.sheetState.fetchQueue.gatherProtectedRanges
+      this.sheetState.fetchQueue.gatherEditProtections
     );
   }
   clearFetchTargets(): void {

@@ -1,8 +1,8 @@
 import {
   protectionRangeEqual,
-  type ModelableProtectedRange,
+  type ModelableEditProtection,
   type ProtectionGridRange,
-} from "../00_base/RawSource/ProtectedRange";
+} from "../00_base/RawSource/EditProtection";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
@@ -97,7 +97,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       sheet.meta.uniformRow("columnId").prepFetchFull();
       sheet.meta.uniformRow("tableHeader").prepFetchFull();
       sheet.meta.uniformRow("colGroupName").prepFetchFull();
-      sheet.prepFetchProtectedRanges();
+      sheet.prepFetchEditProtections();
     });
     this.ss.fetchAllPrepped();
   }
@@ -161,18 +161,18 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       report.push(`Removed duplicates: ${duplicates.join("; ")}`);
     }
   }
-  private _removeProtection(protection: ModelableProtectedRange): void {
+  private _removeProtection(protection: ModelableEditProtection): void {
     floor.sheetNames.forEach((sheetName) => {
       const sheet = this.ss.sheet(sheetName);
       if (sheet.schema.sheetGid !== protection.range.sheetId) return;
       sheet.removeEditProtectionById(protection.id);
     });
   }
-  private _floorProtections(): ModelableProtectedRange[] {
+  private _floorProtections(): ModelableEditProtection[] {
     return floor.sheetNames.flatMap((sheetName) =>
       this.ss
         .sheet(sheetName)
-        .protectedRanges()
+        .editProtections()
         .flatMap((protection) => {
           if (protection.kind === "unmodelable") return [];
           if (floorMatchKey(protection.description) === undefined) return [];

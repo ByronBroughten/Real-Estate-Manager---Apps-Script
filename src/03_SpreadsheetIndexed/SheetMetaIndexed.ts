@@ -64,8 +64,8 @@ export class SheetMetaIndexed extends SheetCommonIndexed {
     if (this.sheetState.fetchQueue.gatherConditionalFormats) {
       this.raw.primary.gatherFetchConditionalFormatRules();
     }
-    if (this.sheetState.fetchQueue.gatherProtectedRanges) {
-      this.raw.primary.gatherFetchProtectedRanges();
+    if (this.sheetState.fetchQueue.gatherEditProtections) {
+      this.raw.primary.gatherFetchEditProtections();
     }
   }
   gatherFetchDataPrepped() {

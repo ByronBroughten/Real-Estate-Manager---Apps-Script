@@ -5,10 +5,10 @@ import type {
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-  ProtectedRange,
+  EditProtection,
   WholeSheetEditLockDeclaration,
   WholeSheetEditWarningDeclaration,
-} from "../00_base/RawSource/ProtectedRange";
+} from "../00_base/RawSource/EditProtection";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
@@ -82,12 +82,12 @@ export class SheetIndexed extends SheetCommonIndexed {
     this.raw.removeConditionalFormatRule(rule);
     return this;
   }
-  prepFetchProtectedRanges(): this {
-    this.sheetState.fetchQueue.gatherProtectedRanges = true;
+  prepFetchEditProtections(): this {
+    this.sheetState.fetchQueue.gatherEditProtections = true;
     return this;
   }
-  protectedRanges(): ProtectedRange[] {
-    return this.raw.protectedRanges();
+  editProtections(): EditProtection[] {
+    return this.raw.editProtections();
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
     this.raw.addEditWarning(declaration);
@@ -111,7 +111,7 @@ export class SheetIndexed extends SheetCommonIndexed {
     this.raw.removeEditProtections();
     return this;
   }
-  removeEditProtection(protection: ProtectedRange): this {
+  removeEditProtection(protection: EditProtection): this {
     this.raw.removeEditProtection(protection);
     return this;
   }
@@ -119,8 +119,8 @@ export class SheetIndexed extends SheetCommonIndexed {
     this.raw.removeEditProtectionByDescription(description);
     return this;
   }
-  removeEditProtectionById(protectedRangeId: number): this {
-    this.raw.removeEditProtectionById(protectedRangeId);
+  removeEditProtectionById(protectionId: number): this {
+    this.raw.removeEditProtectionById(protectionId);
     return this;
   }
   anchoredA1(colIndex: number): string {
