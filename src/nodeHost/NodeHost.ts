@@ -2,8 +2,8 @@ import {
   GoogleSheetsAPI,
   type OpaqueRawRequest,
   type SheetsHttpTransport,
-} from "../00_base/GoogleSheetsAPI";
-import { installRawSource } from "../00_base/RawSource";
+} from "../00_base/GoogleSheets/GoogleSheetsAPI";
+import { installRawSource } from "../00_base/RawSource/RawSource";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
 const spreadsheetIdProperty = "realEstateSpreadsheetId";

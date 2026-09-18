@@ -1,11 +1,17 @@
-import type { CellValue, CellValueName } from "../00_base/base";
 import {
   baseValueSchemas,
   type BaseValueName,
   type BaseValues,
   type BlankOf,
-} from "../00_base/baseValueSchemas";
-import type { ValueSchemaBase, ValueSchemaKey } from "../00_base/valueSchema";
+} from "../00_base/CellValues/baseValueSchemas";
+import type {
+  CellValue,
+  CellValueName,
+} from "../00_base/CellValues/cellValues";
+import type {
+  ValueSchemaBase,
+  ValueSchemaKey,
+} from "../00_base/CellValues/valueSchema";
 import type { Merge } from "../utils/Obj/merge";
 import type { ValueConfigName, ValueConfigValues } from "./valueConfigsTypes";
 import { makeSchemasFromValueConfig } from "./valueConfigSchemas";

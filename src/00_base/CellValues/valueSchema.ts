@@ -1,4 +1,4 @@
-import type { NotEmpty } from "./base";
+import type { NotEmpty } from "./cellValues";
 
 export type ValueSchemaBase<V = unknown> = {
   type: V;

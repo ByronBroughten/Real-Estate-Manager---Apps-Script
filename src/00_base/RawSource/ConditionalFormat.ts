@@ -1,4 +1,4 @@
-import type { CellValue } from "./base";
+import type { CellValue } from "../CellValues/cellValues";
 import type { GridRangeProps } from "./RawSource";
 import {
   quantizeRgbChannels,

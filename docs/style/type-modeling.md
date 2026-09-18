@@ -31,4 +31,4 @@ Test files are separately mid-migration off `as` via the `migrate-to-shoehorn` s
 
 ## Where utility types live
 
-`NotEmpty<V>` is the one deliberate exception to `utils/Obj.ts`: it sits in `00_base/base.ts` beside the wire value types, because the blank it removes is the cell blank those types define, not a general structural transform (#12).
+`NotEmpty<V>` is the one deliberate exception to `utils/Obj.ts`: it sits in `00_base/CellValues/cellValues.ts` beside the wire value types, because the blank it removes is the cell blank those types define, not a general structural transform (#12).

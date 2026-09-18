@@ -4,7 +4,7 @@ import {
   type CodebaseNameDelimiter,
   type UniformRowName,
   type UniformRowValueName,
-} from "../../00_base/base";
+} from "../../00_base/CellValues/cellValues";
 import {
   ssConfigGet,
   type LiveSpreadsheetConfig,

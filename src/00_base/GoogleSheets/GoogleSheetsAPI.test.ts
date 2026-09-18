@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { assertType, type IsExactly } from "../testSupport/typeAssertions";
+import { assertType, type IsExactly } from "../../testSupport/typeAssertions";
+import type { LocalWriteOperation } from "../RawSource/RawSource";
+import type { RgbColor } from "../RawSource/RgbColor";
 import {
   GoogleSheetsAPI,
   type OpaqueRawRequest,
   type SheetsHttpRequest,
 } from "./GoogleSheetsAPI";
-import type { LocalWriteOperation } from "./RawSource";
-import type { RgbColor } from "./RgbColor";
 
 const spreadsheetId = "spreadsheet-under-test";
 const lightGreen: RgbColor = { red: 0.851, green: 0.918, blue: 0.827 };

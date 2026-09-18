@@ -1,4 +1,4 @@
-import type { NotEmpty } from "../00_base/base";
+import type { NotEmpty } from "../00_base/CellValues/cellValues";
 import type {
   ColumnName,
   ColumnValue,

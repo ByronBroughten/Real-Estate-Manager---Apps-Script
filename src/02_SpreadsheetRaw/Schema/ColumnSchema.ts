@@ -1,4 +1,4 @@
-import type { ValueSchemaKey } from "../../00_base/valueSchema";
+import type { ValueSchemaKey } from "../../00_base/CellValues/valueSchema";
 import {
   getColumnTraitByIndex,
   type ColumnConfig,

@@ -96,4 +96,5 @@ One line per rule. The reasoning and worked examples are one file away:
   - PascalCase mirroring the exported class name (`SheetConfigOperator.ts`, `ConfigOrchestrator.ts`).
   - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions (`Str.ts` → `Str`, `Obj`, `Arr`, `Dat`, `Tim`, `Val`). A fat bundle's pieces split into a same-named subfolder (`utils/Obj/merge.ts`) and are re-assembled in the parent file.
   - camelCase for plain data/config or entry-point files (`columnConfigs.ts`, `businessEndpoints.ts`, `index.ts`).
+  - A long module's helpers split by subject into a same-named subfolder of camelCase files, each exporting camelCase bundles written with method shorthand (`GoogleSheets/GoogleSheetsAPI/cellData.ts` → `cellDataRequests`).
 - **Tier subfolders**: `ClassBases/` for base and Common classes + their prop interfaces; `Types/`/`ClassTypes/` for supporting state/shape types consumed by that tier's classes.

@@ -1,6 +1,6 @@
-import { Dat, type DateSerial } from "../utils/Dat";
-import { Val } from "../utils/Val";
-import { cellValueNames, type CellValueNameToValue } from "./base";
+import { Dat, type DateSerial } from "../../utils/Dat";
+import { Val } from "../../utils/Val";
+import { cellValueNames, type CellValueNameToValue } from "./cellValues";
 import { vsc, type ValueSchemaBase } from "./valueSchema";
 
 export const baseValueNames = ["id", "checkbox", ...cellValueNames] as const;

@@ -1,4 +1,4 @@
-import { isBaseValueName } from "../00_base/baseValueSchemas";
+import { isBaseValueName } from "../00_base/CellValues/baseValueSchemas";
 import {
   makeImportLine,
   type ValueConfigsBase,

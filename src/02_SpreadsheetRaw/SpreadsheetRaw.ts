@@ -1,5 +1,8 @@
-import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
-import type { GridFetchRange, SpreadsheetSnapshot } from "../00_base/RawSource";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
+import type {
+  GridFetchRange,
+  SpreadsheetSnapshot,
+} from "../00_base/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetChanges,

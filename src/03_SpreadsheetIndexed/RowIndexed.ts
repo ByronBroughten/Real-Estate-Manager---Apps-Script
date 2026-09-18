@@ -1,4 +1,4 @@
-import type { CellValue, NotEmpty } from "../00_base/base";
+import type { CellValue, NotEmpty } from "../00_base/CellValues/cellValues";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { CellIndexed } from "./CellIndexed";

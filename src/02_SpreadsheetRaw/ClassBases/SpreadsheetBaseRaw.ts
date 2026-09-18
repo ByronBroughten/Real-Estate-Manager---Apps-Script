@@ -1,5 +1,5 @@
-import { AppsScript } from "../../00_base/AppsScript";
-import { installedRawSource } from "../../00_base/RawSource";
+import { AppsScript } from "../../00_base/GoogleSheets/AppsScript";
+import { installedRawSource } from "../../00_base/RawSource/RawSource";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   emptySpreadsheetFetchQueue,

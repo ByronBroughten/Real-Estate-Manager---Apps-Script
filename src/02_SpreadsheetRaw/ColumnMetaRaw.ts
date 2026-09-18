@@ -1,12 +1,12 @@
+import type { BaseValueName } from "../00_base/CellValues/baseValueSchemas";
 import type {
   CellValue,
   CellValueName,
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../00_base/base";
-import type { BaseValueName } from "../00_base/baseValueSchemas";
-import type { GridCellSnapshot } from "../00_base/RawSource";
+} from "../00_base/CellValues/cellValues";
+import type { GridCellSnapshot } from "../00_base/RawSource/RawSource";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";

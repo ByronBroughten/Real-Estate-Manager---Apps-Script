@@ -1,8 +1,11 @@
-import type { UniformRowName, UniformRowValueName } from "../00_base/base";
+import type {
+  UniformRowName,
+  UniformRowValueName,
+} from "../00_base/CellValues/cellValues";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
-} from "../00_base/ProtectedRange";
+} from "../00_base/RawSource/ProtectedRange";
 import type {
   ColumnFullName,
   ColumnName,

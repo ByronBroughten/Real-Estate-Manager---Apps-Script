@@ -1,13 +1,16 @@
-import type { ConditionalFormatRule } from "../../00_base/ConditionalFormat";
-import type { ProtectedRange } from "../../00_base/ProtectedRange";
+import type {
+  CellValue,
+  CellValueName,
+} from "../../00_base/CellValues/cellValues";
+import type { ConditionalFormatRule } from "../../00_base/RawSource/ConditionalFormat";
+import type { ProtectedRange } from "../../00_base/RawSource/ProtectedRange";
 import type {
   FindReplaceScope as BaseFindReplaceScope,
   FindReplaceTerms as BaseFindReplaceTerms,
   LocalWriteOperation,
   RawSource,
-} from "../../00_base/RawSource";
-import type { RgbColor } from "../../00_base/RgbColor";
-import type { CellValue, CellValueName } from "../../00_base/base";
+} from "../../00_base/RawSource/RawSource";
+import type { RgbColor } from "../../00_base/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface StateRaw {

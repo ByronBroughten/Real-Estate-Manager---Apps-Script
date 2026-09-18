@@ -2,7 +2,7 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../../00_base/base";
+} from "../../00_base/CellValues/cellValues";
 import type { StrictOmit } from "../../utils/Obj";
 import { getUniformRowIndex } from "../Schema/SchemaBase";
 import type { RowRawProps } from "./RowBaseRaw";

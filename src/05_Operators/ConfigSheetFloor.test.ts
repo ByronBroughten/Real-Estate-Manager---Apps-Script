@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import type { ProtectedRange } from "../00_base/ProtectedRange";
+import type { ProtectedRange } from "../00_base/RawSource/ProtectedRange";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";

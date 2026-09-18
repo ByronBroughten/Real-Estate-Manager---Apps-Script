@@ -1,5 +1,5 @@
-import { GoogleSheetsAPI } from "../00_base/GoogleSheetsAPI";
-import { installRawSource } from "../00_base/RawSource";
+import { GoogleSheetsAPI } from "../00_base/GoogleSheets/GoogleSheetsAPI";
+import { installRawSource } from "../00_base/RawSource/RawSource";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 
 type BatchUpdateRequest =

@@ -1,8 +1,8 @@
-import { GoogleSheetsAPI } from "../00_base/GoogleSheetsAPI";
+import { GoogleSheetsAPI } from "../00_base/GoogleSheets/GoogleSheetsAPI";
 import {
   hasInstalledRawSource,
   installRawSource,
-} from "../00_base/RawSource";
+} from "../00_base/RawSource/RawSource";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import type { ColumnSchema } from "../02_SpreadsheetRaw/Schema/ColumnSchema";
 import { SpreadsheetSchema } from "../02_SpreadsheetRaw/Schema/SpreadsheetSchema";

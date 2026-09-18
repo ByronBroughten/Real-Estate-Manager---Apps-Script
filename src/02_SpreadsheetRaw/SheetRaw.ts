@@ -1,10 +1,10 @@
-import type { CellValueName } from "../00_base/base";
+import type { CellValueName } from "../00_base/CellValues/cellValues";
 import {
   conditionalFormatRulesEqual,
   rangeEqual,
   type ConditionalFormatDeclaration,
   type ConditionalFormatRule,
-} from "../00_base/ConditionalFormat";
+} from "../00_base/RawSource/ConditionalFormat";
 import {
   isWholeColumnGridRange,
   protectedRangeContentSatisfies,
@@ -18,8 +18,11 @@ import {
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
-} from "../00_base/ProtectedRange";
-import type { GridRangeProps, SheetSnapshot } from "../00_base/RawSource";
+} from "../00_base/RawSource/ProtectedRange";
+import type {
+  GridRangeProps,
+  SheetSnapshot,
+} from "../00_base/RawSource/RawSource";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import { Arr } from "../utils/Arr";
 import { assertValueAndFormulaExclusive } from "./CellRaw";

@@ -2,12 +2,12 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../00_base/base";
+} from "../00_base/CellValues/cellValues";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   ProtectedRange,
-} from "../00_base/ProtectedRange";
+} from "../00_base/RawSource/ProtectedRange";
 import { UniformRowBaseRaw } from "./ClassBases/UniformRowBaseRaw";
 
 export class UniformRowRaw<

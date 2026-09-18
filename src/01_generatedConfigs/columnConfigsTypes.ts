@@ -1,4 +1,7 @@
-import type { CodebaseNameDelimiter, NotEmpty } from "../00_base/base";
+import type {
+  CodebaseNameDelimiter,
+  NotEmpty,
+} from "../00_base/CellValues/cellValues";
 import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./columnConfigs";

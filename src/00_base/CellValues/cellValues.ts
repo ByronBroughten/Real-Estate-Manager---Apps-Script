@@ -1,4 +1,4 @@
-import { Obj } from "../utils/Obj";
+import { Obj } from "../../utils/Obj";
 
 const cellValues = {
   string: "" as string,

@@ -3,7 +3,7 @@ import {
   assertNotType,
   assertType,
   type IsExactly,
-} from "../testSupport/typeAssertions";
+} from "../../testSupport/typeAssertions";
 import {
   protectionRangeEqual,
   type EditLockDeclaration,

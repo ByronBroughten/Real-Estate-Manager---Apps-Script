@@ -1,4 +1,4 @@
-import type { RgbColor } from "../00_base/RgbColor";
+import type { RgbColor } from "../00_base/RawSource/RgbColor";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/StateIndexed";

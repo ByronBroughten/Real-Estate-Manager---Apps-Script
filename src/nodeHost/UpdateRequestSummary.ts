@@ -1,4 +1,4 @@
-import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
 import { sheetConfigsIndexed } from "../01_generatedConfigs/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 

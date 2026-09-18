@@ -1,4 +1,7 @@
-import { type CellValueName, type UniformRowName } from "../00_base/base";
+import {
+  type CellValueName,
+  type UniformRowName,
+} from "../00_base/CellValues/cellValues";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";

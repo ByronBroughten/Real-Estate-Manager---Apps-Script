@@ -2,7 +2,7 @@ import {
   protectionRangeEqual,
   type ModelableProtectedRange,
   type ProtectionGridRange,
-} from "../00_base/ProtectedRange";
+} from "../00_base/RawSource/ProtectedRange";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";

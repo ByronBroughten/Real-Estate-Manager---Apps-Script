@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   stubPropertiesService,
   stubScriptAndSpreadsheetApp,
-} from "../testSupport/fakeAppsScriptGlobals";
+} from "../../testSupport/fakeAppsScriptGlobals";
 import { AppsScript } from "./AppsScript";
 
 describe("AppsScript.projectProperties", () => {

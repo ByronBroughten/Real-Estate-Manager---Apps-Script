@@ -1,4 +1,4 @@
-import type { UniformRowName } from "../00_base/base";
+import type { UniformRowName } from "../00_base/CellValues/cellValues";
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";

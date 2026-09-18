@@ -2,12 +2,12 @@ import type {
   UniformRowName,
   UniformRowValue,
   UniformRowValueName,
-} from "../00_base/base";
+} from "../00_base/CellValues/cellValues";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   ProtectedRange,
-} from "../00_base/ProtectedRange";
+} from "../00_base/RawSource/ProtectedRange";
 import { getUniformRowIndex } from "../02_SpreadsheetRaw/Schema/SchemaBase";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";

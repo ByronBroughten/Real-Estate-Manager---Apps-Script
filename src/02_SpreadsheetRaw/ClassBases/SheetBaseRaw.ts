@@ -1,4 +1,7 @@
-import type { SheetSnapshot, TableSnapshot } from "../../00_base/RawSource";
+import type {
+  SheetSnapshot,
+  TableSnapshot,
+} from "../../00_base/RawSource/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import {

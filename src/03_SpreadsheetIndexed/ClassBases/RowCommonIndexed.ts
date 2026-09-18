@@ -1,4 +1,4 @@
-import type { CellValue } from "../../00_base/base";
+import type { CellValue } from "../../00_base/CellValues/cellValues";
 import { RowBaseIndexed } from "./RowBaseIndexed";
 
 export abstract class RowCommonIndexed extends RowBaseIndexed {

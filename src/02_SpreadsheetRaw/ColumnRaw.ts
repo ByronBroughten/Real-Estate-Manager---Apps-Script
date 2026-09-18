@@ -1,13 +1,16 @@
-import type { CellValue, CellValueName } from "../00_base/base";
+import type {
+  CellValue,
+  CellValueName,
+} from "../00_base/CellValues/cellValues";
 import type {
   ConditionalFormatDeclaration,
   ConditionalFormatRule,
-} from "../00_base/ConditionalFormat";
+} from "../00_base/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
   EditWarningDeclaration,
   ProtectedRange,
-} from "../00_base/ProtectedRange";
+} from "../00_base/RawSource/ProtectedRange";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";

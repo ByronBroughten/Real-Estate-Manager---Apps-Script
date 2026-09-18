@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
+import type { OpaqueRawRequest } from "../00_base/GoogleSheets/GoogleSheetsAPI";
 import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
