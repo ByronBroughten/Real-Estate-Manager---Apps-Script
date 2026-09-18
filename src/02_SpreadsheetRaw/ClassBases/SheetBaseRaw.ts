@@ -16,12 +16,6 @@ export interface SheetRawProps extends SpreadsheetRawProps {
   sheetGid: number;
 }
 
-export class SheetRawNotFoundError extends Error {
-  constructor(sheetGid: number) {
-    super(`Sheet with sheetGid "${sheetGid}" not found.`);
-  }
-}
-
 export class SheetBaseRaw extends SpreadsheetBaseRaw {
   readonly sheetGid: number;
   constructor({ sheetGid, ...rest }: SheetRawProps) {
