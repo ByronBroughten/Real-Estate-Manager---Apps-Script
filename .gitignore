@@ -11,3 +11,6 @@ nodeHost.config.json
 # OAuth client secrets live outside the repo; this is belt-and-braces.
 client_secret*.json
 .clasprc.json*
+
+# Full JSON responses from `npm run probe` — live spreadsheet data, never committed.
+.probe/

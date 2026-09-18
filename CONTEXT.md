@@ -51,7 +51,7 @@ A prompt Sheets shows anyone, the owner included, before they change a cell the 
 _Avoid_: warning (that is a run state), protection
 
 **Edit lock**:
-A cell only named editors can change. A lock that names none inherits the spreadsheet's editors and does not stop them. A lock that names users can stop the owner in the UI if their account is not on the list. A cell nobody should edit still gets an edit warning as well, because a lock may not prompt the owner.
+A cell only the editors it names can change; a lock that names none stops nobody.
 _Avoid_: protection, lock
 
 **Config-sheet floor**:

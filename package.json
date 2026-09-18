@@ -13,7 +13,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "chore": "tsx scripts/chore.mjs"
+    "chore": "tsx scripts/chore.mjs",
+    "probe": "node scripts/sheetsProbe.mjs"
   },
   "repository": {
     "type": "git",
