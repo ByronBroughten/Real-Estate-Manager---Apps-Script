@@ -414,7 +414,7 @@ export const columnConfigs = makeColumnConfigs({
     "sheetTitle": { "columnId": "c:scf:0Ctj9xZ", "header": "Sheet title", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "letApiAccess": { "columnId": "c:scf:GOJ0ixi", "header": "Let api access", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "idPrefix": { "columnId": "c:scf:3dZ5h-J", "header": "ID prefix", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "idPrefixIsUniqueOrEmpty": { "columnId": "c:scf:cK5WM0v", "header": "ID prefix Is unique or empty", "valueName": "boolean", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
+    "idPrefixIsUniqueOrEmpty": { "columnId": "c:scf:cK5WM0v", "header": "ID prefix is unique or empty", "valueName": "boolean", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "splitReceipt": {
     "name": { "columnId": "c:srct:CHhpNpt", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
