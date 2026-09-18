@@ -22,7 +22,9 @@
       "mcp__gsheets__get_sheet_data",
       "mcp__gsheets__list_sheets"
     ],
-    "ask": ["Bash(npm run chore * --send*)"],
+    "ask": [
+      "Bash(npm run chore * --send*)"
+    ],
     "deny": [
       "Read(./src/01_generatedConfigs/columnConfigs.ts)"
     ]
@@ -35,6 +37,11 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bashReadGuard.mjs\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/masterCommitGuard.mjs\"",
             "timeout": 10
           }
         ]
