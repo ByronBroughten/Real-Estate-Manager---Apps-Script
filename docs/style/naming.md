@@ -17,6 +17,7 @@ Style fragment. The one-line rules live in [`STYLE.md`](../../STYLE.md); this fi
 - **A constant is camelCase, and two or more in one file that serve one purpose become one `as const` object named for that purpose** (#61). SCREAMING constants spent the shout on values that need no warning, so the multi-row delete's name stopped standing out; camelCase leaves the shout to that one method. Grouping names the purpose once instead of repeating it as a suffix on every sibling: `SHEET_PROPERTIES_FIELDS`, `CONDITIONAL_FORMAT_FIELDS` and the rest became `fieldMasks.sheetProperties` and friends in the Google Sheets adapter, and the summary's four widths and caps became `layoutLimits`. A constant with no sibling stays a plain `const` (`sheetsApiBase`). Google's own enum strings (`"CUSTOM_FORMULA"`, `"NUMBER_EQ"`) are values, not names, and keep Google's spelling. `@typescript-eslint/naming-convention` holds variables to camelCase or PascalCase and rejects an all-caps word, and leaves method names free so the delete's shout still passes.
 - **Method names draw from one controlled verb vocabulary**, each with a distinct meaning — don't invent a new verb for a meaning already on this list:
   - `fetch` — actually hits the live Sheets API
+  - `integrate` — merges a fetched snapshot into local state; no API call, so it is never `fetch`
   - `prep`/`gather` — queue state locally before a fetch (`prepFetchX` queues only; `gatherFetchX` queues *and* fetches)
   - `update` — writes a local/queued change, not yet flushed
   - `append` — adds a new row

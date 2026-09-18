@@ -46,6 +46,9 @@ _Avoid_: sheet prefix, ID code
 The Sheet Config checkbox that says this tab is one the app knows about — not every tab, and not every catalogue row on Sheet Config.
 _Avoid_: enabled sheet, API sheet, known sheet
 
+**Edit protection**:
+Either an edit warning or an edit lock.
+
 **Edit warning**:
 A prompt Sheets shows anyone, the owner included, before they change a cell the app depends on; the edit still goes through if they confirm.
 _Avoid_: warning (that is a run state), protection

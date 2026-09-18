@@ -1,20 +1,12 @@
 import type { CellValueName } from "../00_base/CellValues/cellValues";
-import {
-  conditionalFormatRulesEqual,
-  rangeEqual,
-  type ConditionalFormatDeclaration,
-  type ConditionalFormatRule,
+import type {
+  ConditionalFormatDeclaration,
+  ConditionalFormatRule,
 } from "../00_base/RawSource/ConditionalFormat";
 import {
-  isWholeColumnGridRange,
-  protectedRangeContentSatisfies,
-  protectedRangesEqual,
-  protectionRangeEqual,
-  protectionRangeHasRowCoordinates,
   type EditLockDeclaration,
   type EditWarningDeclaration,
   type ProtectedRange,
-  type ProtectedRangeContent,
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
@@ -36,14 +28,30 @@ import {
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
+import { SheetConditionalFormatsRaw } from "./SheetRaw/SheetConditionalFormatsRaw";
+import { SheetEditProtectionsRaw } from "./SheetRaw/SheetEditProtectionsRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
+/**
+ * One sheet's grid state by index: rows, columns, table geometry, pruning,
+ * queued sheet-level requests, and integrating fetched sheet data into rows,
+ * cells and Meta column facts. Conditional format rules and edit protections
+ * live in SheetRaw/ and are reached through one-line delegations here.
+ * Uniform rows and column facts are SheetMetaRaw; spreadsheet-wide fetch and
+ * flush are SpreadsheetRaw. By-name resolution is Indexed/Named.
+ */
 export class SheetRaw extends SheetCommonRaw {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
   get meta(): SheetMetaRaw {
     return new SheetMetaRaw(this.sheetRawProps);
+  }
+  private get conditionalFormats(): SheetConditionalFormatsRaw {
+    return new SheetConditionalFormatsRaw(this.sheetRawProps);
+  }
+  private get editProtections(): SheetEditProtectionsRaw {
+    return new SheetEditProtectionsRaw(this.sheetRawProps);
   }
   get rowIndexesAreStale(): boolean {
     return (
@@ -207,102 +215,6 @@ export class SheetRaw extends SheetCommonRaw {
     this.meta.tableHeaderRow.cell(startTableColIndex).gatherFetchRange();
     return this;
   }
-  gatherFetchConditionalFormatRules(): this {
-    this.sheetState.fetchQueue.gatherConditionalFormats = true;
-    return this;
-  }
-  conditionalFormatRules(): ConditionalFormatRule[] {
-    const rules = this.sheetState.working.conditionalFormats.rules;
-    if (rules === null) {
-      throw new Error(
-        `Conditional format rules have not been fetched for sheetGid ${this.sheetGid}.`,
-      );
-    }
-    return rules;
-  }
-  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
-    return this.addConditionalFormatRuleAt(this.dataGridRange, declaration);
-  }
-  removeConditionalFormatRules(): this {
-    return this.removeConditionalFormatRulesAt(this.dataGridRange);
-  }
-  addConditionalFormatRuleAt(
-    range: GridRangeProps,
-    declaration: ConditionalFormatDeclaration,
-  ): this {
-    this.activeTable.assertRowIndexesNotStale();
-    this.assertConditionalFormatIndexesNotStale();
-    const rule: Extract<ConditionalFormatRule, { kind: "boolean" }> = {
-      kind: "boolean",
-      ranges: [range],
-      condition: declaration.condition,
-      format: declaration.format,
-    };
-    if (
-      this._pendingConditionalFormatRules().some((pending) =>
-        conditionalFormatRulesEqual(pending, rule),
-      )
-    ) {
-      return this;
-    }
-    this.updateRequests.addConditionalFormat.push({
-      kind: "addConditionalFormatRule",
-      index: 0,
-      rule,
-    });
-    return this;
-  }
-  private _pendingConditionalFormatRules(): ConditionalFormatRule[] {
-    const fetched = this.sheetState.working.conditionalFormats.rules;
-    const rules = fetched === null ? [] : [...fetched];
-    const deletes = [...this.updateRequests.deleteConditionalFormat]
-      .filter((operation) => operation.sheetId === this.sheetGid)
-      .sort((left, right) => right.index - left.index);
-    deletes.forEach((operation) => {
-      rules.splice(operation.index, 1);
-    });
-    this.updateRequests.addConditionalFormat.forEach((operation) => {
-      if (operation.rule.ranges[0]?.sheetId !== this.sheetGid) return;
-      rules.splice(operation.index, 0, operation.rule);
-    });
-    return rules;
-  }
-  removeConditionalFormatRulesAt(range: GridRangeProps): this {
-    this.activeTable.assertRowIndexesNotStale();
-    this.assertConditionalFormatIndexesNotStale();
-    this.conditionalFormatRules().forEach((rule, index) => {
-      if (rule.ranges.length !== 1) return;
-      if (!rangeEqual(range, rule.ranges[0])) return;
-      this.updateRequests.deleteConditionalFormat.push({
-        kind: "deleteConditionalFormatRule",
-        sheetId: this.sheetGid,
-        index,
-      });
-    });
-    return this;
-  }
-  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
-    this.activeTable.assertRowIndexesNotStale();
-    this.assertConditionalFormatIndexesNotStale();
-    this.conditionalFormatRules().forEach((existing, index) => {
-      if (!conditionalFormatRulesEqual(existing, rule)) return;
-      this.updateRequests.deleteConditionalFormat.push({
-        kind: "deleteConditionalFormatRule",
-        sheetId: this.sheetGid,
-        index,
-      });
-    });
-    return this;
-  }
-  markConditionalFormatIndexesStale(): void {
-    this.sheetState.working.conditionalFormats.isStale = true;
-  }
-  assertConditionalFormatIndexesNotStale(): void {
-    if (!this.sheetState.working.conditionalFormats.isStale) return;
-    throw new Error(
-      `Conditional format indexes are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's rules before mutating them again.`,
-    );
-  }
   hasQueuedFullRowFetch(rowIndex: number): boolean {
     return this.sheetState.fetchQueue.toFinalize.rows.has(rowIndex);
   }
@@ -336,216 +248,6 @@ export class SheetRaw extends SheetCommonRaw {
       this._integrateSheetData(sheet.gridBlocks);
     }
   }
-  integrateConditionalFormatRules(rules: ConditionalFormatRule[]): void {
-    this.sheetState.working.conditionalFormats.rules = rules;
-    this.sheetState.fetchQueue.gatherConditionalFormats = false;
-    this.sheetState.working.conditionalFormats.isStale = false;
-  }
-  gatherFetchProtectedRanges(): this {
-    this.sheetState.fetchQueue.gatherProtectedRanges = true;
-    return this;
-  }
-  protectedRanges(): ProtectedRange[] {
-    this.assertProtectedRangesNotStale();
-    const protections = this.sheetState.working.protectedRanges.ranges;
-    if (protections === null) {
-      throw new Error(
-        `Protected ranges have not been fetched for sheetGid ${this.sheetGid}.`,
-      );
-    }
-    return protections;
-  }
-  addEditWarning(declaration: EditWarningDeclaration = {}): this {
-    return this.addEditWarningAt(this.dataGridRange, declaration);
-  }
-  addEditLock(declaration: EditLockDeclaration = {}): this {
-    return this.addEditLockAt(this.dataGridRange, declaration);
-  }
-  addEditWarningWholeSheet(
-    declaration: WholeSheetEditWarningDeclaration = {},
-  ): this {
-    return this._queueProtection({
-      kind: "warning",
-      range: this.wholeSheetGridRange,
-      description: declaration.description ?? "",
-      users: [],
-      groups: [],
-      unprotectedRanges: declaration.unprotectedRanges ?? [],
-    });
-  }
-  addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
-    return this._queueProtection({
-      kind: "lock",
-      range: this.wholeSheetGridRange,
-      description: declaration.description ?? "",
-      users: declaration.users ?? [],
-      groups: declaration.groups ?? [],
-      unprotectedRanges: declaration.unprotectedRanges ?? [],
-    });
-  }
-  addEditWarningAt(
-    range: ProtectionGridRange,
-    declaration: EditWarningDeclaration = {},
-  ): this {
-    return this._queueProtection({
-      kind: "warning",
-      range,
-      description: declaration.description ?? "",
-      users: [],
-      groups: [],
-      unprotectedRanges: [],
-    });
-  }
-  addEditLockAt(
-    range: ProtectionGridRange,
-    declaration: EditLockDeclaration = {},
-  ): this {
-    return this._queueProtection({
-      kind: "lock",
-      range,
-      description: declaration.description ?? "",
-      users: declaration.users ?? [],
-      groups: declaration.groups ?? [],
-      unprotectedRanges: [],
-    });
-  }
-  private _queueProtection(protection: ProtectedRangeContent): this {
-    this._assertProtectionWriteCoordinatesNotStale(
-      protection.range,
-      protection.unprotectedRanges,
-    );
-    this.assertProtectedRangesNotStale();
-    if (
-      this._pendingProtectedRangeContents().some((pending) =>
-        protectedRangeContentSatisfies(pending, protection),
-      )
-    ) {
-      return this;
-    }
-    this.updateRequests.addProtectedRange.push({
-      kind: "addProtectedRange",
-      protection,
-    });
-    return this;
-  }
-  private _pendingProtectedRangeContents(): ProtectedRangeContent[] {
-    const fetched = this.sheetState.working.protectedRanges.ranges;
-    const protections: ProtectedRange[] = fetched === null ? [] : [...fetched];
-    const deletedIds = new Set(
-      this.updateRequests.deleteProtectedRange
-        .filter((operation) => operation.sheetId === this.sheetGid)
-        .map((operation) => operation.protectedRangeId),
-    );
-    const remaining = protections.filter(
-      (protection) => !deletedIds.has(protection.id),
-    );
-    const queued = this.updateRequests.addProtectedRange
-      .filter(
-        (operation) => operation.protection.range.sheetId === this.sheetGid,
-      )
-      .map((operation) => operation.protection);
-    return [
-      ...remaining.flatMap((protection) =>
-        protection.kind === "unmodelable" ? [] : [protection],
-      ),
-      ...queued,
-    ];
-  }
-  removeEditProtections(): this {
-    return this.removeEditProtectionsAt(this.dataGridRange);
-  }
-  removeEditProtectionsAt(range: ProtectionGridRange): this {
-    this._assertProtectionWriteCoordinatesNotStale(range, []);
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((protection) => {
-      if (protection.kind === "unmodelable") return;
-      if (!protectionRangeEqual(range, protection.range)) return;
-      this._queueDeleteProtectedRange(protection.id);
-    });
-    return this;
-  }
-  removeEditProtection(protection: ProtectedRange): this {
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((existing) => {
-      if (!protectedRangesEqual(existing, protection)) return;
-      if (existing.kind !== "unmodelable") {
-        this._assertProtectionWriteCoordinatesNotStale(
-          existing.range,
-          existing.unprotectedRanges,
-        );
-      }
-      this._queueDeleteProtectedRange(existing.id);
-    });
-    return this;
-  }
-  removeEditProtectionByDescription(description: string): this {
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((existing) => {
-      if (existing.kind === "unmodelable") return;
-      if (existing.description !== description) return;
-      this._assertProtectionWriteCoordinatesNotStale(
-        existing.range,
-        existing.unprotectedRanges,
-      );
-      this._queueDeleteProtectedRange(existing.id);
-    });
-    return this;
-  }
-  removeEditProtectionById(protectedRangeId: number): this {
-    this.assertProtectedRangesNotStale();
-    this.protectedRanges().forEach((existing) => {
-      if (existing.id !== protectedRangeId) return;
-      if (existing.kind !== "unmodelable") {
-        this._assertProtectionWriteCoordinatesNotStale(
-          existing.range,
-          existing.unprotectedRanges,
-        );
-      }
-      this._queueDeleteProtectedRange(existing.id);
-    });
-    return this;
-  }
-  private _queueDeleteProtectedRange(protectedRangeId: number): void {
-    this.updateRequests.deleteProtectedRange.push({
-      kind: "deleteProtectedRange",
-      sheetId: this.sheetGid,
-      protectedRangeId,
-    });
-  }
-  private _assertProtectionWriteCoordinatesNotStale(
-    range: ProtectionGridRange,
-    unprotectedRanges: ProtectionGridRange[],
-  ): void {
-    [range, ...unprotectedRanges].forEach((item) => {
-      this._assertOneProtectionRangeCoordinatesNotStale(item);
-    });
-  }
-  private _assertOneProtectionRangeCoordinatesNotStale(
-    range: ProtectionGridRange,
-  ): void {
-    if (isWholeColumnGridRange(range)) {
-      if (this.sheetState.working.knownTable !== null) {
-        this.activeTable.validateColIndexNotStale(range.startColumnIndex);
-      }
-      return;
-    }
-    if (!protectionRangeHasRowCoordinates(range)) return;
-    this.activeTable.assertRowIndexesNotStale();
-  }
-  markProtectedRangesStale(): void {
-    this.sheetState.working.protectedRanges.isStale = true;
-  }
-  assertProtectedRangesNotStale(): void {
-    if (!this.sheetState.working.protectedRanges.isStale) return;
-    throw new Error(
-      `Protections are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's protections before reading or mutating them again.`,
-    );
-  }
-  integrateProtectedRanges(protections: ProtectedRange[]): void {
-    this.sheetState.working.protectedRanges.ranges = protections;
-    this.sheetState.fetchQueue.gatherProtectedRanges = false;
-    this.sheetState.working.protectedRanges.isStale = false;
-  }
   private _integrateSheetData(
     gridBlocks: NonNullable<SheetSnapshot["gridBlocks"]>,
   ): void {
@@ -574,6 +276,113 @@ export class SheetRaw extends SheetCommonRaw {
         }
       });
     });
+  }
+  gatherFetchConditionalFormatRules(): this {
+    this.conditionalFormats.gatherFetchConditionalFormatRules();
+    return this;
+  }
+  conditionalFormatRules(): ConditionalFormatRule[] {
+    return this.conditionalFormats.conditionalFormatRules();
+  }
+  addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
+    this.conditionalFormats.addConditionalFormatRule(declaration);
+    return this;
+  }
+  removeConditionalFormatRules(): this {
+    this.conditionalFormats.removeConditionalFormatRules();
+    return this;
+  }
+  addConditionalFormatRuleAt(
+    range: GridRangeProps,
+    declaration: ConditionalFormatDeclaration,
+  ): this {
+    this.conditionalFormats.addConditionalFormatRuleAt(range, declaration);
+    return this;
+  }
+  removeConditionalFormatRulesAt(range: GridRangeProps): this {
+    this.conditionalFormats.removeConditionalFormatRulesAt(range);
+    return this;
+  }
+  removeConditionalFormatRule(rule: ConditionalFormatRule): this {
+    this.conditionalFormats.removeConditionalFormatRule(rule);
+    return this;
+  }
+  markConditionalFormatIndexesStale(): void {
+    this.conditionalFormats.markConditionalFormatIndexesStale();
+  }
+  assertConditionalFormatIndexesNotStale(): void {
+    this.conditionalFormats.assertConditionalFormatIndexesNotStale();
+  }
+  integrateConditionalFormatRules(rules: ConditionalFormatRule[]): void {
+    this.conditionalFormats.integrateConditionalFormatRules(rules);
+  }
+  gatherFetchProtectedRanges(): this {
+    this.editProtections.gatherFetchProtectedRanges();
+    return this;
+  }
+  protectedRanges(): ProtectedRange[] {
+    return this.editProtections.protectedRanges();
+  }
+  addEditWarning(declaration: EditWarningDeclaration = {}): this {
+    this.editProtections.addEditWarning(declaration);
+    return this;
+  }
+  addEditLock(declaration: EditLockDeclaration = {}): this {
+    this.editProtections.addEditLock(declaration);
+    return this;
+  }
+  addEditWarningWholeSheet(
+    declaration: WholeSheetEditWarningDeclaration = {},
+  ): this {
+    this.editProtections.addEditWarningWholeSheet(declaration);
+    return this;
+  }
+  addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
+    this.editProtections.addEditLockWholeSheet(declaration);
+    return this;
+  }
+  addEditWarningAt(
+    range: ProtectionGridRange,
+    declaration: EditWarningDeclaration = {},
+  ): this {
+    this.editProtections.addEditWarningAt(range, declaration);
+    return this;
+  }
+  addEditLockAt(
+    range: ProtectionGridRange,
+    declaration: EditLockDeclaration = {},
+  ): this {
+    this.editProtections.addEditLockAt(range, declaration);
+    return this;
+  }
+  removeEditProtections(): this {
+    this.editProtections.removeEditProtections();
+    return this;
+  }
+  removeEditProtectionsAt(range: ProtectionGridRange): this {
+    this.editProtections.removeEditProtectionsAt(range);
+    return this;
+  }
+  removeEditProtection(protection: ProtectedRange): this {
+    this.editProtections.removeEditProtection(protection);
+    return this;
+  }
+  removeEditProtectionByDescription(description: string): this {
+    this.editProtections.removeEditProtectionByDescription(description);
+    return this;
+  }
+  removeEditProtectionById(protectedRangeId: number): this {
+    this.editProtections.removeEditProtectionById(protectedRangeId);
+    return this;
+  }
+  markProtectedRangesStale(): void {
+    this.editProtections.markProtectedRangesStale();
+  }
+  assertProtectedRangesNotStale(): void {
+    this.editProtections.assertProtectedRangesNotStale();
+  }
+  integrateProtectedRanges(protections: ProtectedRange[]): void {
+    this.editProtections.integrateProtectedRanges(protections);
   }
   // The uniform rows survive, or every later column-index resolution breaks.
   removeRowsExcept(...rowIdxesToKeep: number[]): void {
