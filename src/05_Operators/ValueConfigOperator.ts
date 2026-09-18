@@ -1,4 +1,4 @@
-import { isBaseValueName } from "../00_Source/CellValues/baseValueSchemas";
+import { isFrameworkValueName } from "../00_Source/CellValues/frameworkValueSchemas";
 import {
   makeImportLine,
   type ValueConfigsBase,
@@ -35,7 +35,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
     this.valueConfigSync.activeHeaders = new Set(
       this.columnConfigOperator
         .activeValueTitles()
-        .filter((valueName) => !isBaseValueName(valueName)),
+        .filter((valueName) => !isFrameworkValueName(valueName)),
     );
     this.activeHeaders.forEach((header) => {
       this.sheet.raw.columnByHeader(header).gatherFetchFull();

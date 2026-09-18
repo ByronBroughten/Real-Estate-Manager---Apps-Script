@@ -1,9 +1,9 @@
 import {
-  baseValueSchemas,
-  type BaseValueName,
-  type BaseValues,
+  frameworkValueSchemas,
+  type FrameworkValueName,
+  type FrameworkValues,
   type BlankOf,
-} from "../00_Source/CellValues/baseValueSchemas";
+} from "../00_Source/CellValues/frameworkValueSchemas";
 import type {
   CellValue,
   CellValueName,
@@ -16,9 +16,9 @@ import type { Merge } from "../utils/Obj/merge";
 import type { ValueConfigName, ValueConfigValues } from "./valueConfigsTypes";
 import { makeSchemasFromValueConfig } from "./valueConfigSchemas";
 
-type ValueNameSimple = BaseValueName | ValueConfigName;
+type ValueNameSimple = FrameworkValueName | ValueConfigName;
 
-type AllValues = Merge<BaseValues, ValueConfigValues>;
+type AllValues = Merge<FrameworkValues, ValueConfigValues>;
 type AllValuesOrEmpty = {
   [VN in ValueNameSimple]: AllValues[VN] | BlankOf<VN>;
 };
@@ -36,7 +36,7 @@ export type VnToCvn<VN extends ValueNameSimple> = VN extends CellValueName
 export type ValueSchema<VN extends ValueName = ValueName> = ValueSchemas[VN];
 
 const valueSchemas: ValueSchemas = {
-  ...baseValueSchemas,
+  ...frameworkValueSchemas,
   ...makeSchemasFromValueConfig(),
 } as const;
 

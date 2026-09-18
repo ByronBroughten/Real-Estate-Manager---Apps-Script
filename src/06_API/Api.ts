@@ -11,7 +11,7 @@ import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
-import { baseEndpoints } from "./baseEndpoints";
+import { frameworkEndpoints } from "./frameworkEndpoints";
 import { EndpointRun } from "./EndpointRun";
 import type { Endpoints } from "./Endpoints";
 
@@ -29,7 +29,7 @@ export class Api extends SpreadsheetBaseNamed {
     super(rest);
     this.endpoints = {
       ...endpoints,
-      ...baseEndpoints,
+      ...frameworkEndpoints,
     };
   }
   static init(endpoints: Endpoints): Api {

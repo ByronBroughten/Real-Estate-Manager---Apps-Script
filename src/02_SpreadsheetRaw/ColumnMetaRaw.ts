@@ -1,4 +1,4 @@
-import type { BaseValueName } from "../00_Source/CellValues/baseValueSchemas";
+import type { FrameworkValueName } from "../00_Source/CellValues/frameworkValueSchemas";
 import type {
   CellValue,
   CellValueName,
@@ -127,7 +127,7 @@ export class ColumnMetaRaw<
     }
     return null;
   }
-  private _declaredColumnTypeValueName(): BaseValueName | null {
+  private _declaredColumnTypeValueName(): FrameworkValueName | null {
     const columnType = this.activeDeclaredColumnType;
     if (columnType === undefined) {
       return null;
@@ -176,7 +176,7 @@ export class ColumnMetaRaw<
 }
 
 // DROPDOWN and COLUMN_TYPE_UNSPECIFIED are absent: neither says what a column holds.
-const columnTypeValueNames: Record<string, BaseValueName> = {
+const columnTypeValueNames: Record<string, FrameworkValueName> = {
   DOUBLE: "number",
   CURRENCY: "number",
   PERCENT: "number",

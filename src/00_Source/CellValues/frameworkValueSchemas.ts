@@ -3,13 +3,17 @@ import { Val } from "../../utils/Val";
 import { cellValueNames, type CellValueNameToValue } from "./cellValues";
 import { vsc, type ValueSchemaBase } from "./valueSchema";
 
-export const baseValueNames = ["id", "checkbox", ...cellValueNames] as const;
-export type BaseValueName = (typeof baseValueNames)[number];
-export function isBaseValueName(x: unknown): boolean {
-  return baseValueNames.includes(x as BaseValueName);
+export const frameworkValueNames = [
+  "id",
+  "checkbox",
+  ...cellValueNames,
+] as const;
+export type FrameworkValueName = (typeof frameworkValueNames)[number];
+export function isFrameworkValueName(x: unknown): boolean {
+  return frameworkValueNames.includes(x as FrameworkValueName);
 }
 
-export interface BaseValues extends CellValueNameToValue {
+export interface FrameworkValues extends CellValueNameToValue {
   id: string;
   checkbox: boolean;
   date: DateSerial;
@@ -21,15 +25,15 @@ export type BlankOf<VN extends string> = VN extends NeverBlankValueName
   ? never
   : "";
 
-type BaseValuesOrEmpty = {
-  [VN in BaseValueName]: BaseValues[VN] | BlankOf<VN>;
+type FrameworkValuesOrEmpty = {
+  [VN in FrameworkValueName]: FrameworkValues[VN] | BlankOf<VN>;
 };
 
 export type CellValueSchemas = {
-  [VN in BaseValueName]: ValueSchemaBase<BaseValuesOrEmpty[VN]>;
+  [VN in FrameworkValueName]: ValueSchemaBase<FrameworkValuesOrEmpty[VN]>;
 };
 
-export const baseValueSchemas: CellValueSchemas = {
+export const frameworkValueSchemas: CellValueSchemas = {
   id: vsc({
     type: "" as string,
     makeDefault: () => {

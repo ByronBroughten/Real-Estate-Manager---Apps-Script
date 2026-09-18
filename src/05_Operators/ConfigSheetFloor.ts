@@ -63,7 +63,7 @@ interface FloorDeclaration {
 
 /**
  * Declares edit warnings on the config-sheet floor cells. Callers pass the
- * base endpoints' feedback column names; the chore is the caller today.
+ * framework endpoints' feedback column names; the chore is the caller today.
  * docs/generated-data.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
