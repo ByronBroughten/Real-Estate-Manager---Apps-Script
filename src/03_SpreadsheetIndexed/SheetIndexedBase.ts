@@ -1,7 +1,8 @@
 import { Val } from "../utils/Val";
-import type {
-  SheetStateIndexed,
-  FetchTargetIndexed,
+import {
+  emptyIndexedFetchQueue,
+  type FetchTargetIndexed,
+  type SheetStateIndexed,
 } from "./ClassTypes/StateIndexed";
 import {
   SpreadsheetIndexedBase,
@@ -27,9 +28,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   private _ensureSheetState() {
     if (!this.sheetsStateIndexed.has(this.sheetGid)) {
       this.sheetsStateIndexed.set(this.sheetGid, {
-        fetchTargets: [],
-        prepFetchConditionalFormats: false,
-        prepFetchProtectedRanges: false,
+        fetchQueue: emptyIndexedFetchQueue(),
       });
     }
   }
@@ -40,18 +39,16 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
     );
   }
   get fetchTargets(): FetchTargetIndexed[] {
-    return this.sheetState.fetchTargets;
+    return this.sheetState.fetchQueue.targets;
   }
   get isPreppedToFetch(): boolean {
     return (
       this.fetchTargets.length > 0 ||
-      this.sheetState.prepFetchConditionalFormats ||
-      this.sheetState.prepFetchProtectedRanges
+      this.sheetState.fetchQueue.conditionalFormats ||
+      this.sheetState.fetchQueue.protectedRanges
     );
   }
   clearFetchTargets(): void {
-    this.sheetState.fetchTargets = [];
-    this.sheetState.prepFetchConditionalFormats = false;
-    this.sheetState.prepFetchProtectedRanges = false;
+    this.sheetState.fetchQueue = emptyIndexedFetchQueue();
   }
 }

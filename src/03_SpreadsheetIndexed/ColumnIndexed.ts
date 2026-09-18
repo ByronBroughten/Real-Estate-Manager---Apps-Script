@@ -59,7 +59,10 @@ export class ColumnIndexed<
     return this.prepFetchSpecific(this.cellIndexesActive);
   }
   prepFetchFull(): this {
-    this.fetchTargets.push({ row: "allDataRows", column: this.columnId });
+    this.fetchTargets.push({
+      kind: "fullDataColumn",
+      column: this.columnId,
+    });
     return this;
   }
   // Through the cells, not straight to Raw, so the value name's blank is read here too.

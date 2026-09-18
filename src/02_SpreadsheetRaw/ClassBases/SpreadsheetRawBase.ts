@@ -1,12 +1,13 @@
 import { AppsScript } from "../../00_base/AppsScript";
 import { installedRawSource } from "../../00_base/RawSource";
-import { SpreadsheetSchema } from "../SpreadsheetSchema";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
-  type ChangesToSave,
+  emptySpreadsheetFetchQueue,
+  emptySpreadsheetWriteQueue,
   type SheetsStateRaw,
   type StateRaw,
 } from "../ClassTypes/StateRaw";
+import { SpreadsheetSchema } from "../SpreadsheetSchema";
 
 export interface SpreadsheetRawProps {
   spreadsheetStateRaw: StateRaw;
@@ -36,13 +37,10 @@ export class SpreadsheetRawBase {
     return ssId;
   }
   get fetcherGridRanges(): GridRangeProps[] {
-    return this.spreadsheetStateRaw.fetcherGridRanges;
+    return this.spreadsheetStateRaw.fetchQueue.gridRanges;
   }
-  get allChangesToSave(): ChangesToSave {
-    return this.spreadsheetStateRaw.changesToSave;
-  }
-  get updateRequests(): StateRaw["updateRequests"] {
-    return this.spreadsheetStateRaw.updateRequests;
+  get updateRequests(): StateRaw["writeQueue"]["updateRequests"] {
+    return this.spreadsheetStateRaw.writeQueue.updateRequests;
   }
   get spreadsheetRawProps(): SpreadsheetRawProps {
     return {
@@ -55,27 +53,10 @@ export class SpreadsheetRawBase {
         allSheetPropertiesAreFetched: false,
         spreadsheetId: null,
         rawSource: installedRawSource(),
-        fetcherGridRanges: [],
-        changesToSave: new Map(),
-        updateRequests: this.initSortedUpdateRequests(),
+        fetchQueue: emptySpreadsheetFetchQueue(),
+        writeQueue: emptySpreadsheetWriteQueue(),
         sheets: new Map(),
       },
-    };
-  }
-  static initSortedUpdateRequests(): StateRaw["updateRequests"] {
-    return {
-      append: [],
-      update: [],
-      delete: [],
-      sort: [],
-      insertColumn: [],
-      fill: [],
-      findReplace: [],
-      deleteConditionalFormat: [],
-      addConditionalFormat: [],
-      deleteProtectedRange: [],
-      addProtectedRange: [],
-      raw: [],
     };
   }
 }

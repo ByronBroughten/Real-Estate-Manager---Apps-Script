@@ -44,11 +44,12 @@ export class SheetRaw extends SheetCommonRaw {
   }
   get rowIndexesAreStale(): boolean {
     return (
-      this.sheetState.knownTable !== null && this.activeTable.rowIndexesAreStale
+      this.sheetState.working.knownTable !== null &&
+      this.activeTable.rowIndexesAreStale
     );
   }
   get hasFetchedProperties(): boolean {
-    return this.sheetState.knownTable !== null;
+    return this.sheetState.working.knownTable !== null;
   }
   get dataGridRange(): GridRangeProps {
     return {
@@ -70,19 +71,19 @@ export class SheetRaw extends SheetCommonRaw {
     };
   }
   get title(): string {
-    if (this.sheetState.title === null) {
+    if (this.sheetState.working.title === null) {
       throw new Error(
         `Sheet title is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
       );
     }
-    return this.sheetState.title;
+    return this.sheetState.working.title;
   }
   get activeRowIndexes(): number[] {
-    const indexes = Array.from(this.sheetState.rowStates.keys());
+    const indexes = Array.from(this.sheetState.working.rowStates.keys());
     return Arr.sortAscending(indexes);
   }
   get activeRowCount(): number {
-    return this.sheetState.rowStates.size;
+    return this.sheetState.working.rowStates.size;
   }
   get lastActiveRowIndex(): number {
     return Math.max(...this.rowStates.keys());
@@ -123,27 +124,20 @@ export class SheetRaw extends SheetCommonRaw {
   }
   private _queuedRowDeleteCount(): number {
     let count = 0;
-    this.allChangesToSave.forEach((change, sheetRowId) => {
-      if (change.level !== "row" || typeof sheetRowId !== "string") return;
-      if (!change.delete) return;
-      if (
-        this.schema.idsFromSheetRowId(sheetRowId).sheetGid !== this.sheetGid
-      ) {
-        return;
-      }
-      count++;
+    this.sheetState.writeQueue.rows.forEach((change) => {
+      if (change.delete) count++;
     });
     return count;
   }
   get cellStateIsStale(): boolean {
-    return this.sheetState.cellStateIsStale;
+    return this.sheetState.working.cellStateIsStale;
   }
   markRowIndexesStale(): void {
     this.activeTable.markRowIndexesStale();
   }
   invalidateCellState(): void {
-    this.sheetState.rowStates.clear();
-    this.sheetState.cellStateIsStale = true;
+    this.sheetState.working.rowStates.clear();
+    this.sheetState.working.cellStateIsStale = true;
   }
   findReplace(terms: FindReplaceTerms): this {
     this.ss.findReplace({ ...terms, scope: { sheetId: this.sheetGid } });
@@ -211,11 +205,11 @@ export class SheetRaw extends SheetCommonRaw {
     return this;
   }
   gatherFetchConditionalFormatRules(): this {
-    this.sheetState.gatherConditionalFormats = true;
+    this.sheetState.fetchQueue.gatherConditionalFormats = true;
     return this;
   }
   conditionalFormatRules(): ConditionalFormatRule[] {
-    const rules = this.sheetState.conditionalFormatRules;
+    const rules = this.sheetState.working.conditionalFormats.rules;
     if (rules === null) {
       throw new Error(
         `Conditional format rules have not been fetched for sheetGid ${this.sheetGid}.`,
@@ -256,7 +250,7 @@ export class SheetRaw extends SheetCommonRaw {
     return this;
   }
   private _pendingConditionalFormatRules(): ConditionalFormatRule[] {
-    const fetched = this.sheetState.conditionalFormatRules;
+    const fetched = this.sheetState.working.conditionalFormats.rules;
     const rules = fetched === null ? [] : [...fetched];
     const deletes = [...this.updateRequests.deleteConditionalFormat]
       .filter((operation) => operation.kind === "deleteConditionalFormatRule")
@@ -300,36 +294,36 @@ export class SheetRaw extends SheetCommonRaw {
     return this;
   }
   markConditionalFormatIndexesStale(): void {
-    this.sheetState.conditionalFormatIndexesAreStale = true;
+    this.sheetState.working.conditionalFormats.isStale = true;
   }
   assertConditionalFormatIndexesNotStale(): void {
-    if (!this.sheetState.conditionalFormatIndexesAreStale) return;
+    if (!this.sheetState.working.conditionalFormats.isStale) return;
     throw new Error(
       `Conditional format indexes are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's rules before mutating them again.`,
     );
   }
   hasQueuedFullRowFetch(rowIndex: number): boolean {
-    return this.sheetState.rowIndexesToFinalize.has(rowIndex);
+    return this.sheetState.fetchQueue.toFinalize.rows.has(rowIndex);
   }
   integrateSheetState(sheet: SheetSnapshot): void {
     this._initSheetState(sheet);
-    this.sheetState.cellStateIsStale = false;
+    this.sheetState.working.cellStateIsStale = false;
     if (sheet.gridBlocks) {
       this._integrateSheetData(sheet.gridBlocks);
     }
   }
   integrateConditionalFormatRules(rules: ConditionalFormatRule[]): void {
-    this.sheetState.conditionalFormatRules = rules;
-    this.sheetState.gatherConditionalFormats = false;
-    this.sheetState.conditionalFormatIndexesAreStale = false;
+    this.sheetState.working.conditionalFormats.rules = rules;
+    this.sheetState.fetchQueue.gatherConditionalFormats = false;
+    this.sheetState.working.conditionalFormats.isStale = false;
   }
   gatherFetchProtectedRanges(): this {
-    this.sheetState.gatherProtectedRanges = true;
+    this.sheetState.fetchQueue.gatherProtectedRanges = true;
     return this;
   }
   protectedRanges(): ProtectedRange[] {
     this.assertProtectedRangesNotStale();
-    const protections = this.sheetState.protectedRanges;
+    const protections = this.sheetState.working.protectedRanges.ranges;
     if (protections === null) {
       throw new Error(
         `Protected ranges have not been fetched for sheetGid ${this.sheetGid}.`,
@@ -411,7 +405,7 @@ export class SheetRaw extends SheetCommonRaw {
     return this;
   }
   private _pendingProtectedRangeContents(): ProtectedRangeContent[] {
-    const fetched = this.sheetState.protectedRanges;
+    const fetched = this.sheetState.working.protectedRanges.ranges;
     const protections: ProtectedRange[] = fetched === null ? [] : [...fetched];
     const deletedIds = new Set(
       this.updateRequests.deleteProtectedRange
@@ -508,7 +502,7 @@ export class SheetRaw extends SheetCommonRaw {
     range: ProtectionGridRange,
   ): void {
     if (isWholeColumnGridRange(range)) {
-      if (this.sheetState.knownTable !== null) {
+      if (this.sheetState.working.knownTable !== null) {
         this.activeTable.validateColIndexNotStale(range.startColumnIndex);
       }
       return;
@@ -517,18 +511,18 @@ export class SheetRaw extends SheetCommonRaw {
     this.activeTable.assertRowIndexesNotStale();
   }
   markProtectedRangesStale(): void {
-    this.sheetState.protectedRangesAreStale = true;
+    this.sheetState.working.protectedRanges.isStale = true;
   }
   assertProtectedRangesNotStale(): void {
-    if (!this.sheetState.protectedRangesAreStale) return;
+    if (!this.sheetState.working.protectedRanges.isStale) return;
     throw new Error(
       `Protections are stale for sheetGid ${this.sheetGid}. Re-fetch the sheet's protections before reading or mutating them again.`,
     );
   }
   integrateProtectedRanges(protections: ProtectedRange[]): void {
-    this.sheetState.protectedRanges = protections;
-    this.sheetState.gatherProtectedRanges = false;
-    this.sheetState.protectedRangesAreStale = false;
+    this.sheetState.working.protectedRanges.ranges = protections;
+    this.sheetState.fetchQueue.gatherProtectedRanges = false;
+    this.sheetState.working.protectedRanges.isStale = false;
   }
   private _integrateSheetData(
     gridBlocks: NonNullable<SheetSnapshot["gridBlocks"]>,
@@ -568,11 +562,11 @@ export class SheetRaw extends SheetCommonRaw {
         this.rowCommon(rowIndex).remove();
       }
     });
-    this.sheetState.isPrunedToSelection = true;
+    this.sheetState.working.isPrunedToSelection = true;
   }
   // A whole-column fill ignores active rows, so it would rewrite what a prune excluded.
   validateNotPrunedToSelection(): void {
-    if (this.sheetState.isPrunedToSelection) {
+    if (this.sheetState.working.isPrunedToSelection) {
       throw new Error(
         `Sheet ${this.sheetGid} has been pruned to a selection. A whole-column write would reach the rows the prune excluded.`,
       );

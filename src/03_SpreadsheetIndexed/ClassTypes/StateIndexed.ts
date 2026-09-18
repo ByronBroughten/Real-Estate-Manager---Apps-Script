@@ -14,45 +14,37 @@ export interface StateIndexed {
 export type SheetsStateIndexed = Map<SheetId, SheetStateIndexed>;
 
 export interface SheetStateIndexed {
-  fetchTargets: FetchTargetIndexed[];
-  prepFetchConditionalFormats: boolean;
-  prepFetchProtectedRanges: boolean;
+  fetchQueue: IndexedFetchQueue;
+}
+
+export interface IndexedFetchQueue {
+  targets: FetchTargetIndexed[];
+  conditionalFormats: boolean;
+  protectedRanges: boolean;
+}
+
+export function emptyIndexedFetchQueue(): IndexedFetchQueue {
+  return {
+    targets: [],
+    conditionalFormats: false,
+    protectedRanges: false,
+  };
 }
 
 type SheetId = number;
 
 interface FullRowTarget {
+  kind: "fullRow";
   row: number;
-  column: "allDataColumns";
 }
 interface FullColumnTarget {
+  kind: "fullDataColumn";
   column: string;
-  row: "allDataRows";
 }
 interface CellTarget {
+  kind: "singleCell";
   row: number;
   column: string;
 }
 
-interface FetchTargetTypes {
-  fullRow: FullRowTarget;
-  fullDataColumn: FullColumnTarget;
-  singleCell: CellTarget;
-}
-export type FetchTargetIndexed = FetchTargetTypes[FetchTargetTypeName];
-type FetchTargetTypeName = keyof FetchTargetTypes;
-
-export function isFetchTargetType<FTN extends FetchTargetTypeName>(
-  target: FetchTargetIndexed,
-  typeName: FTN,
-): target is FetchTargetTypes[FTN] {
-  if (typeName === "fullRow") {
-    return target.column === "allDataColumns";
-  } else if (typeName === "fullDataColumn") {
-    return target.row === "allDataRows";
-  } else if (typeName === "singleCell") {
-    return target.row !== "allDataRows" && target.column !== "allDataColumns";
-  } else {
-    return false;
-  }
-}
+export type FetchTargetIndexed = FullRowTarget | FullColumnTarget | CellTarget;

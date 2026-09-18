@@ -13,7 +13,7 @@ export class ColumnRawBase extends SheetRawBase {
   }
   // Absent until a fetch records a fact about this column.
   get columnState(): ColumnStateRaw | undefined {
-    return this.sheetState.columnStates.get(this.colIndex);
+    return this.sheetState.working.columnStates.get(this.colIndex);
   }
   get columnRawProps(): ColumnRawProps {
     return {

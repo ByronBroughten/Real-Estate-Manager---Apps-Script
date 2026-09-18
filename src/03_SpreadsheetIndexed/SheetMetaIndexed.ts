@@ -1,6 +1,5 @@
 import type { UniformRowName } from "../00_base/base";
 import { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
-import { isFetchTargetType } from "./ClassTypes/StateIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
 import { SheetCommon } from "./SheetCommon";
 import { SheetIndexed } from "./SheetIndexed";
@@ -62,10 +61,10 @@ export class SheetMetaIndexed extends SheetCommon {
     ) {
       this.raw.gatherFetchColumnIdsInit(startTableColIndex);
     }
-    if (this.sheetState.prepFetchConditionalFormats) {
+    if (this.sheetState.fetchQueue.conditionalFormats) {
       this.raw.primary.gatherFetchConditionalFormatRules();
     }
-    if (this.sheetState.prepFetchProtectedRanges) {
+    if (this.sheetState.fetchQueue.protectedRanges) {
       this.raw.primary.gatherFetchProtectedRanges();
     }
   }
@@ -73,11 +72,11 @@ export class SheetMetaIndexed extends SheetCommon {
     // This is so that table dimensions and columnIndexes can be guaranteed
     // before their fetch requests are generated.
     this.fetchTargets.forEach((target) => {
-      if (isFetchTargetType(target, "fullRow")) {
+      if (target.kind === "fullRow") {
         this.raw.primary.rowCommon(target.row).gatherFetchFull();
-      } else if (isFetchTargetType(target, "fullDataColumn")) {
+      } else if (target.kind === "fullDataColumn") {
         this.column(target.column).raw.primary.gatherFetchFull();
-      } else if (isFetchTargetType(target, "singleCell")) {
+      } else if (target.kind === "singleCell") {
         const colIndex = this.column(target.column).colIndex;
         this.raw.primary
           .rowCommon(target.row)

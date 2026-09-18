@@ -37,9 +37,10 @@ export class CellRaw<
     this.sheet.gatherFetchRange(this.gridRange);
     // Sheets omits a never-written cell; finalize treats that as empty.
     const colIndexes =
-      this.sheetState.cellsToFinalize.get(this.rowIndex) ?? new Set();
+      this.sheetState.fetchQueue.toFinalize.cells.get(this.rowIndex) ??
+      new Set();
     colIndexes.add(this.colIndex);
-    this.sheetState.cellsToFinalize.set(this.rowIndex, colIndexes);
+    this.sheetState.fetchQueue.toFinalize.cells.set(this.rowIndex, colIndexes);
     return this;
   }
   gatherUpdateRequest(change: RowCellChange): void {
@@ -165,15 +166,14 @@ export class CellRaw<
   }
   // Fills go before per-cell updates in a flush, so a cell's own value wins.
   private _queuedValue(): CellValue | "" | undefined {
-    const rowChange = this.allChangesToSave.get(this.row.sheetRowId);
-    if (rowChange?.level === "row") {
+    const rowChange = this.sheetState.writeQueue.rows.get(this.rowIndex);
+    if (rowChange !== undefined) {
       const cellChange = rowChange.update.get(this.colIndex);
       if (cellChange?.value !== undefined) return cellChange.value;
     }
-    const sheetChange = this.allChangesToSave.get(this.sheetGid);
-    if (sheetChange?.level !== "sheet") return undefined;
-    for (let i = sheetChange.fills.length - 1; i >= 0; i--) {
-      const fill = sheetChange.fills[i];
+    const fills = this.sheetState.writeQueue.sheet.fills;
+    for (let i = fills.length - 1; i >= 0; i--) {
+      const fill = fills[i];
       if (fill === undefined || fill.value === undefined) continue;
       if (fill.colIndex !== this.colIndex) continue;
       if (

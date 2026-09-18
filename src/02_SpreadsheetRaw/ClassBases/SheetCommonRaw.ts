@@ -14,7 +14,7 @@ export abstract class SheetCommonRaw extends SheetRawBase {
   // Abstract: importing SpreadsheetRaw here would close an init-time cycle.
   abstract get ss(): SpreadsheetRaw;
   get activeTable(): ActiveTableRaw {
-    const knownTable = this.sheetState.knownTable;
+    const knownTable = this.sheetState.working.knownTable;
     if (knownTable === null) {
       throw new Error(
         `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
@@ -34,29 +34,16 @@ export abstract class SheetCommonRaw extends SheetRawBase {
     );
   }
   get changesToSave(): SheetChangesToSave {
-    this._ensureChangesToSaveExists();
-    return this.allChangesToSave.get(this.sheetGid) as SheetChangesToSave;
-  }
-  private _ensureChangesToSaveExists(): void {
-    const sheetChangesToSave = this.spreadsheetStateRaw.changesToSave;
-    const sheetGid = this.sheetGid;
-    if (!sheetChangesToSave.has(sheetGid)) {
-      sheetChangesToSave.set(sheetGid, {
-        level: "sheet",
-        sort: null,
-        insertColumn: null,
-        fills: [],
-      });
-    }
+    return this.sheetState.writeQueue.sheet;
   }
   // The table's own range, not the layout's: no table means no table columns.
   isTableColIndex(colIndex: number): boolean {
-    if (this.sheetState.knownTable === null) return false;
+    if (this.sheetState.working.knownTable === null) return false;
     const { startColumnIndex, endColumnIndex } = this.activeTable;
     return colIndex >= startColumnIndex && colIndex < endColumnIndex;
   }
   gatherFetchRange(gr: SheetGridRangeProps): this {
-    this.spreadsheetStateRaw.fetcherGridRanges.push({
+    this.spreadsheetStateRaw.fetchQueue.gridRanges.push({
       sheetId: this.sheetGid,
       ...gr,
     });

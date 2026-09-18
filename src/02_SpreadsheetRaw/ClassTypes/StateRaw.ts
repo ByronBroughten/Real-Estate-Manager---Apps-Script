@@ -14,10 +14,17 @@ export interface StateRaw {
   allSheetPropertiesAreFetched: boolean;
   spreadsheetId: string | null;
   rawSource: RawSource;
-  changesToSave: ChangesToSave;
-  fetcherGridRanges: GridRangeProps[];
-  updateRequests: Record<UpdateRequestName, LocalWriteOperation[]>;
+  fetchQueue: SpreadsheetFetchQueueRaw;
+  writeQueue: SpreadsheetWriteQueueRaw;
   sheets: SheetsStateRaw;
+}
+
+export interface SpreadsheetFetchQueueRaw {
+  gridRanges: GridRangeProps[];
+}
+
+export interface SpreadsheetWriteQueueRaw {
+  updateRequests: Record<UpdateRequestName, LocalWriteOperation[]>;
 }
 
 const updateRequestNames = [
@@ -39,6 +46,12 @@ export type UpdateRequestName = (typeof updateRequestNames)[number];
 export type SheetsStateRaw = Map<SheetId, SheetStateRaw>;
 
 export interface SheetStateRaw {
+  working: SheetWorkingStateRaw;
+  fetchQueue: SheetFetchQueueRaw;
+  writeQueue: SheetWriteQueueRaw;
+}
+
+export interface SheetWorkingStateRaw {
   title: string | null;
   knownTable: KnownTableRaw | null;
   hasExtraTables: boolean;
@@ -47,18 +60,38 @@ export interface SheetStateRaw {
   hasFetchedColumnIds: boolean;
   isPrunedToSelection: boolean;
   rowStates: RowStatesRaw;
+  columnStates: ColumnStatesRaw;
+  conditionalFormats: ConditionalFormatsStateRaw;
+  protectedRanges: ProtectedRangesStateRaw;
+}
+
+export interface ConditionalFormatsStateRaw {
+  rules: ConditionalFormatRule[] | null;
+  isStale: boolean;
+}
+
+export interface ProtectedRangesStateRaw {
+  ranges: ProtectedRange[] | null;
+  isStale: boolean;
+}
+
+export interface SheetFetchQueueRaw {
+  gatherConditionalFormats: boolean;
+  gatherProtectedRanges: boolean;
+  toFinalize: SheetFinalizeQueueRaw;
+}
+
+export interface SheetFinalizeQueueRaw {
+  rows: Set<RowIndex>;
+  columns: Set<ColIndex>;
+  cells: Map<RowIndex, Set<ColIndex>>;
+}
+
+export interface SheetWriteQueueRaw {
+  sheet: SheetChangesToSave;
+  rows: Map<RowIndex, RowChangesToSave>;
   // A row an append has handed out, so a second append can't reuse it.
   reservedRowIndexes: Set<RowIndex>;
-  columnStates: ColumnStatesRaw;
-  rowIndexesToFinalize: Set<RowIndex>;
-  colIndexesToFinalize: Set<ColIndex>;
-  cellsToFinalize: Map<RowIndex, Set<ColIndex>>;
-  gatherConditionalFormats: boolean;
-  conditionalFormatRules: ConditionalFormatRule[] | null;
-  conditionalFormatIndexesAreStale: boolean;
-  gatherProtectedRanges: boolean;
-  protectedRanges: ProtectedRange[] | null;
-  protectedRangesAreStale: boolean;
 }
 
 export type RowStatesRaw = Map<RowIndex, RowStateRaw>;
@@ -95,19 +128,13 @@ export interface KnownTableRaw {
 type SheetId = number;
 type RowIndex = number;
 type ColIndex = number;
-type SheetRowId = string;
 
 export type SortParameters = {
   colIdxToSortBy: number;
   sortOrder: "ASCENDING" | "DESCENDING";
 };
 
-export type ChangesToSave = Map<
-  SheetId | SheetRowId,
-  RowChangesToSave | SheetChangesToSave
->;
 export type RowChangesToSave = {
-  level: "row";
   append: boolean;
   delete: boolean;
   // Values, not indexes, so a queued write never depends on fetched row state.
@@ -120,7 +147,6 @@ export interface RowCellChange<VN extends CellValueName = CellValueName> {
   backgroundColor?: RgbColor;
 }
 export type SheetChangesToSave = {
-  level: "sheet";
   sort: null | SortParameters;
   insertColumn: null | ColIndex;
   fills: ColumnFill[];
@@ -175,4 +201,83 @@ export function makeRowRange(
   endRowIndex?: number,
 ): RowRange {
   return { startRowIndex, endRowIndex };
+}
+
+export function emptyUpdateRequests(): Record<
+  UpdateRequestName,
+  LocalWriteOperation[]
+> {
+  return {
+    append: [],
+    update: [],
+    delete: [],
+    sort: [],
+    insertColumn: [],
+    fill: [],
+    findReplace: [],
+    deleteConditionalFormat: [],
+    addConditionalFormat: [],
+    deleteProtectedRange: [],
+    addProtectedRange: [],
+    raw: [],
+  };
+}
+
+export function emptySpreadsheetFetchQueue(): SpreadsheetFetchQueueRaw {
+  return { gridRanges: [] };
+}
+
+export function emptySpreadsheetWriteQueue(): SpreadsheetWriteQueueRaw {
+  return { updateRequests: emptyUpdateRequests() };
+}
+
+export function emptySheetChanges(): SheetChangesToSave {
+  return { sort: null, insertColumn: null, fills: [] };
+}
+
+export function emptyRowChanges(): RowChangesToSave {
+  return { append: false, delete: false, update: new Map() };
+}
+
+export function emptySheetWriteQueue(): SheetWriteQueueRaw {
+  return {
+    sheet: emptySheetChanges(),
+    rows: new Map(),
+    reservedRowIndexes: new Set(),
+  };
+}
+
+export function emptySheetFetchQueue(): SheetFetchQueueRaw {
+  return {
+    gatherConditionalFormats: false,
+    gatherProtectedRanges: false,
+    toFinalize: {
+      rows: new Set(),
+      columns: new Set(),
+      cells: new Map(),
+    },
+  };
+}
+
+export function emptySheetWorkingState(): SheetWorkingStateRaw {
+  return {
+    title: null,
+    knownTable: null,
+    hasExtraTables: false,
+    cellStateIsStale: false,
+    hasFetchedColumnIds: false,
+    isPrunedToSelection: false,
+    rowStates: new Map(),
+    columnStates: new Map(),
+    conditionalFormats: { rules: null, isStale: false },
+    protectedRanges: { ranges: null, isStale: false },
+  };
+}
+
+export function emptySheetStateRaw(): SheetStateRaw {
+  return {
+    working: emptySheetWorkingState(),
+    fetchQueue: emptySheetFetchQueue(),
+    writeQueue: emptySheetWriteQueue(),
+  };
 }

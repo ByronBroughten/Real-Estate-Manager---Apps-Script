@@ -16,6 +16,7 @@ import {
   type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
+import type { FetchTargetIndexed } from "./ClassTypes/StateIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
 import { RowIndexed } from "./RowIndexed";
@@ -145,9 +146,9 @@ describe("Indexed value accessors", () => {
     sheet.column(ID_COLUMN_ID).prepFetchSpecific([BLANK_ROW_INDEX]);
     ssi.fetchAllPrepped();
 
-    expect(sheet.column(ID_COLUMN_ID).cell(BLANK_ROW_INDEX).valueOrEmpty()).toBe(
-      "",
-    );
+    expect(
+      sheet.column(ID_COLUMN_ID).cell(BLANK_ROW_INDEX).valueOrEmpty(),
+    ).toBe("");
   });
 
   it("reads a filled cell identically through both forms", () => {
@@ -409,7 +410,9 @@ describe("Indexed formula writes", () => {
           sheetId: TEST_GID,
           title: "Test",
           rows: buildGridRows({
-            0: Object.values(columnConfigs.test).map((column) => column.columnId),
+            0: Object.values(columnConfigs.test).map(
+              (column) => column.columnId,
+            ),
           }),
           table: { endRowIndex: 6 },
         },
@@ -440,6 +443,122 @@ describe("Indexed formula writes", () => {
         .column(TEST_FORMULA_COLUMN_ID)
         .updateAllFormulas("=2+SINGLE(test[Number])"),
     ).not.toThrow();
+  });
+});
+
+describe("Indexed fetch targets", () => {
+  beforeEach(() => {
+    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
+  });
+
+  function recordedGridRanges(calls: object[]): unknown[] {
+    const resource = calls[0] as {
+      dataFilters: { gridRange: unknown }[];
+    };
+    return resource.dataFilters.map((filter) => filter.gridRange);
+  }
+
+  function occupancyWithTwoColumns() {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: OCCUPANCY_GID,
+          title: "Occupancy",
+          rows: buildGridRows({
+            0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+            3: ["ID", "Update terms, select"],
+            4: ["r:occ:row4", true],
+            5: [null, null],
+          }),
+          table: { endRowIndex: 6 },
+        },
+      ],
+    });
+  }
+
+  function lastFetchedRanges(getByDataFilterCalls: object[]): unknown[] {
+    const lastCall = getByDataFilterCalls[getByDataFilterCalls.length - 1];
+    if (lastCall === undefined) return [];
+    return recordedGridRanges([lastCall]);
+  }
+
+  it("narrows FetchTargetIndexed by kind", () => {
+    type FullRow = Extract<FetchTargetIndexed, { kind: "fullRow" }>;
+    type FullColumn = Extract<FetchTargetIndexed, { kind: "fullDataColumn" }>;
+    type SingleCell = Extract<FetchTargetIndexed, { kind: "singleCell" }>;
+
+    assertType<IsExactly<FullRow, { kind: "fullRow"; row: number }>>(true);
+    assertType<
+      IsExactly<FullColumn, { kind: "fullDataColumn"; column: string }>
+    >(true);
+    assertType<
+      IsExactly<SingleCell, { kind: "singleCell"; row: number; column: string }>
+    >(true);
+  });
+
+  it("resolves a full-row target to that row's table columns", () => {
+    const { getByDataFilterCalls } = occupancyWithTwoColumns();
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    ssi.sheet(OCCUPANCY_GID).topRow.prepFetchFull();
+    ssi.fetchAllPrepped();
+
+    expect(lastFetchedRanges(getByDataFilterCalls)).toEqual(
+      expect.arrayContaining([
+        {
+          sheetId: OCCUPANCY_GID,
+          startRowIndex: FILLED_ROW_INDEX,
+          endRowIndex: FILLED_ROW_INDEX + 1,
+          startColumnIndex: 0,
+        },
+      ]),
+    );
+  });
+
+  it("resolves a full-data-column target to that column's data rows", () => {
+    const { getByDataFilterCalls } = occupancyWithTwoColumns();
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    ssi.sheet(OCCUPANCY_GID).column(ID_COLUMN_ID).prepFetchFull();
+    ssi.fetchAllPrepped();
+
+    expect(lastFetchedRanges(getByDataFilterCalls)).toEqual(
+      expect.arrayContaining([
+        {
+          sheetId: OCCUPANCY_GID,
+          startRowIndex: FILLED_ROW_INDEX,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+      ]),
+    );
+  });
+
+  it("resolves a single-cell target to that cell's grid range", () => {
+    const { getByDataFilterCalls } = occupancyWithTwoColumns();
+    const ssi = new SpreadsheetIndexed(
+      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    );
+    ssi
+      .sheet(OCCUPANCY_GID)
+      .column(ID_COLUMN_ID)
+      .cell(FILLED_ROW_INDEX)
+      .prepFetch();
+    ssi.fetchAllPrepped();
+
+    expect(lastFetchedRanges(getByDataFilterCalls)).toEqual(
+      expect.arrayContaining([
+        {
+          sheetId: OCCUPANCY_GID,
+          startRowIndex: FILLED_ROW_INDEX,
+          endRowIndex: FILLED_ROW_INDEX + 1,
+          startColumnIndex: 0,
+          endColumnIndex: 1,
+        },
+      ]),
+    );
   });
 });
 

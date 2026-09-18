@@ -1,13 +1,16 @@
 import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import type { GridFetchRange, SpreadsheetSnapshot } from "../00_base/RawSource";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
-import type {
-  FindReplaceProps,
-  SheetStateRaw,
-  RowChangesToSave,
-  SheetChangesToSave,
+import {
+  emptySheetChanges,
+  emptySheetWriteQueue,
+  emptySpreadsheetWriteQueue,
+  emptyUpdateRequests,
+  type FindReplaceProps,
+  type RowChangesToSave,
+  type SheetChangesToSave,
+  type SheetStateRaw,
 } from "./ClassTypes/StateRaw";
-import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 
@@ -27,6 +30,11 @@ type TablePlacement =
   | (MisplacedTable & { kind: "misplaced" })
   | { kind: "none" }
   | { kind: "well-placed" };
+
+interface SheetRowRef {
+  sheetGid: number;
+  rowIndex: number;
+}
 
 /**
  * Spreadsheet-level Raw: GID+index fetch and the two Sheets chokepoints
@@ -67,10 +75,6 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   sheets(...sheetGids: number[]): SheetRaw[] {
     return sheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
-  rowBySheetRowId(sheetRowId: string): RowCommonRaw {
-    const { sheetGid, rowIndex } = this.schema.idsFromSheetRowId(sheetRowId);
-    return this.sheet(sheetGid).rowCommon(rowIndex);
-  }
   ensureAllSheetPropertiesAreFetched() {
     if (!this.spreadsheetStateRaw.allSheetPropertiesAreFetched) {
       this._fetchAndIntegrateAllSheetProperties();
@@ -96,7 +100,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const data = this._fetchByGridRanges(includeProgrammaticFacts);
     this._addDataToState(data);
     this._finalizeGatheredFetches();
-    this.spreadsheetStateRaw.fetcherGridRanges = [];
+    this.spreadsheetStateRaw.fetchQueue.gridRanges = [];
   }
   // One sheet by GID without Table-placement finalize, so a moved Table can wait for overlay.
   fetchSheetUsedGrid(sheetGid: number): void {
@@ -113,10 +117,13 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     if (!state) {
       return { kind: "none" };
     }
-    if (state.hasExtraTables) {
+    if (state.working.hasExtraTables) {
       return { kind: "extra" };
     }
-    if (state.knownTable === null || !this.schema.isInSheetGids(sheetGid)) {
+    if (
+      state.working.knownTable === null ||
+      !this.schema.isInSheetGids(sheetGid)
+    ) {
       return { kind: "none" };
     }
     const { startRowIndex, startColumnIndex } =
@@ -143,51 +150,49 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         return;
       }
       const sheet = this.sheet(sheetGid);
+      const toFinalize = state.fetchQueue.toFinalize;
       this._finalizeFetchedCells(sheet, state);
-      if (
-        state.rowIndexesToFinalize.size === 0 &&
-        state.colIndexesToFinalize.size === 0
-      ) {
+      if (toFinalize.rows.size === 0 && toFinalize.columns.size === 0) {
         return;
       }
-      if (state.knownTable === null) {
+      if (state.working.knownTable === null) {
         absentTables.push({ sheetGid });
         return;
       }
-      if (state.rowIndexesToFinalize.has(this.schema.colIdRowIndex)) {
-        state.hasFetchedColumnIds = true;
+      if (toFinalize.rows.has(this.schema.colIdRowIndex)) {
+        state.working.hasFetchedColumnIds = true;
       }
-      state.rowIndexesToFinalize.forEach((rowIndex) => {
+      toFinalize.rows.forEach((rowIndex) => {
         sheet.rowCommon(rowIndex).ensureFullActiveDataCells();
       });
-      state.colIndexesToFinalize.forEach((colIndex) => {
+      toFinalize.columns.forEach((colIndex) => {
         sheet.column(colIndex).ensureFullActiveDataCells();
       });
       this._ensureFetchedActiveFacts(sheet, state);
-      state.rowIndexesToFinalize.clear();
-      state.colIndexesToFinalize.clear();
+      toFinalize.rows.clear();
+      toFinalize.columns.clear();
     });
     this._reportTablePlacement({ misplacedTables, absentTables });
   }
   private _finalizeFetchedCells(sheet: SheetRaw, state: SheetStateRaw): void {
-    state.cellsToFinalize.forEach((colIndexes, rowIndex) => {
+    state.fetchQueue.toFinalize.cells.forEach((colIndexes, rowIndex) => {
       const row = sheet.rowCommon(rowIndex);
       row.ensureStateExists();
       colIndexes.forEach((colIndex) => {
         row.cell(colIndex).ensureActive();
       });
     });
-    state.cellsToFinalize.clear();
+    state.fetchQueue.toFinalize.cells.clear();
   }
   // After the backfills above, so a blank fact is sampled rather than built.
   private _ensureFetchedActiveFacts(
     sheet: SheetRaw,
     state: SheetStateRaw,
   ): void {
-    if (state.rowIndexesToFinalize.has(this.schema.topDataRowIdx)) {
+    if (state.fetchQueue.toFinalize.rows.has(this.schema.topDataRowIdx)) {
       sheet.meta.ensureTableColumnsActiveFacts();
     }
-    state.colIndexesToFinalize.forEach((colIndex) => {
+    state.fetchQueue.toFinalize.columns.forEach((colIndex) => {
       if (!sheet.isTableColIndex(colIndex)) return;
       sheet.meta.column(colIndex).ensureActiveFacts();
     });
@@ -248,7 +253,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   private _sheetsWithExtraTables(): SheetIdentity[] {
     const extraTables: SheetIdentity[] = [];
     this.spreadsheetStateRaw.sheets.forEach((state, sheetGid) => {
-      if (!state.hasExtraTables || !this.schema.isInSheetGids(sheetGid)) {
+      if (
+        !state.working.hasExtraTables ||
+        !this.schema.isInSheetGids(sheetGid)
+      ) {
         return;
       }
       extraTables.push({ sheetGid });
@@ -293,13 +301,17 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     includeProgrammaticFacts: boolean,
     gridRanges: GridFetchRange[] = this.fetcherGridRanges,
   ): SpreadsheetSnapshot {
-    return this.spreadsheetStateRaw.rawSource.fetchGrid(this.spreadsheetId, gridRanges, {
-      includeProgrammaticFacts,
-    });
+    return this.spreadsheetStateRaw.rawSource.fetchGrid(
+      this.spreadsheetId,
+      gridRanges,
+      {
+        includeProgrammaticFacts,
+      },
+    );
   }
   private _fetchGatheredConditionalFormatRules(): void {
     const gatheringGids = Array.from(this.sheetsStateRaw.entries())
-      .filter(([, state]) => state.gatherConditionalFormats)
+      .filter(([, state]) => state.fetchQueue.gatherConditionalFormats)
       .map(([sheetGid]) => sheetGid);
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
@@ -311,7 +323,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _fetchGatheredProtectedRanges(): void {
     const gatheringGids = Array.from(this.sheetsStateRaw.entries())
-      .filter(([, state]) => state.gatherProtectedRanges)
+      .filter(([, state]) => state.fetchQueue.gatherProtectedRanges)
       .map(([sheetGid]) => sheetGid);
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
@@ -370,8 +382,10 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   // Abandons queued writes while local state still reflects them — terminal step only.
   discardQueuedChanges(): this {
-    this.spreadsheetStateRaw.changesToSave = new Map();
-    this.spreadsheetStateRaw.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+    this.spreadsheetStateRaw.writeQueue = emptySpreadsheetWriteQueue();
+    this.sheetsStateRaw.forEach((state) => {
+      state.writeQueue = emptySheetWriteQueue();
+    });
     return this;
   }
   private _sheetGidsWithRowDeletes(): Set<number> {
@@ -385,25 +399,22 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     );
   }
   private _gatherUpdateRequests() {
-    const changes = this.allChangesToSave;
-    for (const [sheetRowId, change] of changes.entries()) {
-      if (change.level === "sheet" && typeof sheetRowId === "number") {
-        this._gatherSheetRequests(sheetRowId, change);
-      } else if (change.level === "row" && typeof sheetRowId === "string") {
-        this._gatherRowRequests(sheetRowId, change);
-      } else {
-        throw new Error(
-          `Invalid change level "${change.level}" with sheetRowId  "${sheetRowId}".`,
-        );
+    this.sheetsStateRaw.forEach((state, sheetGid) => {
+      this._gatherSheetRequests(sheetGid, state.writeQueue.sheet);
+      for (const [rowIndex, change] of state.writeQueue.rows) {
+        this._gatherRowRequests(change, { sheetGid, rowIndex });
       }
-    }
-    this.spreadsheetStateRaw.changesToSave = new Map();
+      state.writeQueue.sheet = emptySheetChanges();
+      state.writeQueue.rows = new Map();
+    });
   }
-  private _gatherRowRequests(sheetRowId: string, change: RowChangesToSave) {
+  private _gatherRowRequests(
+    change: RowChangesToSave,
+    { sheetGid, rowIndex }: SheetRowRef,
+  ) {
     if (change.append && change.delete) {
       return;
     } else if (change.delete) {
-      const { sheetGid, rowIndex } = this.schema.idsFromSheetRowId(sheetRowId);
       this.updateRequests.delete.push({
         kind: "deleteRows",
         sheetId: sheetGid,
@@ -411,7 +422,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         endIndex: rowIndex + 1,
       });
     } else {
-      const row = this.rowBySheetRowId(sheetRowId);
+      const row = this.sheet(sheetGid).rowCommon(rowIndex);
       if (change.append) {
         row.gatherAppendRequest();
       }
@@ -420,15 +431,15 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       }
     }
   }
-  private _gatherSheetRequests(sheetRowId: number, change: SheetChangesToSave) {
+  private _gatherSheetRequests(sheetGid: number, change: SheetChangesToSave) {
     if (change.insertColumn !== null) {
-      this.sheet(sheetRowId).gatherInsertColumnRequest(change.insertColumn);
+      this.sheet(sheetGid).gatherInsertColumnRequest(change.insertColumn);
     }
     if (change.sort !== null) {
-      this.sheet(sheetRowId).gatherSortRequest(change.sort);
+      this.sheet(sheetGid).gatherSortRequest(change.sort);
     }
     change.fills.forEach((fill) => {
-      this.sheet(sheetRowId).gatherFillRequest(fill);
+      this.sheet(sheetGid).gatherFillRequest(fill);
     });
   }
   private _sheetGidsWithConditionalFormatMutations(): Set<number> {
@@ -478,7 +489,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return sheetGids;
   }
   private _sendUpdateRequests() {
-    const surs = this.spreadsheetStateRaw.updateRequests;
+    const surs = this.spreadsheetStateRaw.writeQueue.updateRequests;
     const operations = [
       ...surs.append,
       ...surs.insertColumn,
@@ -497,33 +508,36 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       ...surs.raw,
     ];
     this.spreadsheetStateRaw.rawSource.flush(this.spreadsheetId, operations);
-    this.spreadsheetStateRaw.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+    this.spreadsheetStateRaw.writeQueue.updateRequests = emptyUpdateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
   // or a later request's pre-computed startIndex lands on the wrong row.
   private _deleteOperationsDescending() {
-    return [...this.spreadsheetStateRaw.updateRequests.delete].sort((a, b) => {
-      if (a.kind !== "deleteRows" || b.kind !== "deleteRows") {
-        throw new Error("Queued delete is not a deleteRows operation.");
-      }
-      return b.startIndex - a.startIndex;
-    });
-  }
-  private _deleteConditionalFormatOperationsDescending() {
-    return [...this.spreadsheetStateRaw.updateRequests.deleteConditionalFormat].sort(
+    return [...this.spreadsheetStateRaw.writeQueue.updateRequests.delete].sort(
       (a, b) => {
-        if (
-          a.kind !== "deleteConditionalFormatRule" ||
-          b.kind !== "deleteConditionalFormatRule"
-        ) {
-          throw new Error(
-            "Queued deleteConditionalFormat is not a deleteConditionalFormatRule operation.",
-          );
+        if (a.kind !== "deleteRows" || b.kind !== "deleteRows") {
+          throw new Error("Queued delete is not a deleteRows operation.");
         }
-        if (a.sheetId !== b.sheetId) return a.sheetId - b.sheetId;
-        return b.index - a.index;
+        return b.startIndex - a.startIndex;
       },
     );
+  }
+  private _deleteConditionalFormatOperationsDescending() {
+    return [
+      ...this.spreadsheetStateRaw.writeQueue.updateRequests
+        .deleteConditionalFormat,
+    ].sort((a, b) => {
+      if (
+        a.kind !== "deleteConditionalFormatRule" ||
+        b.kind !== "deleteConditionalFormatRule"
+      ) {
+        throw new Error(
+          "Queued deleteConditionalFormat is not a deleteConditionalFormatRule operation.",
+        );
+      }
+      if (a.sheetId !== b.sheetId) return a.sheetId - b.sheetId;
+      return b.index - a.index;
+    });
   }
 }

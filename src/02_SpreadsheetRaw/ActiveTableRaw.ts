@@ -80,7 +80,7 @@ export class ActiveTableRaw {
     );
   }
   private _knownTable(): KnownTableRaw {
-    const knownTable = this.sheetState.knownTable;
+    const knownTable = this.sheetState.working.knownTable;
     if (knownTable === null) {
       throw new Error(
         `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,

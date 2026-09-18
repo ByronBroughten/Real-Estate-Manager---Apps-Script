@@ -37,7 +37,11 @@ export class CellIndexed<
     return this.raw.isActive;
   }
   prepFetch(): this {
-    this.fetchTargets.push({ row: this.rowIndex, column: this.columnId });
+    this.fetchTargets.push({
+      kind: "singleCell",
+      row: this.rowIndex,
+      column: this.columnId,
+    });
     return this;
   }
   // Indexed is the lowest tier that knows the value name, so the blank is read here.

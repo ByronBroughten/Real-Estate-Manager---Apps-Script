@@ -1,10 +1,11 @@
 import type { SheetSnapshot, TableSnapshot } from "../../00_base/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
-import type {
-  ColumnStateRaw,
-  RowStateRaw,
-  SheetStateRaw,
+import {
+  emptySheetStateRaw,
+  type ColumnStateRaw,
+  type RowStateRaw,
+  type SheetStateRaw,
 } from "../ClassTypes/StateRaw";
 import {
   SpreadsheetRawBase,
@@ -30,43 +31,24 @@ export class SheetRawBase extends SpreadsheetRawBase {
   }
   private _ensureSheetState() {
     if (!this.spreadsheetStateRaw.sheets.has(this.sheetGid)) {
-      this.spreadsheetStateRaw.sheets.set(this.sheetGid, {
-        title: null,
-        knownTable: null,
-        hasExtraTables: false,
-        cellStateIsStale: false,
-        hasFetchedColumnIds: false,
-        isPrunedToSelection: false,
-        rowStates: new Map(),
-        reservedRowIndexes: new Set(),
-        columnStates: new Map(),
-        rowIndexesToFinalize: new Set(),
-        colIndexesToFinalize: new Set(),
-        cellsToFinalize: new Map(),
-        gatherConditionalFormats: false,
-        conditionalFormatRules: null,
-        conditionalFormatIndexesAreStale: false,
-        gatherProtectedRanges: false,
-        protectedRanges: null,
-        protectedRangesAreStale: false,
-      });
+      this.spreadsheetStateRaw.sheets.set(this.sheetGid, emptySheetStateRaw());
     }
   }
   protected _initSheetState(sheet: SheetSnapshot): void {
     if (sheet.title) {
-      this.sheetState.title = sheet.title;
+      this.sheetState.working.title = sheet.title;
     }
     const tables = sheet.tables;
     if (!tables) {
       return;
     }
     if (tables.length > 1) {
-      this.sheetState.hasExtraTables = true;
-      this.sheetState.knownTable = null;
+      this.sheetState.working.hasExtraTables = true;
+      this.sheetState.working.knownTable = null;
       this._clearColumnPropertyFields();
       return;
     }
-    this.sheetState.hasExtraTables = false;
+    this.sheetState.working.hasExtraTables = false;
     if (tables.length === 0) {
       return;
     }
@@ -79,8 +61,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
       "startColumnIndex",
       "endColumnIndex",
     );
-    const previous = this.sheetState.knownTable;
-    this.sheetState.knownTable = {
+    const previous = this.sheetState.working.knownTable;
+    this.sheetState.working.knownTable = {
       tableId: table.tableId,
       ...range,
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
@@ -89,7 +71,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
     this._parseColumnProperties(table, range.startColumnIndex);
   }
   private _clearColumnPropertyFields(): void {
-    this.sheetState.columnStates.forEach((columnState) => {
+    this.sheetState.working.columnStates.forEach((columnState) => {
       delete columnState.validationValues;
       delete columnState.validationConditionType;
       delete columnState.declaredType;
@@ -117,10 +99,10 @@ export class SheetRawBase extends SpreadsheetRawBase {
     });
   }
   protected _ensureColumnState(colIndex: number): ColumnStateRaw {
-    const existing = this.sheetState.columnStates.get(colIndex);
+    const existing = this.sheetState.working.columnStates.get(colIndex);
     if (existing !== undefined) return existing;
     const created: ColumnStateRaw = {};
-    this.sheetState.columnStates.set(colIndex, created);
+    this.sheetState.working.columnStates.set(colIndex, created);
     return created;
   }
   protected get sheetState(): SheetStateRaw {
@@ -131,18 +113,18 @@ export class SheetRawBase extends SpreadsheetRawBase {
   }
   getRowState(rowIndex: number): RowStateRaw {
     return Val.assert(
-      this.sheetState.rowStates.get(rowIndex),
+      this.sheetState.working.rowStates.get(rowIndex),
       `rowState for row ${rowIndex} on sheetGid ${this.sheetGid}`,
     );
   }
-  get columnStates(): SheetStateRaw["columnStates"] {
-    return this.sheetState.columnStates;
+  get columnStates(): SheetStateRaw["working"]["columnStates"] {
+    return this.sheetState.working.columnStates;
   }
   get sheetLabel(): string {
-    return `"${this.sheetState.title ?? "(untitled)"}" (gid ${this.sheetGid})`;
+    return `"${this.sheetState.working.title ?? "(untitled)"}" (gid ${this.sheetGid})`;
   }
-  get rowStates(): SheetStateRaw["rowStates"] {
-    return this.sheetState.rowStates;
+  get rowStates(): SheetStateRaw["working"]["rowStates"] {
+    return this.sheetState.working.rowStates;
   }
   get sheetRawProps(): SheetRawProps {
     return {

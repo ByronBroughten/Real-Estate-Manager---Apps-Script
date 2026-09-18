@@ -8,8 +8,8 @@ export abstract class RowCommonIndexed extends RowIndexedBase {
   }
   prepFetchFull(): void {
     this.fetchTargets.push({
+      kind: "fullRow",
       row: this.rowIndex,
-      column: "allDataColumns",
     });
   }
 }

@@ -225,7 +225,7 @@ export class ColumnRaw<
       startColumnIndex: this.colIndex,
       endColumnIndex: this.colIndex + 1,
     });
-    this.sheetState.colIndexesToFinalize.add(this.colIndex);
+    this.sheetState.fetchQueue.toFinalize.columns.add(this.colIndex);
     return this;
   }
   // A full-column fetch can hit rows that are entirely blank across every

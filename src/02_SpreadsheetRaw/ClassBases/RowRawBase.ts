@@ -24,20 +24,20 @@ export class RowRawBase extends SheetRawBase {
     return this.getRowState(this.rowIndex);
   }
   rowIsActive(): boolean {
-    return this.sheetState.rowStates.has(this.rowIndex);
+    return this.sheetState.working.rowStates.has(this.rowIndex);
   }
   get isReserved(): boolean {
-    return this.sheetState.reservedRowIndexes.has(this.rowIndex);
+    return this.sheetState.writeQueue.reservedRowIndexes.has(this.rowIndex);
   }
   reserve(): void {
-    this.sheetState.reservedRowIndexes.add(this.rowIndex);
+    this.sheetState.writeQueue.reservedRowIndexes.add(this.rowIndex);
   }
   release(): void {
-    this.sheetState.reservedRowIndexes.delete(this.rowIndex);
+    this.sheetState.writeQueue.reservedRowIndexes.delete(this.rowIndex);
   }
   validateIsWritable(): void {
     if (!this.isDataRow || this.rowIsActive()) return;
-    if (this.sheetState.knownTable === null) {
+    if (this.sheetState.working.knownTable === null) {
       throw new Error(
         `Cannot write to row ${this.rowIndex} of sheetGid ${this.sheetGid} before its sheet properties have been fetched.`,
       );

@@ -1,11 +1,12 @@
 import type { CellValue, CellValueName } from "../../00_base/base";
 import { Obj } from "../../utils/Obj";
-import type {
-  RowChangeProps,
-  RowChangesToSave,
-  RowChangeUpdateProps,
-} from "../ClassTypes/StateRaw";
 import { CellRaw } from "../CellRaw";
+import {
+  emptyRowChanges,
+  type RowChangeProps,
+  type RowChangesToSave,
+  type RowChangeUpdateProps,
+} from "../ClassTypes/StateRaw";
 import { SheetRaw } from "../SheetRaw";
 import { RowRawBase } from "./RowRawBase";
 
@@ -57,36 +58,28 @@ export abstract class RowCommonRaw extends RowRawBase {
     this.cell(colIndex).updateValue(value);
     return this;
   }
-  get sheetRowId(): string {
-    return this.schema.makeId(this.sheetGid, this.rowIndex);
-  }
   gatherFetchFull(): this {
     this.sheet.gatherFetchRange({
       startRowIndex: this.rowIndex,
       endRowIndex: this.rowIndex + 1,
       startColumnIndex: this.sheet.activeTable.startColumnIndex,
     });
-    this.sheetState.rowIndexesToFinalize.add(this.rowIndex);
+    this.sheetState.fetchQueue.toFinalize.rows.add(this.rowIndex);
     return this;
   }
   get isQueuedForDelete(): boolean {
-    const changes = this.allChangesToSave.get(this.sheetRowId);
-    return changes?.level === "row" && changes.delete;
+    return this.sheetState.writeQueue.rows.get(this.rowIndex)?.delete === true;
   }
   get changesToSave(): RowChangesToSave {
     this._ensureChangesToSaveExists();
-    return this.allChangesToSave.get(this.sheetRowId) as RowChangesToSave;
+    return this.sheetState.writeQueue.rows.get(
+      this.rowIndex,
+    ) as RowChangesToSave;
   }
   private _ensureChangesToSaveExists(): void {
-    const sheetChangesToSave = this.spreadsheetStateRaw.changesToSave;
-    const sheetRowId = this.sheetRowId;
-    if (!sheetChangesToSave.has(sheetRowId)) {
-      sheetChangesToSave.set(sheetRowId, {
-        level: "row",
-        append: false,
-        delete: false,
-        update: new Map(),
-      });
+    const rowChanges = this.sheetState.writeQueue.rows;
+    if (!rowChanges.has(this.rowIndex)) {
+      rowChanges.set(this.rowIndex, emptyRowChanges());
     }
   }
   addRowChangeToSave(props: RowChangeProps): this {

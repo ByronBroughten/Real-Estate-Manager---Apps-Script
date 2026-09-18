@@ -1002,6 +1002,93 @@ describe("RowRaw.delete", () => {
 
     expect(() => raw.sheet(111).topRow.delete()).toThrowError(/last data row/);
   });
+
+  it("does not change another sheet's data-row count when a row delete is queued", () => {
+    stubSheetsService({
+      sheets: [
+        { sheetId: 111, title: "Leases", table: { endRowIndex: 11 } },
+        { sheetId: 222, title: "Units", table: { endRowIndex: 6 } },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const unitsBefore = raw.sheet(222).dataRowCountAfterFlush;
+
+    raw.sheet(111).row(5).delete();
+
+    expect(raw.sheet(222).dataRowCountAfterFlush).toBe(unitsBefore);
+    expect(raw.sheet(111).dataRowCountAfterFlush).toBe(6);
+  });
+});
+
+describe("working view", () => {
+  it("makes an appended row active and grows the table end before the flush", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const endBefore = raw.sheet(111).activeTable.endRowIndex;
+
+    const row = raw.sheet(111).appendDataRow();
+
+    expect(row.rowIsActive()).toBe(true);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(endBefore + 1);
+  });
+
+  it("drops a removed row from the working view before the flush, leaving table indexes unmoved", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({ 4: ["kept"], 5: ["deleted"] }),
+          table: { endRowIndex: 11 },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).gatherFetchFull();
+    raw.fetchAllGathered();
+    expect(raw.sheet(111).row(5).rowIsActive()).toBe(true);
+    const endBefore = raw.sheet(111).activeTable.endRowIndex;
+
+    raw.sheet(111).row(5).delete();
+
+    expect(raw.sheet(111).row(5).rowIsActive()).toBe(false);
+    expect(raw.sheet(111).activeTable.endRowIndex).toBe(endBefore);
+    expect(raw.sheet(111).dataRowCountAfterFlush).toBe(6);
+  });
+
+  it("keeps pre-flush row indexes after a flushed delete, so the removed row stays inactive at its old index", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({ 4: ["kept"], 5: ["deleted"] }),
+          table: { endRowIndex: 11 },
+        },
+      ],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).gatherFetchFull();
+    raw.fetchAllGathered();
+    raw.sheet(111).row(5).delete();
+    raw.batchUpdateGSheets();
+
+    expect(raw.sheet(111).row(5).rowIsActive()).toBe(false);
+    expect(raw.sheet(111).rowIndexesAreStale).toBe(true);
+    expect(() => raw.sheet(111).activeTable.endRowIndex).toThrow(
+      /Row indexes are stale/,
+    );
+  });
 });
 
 describe("queued writes outlive a same-run re-fetch", () => {
@@ -1027,7 +1114,10 @@ describe("queued writes outlive a same-run re-fetch", () => {
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
     raw.sheet(111).topRow.gatherFetchFull();
-    raw.sheet(111).row(TOP_DATA_ROW_INDEX + 1).gatherFetchFull();
+    raw
+      .sheet(111)
+      .row(TOP_DATA_ROW_INDEX + 1)
+      .gatherFetchFull();
     raw.fetchAllGathered();
     return raw;
   }
@@ -1380,6 +1470,25 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
     expect(batchUpdateCalls).toEqual([]);
     expect(raw.sheet(111).rowIndexesAreStale).toBe(false);
     expect(raw.sheet(111).activeTable.endRowIndex).toBe(11);
+  });
+
+  it("empties the spreadsheet and per-sheet write queues, so a later flush sends nothing", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).delete();
+    raw.sheet(111).requestSortGSheet({
+      colIdxToSortBy: 0,
+      sortOrder: "ASCENDING",
+    });
+    raw.gatherRawRequest({ updateTable: { table: { tableId: "t" } } });
+    raw.discardQueuedChanges();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
   });
 
   it("still sends changes queued after the discard, so a failure handler can report status", () => {
@@ -2062,9 +2171,9 @@ describe("Raw value types", () => {
         boolean | ""
       >
     >(true);
-    assertType<IsExactly<RowCellChange["backgroundColor"], RgbColor | undefined>>(
-      true,
-    );
+    assertType<
+      IsExactly<RowCellChange["backgroundColor"], RgbColor | undefined>
+    >(true);
   });
 });
 
@@ -2289,14 +2398,14 @@ describe("SheetMetaRaw.activeColumnIds", () => {
   }
 
   it("throws when a Table column-ID cell is a number, boolean, or date", () => {
-    expect(() => fetchedColumnIdSheet(["c:lse:aaa", 42]).activeColumnIds).toThrow(
-      /Leases.*column index 1/,
-    );
-    expect(() => fetchedColumnIdSheet(["c:lse:aaa", true]).activeColumnIds).toThrow(
-      /Leases.*column index 1/,
-    );
-    expect(() =>
-      fetchedColumnIdSheet(["c:lse:aaa", 44927]).activeColumnIds,
+    expect(
+      () => fetchedColumnIdSheet(["c:lse:aaa", 42]).activeColumnIds,
+    ).toThrow(/Leases.*column index 1/);
+    expect(
+      () => fetchedColumnIdSheet(["c:lse:aaa", true]).activeColumnIds,
+    ).toThrow(/Leases.*column index 1/);
+    expect(
+      () => fetchedColumnIdSheet(["c:lse:aaa", 44927]).activeColumnIds,
     ).toThrow(/Leases.*column index 1/);
   });
 

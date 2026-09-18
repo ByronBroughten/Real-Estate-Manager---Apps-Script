@@ -13,7 +13,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
     return new SheetRaw(this.sheetRawProps);
   }
   get hasFetchedColumnIds(): boolean {
-    return this.sheetState.hasFetchedColumnIds;
+    return this.sheetState.working.hasFetchedColumnIds;
   }
   get tableHeaderRow(): UniformRowRaw<"tableHeader"> {
     return this.uniformRow("tableHeader");
@@ -104,7 +104,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
       endRowIndex: this.schema.colIdRowIndex + 1,
       startColumnIndex: startTableColIndex,
     });
-    this.sheetState.rowIndexesToFinalize.add(this.schema.colIdRowIndex);
+    this.sheetState.fetchQueue.toFinalize.rows.add(this.schema.colIdRowIndex);
     return this;
   }
   private _columnIdInTable(colIndex: number): string {

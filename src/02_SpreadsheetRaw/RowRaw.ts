@@ -36,7 +36,7 @@ export class RowRaw extends RowCommonRaw {
         `Cannot append row ${this.rowIndex} because it is already active.`,
       );
     }
-    this.sheetState.rowStates.set(this.rowIndex, new Map());
+    this.sheetState.working.rowStates.set(this.rowIndex, new Map());
     this.addRowChangeToSave({ action: "append" });
     this.sheet.activeTable.growEndRowIndex();
     return this;
