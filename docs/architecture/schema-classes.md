@@ -7,12 +7,12 @@ The Schema tier root, `src/01_SpreadsheetSchema/`, holds the four schema classes
 
 The converse is worth knowing, because it looks like the same hazard and isn't: **two sibling classes may import each other as values and instantiate each other in getter bodies.** `SheetSchema`/`ColumnSchema`, `SheetRaw`/`SheetMetaRaw` and `ColumnRaw`/`ColumnMetaRaw` already do, in both directions. Only `extends` runs at module init, so a cycle whose imports are used exclusively inside method and getter bodies is safe. When a cycle would close through an `extends` clause, move the shared members to a base that imports no subclass, as `SpreadsheetBaseSchema` does, or use an `abstract` member implemented on each subclass, as `SheetCommonRaw` does with `ss`.
 
-| Class                 | Answers                                                             | Reached from                               |
-| --------------------- | ------------------------------------------------------------------- | ------------------------------------------ |
-| `SpreadsheetBaseSchema`          | Uniform-row indexes, ID encode/decode, layout constants             | Every Raw-tier class                       |
-| `SpreadsheetSchema`   | The sheet list and navigation to a sheet's schema                   | Spreadsheet-level classes                  |
-| `SheetSchema<SN>`     | A sheet's traits, its column IDs and names                          | Sheet-level and row-level classes          |
-| `ColumnSchema<SN,CN>` | A column's value name, validation, default, full name               | Column-level and cell-level classes        |
+| Class                   | Answers                                                 | Reached from                        |
+| ----------------------- | ------------------------------------------------------- | ----------------------------------- |
+| `SpreadsheetBaseSchema` | Uniform-row indexes, ID encode/decode, layout constants | Every Raw-tier class                |
+| `SpreadsheetSchema`     | The sheet list and navigation to a sheet's schema       | Spreadsheet-level classes           |
+| `SheetSchema<SN>`       | A sheet's traits, its column IDs and names              | Sheet-level and row-level classes   |
+| `ColumnSchema<SN,CN>`   | A column's value name, validation, default, full name   | Column-level and cell-level classes |
 
 `SheetSchema` and `ColumnSchema` are **siblings**, both extending `SpreadsheetBaseSchema`, as does `SpreadsheetSchema`. `ColumnSchema` does *not* extend `SheetSchema` — it reaches its sheet through a `sheet` accessor. That's forced: one accessor named `schema` declared at the Raw root means every narrowing override must be assignable to what the root declares, and the consuming class tree branches (the sheet class, the row base and the column base are siblings under a shared sheet-scoped base), so the two need only be assignable to `SpreadsheetBaseSchema`, never to each other. The Raw root declares `schema` as `SpreadsheetBaseSchema`, and each concrete spreadsheet class (`SpreadsheetRaw`, `SpreadsheetIndexed`, `SpreadsheetNamed`, `Api`) narrows it to `SpreadsheetSchema`.
 

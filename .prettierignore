@@ -7,10 +7,10 @@ coverage/
 
 # Written by `npm run gen:configs` in its own JSON-ish shape (quoted keys, no
 # trailing commas). Formatting them makes every regeneration a spurious diff.
-src/01_generatedConfigs/sheetConfigs.ts
-src/01_generatedConfigs/columnConfigs.ts
-src/01_generatedConfigs/valueConfigs.ts
-src/01_generatedConfigs/spreadsheetConfig.ts
+src/01_SpreadsheetSchema/generated/sheetConfigs.ts
+src/01_SpreadsheetSchema/generated/columnConfigs.ts
+src/01_SpreadsheetSchema/generated/valueConfigs.ts
+src/01_SpreadsheetSchema/generated/spreadsheetConfig.ts
 
 # Hand-curated prose; prettier rewrites *emphasis* and re-pads wide tables.
 *.md
