@@ -6,11 +6,7 @@ await runFailOpen(() => {
   const input = readHookInput();
   const command = input?.tool_input?.command;
   if (input?.tool_name !== "Bash" || typeof command !== "string") return;
-  const { denyReason } = BashReads.init({
-    command,
-    cwd: input.cwd ?? process.cwd(),
-    projectDir: process.env.CLAUDE_PROJECT_DIR,
-  }).classify();
+  const { denyReason } = BashReads.initFromHook(input).classify();
   if (!denyReason) return;
   writeHookOutput({
     hookSpecificOutput: {

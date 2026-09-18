@@ -41,6 +41,7 @@ class SheetsProbe {
   _fetch() {
     const request = this._request();
     console.log(`probe: ${request.method} ${request.url}`);
+    assertIsRead(request);
     const response = SheetsTransport.init().send(request);
     const json = JSON.stringify(response, null, 2);
     mkdirSync(fileURLToPath(PROBE_DIR), { recursive: true });
@@ -84,6 +85,15 @@ const USAGE = `Usage:
 A path is dot-separated: an index, a key, or key=value to pick an array
 element by that key or by properties.<key> — e.g. sheets.title=Occupancy.protectedRanges.
 Only a summary is printed; the full response is saved to ${OUTPUT_SHOWN}.`;
+
+// A backstop for future edits to _request: the transport itself has no dry-run gate.
+function assertIsRead({ method, url }) {
+  const isGet = method === "GET" && !/:\w+(\?|$)/.test(url.split("/").pop());
+  const isFilterRead = method === "POST" && /:getByDataFilter(\?|$)/.test(url);
+  if (!isGet && !isFilterRead) {
+    throw new Error(`The probe only reads; refusing ${method} ${url}.`);
+  }
+}
 
 function parsedFilter(filter) {
   let body;

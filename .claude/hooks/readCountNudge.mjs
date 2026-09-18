@@ -1,5 +1,4 @@
-// PostToolUse on reads: reminds Claude to write findings down at 15 reads in a turn, then every 10.
-// UserPromptSubmit: resets the count, so the limit is per turn.
+// Nudges a write-up at 15 reads per turn, then every 10; UserPromptSubmit resets the count.
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { BashReads } from "./lib/bashReads.mjs";
 import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.mjs";
@@ -42,11 +41,7 @@ class ReadCount {
     if (READ_TOOLS.has(toolName)) return true;
     if (toolName !== "Bash" || typeof toolInput?.command !== "string") return false;
     try {
-      return BashReads.init({
-        command: toolInput.command,
-        cwd: this.input.cwd ?? process.cwd(),
-        projectDir: process.env.CLAUDE_PROJECT_DIR,
-      }).classify().isRead;
+      return BashReads.initFromHook(this.input).classify().isRead;
     } catch {
       return false;
     }

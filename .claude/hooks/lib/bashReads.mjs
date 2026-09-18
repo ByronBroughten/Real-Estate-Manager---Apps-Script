@@ -22,6 +22,13 @@ export class BashReads {
   static init({ command, cwd, projectDir }) {
     return new BashReads({ command, cwd, projectDir: projectDir ?? cwd });
   }
+  static initFromHook(input) {
+    return BashReads.init({
+      command: input.tool_input.command,
+      cwd: input.cwd ?? process.cwd(),
+      projectDir: process.env.CLAUDE_PROJECT_DIR,
+    });
+  }
   // Throws on a command it cannot parse; callers treat that as "allow, not a read".
   classify() {
     let cwd = this.cwd;
@@ -103,8 +110,10 @@ function headTailRead(name, args, segment) {
       if (!arg.startsWith("-") && !isGlob(arg)) files.push(arg);
       continue;
     }
+    // `head -n -5` is all but 5 lines and `tail -n +5` is line 5 on: both run to the file's end.
+    const sign = String(value)[0];
+    if ((name === "head" && sign === "-") || (name === "tail" && sign === "+")) isBounded = false;
     if (arg.startsWith("-c")) continue;
-    if (name === "tail" && String(value).startsWith("+")) isBounded = false;
     count = Number.parseInt(String(value).replace(/^[+-]/, ""), 10);
   }
   const isSmall = isBounded && Number.isFinite(count) && count <= LARGE_FILE_LINES;
@@ -113,7 +122,7 @@ function headTailRead(name, args, segment) {
 
 function optionValue(arg) {
   const match =
-    /^-n(\+?\d+)$/.exec(arg) ?? /^--lines=(\+?\d+)$/.exec(arg) ?? /^-(\d+)$/.exec(arg) ?? /^-c(\d+)$/.exec(arg);
+    /^-n([+-]?\d+)$/.exec(arg) ?? /^--lines=([+-]?\d+)$/.exec(arg) ?? /^-(\d+)$/.exec(arg) ?? /^-c(\d+)$/.exec(arg);
   return match ? match[1] : undefined;
 }
 
