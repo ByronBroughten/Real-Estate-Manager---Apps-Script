@@ -13,8 +13,8 @@ import type {
   MakeColumnFullName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
-import { ColumnMetaIndexed } from "../03_SpreadsheetIndexed/ColumnMetaIndexed";
+import type { CellIdentified } from "../03_SpreadsheetIdentified/CellIdentified";
+import { ColumnMetaIdentified } from "../03_SpreadsheetIdentified/ColumnMetaIdentified";
 import { ColumnCommonNamed } from "./ClassBases/ColumnCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { SheetMetaNamed } from "./SheetMetaNamed";
@@ -27,11 +27,11 @@ export class ColumnMetaNamed<
     return new SheetMetaNamed(this.sheetNamedProps);
   }
   get raw() {
-    return this.sheet.raw.column(this.indexed.colIndex);
+    return this.sheet.raw.column(this.identified.colIndex);
   }
-  get indexed(): ColumnMetaIndexed<ColumnValueName<SN, CN>> {
-    return new ColumnMetaIndexed<ColumnValueName<SN, CN>>({
-      ...this.sheet.indexed.sheetIndexedProps,
+  get identified(): ColumnMetaIdentified<ColumnValueName<SN, CN>> {
+    return new ColumnMetaIdentified<ColumnValueName<SN, CN>>({
+      ...this.sheet.identified.sheetIdentifiedProps,
       columnId: this.columnId,
     });
   }
@@ -39,20 +39,20 @@ export class ColumnMetaNamed<
     return new ColumnNamed(this.columnNamedProps);
   }
   get colIndex() {
-    return this.indexed.colIndex;
+    return this.identified.colIndex;
   }
   get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
     return this.schema.fullName;
   }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
-  ): CellIndexed<UniformRowValueName<UN>> {
+  ): CellIdentified<UniformRowValueName<UN>> {
     // intentionally not cell named, because named cells only work for data...
-    return this.indexed.uniformCell(rowName);
+    return this.identified.uniformCell(rowName);
   }
   prepFetchUniformCell<UN extends UniformRowName>(
     rowName: UN,
-  ): CellIndexed<UniformRowValueName<UN>> {
+  ): CellIdentified<UniformRowValueName<UN>> {
     return this.uniformCell(rowName).prepFetch();
   }
   actionRowToDefault(): ColumnMetaNamed<SN, CN> {

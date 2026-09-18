@@ -358,7 +358,7 @@ function runBuildLedger(): void {
     entryColumnName: "buildLedgerTimeLastRan",
     endpoint: buildLedger,
   });
-  run.sheet.indexed.meta.ensureColumnIdsAreFetched();
+  run.sheet.identified.meta.ensureColumnIdsAreFetched();
   run.run(true);
 }
 

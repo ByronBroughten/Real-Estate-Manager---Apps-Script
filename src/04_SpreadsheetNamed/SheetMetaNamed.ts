@@ -2,8 +2,8 @@ import type { UniformRowName } from "../00_Source/CellValues/cellValues";
 import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
-import { SheetMetaIndexed } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
-import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";
+import { SheetMetaIdentified } from "../03_SpreadsheetIdentified/SheetMetaIdentified";
+import type { UniformRowIdentified } from "../03_SpreadsheetIdentified/UniformRowIdentified";
 import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { SheetNamed } from "./SheetNamed";
@@ -18,8 +18,8 @@ export class SheetMetaNamed<
   get raw(): SheetMetaRaw {
     return this.spreadsheet.raw.sheetMeta(this.sheetGid);
   }
-  get indexed(): SheetMetaIndexed {
-    return new SheetMetaIndexed({
+  get identified(): SheetMetaIdentified {
+    return new SheetMetaIdentified({
       ...this.sheetNamedProps,
       sheetGid: this.sheetGid,
     });
@@ -37,17 +37,17 @@ export class SheetMetaNamed<
     });
   }
   columnByIndex(colIndex: number): ColumnMetaNamed<SN> {
-    const columnId = this.indexed.columnIdByIndex(colIndex);
+    const columnId = this.identified.columnIdByIndex(colIndex);
     const columnName = this.schema.colNameByColumnId(columnId);
     return this.column(columnName);
   }
-  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIndexed<UN> {
-    return this.indexed.uniformRow(rowName);
+  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIdentified<UN> {
+    return this.identified.uniformRow(rowName);
   }
   isActiveColumnId(columnId: string): boolean {
-    return this.indexed.isActiveColumnId(columnId);
+    return this.identified.isActiveColumnId(columnId);
   }
   addMissingColumnIds(): number {
-    return this.indexed.addMissingColumnIds();
+    return this.identified.addMissingColumnIds();
   }
 }

@@ -12,25 +12,25 @@ import type {
 import type { Value } from "../01_SpreadsheetSchema/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import { SheetCommonIndexed } from "./ClassBases/SheetCommonIndexed";
-import { ColumnIndexed } from "./ColumnIndexed";
-import { RowIndexed } from "./RowIndexed";
-import { SheetMetaIndexed } from "./SheetMetaIndexed";
+import { SheetCommonIdentified } from "./ClassBases/SheetCommonIdentified";
+import { ColumnIdentified } from "./ColumnIdentified";
+import { RowIdentified } from "./RowIdentified";
+import { SheetMetaIdentified } from "./SheetMetaIdentified";
 
-export class SheetIndexed extends SheetCommonIndexed {
-  get meta(): SheetMetaIndexed {
-    return new SheetMetaIndexed(this.sheetIndexedProps);
+export class SheetIdentified extends SheetCommonIdentified {
+  get meta(): SheetMetaIdentified {
+    return new SheetMetaIdentified(this.sheetIdentifiedProps);
   }
   get raw(): SheetRaw {
-    return new SheetRaw(this.sheetIndexedProps);
+    return new SheetRaw(this.sheetIdentifiedProps);
   }
   get rowIndexesActive(): number[] {
     return this.raw.rowIndexesActive;
   }
-  get rows(): RowIndexed[] {
+  get rows(): RowIdentified[] {
     return this.raw.rows.map((row) => this.row(row.rowIndex));
   }
-  get topRow(): RowIndexed {
+  get topRow(): RowIdentified {
     return this.row(this.schema.topDataRowIdx);
   }
   get rowCount(): number {
@@ -53,9 +53,9 @@ export class SheetIndexed extends SheetCommonIndexed {
       this.meta.isActiveColumnId(columnId),
     );
   }
-  column(columnId: string): ColumnIndexed {
-    return new ColumnIndexed({
-      ...this.sheetIndexedProps,
+  column(columnId: string): ColumnIdentified {
+    return new ColumnIdentified({
+      ...this.sheetIdentifiedProps,
       columnId,
     });
   }
@@ -126,9 +126,9 @@ export class SheetIndexed extends SheetCommonIndexed {
   anchoredA1(colIndex: number): string {
     return this.schema.anchoredA1(colIndex, this.schema.topDataRowIdx);
   }
-  row(rowIndex: number): RowIndexed {
-    return new RowIndexed({
-      ...this.sheetIndexedProps,
+  row(rowIndex: number): RowIdentified {
+    return new RowIdentified({
+      ...this.sheetIdentifiedProps,
       rowIndex,
     });
   }
@@ -139,7 +139,7 @@ export class SheetIndexed extends SheetCommonIndexed {
     rowIndexesBelow.forEach((rowIndex) => this.row(rowIndex).delete());
     this.row(topRowIndex).clearValues();
   }
-  appendRowDefault(): RowIndexed {
+  appendRowDefault(): RowIdentified {
     const row = this._rowToFillWithDefaults();
     this._defaultDataValues().forEach((value, columnId) => {
       row.updateValue(columnId, value);
@@ -157,7 +157,7 @@ export class SheetIndexed extends SheetCommonIndexed {
     return rowIndexes.filter((rowIndex) => !this.row(rowIndex).isBlank);
   }
   // Appending past a blank row would leave it stranded above the data forever.
-  private _rowToFillWithDefaults(): RowIndexed {
+  private _rowToFillWithDefaults(): RowIdentified {
     if (this._isTopRowReusable()) return this.topRow;
     return this.row(this.raw.appendDataRow().rowIndex);
   }

@@ -1,6 +1,6 @@
 import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import { SheetSchema } from "../01_SpreadsheetSchema/SheetSchema";
-import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { ColumnBaseNamed } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import type { SheetNameWithIdColumn } from "../04_SpreadsheetNamed/SheetNameGroups";
@@ -59,15 +59,16 @@ export class RowIdByNameOperator<
     return cell.valueNotEmpty();
   }
   // By column id, so the name column's own value type isn't composed into the read.
-  private get _nameColumn(): ColumnIndexed {
-    return this.sheet.columnIndexed(this.columnName);
+  private get _nameColumn(): ColumnIdentified {
+    return this.sheet.columnIdentified(this.columnName);
   }
   // The id column is the framework's own, so it is named at the widened sheet type.
-  private get _idColumn(): ColumnIndexed<"id"> {
-    return new ColumnIndexed<"id">({
-      ...this.sheet.indexed.sheetIndexedProps,
-      columnId: SheetSchema.fromSheetName<SheetNameWithIdColumn>(this.sheetName)
-        .columnByName("id").columnId,
+  private get _idColumn(): ColumnIdentified<"id"> {
+    return new ColumnIdentified<"id">({
+      ...this.sheet.identified.sheetIdentifiedProps,
+      columnId: SheetSchema.fromSheetName<SheetNameWithIdColumn>(
+        this.sheetName,
+      ).columnByName("id").columnId,
     });
   }
 }

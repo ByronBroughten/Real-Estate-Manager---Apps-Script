@@ -1,12 +1,12 @@
 import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
 import { SheetMetaRaw } from "../../02_SpreadsheetRaw/SheetMetaRaw";
-import { ColumnBaseIndexed } from "./ColumnBaseIndexed";
+import { ColumnBaseIdentified } from "./ColumnBaseIdentified";
 
-export abstract class ColumnCommonIndexed<
+export abstract class ColumnCommonIdentified<
   VN extends ValueName = ValueName,
-> extends ColumnBaseIndexed<VN> {
+> extends ColumnBaseIdentified<VN> {
   get colIndex() {
-    return new SheetMetaRaw(this.sheetIndexedProps).colIndexOfActiveColumnId(
+    return new SheetMetaRaw(this.sheetIdentifiedProps).colIndexOfActiveColumnId(
       this.columnId,
     );
   }

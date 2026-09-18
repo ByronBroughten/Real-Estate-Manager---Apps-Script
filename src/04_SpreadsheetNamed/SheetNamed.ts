@@ -18,8 +18,8 @@ import type {
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
-import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
+import type { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
+import { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
@@ -41,25 +41,25 @@ export class SheetNamed<
     return new SheetMetaNamed(this.sheetNamedProps);
   }
   get raw(): SheetRaw {
-    return this.indexed.raw;
+    return this.identified.raw;
   }
-  get indexed(): SheetIndexed {
-    return new SheetIndexed({
+  get identified(): SheetIdentified {
+    return new SheetIdentified({
       ...this.sheetNamedProps,
       sheetGid: this.sheetGid,
     });
   }
   get rowIndexesActive(): number[] {
-    return this.indexed.rowIndexesActive;
+    return this.identified.rowIndexesActive;
   }
   get rowIndexesActiveWithData(): number[] {
-    return this.indexed.rowIndexesActiveWithData;
+    return this.identified.rowIndexesActiveWithData;
   }
   get rowIndexesFullWithData(): number[] {
-    return this.indexed.rowIndexesFullWithData;
+    return this.identified.rowIndexesFullWithData;
   }
   get rows(): RowNamed<SN>[] {
-    return this.indexed.rows.map((row) => this.row(row.rowIndex));
+    return this.identified.rows.map((row) => this.row(row.rowIndex));
   }
   get topRow(): RowNamed<SN> {
     return this.row(this.schema.topDataRowIdx);
@@ -77,9 +77,9 @@ export class SheetNamed<
     });
   }
   // By id, so the column name's value type isn't composed into the result.
-  columnIndexed(columnName: ColumnName<SN>): ColumnIndexed {
+  columnIdentified(columnName: ColumnName<SN>): ColumnIdentified {
     const { columnId } = this.schema.columnByName(columnName);
-    return this.indexed.column(columnId);
+    return this.identified.column(columnId);
   }
   columns<CNs extends readonly ColumnName<SN>[]>(
     ...columnNames: CNs
@@ -127,70 +127,70 @@ export class SheetNamed<
     });
   }
   DELETE_ALL_DATA_ROWS(): void {
-    this.indexed.DELETE_ALL_DATA_ROWS();
+    this.identified.DELETE_ALL_DATA_ROWS();
   }
   findReplace(terms: FindReplaceTerms): this {
-    this.indexed.findReplace(terms);
+    this.identified.findReplace(terms);
     return this;
   }
   prepFetchConditionalFormatRules(): this {
-    this.indexed.prepFetchConditionalFormatRules();
+    this.identified.prepFetchConditionalFormatRules();
     return this;
   }
   conditionalFormatRules(): ConditionalFormatRule[] {
-    return this.indexed.conditionalFormatRules();
+    return this.identified.conditionalFormatRules();
   }
   addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
-    this.indexed.addConditionalFormatRule(declaration);
+    this.identified.addConditionalFormatRule(declaration);
     return this;
   }
   removeConditionalFormatRules(): this {
-    this.indexed.removeConditionalFormatRules();
+    this.identified.removeConditionalFormatRules();
     return this;
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
-    this.indexed.removeConditionalFormatRule(rule);
+    this.identified.removeConditionalFormatRule(rule);
     return this;
   }
   prepFetchEditProtections(): this {
-    this.indexed.prepFetchEditProtections();
+    this.identified.prepFetchEditProtections();
     return this;
   }
   editProtections(): EditProtection[] {
-    return this.indexed.editProtections();
+    return this.identified.editProtections();
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
-    this.indexed.addEditWarning(declaration);
+    this.identified.addEditWarning(declaration);
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {
-    this.indexed.addEditLock(declaration);
+    this.identified.addEditLock(declaration);
     return this;
   }
   addEditWarningWholeSheet(
     declaration: WholeSheetEditWarningDeclaration = {},
   ): this {
-    this.indexed.addEditWarningWholeSheet(declaration);
+    this.identified.addEditWarningWholeSheet(declaration);
     return this;
   }
   addEditLockWholeSheet(declaration: WholeSheetEditLockDeclaration = {}): this {
-    this.indexed.addEditLockWholeSheet(declaration);
+    this.identified.addEditLockWholeSheet(declaration);
     return this;
   }
   removeEditProtections(): this {
-    this.indexed.removeEditProtections();
+    this.identified.removeEditProtections();
     return this;
   }
   removeEditProtection(protection: EditProtection): this {
-    this.indexed.removeEditProtection(protection);
+    this.identified.removeEditProtection(protection);
     return this;
   }
   removeEditProtectionByDescription(description: string): this {
-    this.indexed.removeEditProtectionByDescription(description);
+    this.identified.removeEditProtectionByDescription(description);
     return this;
   }
   removeEditProtectionById(protectionId: number): this {
-    this.indexed.removeEditProtectionById(protectionId);
+    this.identified.removeEditProtectionById(protectionId);
     return this;
   }
   anchoredA1(columnName: ColumnName<SN>): string {
@@ -221,7 +221,7 @@ export class SheetNamed<
     return rows[0]!;
   }
   appendRowWithVals(values: Partial<SheetDataValues<SN>>): RowNamed<SN> {
-    const { rowIndex } = this.indexed.appendRowDefault();
+    const { rowIndex } = this.identified.appendRowDefault();
     return this.row(rowIndex).updateValues(values);
   }
   appendRowWithAllVals(values: SheetDataValuesAll<SN>): RowNamed<SN> {

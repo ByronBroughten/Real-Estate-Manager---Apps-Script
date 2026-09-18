@@ -1,17 +1,17 @@
 import {
-  SpreadsheetBaseIndexed,
-  type SpreadsheetIndexedProps,
-} from "../../03_SpreadsheetIndexed/ClassBases/SpreadsheetBaseIndexed";
+  SpreadsheetBaseIdentified,
+  type SpreadsheetIdentifiedProps,
+} from "../../03_SpreadsheetIdentified/ClassBases/SpreadsheetBaseIdentified";
 
-export interface SpreadsheetNamedProps extends SpreadsheetIndexedProps {}
+export interface SpreadsheetNamedProps extends SpreadsheetIdentifiedProps {}
 
-export class SpreadsheetBaseNamed extends SpreadsheetBaseIndexed {
+export class SpreadsheetBaseNamed extends SpreadsheetBaseIdentified {
   get spreadsheetNamedProps(): SpreadsheetNamedProps {
     return {
-      ...this.spreadsheetIndexedProps,
+      ...this.spreadsheetIdentifiedProps,
     };
   }
   static initSpreadsheetNamedProps(): SpreadsheetNamedProps {
-    return SpreadsheetBaseIndexed.initSpreadsheetIndexedProps();
+    return SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps();
   }
 }

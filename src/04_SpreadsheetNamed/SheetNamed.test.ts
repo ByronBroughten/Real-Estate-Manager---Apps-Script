@@ -798,7 +798,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
       }),
     ]);
 
-    sheet.indexed.raw.removeEditProtectionsAt(wholeSheetRange);
+    sheet.identified.raw.removeEditProtectionsAt(wholeSheetRange);
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
@@ -809,7 +809,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   it("refuses a whole-column protection write while column indexes are stale", () => {
     const { ss, sheet } = fetchedOccupancyProtections();
 
-    sheet.indexed.raw.addSheetChangeToSave({
+    sheet.identified.raw.addSheetChangeToSave({
       action: "insertColumn",
       startColumnIndex: 0,
     });

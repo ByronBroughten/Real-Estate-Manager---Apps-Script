@@ -16,19 +16,19 @@ import {
   type VnToCvn,
 } from "../01_SpreadsheetSchema/valueSchemas";
 import { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
-import { CellBaseIndexed } from "./ClassBases/CellBaseIndexed";
-import type { CellChange } from "./ClassTypes/StateIndexed";
-import { ColumnIndexed } from "./ColumnIndexed";
+import { CellBaseIdentified } from "./ClassBases/CellBaseIdentified";
+import type { CellChange } from "./ClassTypes/StateIdentified";
+import { ColumnIdentified } from "./ColumnIdentified";
 
-export class CellIndexed<
+export class CellIdentified<
   VN extends ValueName = ValueName,
-> extends CellBaseIndexed<VN> {
-  get column(): ColumnIndexed<VN> {
-    return new ColumnIndexed(this.cellIndexedProps);
+> extends CellBaseIdentified<VN> {
+  get column(): ColumnIdentified<VN> {
+    return new ColumnIdentified(this.cellIdentifiedProps);
   }
   get raw(): CellRaw<VnToCvn<VN>> {
     return new CellRaw<VnToCvn<VN>>({
-      ...this.cellIndexedProps,
+      ...this.cellIdentifiedProps,
       rowIndex: this.rowIndex,
       colIndex: this.column.colIndex,
     });
@@ -44,7 +44,7 @@ export class CellIndexed<
     });
     return this;
   }
-  // Indexed is the lowest tier that knows the value name, so the blank is read here.
+  // Identified is the lowest tier that knows the value name, so the blank is read here.
   valueOrEmpty(): Value<VN> {
     const value = this.raw.valueOrEmpty();
     const blankReadsAs = this.schema.valTrait("blankReadsAs");

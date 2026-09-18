@@ -1,40 +1,40 @@
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
-import { SpreadsheetBaseIndexed } from "./ClassBases/SpreadsheetBaseIndexed";
-import { type ColumnIndexed } from "./ColumnIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import { SpreadsheetBaseIdentified } from "./ClassBases/SpreadsheetBaseIdentified";
+import { type ColumnIdentified } from "./ColumnIdentified";
+import { SheetIdentified } from "./SheetIdentified";
 import {
-  SheetMetaIndexed,
+  SheetMetaIdentified,
   type GatherDataPrerequisitesProps,
-} from "./SheetMetaIndexed";
+} from "./SheetMetaIdentified";
 
-export class SpreadsheetIndexed extends SpreadsheetBaseIndexed {
+export class SpreadsheetIdentified extends SpreadsheetBaseIdentified {
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  sheet(sheetGid: number): SheetIndexed {
-    return new SheetIndexed({
-      ...this.spreadsheetIndexedProps,
+  sheet(sheetGid: number): SheetIdentified {
+    return new SheetIdentified({
+      ...this.spreadsheetIdentifiedProps,
       sheetGid,
     });
   }
-  sheetMeta(sheetGid: number): SheetMetaIndexed {
-    return new SheetMetaIndexed({
-      ...this.spreadsheetIndexedProps,
+  sheetMeta(sheetGid: number): SheetMetaIdentified {
+    return new SheetMetaIdentified({
+      ...this.spreadsheetIdentifiedProps,
       sheetGid,
     });
   }
-  column(sheetGid: number, columnId: string): ColumnIndexed {
+  column(sheetGid: number, columnId: string): ColumnIdentified {
     return this.sheet(sheetGid).column(columnId);
   }
-  get activeSheets(): SheetIndexed[] {
+  get activeSheets(): SheetIdentified[] {
     return this.raw.activeSheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
-  get sheetsPreppedForFetch(): SheetMetaIndexed[] {
-    return Array.from(this.sheetsStateIndexed.keys())
+  get sheetsPreppedForFetch(): SheetMetaIdentified[] {
+    return Array.from(this.sheetsStateIdentified.keys())
       .map((sheetGid) => this.sheetMeta(sheetGid))
       .filter((sheet) => sheet.isPreppedToFetch);
   }

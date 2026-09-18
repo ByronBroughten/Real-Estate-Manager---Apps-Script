@@ -1,6 +1,6 @@
 import type { ColumnNameFiltered } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { ColumnBaseNamed } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
@@ -27,9 +27,9 @@ export class CheckboxColumnOperator<
     return new ColumnNamed(this.columnNamedProps);
   }
   // Named can't re-derive `checkbox` while SN is generic, so the write is pinned here.
-  get indexed(): ColumnIndexed<"checkbox"> {
-    return new ColumnIndexed<"checkbox">({
-      ...this.sheet.indexed.sheetIndexedProps,
+  get identified(): ColumnIdentified<"checkbox"> {
+    return new ColumnIdentified<"checkbox">({
+      ...this.sheet.identified.sheetIdentifiedProps,
       columnId: this.column.columnId,
     });
   }
@@ -40,7 +40,7 @@ export class CheckboxColumnOperator<
   }
   // The active-cells fill, so an uncheck is safe on a sheet pruned to a selection.
   uncheckActiveCells(): this {
-    this.indexed.updateActiveCells({ value: false });
+    this.identified.updateActiveCells({ value: false });
     return this;
   }
 }

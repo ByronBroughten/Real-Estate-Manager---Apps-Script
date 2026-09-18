@@ -7,23 +7,23 @@ export interface CellChange<VN extends ValueName = ValueName> {
   backgroundColor?: RgbColor;
 }
 
-export interface StateIndexed {
-  sheets: SheetsStateIndexed;
+export interface StateIdentified {
+  sheets: SheetsStateIdentified;
 }
 
-export type SheetsStateIndexed = Map<SheetId, SheetStateIndexed>;
+export type SheetsStateIdentified = Map<SheetId, SheetStateIdentified>;
 
-export interface SheetStateIndexed {
-  fetchQueue: SheetFetchQueueIndexed;
+export interface SheetStateIdentified {
+  fetchQueue: SheetFetchQueueIdentified;
 }
 
-export interface SheetFetchQueueIndexed {
-  targets: FetchTargetIndexed[];
+export interface SheetFetchQueueIdentified {
+  targets: FetchTargetIdentified[];
   gatherConditionalFormats: boolean;
   gatherEditProtections: boolean;
 }
 
-export function emptySheetFetchQueueIndexed(): SheetFetchQueueIndexed {
+export function emptySheetFetchQueueIdentified(): SheetFetchQueueIdentified {
   return {
     targets: [],
     gatherConditionalFormats: false,
@@ -47,4 +47,5 @@ interface CellTarget {
   column: string;
 }
 
-export type FetchTargetIndexed = FullRowTarget | FullColumnTarget | CellTarget;
+export type FetchTargetIdentified =
+  FullRowTarget | FullColumnTarget | CellTarget;

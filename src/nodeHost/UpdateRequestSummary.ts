@@ -1,5 +1,5 @@
 import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
-import { sheetConfigsIndexed } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { sheetConfigsIdentified } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 
 type GoogleUpdateRequest = OpaqueRawRequest;
@@ -296,7 +296,7 @@ const label = {
   },
   sheet(sheetGid: number | undefined): string {
     if (sheetGid === undefined) return "(no sheet)";
-    return sheetConfigsIndexed.get(sheetGid)?.sheetName ?? `gid ${sheetGid}`;
+    return sheetConfigsIdentified.get(sheetGid)?.sheetName ?? `gid ${sheetGid}`;
   },
   dimensionSpan(
     dimension: string,

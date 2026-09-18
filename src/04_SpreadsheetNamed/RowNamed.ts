@@ -8,7 +8,7 @@ import type {
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { Value, ValueName } from "../01_SpreadsheetSchema/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
-import { RowIndexed } from "../03_SpreadsheetIndexed/RowIndexed";
+import { RowIdentified } from "../03_SpreadsheetIdentified/RowIdentified";
 import { Obj } from "../utils/Obj";
 import { CellNamed } from "./CellNamed";
 import { RowBaseNamed } from "./ClassBases/RowBaseNamed";
@@ -19,8 +19,8 @@ export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }
-  get indexed(): RowIndexed {
-    return new RowIndexed({
+  get identified(): RowIdentified {
+    return new RowIdentified({
       ...this.rowNamedProps,
       sheetGid: this.sheet.sheetGid,
     });
@@ -66,7 +66,7 @@ export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {
     );
   }
   get activeCellNames(): ColumnName<SN>[] {
-    return this.indexed.activeColumnIds.map((columnId) =>
+    return this.identified.activeColumnIds.map((columnId) =>
       this.schema.colNameByColumnId(columnId),
     );
   }
@@ -95,14 +95,14 @@ export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {
     return this;
   }
   get isBlank(): boolean {
-    return this.indexed.isBlank;
+    return this.identified.isBlank;
   }
   clearValues(): RowNamed<SN> {
-    this.indexed.clearValues();
+    this.identified.clearValues();
     return this;
   }
   delete(): void {
-    this.indexed.delete();
+    this.identified.delete();
   }
   setValueType<CN extends ColumnName<SN>>(
     columnName: CN,
@@ -119,7 +119,7 @@ export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {
     return this;
   }
   prepFetchFull(): this {
-    this.indexed.prepFetchFull();
+    this.identified.prepFetchFull();
     return this;
   }
 }

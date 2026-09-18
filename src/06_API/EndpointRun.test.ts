@@ -102,7 +102,7 @@ function runEndpoint(endpoint: Endpoint<"occupancy">, isChecked = true) {
     entryColumnName: "buildLedgerTimeLastRan",
     endpoint,
   });
-  run.sheet.indexed.meta.ensureColumnIdsAreFetched();
+  run.sheet.identified.meta.ensureColumnIdsAreFetched();
   run.run(isChecked);
 }
 

@@ -25,17 +25,17 @@ export function getSheetTraitByName<
   ] as SheetConfig[K];
 }
 
-export const sheetConfigsIndexed = Obj.toKeyedMap(
+export const sheetConfigsIdentified = Obj.toKeyedMap(
   sheetConfigs,
   "sheetGid",
   "sheetName",
 );
 
-export const configSheetGids = [...sheetConfigsIndexed.keys()];
+export const configSheetGids = [...sheetConfigsIdentified.keys()];
 
 export function getSheetTraitByGid<K extends keyof SheetConfig>(
   sheetGid: number,
   key: K,
 ): SheetConfig[K] {
-  return sheetConfigsIndexed.get(sheetGid)![key];
+  return sheetConfigsIdentified.get(sheetGid)![key];
 }

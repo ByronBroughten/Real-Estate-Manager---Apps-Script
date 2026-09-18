@@ -1,25 +1,25 @@
 import type { UniformRowName } from "../00_Source/CellValues/cellValues";
 import { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
-import { SheetCommonIndexed } from "./ClassBases/SheetCommonIndexed";
-import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
-import { SheetIndexed } from "./SheetIndexed";
-import { UniformRowIndexed } from "./UniformRowIndexed";
+import { SheetCommonIdentified } from "./ClassBases/SheetCommonIdentified";
+import { ColumnMetaIdentified } from "./ColumnMetaIdentified";
+import { SheetIdentified } from "./SheetIdentified";
+import { UniformRowIdentified } from "./UniformRowIdentified";
 
 export interface GatherDataPrerequisitesProps {
   skipFetchingProperties?: boolean;
   includeProgrammaticFacts?: boolean;
 }
 
-export class SheetMetaIndexed extends SheetCommonIndexed {
+export class SheetMetaIdentified extends SheetCommonIdentified {
   get raw(): SheetMetaRaw {
-    return new SheetMetaRaw(this.sheetIndexedProps);
+    return new SheetMetaRaw(this.sheetIdentifiedProps);
   }
-  get primary(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
+  get primary(): SheetIdentified {
+    return new SheetIdentified(this.sheetIdentifiedProps);
   }
-  column(columnId: string): ColumnMetaIndexed {
-    return new ColumnMetaIndexed({
-      ...this.sheetIndexedProps,
+  column(columnId: string): ColumnMetaIdentified {
+    return new ColumnMetaIdentified({
+      ...this.sheetIdentifiedProps,
       columnId,
     });
   }
@@ -29,13 +29,13 @@ export class SheetMetaIndexed extends SheetCommonIndexed {
   columnIdByIndex(colIndex: number): string {
     return this.raw.columnIdAt(colIndex);
   }
-  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIndexed<UN> {
-    return new UniformRowIndexed({
-      ...this.sheetIndexedProps,
+  uniformRow<UN extends UniformRowName>(rowName: UN): UniformRowIdentified<UN> {
+    return new UniformRowIdentified({
+      ...this.sheetIdentifiedProps,
       uniformRowName: rowName,
     });
   }
-  uniformRowByIndex(rowIndex: number): UniformRowIndexed {
+  uniformRowByIndex(rowIndex: number): UniformRowIdentified {
     return this.uniformRow(this.schema.uniformRowNameByIndex(rowIndex));
   }
   isTableColIndex(colIndex: number): boolean {

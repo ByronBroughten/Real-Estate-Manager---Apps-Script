@@ -17,7 +17,7 @@ import { SpreadsheetFlusherRaw } from "./SpreadsheetRaw/SpreadsheetFlusherRaw";
  * `fetchAllSheetProperties` via RawSource.fetchSheetProperties,
  * `batchUpdateGSheets` via RawSource.flush), delegated to SpreadsheetRaw/.
  * Sheet/row/column by index live on SheetRaw / RowRaw / ColumnRaw here;
- * by-name and columnId resolution are Indexed/Named. Schema classes that
+ * by-name and columnId resolution are Identified/Named. Schema classes that
  * resolve columns live in Schema/ because they sit below both consumer tiers.
  * docs/architecture/round-trips.md, schema-classes.md, class-chains.md
  */

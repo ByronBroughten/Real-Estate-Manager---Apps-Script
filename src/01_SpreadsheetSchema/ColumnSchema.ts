@@ -1,6 +1,6 @@
 import type { ValueSchemaKey } from "../00_Source/CellValues/valueSchema";
 import {
-  getColumnTraitByIndex,
+  getColumnTraitById,
   type ColumnConfig,
   type ColumnConfigAt,
   type ColumnFullName,
@@ -59,7 +59,7 @@ export class ColumnSchema<
   trait<K extends keyof ColumnConfig>(
     key: K,
   ): ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>] {
-    return getColumnTraitByIndex(
+    return getColumnTraitById(
       this.sheetGid,
       this.columnId,
       key,

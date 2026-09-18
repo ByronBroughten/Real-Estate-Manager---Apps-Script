@@ -19,24 +19,24 @@ import type {
   RowCellChange,
 } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
-import { CellIndexed } from "./CellIndexed";
-import { ColumnCommonIndexed } from "./ClassBases/ColumnCommonIndexed";
-import type { CellChange } from "./ClassTypes/StateIndexed";
-import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import { CellIdentified } from "./CellIdentified";
+import { ColumnCommonIdentified } from "./ClassBases/ColumnCommonIdentified";
+import type { CellChange } from "./ClassTypes/StateIdentified";
+import { ColumnMetaIdentified } from "./ColumnMetaIdentified";
+import { SheetIdentified } from "./SheetIdentified";
 
-export class ColumnIndexed<
+export class ColumnIdentified<
   VN extends ValueName = ValueName,
-> extends ColumnCommonIndexed<VN> {
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
+> extends ColumnCommonIdentified<VN> {
+  get sheet(): SheetIdentified {
+    return new SheetIdentified(this.sheetIdentifiedProps);
   }
-  get meta(): ColumnMetaIndexed<VN> {
-    return new ColumnMetaIndexed(this.columnIndexedProps);
+  get meta(): ColumnMetaIdentified<VN> {
+    return new ColumnMetaIdentified(this.columnIdentifiedProps);
   }
   get raw(): ColumnRaw<VnToCvn<VN>> {
     return new ColumnRaw({
-      ...this.sheetIndexedProps,
+      ...this.sheetIdentifiedProps,
       colIndex: this.colIndex,
     });
   }
@@ -46,7 +46,7 @@ export class ColumnIndexed<
   get cellIndexesFull(): number[] {
     return this.raw.cellIndexesFull;
   }
-  get cellsFull(): CellIndexed<VN>[] {
+  get cellsFull(): CellIdentified<VN>[] {
     return this.cellIndexesFull.map((rowIndex) => this.cell(rowIndex));
   }
   prepFetchSpecific(rowIndexes: number[]): this {
@@ -90,13 +90,13 @@ export class ColumnIndexed<
   valueNotEmpty(rowIndex: number): NotEmpty<Value<VN>> {
     return this.cell(rowIndex).valueNotEmpty();
   }
-  cell(rowIndex: number): CellIndexed<VN> {
-    return new CellIndexed({
-      ...this.columnIndexedProps,
+  cell(rowIndex: number): CellIdentified<VN> {
+    return new CellIdentified({
+      ...this.columnIdentifiedProps,
       rowIndex,
     });
   }
-  get cellsActive(): CellIndexed<VN>[] {
+  get cellsActive(): CellIdentified<VN>[] {
     return this.cellIndexesActive.map((rowIndex) => this.cell(rowIndex));
   }
   activeCellsToDefault() {

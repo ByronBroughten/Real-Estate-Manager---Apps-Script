@@ -6,7 +6,7 @@ import {
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import type { ColumnSchema } from "../01_SpreadsheetSchema/ColumnSchema";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
-import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
+import { SpreadsheetIdentified } from "../03_SpreadsheetIdentified/SpreadsheetIdentified";
 import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
@@ -44,8 +44,8 @@ export class Api extends SpreadsheetBaseNamed {
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
-  get ssi(): SpreadsheetIndexed {
-    return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
+  get ssi(): SpreadsheetIdentified {
+    return new SpreadsheetIdentified(this.spreadsheetIdentifiedProps);
   }
   static eventIndexToBase0(eventIndex: number): number {
     return eventIndex - 1;

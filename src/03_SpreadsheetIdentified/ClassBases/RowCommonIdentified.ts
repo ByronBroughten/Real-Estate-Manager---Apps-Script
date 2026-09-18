@@ -1,7 +1,7 @@
 import type { CellValue } from "../../00_Source/CellValues/cellValues";
-import { RowBaseIndexed } from "./RowBaseIndexed";
+import { RowBaseIdentified } from "./RowBaseIdentified";
 
-export abstract class RowCommonIndexed extends RowBaseIndexed {
+export abstract class RowCommonIdentified extends RowBaseIdentified {
   abstract get activeValueArr(): CellValue[];
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);

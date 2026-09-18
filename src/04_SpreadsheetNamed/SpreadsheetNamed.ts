@@ -2,9 +2,9 @@ import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes.js";
 import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
-import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
-import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
-import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
+import type { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
+import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIdentified/SheetMetaIdentified";
+import { SpreadsheetIdentified } from "../03_SpreadsheetIdentified/SpreadsheetIdentified.js";
 import { Obj } from "../utils/Obj.js";
 import { Val } from "../utils/Val.js";
 import { SpreadsheetBaseNamed } from "./ClassBases/SpreadsheetBaseNamed.js";
@@ -31,8 +31,8 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  get indexed(): SpreadsheetIndexed {
-    return new SpreadsheetIndexed(this.spreadsheetIndexedProps);
+  get identified(): SpreadsheetIdentified {
+    return new SpreadsheetIdentified(this.spreadsheetIdentifiedProps);
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
@@ -53,13 +53,13 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
     }, {} as NamedSheets<TN>);
   }
   get activeSheetNames(): SheetName[] {
-    return this.indexed.activeSheets.map((sheet) => sheet.sheetName);
+    return this.identified.activeSheets.map((sheet) => sheet.sheetName);
   }
   get activeSheets(): SheetNamed<SheetName>[] {
     return this.activeSheetNames.map((sheetName) => this.sheet(sheetName));
   }
   fetchAllPrepped(props: GatherDataPrerequisitesProps = {}): SpreadsheetNamed {
-    this.indexed.fetchAllPrepped(props);
+    this.identified.fetchAllPrepped(props);
     return this;
   }
   fetch<SN extends SheetName>(
@@ -142,11 +142,11 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
         `sheetColumnNames[${sheetName}]`,
       );
       const namedSheet = this.sheet(sheetName);
-      const indexedSheet = namedSheet.indexed;
+      const identifiedSheet = namedSheet.identified;
       columnNames.forEach((columnName) => {
         const columnId = namedSheet.schema.columnByName(columnName).columnId;
         specifiers.forEach((specifier) => {
-          prepFetchRowSpecifier(indexedSheet, specifier, columnId);
+          prepFetchRowSpecifier(identifiedSheet, specifier, columnId);
         });
       });
     });
@@ -211,7 +211,7 @@ function sheetNamesFromReqProps<T extends SheetName>(
 }
 
 function prepFetchRowSpecifier(
-  sheet: SheetIndexed,
+  sheet: SheetIdentified,
   rowSpecifier: RowSpecifierName,
   columnId: string,
 ): void {

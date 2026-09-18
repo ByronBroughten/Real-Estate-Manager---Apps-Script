@@ -1,20 +1,23 @@
 import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
 import { ColumnSchema } from "../../01_SpreadsheetSchema/ColumnSchema";
-import { SheetBaseIndexed, type SheetIndexedProps } from "./SheetBaseIndexed";
+import {
+  SheetBaseIdentified,
+  type SheetIdentifiedProps,
+} from "./SheetBaseIdentified";
 
-export interface ColumnIndexedProps<
+export interface ColumnIdentifiedProps<
   VN extends ValueName = ValueName,
-> extends SheetIndexedProps {
+> extends SheetIdentifiedProps {
   columnId: string;
   valueName?: VN;
 }
 
-export class ColumnBaseIndexed<
+export class ColumnBaseIdentified<
   VN extends ValueName = ValueName,
-> extends SheetBaseIndexed {
+> extends SheetBaseIdentified {
   readonly columnId: string;
   readonly valueName?: VN;
-  constructor({ columnId, valueName, ...props }: ColumnIndexedProps<VN>) {
+  constructor({ columnId, valueName, ...props }: ColumnIdentifiedProps<VN>) {
     super(props);
     this.columnId = columnId;
     this.valueName = valueName;
@@ -22,9 +25,9 @@ export class ColumnBaseIndexed<
   get schema(): ColumnSchema {
     return ColumnSchema.fromColumnId(this.sheetGid, this.columnId);
   }
-  get columnIndexedProps(): ColumnIndexedProps<VN> {
+  get columnIdentifiedProps(): ColumnIdentifiedProps<VN> {
     return {
-      ...this.sheetIndexedProps,
+      ...this.sheetIdentifiedProps,
       columnId: this.columnId,
       valueName: this.valueName,
     };

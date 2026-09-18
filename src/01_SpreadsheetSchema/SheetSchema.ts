@@ -1,5 +1,5 @@
 import {
-  getColumnTraitByIndex,
+  getColumnTraitById,
   getColumnTraitByName,
   getSheetColumnIds,
   getSheetColumnNames,
@@ -68,12 +68,12 @@ export class SheetSchema<
   }
   get nonFormulaColumnIds(): string[] {
     return [...this.columnIds].filter((columnId) => {
-      return !getColumnTraitByIndex(this.sheetGid, columnId, "isFormula");
+      return !getColumnTraitById(this.sheetGid, columnId, "isFormula");
     });
   }
   // Goes by gid, the only O(1) columnId -> columnName index; by name would scan the sheet.
   colNameByColumnId(columnId: string): ColumnName<SN> {
-    return getColumnTraitByIndex(
+    return getColumnTraitById(
       this.sheetGid,
       columnId,
       "columnName",

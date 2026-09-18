@@ -169,7 +169,7 @@ describe("Named value accessors", () => {
     expect(cell.valueOrEmpty()).toBe("r:occ:row4");
   });
 
-  // The same read one tier up, which is what proves Indexed and Named agree.
+  // The same read one tier up, which is what proves Identified and Named agree.
   it("reads an untouched checkbox as unchecked, with no blank in the type", () => {
     const sheet = fetchedOccupancySheet();
     const column = sheet.column("updateTermsSelect");

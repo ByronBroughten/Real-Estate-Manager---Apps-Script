@@ -1,7 +1,7 @@
 import type { RgbColor } from "../00_Source/RawSource/RgbColor";
 import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/StateIndexed";
+import type { CellChange } from "../03_SpreadsheetIdentified/ClassTypes/StateIdentified";
 import {
   SheetBaseNamed,
   type SheetNamedProps,
@@ -197,7 +197,7 @@ export class EndpointRun<
   ): void {
     if (!columnName) return;
     // Re-deriving the value type here would compose two mapped filters, at ~43k instantiations.
-    const column = this.sheet.columnIndexed(columnName);
+    const column = this.sheet.columnIdentified(columnName);
     if (this.endpoint.selector) {
       column.updateActiveCells(change);
     } else {
@@ -230,7 +230,7 @@ export class EndpointRun<
     change: CellChange<"string">,
   ): void {
     if (!columnName) return;
-    this.sheet.columnIndexed(columnName).cell(rowIndex).update(change);
+    this.sheet.columnIdentified(columnName).cell(rowIndex).update(change);
   }
   // Queued changes are shared by reference, so a half-finished run must be dropped before status is written.
   private _onRunError(error: unknown): void {

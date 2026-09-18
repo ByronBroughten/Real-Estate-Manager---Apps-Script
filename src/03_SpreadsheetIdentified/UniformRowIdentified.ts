@@ -11,21 +11,21 @@ import type {
 import { uniformRows } from "../01_SpreadsheetSchema/uniformRows";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
-import type { RowIndexedProps } from "./ClassBases/RowBaseIndexed";
-import { RowCommonIndexed } from "./ClassBases/RowCommonIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import type { RowIdentifiedProps } from "./ClassBases/RowBaseIdentified";
+import { RowCommonIdentified } from "./ClassBases/RowCommonIdentified";
+import { SheetIdentified } from "./SheetIdentified";
 
-export interface UniformRowIndexedProps<
+export interface UniformRowIdentifiedProps<
   UN extends UniformRowName,
-> extends StrictOmit<RowIndexedProps, "rowIndex"> {
+> extends StrictOmit<RowIdentifiedProps, "rowIndex"> {
   uniformRowName: UN;
 }
 
-export class UniformRowIndexed<
+export class UniformRowIdentified<
   UN extends UniformRowName = UniformRowName,
-> extends RowCommonIndexed {
+> extends RowCommonIdentified {
   readonly uniformRowName: UN;
-  constructor({ uniformRowName, ...rest }: UniformRowIndexedProps<UN>) {
+  constructor({ uniformRowName, ...rest }: UniformRowIdentifiedProps<UN>) {
     super({
       ...rest,
       rowIndex: uniformRows.index(uniformRowName),
@@ -33,12 +33,12 @@ export class UniformRowIndexed<
     this.uniformRowName = uniformRowName;
     this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
+  get sheet(): SheetIdentified {
+    return new SheetIdentified(this.sheetIdentifiedProps);
   }
   get raw(): UniformRowRaw<UN> {
     return new UniformRowRaw({
-      ...this.rowIndexedProps,
+      ...this.rowIdentifiedProps,
       uniformRowName: this.uniformRowName,
     });
   }

@@ -227,7 +227,7 @@ function runAddPropertyExpense(): void {
     entryColumnName: "runStatus",
     endpoint: addPropertyExpense,
   });
-  run.sheet.indexed.meta.ensureColumnIdsAreFetched();
+  run.sheet.identified.meta.ensureColumnIdsAreFetched();
   run.run(true);
 }
 

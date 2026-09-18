@@ -23,7 +23,7 @@ import type {
   VnToCvn,
 } from "../01_SpreadsheetSchema/valueSchemas";
 import type { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
-import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
+import type { CellIdentified } from "../03_SpreadsheetIdentified/CellIdentified";
 import { CellBaseNamed } from "./ClassBases/CellBaseNamed";
 import { ColumnNamed } from "./ColumnNamed";
 
@@ -34,17 +34,17 @@ export class CellNamed<
   get column(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
   }
-  get indexed(): CellIndexed<ColumnValueName<SN, CN>> {
-    return this.column.indexed.cell(this.rowIndex);
+  get identified(): CellIdentified<ColumnValueName<SN, CN>> {
+    return this.column.identified.cell(this.rowIndex);
   }
   get raw(): CellRaw<VnToCvn<ColumnValueName<SN, CN>>> {
-    return this.indexed.raw;
+    return this.identified.raw;
   }
   get isActive(): boolean {
-    return this.indexed.isActive;
+    return this.identified.isActive;
   }
   valueOrEmpty(): ColumnValue<SN, CN> {
-    return this.indexed.valueOrEmpty();
+    return this.identified.valueOrEmpty();
   }
   // Checked here, not delegated, so the message names the column the caller wrote.
   valueNotEmpty(): NotEmpty<ColumnValue<SN, CN>> {
@@ -65,21 +65,21 @@ export class CellNamed<
     }
   }
   updateValue(value: ColumnValue<SN, CN>): this {
-    this.indexed.updateValue(value);
+    this.identified.updateValue(value);
     return this;
   }
   updateFormula(
     formula: ColumnIsFormula<SN, CN> extends true ? string : never,
   ): this {
-    this.indexed.updateFormula(formula);
+    this.identified.updateFormula(formula);
     return this;
   }
   updateBackgroundColor(backgroundColor: RgbColor): this {
-    this.indexed.updateBackgroundColor(backgroundColor);
+    this.identified.updateBackgroundColor(backgroundColor);
     return this;
   }
   updateToDefault(): this {
-    this.indexed.updateToDefault();
+    this.identified.updateToDefault();
     return this;
   }
   setValueType(valueName: ValueName, value: Value): this {
@@ -93,35 +93,35 @@ export class CellNamed<
     return this;
   }
   addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
-    this.indexed.addConditionalFormatRule(declaration);
+    this.identified.addConditionalFormatRule(declaration);
     return this;
   }
   removeConditionalFormatRules(): this {
-    this.indexed.removeConditionalFormatRules();
+    this.identified.removeConditionalFormatRules();
     return this;
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
-    this.indexed.removeConditionalFormatRule(rule);
+    this.identified.removeConditionalFormatRule(rule);
     return this;
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
-    this.indexed.addEditWarning(declaration);
+    this.identified.addEditWarning(declaration);
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {
-    this.indexed.addEditLock(declaration);
+    this.identified.addEditLock(declaration);
     return this;
   }
   removeEditProtections(): this {
-    this.indexed.removeEditProtections();
+    this.identified.removeEditProtections();
     return this;
   }
   removeEditProtection(protection: EditProtection): this {
-    this.indexed.removeEditProtection(protection);
+    this.identified.removeEditProtection(protection);
     return this;
   }
   anchoredA1(columnName: ColumnName<SN> = this.columnName): string {
-    const colIndex = this.column.sheet.column(columnName).indexed.colIndex;
-    return this.indexed.anchoredA1(colIndex);
+    const colIndex = this.column.sheet.column(columnName).identified.colIndex;
+    return this.identified.anchoredA1(colIndex);
   }
 }

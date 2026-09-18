@@ -17,8 +17,8 @@ import type {
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
-import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/StateIndexed";
-import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
+import type { CellChange } from "../03_SpreadsheetIdentified/ClassTypes/StateIdentified";
+import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { CellNamed } from "./CellNamed";
 import { ColumnCommonNamed } from "./ClassBases/ColumnCommonNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
@@ -34,25 +34,25 @@ export class ColumnNamed<
   get meta(): ColumnMetaNamed<SN, CN> {
     return new ColumnMetaNamed(this.columnNamedProps);
   }
-  get indexed(): ColumnIndexed<ColumnValueName<SN, CN>> {
-    return new ColumnIndexed<ColumnValueName<SN, CN>>({
-      ...this.sheet.indexed.sheetIndexedProps,
+  get identified(): ColumnIdentified<ColumnValueName<SN, CN>> {
+    return new ColumnIdentified<ColumnValueName<SN, CN>>({
+      ...this.sheet.identified.sheetIdentifiedProps,
       columnId: this.columnId,
     });
   }
   get raw() {
-    return this.indexed.raw;
+    return this.identified.raw;
   }
   get rowIndexesActive(): number[] {
-    return this.indexed.cellIndexesActive;
+    return this.identified.cellIndexesActive;
   }
   get valueArrOrEmpty(): ColumnValue<SN, CN>[] {
-    return this.indexed.valueArrOrEmpty;
+    return this.identified.valueArrOrEmpty;
   }
   get valueArrFilterEmpty(): NotEmpty<ColumnValue<SN, CN>>[] {
-    return this.indexed.valueArrFilterEmpty;
+    return this.identified.valueArrFilterEmpty;
   }
-  // Not delegated to Indexed, so a blank throws with the Named message.
+  // Not delegated to Identified, so a blank throws with the Named message.
   get valueArrNotEmpty(): NotEmpty<ColumnValue<SN, CN>>[] {
     return this.rowIndexesActive.map((rowIndex) =>
       this.valueNotEmpty(rowIndex),
@@ -80,101 +80,101 @@ export class ColumnNamed<
     });
   }
   updateAllCells(change: CellChange<ColumnValueName<SN, CN>>): this {
-    this.indexed.updateAllCells(change);
+    this.identified.updateAllCells(change);
     return this;
   }
   updateActiveCells(change: CellChange<ColumnValueName<SN, CN>>): this {
-    this.indexed.updateActiveCells(change);
+    this.identified.updateActiveCells(change);
     return this;
   }
   updateAllFormulas(
     formula: ColumnIsFormula<SN, CN> extends true ? string : never,
   ): this {
-    this.indexed.updateAllFormulas(formula);
+    this.identified.updateAllFormulas(formula);
     return this;
   }
   updateActiveFormulas(
     formula: ColumnIsFormula<SN, CN> extends true ? string : never,
   ): this {
-    this.indexed.updateActiveFormulas(formula);
+    this.identified.updateActiveFormulas(formula);
     return this;
   }
   // Plain strings, unlike every other write here: Google matches the cell's text.
   findReplace(terms: FindReplaceTerms): this {
-    this.indexed.findReplace(terms);
+    this.identified.findReplace(terms);
     return this;
   }
   addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
-    this.indexed.addConditionalFormatRule(declaration);
+    this.identified.addConditionalFormatRule(declaration);
     return this;
   }
   removeConditionalFormatRules(): this {
-    this.indexed.removeConditionalFormatRules();
+    this.identified.removeConditionalFormatRules();
     return this;
   }
   removeConditionalFormatRule(rule: ConditionalFormatRule): this {
-    this.indexed.removeConditionalFormatRule(rule);
+    this.identified.removeConditionalFormatRule(rule);
     return this;
   }
   gridRangeFromRow(startRowIndex: number) {
-    return this.indexed.gridRangeFromRow(startRowIndex);
+    return this.identified.gridRangeFromRow(startRowIndex);
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {
-    this.indexed.addEditWarning(declaration);
+    this.identified.addEditWarning(declaration);
     return this;
   }
   addEditWarningFromRow(
     startRowIndex: number,
     declaration: EditWarningDeclaration = {},
   ): this {
-    this.indexed.addEditWarningFromRow(startRowIndex, declaration);
+    this.identified.addEditWarningFromRow(startRowIndex, declaration);
     return this;
   }
   addEditWarningWholeColumn(declaration: EditWarningDeclaration = {}): this {
-    this.indexed.addEditWarningWholeColumn(declaration);
+    this.identified.addEditWarningWholeColumn(declaration);
     return this;
   }
   addEditLock(declaration: EditLockDeclaration = {}): this {
-    this.indexed.addEditLock(declaration);
+    this.identified.addEditLock(declaration);
     return this;
   }
   addEditLockWholeColumn(declaration: EditLockDeclaration = {}): this {
-    this.indexed.addEditLockWholeColumn(declaration);
+    this.identified.addEditLockWholeColumn(declaration);
     return this;
   }
   removeEditProtections(): this {
-    this.indexed.removeEditProtections();
+    this.identified.removeEditProtections();
     return this;
   }
   removeEditProtectionsWholeColumn(): this {
-    this.indexed.removeEditProtectionsWholeColumn();
+    this.identified.removeEditProtectionsWholeColumn();
     return this;
   }
   removeEditProtection(protection: EditProtection): this {
-    this.indexed.removeEditProtection(protection);
+    this.identified.removeEditProtection(protection);
     return this;
   }
   anchoredA1(columnName: ColumnName<SN> = this.columnName): string {
-    return this.sheet.column(columnName).indexed.anchoredA1();
+    return this.sheet.column(columnName).identified.anchoredA1();
   }
   prepFetchSpecific(rowIndexes: number[]): this {
-    this.indexed.prepFetchSpecific(rowIndexes);
+    this.identified.prepFetchSpecific(rowIndexes);
     return this;
   }
   prepFetchActive(): this {
-    this.indexed.prepFetchActive();
+    this.identified.prepFetchActive();
     return this;
   }
   prepFetchFull(): this {
-    this.indexed.prepFetchFull();
+    this.identified.prepFetchFull();
     return this;
   }
   activeCellsToDefault(): this {
-    this.indexed.activeCellsToDefault();
+    this.identified.activeCellsToDefault();
     return this;
   }
   emptyActiveCellsToDefualt(): this {
-    this.indexed.emptyActiveCellsToDefualt();
+    this.identified.emptyActiveCellsToDefualt();
     return this;
   }
 }

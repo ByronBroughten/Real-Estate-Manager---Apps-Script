@@ -1,21 +1,21 @@
 import type { CellValue, NotEmpty } from "../00_Source/CellValues/cellValues";
 import { type Value } from "../01_SpreadsheetSchema/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
-import { CellIndexed } from "./CellIndexed";
-import type { RowIndexedProps } from "./ClassBases/RowBaseIndexed";
-import { RowCommonIndexed } from "./ClassBases/RowCommonIndexed";
-import { SheetIndexed } from "./SheetIndexed";
+import { CellIdentified } from "./CellIdentified";
+import type { RowIdentifiedProps } from "./ClassBases/RowBaseIdentified";
+import { RowCommonIdentified } from "./ClassBases/RowCommonIdentified";
+import { SheetIdentified } from "./SheetIdentified";
 
-export class RowIndexed extends RowCommonIndexed {
-  constructor(props: RowIndexedProps) {
+export class RowIdentified extends RowCommonIdentified {
+  constructor(props: RowIdentifiedProps) {
     super(props);
     void this.raw;
   }
-  get sheet(): SheetIndexed {
-    return new SheetIndexed(this.sheetIndexedProps);
+  get sheet(): SheetIdentified {
+    return new SheetIdentified(this.sheetIdentifiedProps);
   }
   get raw(): RowRaw {
-    return new RowRaw(this.rowIndexedProps);
+    return new RowRaw(this.rowIdentifiedProps);
   }
   get activeValueArr(): CellValue[] {
     return this.raw.activeValueArr;
@@ -31,12 +31,12 @@ export class RowIndexed extends RowCommonIndexed {
     return this;
   }
   cell(columnId: string) {
-    return new CellIndexed({
-      ...this.rowIndexedProps,
+    return new CellIdentified({
+      ...this.rowIdentifiedProps,
       columnId,
     });
   }
-  updateToDefault(...columnIds: string[]): RowIndexed {
+  updateToDefault(...columnIds: string[]): RowIdentified {
     columnIds.forEach((columnId) => this.cell(columnId).updateToDefault());
     return this;
   }
@@ -79,7 +79,7 @@ export class RowIndexed extends RowCommonIndexed {
       this.raw.delete();
     }
   }
-  private get _nonFormulaCellsActive(): CellIndexed[] {
+  private get _nonFormulaCellsActive(): CellIdentified[] {
     return this.sheet.nonFormulaColumnIds
       .map((columnId) => this.cell(columnId))
       .filter((cell) => cell.isActive);

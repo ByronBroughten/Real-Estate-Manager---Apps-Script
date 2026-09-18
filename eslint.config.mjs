@@ -41,7 +41,7 @@ export default defineConfig(
               regex:
                 "^(\\.\\./)+01_SpreadsheetSchema/(SheetSchema|ColumnSchema|columnConfigsTypes|valueConfigsTypes|generated/(columnConfigs|valueConfigs))(\\.js)?$",
               message:
-                "Raw is positional: it addresses by GID and index and never resolves a column. Column and value lookups belong in the Indexed tier or above.",
+                "Raw is positional: it addresses by GID and index and never resolves a column. Column and value lookups belong in the Identified tier or above.",
             },
           ],
         },

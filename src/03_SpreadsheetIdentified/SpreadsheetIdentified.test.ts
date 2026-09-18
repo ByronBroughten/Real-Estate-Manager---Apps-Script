@@ -15,51 +15,51 @@ import {
   stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import { SpreadsheetBaseIndexed } from "./ClassBases/SpreadsheetBaseIndexed";
-import type { FetchTargetIndexed } from "./ClassTypes/StateIndexed";
-import { ColumnIndexed } from "./ColumnIndexed";
-import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
-import { RowIndexed } from "./RowIndexed";
-import { SheetIndexed } from "./SheetIndexed";
-import { SheetMetaIndexed } from "./SheetMetaIndexed";
-import { SpreadsheetIndexed } from "./SpreadsheetIndexed";
+import { SpreadsheetBaseIdentified } from "./ClassBases/SpreadsheetBaseIdentified";
+import type { FetchTargetIdentified } from "./ClassTypes/StateIdentified";
+import { ColumnIdentified } from "./ColumnIdentified";
+import { ColumnMetaIdentified } from "./ColumnMetaIdentified";
+import { RowIdentified } from "./RowIdentified";
+import { SheetIdentified } from "./SheetIdentified";
+import { SheetMetaIdentified } from "./SheetMetaIdentified";
+import { SpreadsheetIdentified } from "./SpreadsheetIdentified";
 
 const occupancyGid = sheetConfigs.occupancy.sheetGid;
 const idColumnId = columnConfigs.occupancy.id.columnId;
 
 // A mis-wired accessor still type-checks; the instance checks catch it.
-describe("SpreadsheetIndexed navigation", () => {
+describe("SpreadsheetIdentified navigation", () => {
   it("gives each accessor the class its return type names", () => {
     stubSheetsService();
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     const sheet = ssi.sheet(occupancyGid);
     const sheetMeta = ssi.sheetMeta(occupancyGid);
     const column = sheet.column(idColumnId);
     const columnMeta = sheetMeta.column(idColumnId);
 
-    assertType<IsExactly<typeof sheet, SheetIndexed>>(true);
-    assertType<IsExactly<typeof sheetMeta, SheetMetaIndexed>>(true);
-    assertType<IsExactly<typeof sheet.meta, SheetMetaIndexed>>(true);
-    assertType<IsExactly<typeof sheetMeta.primary, SheetIndexed>>(true);
-    assertType<IsExactly<typeof column, ColumnIndexed>>(true);
-    assertType<IsExactly<typeof columnMeta, ColumnMetaIndexed>>(true);
-    assertType<IsExactly<typeof column.sheet, SheetIndexed>>(true);
-    assertType<IsExactly<typeof columnMeta.sheet, SheetMetaIndexed>>(true);
-    assertType<IsExactly<typeof column.meta, ColumnMetaIndexed>>(true);
-    assertType<IsExactly<typeof columnMeta.primary, ColumnIndexed>>(true);
-    assertType<IsExactly<ReturnType<typeof sheet.row>, RowIndexed>>(true);
+    assertType<IsExactly<typeof sheet, SheetIdentified>>(true);
+    assertType<IsExactly<typeof sheetMeta, SheetMetaIdentified>>(true);
+    assertType<IsExactly<typeof sheet.meta, SheetMetaIdentified>>(true);
+    assertType<IsExactly<typeof sheetMeta.primary, SheetIdentified>>(true);
+    assertType<IsExactly<typeof column, ColumnIdentified>>(true);
+    assertType<IsExactly<typeof columnMeta, ColumnMetaIdentified>>(true);
+    assertType<IsExactly<typeof column.sheet, SheetIdentified>>(true);
+    assertType<IsExactly<typeof columnMeta.sheet, SheetMetaIdentified>>(true);
+    assertType<IsExactly<typeof column.meta, ColumnMetaIdentified>>(true);
+    assertType<IsExactly<typeof columnMeta.primary, ColumnIdentified>>(true);
+    assertType<IsExactly<ReturnType<typeof sheet.row>, RowIdentified>>(true);
 
-    expect(sheet.meta).toBeInstanceOf(SheetMetaIndexed);
-    expect(sheetMeta.primary).toBeInstanceOf(SheetIndexed);
-    expect(column).toBeInstanceOf(ColumnIndexed);
-    expect(columnMeta).toBeInstanceOf(ColumnMetaIndexed);
-    expect(column.sheet).toBeInstanceOf(SheetIndexed);
-    expect(columnMeta.sheet).toBeInstanceOf(SheetMetaIndexed);
-    expect(column.meta).toBeInstanceOf(ColumnMetaIndexed);
-    expect(columnMeta.primary).toBeInstanceOf(ColumnIndexed);
-    expect(sheet.row(sheet.schema.topDataRowIdx)).toBeInstanceOf(RowIndexed);
+    expect(sheet.meta).toBeInstanceOf(SheetMetaIdentified);
+    expect(sheetMeta.primary).toBeInstanceOf(SheetIdentified);
+    expect(column).toBeInstanceOf(ColumnIdentified);
+    expect(columnMeta).toBeInstanceOf(ColumnMetaIdentified);
+    expect(column.sheet).toBeInstanceOf(SheetIdentified);
+    expect(columnMeta.sheet).toBeInstanceOf(SheetMetaIdentified);
+    expect(column.meta).toBeInstanceOf(ColumnMetaIdentified);
+    expect(columnMeta.primary).toBeInstanceOf(ColumnIdentified);
+    expect(sheet.row(sheet.schema.topDataRowIdx)).toBeInstanceOf(RowIdentified);
   });
 });
 
@@ -86,9 +86,9 @@ function stubOccupancyWithBlankRow() {
   });
 }
 
-function fetchedOccupancySheet(): SheetIndexed {
-  const ssi = new SpreadsheetIndexed(
-    SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+function fetchedOccupancySheet(): SheetIdentified {
+  const ssi = new SpreadsheetIdentified(
+    SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
   );
   const sheet = ssi.sheet(occupancyGid);
   sheet.column(idColumnId).prepFetchFull();
@@ -97,13 +97,13 @@ function fetchedOccupancySheet(): SheetIndexed {
   return sheet;
 }
 
-describe("Indexed value accessors", () => {
+describe("Identified value accessors", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
     stubOccupancyWithBlankRow();
   });
 
-  it("throws from CellIndexed.valueNotEmpty on a blank cell, naming the column id and the row", () => {
+  it("throws from CellIdentified.valueNotEmpty on a blank cell, naming the column id and the row", () => {
     const cell = fetchedOccupancySheet().column(idColumnId).cell(blankRowIndex);
 
     expect(() => cell.valueNotEmpty()).toThrowError(
@@ -111,7 +111,7 @@ describe("Indexed value accessors", () => {
     );
   });
 
-  it("returns the empty string from CellIndexed.valueOrEmpty on that same cell", () => {
+  it("returns the empty string from CellIdentified.valueOrEmpty on that same cell", () => {
     const cell = fetchedOccupancySheet().column(idColumnId).cell(blankRowIndex);
 
     expect(cell.valueOrEmpty()).toBe("");
@@ -134,8 +134,8 @@ describe("Indexed value accessors", () => {
         },
       ],
     });
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     const sheet = ssi.sheet(occupancyGid);
     sheet.column(idColumnId).prepFetchSpecific([blankRowIndex]);
@@ -157,8 +157,8 @@ describe("Indexed value accessors", () => {
 
   it("reads an untouched checkbox as unchecked through every accessor", () => {
     const sheet = fetchedOccupancySheet();
-    const column = new ColumnIndexed<"checkbox">({
-      ...sheet.sheetIndexedProps,
+    const column = new ColumnIdentified<"checkbox">({
+      ...sheet.sheetIdentifiedProps,
       columnId: selectColumnId,
     });
 
@@ -175,14 +175,14 @@ describe("Indexed value accessors", () => {
     );
   });
 
-  it("throws from ColumnIndexed.valueNotEmpty and returns empty from valueOrEmpty", () => {
+  it("throws from ColumnIdentified.valueNotEmpty and returns empty from valueOrEmpty", () => {
     const column = fetchedOccupancySheet().column(idColumnId);
 
     expect(() => column.valueNotEmpty(blankRowIndex)).toThrowError(/is empty/);
     expect(column.valueOrEmpty(blankRowIndex)).toBe("");
   });
 
-  it("throws from RowIndexed.valueNotEmpty and returns empty from RowIndexed.valueOrEmpty", () => {
+  it("throws from RowIdentified.valueNotEmpty and returns empty from RowIdentified.valueOrEmpty", () => {
     const row = fetchedOccupancySheet().row(blankRowIndex);
 
     expect(() => row.valueNotEmpty(idColumnId)).toThrowError(/is empty/);
@@ -216,9 +216,9 @@ function stubSheetConfigWithUnreadTopRow() {
   return stubSheetConfigSheet({ 4: blankSheetConfigRow }, [4]);
 }
 
-function fetchedSheetConfig(): SheetIndexed {
-  const ssi = new SpreadsheetIndexed(
-    SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+function fetchedSheetConfig(): SheetIdentified {
+  const ssi = new SpreadsheetIdentified(
+    SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
   );
   const sheet = ssi.sheet(sheetConfigGid);
   sheet.topRow.prepFetchFull();
@@ -226,15 +226,15 @@ function fetchedSheetConfig(): SheetIndexed {
   return sheet;
 }
 
-function unfetchedSheetConfig(): SheetIndexed {
-  const ssi = new SpreadsheetIndexed(
-    SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+function unfetchedSheetConfig(): SheetIdentified {
+  const ssi = new SpreadsheetIdentified(
+    SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
   );
   ssi.sheetMeta(sheetConfigGid).ensureColumnIdsAreFetched();
   return ssi.sheet(sheetConfigGid);
 }
 
-describe("RowIndexed.isBlank / isReusable", () => {
+describe("RowIdentified.isBlank / isReusable", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
@@ -268,7 +268,7 @@ describe("RowIndexed.isBlank / isReusable", () => {
   });
 });
 
-describe("SheetIndexed.hasNoData", () => {
+describe("SheetIdentified.hasNoData", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
@@ -286,7 +286,7 @@ describe("SheetIndexed.hasNoData", () => {
   });
 });
 
-describe("RowIndexed.clearValues", () => {
+describe("RowIdentified.clearValues", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
@@ -296,8 +296,8 @@ describe("RowIndexed.clearValues", () => {
       4: filledSheetConfigRow,
     });
 
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     const sheet = ssi.sheet(sheetConfigGid);
     sheet.topRow.prepFetchFull();
@@ -341,7 +341,7 @@ describe("RowIndexed.clearValues", () => {
   });
 });
 
-describe("SheetIndexed.appendRowDefault", () => {
+describe("SheetIdentified.appendRowDefault", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
@@ -373,8 +373,8 @@ describe("SheetIndexed.appendRowDefault", () => {
       ],
     });
 
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     const sheet = ssi.sheet(sheetConfigGid);
     sheet.topRow.prepFetchFull();
@@ -394,7 +394,7 @@ const testGid = sheetConfigs.test.sheetGid;
 const testNumberColumnId = columnConfigs.test.num.columnId;
 const testFormulaColumnId = columnConfigs.test.formulaTest.columnId;
 
-describe("Indexed formula writes", () => {
+describe("Identified formula writes", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
     stubSheetsService({
@@ -414,8 +414,8 @@ describe("Indexed formula writes", () => {
   });
 
   it("refuses a formula write on a non-formula column", () => {
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     ssi.raw.fetchAllSheetProperties();
 
@@ -425,8 +425,8 @@ describe("Indexed formula writes", () => {
   });
 
   it("queues a formula write on Formula test", () => {
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     ssi.raw.fetchAllSheetProperties();
 
@@ -439,7 +439,7 @@ describe("Indexed formula writes", () => {
   });
 });
 
-describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
+describe("SpreadsheetIdentified.fetchAllPrepped / FetchTargetIdentified", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });
@@ -475,10 +475,13 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
     return recordedGridRanges([lastCall]);
   }
 
-  it("narrows FetchTargetIndexed by kind", () => {
-    type FullRow = Extract<FetchTargetIndexed, { kind: "fullRow" }>;
-    type FullColumn = Extract<FetchTargetIndexed, { kind: "fullDataColumn" }>;
-    type SingleCell = Extract<FetchTargetIndexed, { kind: "singleCell" }>;
+  it("narrows FetchTargetIdentified by kind", () => {
+    type FullRow = Extract<FetchTargetIdentified, { kind: "fullRow" }>;
+    type FullColumn = Extract<
+      FetchTargetIdentified,
+      { kind: "fullDataColumn" }
+    >;
+    type SingleCell = Extract<FetchTargetIdentified, { kind: "singleCell" }>;
 
     assertType<IsExactly<FullRow, { kind: "fullRow"; row: number }>>(true);
     assertType<
@@ -491,8 +494,8 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
 
   it("resolves a full-row target to that row's table columns", () => {
     const { getByDataFilterCalls } = occupancyWithTwoColumns();
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     ssi.sheet(occupancyGid).topRow.prepFetchFull();
     ssi.fetchAllPrepped();
@@ -511,8 +514,8 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
 
   it("resolves a full-data-column target to that column's data rows", () => {
     const { getByDataFilterCalls } = occupancyWithTwoColumns();
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     ssi.sheet(occupancyGid).column(idColumnId).prepFetchFull();
     ssi.fetchAllPrepped();
@@ -531,8 +534,8 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
 
   it("resolves a single-cell target to that cell's grid range", () => {
     const { getByDataFilterCalls } = occupancyWithTwoColumns();
-    const ssi = new SpreadsheetIndexed(
-      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
     );
     ssi.sheet(occupancyGid).column(idColumnId).cell(filledRowIndex).prepFetch();
     ssi.fetchAllPrepped();
