@@ -7,6 +7,7 @@ export default defineConfig(
   tseslint.configs.recommended,
   {
     rules: {
+      "max-classes-per-file": ["error", 1],
       // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
       "@typescript-eslint/no-unused-vars": [
         "error",

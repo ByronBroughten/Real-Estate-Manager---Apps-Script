@@ -1,5 +1,5 @@
 import type { ValueName } from "../../01_generatedConfigs/valueSchemas";
-import { ColumnSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
+import { ColumnSchema } from "../../02_SpreadsheetRaw/Schema/ColumnSchema";
 import { SheetBaseIndexed, type SheetIndexedProps } from "./SheetBaseIndexed";
 
 export interface ColumnIndexedProps<

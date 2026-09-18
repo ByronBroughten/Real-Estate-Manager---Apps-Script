@@ -1,4 +1,4 @@
-import { SheetSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
+import { SheetSchema } from "../../02_SpreadsheetRaw/Schema/SheetSchema";
 import { SheetBaseIndexed, type SheetIndexedProps } from "./SheetBaseIndexed";
 
 export interface RowIndexedProps extends SheetIndexedProps {

@@ -7,7 +7,7 @@ import {
   type SheetsStateRaw,
   type StateRaw,
 } from "../ClassTypes/StateRaw";
-import { SpreadsheetSchema } from "../SpreadsheetSchema";
+import { SchemaBase } from "../Schema/SchemaBase";
 
 export interface SpreadsheetRawProps {
   spreadsheetStateRaw: StateRaw;
@@ -21,8 +21,8 @@ export class SpreadsheetBaseRaw {
   protected get sheetsStateRaw(): SheetsStateRaw {
     return this.spreadsheetStateRaw.sheets;
   }
-  get schema(): SpreadsheetSchema {
-    return new SpreadsheetSchema();
+  get schema(): SchemaBase {
+    return new SchemaBase();
   }
   get spreadsheetId(): string {
     const cached = this.spreadsheetStateRaw.spreadsheetId;

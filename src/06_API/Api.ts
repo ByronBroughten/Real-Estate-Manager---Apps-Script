@@ -4,7 +4,8 @@ import {
   installRawSource,
 } from "../00_base/RawSource";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import type { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
+import type { ColumnSchema } from "../02_SpreadsheetRaw/Schema/ColumnSchema";
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/Schema/SpreadsheetSchema";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
   SpreadsheetBaseNamed,
@@ -39,6 +40,9 @@ export class Api extends SpreadsheetBaseNamed {
       endpoints,
       ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     });
+  }
+  get schema(): SpreadsheetSchema {
+    return new SpreadsheetSchema();
   }
   get ssi(): SpreadsheetIndexed {
     return new SpreadsheetIndexed(this.spreadsheetIndexedProps);

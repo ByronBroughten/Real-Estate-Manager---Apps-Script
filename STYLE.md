@@ -6,7 +6,7 @@ One line per rule. The reasoning and worked examples are one file away:
 
 | When | File |
 | --- | --- |
-| Writing a coordinator or an Operator, placing a member | [`docs/style/class-shape.md`](./docs/style/class-shape.md) |
+| Writing a coordinator or an Operator, placing a member or a class | [`docs/style/class-shape.md`](./docs/style/class-shape.md) |
 | Naming a value, method, flag, getter or param bag | [`docs/style/naming.md`](./docs/style/naming.md) |
 | A cast, a type-level assertion, a registry literal | [`docs/style/type-modeling.md`](./docs/style/type-modeling.md) |
 | A guard, a blank-tolerant read, a `catch`, a skip-and-log | [`docs/style/error-handling.md`](./docs/style/error-handling.md) |
@@ -23,6 +23,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **Member order:** `static init()`, then collaborator getters, then public behavior methods, then `_`-prefixed private helpers — a single-caller helper sits right after its caller.
 - **Delete dead scaffolding in a file you touch** — a stub nothing calls, a placeholder, a variable instantiated and discarded. **Ask before deleting commented-out code.** Zero callers is a list of candidates, not a verdict.
 - **A "why" comment carries over verbatim across a restructure.**
+- **One class per file, custom `Error` subclasses included.** Lint enforces it.
 
 ## Naming
 

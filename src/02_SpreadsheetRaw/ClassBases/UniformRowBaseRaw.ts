@@ -4,7 +4,7 @@ import type {
   UniformRowValueName,
 } from "../../00_base/base";
 import type { StrictOmit } from "../../utils/Obj";
-import { getUniformRowIndex } from "../SpreadsheetSchema";
+import { getUniformRowIndex } from "../Schema/SchemaBase";
 import type { RowRawProps } from "./RowBaseRaw";
 import { RowCommonRaw } from "./RowCommonRaw";
 

@@ -1,5 +1,5 @@
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
-import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
+import { SheetSchema } from "../02_SpreadsheetRaw/Schema/SheetSchema";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { ColumnBaseNamed } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";

@@ -1,5 +1,6 @@
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes.js";
 import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/Schema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
@@ -23,6 +24,9 @@ import {
 export class SpreadsheetNamed extends SpreadsheetBaseNamed {
   static init(): SpreadsheetNamed {
     return new SpreadsheetNamed(SpreadsheetNamed.initSpreadsheetNamedProps());
+  }
+  get schema(): SpreadsheetSchema {
+    return new SpreadsheetSchema();
   }
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);

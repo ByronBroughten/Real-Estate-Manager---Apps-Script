@@ -94,6 +94,12 @@ Editing a file is the moment to remove, not preserve, a stub nothing calls, a pl
 
 **Zero callers is not proof of dead.** Some members are parked for planned work and carry no marker distinguishing them from cruft — `SheetRaw.clearRowIndexStale` and `SheetRaw.requestSortGSheet` are both intentional. A grep-derived list of uncalled members is a set of candidates, not a verdict: name what you found and ask, rather than deleting on the count. A member whose only caller is a test is a third case again — deleting it deletes coverage.
 
+## One class per file
+
+A file named for a class holds only that class, so the file name tells a reader everything in it. There are no exceptions, custom `Error` subclasses included; `max-classes-per-file` enforces it. A helper type or free function that serves one class lives in that class's file.
+
+Splitting a class family can close an import cycle through an `extends` clause; [schema classes](../architecture/schema-classes.md) covers why that crashes and how `SchemaBase` breaks it.
+
 ## Keep "why" comments across a refactor
 
 A comment explaining a non-obvious invariant (e.g. why two sheets must sync in one flush) carries over verbatim across a restructure — it documents the invariant, not the code shape around it.

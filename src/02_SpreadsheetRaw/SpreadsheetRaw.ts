@@ -11,6 +11,7 @@ import {
   type SheetChangesToSave,
   type SheetStateRaw,
 } from "./ClassTypes/StateRaw";
+import { SpreadsheetSchema } from "./Schema/SpreadsheetSchema";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 
@@ -43,13 +44,16 @@ interface SheetRowRef {
  * `_sendUpdateRequests` via RawSource.flush). Sheet/row/column by index
  * live on SheetRaw / RowRaw / ColumnRaw in this folder.
  * Column-by-name and columnId resolution are Indexed/Named.
- * Schema classes that resolve columns share SpreadsheetSchema.ts here
+ * Schema classes that resolve columns live in Schema/ here
  * because they must sit below both consumer tiers.
  * docs/architecture/round-trips.md, schema-classes.md, class-chains.md
  */
 export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   static init(): SpreadsheetRaw {
     return new SpreadsheetRaw(SpreadsheetBaseRaw.initSpreadsheetRawProps());
+  }
+  get schema(): SpreadsheetSchema {
+    return new SpreadsheetSchema();
   }
   gidIsActive(sheetGid: number): boolean {
     return this.activeSheetGids.includes(sheetGid);

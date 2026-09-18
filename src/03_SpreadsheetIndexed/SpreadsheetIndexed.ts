@@ -1,3 +1,4 @@
+import { SpreadsheetSchema } from "../02_SpreadsheetRaw/Schema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { SpreadsheetBaseIndexed } from "./ClassBases/SpreadsheetBaseIndexed";
 import { type ColumnIndexed } from "./ColumnIndexed";
@@ -8,6 +9,9 @@ import {
 } from "./SheetMetaIndexed";
 
 export class SpreadsheetIndexed extends SpreadsheetBaseIndexed {
+  get schema(): SpreadsheetSchema {
+    return new SpreadsheetSchema();
+  }
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
