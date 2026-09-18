@@ -14,7 +14,7 @@ const path = {
   claspRc: fileURLToPath(new URL(".clasprc.json", `file://${homedir()}/`)),
 };
 
-class SheetsTransport {
+export class SheetsTransport {
   accessToken = null;
   static init() {
     return new SheetsTransport();

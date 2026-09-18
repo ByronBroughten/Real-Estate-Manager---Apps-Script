@@ -56,13 +56,32 @@ Google no longer lets you view or download a client secret after creating it, bu
 
 ### Seeing the raw Sheets JSON
 
-`GoogleSheetsAPI` maps the payload before anything can log it, and the `gsheets` MCP returns cell values only. To see what Google actually sent, write a throwaway `scripts/*.tmp.mjs` (it must sit in `scripts/` for the relative imports) that imports `NodeHost`, wraps `NodeHost.init` so the `transport` it receives is captured or logged, then calls `startNodeHost({ isDryRun: true })`. The captured transport issues any read — a plain `GET` with a `fields` mask, or `:getByDataFilter` — authenticated like a chore. Reads only; delete the script in the same turn.
+`GoogleSheetsAPI` maps the payload before anything can log it, and the `gsheets` MCP returns cell values only. To see what Google actually sent, use the committed probe:
+
+```
+npm run probe -- --fields 'sheets(properties(sheetId,title),protectedRanges)'
+npm run probe -- --filter '{"dataFilters":[...]}' [--fields '<mask>']
+npm run probe -- --path sheets.title=Occupancy.protectedRanges   # re-read the last response, no request
+```
+
+`scripts/sheetsProbe.mjs` sends one request through the Node host's `SheetsTransport`, authenticated like a chore. That request is a `GET` with a `fields` mask or a `:getByDataFilter`, and the script cannot build any other kind. It writes the full response, pretty-printed, to the gitignored `.probe/last.json`. Stdout gets only a summary: top-level keys, array counts, and each sheet's id and title. With `--path`, stdout gets that one subtree, printed whole when it is short and summarized when it is not. **Never print a full body into the chat.** When the summary isn't enough, `Read` a line range of `.probe/last.json`. The throwaway `scripts/*.tmp.mjs` route this replaced is retired.
 
 ### The `gsheets` MCP tools
 
 This project also has a `gsheets` MCP server available, which can read and write the user's real Google Sheet directly — separately from `clasp`/Apps Script.
 
 - **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`.
-- **They return cell values only, so they cannot see a table's declared column types.** `tables[].columnProperties` — a column's `columnType`, its table-column name, its validation rule — is invisible to `get_sheet_data`, and `include_grid_data` reaches cell formats but not tables. Reading those means calling the Sheets REST API directly with the `clasp` credential: read-only and safe, but it opens a local credentials file, so **ask before running an ad-hoc script that does it**. The chore runner and `gen:configs` are exempt from that rule — both open the same credential as a routine step, and both are covered by the permissions above.
+- **They return cell values only, so they cannot see a table's declared column types.** `tables[].columnProperties` — a column's `columnType`, its table-column name, its validation rule — is invisible to `get_sheet_data`, and `include_grid_data` reaches cell formats but not tables. Reading those means calling the Sheets REST API with the `clasp` credential, and `npm run probe` (above) is how to do it. It is read-only and on the allow-list, like a chore dry run. **Ask before running any other script that opens that credential.** The chore runner and `gen:configs` are exempt, because they open it as a routine step and the permissions above cover them.
 - **Any tool that writes — `create_spreadsheet`, `create_sheet`, `update_cells`, `batch_update_cells` — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.
 - **`share_spreadsheet` needs its own, separate confirmation** — it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.
+
+### Claude Code guardrails
+
+`.claude/settings.json` registers three Node hooks in `.claude/hooks/`, all fail-open (bad input allows the call), plus one project agent. Only the first hook blocks anything; the others add a reminder.
+
+- **`bashReadGuard.mjs`** (PreToolUse, Bash) denies a Bash read of `columnConfigs.ts`, unless it is a grep or a `sed -n` range of at most 150 lines. It also denies a whole-file dump (`cat`, unbounded `head`/`tail`, `sed` without `-n`, `sed -n '1,$p'`) of a repo file over 150 lines. The deny message names the alternative. Piped input, small files, and anything under `.probe/`, `node_modules/` or outside the repo are not guarded. The classifier (`lib/bashReads.mjs`) is shared with the next hook.
+- **`readCountNudge.mjs`** (PostToolUse on Read/Grep/Glob/Bash; reset on UserPromptSubmit) counts reads per turn: Read, Grep, Glob, and Bash calls the classifier calls reads. Edits, `tsc` and test runs are not counted. At 15 reads, and every 10 after, it reminds Claude to write findings down with `file:line`. Each subagent has its own count, and `repo-explorer` is exempt.
+- **`contextSizeNudge.mjs`** (UserPromptSubmit) estimates context from the transcript's last main-thread usage figures, falling back to bytes ÷ 4. It warns once past ~400k and once past ~1M; the second warning asks for a handoff (CLAUDE.md, Handoffs) and a fresh session.
+- **`.claude/agents/repo-explorer.md`** is a read-only (Read/Grep/Glob) Sonnet agent for sweeps of about 5+ files. It returns `file:line` plus verbatim quotes.
+
+Per-session state (the read log and which size warnings have fired) lives in `$TMPDIR/claude-guardrails/`, keyed by session id.

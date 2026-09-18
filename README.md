@@ -19,7 +19,7 @@ Do not read this file whole. Open the one section or disclosed doc the task need
 | --- | --- |
 | Placing a file or import | the tier table below |
 | Naming an accessor, Meta vs primary, Raw/Indexed/Named | [Naming vocabulary](#naming-vocabulary) |
-| Hosts, chores runner, live-sheet commands, MCP | [`docs/how-it-runs.md`](./docs/how-it-runs.md) |
+| Hosts, chores runner, live-sheet commands, Sheets probe, MCP, Claude Code hooks | [`docs/how-it-runs.md`](./docs/how-it-runs.md) |
 | Architecture mechanics | [`docs/architecture.md`](./docs/architecture.md) index — open one file from it |
 | Regenerating configs | [`docs/generated-data.md`](./docs/generated-data.md) |
 | Tests and fakes | [`docs/testing.md`](./docs/testing.md) |
