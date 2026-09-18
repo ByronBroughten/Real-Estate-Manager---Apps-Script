@@ -5,7 +5,7 @@ import { SheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SheetBaseNamed
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
-import type { ConfigSyncState, OperatorProps } from "./OperatorBase";
+import type { ConfigSyncState, OperatorProps } from "./SpreadsheetBaseOperator";
 
 export interface SheetOperatorProps<
   SN extends SheetNameSimple,

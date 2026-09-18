@@ -13,7 +13,7 @@ import {
   type SheetName,
 } from "./sheetConfigsTypes";
 import { ColumnSchema } from "./ColumnSchema";
-import { SchemaBase } from "./SchemaBase";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 
 function sheetNameFromGid(sheetGid: number): SheetName {
   if (!configSheetGids.includes(sheetGid)) {
@@ -29,7 +29,9 @@ export interface SheetSchemaProps<SN extends SheetName> {
   sheetName: SN;
 }
 
-export class SheetSchema<SN extends SheetName = SheetName> extends SchemaBase {
+export class SheetSchema<
+  SN extends SheetName = SheetName,
+> extends SpreadsheetBaseSchema {
   readonly sheetGid: number;
   readonly sheetName: SN;
   constructor({ sheetGid, sheetName }: SheetSchemaProps<SN>) {

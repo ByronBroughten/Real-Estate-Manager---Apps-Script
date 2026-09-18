@@ -3,10 +3,10 @@ import {
   configSheetNames,
   type SheetName,
 } from "./sheetConfigsTypes";
-import { SchemaBase } from "./SchemaBase";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 import { SheetSchema } from "./SheetSchema";
 
-export class SpreadsheetSchema extends SchemaBase {
+export class SpreadsheetSchema extends SpreadsheetBaseSchema {
   isInSheetGids(sheetGid: number): boolean {
     return configSheetGids.includes(sheetGid);
   }

@@ -13,7 +13,7 @@ import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
 import { uniformRows } from "./uniformRows";
 
-export class SchemaBase {
+export class SpreadsheetBaseSchema {
   get codebaseNameDelimiter(): CodebaseNameDelimiter {
     return codebaseNameDelimiter;
   }

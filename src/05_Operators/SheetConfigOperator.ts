@@ -7,10 +7,10 @@ import {
 import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  OperatorBase,
+  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
-} from "./OperatorBase";
+} from "./SpreadsheetBaseOperator";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   constructor(props: OperatorProps) {
@@ -20,7 +20,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
   }
   static init(): SheetConfigOperator {
-    return new SheetConfigOperator(OperatorBase.initOperatorProps());
+    return new SheetConfigOperator(SpreadsheetBaseOperator.initOperatorProps());
   }
   get sheetConfigSync(): ConfigSyncState["sheetConfigSync"] {
     return this.configSyncState.sheetConfigSync;

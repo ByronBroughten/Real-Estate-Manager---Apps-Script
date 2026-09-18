@@ -8,7 +8,7 @@ import {
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
-import { OperatorBase } from "./OperatorBase";
+import { SpreadsheetBaseOperator } from "./SpreadsheetBaseOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
@@ -28,11 +28,11 @@ export interface ConfigRegeneration {
  * npm run gen:configs is the only regeneration path.
  * docs/generated-data.md
  */
-export class ConfigOrchestrator extends OperatorBase {
+export class ConfigOrchestrator extends SpreadsheetBaseOperator {
   constructor(props: SpreadsheetNamedProps) {
     super({
       ...props,
-      configSyncState: OperatorBase.initConfigSyncState(),
+      configSyncState: SpreadsheetBaseOperator.initConfigSyncState(),
     });
   }
   static init(): ConfigOrchestrator {

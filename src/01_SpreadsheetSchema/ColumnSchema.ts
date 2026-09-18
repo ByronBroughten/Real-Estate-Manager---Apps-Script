@@ -9,11 +9,8 @@ import {
   type MakeColumnFullName,
 } from "./columnConfigsTypes";
 import type { SheetName } from "./sheetConfigsTypes";
-import {
-  getValTrait,
-  type ValueSchema,
-} from "./valueSchemas";
-import { SchemaBase } from "./SchemaBase";
+import { getValTrait, type ValueSchema } from "./valueSchemas";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 import { SheetSchema, type SheetSchemaProps } from "./SheetSchema";
 
 interface ColumnSchemaProps<
@@ -27,7 +24,7 @@ interface ColumnSchemaProps<
 export class ColumnSchema<
   SN extends SheetName = SheetName,
   CN extends ColumnName<SN> = ColumnName<SN>,
-> extends SchemaBase {
+> extends SpreadsheetBaseSchema {
   readonly sheetGid: number;
   readonly sheetName: SN;
   readonly columnId: string;

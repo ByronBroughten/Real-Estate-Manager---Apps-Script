@@ -6,10 +6,10 @@ import {
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  OperatorBase,
+  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
-} from "./OperatorBase";
+} from "./SpreadsheetBaseOperator";
 
 export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   constructor(props: OperatorProps) {
@@ -25,7 +25,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
     return this.valueConfigSync.activeHeaders;
   }
   static init(): ValueConfigOperator {
-    return new ValueConfigOperator(OperatorBase.initOperatorProps());
+    return new ValueConfigOperator(SpreadsheetBaseOperator.initOperatorProps());
   }
   get columnConfigOperator(): ColumnConfigOperator {
     return new ColumnConfigOperator(this.operatorProps);

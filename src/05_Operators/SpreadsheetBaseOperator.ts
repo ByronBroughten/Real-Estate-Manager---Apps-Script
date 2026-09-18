@@ -26,7 +26,7 @@ export interface OperatorProps extends SpreadsheetNamedProps {
   configSyncState: ConfigSyncState;
 }
 
-export class OperatorBase extends SpreadsheetBaseNamed {
+export class SpreadsheetBaseOperator extends SpreadsheetBaseNamed {
   protected configSyncState: ConfigSyncState;
   constructor({ configSyncState, ...rest }: OperatorProps) {
     super(rest);
@@ -55,7 +55,7 @@ export class OperatorBase extends SpreadsheetBaseNamed {
   static initOperatorProps(): OperatorProps {
     return {
       ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
-      configSyncState: OperatorBase.initConfigSyncState(),
+      configSyncState: SpreadsheetBaseOperator.initConfigSyncState(),
     };
   }
 }

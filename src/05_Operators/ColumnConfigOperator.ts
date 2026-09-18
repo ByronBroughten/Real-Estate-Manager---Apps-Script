@@ -7,11 +7,11 @@ import { Str } from "../utils/Str";
 import { columnConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  OperatorBase,
+  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
   type UntypedHeadersBySheetTitle,
-} from "./OperatorBase";
+} from "./SpreadsheetBaseOperator";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
@@ -23,7 +23,9 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     });
   }
   static init() {
-    return new ColumnConfigOperator(OperatorBase.initOperatorProps());
+    return new ColumnConfigOperator(
+      SpreadsheetBaseOperator.initOperatorProps(),
+    );
   }
   get columnConfigSync(): ConfigSyncState["columnConfigSync"] {
     return this.configSyncState.columnConfigSync;

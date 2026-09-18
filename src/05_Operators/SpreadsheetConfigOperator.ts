@@ -9,10 +9,10 @@ import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetC
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  OperatorBase,
+  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
-} from "./OperatorBase";
+} from "./SpreadsheetBaseOperator";
 import {
   SpreadsheetConfigDataRow,
   spreadsheetConfigColumnLabel,
@@ -39,7 +39,9 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     });
   }
   static init(): SpreadsheetConfigOperator {
-    return new SpreadsheetConfigOperator(OperatorBase.initOperatorProps());
+    return new SpreadsheetConfigOperator(
+      SpreadsheetBaseOperator.initOperatorProps(),
+    );
   }
   get spreadsheetConfigSync(): ConfigSyncState["spreadsheetConfigSync"] {
     return this.configSyncState.spreadsheetConfigSync;
