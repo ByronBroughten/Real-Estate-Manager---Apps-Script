@@ -68,9 +68,9 @@ _Avoid_: minimum headers, floor sheet
 A unit of work the spreadsheet can be asked to do, wired to one column and triggered by a checkbox in that column's action row. Any column can be the one; it declares for itself which other columns the framework should manage on its behalf.
 _Avoid_: handler, command, action
 
-**Base endpoint**:
+**Framework endpoint**:
 An endpoint the framework itself provides on Spreadsheet Config, present in every spreadsheet whatever business endpoints it adds.
-_Avoid_: built-in endpoint, core endpoint, system endpoint
+_Avoid_: base endpoint, built-in endpoint, core endpoint, system endpoint
 
 **Runner**:
 An endpoint whose entry checkbox is a run button: ticking it starts the work, and the box clears itself immediately. An endpoint is one unless it says it also runs on unticking.
