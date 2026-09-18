@@ -26,25 +26,25 @@ type WrittenValue = string | number | boolean | null;
 type FakeRow<C> = Partial<Record<keyof C, FakeCell>>;
 type WrittenRow = Record<string, WrittenValue>;
 
-const TOP_DATA_ROW_INDEX = 4;
-const STAGING_GID = sheetConfigs.addPropertyExpense.sheetGid;
-const EXPENSE_GID = sheetConfigs.propertyExpense.sheetGid;
-const RECEIPT_GID = sheetConfigs.splitReceipt.sheetGid;
+const topDataRowIndex = 4;
+const stagingGid = sheetConfigs.addPropertyExpense.sheetGid;
+const expenseGid = sheetConfigs.propertyExpense.sheetGid;
+const receiptGid = sheetConfigs.splitReceipt.sheetGid;
 
-const CASE = "r:prp:case";
-const CASE_NAME = "140 Case";
-const CHARLES = "r:prp:charles";
-const CHARLES_NAME = "282 Charles";
-const CASE_UNIT = "r:unt:caseOne";
-const CASE_UNIT_NAME = "140 Case, Unit 1";
-const CHARLES_UNIT = "r:unt:charlesOne";
-const CHARLES_UNIT_NAME = "282 Charles, Unit 1";
+const caseProperty = "r:prp:case";
+const caseName = "140 Case";
+const charlesProperty = "r:prp:charles";
+const charlesName = "282 Charles";
+const caseUnit = "r:unt:caseOne";
+const caseUnitName = "140 Case, Unit 1";
+const charlesUnit = "r:unt:charlesOne";
+const charlesUnitName = "282 Charles, Unit 1";
 
-const HARDWARE_RECEIPT = "r:srct:hardware";
-const HARDWARE_RECEIPT_NAME = "Hardware store, 3 Mar";
-const LUMBER_RECEIPT_NAME = "Lumber yard, 4 Mar";
+const hardwareReceipt = "r:srct:hardware";
+const hardwareReceiptName = "Hardware store, 3 Mar";
+const lumberReceiptName = "Lumber yard, 4 Mar";
 
-const DAY_ONE = 45000;
+const dayOne = 45000;
 
 const stagingColumnNames = [
   "date",
@@ -82,8 +82,8 @@ const expenseColumnNames = [
   "splitReceiptId",
 ] as const;
 
-const STAGING_RUN_STATUS_COL_INDEX = stagingColumnNames.indexOf("runStatus");
-const RECEIPT_ID_COL_INDEX = 1;
+const stagingRunStatusColIndex = stagingColumnNames.indexOf("runStatus");
+const receiptIdColIndex = 1;
 
 interface SheetStubProps<C> {
   sheetName: keyof typeof sheetConfigs;
@@ -111,12 +111,12 @@ function stubSheet<C extends Record<string, ColumnFixture>>({
       3: columnNames.map((columnName) => columnOf(columnName).header),
       ...Object.fromEntries(
         dataRows.map((row, index) => [
-          TOP_DATA_ROW_INDEX + index,
+          topDataRowIndex + index,
           columnNames.map((columnName) => row[columnName] ?? null),
         ]),
       ),
     }),
-    table: { endRowIndex: TOP_DATA_ROW_INDEX + dataRows.length },
+    table: { endRowIndex: topDataRowIndex + dataRows.length },
   };
 }
 
@@ -125,7 +125,7 @@ type StagingRow = FakeRow<typeof columnConfigs.addPropertyExpense>;
 // Everything a person must type, so a test only has to say what it varies.
 function typedRow(overrides: StagingRow = {}): StagingRow {
   return {
-    date: DAY_ONE,
+    date: dayOne,
     billerName: "Ace Hardware",
     description: "Furnace filters",
     amount: 24,
@@ -154,8 +154,8 @@ function stubProperty(dataRows?: readonly FakeRow<typeof columnConfigs.property>
     dataRows:
       dataRows ??
       [
-        { name: CASE_NAME, id: CASE },
-        { name: CHARLES_NAME, id: CHARLES },
+        { name: caseName, id: caseProperty },
+        { name: charlesName, id: charlesProperty },
       ],
   });
 }
@@ -167,8 +167,8 @@ function stubUnit() {
     config: columnConfigs.unit,
     columnNames: ["name", "id", "propertyId"],
     dataRows: [
-      { name: CASE_UNIT_NAME, id: CASE_UNIT, propertyId: CASE },
-      { name: CHARLES_UNIT_NAME, id: CHARLES_UNIT, propertyId: CHARLES },
+      { name: caseUnitName, id: caseUnit, propertyId: caseProperty },
+      { name: charlesUnitName, id: charlesUnit, propertyId: charlesProperty },
     ],
   });
 }
@@ -181,8 +181,8 @@ function stubSplitReceipt() {
     config: columnConfigs.splitReceipt,
     columnNames: ["name", "id"],
     dataRows: [
-      { name: HARDWARE_RECEIPT_NAME, id: HARDWARE_RECEIPT },
-      { name: LUMBER_RECEIPT_NAME },
+      { name: hardwareReceiptName, id: hardwareReceipt },
+      { name: lumberReceiptName },
     ],
   });
 }
@@ -194,8 +194,8 @@ function stubPropertyExpense() {
     config: columnConfigs.propertyExpense,
     columnNames: expenseColumnNames,
     dataRows: [
-      { id: "r:pex:old", propertyId: CASE, date: 44000, amount: 10 },
-      { id: "r:pex:older", propertyId: CHARLES, date: 44001, amount: 20 },
+      { id: "r:pex:old", propertyId: caseProperty, date: 44000, amount: 10 },
+      { id: "r:pex:older", propertyId: charlesProperty, date: 44001, amount: 20 },
     ],
   });
 }
@@ -290,24 +290,24 @@ function rowsWrittenTo(
 
 // The minted id is random, so it is asserted by shape where it matters instead.
 function expensesAppended(calls: BatchUpdateCall[]): WrittenRow[] {
-  return [...rowsWrittenTo(calls, EXPENSE_GID, expenseColumnNames).values()].map(
+  return [...rowsWrittenTo(calls, expenseGid, expenseColumnNames).values()].map(
     ({ id: _id, ...expense }) => expense,
   );
 }
 
 function stagingRowsWritten(calls: BatchUpdateCall[]): Map<number, WrittenRow> {
-  const rows = rowsWrittenTo(calls, STAGING_GID, stagingColumnNames);
+  const rows = rowsWrittenTo(calls, stagingGid, stagingColumnNames);
   [...rows.keys()]
-    .filter((rowIndex) => rowIndex < TOP_DATA_ROW_INDEX)
+    .filter((rowIndex) => rowIndex < topDataRowIndex)
     .forEach((rowIndex) => rows.delete(rowIndex));
   return rows;
 }
 
 function rowMessages(calls: BatchUpdateCall[]): Map<number, WrittenValue> {
-  return [...cellsWrittenTo(calls, STAGING_GID).entries()]
-    .filter(([rowIndex]) => rowIndex >= TOP_DATA_ROW_INDEX)
+  return [...cellsWrittenTo(calls, stagingGid).entries()]
+    .filter(([rowIndex]) => rowIndex >= topDataRowIndex)
     .reduce((messages, [rowIndex, cells]) => {
-      const message = cells.get(STAGING_RUN_STATUS_COL_INDEX);
+      const message = cells.get(stagingRunStatusColIndex);
       if (message === undefined) return messages;
       return messages.set(rowIndex, message);
     }, new Map<number, WrittenValue>());
@@ -316,7 +316,7 @@ function rowMessages(calls: BatchUpdateCall[]): Map<number, WrittenValue> {
 function stagingRowsDeleted(calls: BatchUpdateCall[]): number[] {
   return allRequests(calls).flatMap((request) => {
     const deleted = request.deleteDimension?.range;
-    if (deleted?.sheetId !== STAGING_GID) return [];
+    if (deleted?.sheetId !== stagingGid) return [];
     return [Val.assert(deleted.startIndex, "deleted row index")];
   });
 }
@@ -335,7 +335,7 @@ function runStateColour(calls: BatchUpdateCall[]) {
     .at(-1);
 }
 
-const WARNING_COLOUR = { red: 0.99, green: 0.85, blue: 0.7 };
+const warningColour = { red: 0.99, green: 0.85, blue: 0.7 };
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
@@ -344,9 +344,9 @@ beforeEach(() => {
 
 describe("addPropertyExpense, a mixed batch", () => {
   const mixedBatch = [
-    typedRow({ unitName: CASE_UNIT_NAME }),
+    typedRow({ unitName: caseUnitName }),
     typedRow({ unitName: "140 Case, Unit 9" }),
-    typedRow({ propertyName: CHARLES_NAME, amount: null }),
+    typedRow({ propertyName: charlesName, amount: null }),
   ];
 
   it("adds the good row and leaves the two bad ones where they are", () => {
@@ -358,10 +358,10 @@ describe("addPropertyExpense, a mixed batch", () => {
 
     expect(expensesAppended(batchUpdateCalls)).toEqual([
       {
-        propertyId: CASE,
-        unitId: CASE_UNIT,
+        propertyId: caseProperty,
+        unitId: caseUnit,
         splitReceiptId: "",
-        date: DAY_ONE,
+        date: dayOne,
         billerName: "Ace Hardware",
         description: "Furnace filters",
         amount: 24,
@@ -372,7 +372,7 @@ describe("addPropertyExpense, a mixed batch", () => {
         notes: "",
       },
     ]);
-    expect(stagingRowsDeleted(batchUpdateCalls)).toEqual([TOP_DATA_ROW_INDEX]);
+    expect(stagingRowsDeleted(batchUpdateCalls)).toEqual([topDataRowIndex]);
   });
 
   it("tells each refused row what is wrong with it, in its own cell", () => {
@@ -384,10 +384,10 @@ describe("addPropertyExpense, a mixed batch", () => {
 
     expect([...rowMessages(batchUpdateCalls).entries()]).toEqual([
       [
-        TOP_DATA_ROW_INDEX + 1,
+        topDataRowIndex + 1,
         'This row was not added: no row of Unit is named "140 Case, Unit 9".',
       ],
-      [TOP_DATA_ROW_INDEX + 2, "This row was not added: Amount is blank."],
+      [topDataRowIndex + 2, "This row was not added: Amount is blank."],
     ]);
   });
 
@@ -401,7 +401,7 @@ describe("addPropertyExpense, a mixed batch", () => {
     expect(runStatusWritten(batchUpdateCalls)).toBe(
       "Added 1 of 3 rows; the rest say why in their own cells.",
     );
-    expect(runStateColour(batchUpdateCalls)).toEqual(WARNING_COLOUR);
+    expect(runStateColour(batchUpdateCalls)).toEqual(warningColour);
   });
 
   it("reads every input sheet in one fetch cycle of its own", () => {
@@ -418,26 +418,26 @@ describe("addPropertyExpense, a mixed batch", () => {
 describe("addPropertyExpense, naming the property and the unit", () => {
   it("takes the property from the unit when only a unit is named", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
-      stagingRows: [typedRow({ unitName: CHARLES_UNIT_NAME })],
+      stagingRows: [typedRow({ unitName: charlesUnitName })],
     });
 
     runAddPropertyExpense();
 
     expect(expensesAppended(batchUpdateCalls)[0]).toMatchObject({
-      propertyId: CHARLES,
-      unitId: CHARLES_UNIT,
+      propertyId: charlesProperty,
+      unitId: charlesUnit,
     });
   });
 
   it("leaves the unit blank when only a property is named", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
-      stagingRows: [typedRow({ propertyName: CASE_NAME })],
+      stagingRows: [typedRow({ propertyName: caseName })],
     });
 
     runAddPropertyExpense();
 
     expect(expensesAppended(batchUpdateCalls)[0]).toMatchObject({
-      propertyId: CASE,
+      propertyId: caseProperty,
       unitId: "",
     });
   });
@@ -445,29 +445,29 @@ describe("addPropertyExpense, naming the property and the unit", () => {
   it("accepts a row naming a unit and that unit's own property", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
       stagingRows: [
-        typedRow({ unitName: CASE_UNIT_NAME, propertyName: CASE_NAME }),
+        typedRow({ unitName: caseUnitName, propertyName: caseName }),
       ],
     });
 
     runAddPropertyExpense();
 
     expect(expensesAppended(batchUpdateCalls)[0]).toMatchObject({
-      propertyId: CASE,
-      unitId: CASE_UNIT,
+      propertyId: caseProperty,
+      unitId: caseUnit,
     });
   });
 
   it("refuses a row whose unit and property disagree", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
       stagingRows: [
-        typedRow({ unitName: CASE_UNIT_NAME, propertyName: CHARLES_NAME }),
+        typedRow({ unitName: caseUnitName, propertyName: charlesName }),
       ],
     });
 
     runAddPropertyExpense();
 
     expect(expensesAppended(batchUpdateCalls)).toEqual([]);
-    expect(rowMessages(batchUpdateCalls).get(TOP_DATA_ROW_INDEX)).toBe(
+    expect(rowMessages(batchUpdateCalls).get(topDataRowIndex)).toBe(
       'This row was not added: unit "140 Case, Unit 1" does not belong to property "282 Charles".',
     );
   });
@@ -479,23 +479,23 @@ describe("addPropertyExpense, naming the property and the unit", () => {
 
     runAddPropertyExpense();
 
-    expect(rowMessages(batchUpdateCalls).get(TOP_DATA_ROW_INDEX)).toBe(
+    expect(rowMessages(batchUpdateCalls).get(topDataRowIndex)).toBe(
       "This row was not added: name a unit or a property.",
     );
   });
 
   it("refuses a name that matches more than one row, and says how many", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
-      stagingRows: [typedRow({ propertyName: CASE_NAME })],
+      stagingRows: [typedRow({ propertyName: caseName })],
       properties: [
-        { name: CASE_NAME, id: CASE },
-        { name: CASE_NAME, id: "r:prp:caseAgain" },
+        { name: caseName, id: caseProperty },
+        { name: caseName, id: "r:prp:caseAgain" },
       ],
     });
 
     runAddPropertyExpense();
 
-    expect(rowMessages(batchUpdateCalls).get(TOP_DATA_ROW_INDEX)).toBe(
+    expect(rowMessages(batchUpdateCalls).get(topDataRowIndex)).toBe(
       'This row was not added: 2 rows of Property are named "140 Case".',
     );
   });
@@ -509,7 +509,7 @@ describe("addPropertyExpense, naming the property and the unit", () => {
 
     runAddPropertyExpense();
 
-    expect(rowMessages(batchUpdateCalls).get(TOP_DATA_ROW_INDEX)).toBe(
+    expect(rowMessages(batchUpdateCalls).get(topDataRowIndex)).toBe(
       'This row was not added: no row of Unit is named "140 Case, Unit 9"; no row of Property is named "9 Nowhere".',
     );
   });
@@ -521,7 +521,7 @@ describe("addPropertyExpense, naming the property and the unit", () => {
 
     runAddPropertyExpense();
 
-    expect(rowMessages(batchUpdateCalls).get(TOP_DATA_ROW_INDEX)).toBe(
+    expect(rowMessages(batchUpdateCalls).get(topDataRowIndex)).toBe(
       "This row was not added: Description is blank; Amount is blank; name a unit or a property.",
     );
   });
@@ -532,8 +532,8 @@ describe("addPropertyExpense, the split receipt", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
       stagingRows: [
         typedRow({
-          propertyName: CASE_NAME,
-          splitReceiptName: HARDWARE_RECEIPT_NAME,
+          propertyName: caseName,
+          splitReceiptName: hardwareReceiptName,
         }),
       ],
     });
@@ -541,7 +541,7 @@ describe("addPropertyExpense, the split receipt", () => {
     runAddPropertyExpense();
 
     expect(expensesAppended(batchUpdateCalls)[0]).toMatchObject({
-      splitReceiptId: HARDWARE_RECEIPT,
+      splitReceiptId: hardwareReceipt,
     });
   });
 
@@ -549,17 +549,17 @@ describe("addPropertyExpense, the split receipt", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
       stagingRows: [
         typedRow({
-          propertyName: CASE_NAME,
-          splitReceiptName: LUMBER_RECEIPT_NAME,
+          propertyName: caseName,
+          splitReceiptName: lumberReceiptName,
         }),
       ],
     });
 
     runAddPropertyExpense();
 
-    const mintedId = cellsWrittenTo(batchUpdateCalls, RECEIPT_GID)
-      .get(TOP_DATA_ROW_INDEX + 1)
-      ?.get(RECEIPT_ID_COL_INDEX);
+    const mintedId = cellsWrittenTo(batchUpdateCalls, receiptGid)
+      .get(topDataRowIndex + 1)
+      ?.get(receiptIdColIndex);
     expect(mintedId).toMatch(/^r:srct:/);
     expect(expensesAppended(batchUpdateCalls)[0]).toMatchObject({
       splitReceiptId: mintedId,
@@ -571,17 +571,17 @@ describe("addPropertyExpense, what the sheet is left holding", () => {
   it("empties the staging sheet to one blank row after a clean batch", () => {
     const { batchUpdateCalls } = stubExpenseSpreadsheet({
       stagingRows: [
-        typedRow({ unitName: CASE_UNIT_NAME }),
-        typedRow({ propertyName: CHARLES_NAME }),
+        typedRow({ unitName: caseUnitName }),
+        typedRow({ propertyName: charlesName }),
       ],
     });
 
     runAddPropertyExpense();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe("Added 2 expenses.");
-    expect(stagingRowsDeleted(batchUpdateCalls)).toEqual([TOP_DATA_ROW_INDEX]);
+    expect(stagingRowsDeleted(batchUpdateCalls)).toEqual([topDataRowIndex]);
     expect(
-      stagingRowsWritten(batchUpdateCalls).get(TOP_DATA_ROW_INDEX + 1),
+      stagingRowsWritten(batchUpdateCalls).get(topDataRowIndex + 1),
     ).toEqual(
       Object.fromEntries(stagingColumnNames.map((columnName) => [columnName, ""])),
     );

@@ -8,8 +8,8 @@ import {
 import type { LocalWriteOperation } from "./RawSource";
 import type { RgbColor } from "./RgbColor";
 
-const SPREADSHEET_ID = "spreadsheet-under-test";
-const LIGHT_GREEN: RgbColor = { red: 0.851, green: 0.918, blue: 0.827 };
+const spreadsheetId = "spreadsheet-under-test";
+const lightGreen: RgbColor = { red: 0.851, green: 0.918, blue: 0.827 };
 
 type BatchUpdateRequest =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
@@ -72,7 +72,7 @@ describe("GoogleSheetsAPI write mapping", () => {
         startRowIndex: 4,
         endRowIndex: 6,
         value: "x",
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
       {
         kind: "fill",
@@ -95,7 +95,7 @@ describe("GoogleSheetsAPI write mapping", () => {
         rowIndex: 5,
         colIndex: 2,
         formula: "=B5",
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
       {
         kind: "findReplace",
@@ -132,7 +132,7 @@ describe("GoogleSheetsAPI write mapping", () => {
       { kind: "raw", request: { updateTable: { table: { tableId: "t" } } } },
     ];
 
-    api.flush(SPREADSHEET_ID, operations);
+    api.flush(spreadsheetId, operations);
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
@@ -165,7 +165,7 @@ describe("GoogleSheetsAPI write mapping", () => {
           },
           cell: {
             userEnteredValue: { stringValue: "x" },
-            userEnteredFormat: { backgroundColor: LIGHT_GREEN },
+            userEnteredFormat: { backgroundColor: lightGreen },
           },
           fields: "userEnteredValue,userEnteredFormat.backgroundColor",
         },
@@ -210,7 +210,7 @@ describe("GoogleSheetsAPI write mapping", () => {
           },
           rows: [
             {
-              values: [{ userEnteredFormat: { backgroundColor: LIGHT_GREEN } }],
+              values: [{ userEnteredFormat: { backgroundColor: lightGreen } }],
             },
           ],
           fields: "userEnteredFormat.backgroundColor",
@@ -256,7 +256,7 @@ describe("GoogleSheetsAPI write mapping", () => {
   it("sends no batchUpdate when the write list is empty", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, []);
+    api.flush(spreadsheetId, []);
 
     expect(batchUpdateCalls).toEqual([]);
   });
@@ -265,7 +265,7 @@ describe("GoogleSheetsAPI write mapping", () => {
     const { api, batchUpdateCalls } = recordingSheets();
     const pink = { red: 244 / 255, green: 204 / 255, blue: 204 / 255 };
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "addConditionalFormatRule",
         index: 0,
@@ -328,7 +328,7 @@ describe("GoogleSheetsAPI write mapping", () => {
   it("stringifies a false condition value as Sheets' FALSE literal", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "addConditionalFormatRule",
         index: 0,
@@ -358,7 +358,7 @@ describe("GoogleSheetsAPI write mapping", () => {
   it("passes a custom formula through unchanged and maps a delete by sheet and index", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "deleteConditionalFormatRule",
         sheetId: 111,
@@ -417,7 +417,7 @@ describe("GoogleSheetsAPI write mapping", () => {
   it("passes an ordered raw request through last", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "updateCell",
         sheetId: 111,
@@ -489,7 +489,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
       ],
     });
 
-    expect(api.fetchSheetProperties(SPREADSHEET_ID)).toEqual({
+    expect(api.fetchSheetProperties(spreadsheetId)).toEqual({
       sheets: [
         {
           sheetGid: 111,
@@ -618,7 +618,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
       ],
     });
 
-    const rules = api.fetchConditionalFormatRules(SPREADSHEET_ID)[0]?.rules;
+    const rules = api.fetchConditionalFormatRules(spreadsheetId)[0]?.rules;
 
     expect(rules).toHaveLength(3);
     expect(rules?.[0]).toEqual({
@@ -685,11 +685,11 @@ describe("GoogleSheetsAPI conditional format read", () => {
       sheets: [{ properties: { sheetId: 111 } }],
     });
 
-    api.fetchConditionalFormatRules(SPREADSHEET_ID);
+    api.fetchConditionalFormatRules(spreadsheetId);
 
     expect(getCalls).toEqual([
       {
-        spreadsheetId: SPREADSHEET_ID,
+        spreadsheetId,
         fields: "sheets(properties(sheetId),conditionalFormats)",
       },
     ]);
@@ -712,7 +712,7 @@ describe("GoogleSheetsAPI conditional format read", () => {
     });
 
     expect(
-      api.fetchConditionalFormatRules(SPREADSHEET_ID)[0]?.rules[0]?.ranges,
+      api.fetchConditionalFormatRules(spreadsheetId)[0]?.rules[0]?.ranges,
     ).toEqual([
       {
         sheetId: 0,
@@ -756,7 +756,7 @@ describe("GoogleSheetsAPI conditional format read", () => {
 
     expect(
       api
-        .fetchConditionalFormatRules(SPREADSHEET_ID)[0]
+        .fetchConditionalFormatRules(spreadsheetId)[0]
         ?.rules.map((read) => read.kind),
     ).toEqual(["unmodelable", "unmodelable"]);
   });
@@ -766,7 +766,7 @@ describe("GoogleSheetsAPI conditional format read", () => {
       sheets: [{ properties: { sheetId: 111 } }],
     });
 
-    expect(api.fetchConditionalFormatRules(SPREADSHEET_ID)).toEqual([
+    expect(api.fetchConditionalFormatRules(spreadsheetId)).toEqual([
       { sheetGid: 111, rules: [] },
     ]);
   });
@@ -778,11 +778,11 @@ describe("GoogleSheetsAPI protected range read", () => {
       sheets: [{ properties: { sheetId: 111 } }],
     });
 
-    api.fetchProtectedRanges(SPREADSHEET_ID);
+    api.fetchProtectedRanges(spreadsheetId);
 
     expect(getCalls).toEqual([
       {
-        spreadsheetId: SPREADSHEET_ID,
+        spreadsheetId,
         fields: "sheets(properties(sheetId),protectedRanges)",
       },
     ]);
@@ -794,7 +794,7 @@ describe("GoogleSheetsAPI protected range read", () => {
       sheets: [{ properties: { sheetId: 111 } }],
     });
 
-    expect(api.fetchProtectedRanges(SPREADSHEET_ID)).toEqual([
+    expect(api.fetchProtectedRanges(spreadsheetId)).toEqual([
       { sheetGid: 111, protections: [] },
     ]);
   });
@@ -815,24 +815,22 @@ describe("GoogleSheetsAPI protected range read", () => {
       ],
     });
 
-    expect(api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0]).toEqual(
-      {
-        kind: "warning",
-        id: 3,
-        range: {
-          sheetId: 0,
-          startRowIndex: 0,
-          endRowIndex: 11,
-          startColumnIndex: 0,
-          endColumnIndex: 1,
-        },
-        description: "",
-        users: [],
-        groups: [],
-        unprotectedRanges: [],
-        requestingUserCanEdit: false,
+    expect(api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0]).toEqual({
+      kind: "warning",
+      id: 3,
+      range: {
+        sheetId: 0,
+        startRowIndex: 0,
+        endRowIndex: 11,
+        startColumnIndex: 0,
+        endColumnIndex: 1,
       },
-    );
+      description: "",
+      users: [],
+      groups: [],
+      unprotectedRanges: [],
+      requestingUserCanEdit: false,
+    });
   });
 
   it("reads a warning's editors as none, since Google lists them but a warning ignores them", () => {
@@ -865,7 +863,7 @@ describe("GoogleSheetsAPI protected range read", () => {
     });
 
     const protection =
-      api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0];
+      api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0];
     expect(protection).toMatchObject({
       kind: "warning",
       users: [],
@@ -890,12 +888,10 @@ describe("GoogleSheetsAPI protected range read", () => {
       ],
     });
 
-    expect(api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0]).toEqual(
-      {
-        kind: "unmodelable",
-        id: 9,
-      },
-    );
+    expect(api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0]).toEqual({
+      kind: "unmodelable",
+      id: 9,
+    });
   });
 
   it("reads a protection with column bounds and no row bounds as a whole-column range, not a whole sheet", () => {
@@ -918,23 +914,21 @@ describe("GoogleSheetsAPI protected range read", () => {
       ],
     });
 
-    expect(api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0]).toEqual(
-      {
-        kind: "warning",
-        id: 8,
-        range: {
-          sheetId: 111,
-          startRowIndex: 0,
-          startColumnIndex: 4,
-          endColumnIndex: 5,
-        },
-        description: "",
-        users: [],
-        groups: [],
-        unprotectedRanges: [],
-        requestingUserCanEdit: false,
+    expect(api.fetchProtectedRanges(spreadsheetId)[0]?.protections[0]).toEqual({
+      kind: "warning",
+      id: 8,
+      range: {
+        sheetId: 111,
+        startRowIndex: 0,
+        startColumnIndex: 4,
+        endColumnIndex: 5,
       },
-    );
+      description: "",
+      users: [],
+      groups: [],
+      unprotectedRanges: [],
+      requestingUserCanEdit: false,
+    });
   });
 });
 
@@ -942,7 +936,7 @@ describe("GoogleSheetsAPI protected range write", () => {
   it("maps a lock with named editors and a whole-sheet warning with unprotected ranges", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "addProtectedRange",
         protection: {
@@ -1024,7 +1018,7 @@ describe("GoogleSheetsAPI protected range write", () => {
   it("writes a whole-column range as column bounds with no end row", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "addProtectedRange",
         protection: {
@@ -1073,7 +1067,7 @@ describe("GoogleSheetsAPI protected range write", () => {
     }));
 
     expect(() =>
-      api.flush(SPREADSHEET_ID, [
+      api.flush(spreadsheetId, [
         {
           kind: "addProtectedRange",
           protection: {
@@ -1095,7 +1089,7 @@ describe("GoogleSheetsAPI protected range write", () => {
     }));
 
     expect(() =>
-      api.flush(SPREADSHEET_ID, [
+      api.flush(spreadsheetId, [
         {
           kind: "addProtectedRange",
           protection: {
@@ -1116,20 +1110,20 @@ describe("GoogleSheetsAPI colour mapping", () => {
   it("maps the RGB record onto Google Color on the way out", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "updateCell",
         sheetId: 1,
         rowIndex: 0,
         colIndex: 0,
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
     ]);
 
     expect(
       batchUpdateCalls[0]?.requests?.[0]?.updateCells?.rows?.[0]?.values?.[0]
         ?.userEnteredFormat?.backgroundColor,
-    ).toEqual(LIGHT_GREEN);
+    ).toEqual(lightGreen);
   });
 
   it("maps Google Color back to the RGB record", () => {
@@ -1147,7 +1141,7 @@ describe("GoogleSheetsAPI colour mapping", () => {
                   values: [
                     {
                       effectiveValue: { stringValue: "x" },
-                      userEnteredFormat: { backgroundColor: LIGHT_GREEN },
+                      userEnteredFormat: { backgroundColor: lightGreen },
                     },
                   ],
                 },
@@ -1159,21 +1153,21 @@ describe("GoogleSheetsAPI colour mapping", () => {
     });
 
     expect(
-      api.fetchSheetProperties(SPREADSHEET_ID).sheets[0]?.gridBlocks?.[0]
+      api.fetchSheetProperties(spreadsheetId).sheets[0]?.gridBlocks?.[0]
         ?.rows[0]?.cells[0]?.backgroundColor,
-    ).toEqual(LIGHT_GREEN);
+    ).toEqual(lightGreen);
   });
 });
 
 describe("GoogleSheetsAPI HTTP transport", () => {
   function seedApi(props: { isDryRun?: boolean } = {}) {
     const transport = vi.fn((_request: SheetsHttpRequest) => ({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
       sheets: [],
     }));
     const reported: OpaqueRawRequest[] = [];
     const api = GoogleSheetsAPI.initHttp({
-      spreadsheetId: SPREADSHEET_ID,
+      spreadsheetId,
       transport,
       isDryRun: props.isDryRun ?? false,
       reportRequests: (requests) => reported.push(...requests),
@@ -1185,12 +1179,12 @@ describe("GoogleSheetsAPI HTTP transport", () => {
     const { api, transport } = seedApi();
     const fields = "sheets(properties(sheetId,title),tables(tableId,range))";
 
-    api.fetchSheetProperties(SPREADSHEET_ID);
+    api.fetchSheetProperties(spreadsheetId);
 
     expect(transport).toHaveBeenCalledWith({
       method: "GET",
       url:
-        `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}` +
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}` +
         `?fields=${encodeURIComponent(fields)}`,
       body: null,
     });
@@ -1200,7 +1194,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
     const { api, transport } = seedApi();
     const gridRanges = [{ sheetId: 111, startRowIndex: 0 }];
 
-    api.fetchGrid(SPREADSHEET_ID, gridRanges, {
+    api.fetchGrid(spreadsheetId, gridRanges, {
       includeProgrammaticFacts: false,
     });
 
@@ -1215,7 +1209,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("posts mapped writes to batchUpdate when the run is not a dry run", () => {
     const { api, transport } = seedApi();
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "updateCell",
         sheetId: 111,
@@ -1234,7 +1228,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("sends nothing at all on a dry run, and reports what it withheld", () => {
     const { api, transport, reported } = seedApi({ isDryRun: true });
 
-    api.flush(SPREADSHEET_ID, [
+    api.flush(spreadsheetId, [
       {
         kind: "updateCell",
         sheetId: 111,
@@ -1252,8 +1246,8 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("still reads from the live spreadsheet on a dry run", () => {
     const { api, transport } = seedApi({ isDryRun: true });
 
-    api.fetchSheetProperties(SPREADSHEET_ID);
-    api.fetchGrid(SPREADSHEET_ID, [{ sheetId: 111, startRowIndex: 0 }], {
+    api.fetchSheetProperties(spreadsheetId);
+    api.fetchGrid(spreadsheetId, [{ sheetId: 111, startRowIndex: 0 }], {
       includeProgrammaticFacts: false,
     });
 

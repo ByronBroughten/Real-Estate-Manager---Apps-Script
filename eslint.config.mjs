@@ -17,6 +17,16 @@ export default defineConfig(
         "error",
         { allowInterfaces: "with-single-extends" },
       ],
+      // Constants are camelCase too; methods stay free, so SHOUTING multi-row deletes pass.
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          selector: "variable",
+          format: ["camelCase", "PascalCase"],
+          leadingUnderscore: "allow",
+          custom: { regex: "^[A-Z][A-Z0-9]+$", match: false },
+        },
+      ],
     },
   },
 );

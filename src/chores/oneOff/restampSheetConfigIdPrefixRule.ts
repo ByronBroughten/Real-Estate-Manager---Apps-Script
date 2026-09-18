@@ -8,7 +8,7 @@ import type { GridRangeProps } from "../../00_base/RawSource";
 import { Val } from "../../utils/Val";
 import type { Chore } from "../Chore";
 
-const PINK = { red: 244 / 255, green: 204 / 255, blue: 204 / 255 };
+const pink = { red: 244 / 255, green: 204 / 255, blue: 204 / 255 };
 
 export const restampSheetConfigIdPrefixRule: Chore = {
   description:
@@ -29,7 +29,7 @@ export const restampSheetConfigIdPrefixRule: Chore = {
         type: "CUSTOM_FORMULA",
         formula: `=${idPrefix.anchoredA1("idPrefixIsUniqueOrEmpty")}=FALSE`,
       },
-      format: { backgroundColor: PINK },
+      format: { backgroundColor: pink },
     };
     const declared: ConditionalFormatRule = {
       kind: "boolean",

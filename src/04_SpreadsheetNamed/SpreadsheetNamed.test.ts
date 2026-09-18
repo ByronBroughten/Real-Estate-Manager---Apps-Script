@@ -83,32 +83,31 @@ describe("SpreadsheetNamed navigation", () => {
   });
 });
 
-const TOP_DATA_ROW_INDEX = ssConfigGet("tableHeaderRowIndexBase0") + 1;
-const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
-const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
-const SELECT_COLUMN_ID = columnConfigs.occupancy.updateTermsSelect.columnId;
-const NEXT_START_DATE_COLUMN_ID =
+const topDataRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
+const occupancyGid = sheetConfigs.occupancy.sheetGid;
+const idColumnId = columnConfigs.occupancy.id.columnId;
+const selectColumnId = columnConfigs.occupancy.updateTermsSelect.columnId;
+const nextStartDateColumnId =
   columnConfigs.occupancy.nextTermsStartDate.columnId;
-const NEXT_END_DATE_COLUMN_ID =
-  columnConfigs.occupancy.nextTermsEndDate.columnId;
-const NEXT_START_DATE_SERIAL = 45000;
-const NEXT_END_DATE_SERIAL = 45365;
-const FILLED_ROW_INDEX = 4;
-const BLANK_ROW_INDEX = 5;
+const nextEndDateColumnId = columnConfigs.occupancy.nextTermsEndDate.columnId;
+const nextStartDateSerial = 45000;
+const nextEndDateSerial = 45365;
+const filledRowIndex = 4;
+const blankRowIndex = 5;
 
 // Row 5 is the blank row; its checkbox is untouched, so it reads blank not false.
 function stubOccupancyWithBlankRow() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
           0: [
-            ID_COLUMN_ID,
-            SELECT_COLUMN_ID,
-            NEXT_START_DATE_COLUMN_ID,
-            NEXT_END_DATE_COLUMN_ID,
+            idColumnId,
+            selectColumnId,
+            nextStartDateColumnId,
+            nextEndDateColumnId,
           ],
           3: [
             "ID",
@@ -116,7 +115,7 @@ function stubOccupancyWithBlankRow() {
             "Next terms start date",
             "Next terms end date",
           ],
-          4: ["r:occ:row4", true, NEXT_START_DATE_SERIAL, NEXT_END_DATE_SERIAL],
+          4: ["r:occ:row4", true, nextStartDateSerial, nextEndDateSerial],
           5: [null, null, null, null],
         }),
         table: { endRowIndex: 6 },
@@ -144,27 +143,27 @@ describe("Named value accessors", () => {
   });
 
   it("names the sheet, the column and the row when CellNamed.value hits a blank cell", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(BLANK_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
 
     expect(() => cell.value()).toThrowError(
-      new RegExp(`"id".*"occupancy".*${BLANK_ROW_INDEX}`),
+      new RegExp(`"id".*"occupancy".*${blankRowIndex}`),
     );
   });
 
   it("keeps the generated column id out of the Named message", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(BLANK_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
 
-    expect(() => cell.value()).not.toThrowError(new RegExp(ID_COLUMN_ID));
+    expect(() => cell.value()).not.toThrowError(new RegExp(idColumnId));
   });
 
   it("returns the empty string from CellNamed.valueOrEmpty on that same cell", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(BLANK_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
 
     expect(cell.valueOrEmpty()).toBe("");
   });
 
   it("reads a filled cell identically through both forms", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(FILLED_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column("id").cell(filledRowIndex);
 
     expect(cell.value()).toBe("r:occ:row4");
     expect(cell.valueOrEmpty()).toBe("r:occ:row4");
@@ -175,10 +174,10 @@ describe("Named value accessors", () => {
     const sheet = fetchedOccupancySheet();
     const column = sheet.column("updateTermsSelect");
 
-    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe(false);
-    expect(column.value(BLANK_ROW_INDEX)).toBe(false);
-    expect(column.value(FILLED_ROW_INDEX)).toBe(true);
-    expect(sheet.row(BLANK_ROW_INDEX).value("updateTermsSelect")).toBe(false);
+    expect(column.valueOrEmpty(blankRowIndex)).toBe(false);
+    expect(column.value(blankRowIndex)).toBe(false);
+    expect(column.value(filledRowIndex)).toBe(true);
+    expect(sheet.row(blankRowIndex).value("updateTermsSelect")).toBe(false);
     assertType<IsExactly<ReturnType<typeof column.value>, boolean>>(true);
     assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, boolean>>(
       true,
@@ -188,19 +187,19 @@ describe("Named value accessors", () => {
   it("throws from ColumnNamed.value and returns empty from valueOrEmpty", () => {
     const column = fetchedOccupancySheet().column("id");
 
-    expect(() => column.value(BLANK_ROW_INDEX)).toThrowError(/is empty/);
-    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe("");
+    expect(() => column.value(blankRowIndex)).toThrowError(/is empty/);
+    expect(column.valueOrEmpty(blankRowIndex)).toBe("");
   });
 
   it("throws from RowNamed.value and returns empty from RowNamed.valueOrEmpty", () => {
-    const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(blankRowIndex);
 
     expect(() => row.value("id")).toThrowError(/is empty/);
     expect(row.valueOrEmpty("id")).toBe("");
   });
 
   it("keeps blanks in the bag returned by RowNamed.valuesOrEmpty", () => {
-    const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(blankRowIndex);
 
     expect(row.valuesOrEmpty("id", "updateTermsSelect")).toEqual({
       id: "",
@@ -217,10 +216,10 @@ describe("Named value accessors", () => {
   });
 
   it("throws from CellNamed.valueNotEmpty on a blank cell, naming it the same way", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(BLANK_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
 
     expect(() => cell.valueNotEmpty()).toThrowError(
-      new RegExp(`"id".*"occupancy".*${BLANK_ROW_INDEX}`),
+      new RegExp(`"id".*"occupancy".*${blankRowIndex}`),
     );
   });
 
@@ -228,34 +227,32 @@ describe("Named value accessors", () => {
     const sheet = fetchedOccupancySheet();
     const column = sheet.column("nextTermsStartDate");
 
-    expect(() => column.value(BLANK_ROW_INDEX)).toThrowError(
-      new RegExp(`"nextTermsStartDate".*"occupancy".*${BLANK_ROW_INDEX}`),
+    expect(() => column.value(blankRowIndex)).toThrowError(
+      new RegExp(`"nextTermsStartDate".*"occupancy".*${blankRowIndex}`),
     );
-    expect(() => column.valueNotEmpty(BLANK_ROW_INDEX)).toThrowError(
-      /is empty/,
-    );
+    expect(() => column.valueNotEmpty(blankRowIndex)).toThrowError(/is empty/);
     expect(() => column.valueArr).toThrowError(/is empty/);
     expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
     expect(() =>
-      sheet.row(BLANK_ROW_INDEX).valueNotEmpty("nextTermsStartDate"),
+      sheet.row(blankRowIndex).valueNotEmpty("nextTermsStartDate"),
     ).toThrowError(/is empty/);
-    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe("");
+    expect(column.valueOrEmpty(blankRowIndex)).toBe("");
   });
 
   it("reads a filled cell identically through all three words", () => {
     const column = fetchedOccupancySheet().column("nextTermsStartDate");
 
-    expect(column.value(FILLED_ROW_INDEX)).toBe(NEXT_START_DATE_SERIAL);
-    expect(column.valueNotEmpty(FILLED_ROW_INDEX)).toBe(NEXT_START_DATE_SERIAL);
-    expect(column.valueOrEmpty(FILLED_ROW_INDEX)).toBe(NEXT_START_DATE_SERIAL);
+    expect(column.value(filledRowIndex)).toBe(nextStartDateSerial);
+    expect(column.valueNotEmpty(filledRowIndex)).toBe(nextStartDateSerial);
+    expect(column.valueOrEmpty(filledRowIndex)).toBe(nextStartDateSerial);
   });
 
   it("keeps the blank out of the unmarked read's type on a column whose box is unticked", () => {
     const column = fetchedOccupancySheet().column("nextTermsStartDate");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const cell = column.cell(FILLED_ROW_INDEX);
+    const cell = column.cell(filledRowIndex);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const row = fetchedOccupancySheet().row(FILLED_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(filledRowIndex);
 
     assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial>>(true);
     assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, DateSerial>>(
@@ -289,30 +286,28 @@ describe("Named value accessors", () => {
     const sheet = fetchedOccupancySheet();
     const column = sheet.column("nextTermsEndDate");
 
-    expect(column.value(BLANK_ROW_INDEX)).toBe("");
-    expect(sheet.row(BLANK_ROW_INDEX).value("nextTermsEndDate")).toBe("");
-    expect(column.valueArr).toEqual([NEXT_END_DATE_SERIAL, ""]);
+    expect(column.value(blankRowIndex)).toBe("");
+    expect(sheet.row(blankRowIndex).value("nextTermsEndDate")).toBe("");
+    expect(column.valueArr).toEqual([nextEndDateSerial, ""]);
   });
 
   it("still throws from the blank-excluding reads on a column whose box is ticked", () => {
     const sheet = fetchedOccupancySheet();
     const column = sheet.column("nextTermsEndDate");
 
-    expect(() => column.valueNotEmpty(BLANK_ROW_INDEX)).toThrowError(
-      /is empty/,
-    );
+    expect(() => column.valueNotEmpty(blankRowIndex)).toThrowError(/is empty/);
     expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
     expect(() =>
-      sheet.row(BLANK_ROW_INDEX).valueNotEmpty("nextTermsEndDate"),
+      sheet.row(blankRowIndex).valueNotEmpty("nextTermsEndDate"),
     ).toThrowError(/is empty/);
   });
 
   it("keeps the blank in the unmarked read's type on a column whose box is ticked", () => {
     const column = fetchedOccupancySheet().column("nextTermsEndDate");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const cell = column.cell(BLANK_ROW_INDEX);
+    const cell = column.cell(blankRowIndex);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(blankRowIndex);
 
     assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial | "">>(true);
     assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, DateSerial>>(
@@ -337,7 +332,7 @@ describe("Named value accessors", () => {
     const sheet = fetchedOccupancySheet();
 
     expect(sheet.rowsFiltered({ id: "" }).map((row) => row.rowIndex)).toEqual([
-      BLANK_ROW_INDEX,
+      blankRowIndex,
     ]);
   });
 
@@ -347,8 +342,8 @@ describe("Named value accessors", () => {
     const sorted = sheet.sortRowsbyColumnName(sheet.rows, "id");
 
     expect(sorted.map((row) => row.rowIndex)).toEqual([
-      BLANK_ROW_INDEX,
-      FILLED_ROW_INDEX,
+      blankRowIndex,
+      filledRowIndex,
     ]);
   });
 });
@@ -392,7 +387,7 @@ describe("SheetNamed.rowByValue", () => {
 
     const row = fetchedOccupancySheet().rowByValue("id", "r:occ:row4");
 
-    expect(row.rowIndex).toBe(FILLED_ROW_INDEX);
+    expect(row.rowIndex).toBe(filledRowIndex);
   });
 
   it("throws naming the sheet, the column and the value when nothing matches", () => {
@@ -417,7 +412,7 @@ describe("SheetNamed.rowByValue", () => {
 
     const row = fetchedOccupancySheet().rowByValue("id", "");
 
-    expect(row.rowIndex).toBe(BLANK_ROW_INDEX);
+    expect(row.rowIndex).toBe(blankRowIndex);
   });
 });
 
@@ -425,14 +420,14 @@ function stubOccupancyWithDuplicateIds() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
           0: [
-            ID_COLUMN_ID,
-            SELECT_COLUMN_ID,
-            NEXT_START_DATE_COLUMN_ID,
-            NEXT_END_DATE_COLUMN_ID,
+            idColumnId,
+            selectColumnId,
+            nextStartDateColumnId,
+            nextEndDateColumnId,
           ],
           3: [
             "ID",
@@ -440,8 +435,8 @@ function stubOccupancyWithDuplicateIds() {
             "Next terms start date",
             "Next terms end date",
           ],
-          4: ["r:occ:dup", true, NEXT_START_DATE_SERIAL, NEXT_END_DATE_SERIAL],
-          5: ["r:occ:dup", true, NEXT_START_DATE_SERIAL, NEXT_END_DATE_SERIAL],
+          4: ["r:occ:dup", true, nextStartDateSerial, nextEndDateSerial],
+          5: ["r:occ:dup", true, nextStartDateSerial, nextEndDateSerial],
         }),
         table: { endRowIndex: 6 },
       },
@@ -496,7 +491,7 @@ describe("SheetNamed.appendRowWithVals", () => {
     const row = ss.sheet("sheetConfig").appendRowWithVals({ idPrefix: "prp" });
     ss.batchUpdateGSheets();
 
-    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(row.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
     expect(row.value("idPrefix")).toBe("prp");
   });
@@ -510,7 +505,7 @@ describe("SheetNamed.appendRowWithVals", () => {
     const row = ss.sheet("sheetConfig").appendRowWithVals({ idPrefix: "unt" });
     ss.batchUpdateGSheets();
 
-    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX + 1);
+    expect(row.rowIndex).toBe(topDataRowIndex + 1);
     expect(appendRequestCount(batchUpdateCalls)).toBe(1);
   });
 
@@ -526,8 +521,8 @@ describe("SheetNamed.appendRowWithVals", () => {
     ss.batchUpdateGSheets();
 
     expect([first.rowIndex, second.rowIndex]).toEqual([
-      TOP_DATA_ROW_INDEX,
-      TOP_DATA_ROW_INDEX + 1,
+      topDataRowIndex,
+      topDataRowIndex + 1,
     ]);
     expect(appendRequestCount(batchUpdateCalls)).toBe(1);
   });
@@ -545,7 +540,7 @@ describe("SheetNamed.appendRowWithVals", () => {
     const rebuilt = sheet.appendRowWithVals({ idPrefix: "two" });
     ss.batchUpdateGSheets();
 
-    expect(rebuilt.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(rebuilt.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
     expect(rebuilt.value("idPrefix")).toBe("two");
   });
@@ -562,13 +557,13 @@ describe("SheetNamed.appendRowWithVals", () => {
     const row = sheet.appendRowWithVals({ idPrefix: "new" });
     ss.batchUpdateGSheets();
 
-    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(row.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
     expect(deleteRequestIndexes(batchUpdateCalls)).toEqual([5]);
   });
 });
 
-const TEST_SHEET_GID = sheetConfigs.test.sheetGid;
+const testSheetGid = sheetConfigs.test.sheetGid;
 const testColumnIdRow = Object.values(columnConfigs.test).map(
   (column) => column.columnId,
 );
@@ -577,7 +572,7 @@ function stubTestSheetWithBlankRow() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: TEST_SHEET_GID,
+        sheetId: testSheetGid,
         title: "Test",
         rows: buildGridRows({
           0: testColumnIdRow,
@@ -653,7 +648,7 @@ describe("SheetNamed.appendRowWithAllVals", () => {
     const row = ss.sheet("test").appendRowWithAllVals(completeTestRow);
     ss.batchUpdateGSheets();
 
-    expect(row.rowIndex).toBe(TOP_DATA_ROW_INDEX);
+    expect(row.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
   });
 
@@ -740,7 +735,7 @@ describe("SheetNamed.appendRowWithAllVals", () => {
   });
 });
 
-const ADD_EXPENSE_GID = sheetConfigs.addPropertyExpense.sheetGid;
+const addExpenseGid = sheetConfigs.addPropertyExpense.sheetGid;
 const expenseColumns = columnConfigs.addPropertyExpense;
 
 // Biller name alone is filled: amount is a required blank, notes an allowed one.
@@ -748,7 +743,7 @@ function stubAddPropertyExpenseSheet() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: ADD_EXPENSE_GID,
+        sheetId: addExpenseGid,
         title: "Add Property Expense",
         rows: buildGridRows({
           0: [
@@ -775,7 +770,7 @@ function fetchedAddExpenseRow(): RowNamed<"addPropertyExpense"> {
     "isUpfrontInvestment",
   );
   ss.fetchAllPrepped();
-  return ss.sheet("addPropertyExpense").row(TOP_DATA_ROW_INDEX);
+  return ss.sheet("addPropertyExpense").row(topDataRowIndex);
 }
 
 describe("RowNamed.blankRequiredColumnNames", () => {
@@ -809,8 +804,8 @@ describe("RowNamed.blankRequiredColumnNames", () => {
   });
 });
 
-const TEST_FORMULA = "=2+SINGLE(test[Number])";
-const FORMULA_TEST_COL_INDEX = Object.keys(columnConfigs.test).indexOf(
+const testFormula = "=2+SINGLE(test[Number])";
+const formulaTestColIndex = Object.keys(columnConfigs.test).indexOf(
   "formulaTest",
 );
 
@@ -818,7 +813,7 @@ function stubTestSheetForFormulaWrite() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: TEST_SHEET_GID,
+        sheetId: testSheetGid,
         title: "Test",
         rows: buildGridRows({
           0: testColumnIdRow,
@@ -841,18 +836,18 @@ describe("Named formula writes", () => {
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
-    ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA);
+    ss.sheet("test").column("formulaTest").updateAllFormulas(testFormula);
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
         pasteData: {
           coordinate: {
-            sheetId: TEST_SHEET_GID,
-            rowIndex: TOP_DATA_ROW_INDEX,
-            columnIndex: FORMULA_TEST_COL_INDEX,
+            sheetId: testSheetGid,
+            rowIndex: topDataRowIndex,
+            columnIndex: formulaTestColIndex,
           },
-          data: `"${TEST_FORMULA}"\n"${TEST_FORMULA}"`,
+          data: `"${testFormula}"\n"${testFormula}"`,
           delimiter: "\t",
           type: "PASTE_FORMULA",
         },
@@ -867,19 +862,19 @@ describe("Named formula writes", () => {
     ss.fetchAllSheetProperties();
     ss.sheet("test")
       .column("formulaTest")
-      .cell(TOP_DATA_ROW_INDEX)
-      .updateFormula(TEST_FORMULA);
+      .cell(topDataRowIndex)
+      .updateFormula(testFormula);
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
         pasteData: {
           coordinate: {
-            sheetId: TEST_SHEET_GID,
-            rowIndex: TOP_DATA_ROW_INDEX,
-            columnIndex: FORMULA_TEST_COL_INDEX,
+            sheetId: testSheetGid,
+            rowIndex: topDataRowIndex,
+            columnIndex: formulaTestColIndex,
           },
-          data: `"${TEST_FORMULA}"`,
+          data: `"${testFormula}"`,
           delimiter: "\t",
           type: "PASTE_FORMULA",
         },
@@ -893,19 +888,19 @@ describe("Named formula writes", () => {
     const ss = SpreadsheetNamed.init();
     ss.sheet("test").prepFetchColumnsFull("formulaTest");
     ss.fetchAllPrepped();
-    ss.sheet("test").raw.removeRowsExcept(TOP_DATA_ROW_INDEX);
-    ss.sheet("test").column("formulaTest").updateActiveFormulas(TEST_FORMULA);
+    ss.sheet("test").raw.removeRowsExcept(topDataRowIndex);
+    ss.sheet("test").column("formulaTest").updateActiveFormulas(testFormula);
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
         pasteData: {
           coordinate: {
-            sheetId: TEST_SHEET_GID,
-            rowIndex: TOP_DATA_ROW_INDEX,
-            columnIndex: FORMULA_TEST_COL_INDEX,
+            sheetId: testSheetGid,
+            rowIndex: topDataRowIndex,
+            columnIndex: formulaTestColIndex,
           },
-          data: `"${TEST_FORMULA}"`,
+          data: `"${testFormula}"`,
           delimiter: "\t",
           type: "PASTE_FORMULA",
         },
@@ -930,7 +925,7 @@ describe("Named formula writes", () => {
     const ss = SpreadsheetNamed.init();
     ss.sheet("test").prepFetchColumnsFull("formulaTest", "num");
     ss.fetchAllPrepped();
-    ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA);
+    ss.sheet("test").column("formulaTest").updateAllFormulas(testFormula);
 
     expect(ss.sheet("test").column("formulaTest").valueArrOrEmpty).toEqual([
       11, 21,
@@ -948,7 +943,7 @@ describe("Named formula writes", () => {
       ss
         .sheet("test")
         .column("formulaTest")
-        .cell(TOP_DATA_ROW_INDEX)
+        .cell(topDataRowIndex)
         .updateValue(99),
     ).toThrowError(/formula column/);
   });
@@ -959,11 +954,8 @@ describe("Named formula writes", () => {
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
-    const cell = ss
-      .sheet("test")
-      .column("formulaTest")
-      .cell(TOP_DATA_ROW_INDEX);
-    cell.updateFormula(TEST_FORMULA);
+    const cell = ss.sheet("test").column("formulaTest").cell(topDataRowIndex);
+    cell.updateFormula(testFormula);
     cell.updateBackgroundColor(backgroundColor);
     ss.batchUpdateGSheets();
 
@@ -971,11 +963,11 @@ describe("Named formula writes", () => {
       {
         pasteData: {
           coordinate: {
-            sheetId: TEST_SHEET_GID,
-            rowIndex: TOP_DATA_ROW_INDEX,
-            columnIndex: FORMULA_TEST_COL_INDEX,
+            sheetId: testSheetGid,
+            rowIndex: topDataRowIndex,
+            columnIndex: formulaTestColIndex,
           },
-          data: `"${TEST_FORMULA}"`,
+          data: `"${testFormula}"`,
           delimiter: "\t",
           type: "PASTE_FORMULA",
         },
@@ -983,11 +975,11 @@ describe("Named formula writes", () => {
       {
         updateCells: {
           range: {
-            sheetId: TEST_SHEET_GID,
-            startRowIndex: TOP_DATA_ROW_INDEX,
-            endRowIndex: TOP_DATA_ROW_INDEX + 1,
-            startColumnIndex: FORMULA_TEST_COL_INDEX,
-            endColumnIndex: FORMULA_TEST_COL_INDEX + 1,
+            sheetId: testSheetGid,
+            startRowIndex: topDataRowIndex,
+            endRowIndex: topDataRowIndex + 1,
+            startColumnIndex: formulaTestColIndex,
+            endColumnIndex: formulaTestColIndex + 1,
           },
           rows: [
             {
@@ -1006,10 +998,10 @@ describe("Named formula writes", () => {
     const ss = SpreadsheetNamed.init();
     ss.sheet("test").prepFetchColumnsFull("formulaTest");
     ss.fetchAllPrepped();
-    ss.sheet("test").raw.removeRowsExcept(TOP_DATA_ROW_INDEX);
+    ss.sheet("test").raw.removeRowsExcept(topDataRowIndex);
 
     expect(() =>
-      ss.sheet("test").column("formulaTest").updateAllFormulas(TEST_FORMULA),
+      ss.sheet("test").column("formulaTest").updateAllFormulas(testFormula),
     ).toThrowError(/pruned to a selection/);
   });
 
@@ -1021,15 +1013,15 @@ describe("Named formula writes", () => {
       formulaColumn: ColumnNamed<"test", "formulaTest">,
       numColumn: ColumnNamed<"test", "num">,
     ) {
-      formulaColumn.updateAllFormulas(TEST_FORMULA);
-      formulaColumn.updateActiveFormulas(TEST_FORMULA);
-      formulaColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
+      formulaColumn.updateAllFormulas(testFormula);
+      formulaColumn.updateActiveFormulas(testFormula);
+      formulaColumn.cell(topDataRowIndex).updateFormula(testFormula);
       // @ts-expect-error Num is not a formula column
-      numColumn.updateAllFormulas(TEST_FORMULA);
+      numColumn.updateAllFormulas(testFormula);
       // @ts-expect-error Num is not a formula column
-      numColumn.updateActiveFormulas(TEST_FORMULA);
+      numColumn.updateActiveFormulas(testFormula);
       // @ts-expect-error Num is not a formula column
-      numColumn.cell(TOP_DATA_ROW_INDEX).updateFormula(TEST_FORMULA);
+      numColumn.cell(topDataRowIndex).updateFormula(testFormula);
     }
 
     expect(formulaWriteTypeGate).toEqual(expect.any(Function));

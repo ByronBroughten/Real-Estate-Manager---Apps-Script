@@ -6,7 +6,7 @@ import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   blankSheetConfigRow,
   filledSheetConfigRow,
-  SHEET_CONFIG_GID,
+  sheetConfigGid,
   sheetConfigColumnIdRow,
   stubSheetConfigSheet,
 } from "../testSupport/fakeSheetConfigSheet";
@@ -24,8 +24,8 @@ import { SheetIndexed } from "./SheetIndexed";
 import { SheetMetaIndexed } from "./SheetMetaIndexed";
 import { SpreadsheetIndexed } from "./SpreadsheetIndexed";
 
-const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
-const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
+const occupancyGid = sheetConfigs.occupancy.sheetGid;
+const idColumnId = columnConfigs.occupancy.id.columnId;
 
 // A mis-wired accessor still type-checks; the instance checks catch it.
 describe("SpreadsheetIndexed navigation", () => {
@@ -34,10 +34,10 @@ describe("SpreadsheetIndexed navigation", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    const sheet = ssi.sheet(OCCUPANCY_GID);
-    const sheetMeta = ssi.sheetMeta(OCCUPANCY_GID);
-    const column = sheet.column(ID_COLUMN_ID);
-    const columnMeta = sheetMeta.column(ID_COLUMN_ID);
+    const sheet = ssi.sheet(occupancyGid);
+    const sheetMeta = ssi.sheetMeta(occupancyGid);
+    const column = sheet.column(idColumnId);
+    const columnMeta = sheetMeta.column(idColumnId);
 
     assertType<IsExactly<typeof sheet, SheetIndexed>>(true);
     assertType<IsExactly<typeof sheetMeta, SheetMetaIndexed>>(true);
@@ -63,19 +63,19 @@ describe("SpreadsheetIndexed navigation", () => {
   });
 });
 
-const SELECT_COLUMN_ID = columnConfigs.occupancy.updateTermsSelect.columnId;
-const FILLED_ROW_INDEX = 4;
-const BLANK_ROW_INDEX = 5;
+const selectColumnId = columnConfigs.occupancy.updateTermsSelect.columnId;
+const filledRowIndex = 4;
+const blankRowIndex = 5;
 
 // Row 5 is the blank row; its checkbox is untouched, so it reads blank not false.
 function stubOccupancyWithBlankRow() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
-          0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+          0: [idColumnId, selectColumnId],
           3: ["ID", "Update terms, select"],
           4: ["r:occ:row4", true],
           5: [null, null],
@@ -90,9 +90,9 @@ function fetchedOccupancySheet(): SheetIndexed {
   const ssi = new SpreadsheetIndexed(
     SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
   );
-  const sheet = ssi.sheet(OCCUPANCY_GID);
-  sheet.column(ID_COLUMN_ID).prepFetchFull();
-  sheet.column(SELECT_COLUMN_ID).prepFetchFull();
+  const sheet = ssi.sheet(occupancyGid);
+  sheet.column(idColumnId).prepFetchFull();
+  sheet.column(selectColumnId).prepFetchFull();
   ssi.fetchAllPrepped();
   return sheet;
 }
@@ -104,19 +104,15 @@ describe("Indexed value accessors", () => {
   });
 
   it("throws from CellIndexed.valueNotEmpty on a blank cell, naming the column id and the row", () => {
-    const cell = fetchedOccupancySheet()
-      .column(ID_COLUMN_ID)
-      .cell(BLANK_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column(idColumnId).cell(blankRowIndex);
 
     expect(() => cell.valueNotEmpty()).toThrowError(
-      new RegExp(`${ID_COLUMN_ID}.*${BLANK_ROW_INDEX}`),
+      new RegExp(`${idColumnId}.*${blankRowIndex}`),
     );
   });
 
   it("returns the empty string from CellIndexed.valueOrEmpty on that same cell", () => {
-    const cell = fetchedOccupancySheet()
-      .column(ID_COLUMN_ID)
-      .cell(BLANK_ROW_INDEX);
+    const cell = fetchedOccupancySheet().column(idColumnId).cell(blankRowIndex);
 
     expect(cell.valueOrEmpty()).toBe("");
   });
@@ -125,15 +121,15 @@ describe("Indexed value accessors", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: OCCUPANCY_GID,
+          sheetId: occupancyGid,
           title: "Occupancy",
           rows: buildGridRows({
-            0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+            0: [idColumnId, selectColumnId],
             3: ["ID", "Update terms, select"],
             4: ["r:occ:row4", true],
             5: [null, null],
           }),
-          rowsWithNoGridData: [BLANK_ROW_INDEX],
+          rowsWithNoGridData: [blankRowIndex],
           table: { endRowIndex: 6 },
         },
       ],
@@ -141,19 +137,19 @@ describe("Indexed value accessors", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    const sheet = ssi.sheet(OCCUPANCY_GID);
-    sheet.column(ID_COLUMN_ID).prepFetchSpecific([BLANK_ROW_INDEX]);
+    const sheet = ssi.sheet(occupancyGid);
+    sheet.column(idColumnId).prepFetchSpecific([blankRowIndex]);
     ssi.fetchAllPrepped();
 
-    expect(
-      sheet.column(ID_COLUMN_ID).cell(BLANK_ROW_INDEX).valueOrEmpty(),
-    ).toBe("");
+    expect(sheet.column(idColumnId).cell(blankRowIndex).valueOrEmpty()).toBe(
+      "",
+    );
   });
 
   it("reads a filled cell identically through both forms", () => {
     const cell = fetchedOccupancySheet()
-      .column(ID_COLUMN_ID)
-      .cell(FILLED_ROW_INDEX);
+      .column(idColumnId)
+      .cell(filledRowIndex);
 
     expect(cell.valueNotEmpty()).toBe("r:occ:row4");
     expect(cell.valueOrEmpty()).toBe("r:occ:row4");
@@ -163,12 +159,12 @@ describe("Indexed value accessors", () => {
     const sheet = fetchedOccupancySheet();
     const column = new ColumnIndexed<"checkbox">({
       ...sheet.sheetIndexedProps,
-      columnId: SELECT_COLUMN_ID,
+      columnId: selectColumnId,
     });
 
-    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe(false);
-    expect(column.valueNotEmpty(BLANK_ROW_INDEX)).toBe(false);
-    expect(column.valueNotEmpty(FILLED_ROW_INDEX)).toBe(true);
+    expect(column.valueOrEmpty(blankRowIndex)).toBe(false);
+    expect(column.valueNotEmpty(blankRowIndex)).toBe(false);
+    expect(column.valueNotEmpty(filledRowIndex)).toBe(true);
     expect(column.valueArrOrEmpty).toEqual([true, false]);
     expect(column.valueArrNotEmpty).toEqual([true, false]);
     assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, boolean>>(
@@ -180,23 +176,21 @@ describe("Indexed value accessors", () => {
   });
 
   it("throws from ColumnIndexed.valueNotEmpty and returns empty from valueOrEmpty", () => {
-    const column = fetchedOccupancySheet().column(ID_COLUMN_ID);
+    const column = fetchedOccupancySheet().column(idColumnId);
 
-    expect(() => column.valueNotEmpty(BLANK_ROW_INDEX)).toThrowError(
-      /is empty/,
-    );
-    expect(column.valueOrEmpty(BLANK_ROW_INDEX)).toBe("");
+    expect(() => column.valueNotEmpty(blankRowIndex)).toThrowError(/is empty/);
+    expect(column.valueOrEmpty(blankRowIndex)).toBe("");
   });
 
   it("throws from RowIndexed.valueNotEmpty and returns empty from RowIndexed.valueOrEmpty", () => {
-    const row = fetchedOccupancySheet().row(BLANK_ROW_INDEX);
+    const row = fetchedOccupancySheet().row(blankRowIndex);
 
-    expect(() => row.valueNotEmpty(ID_COLUMN_ID)).toThrowError(/is empty/);
-    expect(row.valueOrEmpty(ID_COLUMN_ID)).toBe("");
+    expect(() => row.valueNotEmpty(idColumnId)).toThrowError(/is empty/);
+    expect(row.valueOrEmpty(idColumnId)).toBe("");
   });
 
   it("throws from valueArrNotEmpty when a fetched cell is blank, but not from the blank-tolerant forms", () => {
-    const column = fetchedOccupancySheet().column(ID_COLUMN_ID);
+    const column = fetchedOccupancySheet().column(idColumnId);
 
     expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
     expect(column.valueArrOrEmpty).toEqual(["r:occ:row4", ""]);
@@ -226,7 +220,7 @@ function fetchedSheetConfig(): SheetIndexed {
   const ssi = new SpreadsheetIndexed(
     SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
   );
-  const sheet = ssi.sheet(SHEET_CONFIG_GID);
+  const sheet = ssi.sheet(sheetConfigGid);
   sheet.topRow.prepFetchFull();
   ssi.fetchAllPrepped();
   return sheet;
@@ -236,8 +230,8 @@ function unfetchedSheetConfig(): SheetIndexed {
   const ssi = new SpreadsheetIndexed(
     SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
   );
-  ssi.sheetMeta(SHEET_CONFIG_GID).ensureColumnIdsAreFetched();
-  return ssi.sheet(SHEET_CONFIG_GID);
+  ssi.sheetMeta(sheetConfigGid).ensureColumnIdsAreFetched();
+  return ssi.sheet(sheetConfigGid);
 }
 
 describe("RowIndexed.isBlank / isReusable", () => {
@@ -305,7 +299,7 @@ describe("RowIndexed.clearValues", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    const sheet = ssi.sheet(SHEET_CONFIG_GID);
+    const sheet = ssi.sheet(sheetConfigGid);
     sheet.topRow.prepFetchFull();
     ssi.fetchAllPrepped();
     sheet.topRow.clearValues();
@@ -368,7 +362,7 @@ describe("SheetIndexed.appendRowDefault", () => {
     const { batchUpdateCalls } = stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: columnIdRow,
@@ -382,7 +376,7 @@ describe("SheetIndexed.appendRowDefault", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    const sheet = ssi.sheet(SHEET_CONFIG_GID);
+    const sheet = ssi.sheet(sheetConfigGid);
     sheet.topRow.prepFetchFull();
     ssi.fetchAllPrepped();
     sheet.appendRowDefault();
@@ -396,9 +390,9 @@ describe("SheetIndexed.appendRowDefault", () => {
   });
 });
 
-const TEST_GID = sheetConfigs.test.sheetGid;
-const TEST_NUMBER_COLUMN_ID = columnConfigs.test.num.columnId;
-const TEST_FORMULA_COLUMN_ID = columnConfigs.test.formulaTest.columnId;
+const testGid = sheetConfigs.test.sheetGid;
+const testNumberColumnId = columnConfigs.test.num.columnId;
+const testFormulaColumnId = columnConfigs.test.formulaTest.columnId;
 
 describe("Indexed formula writes", () => {
   beforeEach(() => {
@@ -406,7 +400,7 @@ describe("Indexed formula writes", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: TEST_GID,
+          sheetId: testGid,
           title: "Test",
           rows: buildGridRows({
             0: Object.values(columnConfigs.test).map(
@@ -426,7 +420,7 @@ describe("Indexed formula writes", () => {
     ssi.raw.fetchAllSheetProperties();
 
     expect(() =>
-      ssi.sheet(TEST_GID).column(TEST_NUMBER_COLUMN_ID).updateAllFormulas("=1"),
+      ssi.sheet(testGid).column(testNumberColumnId).updateAllFormulas("=1"),
     ).toThrowError(/not a formula column/);
   });
 
@@ -438,8 +432,8 @@ describe("Indexed formula writes", () => {
 
     expect(() =>
       ssi
-        .sheet(TEST_GID)
-        .column(TEST_FORMULA_COLUMN_ID)
+        .sheet(testGid)
+        .column(testFormulaColumnId)
         .updateAllFormulas("=2+SINGLE(test[Number])"),
     ).not.toThrow();
   });
@@ -461,10 +455,10 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
     return stubSheetsService({
       sheets: [
         {
-          sheetId: OCCUPANCY_GID,
+          sheetId: occupancyGid,
           title: "Occupancy",
           rows: buildGridRows({
-            0: [ID_COLUMN_ID, SELECT_COLUMN_ID],
+            0: [idColumnId, selectColumnId],
             3: ["ID", "Update terms, select"],
             4: ["r:occ:row4", true],
             5: [null, null],
@@ -500,15 +494,15 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    ssi.sheet(OCCUPANCY_GID).topRow.prepFetchFull();
+    ssi.sheet(occupancyGid).topRow.prepFetchFull();
     ssi.fetchAllPrepped();
 
     expect(lastFetchedRanges(getByDataFilterCalls)).toEqual(
       expect.arrayContaining([
         {
-          sheetId: OCCUPANCY_GID,
-          startRowIndex: FILLED_ROW_INDEX,
-          endRowIndex: FILLED_ROW_INDEX + 1,
+          sheetId: occupancyGid,
+          startRowIndex: filledRowIndex,
+          endRowIndex: filledRowIndex + 1,
           startColumnIndex: 0,
         },
       ]),
@@ -520,14 +514,14 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    ssi.sheet(OCCUPANCY_GID).column(ID_COLUMN_ID).prepFetchFull();
+    ssi.sheet(occupancyGid).column(idColumnId).prepFetchFull();
     ssi.fetchAllPrepped();
 
     expect(lastFetchedRanges(getByDataFilterCalls)).toEqual(
       expect.arrayContaining([
         {
-          sheetId: OCCUPANCY_GID,
-          startRowIndex: FILLED_ROW_INDEX,
+          sheetId: occupancyGid,
+          startRowIndex: filledRowIndex,
           startColumnIndex: 0,
           endColumnIndex: 1,
         },
@@ -540,19 +534,15 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
     const ssi = new SpreadsheetIndexed(
       SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
-    ssi
-      .sheet(OCCUPANCY_GID)
-      .column(ID_COLUMN_ID)
-      .cell(FILLED_ROW_INDEX)
-      .prepFetch();
+    ssi.sheet(occupancyGid).column(idColumnId).cell(filledRowIndex).prepFetch();
     ssi.fetchAllPrepped();
 
     expect(lastFetchedRanges(getByDataFilterCalls)).toEqual(
       expect.arrayContaining([
         {
-          sheetId: OCCUPANCY_GID,
-          startRowIndex: FILLED_ROW_INDEX,
-          endRowIndex: FILLED_ROW_INDEX + 1,
+          sheetId: occupancyGid,
+          startRowIndex: filledRowIndex,
+          endRowIndex: filledRowIndex + 1,
           startColumnIndex: 0,
           endColumnIndex: 1,
         },

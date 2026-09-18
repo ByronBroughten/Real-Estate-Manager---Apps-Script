@@ -15,19 +15,19 @@ type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
 type FloorCellKind = "header" | "column ID" | "group heading" | "data";
 type FloorSheetName = "spreadsheetConfig" | "sheetConfig" | "columnConfig";
 
-const FLOOR_SHEET_NAMES: readonly FloorSheetName[] = [
+const floorSheetNames: readonly FloorSheetName[] = [
   "spreadsheetConfig",
   "sheetConfig",
   "columnConfig",
 ];
-const FLOOR_PREFIX = "Config-sheet floor";
-const GROUP_HEADINGS = [
+const floorPrefix = "Config-sheet floor";
+const groupHeadings = [
   "Fill Row IDs",
   "Sync Config Sheet Rows",
   "Spreadsheet Rules",
 ] as const;
 
-const LAYOUT_COLUMNS: readonly SpreadsheetConfigColumnName[] = [
+const layoutColumns: readonly SpreadsheetConfigColumnName[] = [
   "idDelimiter",
   "idHeader",
   "startTableColumnIndexBase1",
@@ -37,7 +37,7 @@ const LAYOUT_COLUMNS: readonly SpreadsheetConfigColumnName[] = [
   "tableHeaderRowIndexBase1",
 ];
 
-const SHEET_CONFIG_COLUMNS: readonly ColumnName<"sheetConfig">[] = [
+const sheetConfigColumns: readonly ColumnName<"sheetConfig">[] = [
   "sheetGid",
   "sheetTitle",
   "idPrefix",
@@ -45,7 +45,7 @@ const SHEET_CONFIG_COLUMNS: readonly ColumnName<"sheetConfig">[] = [
   "letApiAccess",
 ];
 
-const COLUMN_CONFIG_COLUMNS: readonly ColumnName<"columnConfig">[] = [
+const columnConfigColumns: readonly ColumnName<"columnConfig">[] = [
   "sheetGid",
   "columnId",
   "sheetTitle",
@@ -78,19 +78,19 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       ...this._spreadsheetConfigDeclarations(feedbackColumnNames, report),
       ...this._bookkeepingDeclarations(
         this.ss.sheet("sheetConfig"),
-        SHEET_CONFIG_COLUMNS,
+        sheetConfigColumns,
       ),
       this._formulaColumnDeclaration(this.ss.sheet("sheetConfig")),
       ...this._bookkeepingDeclarations(
         this.ss.sheet("columnConfig"),
-        COLUMN_CONFIG_COLUMNS,
+        columnConfigColumns,
       ),
     ];
     this._reconcile(declarations, report);
     return report.join("\n");
   }
   private _fetchFloorSheets(): void {
-    FLOOR_SHEET_NAMES.forEach((sheetName) => {
+    floorSheetNames.forEach((sheetName) => {
       const sheet = this.ss.sheet(sheetName);
       sheet.meta.uniformRow("columnId").prepFetchFull();
       sheet.meta.uniformRow("tableHeader").prepFetchFull();
@@ -117,7 +117,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       ...this._bookkeepingDeclarations(sheet, [
         "tableMenuSpace",
         ...feedbackColumnNames,
-        ...LAYOUT_COLUMNS,
+        ...layoutColumns,
       ]),
       this._dataCellDeclaration(tableMenuSpace),
       ...feedbackColumnNames.map((columnName) =>
@@ -149,7 +149,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       );
       const isGroupStart =
         heading !== previousHeading &&
-        GROUP_HEADINGS.some((groupHeading) => groupHeading === heading);
+        groupHeadings.some((groupHeading) => groupHeading === heading);
       previousHeading = heading;
       if (!isGroupStart) return;
       declarations.push(
@@ -214,7 +214,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     const header = String(
       column.meta.uniformCell("tableHeader").valueOrEmpty(),
     );
-    return `${FLOOR_PREFIX} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
+    return `${floorPrefix} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
   }
   private _reconcile(declarations: FloorDeclaration[], report: string[]): void {
     const existing = this._floorProtections();
@@ -250,14 +250,14 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     }
   }
   private _removeProtection(protection: ModelableProtectedRange): void {
-    FLOOR_SHEET_NAMES.forEach((sheetName) => {
+    floorSheetNames.forEach((sheetName) => {
       const sheet = this.ss.sheet(sheetName);
       if (sheet.schema.sheetGid !== protection.range.sheetId) return;
       sheet.removeEditProtectionById(protection.id);
     });
   }
   private _floorProtections(): ModelableProtectedRange[] {
-    return FLOOR_SHEET_NAMES.flatMap((sheetName) =>
+    return floorSheetNames.flatMap((sheetName) =>
       this.ss
         .sheet(sheetName)
         .protectedRanges()
@@ -272,7 +272,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
 
 function floorMatchKey(description: string): string | undefined {
   const parts = description.split(" · ");
-  if (parts.length !== 5 || parts[0] !== FLOOR_PREFIX) return undefined;
+  if (parts.length !== 5 || parts[0] !== floorPrefix) return undefined;
   const columnId = parts[2]?.match(/\(([^)]+)\)$/)?.[1];
   if (columnId === undefined) return undefined;
   return `${columnId} · ${parts[3]} · ${parts[4]}`;

@@ -3,8 +3,8 @@ import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import { getSheetTraitByName } from "../01_generatedConfigs/sheetConfigsTypes";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
-const OCCUPANCY_GID = getSheetTraitByName("occupancy", "sheetGid");
-const UNKNOWN_GID = 999999;
+const occupancyGid = getSheetTraitByName("occupancy", "sheetGid");
+const unknownGid = 999999;
 
 function onlyLine(request: OpaqueRawRequest): string {
   const [line] = UpdateRequestSummary.init([request]).lines;
@@ -17,7 +17,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         updateCells: {
           range: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             startRowIndex: 4,
             endRowIndex: 6,
             startColumnIndex: 2,
@@ -39,10 +39,10 @@ describe("UpdateRequestSummary.lines", () => {
     expect(
       onlyLine({
         updateCells: {
-          range: { sheetId: UNKNOWN_GID, startRowIndex: 0, endRowIndex: 1 },
+          range: { sheetId: unknownGid, startRowIndex: 0, endRowIndex: 1 },
         },
       }),
-    ).toContain(`gid ${UNKNOWN_GID}`);
+    ).toContain(`gid ${unknownGid}`);
   });
 
   it("counts every cell a column fill covers", () => {
@@ -50,7 +50,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         repeatCell: {
           range: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             startRowIndex: 4,
             endRowIndex: 9,
             startColumnIndex: 5,
@@ -67,7 +67,7 @@ describe("UpdateRequestSummary.lines", () => {
     expect(
       onlyLine({
         appendCells: {
-          sheetId: OCCUPANCY_GID,
+          sheetId: occupancyGid,
           rows: [{ values: [{ userEnteredValue: { stringValue: "r:abc" } }] }],
           fields: "userEnteredValue",
         },
@@ -80,7 +80,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         deleteDimension: {
           range: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             dimension: "ROWS",
             startIndex: 6,
             endIndex: 9,
@@ -95,7 +95,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         insertDimension: {
           range: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             dimension: "COLUMNS",
             startIndex: 27,
             endIndex: 28,
@@ -109,7 +109,7 @@ describe("UpdateRequestSummary.lines", () => {
     expect(
       onlyLine({
         sortRange: {
-          range: { sheetId: OCCUPANCY_GID, startRowIndex: 4 },
+          range: { sheetId: occupancyGid, startRowIndex: 4 },
           sortSpecs: [{ dimensionIndex: 2, sortOrder: "ASCENDING" }],
         },
       }),
@@ -124,7 +124,7 @@ describe("UpdateRequestSummary.lines", () => {
           replacement: "Payment",
           matchEntireCell: true,
           range: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             startRowIndex: 4,
             endRowIndex: 9,
             startColumnIndex: 2,
@@ -143,7 +143,7 @@ describe("UpdateRequestSummary.lines", () => {
         findReplace: {
           find: "Currency",
           replacement: "Payment",
-          sheetId: OCCUPANCY_GID,
+          sheetId: occupancyGid,
         },
       }),
     ).toBe(
@@ -171,7 +171,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         pasteData: {
           coordinate: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             rowIndex: 4,
             columnIndex: 6,
           },
@@ -190,7 +190,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         pasteData: {
           coordinate: {
-            sheetId: OCCUPANCY_GID,
+            sheetId: occupancyGid,
             rowIndex: 4,
             columnIndex: 6,
           },
@@ -210,7 +210,7 @@ describe("UpdateRequestSummary.lines", () => {
           rule: {
             ranges: [
               {
-                sheetId: OCCUPANCY_GID,
+                sheetId: occupancyGid,
                 startRowIndex: 4,
                 endRowIndex: 11,
                 startColumnIndex: 0,
@@ -230,7 +230,7 @@ describe("UpdateRequestSummary.lines", () => {
     expect(
       onlyLine({
         deleteConditionalFormatRule: {
-          sheetId: OCCUPANCY_GID,
+          sheetId: occupancyGid,
           index: 3,
         },
       }),
@@ -243,7 +243,7 @@ describe("UpdateRequestSummary.lines", () => {
         addProtectedRange: {
           protectedRange: {
             range: {
-              sheetId: OCCUPANCY_GID,
+              sheetId: occupancyGid,
               startRowIndex: 4,
               endRowIndex: 11,
               startColumnIndex: 0,

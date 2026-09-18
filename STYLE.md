@@ -37,6 +37,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **Trim a method name to what the return type doesn't already say** — `generateConfigFilesSources` → `generateConfigFiles`.
 - **A name has to read to someone who has never opened this codebase** — never jargon named after the mechanism that sets it.
 - **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name**, and keeps it once a guard makes the operation safe.
+- **A constant is camelCase; two or more in one file that serve one purpose become one `as const` object named for that purpose** (`fieldMasks`, `layoutLimits`). Lint enforces the casing.
 - **Method names draw from one controlled verb vocabulary** — don't invent a new verb for a meaning already on this list:
   - `fetch` — actually hits the live Sheets API
   - `prep`/`gather` — queue state locally before a fetch (`prepFetchX` queues only; `gatherFetchX` queues _and_ fetches)

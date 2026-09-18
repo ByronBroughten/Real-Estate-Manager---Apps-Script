@@ -19,17 +19,17 @@ import {
   type CheckboxColumnName,
 } from "./CheckboxColumnOperator";
 
-const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
+const occupancyGid = sheetConfigs.occupancy.sheetGid;
 const c = columnConfigs.occupancy;
 const columnIds = [c.id.columnId, c.updateTermsSelect.columnId];
-const SELECT_COL_INDEX = 1;
-const END_ROW_INDEX = 7;
+const selectColIndex = 1;
+const endRowIndex = 7;
 
 function seedOccupancySelectColumn(selectCells: readonly FakeCell[]) {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
           0: columnIds,
@@ -38,7 +38,7 @@ function seedOccupancySelectColumn(selectCells: readonly FakeCell[]) {
           5: ["r:occ:row5", selectCells[1] ?? null],
           6: ["r:occ:row6", selectCells[2] ?? null],
         }),
-        table: { endRowIndex: END_ROW_INDEX },
+        table: { endRowIndex },
       },
     ],
   });
@@ -70,7 +70,7 @@ function selectFills(
     .flatMap((call) => call.requests ?? [])
     .filter(
       (request) =>
-        request.repeatCell?.range?.startColumnIndex === SELECT_COL_INDEX,
+        request.repeatCell?.range?.startColumnIndex === selectColIndex,
     )
     .map((request) => ({
       startRowIndex: request.repeatCell?.range?.startRowIndex,

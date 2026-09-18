@@ -16,13 +16,13 @@ import { ColumnConfigOperator } from "./ColumnConfigOperator";
 // production code actually resolves column names through.
 const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
-const SHEET_CONFIG_GID = 210603630;
-const COLUMN_CONFIG_GID = 2034522667;
-const PROPERTY_GID = 999001;
-const NEW_SHEET_GID = 999002;
-const UNRESOLVABLE_GID = 424242;
+const sheetConfigGid = 210603630;
+const columnConfigGid = 2034522667;
+const propertyGid = 999001;
+const newSheetGid = 999002;
+const unresolvableGid = 424242;
 
-const TEST_SHEET_GID = 2089200354;
+const testSheetGid = 2089200354;
 
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
@@ -40,13 +40,13 @@ const columnConfigColumnIdRow = [
 ];
 
 const freshlyAppendedRowMissingHeaderAndValueName = [
-  PROPERTY_GID,
+  propertyGid,
   "c:prp:ddd",
   "Property",
   "",
 ];
 const rowReferencingUnresolvableSheet = [
-  UNRESOLVABLE_GID,
+  unresolvableGid,
   "c:???:eee",
   "",
   "Orphan Field",
@@ -83,29 +83,29 @@ function stubGroupedColumnConfigSheets(): void {
   stubSheetsService({
     sheets: [
       {
-        sheetId: SHEET_CONFIG_GID,
+        sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
-          4: [PROPERTY_GID, "Property", true, ""],
-          5: [NEW_SHEET_GID, "Brand New Sheet", true, ""],
+          4: [propertyGid, "Property", true, ""],
+          5: [newSheetGid, "Brand New Sheet", true, ""],
         }),
         table: { endRowIndex: 6 },
       },
       {
-        sheetId: COLUMN_CONFIG_GID,
+        sheetId: columnConfigGid,
         title: "Column Config",
         rows: buildGridRows({
           0: columnConfigColumnIdRow,
           4: [
-            PROPERTY_GID,
+            propertyGid,
             "c:prp:aaa",
             "Property",
             "Rent Amount",
           ],
-          5: [PROPERTY_GID, "c:prp:bbb", "Property", "Notes"],
+          5: [propertyGid, "c:prp:bbb", "Property", "Notes"],
           6: [
-            NEW_SHEET_GID,
+            newSheetGid,
             "c:999002:ccc",
             "Brand New Sheet",
             "Some Field",
@@ -114,7 +114,7 @@ function stubGroupedColumnConfigSheets(): void {
         table: { endRowIndex: 7 },
       },
       {
-        sheetId: PROPERTY_GID,
+        sheetId: propertyGid,
         title: "Property",
         rows: buildGridRows({
           0: ["c:prp:aaa", "c:prp:bbb"],
@@ -124,7 +124,7 @@ function stubGroupedColumnConfigSheets(): void {
         table: { endRowIndex: 5 },
       },
       {
-        sheetId: NEW_SHEET_GID,
+        sheetId: newSheetGid,
         title: "Brand New Sheet",
         rows: buildGridRows({
           0: ["c:999002:ccc"],
@@ -216,21 +216,21 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", true, ""],
+            4: [propertyGid, "Property", true, ""],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
             4: [
-              PROPERTY_GID,
+              propertyGid,
               "c:prp:aaa",
               "Property",
               "Rent Amount",
@@ -238,7 +238,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               true,
             ],
             5: [
-              PROPERTY_GID,
+              propertyGid,
               "c:prp:bbb",
               "Property",
               "Notes",
@@ -249,7 +249,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           table: { endRowIndex: 6 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({
             0: ["c:prp:aaa", "c:prp:bbb"],
@@ -271,13 +271,13 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
@@ -286,7 +286,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
         },
@@ -302,13 +302,13 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({ 0: sheetConfigColumnIdRow }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
@@ -317,7 +317,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
         },
@@ -333,27 +333,27 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", true, ""],
+            4: [propertyGid, "Property", true, ""],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
             4: [
-              PROPERTY_GID,
+              propertyGid,
               "c:prp:aaa",
               "Property",
               "Rent Amount",
             ],
             5: [
-              PROPERTY_GID,
+              propertyGid,
               "c:prp:bbb",
               "Property",
               "Rent  Amount",
@@ -362,7 +362,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           table: { endRowIndex: 6 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({
             0: ["c:prp:aaa", "c:prp:bbb"],
@@ -382,7 +382,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
 
 describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", () => {
   const testSheetConfigRowWithApiAccess = [
-    TEST_SHEET_GID,
+    testSheetGid,
     "Test",
     true,
     "test",
@@ -390,7 +390,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
 
   function seedSheetConfigFixture() {
     return {
-      sheetId: SHEET_CONFIG_GID,
+      sheetId: sheetConfigGid,
       title: "Sheet Config",
       rows: buildGridRows({
         0: sheetConfigColumnIdRow,
@@ -405,24 +405,24 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
       sheets: [
         seedSheetConfigFixture(),
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
             4: [
-              TEST_SHEET_GID,
+              testSheetGid,
               "c:test:corr01",
               "Stale Title",
               "Stale Header",
               null,
               true,
             ],
-            5: [TEST_SHEET_GID, "c:test:corr02", "Test", "ID"],
+            5: [testSheetGid, "c:test:corr02", "Test", "ID"],
           }),
           table: { endRowIndex: 6 },
         },
         {
-          sheetId: TEST_SHEET_GID,
+          sheetId: testSheetGid,
           title: "Test",
           rows: buildGridRows({
             0: ["c:test:corr01", "c:test:corr02"],
@@ -461,16 +461,16 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
       sheets: [
         seedSheetConfigFixture(),
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr05", null, null],
+            4: [testSheetGid, "c:test:corr05", null, null],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: TEST_SHEET_GID,
+          sheetId: testSheetGid,
           title: "Test",
           rows: buildGridRows({
             0: ["c:test:corr05"],
@@ -499,16 +499,16 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
       sheets: [
         seedSheetConfigFixture(),
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr03", "Test", "Description"],
+            4: [testSheetGid, "c:test:corr03", "Test", "Description"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: TEST_SHEET_GID,
+          sheetId: testSheetGid,
           title: "Test",
           rows: buildGridRows({
             0: ["c:test:corr03"],
@@ -542,16 +542,16 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
       sheets: [
         seedSheetConfigFixture(),
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "c:test:corr04", "Test", "Move-in Date"],
+            4: [testSheetGid, "c:test:corr04", "Test", "Move-in Date"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: TEST_SHEET_GID,
+          sheetId: testSheetGid,
           title: "Test",
           rows: buildGridRows({
             0: ["c:test:corr04"],
@@ -596,7 +596,7 @@ function syncColumnsUnderTest({
   };
   columnIds.forEach((columnId, index) => {
     columnConfigRows[4 + index] = [
-      TEST_SHEET_GID,
+      testSheetGid,
       columnId,
       "Test",
       "",
@@ -605,22 +605,22 @@ function syncColumnsUnderTest({
   stubSheetsService({
     sheets: [
       {
-        sheetId: SHEET_CONFIG_GID,
+        sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
-          4: [TEST_SHEET_GID, "Test", true, "test"],
+          4: [testSheetGid, "Test", true, "test"],
         }),
         table: { endRowIndex: 5 },
       },
       {
-        sheetId: COLUMN_CONFIG_GID,
+        sheetId: columnConfigGid,
         title: "Column Config",
         rows: buildGridRows(columnConfigRows),
         table: { endRowIndex: Math.max(5, 4 + columnIds.length) },
       },
       {
-        sheetId: TEST_SHEET_GID,
+        sheetId: testSheetGid,
         title: "Test",
         rows: buildGridRows({ 0: columnIds, 3: headers, 4: topDataRow }),
         ...(topDataRowAbsence ? { [topDataRowAbsence]: [4] } : {}),
@@ -1028,25 +1028,25 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
             // Api-access sheet: gets a missing column ID filled in.
-            4: [TEST_SHEET_GID, "Test", true, "tst"],
+            4: [testSheetGid, "Test", true, "tst"],
 
-            5: [UNRESOLVABLE_GID, "Ghost", false, "gho"],
+            5: [unresolvableGid, "Ghost", false, "gho"],
           }),
           table: { endRowIndex: 6 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({ 0: columnConfigColumnIdRow }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: TEST_SHEET_GID,
+          sheetId: testSheetGid,
           title: "Test",
           rows: buildGridRows({
             0: [""],
@@ -1062,7 +1062,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
 
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
 
-    const colIdRow = operator.ss.raw.sheetMeta(TEST_SHEET_GID).colIdRow;
+    const colIdRow = operator.ss.raw.sheetMeta(testSheetGid).colIdRow;
     expect(colIdRow.valueOrEmpty(0)).not.toBe("");
   });
 
@@ -1070,22 +1070,22 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [TEST_SHEET_GID, "Test", true, "tst"],
+            4: [testSheetGid, "Test", true, "tst"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({ 0: columnConfigColumnIdRow }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: TEST_SHEET_GID,
+          sheetId: testSheetGid,
           title: "Test",
           rows: buildGridRows({
             3: ["Amount"],
@@ -1104,7 +1104,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
 
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
 
-    const colIdRow = operator.ss.raw.sheetMeta(TEST_SHEET_GID).colIdRow;
+    const colIdRow = operator.ss.raw.sheetMeta(testSheetGid).colIdRow;
     expect(colIdRow.valueOrEmpty(0)).not.toBe("");
   });
 });
@@ -1123,23 +1123,23 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [COLUMN_CONFIG_GID, "Column Config", true, "ccf"],
+            4: [columnConfigGid, "Column Config", true, "ccf"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
             3: columnConfigHeaderRow,
             4: [],
             5: [
-              COLUMN_CONFIG_GID,
+              columnConfigGid,
               cc.sheetGid.columnId,
               "Stale Title",
               "Stale Header",
@@ -1156,22 +1156,22 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [COLUMN_CONFIG_GID, "Column Config", false, "ccf"],
+            4: [columnConfigGid, "Column Config", false, "ccf"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
             3: columnConfigHeaderRow,
-            4: [COLUMN_CONFIG_GID, cc.sheetGid.columnId, "Column Config"],
-            5: [COLUMN_CONFIG_GID, cc.header.columnId, "Column Config"],
+            4: [columnConfigGid, cc.sheetGid.columnId, "Column Config"],
+            5: [columnConfigGid, cc.header.columnId, "Column Config"],
           }),
           table: { endRowIndex: 6 },
         },

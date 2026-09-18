@@ -14,14 +14,14 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { ConfigOrchestrator } from "./ConfigOrchestrator";
 
-const TEST_SHEET_GID = 2089200354;
-const SHEET_CONFIG_GID = 210603630;
-const COLUMN_CONFIG_GID = 2034522667;
-const DRAFT_GID = 777000111;
-const DRAFT_TITLE = "Add Occ Payment Intention";
-const HEADER_ONLY_TABLE_END_ROW_INDEX =
+const testSheetGid = 2089200354;
+const sheetConfigGid = 210603630;
+const columnConfigGid = 2034522667;
+const draftGid = 777000111;
+const draftTitle = "Add Occ Payment Intention";
+const headerOnlyTableEndRowIndex =
   ssConfigGet("tableHeaderRowIndexBase0") + 1;
-const SPREADSHEET_CONFIG_GID = getSheetTraitByName(
+const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
   "sheetGid",
 );
@@ -41,7 +41,7 @@ const spreadsheetConfigHeaders = [
 ];
 
 const testSheetConfigRowWithApiAccess = [
-  TEST_SHEET_GID,
+  testSheetGid,
   "Test",
   true,
   "test",
@@ -60,7 +60,7 @@ function spreadsheetConfigSheet(
   } = {},
 ) {
   return {
-    sheetId: SPREADSHEET_CONFIG_GID,
+    sheetId: spreadsheetConfigGid,
     title: "Spreadsheet Config",
     rows: buildGridRows({
       3: spreadsheetConfigHeaders,
@@ -88,8 +88,8 @@ function headerOnlyDraftSheet(
     rows[4] = [];
   }
   const sheet: FakeSheetProperties = {
-    sheetId: options.sheetId ?? DRAFT_GID,
-    title: options.title ?? DRAFT_TITLE,
+    sheetId: options.sheetId ?? draftGid,
+    title: options.title ?? draftTitle,
     rows: buildGridRows(rows),
   };
   if (table === "missing") {
@@ -99,7 +99,7 @@ function headerOnlyDraftSheet(
     ...sheet,
     table: {
       endRowIndex:
-        table === "header-only" ? HEADER_ONLY_TABLE_END_ROW_INDEX : 5,
+        table === "header-only" ? headerOnlyTableEndRowIndex : 5,
     },
   };
 }
@@ -130,7 +130,7 @@ function seedFixture(
         extraRows: options.spreadsheetConfigExtraRows,
       }),
       {
-        sheetId: SHEET_CONFIG_GID,
+        sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({
           0: [
@@ -145,7 +145,7 @@ function seedFixture(
         table: { endRowIndex: options.sheetConfigTableEndRowIndex ?? 5 },
       },
       {
-        sheetId: COLUMN_CONFIG_GID,
+        sheetId: columnConfigGid,
         title: "Column Config",
         // appendRowWithVals (used by ColumnConfigOperator._appendColumnRows)
         // resolves every non-formula column of the sheet's schema against
@@ -164,7 +164,7 @@ function seedFixture(
         table: { endRowIndex: 5 },
       },
       {
-        sheetId: TEST_SHEET_GID,
+        sheetId: testSheetGid,
         title: "Test",
         // Row 4 (the top data row) must be present, even blank, and a table
         // range declared, now that
@@ -197,7 +197,7 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
     // The column ID gathered from the "test" sheet made it into a newly
     // appended Column Config row, which is part of what got flushed.
     expect(orchestrator.sheetConfigOperator.newSheetConfigs().test).toEqual({
-      sheetGid: TEST_SHEET_GID,
+      sheetGid: testSheetGid,
       idPrefix: "test",
       hasIdColumn: false,
     });
@@ -275,7 +275,7 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
       sheets: [
         spreadsheetConfigSheet(":"),
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: [
@@ -284,12 +284,12 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
               sc.letApiAccess.columnId,
               sc.idPrefix.columnId,
             ],
-            4: [COLUMN_CONFIG_GID, "Column Config", true, "ccf"],
+            4: [columnConfigGid, "Column Config", true, "ccf"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: COLUMN_CONFIG_GID,
+          sheetId: columnConfigGid,
           title: "Column Config",
           rows: buildGridRows({
             0: columnIdRow,
@@ -302,13 +302,13 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
               cc.emptyValueAllowed.header,
             ],
             4: [
-              COLUMN_CONFIG_GID,
+              columnConfigGid,
               cc.sheetGid.columnId,
               "Column Config",
               cc.sheetGid.header,
             ],
             5: [
-              COLUMN_CONFIG_GID,
+              columnConfigGid,
               "c:ccf:stale-gone",
               "Column Config",
               "Gone",
@@ -372,7 +372,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet()],
       extraSheetConfigDataRows: {
-        5: [DRAFT_GID, DRAFT_TITLE, false, ""],
+        5: [draftGid, draftTitle, false, ""],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -383,7 +383,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
       orchestrator.sheetConfigOperator.newSheetConfigs().addOccPaymentIntention,
     ).toBeUndefined();
     expect(
-      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(DRAFT_GID),
+      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(draftGid),
     ).toBe(true);
   });
 
@@ -391,7 +391,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet()],
       extraSheetConfigDataRows: {
-        5: [DRAFT_GID, DRAFT_TITLE, true, ""],
+        5: [draftGid, draftTitle, true, ""],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -410,14 +410,14 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
         }),
       ],
       extraSheetConfigDataRows: {
-        5: [DRAFT_GID, DRAFT_TITLE, true, "aopi"],
+        5: [draftGid, draftTitle, true, "aopi"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
 
     const parsed = ConfigOrchestrator.init().generateConfigFiles();
     expect(parsed.sheetConfigs).toContain(
-      `"addOccPaymentIntention": { "sheetGid": ${DRAFT_GID}, "idPrefix": "aopi", "hasIdColumn": true }`,
+      `"addOccPaymentIntention": { "sheetGid": ${draftGid}, "idPrefix": "aopi", "hasIdColumn": true }`,
     );
   });
 
@@ -425,7 +425,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet()],
       extraSheetConfigDataRows: {
-        5: [DRAFT_GID, DRAFT_TITLE, null, ""],
+        5: [draftGid, draftTitle, null, ""],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -443,7 +443,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     const orchestrator = ConfigOrchestrator.init();
     const parsed = orchestrator.generateConfigFiles();
     expect(
-      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(DRAFT_GID),
+      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(draftGid),
     ).toBe(true);
     expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
   });
@@ -452,7 +452,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet({ table: "with-data-row" })],
       extraSheetConfigDataRows: {
-        5: [DRAFT_GID, DRAFT_TITLE, false, "aopi"],
+        5: [draftGid, draftTitle, false, "aopi"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -465,7 +465,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
   });
 
   it("syncs several header-only drafts in one run", () => {
-    const secondDraftGid = DRAFT_GID + 1;
+    const secondDraftGid = draftGid + 1;
     const secondTitle = "Add Occ Charge Intention";
     seedFixture({
       extraSheets: [
@@ -480,7 +480,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     const orchestrator = ConfigOrchestrator.init();
     expect(() => orchestrator.syncConfigSheetRows()).not.toThrow();
     const gids = orchestrator.sheetConfigOperator.sheet.column("sheetGid");
-    expect(gids.hasValue(DRAFT_GID)).toBe(true);
+    expect(gids.hasValue(draftGid)).toBe(true);
     expect(gids.hasValue(secondDraftGid)).toBe(true);
   });
 
@@ -496,8 +496,8 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
   it("still syncs the config-describing sheets when they have Let api access", () => {
     seedFixture({
       extraSheetConfigDataRows: {
-        5: [SHEET_CONFIG_GID, "Sheet Config", true, "scf"],
-        6: [COLUMN_CONFIG_GID, "Column Config", true, "ccf"],
+        5: [sheetConfigGid, "Sheet Config", true, "scf"],
+        6: [columnConfigGid, "Column Config", true, "ccf"],
       },
       sheetConfigTableEndRowIndex: 7,
     });
@@ -509,7 +509,7 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet({ table: "missing" })],
       extraSheetConfigDataRows: {
-        5: [DRAFT_GID, DRAFT_TITLE, true, "aopi"],
+        5: [draftGid, draftTitle, true, "aopi"],
       },
       sheetConfigTableEndRowIndex: 6,
     });

@@ -4,13 +4,13 @@ import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { NodeHost } from "./NodeHost";
 import type { SheetsHttpRequest } from "../00_base/GoogleSheetsAPI";
 
-const SPREADSHEET_ID = "spreadsheet-under-test";
-const LEASES_GID = 111;
+const spreadsheetId = "spreadsheet-under-test";
+const leasesGid = 111;
 
 const leasesPayload = {
   sheets: [
     {
-      properties: { sheetId: LEASES_GID, title: "Leases" },
+      properties: { sheetId: leasesGid, title: "Leases" },
       tables: [
         {
           tableId: "fake-table",
@@ -29,7 +29,7 @@ const leasesPayload = {
 function seedHost(isDryRun: boolean) {
   const transport = vi.fn((_request: SheetsHttpRequest) => leasesPayload);
   const host = NodeHost.init({
-    spreadsheetId: SPREADSHEET_ID,
+    spreadsheetId,
     transport,
     isDryRun,
     log: vi.fn(),
@@ -40,7 +40,7 @@ function seedHost(isDryRun: boolean) {
 function writeOneCell(): SpreadsheetRaw {
   const raw = SpreadsheetRaw.init();
   raw.fetchAllSheetProperties();
-  raw.sheet(LEASES_GID).row(5).cell(2).updateValue("Processing...");
+  raw.sheet(leasesGid).row(5).cell(2).updateValue("Processing...");
   raw.batchUpdateGSheets();
   return raw;
 }
@@ -64,7 +64,7 @@ describe("NodeHost.ensureGlobals", () => {
       transport.mock.calls.filter(([request]) => request.method === "POST"),
     ).toEqual([]);
     expect(host.summary.count).toBe(1);
-    expect(host.summary.lines[0]).toContain(`gid ${LEASES_GID}!C6:C6`);
+    expect(host.summary.lines[0]).toContain(`gid ${leasesGid}!C6:C6`);
   });
 
   it("sends the write once the dry run is not armed", () => {
@@ -83,7 +83,7 @@ describe("NodeHost.ensureGlobals", () => {
   it("serves the spreadsheet id the framework reads from its script property", () => {
     seedHost(true);
 
-    expect(SpreadsheetRaw.init().spreadsheetId).toBe(SPREADSHEET_ID);
+    expect(SpreadsheetRaw.init().spreadsheetId).toBe(spreadsheetId);
   });
 
   it("installs PropertiesService and Logger only, not a Sheets global", () => {

@@ -13,7 +13,7 @@ import {
 import { Api } from "./Api";
 import type { Endpoints } from "./Endpoints";
 
-const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
+const occupancyGid = sheetConfigs.occupancy.sheetGid;
 const c = columnConfigs.occupancy;
 // The last column is deliberately left without a column id.
 const columnIds = [
@@ -22,18 +22,18 @@ const columnIds = [
   c.buildLedgerTimeLastRan.columnId,
   "",
 ];
-const ID_COL_INDEX = 0;
-const TWO_WAY_COL_INDEX = 1;
-const BUTTON_COL_INDEX = 2;
-const BLANK_ID_COL_INDEX = 3;
-const ACTION_ROW_INDEX = spreadsheetConfig.actionRowIndexBase0;
-const END_ROW_INDEX = 7;
+const idColIndex = 0;
+const twoWayColIndex = 1;
+const buttonColIndex = 2;
+const blankIdColIndex = 3;
+const actionRowIndex = spreadsheetConfig.actionRowIndexBase0;
+const endRowIndex = 7;
 
 function stubOccupancySheet() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
           0: columnIds,
@@ -42,7 +42,7 @@ function stubOccupancySheet() {
           5: ["c:occ:row5", false, "", ""],
           6: ["c:occ:row6", false, "", ""],
         }),
-        table: { endRowIndex: END_ROW_INDEX },
+        table: { endRowIndex },
       },
     ],
   });
@@ -54,7 +54,7 @@ function actionRowEdit(colIndex: number, value: string) {
     range: {
       getRow: () => spreadsheetConfig.actionRowIndexBase0 + 1,
       getColumn: () => colIndex + 1,
-      getSheet: () => ({ getSheetId: () => OCCUPANCY_GID }),
+      getSheet: () => ({ getSheetId: () => occupancyGid }),
     },
   } as unknown as GoogleAppsScript.Events.SheetsOnEdit;
 }
@@ -81,8 +81,7 @@ function actionRowWrites(
   return calls
     .flatMap((call) => call.requests ?? [])
     .filter(
-      (request) =>
-        request.updateCells?.range?.startRowIndex === ACTION_ROW_INDEX,
+      (request) => request.updateCells?.range?.startRowIndex === actionRowIndex,
     )
     .map((request) => ({
       colIndex: request.updateCells?.range?.startColumnIndex,
@@ -97,16 +96,16 @@ beforeEach(() => {
 
 describe("Api.isSuspectedApiCall", () => {
   it("accepts an unchecked action-row checkbox, so a two-way entry can deselect", () => {
-    expect(
-      Api.isSuspectedApiCall(actionRowEdit(TWO_WAY_COL_INDEX, "FALSE")),
-    ).toBe(true);
-    expect(
-      Api.isSuspectedApiCall(actionRowEdit(TWO_WAY_COL_INDEX, "TRUE")),
-    ).toBe(true);
+    expect(Api.isSuspectedApiCall(actionRowEdit(twoWayColIndex, "FALSE"))).toBe(
+      true,
+    );
+    expect(Api.isSuspectedApiCall(actionRowEdit(twoWayColIndex, "TRUE"))).toBe(
+      true,
+    );
   });
   it("ignores an action-row edit that isn't a checkbox", () => {
     expect(
-      Api.isSuspectedApiCall(actionRowEdit(TWO_WAY_COL_INDEX, "some text")),
+      Api.isSuspectedApiCall(actionRowEdit(twoWayColIndex, "some text")),
     ).toBe(false);
   });
 });
@@ -117,7 +116,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     stubOccupancySheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
-      actionRowEdit(BUTTON_COL_INDEX, "TRUE"),
+      actionRowEdit(buttonColIndex, "TRUE"),
     );
 
     expect(calls).toEqual(["button"]);
@@ -128,7 +127,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
-      actionRowEdit(ID_COL_INDEX, "TRUE"),
+      actionRowEdit(idColIndex, "TRUE"),
     );
 
     expect(calls).toEqual([]);
@@ -140,7 +139,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
-      actionRowEdit(BLANK_ID_COL_INDEX, "TRUE"),
+      actionRowEdit(blankIdColIndex, "TRUE"),
     );
 
     expect(calls).toEqual([]);
@@ -152,7 +151,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     stubOccupancySheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
-      actionRowEdit(BUTTON_COL_INDEX, "FALSE"),
+      actionRowEdit(buttonColIndex, "FALSE"),
     );
 
     expect(calls).toEqual([]);
@@ -163,8 +162,8 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     stubOccupancySheet();
     const api = Api.init(trackingEndpoints(calls));
 
-    api.handleSheetOnEditEvent(actionRowEdit(TWO_WAY_COL_INDEX, "TRUE"));
-    api.handleSheetOnEditEvent(actionRowEdit(TWO_WAY_COL_INDEX, "FALSE"));
+    api.handleSheetOnEditEvent(actionRowEdit(twoWayColIndex, "TRUE"));
+    api.handleSheetOnEditEvent(actionRowEdit(twoWayColIndex, "FALSE"));
 
     expect(calls).toEqual(["twoWay:true", "twoWay:false"]);
   });
@@ -175,11 +174,11 @@ describe("Api.handleSheetOnEditEvent, the entry checkbox", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     Api.init(trackingEndpoints([])).handleSheetOnEditEvent(
-      actionRowEdit(BUTTON_COL_INDEX, "TRUE"),
+      actionRowEdit(buttonColIndex, "TRUE"),
     );
 
     expect(actionRowWrites(batchUpdateCalls)).toEqual([
-      { colIndex: BUTTON_COL_INDEX, value: { boolValue: false } },
+      { colIndex: buttonColIndex, value: { boolValue: false } },
     ]);
   });
 
@@ -187,7 +186,7 @@ describe("Api.handleSheetOnEditEvent, the entry checkbox", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     Api.init(trackingEndpoints([])).handleSheetOnEditEvent(
-      actionRowEdit(TWO_WAY_COL_INDEX, "TRUE"),
+      actionRowEdit(twoWayColIndex, "TRUE"),
     );
 
     expect(actionRowWrites(batchUpdateCalls)).toEqual([]);
@@ -197,7 +196,7 @@ describe("Api.handleSheetOnEditEvent, the entry checkbox", () => {
     const { batchUpdateCalls, getByDataFilterCalls } = stubOccupancySheet();
 
     Api.init(trackingEndpoints([])).handleSheetOnEditEvent(
-      actionRowEdit(BUTTON_COL_INDEX, "TRUE"),
+      actionRowEdit(buttonColIndex, "TRUE"),
     );
 
     expect(getByDataFilterCalls).toHaveLength(1);

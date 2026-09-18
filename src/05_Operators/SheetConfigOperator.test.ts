@@ -15,10 +15,10 @@ import { SheetConfigOperator } from "./SheetConfigOperator";
 // made-up ids means the fixture stays honest to what the production code
 // actually resolves column names through.
 const sc = columnConfigs.sheetConfig;
-const SHEET_CONFIG_GID = 210603630;
-const PROPERTY_GID = 999001;
-const NEW_SHEET_GID = 999002;
-const UNIT_GID = 999003;
+const sheetConfigGid = 210603630;
+const propertyGid = 999001;
+const newSheetGid = 999002;
+const unitGid = 999003;
 
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
@@ -28,7 +28,7 @@ const sheetConfigColumnIdRow = [
 ];
 
 const existingPropertyConfigRow = [
-  PROPERTY_GID,
+  propertyGid,
   "Property",
   true,
   "prp",
@@ -62,7 +62,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
@@ -73,14 +73,14 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
         // Referenced by the existing row above; no "ID" header, so
         // hasIdColumn is emitted false from the header-row sample.
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
         },
         // Present in the spreadsheet but with NO existing Sheet Config row.
         {
-          sheetId: NEW_SHEET_GID,
+          sheetId: newSheetGid,
           title: "Brand New Sheet",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
@@ -93,14 +93,14 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const sheetConfigs = operator.newSheetConfigs();
 
     expect(sheetConfigs.property).toEqual({
-      sheetGid: PROPERTY_GID,
+      sheetGid: propertyGid,
       idPrefix: "prp",
       hasIdColumn: false,
     });
     // A newly-discovered sheet gets a Sheet Config row appended, but stays
     // excluded from the generated file until a human sets letApiAccess.
     expect(sheetConfigs.brandNewSheet).toBeUndefined();
-    expect(operator.sheet.column("sheetGid").hasValue(NEW_SHEET_GID)).toBe(
+    expect(operator.sheet.column("sheetGid").hasValue(newSheetGid)).toBe(
       true,
     );
   });
@@ -109,19 +109,19 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
             // A human already turned on API access for this sheet, but no
             // deploy has run since — this run's own live sync is the only
             // place the mapping exists.
-            4: [NEW_SHEET_GID, "Brand New Sheet", true, ""],
+            4: [newSheetGid, "Brand New Sheet", true, ""],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: NEW_SHEET_GID,
+          sheetId: newSheetGid,
           title: "Brand New Sheet",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
@@ -132,7 +132,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(operator.sheetNamesByGid().get(NEW_SHEET_GID)).toBe("brandNewSheet");
+    expect(operator.sheetNamesByGid().get(newSheetGid)).toBe("brandNewSheet");
     expect(operator.toFileSource().split("\n")).toContain(
       '  "brandNewSheet": { "sheetGid": 999002, "idPrefix": "", "hasIdColumn": false }',
     );
@@ -143,16 +143,16 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", null, "prp"],
+            4: [propertyGid, "Property", null, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
@@ -172,12 +172,12 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
             4: existingPropertyConfigRow,
-            5: [NEW_SHEET_GID, "Gone", true, "gon"],
+            5: [newSheetGid, "Gone", true, "gon"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -196,16 +196,16 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", true, null],
+            4: [propertyGid, "Property", true, null],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
@@ -217,7 +217,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     syncSheetConfigOperator(operator);
 
     expect(operator.newSheetConfigs().property).toEqual({
-      sheetGid: PROPERTY_GID,
+      sheetGid: propertyGid,
       idPrefix: "",
       hasIdColumn: false,
     });
@@ -227,16 +227,16 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Stale Title", true, "prp"],
+            4: [propertyGid, "Stale Title", true, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: ["Name"] }),
           table: { endRowIndex: 5 },
@@ -255,16 +255,16 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Stale Title", false, "prp"],
+            4: [propertyGid, "Stale Title", false, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: ["Name"] }),
           table: { endRowIndex: 4 },
@@ -283,16 +283,16 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", true, "prp"],
+            4: [propertyGid, "Property", true, "prp"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: ["ID", "Name"] }),
           table: { endRowIndex: 5 },
@@ -310,23 +310,23 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: SHEET_CONFIG_GID,
+          sheetId: sheetConfigGid,
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [PROPERTY_GID, "Property", true, "prp"],
-            5: [UNIT_GID, "Unit", true, "prp"],
+            4: [propertyGid, "Property", true, "prp"],
+            5: [unitGid, "Unit", true, "prp"],
           }),
           table: { endRowIndex: 6 },
         },
         {
-          sheetId: PROPERTY_GID,
+          sheetId: propertyGid,
           title: "Property",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: UNIT_GID,
+          sheetId: unitGid,
           title: "Unit",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },

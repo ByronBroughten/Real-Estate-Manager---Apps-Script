@@ -26,26 +26,26 @@ interface ColumnFixture {
 type WrittenValue = string | number | boolean | null;
 type FakeRow<C> = Partial<Record<keyof C, FakeCell>>;
 
-const TOP_DATA_ROW_INDEX = 4;
-const LEDGER_GID = sheetConfigs.occupancyLedger.sheetGid;
-const VARIABLE_GID = sheetConfigs.variable.sheetGid;
-const LEDGER_COLUMN_COUNT = 7;
-const AMOUNT_OWED_COL_INDEX = 5;
+const topDataRowIndex = 4;
+const ledgerGid = sheetConfigs.occupancyLedger.sheetGid;
+const variableGid = sheetConfigs.variable.sheetGid;
+const ledgerColumnCount = 7;
+const amountOwedColIndex = 5;
 
-const TENANT = "r:occ:tenant";
-const TENANT_NAME = "Reiona`282 Charles, Unit 1";
-const NEIGHBOUR = "r:occ:neighbour";
-const NEWCOMER = "r:occ:newcomer";
-const NEWCOMER_NAME = "Alanna`140 Case, Unit 1";
+const tenant = "r:occ:tenant";
+const tenantName = "Reiona`282 Charles, Unit 1";
+const neighbour = "r:occ:neighbour";
+const newcomer = "r:occ:newcomer";
+const newcomerName = "Alanna`140 Case, Unit 1";
 
-const RENT_CHARGE = "r:och:rent";
-const DEPOSIT_CHARGE = "r:och:deposit";
-const DAMAGE_CHARGE = "r:och:damage";
-const NEIGHBOUR_CHARGE = "r:och:neighbour";
+const rentCharge = "r:och:rent";
+const depositCharge = "r:och:deposit";
+const damageCharge = "r:och:damage";
+const neighbourCharge = "r:och:neighbour";
 
-const DAY_ONE = 45000;
-const DAY_TWO = 45010;
-const DAY_THREE = 45020;
+const dayOne = 45000;
+const dayTwo = 45010;
+const dayThree = 45020;
 
 interface SheetStubProps<C> {
   sheetName: keyof typeof sheetConfigs;
@@ -70,12 +70,12 @@ function stubSheet<C extends Record<string, ColumnFixture>>({
       3: columnNames.map((columnName) => columnOf(columnName).header),
       ...Object.fromEntries(
         dataRows.map((row, index) => [
-          TOP_DATA_ROW_INDEX + index,
+          topDataRowIndex + index,
           columnNames.map((columnName) => row[columnName] ?? null),
         ]),
       ),
     }),
-    table: { endRowIndex: TOP_DATA_ROW_INDEX + dataRows.length },
+    table: { endRowIndex: topDataRowIndex + dataRows.length },
   };
 }
 
@@ -96,22 +96,22 @@ function stubOccupancy(
     ],
     dataRows: [
       {
-        id: TENANT,
-        name: TENANT_NAME,
-        buildLedgerStartDate: startDates[TENANT],
-        buildLedgerSelect: selectedOccupancyId === TENANT,
+        id: tenant,
+        name: tenantName,
+        buildLedgerStartDate: startDates[tenant],
+        buildLedgerSelect: selectedOccupancyId === tenant,
       },
       {
-        id: NEIGHBOUR,
+        id: neighbour,
         name: "Someone Else`99 Elsewhere, Unit 2",
-        buildLedgerStartDate: startDates[NEIGHBOUR],
-        buildLedgerSelect: selectedOccupancyId === NEIGHBOUR,
+        buildLedgerStartDate: startDates[neighbour],
+        buildLedgerSelect: selectedOccupancyId === neighbour,
       },
       {
-        id: NEWCOMER,
-        name: NEWCOMER_NAME,
-        buildLedgerStartDate: startDates[NEWCOMER],
-        buildLedgerSelect: selectedOccupancyId === NEWCOMER,
+        id: newcomer,
+        name: newcomerName,
+        buildLedgerStartDate: startDates[newcomer],
+        buildLedgerSelect: selectedOccupancyId === newcomer,
       },
     ],
   });
@@ -121,31 +121,31 @@ type ChargeRow = FakeRow<typeof columnConfigs.occCharge>;
 
 const chargeRows: ChargeRow[] = [
   {
-    id: RENT_CHARGE,
-    occupancyId: TENANT,
-    date: DAY_ONE,
+    id: rentCharge,
+    occupancyId: tenant,
+    date: dayOne,
     description: "Rent (base)",
     amount: 50,
   },
   {
-    id: DEPOSIT_CHARGE,
-    occupancyId: TENANT,
-    date: DAY_ONE,
+    id: depositCharge,
+    occupancyId: tenant,
+    date: dayOne,
     description: "Security deposit",
     amount: 1100,
   },
   {
-    id: DAMAGE_CHARGE,
-    occupancyId: TENANT,
-    date: DAY_TWO,
+    id: damageCharge,
+    occupancyId: tenant,
+    date: dayTwo,
     description: "Damage, waste, or service",
     amount: 220,
     notes: "Plumber cost",
   },
   {
-    id: NEIGHBOUR_CHARGE,
-    occupancyId: NEIGHBOUR,
-    date: DAY_ONE,
+    id: neighbourCharge,
+    occupancyId: neighbour,
+    date: dayOne,
     description: "Rent (base)",
     amount: 999,
   },
@@ -175,20 +175,20 @@ function stubOccChargeReduce() {
     columnNames: ["chargeId", "date", "description", "amount"],
     dataRows: [
       {
-        chargeId: DAMAGE_CHARGE,
-        date: DAY_THREE,
+        chargeId: damageCharge,
+        date: dayThree,
         description: "Forgiveness",
         amount: 110,
       },
       {
-        chargeId: DAMAGE_CHARGE,
-        date: DAY_THREE,
+        chargeId: damageCharge,
+        date: dayThree,
         description: "Security deposit",
         amount: 110,
       },
       {
-        chargeId: NEIGHBOUR_CHARGE,
-        date: DAY_THREE,
+        chargeId: neighbourCharge,
+        date: dayThree,
         description: "Forgiveness",
         amount: 999,
       },
@@ -203,67 +203,67 @@ type AllocationRow = FakeRow<typeof columnConfigs.occPayAllocation>;
 const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:rentAndDeposit",
-    occupancyId: TENANT,
+    occupancyId: tenant,
     filledOut: "Yes",
     formOfPayment: "Payment",
     payerCategory: "Household",
-    payerName: TENANT_NAME,
-    paymentDate: DAY_ONE,
+    payerName: tenantName,
+    paymentDate: dayOne,
     amount: 50,
     chargeDescription: "Rent (base)",
   },
   {
     paymentId: "r:opy:rentAndDeposit",
-    occupancyId: TENANT,
+    occupancyId: tenant,
     filledOut: "Yes",
     formOfPayment: "Payment",
     payerCategory: "Household",
-    payerName: TENANT_NAME,
-    paymentDate: DAY_ONE,
+    payerName: tenantName,
+    paymentDate: dayOne,
     amount: 1100,
     chargeDescription: "Security deposit",
   },
   {
     paymentId: "r:opy:caretaking",
-    occupancyId: TENANT,
+    occupancyId: tenant,
     filledOut: "Yes",
     formOfPayment: "Caretaking",
     payerCategory: "Household",
-    payerName: TENANT_NAME,
-    paymentDate: DAY_TWO,
+    payerName: tenantName,
+    paymentDate: dayTwo,
     amount: 25,
     chargeDescription: "Rent (base)",
   },
   {
     paymentId: "r:opy:agency",
-    occupancyId: TENANT,
+    occupancyId: tenant,
     filledOut: "Yes",
     formOfPayment: "Payment",
     payerCategory: "Non-resident",
     payerName: "Ramsey County",
-    paymentDate: DAY_TWO,
+    paymentDate: dayTwo,
     amount: 200,
     chargeDescription: "Damage, waste, or service",
   },
   {
     paymentId: "r:opy:halfEntered",
-    occupancyId: TENANT,
+    occupancyId: tenant,
     filledOut: "No",
     formOfPayment: "Payment",
     payerCategory: "Household",
-    payerName: TENANT_NAME,
-    paymentDate: DAY_TWO,
+    payerName: tenantName,
+    paymentDate: dayTwo,
     amount: 77,
     chargeDescription: "Rent (base)",
   },
   {
     paymentId: "r:opy:neighbour",
-    occupancyId: NEIGHBOUR,
+    occupancyId: neighbour,
     filledOut: "Yes",
     formOfPayment: "Payment",
     payerCategory: "Household",
     payerName: "Someone Else`99 Elsewhere, Unit 2",
-    paymentDate: DAY_TWO,
+    paymentDate: dayTwo,
     amount: 888,
     chargeDescription: "Rent (base)",
   },
@@ -302,7 +302,7 @@ function stubVariable() {
 // Three rows of a previous run's ledger, so the rebuild has something to wipe.
 function stubOccupancyLedger() {
   const staleRow = {
-    date: DAY_ONE,
+    date: dayOne,
     issuer: "Property management",
     description: "Stale",
     charge: 1,
@@ -334,7 +334,7 @@ interface LedgerSpreadsheetProps {
 }
 
 function stubLedgerSpreadsheet({
-  selectedOccupancyId = TENANT,
+  selectedOccupancyId = tenant,
   charges = chargeRows,
   allocations = allocationRows,
   startDates = {},
@@ -400,10 +400,10 @@ function cellsWrittenTo(
 }
 
 function ledgerRowsWritten(calls: BatchUpdateCall[]): WrittenValue[][] {
-  return [...cellsWrittenTo(calls, LEDGER_GID).entries()]
+  return [...cellsWrittenTo(calls, ledgerGid).entries()]
     .sort(([a], [b]) => a - b)
     .map(([, row]) =>
-      [...Array(LEDGER_COLUMN_COUNT).keys()].map(
+      [...Array(ledgerColumnCount).keys()].map(
         (colIndex) => row.get(colIndex) ?? null,
       ),
     );
@@ -411,11 +411,11 @@ function ledgerRowsWritten(calls: BatchUpdateCall[]): WrittenValue[][] {
 
 function ledgerRowShapeRequests(calls: BatchUpdateCall[]): string[] {
   return allRequests(calls).flatMap((request) => {
-    if (request.appendCells?.sheetId === LEDGER_GID) {
+    if (request.appendCells?.sheetId === ledgerGid) {
       return [`append ${String(request.appendCells.rows?.length ?? 0)}`];
     }
     const deleted = request.deleteDimension?.range;
-    if (deleted?.sheetId !== LEDGER_GID) return [];
+    if (deleted?.sheetId !== ledgerGid) return [];
     return [`delete ${String(deleted.startIndex)}`];
   });
 }
@@ -439,9 +439,9 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
-      [DAY_ONE, "Property management", "Rent (base)", 50, "", null, ""],
+      [dayOne, "Property management", "Rent (base)", 50, "", null, ""],
       [
-        DAY_ONE,
+        dayOne,
         "Property management",
         "Security deposit",
         1100,
@@ -449,9 +449,9 @@ describe("buildLedger, the page it writes", () => {
         null,
         "",
       ],
-      [DAY_ONE, "Household", "Payment", "", 1150, null, ""],
+      [dayOne, "Household", "Payment", "", 1150, null, ""],
       [
-        DAY_TWO,
+        dayTwo,
         "Property management",
         "Damage, waste, or service",
         220,
@@ -459,11 +459,11 @@ describe("buildLedger, the page it writes", () => {
         null,
         "Plumber cost",
       ],
-      [DAY_TWO, "Household", "Caretaking", "", 25, null, ""],
-      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, ""],
-      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, ""],
+      [dayTwo, "Household", "Caretaking", "", 25, null, ""],
+      [dayTwo, "Ramsey County", "Payment", "", 200, null, ""],
+      [dayThree, "Property management", "Forgiveness", -110, "", null, ""],
       [
-        DAY_THREE,
+        dayThree,
         "Security deposit",
         "Damage, waste, or service",
         "",
@@ -478,9 +478,9 @@ describe("buildLedger, the page it writes", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
       charges: [
         {
-          id: DEPOSIT_CHARGE,
-          occupancyId: TENANT,
-          date: DAY_ONE,
+          id: depositCharge,
+          occupancyId: tenant,
+          date: dayOne,
           description: "Security deposit",
           amount: 1100,
         },
@@ -488,12 +488,12 @@ describe("buildLedger, the page it writes", () => {
       allocations: [
         {
           paymentId: "r:opy:deposit",
-          occupancyId: TENANT,
+          occupancyId: tenant,
           filledOut: "Yes",
           formOfPayment: "Payment",
           payerCategory: "Household",
-          payerName: TENANT_NAME,
-          paymentDate: DAY_ONE,
+          payerName: tenantName,
+          paymentDate: dayOne,
           amount: 875,
           chargeDescription: "Security deposit",
         },
@@ -504,7 +504,7 @@ describe("buildLedger, the page it writes", () => {
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
       [
-        DAY_ONE,
+        dayOne,
         "Property management",
         "Security deposit",
         1100,
@@ -512,7 +512,7 @@ describe("buildLedger, the page it writes", () => {
         null,
         "",
       ],
-      [DAY_ONE, "Household", "Payment", "", 875, null, ""],
+      [dayOne, "Household", "Payment", "", 875, null, ""],
     ]);
   });
 
@@ -523,7 +523,7 @@ describe("buildLedger, the page it writes", () => {
 
     expect(
       ledgerRowsWritten(batchUpdateCalls).map(
-        (row) => row[AMOUNT_OWED_COL_INDEX],
+        (row) => row[amountOwedColIndex],
       ),
     ).toEqual([null, null, null, null, null, null, null, null]);
   });
@@ -542,18 +542,18 @@ describe("buildLedger, the page it writes", () => {
 
   it("stamps the occupancy and the day it ran into the Variable sheet", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_TWO },
+      startDates: { [tenant]: dayTwo },
     });
 
     runBuildLedger();
 
     expect([
-      ...cellsWrittenTo(batchUpdateCalls, VARIABLE_GID).entries(),
+      ...cellsWrittenTo(batchUpdateCalls, variableGid).entries(),
     ]).toEqual([
       [
-        TOP_DATA_ROW_INDEX,
+        topDataRowIndex,
         new Map<number, WrittenValue>([
-          [0, TENANT],
+          [0, tenant],
           [1, Dat.today()],
         ]),
       ],
@@ -570,14 +570,14 @@ describe("buildLedger, the page it writes", () => {
 
   it("opens a cut page with a prior balance, then only lines on or after the start date", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_TWO },
+      startDates: { [tenant]: dayTwo },
     });
 
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
       [
-        DAY_TWO,
+        dayTwo,
         "Property management",
         "Prior balance",
         0,
@@ -586,7 +586,7 @@ describe("buildLedger, the page it writes", () => {
         "",
       ],
       [
-        DAY_TWO,
+        dayTwo,
         "Property management",
         "Damage, waste, or service",
         220,
@@ -594,11 +594,11 @@ describe("buildLedger, the page it writes", () => {
         null,
         "Plumber cost",
       ],
-      [DAY_TWO, "Household", "Caretaking", "", 25, null, ""],
-      [DAY_TWO, "Ramsey County", "Payment", "", 200, null, ""],
-      [DAY_THREE, "Property management", "Forgiveness", -110, "", null, ""],
+      [dayTwo, "Household", "Caretaking", "", 25, null, ""],
+      [dayTwo, "Ramsey County", "Payment", "", 200, null, ""],
+      [dayThree, "Property management", "Forgiveness", -110, "", null, ""],
       [
-        DAY_THREE,
+        dayThree,
         "Security deposit",
         "Damage, waste, or service",
         "",
@@ -611,7 +611,7 @@ describe("buildLedger, the page it writes", () => {
 
   it("keeps a charge on the start date as its own line after the prior balance", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_TWO },
+      startDates: { [tenant]: dayTwo },
     });
 
     runBuildLedger();
@@ -619,12 +619,12 @@ describe("buildLedger, the page it writes", () => {
     const rows = ledgerRowsWritten(batchUpdateCalls);
     expect(rows[0]?.[2]).toBe("Prior balance");
     expect(rows[1]?.[2]).toBe("Damage, waste, or service");
-    expect(rows[1]?.[0]).toBe(DAY_TWO);
+    expect(rows[1]?.[0]).toBe(dayTwo);
   });
 
   it("writes the full ledger with no prior balance when the start date is before every line", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_ONE - 1 },
+      startDates: { [tenant]: dayOne - 1 },
     });
 
     runBuildLedger();
@@ -643,14 +643,14 @@ describe("buildLedger, the page it writes", () => {
 
   it("is only the prior balance when the start date is after every line", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_THREE + 1 },
+      startDates: { [tenant]: dayThree + 1 },
     });
 
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
       [
-        DAY_THREE + 1,
+        dayThree + 1,
         "Property management",
         "Prior balance",
         -225,
@@ -663,12 +663,12 @@ describe("buildLedger, the page it writes", () => {
 
   it("still shows a $0 prior balance when history is paid", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_TWO },
+      startDates: { [tenant]: dayTwo },
       charges: [
         {
-          id: DEPOSIT_CHARGE,
-          occupancyId: TENANT,
-          date: DAY_ONE,
+          id: depositCharge,
+          occupancyId: tenant,
+          date: dayOne,
           description: "Security deposit",
           amount: 1100,
         },
@@ -676,12 +676,12 @@ describe("buildLedger, the page it writes", () => {
       allocations: [
         {
           paymentId: "r:opy:deposit",
-          occupancyId: TENANT,
+          occupancyId: tenant,
           filledOut: "Yes",
           formOfPayment: "Payment",
           payerCategory: "Household",
-          payerName: TENANT_NAME,
-          paymentDate: DAY_ONE,
+          payerName: tenantName,
+          paymentDate: dayOne,
           amount: 1100,
           chargeDescription: "Security deposit",
         },
@@ -692,7 +692,7 @@ describe("buildLedger, the page it writes", () => {
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
       [
-        DAY_TWO,
+        dayTwo,
         "Property management",
         "Prior balance",
         0,
@@ -711,7 +711,7 @@ describe("buildLedger, what it reports", () => {
     runBuildLedger();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe(
-      `Built ledger for ${TENANT_NAME}: 3 charges, 3 payments, 2 reductions.`,
+      `Built ledger for ${tenantName}: 3 charges, 3 payments, 2 reductions.`,
     );
   });
 
@@ -719,9 +719,9 @@ describe("buildLedger, what it reports", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
       charges: [
         {
-          id: RENT_CHARGE,
-          occupancyId: TENANT,
-          date: DAY_ONE,
+          id: rentCharge,
+          occupancyId: tenant,
+          date: dayOne,
           description: "Rent (base)",
           amount: 50,
         },
@@ -729,12 +729,12 @@ describe("buildLedger, what it reports", () => {
       allocations: [
         {
           paymentId: "r:opy:rent",
-          occupancyId: TENANT,
+          occupancyId: tenant,
           filledOut: "Yes",
           formOfPayment: "Payment",
           payerCategory: "Household",
-          payerName: TENANT_NAME,
-          paymentDate: DAY_ONE,
+          payerName: tenantName,
+          paymentDate: dayOne,
           amount: 50,
           chargeDescription: "Rent (base)",
         },
@@ -744,62 +744,62 @@ describe("buildLedger, what it reports", () => {
     runBuildLedger();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe(
-      `Built ledger for ${TENANT_NAME}: 1 charge, 1 payment, 0 reductions.`,
+      `Built ledger for ${tenantName}: 1 charge, 1 payment, 0 reductions.`,
     );
   });
 
   it("names the start date in the run status and ignores the prior balance in the counts", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_TWO },
+      startDates: { [tenant]: dayTwo },
     });
 
     runBuildLedger();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe(
-      `Built ledger for ${TENANT_NAME}, from 25 Mar 2023: 1 charge, 2 payments, 2 reductions.`,
+      `Built ledger for ${tenantName}, from 25 Mar 2023: 1 charge, 2 payments, 2 reductions.`,
     );
   });
 
   it("reports a prior-balance-only window as a built page of zeroes", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_THREE + 1 },
+      startDates: { [tenant]: dayThree + 1 },
     });
 
     runBuildLedger();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe(
-      `Built ledger for ${TENANT_NAME}, from 5 Apr 2023: 0 charges, 0 payments, 0 reductions.`,
+      `Built ledger for ${tenantName}, from 5 Apr 2023: 0 charges, 0 payments, 0 reductions.`,
     );
   });
 
   it("still carries from in the run status when the start date is before every line", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      startDates: { [TENANT]: DAY_ONE - 1 },
+      startDates: { [tenant]: dayOne - 1 },
     });
 
     runBuildLedger();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe(
-      `Built ledger for ${TENANT_NAME}, from 14 Mar 2023: 3 charges, 3 payments, 2 reductions.`,
+      `Built ledger for ${tenantName}, from 14 Mar 2023: 3 charges, 3 payments, 2 reductions.`,
     );
   });
 
   it("says so plainly when an occupancy has nothing billed or paid", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      selectedOccupancyId: NEWCOMER,
-      startDates: { [NEWCOMER]: DAY_TWO },
+      selectedOccupancyId: newcomer,
+      startDates: { [newcomer]: dayTwo },
     });
 
     runBuildLedger();
 
     expect(runStatusWritten(batchUpdateCalls)).toBe(
-      `No charges or payments for ${NEWCOMER_NAME}.`,
+      `No charges or payments for ${newcomerName}.`,
     );
   });
 
   it("names the blank cell it hit and leaves the previous ledger alone", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
-      charges: [{ id: RENT_CHARGE, occupancyId: TENANT, amount: 50 }],
+      charges: [{ id: rentCharge, occupancyId: tenant, amount: 50 }],
     });
 
     runBuildLedger();

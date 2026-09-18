@@ -19,8 +19,8 @@ import {
  */
 const sheetConfigColumns = columnConfigs.sheetConfig;
 
-export const SHEET_CONFIG_GID = sheetConfigs.sheetConfig.sheetGid;
-export const SHEET_CONFIG_FORMULA_COLUMN_ID =
+export const sheetConfigGid = sheetConfigs.sheetConfig.sheetGid;
+export const sheetConfigFormulaColumnId =
   sheetConfigColumns.idPrefixIsUniqueOrEmpty.columnId;
 
 export const sheetConfigColumnIdRow = [
@@ -28,7 +28,7 @@ export const sheetConfigColumnIdRow = [
   sheetConfigColumns.sheetTitle.columnId,
   sheetConfigColumns.letApiAccess.columnId,
   sheetConfigColumns.idPrefix.columnId,
-  SHEET_CONFIG_FORMULA_COLUMN_ID,
+  sheetConfigFormulaColumnId,
 ];
 
 /** Every non-formula column filled in; the formula column shows its result. */
@@ -63,7 +63,7 @@ export function stubSheetConfigSheet(
   return stubSheetsService({
     sheets: [
       {
-        sheetId: SHEET_CONFIG_GID,
+        sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({ 0: sheetConfigColumnIdRow, ...dataRows }),
         rowsWithNoGridData,

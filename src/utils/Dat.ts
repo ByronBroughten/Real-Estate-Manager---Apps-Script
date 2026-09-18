@@ -44,7 +44,7 @@ function validate(value: unknown): DateSerial {
   throw new Error(`value "${String(value)}" is not a whole-day date serial`);
 }
 
-const MONTH_ABBREVS = [
+const monthAbbrevs = [
   "Jan",
   "Feb",
   "Mar",
@@ -60,14 +60,14 @@ const MONTH_ABBREVS = [
 ] as const;
 
 export const Dat = {
-  SHEET_TIMEZONE: "America/Chicago",
-  SHEETS_EPOCH_UTC_MS: Date.UTC(1899, 11, 30), // Dec 30, 1899, 00:00 UTC
-  MS_PER_DAY: 86400000,
+  sheetTimezone: "America/Chicago",
+  sheetsEpochUtcMs: Date.UTC(1899, 11, 30), // Dec 30, 1899, 00:00 UTC
+  msPerDay: 86400000,
   isSerial,
   validate,
   today(): DateSerial {
     const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: this.SHEET_TIMEZONE,
+      timeZone: this.sheetTimezone,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -85,7 +85,7 @@ export const Dat = {
   },
   fromYmd({ year, month, day }: Ymd): DateSerial {
     const utcMs = this._utcMsFromYmd({ year, month, day });
-    const serial = (utcMs - this.SHEETS_EPOCH_UTC_MS) / this.MS_PER_DAY;
+    const serial = (utcMs - this.sheetsEpochUtcMs) / this.msPerDay;
     if (!isSerial(serial)) {
       throw new Error(`${year}-${month}-${day} is not a real date.`);
     }
@@ -93,7 +93,7 @@ export const Dat = {
   },
   toYmd(date: DateSerial): Ymd {
     const utc = new Date(
-      this.SHEETS_EPOCH_UTC_MS + validate(date) * this.MS_PER_DAY,
+      this.sheetsEpochUtcMs + validate(date) * this.msPerDay,
     );
     return {
       year: utc.getUTCFullYear(),
@@ -103,7 +103,7 @@ export const Dat = {
   },
   toDayMonthYear(date: DateSerial): string {
     const { year, month, day } = this.toYmd(date);
-    const monthAbbrev = MONTH_ABBREVS[month - 1];
+    const monthAbbrev = monthAbbrevs[month - 1];
     if (monthAbbrev === undefined) {
       throw new Error(`month ${month} is not 1-12`);
     }

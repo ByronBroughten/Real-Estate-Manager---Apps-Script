@@ -16,7 +16,7 @@ import type { ActionReturn, Endpoint } from "./Endpoints";
 type BatchUpdateCall =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
 
-const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
+const occupancyGid = sheetConfigs.occupancy.sheetGid;
 const c = columnConfigs.occupancy;
 const columnIds = [
   c.id.columnId,
@@ -30,19 +30,19 @@ const headers = [
   "Build ledger, time last ran",
   "Build ledger, run status",
 ];
-const SELECTOR_COL_INDEX = 1;
-const TIME_LAST_RAN_COL_INDEX = 2;
-const RUN_STATUS_COL_INDEX = 3;
-const ACTION_ROW_INDEX = 2;
-const TOP_DATA_ROW_INDEX = 4;
-const END_ROW_INDEX = 9;
+const selectorColIndex = 1;
+const timeLastRanColIndex = 2;
+const runStatusColIndex = 3;
+const actionRowIndex = 2;
+const topDataRowIndex = 4;
+const endRowIndex = 9;
 
-const LIGHT_YELLOW = { red: 1, green: 0.949, blue: 0.8 };
-const LIGHT_GREEN = { red: 0.851, green: 0.918, blue: 0.827 };
-const LIGHT_ORANGE = { red: 0.99, green: 0.85, blue: 0.7 };
-const LIGHT_RED = { red: 0.957, green: 0.8, blue: 0.8 };
+const lightYellow = { red: 1, green: 0.949, blue: 0.8 };
+const lightGreen = { red: 0.851, green: 0.918, blue: 0.827 };
+const lightOrange = { red: 0.99, green: 0.85, blue: 0.7 };
+const lightRed = { red: 0.957, green: 0.8, blue: 0.8 };
 
-const TIMESTAMP = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+const timestamp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
 // Rows 4 and 6 are ticked; 5, 7 and 8 are the rows a selective run must not touch.
 function stubOccupancySheet(checkedRowIndexes: number[] = [4, 6]) {
@@ -55,7 +55,7 @@ function stubOccupancySheet(checkedRowIndexes: number[] = [4, 6]) {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
           0: columnIds,
@@ -66,7 +66,7 @@ function stubOccupancySheet(checkedRowIndexes: number[] = [4, 6]) {
           7: dataRow(7),
           8: dataRow(8),
         }),
-        table: { endRowIndex: END_ROW_INDEX },
+        table: { endRowIndex },
       },
     ],
   });
@@ -78,7 +78,7 @@ function stubOccupancySheetWithBlankRow() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: OCCUPANCY_GID,
+        sheetId: occupancyGid,
         title: "Occupancy",
         rows: buildGridRows({
           0: columnIds,
@@ -89,7 +89,7 @@ function stubOccupancySheetWithBlankRow() {
           7: dataRow(7),
           8: dataRow(8),
         }),
-        table: { endRowIndex: END_ROW_INDEX },
+        table: { endRowIndex },
       },
     ],
   });
@@ -178,7 +178,7 @@ function cellWritesFor(calls: BatchUpdateCall[], colIndex: number) {
     .filter(
       (request) =>
         request.updateCells?.range?.startColumnIndex === colIndex &&
-        (request.updateCells.range.startRowIndex ?? 0) >= TOP_DATA_ROW_INDEX,
+        (request.updateCells.range.startRowIndex ?? 0) >= topDataRowIndex,
     )
     .map((request) => {
       const cell = request.updateCells?.rows?.[0]?.values?.[0];
@@ -193,7 +193,7 @@ function cellWritesFor(calls: BatchUpdateCall[], colIndex: number) {
 function actionRowWrites(calls: BatchUpdateCall[]) {
   return allRequests(calls).filter((request) => {
     const range = request.repeatCell?.range ?? request.updateCells?.range;
-    return range?.startRowIndex === ACTION_ROW_INDEX;
+    return range?.startRowIndex === actionRowIndex;
   });
 }
 
@@ -205,7 +205,7 @@ function touchedRowIndexes(calls: BatchUpdateCall[]): number[] {
       const end = range?.endRowIndex ?? start + 1;
       return Array.from({ length: end - start }, (_, i) => start + i);
     })
-    .filter((rowIndex) => rowIndex >= TOP_DATA_ROW_INDEX);
+    .filter((rowIndex) => rowIndex >= topDataRowIndex);
   return [...new Set(rowIndexes)].sort((a, b) => a - b);
 }
 
@@ -220,30 +220,30 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
 
     runEndpoint(selectiveEndpoint(noOp));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex)).toEqual([
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: "Running…",
-        backgroundColor: LIGHT_YELLOW,
+        backgroundColor: lightYellow,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: "Running…",
-        backgroundColor: LIGHT_YELLOW,
+        backgroundColor: lightYellow,
       },
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: "Succeeded",
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: "Succeeded",
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
     ]);
   });
@@ -273,24 +273,24 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     runEndpoint(selectiveEndpoint(noOp));
-    const writes = fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX);
+    const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
 
-    expect(writes[0]?.value).toMatch(TIMESTAMP);
-    expect(writes[0]?.backgroundColor).toEqual(LIGHT_YELLOW);
-    expect(writes[1]?.value).toMatch(TIMESTAMP);
-    expect(writes[1]?.backgroundColor).toEqual(LIGHT_YELLOW);
+    expect(writes[0]?.value).toMatch(timestamp);
+    expect(writes[0]?.backgroundColor).toEqual(lightYellow);
+    expect(writes[1]?.value).toMatch(timestamp);
+    expect(writes[1]?.backgroundColor).toEqual(lightYellow);
     expect(writes.slice(2)).toEqual([
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: undefined,
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: undefined,
-        backgroundColor: LIGHT_GREEN,
+        backgroundColor: lightGreen,
       },
     ]);
   });
@@ -310,7 +310,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
 
     runEndpoint(selectiveEndpoint(noOp));
 
-    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([
+    expect(checkboxFillsFor(batchUpdateCalls, selectorColIndex)).toEqual([
       { startRowIndex: 4, endRowIndex: 5, value: false },
       { startRowIndex: 6, endRowIndex: 7, value: false },
     ]);
@@ -325,8 +325,8 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
       }),
     );
 
-    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([]);
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(checkboxFillsFor(batchUpdateCalls, selectorColIndex)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       "Error: no good",
     );
   });
@@ -336,8 +336,8 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
 
     runEndpoint(retainingEndpoint(noOp));
 
-    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([]);
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(checkboxFillsFor(batchUpdateCalls, selectorColIndex)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       "Succeeded",
     );
   });
@@ -347,7 +347,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
 
     runEndpoint({ ...selectiveEndpoint(noOp), runOnUncheck: true }, false);
 
-    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([
+    expect(checkboxFillsFor(batchUpdateCalls, selectorColIndex)).toEqual([
       { startRowIndex: 4, endRowIndex: 5, value: false },
       { startRowIndex: 6, endRowIndex: 7, value: false },
     ]);
@@ -360,25 +360,25 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     runEndpoint(reportingEndpoint(noOp));
-    const writes = fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX);
+    const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
 
-    expect(writes[0]?.startRowIndex).toBe(TOP_DATA_ROW_INDEX);
-    expect(writes[0]?.endRowIndex).toBe(END_ROW_INDEX);
-    expect(writes[0]?.value).toMatch(TIMESTAMP);
-    expect(writes[0]?.backgroundColor).toEqual(LIGHT_YELLOW);
+    expect(writes[0]?.startRowIndex).toBe(topDataRowIndex);
+    expect(writes[0]?.endRowIndex).toBe(endRowIndex);
+    expect(writes[0]?.value).toMatch(timestamp);
+    expect(writes[0]?.backgroundColor).toEqual(lightYellow);
   });
 
   it("writes the start time once and only recolours it afterwards", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
     runEndpoint(reportingEndpoint(noOp));
-    const writes = fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX);
+    const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
 
     expect(writes[1]).toEqual({
-      startRowIndex: TOP_DATA_ROW_INDEX,
-      endRowIndex: END_ROW_INDEX,
+      startRowIndex: topDataRowIndex,
+      endRowIndex,
       value: undefined,
-      backgroundColor: LIGHT_GREEN,
+      backgroundColor: lightGreen,
     });
     expect(writes).toHaveLength(2);
   });
@@ -422,11 +422,11 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
 
     runEndpoint(reportingEndpoint(noOp));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)[0]).toEqual({
-      startRowIndex: TOP_DATA_ROW_INDEX,
-      endRowIndex: END_ROW_INDEX,
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex)[0]).toEqual({
+      startRowIndex: topDataRowIndex,
+      endRowIndex,
       value: "Running…",
-      backgroundColor: LIGHT_YELLOW,
+      backgroundColor: lightYellow,
     });
   });
 });
@@ -437,7 +437,7 @@ describe("EndpointRun.run, the run status message", () => {
 
     runEndpoint(reportingEndpoint(() => "Built 5 ledgers"));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       "Built 5 ledgers",
     );
   });
@@ -447,7 +447,7 @@ describe("EndpointRun.run, the run status message", () => {
 
     runEndpoint(reportingEndpoint(noOp));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       "Succeeded",
     );
   });
@@ -460,7 +460,7 @@ describe("EndpointRun.run, the two flushes", () => {
     runEndpoint(reportingEndpoint(noOp));
 
     expect(
-      fillsFor(batchUpdateCalls.slice(0, 1), RUN_STATUS_COL_INDEX).map(
+      fillsFor(batchUpdateCalls.slice(0, 1), runStatusColIndex).map(
         (write) => write.value,
       ),
     ).toEqual(["Running…"]);
@@ -477,8 +477,8 @@ describe("EndpointRun.run, an endpoint declaring no feedback columns", () => {
       selector: { column: "buildLedgerSelect" },
     });
 
-    expect(fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX)).toEqual([]);
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, timeLastRanColIndex)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex)).toEqual([]);
   });
 });
 
@@ -486,7 +486,7 @@ describe("EndpointRun.run, a run that fails", () => {
   // Reading a row past the table's last one is a real read on real state.
   function failingAction(ss: Parameters<Endpoint<"occupancy">["action"]>[0]) {
     ss.sheet("occupancy").row(4).cell("id").updateValue("r:occ:written");
-    ss.sheet("occupancy").row(END_ROW_INDEX).value("id");
+    ss.sheet("occupancy").row(endRowIndex).value("id");
   }
 
   it("writes the error text and red to the selected rows only", () => {
@@ -494,34 +494,32 @@ describe("EndpointRun.run, a run that fails", () => {
 
     runEndpoint(selectiveEndpoint(failingAction));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).slice(2)).toEqual([
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).slice(2)).toEqual([
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: expect.stringMatching(/^Error: /) as string,
-        backgroundColor: LIGHT_RED,
+        backgroundColor: lightRed,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: expect.stringMatching(/^Error: /) as string,
-        backgroundColor: LIGHT_RED,
+        backgroundColor: lightRed,
       },
     ]);
-    expect(
-      fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX).slice(2),
-    ).toEqual([
+    expect(fillsFor(batchUpdateCalls, timeLastRanColIndex).slice(2)).toEqual([
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: undefined,
-        backgroundColor: LIGHT_RED,
+        backgroundColor: lightRed,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: undefined,
-        backgroundColor: LIGHT_RED,
+        backgroundColor: lightRed,
       },
     ]);
   });
@@ -550,7 +548,7 @@ describe("EndpointRun.run, an empty selection", () => {
     );
 
     expect(calls).toEqual([]);
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([]);
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex)).toEqual([]);
     expect(batchUpdateCalls).toHaveLength(1);
   });
 });
@@ -561,7 +559,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
 
     runEndpoint(oneRowEndpoint(noOp));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       'Error: This endpoint runs on one row of "Occupancy" at a time, but 2 are selected.',
     );
   });
@@ -584,7 +582,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
 
     runEndpoint(oneRowEndpoint(noOp));
 
-    expect(checkboxFillsFor(batchUpdateCalls, SELECTOR_COL_INDEX)).toEqual([]);
+    expect(checkboxFillsFor(batchUpdateCalls, selectorColIndex)).toEqual([]);
   });
 
   it("reports the refusal as a failed run on every ticked row", () => {
@@ -592,20 +590,18 @@ describe("EndpointRun.run, a selector that requires one row", () => {
 
     runEndpoint(oneRowEndpoint(noOp));
 
-    expect(
-      fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX).slice(2),
-    ).toEqual([
+    expect(fillsFor(batchUpdateCalls, timeLastRanColIndex).slice(2)).toEqual([
       {
         startRowIndex: 4,
         endRowIndex: 5,
         value: undefined,
-        backgroundColor: LIGHT_RED,
+        backgroundColor: lightRed,
       },
       {
         startRowIndex: 6,
         endRowIndex: 7,
         value: undefined,
-        backgroundColor: LIGHT_RED,
+        backgroundColor: lightRed,
       },
     ]);
   });
@@ -628,7 +624,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
 
     runEndpoint(oneRowEndpoint(noOp));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       "Succeeded",
     );
   });
@@ -645,7 +641,7 @@ describe("EndpointRun.run, a run report naming a state", () => {
       })),
     );
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.value).toBe(
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
       "Added 3 of 5",
     );
   });
@@ -661,12 +657,11 @@ describe("EndpointRun.run, a run report naming a state", () => {
     );
 
     expect(
-      fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)?.backgroundColor,
-    ).toEqual(LIGHT_ORANGE);
+      fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.backgroundColor,
+    ).toEqual(lightOrange);
     expect(
-      fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX).at(-1)
-        ?.backgroundColor,
-    ).toEqual(LIGHT_ORANGE);
+      fillsFor(batchUpdateCalls, timeLastRanColIndex).at(-1)?.backgroundColor,
+    ).toEqual(lightOrange);
   });
 
   it("leaves the start time written once, recolouring it without a value", () => {
@@ -678,9 +673,9 @@ describe("EndpointRun.run, a run report naming a state", () => {
         message: "Added 3 of 5",
       })),
     );
-    const writes = fillsFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX);
+    const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
 
-    expect(writes[0]?.value).toMatch(TIMESTAMP);
+    expect(writes[0]?.value).toMatch(timestamp);
     expect(writes[1]?.value).toBeUndefined();
     expect(writes).toHaveLength(2);
   });
@@ -701,9 +696,9 @@ describe("EndpointRun.run, a run report naming rows", () => {
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
-    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
-      { rowIndex: 5, value: "No such unit", backgroundColor: LIGHT_RED },
-      { rowIndex: 7, value: "Amount is blank", backgroundColor: LIGHT_RED },
+    expect(cellWritesFor(batchUpdateCalls, runStatusColIndex)).toEqual([
+      { rowIndex: 5, value: "No such unit", backgroundColor: lightRed },
+      { rowIndex: 7, value: "Amount is blank", backgroundColor: lightRed },
     ]);
   });
 
@@ -712,9 +707,9 @@ describe("EndpointRun.run, a run report naming rows", () => {
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
-    expect(cellWritesFor(batchUpdateCalls, TIME_LAST_RAN_COL_INDEX)).toEqual([
-      { rowIndex: 5, value: undefined, backgroundColor: LIGHT_RED },
-      { rowIndex: 7, value: undefined, backgroundColor: LIGHT_RED },
+    expect(cellWritesFor(batchUpdateCalls, timeLastRanColIndex)).toEqual([
+      { rowIndex: 5, value: undefined, backgroundColor: lightRed },
+      { rowIndex: 7, value: undefined, backgroundColor: lightRed },
     ]);
   });
 
@@ -723,11 +718,11 @@ describe("EndpointRun.run, a run report naming rows", () => {
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)).toEqual({
-      startRowIndex: TOP_DATA_ROW_INDEX,
-      endRowIndex: END_ROW_INDEX,
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)).toEqual({
+      startRowIndex: topDataRowIndex,
+      endRowIndex,
       value: "Succeeded",
-      backgroundColor: LIGHT_GREEN,
+      backgroundColor: lightGreen,
     });
   });
 
@@ -742,11 +737,11 @@ describe("EndpointRun.run, a run report naming rows", () => {
       })),
     );
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)).toEqual({
-      startRowIndex: TOP_DATA_ROW_INDEX,
-      endRowIndex: END_ROW_INDEX,
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)).toEqual({
+      startRowIndex: topDataRowIndex,
+      endRowIndex,
       value: "Added 3 of 5",
-      backgroundColor: LIGHT_ORANGE,
+      backgroundColor: lightOrange,
     });
   });
 
@@ -761,8 +756,8 @@ describe("EndpointRun.run, a run report naming rows", () => {
       })),
     );
 
-    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
-      { rowIndex: 5, value: "Check this one", backgroundColor: LIGHT_ORANGE },
+    expect(cellWritesFor(batchUpdateCalls, runStatusColIndex)).toEqual([
+      { rowIndex: 5, value: "Check this one", backgroundColor: lightOrange },
     ]);
   });
 
@@ -792,8 +787,8 @@ describe("EndpointRun.run, a run report naming rows", () => {
       })),
     );
 
-    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
-      { rowIndex: 6, value: "No such unit", backgroundColor: LIGHT_RED },
+    expect(cellWritesFor(batchUpdateCalls, runStatusColIndex)).toEqual([
+      { rowIndex: 6, value: "No such unit", backgroundColor: lightRed },
     ]);
   });
 
@@ -803,16 +798,16 @@ describe("EndpointRun.run, a run report naming rows", () => {
     runEndpoint(
       reportingEndpoint(() => ({
         rows: new Map([
-          [END_ROW_INDEX, { runState: "failure" as const, message: "Nowhere" }],
+          [endRowIndex, { runState: "failure" as const, message: "Nowhere" }],
         ]),
       })),
     );
 
-    expect(fillsFor(batchUpdateCalls, RUN_STATUS_COL_INDEX).at(-1)).toEqual({
-      startRowIndex: TOP_DATA_ROW_INDEX,
-      endRowIndex: END_ROW_INDEX,
-      value: `Error: Row ${END_ROW_INDEX} is not a data row of "Occupancy", so this run cannot report into it.`,
-      backgroundColor: LIGHT_RED,
+    expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)).toEqual({
+      startRowIndex: topDataRowIndex,
+      endRowIndex,
+      value: `Error: Row ${endRowIndex} is not a data row of "Occupancy", so this run cannot report into it.`,
+      backgroundColor: lightRed,
     });
   });
 
@@ -840,8 +835,8 @@ describe("EndpointRun.run, a run report naming rows", () => {
         (request) => request.deleteDimension?.range?.startIndex === 5,
       ),
     ).toHaveLength(1);
-    expect(cellWritesFor(batchUpdateCalls, RUN_STATUS_COL_INDEX)).toEqual([
-      { rowIndex: 7, value: "Amount is blank", backgroundColor: LIGHT_RED },
+    expect(cellWritesFor(batchUpdateCalls, runStatusColIndex)).toEqual([
+      { rowIndex: 7, value: "Amount is blank", backgroundColor: lightRed },
     ]);
   });
 });

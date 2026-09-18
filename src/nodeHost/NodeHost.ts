@@ -6,7 +6,7 @@ import {
 import { installRawSource } from "../00_base/RawSource";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
-const SPREADSHEET_ID_PROPERTY = "realEstateSpreadsheetId";
+const spreadsheetIdProperty = "realEstateSpreadsheetId";
 
 export interface NodeHostProps {
   spreadsheetId: string;
@@ -56,7 +56,7 @@ export class NodeHost {
     return {
       getScriptProperties: () => ({
         getProperty: (key: string): string | null =>
-          key === SPREADSHEET_ID_PROPERTY ? spreadsheetId : null,
+          key === spreadsheetIdProperty ? spreadsheetId : null,
       }),
     };
   }

@@ -11,7 +11,7 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 
-const SPREADSHEET_CONFIG_GID = getSheetTraitByName(
+const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
   "sheetGid",
 );
@@ -43,7 +43,7 @@ function stubSpreadsheetConfigSheet(
   return stubSheetsService({
     sheets: [
       {
-        sheetId: SPREADSHEET_CONFIG_GID,
+        sheetId: spreadsheetConfigGid,
         title: "Spreadsheet Config",
         rows: buildGridRows(rowsByIndex),
       },
@@ -86,7 +86,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
       ].join("\n"),
     );
     expect(getByDataFilterCalls[0]).toMatchObject({
-      dataFilters: [{ gridRange: { sheetId: SPREADSHEET_CONFIG_GID } }],
+      dataFilters: [{ gridRange: { sheetId: spreadsheetConfigGid } }],
     });
   });
 

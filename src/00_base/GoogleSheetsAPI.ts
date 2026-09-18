@@ -58,25 +58,25 @@ interface FieldsArg {
   fields?: string;
 }
 
-const SHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
+const sheetsApiBase = "https://sheets.googleapis.com/v4/spreadsheets";
 
-const SHEET_PROPERTIES_FIELDS =
-  "sheets(properties(sheetId,title),tables(tableId,range))";
-const CONDITIONAL_FORMAT_FIELDS =
-  "sheets(properties(sheetId),conditionalFormats)";
-const PROTECTED_RANGE_FIELDS = "sheets(properties(sheetId),protectedRanges)";
-const GRID_FIELDS_WITH_PROGRAMMATIC_FACTS =
-  "sheets(" +
-  "properties(sheetId,title)," +
-  "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
-  "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
-  ")";
-const GRID_FIELDS_WITHOUT_PROGRAMMATIC_FACTS =
-  "sheets(" +
-  "properties(sheetId,title)," +
-  "tables(tableId,range)," +
-  "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
-  ")";
+const fieldMasks = {
+  sheetProperties: "sheets(properties(sheetId,title),tables(tableId,range))",
+  conditionalFormats: "sheets(properties(sheetId),conditionalFormats)",
+  protectedRanges: "sheets(properties(sheetId),protectedRanges)",
+  gridWithProgrammaticFacts:
+    "sheets(" +
+    "properties(sheetId,title)," +
+    "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
+    "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
+    ")",
+  gridWithoutProgrammaticFacts:
+    "sheets(" +
+    "properties(sheetId,title)," +
+    "tables(tableId,range)," +
+    "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
+    ")",
+} as const;
 
 export interface SheetsHttpRequest {
   method: "GET" | "POST";
@@ -134,7 +134,7 @@ export class GoogleSheetsAPI implements RawSource {
   fetchSheetProperties(spreadsheetId: string): SpreadsheetSnapshot {
     return toSpreadsheetSnapshot(
       this.sheets.Spreadsheets.get(spreadsheetId, {
-        fields: SHEET_PROPERTIES_FIELDS,
+        fields: fieldMasks.sheetProperties,
       }),
     );
   }
@@ -161,7 +161,7 @@ export class GoogleSheetsAPI implements RawSource {
     spreadsheetId: string,
   ): SheetConditionalFormatSnapshot[] {
     const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
-      fields: CONDITIONAL_FORMAT_FIELDS,
+      fields: fieldMasks.conditionalFormats,
     });
     return Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
       (sheet) => ({
@@ -176,7 +176,7 @@ export class GoogleSheetsAPI implements RawSource {
   // Assumed to drop protectedRanges the same way until the probe says otherwise.
   fetchProtectedRanges(spreadsheetId: string): SheetProtectedRangeSnapshot[] {
     const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
-      fields: PROTECTED_RANGE_FIELDS,
+      fields: fieldMasks.protectedRanges,
     });
     return Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
       (sheet) => ({
@@ -209,7 +209,7 @@ function httpSheetsTransport(
       );
     }
     const query = fields ? `?fields=${encodeURIComponent(fields)}` : "";
-    return `${SHEETS_API_BASE}/${spreadsheetId}${suffix}${query}`;
+    return `${sheetsApiBase}/${spreadsheetId}${suffix}${query}`;
   };
   return {
     Spreadsheets: {
@@ -252,8 +252,8 @@ function toSpreadsheetSnapshot(
 
 function gridFields(options: GridFetchOptions): string {
   return options.includeProgrammaticFacts
-    ? GRID_FIELDS_WITH_PROGRAMMATIC_FACTS
-    : GRID_FIELDS_WITHOUT_PROGRAMMATIC_FACTS;
+    ? fieldMasks.gridWithProgrammaticFacts
+    : fieldMasks.gridWithoutProgrammaticFacts;
 }
 
 function toSheetSnapshot(sheet: GoogleSheet): SheetSnapshot {

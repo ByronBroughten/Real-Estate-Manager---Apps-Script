@@ -12,11 +12,13 @@ type UserEnteredValue = NonNullable<
 type RowData = GoogleAppsScript.Sheets.Schema.RowData;
 type DimensionRange = GoogleAppsScript.Sheets.Schema.DimensionRange;
 
-const MAX_SAMPLE_VALUES = 4;
-const MAX_RAW_CHARS = 120;
-const SUBJECT_WIDTH = 24;
-const COUNT_WIDTH = 14;
-const FIND_REPLACE_FLAGS = [
+const layoutLimits = {
+  maxSampleValues: 4,
+  maxRawChars: 120,
+  subjectWidth: 24,
+  countWidth: 14,
+} as const;
+const findReplaceFlags = [
   "matchCase",
   "matchEntireCell",
   "searchByRegex",
@@ -183,7 +185,7 @@ export class UpdateRequestSummary {
   private _findReplaceFlagsLabel(
     findReplace: GoogleAppsScript.Sheets.Schema.FindReplaceRequest | undefined,
   ): string {
-    const flags = FIND_REPLACE_FLAGS.filter((flag) => findReplace?.[flag]);
+    const flags = findReplaceFlags.filter((flag) => findReplace?.[flag]);
     if (flags.length === 0) return "(no flags)";
     return flags.join(", ");
   }
@@ -259,7 +261,9 @@ export class UpdateRequestSummary {
     return this._columns(
       this._sheetLabel(this._sheetIdOf(inner)),
       "",
-      json.length > MAX_RAW_CHARS ? `${json.slice(0, MAX_RAW_CHARS)}…` : json,
+      json.length > layoutLimits.maxRawChars
+        ? `${json.slice(0, layoutLimits.maxRawChars)}…`
+        : json,
       "",
     );
   }
@@ -271,8 +275,8 @@ export class UpdateRequestSummary {
     fields: string,
   ): string {
     return [
-      subject.padEnd(SUBJECT_WIDTH),
-      count.padEnd(COUNT_WIDTH),
+      subject.padEnd(layoutLimits.subjectWidth),
+      count.padEnd(layoutLimits.countWidth),
       values,
       fields,
     ]
@@ -324,8 +328,8 @@ export class UpdateRequestSummary {
       (row.values ?? []).map((cell) => valueLabel(cell.userEnteredValue)),
     );
     if (values.length === 0) return "(no values)";
-    const shown = values.slice(0, MAX_SAMPLE_VALUES).join(", ");
-    return values.length > MAX_SAMPLE_VALUES ? `${shown}, …` : shown;
+    const shown = values.slice(0, layoutLimits.maxSampleValues).join(", ");
+    return values.length > layoutLimits.maxSampleValues ? `${shown}, …` : shown;
   }
   private _fieldsLabel(fields: string | undefined): string {
     return fields ? `[${fields}]` : "";

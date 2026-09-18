@@ -13,25 +13,25 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { ConfigSheetFloor } from "./ConfigSheetFloor";
 
-const SPREADSHEET_CONFIG_GID = getSheetTraitByName(
+const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
   "sheetGid",
 );
-const SHEET_CONFIG_GID = getSheetTraitByName("sheetConfig", "sheetGid");
-const COLUMN_CONFIG_GID = getSheetTraitByName("columnConfig", "sheetGid");
-const TOP_DATA_ROW_INDEX = ssConfigGet("tableHeaderRowIndexBase0") + 1;
+const sheetConfigGid = getSheetTraitByName("sheetConfig", "sheetGid");
+const columnConfigGid = getSheetTraitByName("columnConfig", "sheetGid");
+const topDataRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
 const ssc = columnConfigs.spreadsheetConfig;
 const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
 
-const FEEDBACK = [
+const feedback = [
   "fillRowIdsTimeLastRan",
   "fillRowIdsRunStatus",
   "syncConfigSheetRowsTimeLastRan",
   "syncConfigSheetRowsRunStatus",
 ] as const;
 
-const SSC_COLUMNS = [
+const sscColumns = [
   "tableMenuSpace",
   "fillRowIdsTimeLastRan",
   "fillRowIdsRunStatus",
@@ -51,21 +51,21 @@ beforeEach(() => {
   stubLogger();
 });
 
-function sscField<K extends (typeof SSC_COLUMNS)[number]>(columnName: K) {
+function sscField<K extends (typeof sscColumns)[number]>(columnName: K) {
   return ssc[columnName];
 }
 
 function floorFixture(
   options: {
-    spreadsheetConfigColumnOrder?: readonly (typeof SSC_COLUMNS)[number][];
+    spreadsheetConfigColumnOrder?: readonly (typeof sscColumns)[number][];
     spreadsheetConfigHeaders?: Partial<
-      Record<(typeof SSC_COLUMNS)[number], string>
+      Record<(typeof sscColumns)[number], string>
     >;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
   } = {},
 ) {
-  const sscOrder = options.spreadsheetConfigColumnOrder ?? SSC_COLUMNS;
+  const sscOrder = options.spreadsheetConfigColumnOrder ?? sscColumns;
   const sscHeaders = sscOrder.map(
     (columnName) =>
       options.spreadsheetConfigHeaders?.[columnName] ??
@@ -101,7 +101,7 @@ function floorFixture(
   return stubSheetsService({
     sheets: [
       {
-        sheetId: SPREADSHEET_CONFIG_GID,
+        sheetId: spreadsheetConfigGid,
         title: "Spreadsheet Config",
         rows: buildGridRows({
           0: sscOrder.map((columnName) => sscField(columnName).columnId),
@@ -113,7 +113,7 @@ function floorFixture(
         protectedRanges: options.spreadsheetConfigProtections,
       },
       {
-        sheetId: SHEET_CONFIG_GID,
+        sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({
           0: [
@@ -130,14 +130,14 @@ function floorFixture(
             sc.idPrefixIsUniqueOrEmpty.header,
             sc.letApiAccess.header,
           ],
-          4: [SHEET_CONFIG_GID, "Sheet Config", "scf", true, true],
-          5: [COLUMN_CONFIG_GID, "Column Config", "ccf", true, true],
+          4: [sheetConfigGid, "Sheet Config", "scf", true, true],
+          5: [columnConfigGid, "Column Config", "ccf", true, true],
         }),
         table: { endRowIndex: 6, endColumnIndex: 5 },
         protectedRanges: options.sheetConfigProtections,
       },
       {
-        sheetId: COLUMN_CONFIG_GID,
+        sheetId: columnConfigGid,
         title: "Column Config",
         rows: buildGridRows({
           0: [
@@ -165,7 +165,7 @@ function floorFixture(
 }
 
 function applyFloor(
-  feedbackColumnNames: readonly (typeof FEEDBACK)[number][] = [...FEEDBACK],
+  feedbackColumnNames: readonly (typeof feedback)[number][] = [...feedback],
 ) {
   const floor = ConfigSheetFloor.init();
   const report = floor.ensure(feedbackColumnNames);
@@ -234,8 +234,8 @@ describe("ConfigSheetFloor", () => {
       throw new Error("formula column warning");
     }
     expect(formula.range).toEqual({
-      sheetId: SHEET_CONFIG_GID,
-      startRowIndex: TOP_DATA_ROW_INDEX,
+      sheetId: sheetConfigGid,
+      startRowIndex: topDataRowIndex,
       startColumnIndex: 3,
       endColumnIndex: 4,
     });
@@ -266,7 +266,7 @@ describe("ConfigSheetFloor", () => {
   it("queues nothing on a second run", () => {
     const { batchUpdateCalls } = floorFixture();
     const { floor } = applyFloor();
-    floor.ensure([...FEEDBACK]);
+    floor.ensure([...feedback]);
     floor.ss.batchUpdateGSheets();
     expect(batchUpdateCalls).toHaveLength(1);
   });
@@ -280,7 +280,7 @@ describe("ConfigSheetFloor", () => {
           description: driftedDescription,
           warningOnly: true,
           range: {
-            sheetId: SPREADSHEET_CONFIG_GID,
+            sheetId: spreadsheetConfigGid,
             startRowIndex: 0,
             endRowIndex: 1,
             startColumnIndex: 0,
@@ -301,8 +301,8 @@ describe("ConfigSheetFloor", () => {
     expect(report).toContain(driftedDescription);
     expect(data).toMatchObject({
       range: {
-        startRowIndex: TOP_DATA_ROW_INDEX,
-        endRowIndex: TOP_DATA_ROW_INDEX + 1,
+        startRowIndex: topDataRowIndex,
+        endRowIndex: topDataRowIndex + 1,
         startColumnIndex: 0,
         endColumnIndex: 1,
       },
@@ -318,7 +318,7 @@ describe("ConfigSheetFloor", () => {
           description: `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · header · warning`,
           warningOnly: true,
           range: {
-            sheetId: SPREADSHEET_CONFIG_GID,
+            sheetId: spreadsheetConfigGid,
             startRowIndex: 3,
             endRowIndex: 4,
             startColumnIndex: 0,
@@ -345,9 +345,9 @@ describe("ConfigSheetFloor", () => {
   it("removes extra floor matches for the same key and reports them", () => {
     const description = `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · data · warning`;
     const inPlace = {
-      sheetId: SPREADSHEET_CONFIG_GID,
-      startRowIndex: TOP_DATA_ROW_INDEX,
-      endRowIndex: TOP_DATA_ROW_INDEX + 1,
+      sheetId: spreadsheetConfigGid,
+      startRowIndex: topDataRowIndex,
+      endRowIndex: topDataRowIndex + 1,
       startColumnIndex: 0,
       endColumnIndex: 1,
     };
