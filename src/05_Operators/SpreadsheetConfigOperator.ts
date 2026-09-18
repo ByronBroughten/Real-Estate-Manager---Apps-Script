@@ -9,15 +9,15 @@ import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetCo
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  SpreadsheetConfigDataRow,
-  spreadsheetConfigColumnLabel,
-  spreadsheetConfigHeader,
-} from "./SpreadsheetConfigDataRow";
-import {
   OperatorBase,
   type ConfigSyncState,
   type OperatorProps,
 } from "./OperatorBase";
+import {
+  SpreadsheetConfigDataRow,
+  spreadsheetConfigColumnLabel,
+  spreadsheetConfigHeader,
+} from "./SpreadsheetConfigDataRow";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
 

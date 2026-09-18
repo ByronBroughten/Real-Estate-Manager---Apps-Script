@@ -65,6 +65,7 @@ One line per rule. The reasoning and worked examples are one file away:
 
 - **`Val.assert(value, "label")` over a bare `!` for "this shouldn't be missing" guards.** Bare `!` only right after an explicit `if (...) throw` already proved the value present.
 - **Read and validate in one step; reach for a marked read (`valueOrEmpty`, `valueNotEmpty`) only where the call site's requirement differs from its column's** Empty value allowed declaration.
+- **A phrase that names the same thing in several messages or labels comes from one function** (`spreadsheetConfigColumnLabel`), so the wording can't drift between them.
 - **Default to a plain `throw new Error("specific message")`.** Mint a custom `Error` subclass only when callers need to catch the failure _category_ by type.
 - **Guard-clause throws, never nested conditionals.** The one accepted exception is an exhaustiveness check, which ends in a trailing `else { throw new Error(...) }`.
 - **`try`/`catch` has no established convention yet** — don't generalize from `EndpointRun.run`, its one use.
@@ -86,6 +87,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **`reduce` is fully accepted** for building a new object/record via an accumulator (`(acc, item) => ({...acc, ...})`), rather than a manual loop with a declared accumulator.
 - **Mutator methods return `this` for chaining** (`fetchAndUpdateAll(): this { ...; return this; }`).
 - **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks.
+- **An option that combines other options is built from them, not from copies of their bodies** — `prepFetchRowSpecifier`'s `"all"` case calls itself for `"headers"`, `"actions"`, `"columnIds"` and `"data"`.
 - **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects.
 
 ## Imports & file organization
