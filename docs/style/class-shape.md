@@ -88,8 +88,9 @@ The criterion bites on the derived fact, not on row or cell addressing: `topCell
 
 ## A helper that never reads `this` is a module function
 
-A private helper with zero references to `this` depends on nothing the instance holds, so it leaves the class: an unexported function below the class, with the moved functions ordered by their first use in the class. Every private helper left in the class body then depends on instance state, and a reader can tell the two kinds of helper apart without reading each body. Keeping it unexported means the move doesn't widen the module's interface. `SpreadsheetRaw`'s `finalizeFetchedCells` and `SchemaBase`'s `makeUniqueIdBase` are examples (#64).
+A private helper with zero references to `this` depends on nothing the instance holds, so it leaves the class: an unexported function below the class, with the moved functions ordered by their first use in the class. Every private helper left in the class body then depends on instance state, and a reader can tell the two kinds of helper apart without reading each body. Keeping it unexported means the move doesn't widen the module's interface. `SchemaBase`'s `makeUniqueIdBase` is an example (#64).
 
+- **A helper whose arguments are one collaborator and that collaborator's state belongs on the collaborator**, not below the class. `SpreadsheetRaw._finalizeFetchedCells(sheet, state)` became `SheetRaw.finalizeFetchedCells()` (#64).
 - **A helper that reads `this` only to reach a collaborator stays a method.** Moving it out would mean passing the collaborator in, which is the threading this file warns against.
 - **A public method that happens not to read `this` stays put.** It is part of the class's interface, not a helper.
 - **A helper that only renames a function already in scope is deleted**, and its callers call that function. `SchemaBase.ssConfig` wrapped the imported `ssConfigGet` with the same signature.

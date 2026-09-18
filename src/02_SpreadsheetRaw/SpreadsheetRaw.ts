@@ -158,7 +158,7 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       }
       const sheet = this.sheet(sheetGid);
       const toFinalize = state.fetchQueue.toFinalize;
-      finalizeFetchedCells(sheet, state);
+      sheet.finalizeFetchedCells();
       if (toFinalize.rows.size === 0 && toFinalize.columns.size === 0) {
         return;
       }
@@ -537,15 +537,4 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       return b.index - a.index;
     });
   }
-}
-
-function finalizeFetchedCells(sheet: SheetRaw, state: SheetStateRaw): void {
-  state.fetchQueue.toFinalize.cells.forEach((colIndexes, rowIndex) => {
-    const row = sheet.rowCommon(rowIndex);
-    row.ensureStateExists();
-    colIndexes.forEach((colIndex) => {
-      row.cell(colIndex).ensureActive();
-    });
-  });
-  state.fetchQueue.toFinalize.cells.clear();
 }

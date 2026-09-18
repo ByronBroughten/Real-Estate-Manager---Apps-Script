@@ -308,6 +308,18 @@ export class SheetRaw extends SheetCommonRaw {
   hasQueuedFullRowFetch(rowIndex: number): boolean {
     return this.sheetState.fetchQueue.toFinalize.rows.has(rowIndex);
   }
+  finalizeFetchedCells(): void {
+    this.sheetState.fetchQueue.toFinalize.cells.forEach(
+      (colIndexes, rowIndex) => {
+        const row = this.rowCommon(rowIndex);
+        row.ensureStateExists();
+        colIndexes.forEach((colIndex) => {
+          row.cell(colIndex).ensureActive();
+        });
+      },
+    );
+    this.sheetState.fetchQueue.toFinalize.cells.clear();
+  }
   integrateSheetState(sheet: SheetSnapshot): void {
     this._initSheetState(sheet);
     this.sheetState.working.cellStateIsStale = false;
