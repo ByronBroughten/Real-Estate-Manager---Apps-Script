@@ -62,6 +62,8 @@ Intuition about cost and intuition about types are both unreliable here, and bot
 
 *Instances, types:* an assignment proves nothing about a mapped or conditional type — it passes against `any` and against `never` alike. Identity-based `IsExactly`/`assertType` is the only probe that means anything, and a probe that needed an `any` to compile has proved nothing at all: intersecting to satisfy an indexer resolves to `any` and makes every downstream assertion vacuously true (CLAUDE.md; STYLE.md, "Type modeling").
 
+*Instances, live behaviour:* the same holds for facts about Sheets that Google's docs don't state, where the cheap check is a probe against the live spreadsheet. A protected-range probe recorded that an open-ended column protection did not cover a Table row added after it was set; a follow-up check found that it does, and the shape decision had briefly been justified by the range merely *reading back* open-ended — a proxy for coverage rather than coverage itself, which is how a decision order written around the proxy produced the wrong branch. The same write-up recorded that Apps Script's "the owner can never be removed as an editor" fails for a REST write, on one observation with an ordinary alternative explanation available: a dotted gmail address may name a different Google identity than the undotted one, in which case the owner was simply not on the list. That claim is withdrawn and the question left open rather than answered (#51, #49; `docs/architecture/protected-ranges.md`).
+
 *Corollary:* record the measurement next to the conclusion. "`SpreadsheetApp` is slower" is re-proposable; "measured ~494ms against ~350ms on this date" is not.
 
 ### Give the common case the unmarked name
