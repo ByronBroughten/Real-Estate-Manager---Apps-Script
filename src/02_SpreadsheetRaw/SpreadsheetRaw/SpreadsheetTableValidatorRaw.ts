@@ -13,6 +13,10 @@ interface TablePlacementObservations {
   misplacedTables: MisplacedTable[];
   absentTables: SheetIdentity[];
 }
+const noObservations: TablePlacementObservations = {
+  misplacedTables: [],
+  absentTables: [],
+};
 export type TablePlacement =
   | { kind: "extra" }
   | (MisplacedTable & { kind: "misplaced" })
@@ -51,7 +55,7 @@ export class SpreadsheetTableValidatorRaw extends SpreadsheetBaseRaw {
   validateTablePlacement({
     misplacedTables,
     absentTables,
-  }: TablePlacementObservations): void {
+  }: TablePlacementObservations = noObservations): void {
     const reclassified = this._reclassifyAbsentTables({
       misplacedTables,
       absentTables,

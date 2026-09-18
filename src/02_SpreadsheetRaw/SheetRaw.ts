@@ -256,14 +256,12 @@ export class SheetRaw extends SheetCommonRaw {
     const fetched = this.sheetState.working.conditionalFormats.rules;
     const rules = fetched === null ? [] : [...fetched];
     const deletes = [...this.updateRequests.deleteConditionalFormat]
-      .filter((operation) => operation.kind === "deleteConditionalFormatRule")
       .filter((operation) => operation.sheetId === this.sheetGid)
       .sort((left, right) => right.index - left.index);
     deletes.forEach((operation) => {
       rules.splice(operation.index, 1);
     });
     this.updateRequests.addConditionalFormat.forEach((operation) => {
-      if (operation.kind !== "addConditionalFormatRule") return;
       if (operation.rule.ranges[0]?.sheetId !== this.sheetGid) return;
       rules.splice(operation.index, 0, operation.rule);
     });
@@ -319,6 +317,17 @@ export class SheetRaw extends SheetCommonRaw {
       },
     );
     this.sheetState.fetchQueue.toFinalize.cells.clear();
+  }
+  // After the backfills above, so a blank fact is sampled rather than built.
+  ensureFetchedActiveFacts(): void {
+    const { toFinalize } = this.sheetState.fetchQueue;
+    if (toFinalize.rows.has(this.schema.topDataRowIdx)) {
+      this.meta.ensureTableColumnsActiveFacts();
+    }
+    toFinalize.columns.forEach((colIndex) => {
+      if (!this.isTableColIndex(colIndex)) return;
+      this.meta.column(colIndex).ensureActiveFacts();
+    });
   }
   integrateSheetState(sheet: SheetSnapshot): void {
     this._initSheetState(sheet);
@@ -424,7 +433,6 @@ export class SheetRaw extends SheetCommonRaw {
     const protections: ProtectedRange[] = fetched === null ? [] : [...fetched];
     const deletedIds = new Set(
       this.updateRequests.deleteProtectedRange
-        .filter((operation) => operation.kind === "deleteProtectedRange")
         .filter((operation) => operation.sheetId === this.sheetGid)
         .map((operation) => operation.protectedRangeId),
     );
@@ -432,7 +440,6 @@ export class SheetRaw extends SheetCommonRaw {
       (protection) => !deletedIds.has(protection.id),
     );
     const queued = this.updateRequests.addProtectedRange
-      .filter((operation) => operation.kind === "addProtectedRange")
       .filter(
         (operation) => operation.protection.range.sheetId === this.sheetGid,
       )

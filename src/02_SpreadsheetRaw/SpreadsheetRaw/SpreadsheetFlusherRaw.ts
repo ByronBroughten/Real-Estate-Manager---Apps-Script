@@ -82,32 +82,15 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     }
   }
   private _sheetGidsWithRowDeletes(): Set<number> {
-    return new Set(
-      this.updateRequests.delete.map((operation) => {
-        if (operation.kind !== "deleteRows") {
-          throw new Error("Queued delete is not a deleteRows operation.");
-        }
-        return operation.sheetId;
-      }),
-    );
+    return new Set(this.updateRequests.delete.map(({ sheetId }) => sheetId));
   }
   private _sheetGidsWithConditionalFormatMutations(): Set<number> {
     const sheetGids = new Set<number>();
-    this.updateRequests.deleteConditionalFormat.forEach((operation) => {
-      if (operation.kind !== "deleteConditionalFormatRule") {
-        throw new Error(
-          "Queued deleteConditionalFormat is not a deleteConditionalFormatRule operation.",
-        );
-      }
-      sheetGids.add(operation.sheetId);
-    });
-    this.updateRequests.addConditionalFormat.forEach((operation) => {
-      if (operation.kind !== "addConditionalFormatRule") {
-        throw new Error(
-          "Queued addConditionalFormat is not an addConditionalFormatRule operation.",
-        );
-      }
-      const sheetId = operation.rule.ranges[0]?.sheetId;
+    this.updateRequests.deleteConditionalFormat.forEach(({ sheetId }) =>
+      sheetGids.add(sheetId),
+    );
+    this.updateRequests.addConditionalFormat.forEach(({ rule }) => {
+      const sheetId = rule.ranges[0]?.sheetId;
       if (sheetId === undefined) {
         throw new Error(
           "Queued addConditionalFormatRule has no range sheetId.",
@@ -118,43 +101,31 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     return sheetGids;
   }
   private _sheetGidsWithProtectedRangeMutations(): Set<number> {
-    const sheetGids = new Set<number>();
-    this.updateRequests.deleteProtectedRange.forEach((operation) => {
-      if (operation.kind !== "deleteProtectedRange") {
-        throw new Error(
-          "Queued deleteProtectedRange is not a deleteProtectedRange operation.",
-        );
-      }
-      sheetGids.add(operation.sheetId);
-    });
-    this.updateRequests.addProtectedRange.forEach((operation) => {
-      if (operation.kind !== "addProtectedRange") {
-        throw new Error(
-          "Queued addProtectedRange is not an addProtectedRange operation.",
-        );
-      }
-      sheetGids.add(operation.protection.range.sheetId);
-    });
-    return sheetGids;
+    return new Set([
+      ...this.updateRequests.deleteProtectedRange.map(({ sheetId }) => sheetId),
+      ...this.updateRequests.addProtectedRange.map(
+        ({ protection }) => protection.range.sheetId,
+      ),
+    ]);
   }
   private _sendUpdateRequests() {
-    const surs = this.spreadsheetStateRaw.writeQueue.updateRequests;
+    const requests = this.updateRequests;
     const operations = [
-      ...surs.append,
-      ...surs.insertColumn,
+      ...requests.append,
+      ...requests.insertColumn,
       // Fills go before updates, so a per-cell write on a filled column wins.
-      ...surs.fill,
-      ...surs.update,
+      ...requests.fill,
+      ...requests.update,
       // Reads the text as it stands mid-batch, so it must follow what writes it.
-      ...surs.findReplace,
+      ...requests.findReplace,
       ...this._deleteOperationsDescending(),
-      ...surs.sort,
+      ...requests.sort,
       ...this._deleteConditionalFormatOperationsDescending(),
-      ...surs.addConditionalFormat,
-      ...surs.deleteProtectedRange,
-      ...surs.addProtectedRange,
+      ...requests.addConditionalFormat,
+      ...requests.deleteProtectedRange,
+      ...requests.addProtectedRange,
       // Outside the ordering rules the queue was built around, so last.
-      ...surs.raw,
+      ...requests.raw,
     ];
     this.spreadsheetStateRaw.rawSource.flush(this.spreadsheetId, operations);
     this.spreadsheetStateRaw.writeQueue.updateRequests = emptyUpdateRequests();
@@ -163,28 +134,12 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
   // row indices below it, so same-sheet deletes must go highest-index-first
   // or a later request's pre-computed startIndex lands on the wrong row.
   private _deleteOperationsDescending() {
-    return [...this.spreadsheetStateRaw.writeQueue.updateRequests.delete].sort(
-      (a, b) => {
-        if (a.kind !== "deleteRows" || b.kind !== "deleteRows") {
-          throw new Error("Queued delete is not a deleteRows operation.");
-        }
-        return b.startIndex - a.startIndex;
-      },
+    return [...this.updateRequests.delete].sort(
+      (a, b) => b.startIndex - a.startIndex,
     );
   }
   private _deleteConditionalFormatOperationsDescending() {
-    return [
-      ...this.spreadsheetStateRaw.writeQueue.updateRequests
-        .deleteConditionalFormat,
-    ].sort((a, b) => {
-      if (
-        a.kind !== "deleteConditionalFormatRule" ||
-        b.kind !== "deleteConditionalFormatRule"
-      ) {
-        throw new Error(
-          "Queued deleteConditionalFormat is not a deleteConditionalFormatRule operation.",
-        );
-      }
+    return [...this.updateRequests.deleteConditionalFormat].sort((a, b) => {
       if (a.sheetId !== b.sheetId) return a.sheetId - b.sheetId;
       return b.index - a.index;
     });

@@ -5,10 +5,21 @@ import type {
 import type { ConditionalFormatRule } from "../../00_base/RawSource/ConditionalFormat";
 import type { ProtectedRange } from "../../00_base/RawSource/ProtectedRange";
 import type {
+  AddConditionalFormatRuleOperation,
+  AddProtectedRangeOperation,
+  AppendRowsOperation,
+  DeleteConditionalFormatRuleOperation,
+  DeleteProtectedRangeOperation,
+  DeleteRowsOperation,
+  FillOperation,
+  FindReplaceOperation,
   FindReplaceScope as BaseFindReplaceScope,
   FindReplaceTerms as BaseFindReplaceTerms,
-  LocalWriteOperation,
+  InsertColumnOperation,
+  OpaqueRawWriteOperation,
   RawSource,
+  SortOperation,
+  UpdateCellOperation,
 } from "../../00_base/RawSource/RawSource";
 import type { RgbColor } from "../../00_base/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
@@ -27,22 +38,23 @@ export interface SpreadsheetFetchQueueRaw {
 }
 
 export interface SpreadsheetWriteQueueRaw {
-  updateRequests: Record<UpdateRequestName, LocalWriteOperation[]>;
+  updateRequests: UpdateRequests;
 }
 
-export type UpdateRequestName =
-  | "append"
-  | "update"
-  | "delete"
-  | "sort"
-  | "insertColumn"
-  | "fill"
-  | "findReplace"
-  | "deleteConditionalFormat"
-  | "addConditionalFormat"
-  | "deleteProtectedRange"
-  | "addProtectedRange"
-  | "raw";
+export interface UpdateRequests {
+  append: AppendRowsOperation[];
+  update: UpdateCellOperation[];
+  delete: DeleteRowsOperation[];
+  sort: SortOperation[];
+  insertColumn: InsertColumnOperation[];
+  fill: FillOperation[];
+  findReplace: FindReplaceOperation[];
+  deleteConditionalFormat: DeleteConditionalFormatRuleOperation[];
+  addConditionalFormat: AddConditionalFormatRuleOperation[];
+  deleteProtectedRange: DeleteProtectedRangeOperation[];
+  addProtectedRange: AddProtectedRangeOperation[];
+  raw: OpaqueRawWriteOperation[];
+}
 
 export type SheetsStateRaw = Map<SheetId, SheetStateRaw>;
 
@@ -204,10 +216,7 @@ export function makeRowRange(
   return { startRowIndex, endRowIndex };
 }
 
-export function emptyUpdateRequests(): Record<
-  UpdateRequestName,
-  LocalWriteOperation[]
-> {
+export function emptyUpdateRequests(): UpdateRequests {
   return {
     append: [],
     update: [],

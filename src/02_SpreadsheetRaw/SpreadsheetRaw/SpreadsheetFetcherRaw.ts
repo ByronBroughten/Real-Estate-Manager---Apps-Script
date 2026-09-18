@@ -3,9 +3,7 @@ import type {
   SpreadsheetSnapshot,
 } from "../../00_base/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
-import type { SheetStateRaw } from "../ClassTypes/StateRaw";
 import { SpreadsheetSchema } from "../Schema/SpreadsheetSchema";
-import type { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
 import {
   type MisplacedTable,
@@ -30,10 +28,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
   }
   fetchAllSheetProperties() {
     this._fetchAndIntegrateAllSheetProperties();
-    this.tableValidator.validateTablePlacement({
-      misplacedTables: [],
-      absentTables: [],
-    });
+    this.tableValidator.validateTablePlacement();
     return { activeSheetGids: this.ss.activeSheetGids };
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
@@ -97,7 +92,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
       toFinalize.columns.forEach((colIndex) => {
         sheet.column(colIndex).ensureFullActiveDataCells();
       });
-      this._ensureFetchedActiveFacts(sheet, state);
+      sheet.ensureFetchedActiveFacts();
       toFinalize.rows.clear();
       toFinalize.columns.clear();
     });
@@ -108,19 +103,6 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     this.tableValidator.validateTablePlacement({
       misplacedTables,
       absentTables,
-    });
-  }
-  // After the backfills above, so a blank fact is sampled rather than built.
-  private _ensureFetchedActiveFacts(
-    sheet: SheetRaw,
-    state: SheetStateRaw,
-  ): void {
-    if (state.fetchQueue.toFinalize.rows.has(this.schema.topDataRowIdx)) {
-      sheet.meta.ensureTableColumnsActiveFacts();
-    }
-    state.fetchQueue.toFinalize.columns.forEach((colIndex) => {
-      if (!sheet.isTableColIndex(colIndex)) return;
-      sheet.meta.column(colIndex).ensureActiveFacts();
     });
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
@@ -143,9 +125,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     );
   }
   private _fetchGatheredConditionalFormatRules(): void {
-    const gatheringGids = Array.from(this.sheetsStateRaw.entries())
-      .filter(([, state]) => state.fetchQueue.gatherConditionalFormats)
-      .map(([sheetGid]) => sheetGid);
+    const gatheringGids = this._gatheringGids("gatherConditionalFormats");
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
       .fetchConditionalFormatRules(this.spreadsheetId)
@@ -155,9 +135,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
       );
   }
   private _fetchGatheredProtectedRanges(): void {
-    const gatheringGids = Array.from(this.sheetsStateRaw.entries())
-      .filter(([, state]) => state.fetchQueue.gatherProtectedRanges)
-      .map(([sheetGid]) => sheetGid);
+    const gatheringGids = this._gatheringGids("gatherProtectedRanges");
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
       .fetchProtectedRanges(this.spreadsheetId)
@@ -165,6 +143,13 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
       .forEach(({ sheetGid, protections }) =>
         this.ss.sheet(sheetGid).integrateProtectedRanges(protections),
       );
+  }
+  private _gatheringGids(
+    flag: "gatherConditionalFormats" | "gatherProtectedRanges",
+  ): number[] {
+    return Array.from(this.sheetsStateRaw.entries())
+      .filter(([, state]) => state.fetchQueue[flag])
+      .map(([sheetGid]) => sheetGid);
   }
   private _addDataToState(snapshot: SpreadsheetSnapshot) {
     snapshot.sheets.forEach((sheetSnapshot) => {
