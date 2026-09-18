@@ -897,6 +897,45 @@ describe("GoogleSheetsAPI protected range read", () => {
       },
     );
   });
+
+  it("reads a protection with column bounds and no row bounds as a whole-column range, not a whole sheet", () => {
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 111 },
+          protectedRanges: [
+            {
+              protectedRangeId: 8,
+              range: {
+                sheetId: 111,
+                startColumnIndex: 4,
+                endColumnIndex: 5,
+              },
+              warningOnly: true,
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(api.fetchProtectedRanges(SPREADSHEET_ID)[0]?.protections[0]).toEqual(
+      {
+        kind: "warning",
+        id: 8,
+        range: {
+          sheetId: 111,
+          startRowIndex: 0,
+          startColumnIndex: 4,
+          endColumnIndex: 5,
+        },
+        description: "",
+        users: [],
+        groups: [],
+        unprotectedRanges: [],
+        requestingUserCanEdit: false,
+      },
+    );
+  });
 });
 
 describe("GoogleSheetsAPI protected range write", () => {
@@ -976,6 +1015,46 @@ describe("GoogleSheetsAPI protected range write", () => {
                 endColumnIndex: 2,
               },
             ],
+          },
+        },
+      },
+    ]);
+  });
+
+  it("writes a whole-column range as column bounds with no end row", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(SPREADSHEET_ID, [
+      {
+        kind: "addProtectedRange",
+        protection: {
+          kind: "warning",
+          range: {
+            sheetId: 111,
+            startRowIndex: 0,
+            startColumnIndex: 4,
+            endColumnIndex: 5,
+          },
+          description: "column warning",
+          users: [],
+          groups: [],
+          unprotectedRanges: [],
+        },
+      },
+    ]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: {
+              sheetId: 111,
+              startRowIndex: 0,
+              startColumnIndex: 4,
+              endColumnIndex: 5,
+            },
+            description: "column warning",
+            warningOnly: true,
           },
         },
       },

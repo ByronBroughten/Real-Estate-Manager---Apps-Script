@@ -400,6 +400,17 @@ const TOP_ID_CELL_RANGE = {
   ...ID_COLUMN_RANGE,
   endRowIndex: TOP_DATA_ROW_INDEX + 1,
 };
+const ID_WHOLE_COLUMN_RANGE = {
+  sheetId: OCCUPANCY_GID,
+  startRowIndex: 0,
+  startColumnIndex: 0,
+  endColumnIndex: 1,
+};
+const ID_WHOLE_COLUMN_GOOGLE_RANGE = {
+  sheetId: OCCUPANCY_GID,
+  startColumnIndex: 0,
+  endColumnIndex: 1,
+};
 
 describe("SheetNamed edit warnings and edit locks", () => {
   beforeEach(() => {
@@ -663,5 +674,168 @@ describe("SheetNamed edit warnings and edit locks", () => {
         },
       },
     ]);
+  });
+
+  it("adds a whole-column warning as a start-row-0 column range with no end row", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.column("id").addEditWarningWholeColumn({
+      description: "id column",
+    });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: ID_WHOLE_COLUMN_RANGE,
+            description: "id column",
+            warningOnly: true,
+          },
+        },
+      },
+    ]);
+  });
+
+  it("adds a whole-column lock as a start-row-0 column range with no end row", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.column("id").addEditLockWholeColumn({
+      description: "id column lock",
+      users: ["editor@example.com"],
+    });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addProtectedRange: {
+          protectedRange: {
+            range: ID_WHOLE_COLUMN_RANGE,
+            description: "id column lock",
+            editors: { users: ["editor@example.com"] },
+          },
+        },
+      },
+    ]);
+  });
+
+  it("queues nothing when adding a whole-column warning identical to one already present", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+      googleProtection(ID_WHOLE_COLUMN_GOOGLE_RANGE, {
+        protectedRangeId: 20,
+        description: "id column",
+        warningOnly: true,
+      }),
+    ]);
+
+    sheet.column("id").addEditWarningWholeColumn({ description: "id column" });
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toEqual([]);
+  });
+
+  it("removes a whole-column protection by exact range, content, description and id, and leaves a whole-sheet protection alone", () => {
+    const wholeColumn = googleProtection(ID_WHOLE_COLUMN_GOOGLE_RANGE, {
+      protectedRangeId: 21,
+      description: "id column",
+      warningOnly: true,
+    });
+    const wholeSheet = googleProtection(WHOLE_SHEET_RANGE, {
+      protectedRangeId: 22,
+      description: "sheet",
+      warningOnly: true,
+    });
+
+    const byRange = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
+    byRange.sheet.column("id").removeEditProtectionsWholeColumn();
+    byRange.ss.batchUpdateGSheets();
+    expect(byRange.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 21 } },
+    ]);
+
+    const byContent = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
+    const named = Val.assert(
+      byContent.sheet.protectedRanges()[0],
+      "whole-column protection",
+    );
+    byContent.sheet.removeEditProtection(named);
+    byContent.ss.batchUpdateGSheets();
+    expect(byContent.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 21 } },
+    ]);
+
+    const byDescription = fetchedOccupancyProtections([
+      wholeColumn,
+      wholeSheet,
+    ]);
+    byDescription.sheet.removeEditProtectionByDescription("id column");
+    byDescription.ss.batchUpdateGSheets();
+    expect(byDescription.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 21 } },
+    ]);
+
+    const byId = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
+    byId.sheet.removeEditProtectionById(21);
+    byId.ss.batchUpdateGSheets();
+    expect(byId.batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 21 } },
+    ]);
+  });
+
+  it("removes a whole-sheet protection by exact range without matching a whole-column protection", () => {
+    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+      googleProtection(ID_WHOLE_COLUMN_GOOGLE_RANGE, {
+        protectedRangeId: 21,
+        description: "id column",
+        warningOnly: true,
+      }),
+      googleProtection(WHOLE_SHEET_RANGE, {
+        protectedRangeId: 22,
+        description: "sheet",
+        warningOnly: true,
+      }),
+    ]);
+
+    sheet.indexed.raw.removeEditProtectionsAt(WHOLE_SHEET_RANGE);
+    ss.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      { deleteProtectedRange: { protectedRangeId: 22 } },
+    ]);
+  });
+
+  it("refuses a whole-column protection write while column indexes are stale", () => {
+    const { ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.indexed.raw.addSheetChangeToSave({
+      action: "insertColumn",
+      startColumnIndex: 0,
+    });
+    ss.batchUpdateGSheets();
+
+    expect(() => sheet.column("id").addEditWarningWholeColumn()).toThrowError(
+      /Column index 0 is stale/,
+    );
+    expect(() => sheet.column("id").addEditLockWholeColumn()).toThrowError(
+      /Column index 0 is stale/,
+    );
+  });
+
+  it("allows a whole-column protection write while row indexes are stale", () => {
+    const { ss, sheet } = fetchedOccupancyProtections();
+
+    sheet.row(TOP_DATA_ROW_INDEX + 1).delete();
+    ss.batchUpdateGSheets();
+
+    expect(() =>
+      sheet
+        .column("id")
+        .addEditWarningWholeColumn({ description: "id column" }),
+    ).not.toThrow();
+    expect(() =>
+      sheet.column("id").addEditLockWholeColumn({
+        description: "id column lock",
+      }),
+    ).not.toThrow();
   });
 });

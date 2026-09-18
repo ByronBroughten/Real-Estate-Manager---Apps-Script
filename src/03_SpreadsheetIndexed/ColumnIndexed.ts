@@ -155,12 +155,24 @@ export class ColumnIndexed<
     this.raw.addEditWarningFromRow(startRowIndex, declaration);
     return this;
   }
+  addEditWarningWholeColumn(declaration: EditWarningDeclaration = {}): this {
+    this.raw.addEditWarningWholeColumn(declaration);
+    return this;
+  }
   addEditLock(declaration: EditLockDeclaration = {}): this {
     this.raw.addEditLock(declaration);
     return this;
   }
+  addEditLockWholeColumn(declaration: EditLockDeclaration = {}): this {
+    this.raw.addEditLockWholeColumn(declaration);
+    return this;
+  }
   removeEditProtections(): this {
     this.raw.removeEditProtections();
+    return this;
+  }
+  removeEditProtectionsWholeColumn(): this {
+    this.raw.removeEditProtectionsWholeColumn();
     return this;
   }
   removeEditProtection(protection: ProtectedRange): this {

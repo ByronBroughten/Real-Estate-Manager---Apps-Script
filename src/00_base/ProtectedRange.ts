@@ -55,6 +55,17 @@ export function isWholeSheetGridRange(
   return !("startRowIndex" in range);
 }
 
+export function isWholeColumnGridRange(
+  range: ProtectionGridRange,
+): range is GridRangeProps & { startColumnIndex: number } {
+  return (
+    "startRowIndex" in range &&
+    range.startRowIndex === 0 &&
+    range.endRowIndex === undefined &&
+    range.startColumnIndex !== undefined
+  );
+}
+
 export function protectionRangeHasRowCoordinates(
   range: ProtectionGridRange,
 ): boolean {

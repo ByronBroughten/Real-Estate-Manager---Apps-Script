@@ -130,12 +130,24 @@ export class ColumnNamed<
     this.indexed.addEditWarningFromRow(startRowIndex, declaration);
     return this;
   }
+  addEditWarningWholeColumn(declaration: EditWarningDeclaration = {}): this {
+    this.indexed.addEditWarningWholeColumn(declaration);
+    return this;
+  }
   addEditLock(declaration: EditLockDeclaration = {}): this {
     this.indexed.addEditLock(declaration);
     return this;
   }
+  addEditLockWholeColumn(declaration: EditLockDeclaration = {}): this {
+    this.indexed.addEditLockWholeColumn(declaration);
+    return this;
+  }
   removeEditProtections(): this {
     this.indexed.removeEditProtections();
+    return this;
+  }
+  removeEditProtectionsWholeColumn(): this {
+    this.indexed.removeEditProtectionsWholeColumn();
     return this;
   }
   removeEditProtection(protection: ProtectedRange): this {

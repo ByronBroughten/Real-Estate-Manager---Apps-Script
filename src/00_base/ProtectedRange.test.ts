@@ -1,14 +1,15 @@
-import { describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   assertNotType,
   assertType,
   type IsExactly,
 } from "../testSupport/typeAssertions";
-import type {
-  EditLockDeclaration,
-  EditWarningDeclaration,
-  WholeSheetEditLockDeclaration,
-  WholeSheetEditWarningDeclaration,
+import {
+  protectionRangeEqual,
+  type EditLockDeclaration,
+  type EditWarningDeclaration,
+  type WholeSheetEditLockDeclaration,
+  type WholeSheetEditWarningDeclaration,
 } from "./ProtectedRange";
 
 type HasUnprotectedRanges<T> = "unprotectedRanges" extends keyof T
@@ -32,5 +33,38 @@ describe("ProtectedRange identity", () => {
     assertNotType<
       IsExactly<EditWarningDeclaration, WholeSheetEditWarningDeclaration>
     >(false);
+  });
+
+  it("does not treat a whole-column range as a whole-sheet range", () => {
+    expect(
+      protectionRangeEqual(
+        {
+          sheetId: 1,
+          startRowIndex: 0,
+          startColumnIndex: 4,
+          endColumnIndex: 5,
+        },
+        { sheetId: 1 },
+      ),
+    ).toBe(false);
+  });
+
+  it("does not treat whole-column ranges on different columns as equal", () => {
+    expect(
+      protectionRangeEqual(
+        {
+          sheetId: 1,
+          startRowIndex: 0,
+          startColumnIndex: 4,
+          endColumnIndex: 5,
+        },
+        {
+          sheetId: 1,
+          startRowIndex: 0,
+          startColumnIndex: 5,
+          endColumnIndex: 6,
+        },
+      ),
+    ).toBe(false);
   });
 });

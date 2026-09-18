@@ -6,6 +6,7 @@ import {
   type ConditionalFormatRule,
 } from "../00_base/ConditionalFormat";
 import {
+  isWholeColumnGridRange,
   protectedRangeContentSatisfies,
   protectedRangesEqual,
   protectionRangeEqual,
@@ -499,10 +500,20 @@ export class SheetRaw extends SheetCommonRaw {
     range: ProtectionGridRange,
     unprotectedRanges: ProtectionGridRange[],
   ): void {
-    const hasRowCoordinates =
-      protectionRangeHasRowCoordinates(range) ||
-      unprotectedRanges.some(protectionRangeHasRowCoordinates);
-    if (!hasRowCoordinates) return;
+    [range, ...unprotectedRanges].forEach((item) => {
+      this._assertOneProtectionRangeCoordinatesNotStale(item);
+    });
+  }
+  private _assertOneProtectionRangeCoordinatesNotStale(
+    range: ProtectionGridRange,
+  ): void {
+    if (isWholeColumnGridRange(range)) {
+      if (this.sheetState.knownTable !== null) {
+        this.activeTable.validateColIndexNotStale(range.startColumnIndex);
+      }
+      return;
+    }
+    if (!protectionRangeHasRowCoordinates(range)) return;
     this.activeTable.assertRowIndexesNotStale();
   }
   markProtectedRangesStale(): void {

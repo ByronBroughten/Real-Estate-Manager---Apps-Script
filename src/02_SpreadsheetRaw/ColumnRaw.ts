@@ -189,12 +189,24 @@ export class ColumnRaw<
     );
     return this;
   }
+  addEditWarningWholeColumn(declaration: EditWarningDeclaration = {}): this {
+    this.sheet.addEditWarningAt(this.gridRangeFromRow(0), declaration);
+    return this;
+  }
   addEditLock(declaration: EditLockDeclaration = {}): this {
     this.sheet.addEditLockAt(this.dataGridRange, declaration);
     return this;
   }
+  addEditLockWholeColumn(declaration: EditLockDeclaration = {}): this {
+    this.sheet.addEditLockAt(this.gridRangeFromRow(0), declaration);
+    return this;
+  }
   removeEditProtections(): this {
     this.sheet.removeEditProtectionsAt(this.dataGridRange);
+    return this;
+  }
+  removeEditProtectionsWholeColumn(): this {
+    this.sheet.removeEditProtectionsAt(this.gridRangeFromRow(0));
     return this;
   }
   removeEditProtection(protection: ProtectedRange): this {
