@@ -61,10 +61,10 @@ export class SheetMetaIndexed extends SheetCommon {
     ) {
       this.raw.gatherFetchColumnIdsInit(startTableColIndex);
     }
-    if (this.sheetState.fetchQueue.conditionalFormats) {
+    if (this.sheetState.fetchQueue.gatherConditionalFormats) {
       this.raw.primary.gatherFetchConditionalFormatRules();
     }
-    if (this.sheetState.fetchQueue.protectedRanges) {
+    if (this.sheetState.fetchQueue.gatherProtectedRanges) {
       this.raw.primary.gatherFetchProtectedRanges();
     }
   }
@@ -83,7 +83,8 @@ export class SheetMetaIndexed extends SheetCommon {
           .cell(colIndex)
           .gatherFetchRange();
       } else {
-        throw new Error(`Unknown pre-fetch type: ${target}`);
+        const exhaustive: never = target;
+        throw new Error(`Unknown fetch target: ${JSON.stringify(exhaustive)}`);
       }
     });
   }

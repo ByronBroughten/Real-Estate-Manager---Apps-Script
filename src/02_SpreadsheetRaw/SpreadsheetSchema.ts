@@ -219,34 +219,6 @@ export class SpreadsheetSchema {
     }
     return { prefix, suffix };
   }
-  idsFromSheetColumnId(sheetColumnId: string): {
-    sheetGid: number;
-    colIndex: number;
-  } {
-    const { idx, ...rest } = this._idsFromSheetIdxId(sheetColumnId);
-    return { ...rest, colIndex: idx };
-  }
-  idsFromSheetRowId(sheetRowId: string): {
-    sheetGid: number;
-    rowIndex: number;
-  } {
-    const { idx, ...rest } = this._idsFromSheetIdxId(sheetRowId);
-    return { ...rest, rowIndex: idx };
-  }
-  private _idsFromSheetIdxId(sheetRowId: string): {
-    sheetGid: number;
-    idx: number;
-  } {
-    const { prefix, suffix } = this.splitId(sheetRowId);
-    const sheetGid = parseInt(prefix);
-    const idx = parseInt(suffix);
-    if (isNaN(sheetGid) || isNaN(idx)) {
-      throw new Error(
-        `Invalid sheetRowId: ${sheetRowId}. Must be in numeric values with a delimiter.`,
-      );
-    }
-    return { sheetGid, idx };
-  }
   private _makeUniqueIdBase(): string {
     const length = 7;
     const alphabet =

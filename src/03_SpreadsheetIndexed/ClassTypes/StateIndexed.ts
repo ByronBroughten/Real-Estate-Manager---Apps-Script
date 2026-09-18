@@ -14,20 +14,20 @@ export interface StateIndexed {
 export type SheetsStateIndexed = Map<SheetId, SheetStateIndexed>;
 
 export interface SheetStateIndexed {
-  fetchQueue: IndexedFetchQueue;
+  fetchQueue: SheetFetchQueueIndexed;
 }
 
-export interface IndexedFetchQueue {
+export interface SheetFetchQueueIndexed {
   targets: FetchTargetIndexed[];
-  conditionalFormats: boolean;
-  protectedRanges: boolean;
+  gatherConditionalFormats: boolean;
+  gatherProtectedRanges: boolean;
 }
 
-export function emptyIndexedFetchQueue(): IndexedFetchQueue {
+export function emptySheetFetchQueueIndexed(): SheetFetchQueueIndexed {
   return {
     targets: [],
-    conditionalFormats: false,
-    protectedRanges: false,
+    gatherConditionalFormats: false,
+    gatherProtectedRanges: false,
   };
 }
 

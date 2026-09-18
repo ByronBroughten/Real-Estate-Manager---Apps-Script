@@ -51,24 +51,6 @@ describe("SpreadsheetSchema", () => {
     });
   });
 
-  describe("idsFromSheetRowId / idsFromSheetColumnId", () => {
-    it("parses a numeric sheetGid:index id", () => {
-      expect(schema.idsFromSheetRowId("12:3")).toEqual({
-        sheetGid: 12,
-        rowIndex: 3,
-      });
-      expect(schema.idsFromSheetColumnId("12:3")).toEqual({
-        sheetGid: 12,
-        colIndex: 3,
-      });
-    });
-
-    it("throws when either part is non-numeric", () => {
-      expect(() => schema.idsFromSheetRowId("abc:3")).toThrow();
-      expect(() => schema.idsFromSheetRowId("12:xyz")).toThrow();
-    });
-  });
-
   describe("makeColIdFromPrefix / makeRowIdFromPrefix", () => {
     it("builds a col id shaped as c:<prefix>:<random>", () => {
       const colId = schema.makeColIdFromPrefix("hh");

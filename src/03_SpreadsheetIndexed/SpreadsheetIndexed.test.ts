@@ -446,7 +446,7 @@ describe("Indexed formula writes", () => {
   });
 });
 
-describe("Indexed fetch targets", () => {
+describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
   beforeEach(() => {
     stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   });

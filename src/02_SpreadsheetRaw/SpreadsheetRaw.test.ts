@@ -1022,7 +1022,7 @@ describe("RowRaw.delete", () => {
   });
 });
 
-describe("working view", () => {
+describe("RowRaw.rowIsActive", () => {
   it("makes an appended row active and grows the table end before the flush", () => {
     stubSheetsService({
       sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],

@@ -64,7 +64,7 @@ export class SheetIndexed extends SheetCommon {
     return this;
   }
   prepFetchConditionalFormatRules(): this {
-    this.sheetState.fetchQueue.conditionalFormats = true;
+    this.sheetState.fetchQueue.gatherConditionalFormats = true;
     return this;
   }
   conditionalFormatRules(): ConditionalFormatRule[] {
@@ -83,7 +83,7 @@ export class SheetIndexed extends SheetCommon {
     return this;
   }
   prepFetchProtectedRanges(): this {
-    this.sheetState.fetchQueue.protectedRanges = true;
+    this.sheetState.fetchQueue.gatherProtectedRanges = true;
     return this;
   }
   protectedRanges(): ProtectedRange[] {

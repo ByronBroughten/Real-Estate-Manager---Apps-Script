@@ -1,6 +1,6 @@
 import { Val } from "../utils/Val";
 import {
-  emptyIndexedFetchQueue,
+  emptySheetFetchQueueIndexed,
   type FetchTargetIndexed,
   type SheetStateIndexed,
 } from "./ClassTypes/StateIndexed";
@@ -28,7 +28,7 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   private _ensureSheetState() {
     if (!this.sheetsStateIndexed.has(this.sheetGid)) {
       this.sheetsStateIndexed.set(this.sheetGid, {
-        fetchQueue: emptyIndexedFetchQueue(),
+        fetchQueue: emptySheetFetchQueueIndexed(),
       });
     }
   }
@@ -44,11 +44,11 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   get isPreppedToFetch(): boolean {
     return (
       this.fetchTargets.length > 0 ||
-      this.sheetState.fetchQueue.conditionalFormats ||
-      this.sheetState.fetchQueue.protectedRanges
+      this.sheetState.fetchQueue.gatherConditionalFormats ||
+      this.sheetState.fetchQueue.gatherProtectedRanges
     );
   }
   clearFetchTargets(): void {
-    this.sheetState.fetchQueue = emptyIndexedFetchQueue();
+    this.sheetState.fetchQueue = emptySheetFetchQueueIndexed();
   }
 }
