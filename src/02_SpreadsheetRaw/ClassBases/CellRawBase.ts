@@ -1,4 +1,4 @@
-import type { RawRowState } from "../ClassTypes/RawState";
+import type { RowStateRaw } from "../ClassTypes/StateRaw";
 import { ColumnRawBase, type ColumnRawProps } from "./ColumnRawBase";
 
 export interface CellRawProps extends ColumnRawProps {
@@ -11,7 +11,7 @@ export class CellRawBase extends ColumnRawBase {
     super(rest);
     this.rowIndex = rowIndex;
   }
-  get rowState(): RawRowState {
+  get rowState(): RowStateRaw {
     return this.getRowState(this.rowIndex);
   }
   get cellRawProps(): CellRawProps {

@@ -10,7 +10,7 @@ import type { BaseValueName } from "../00_base/baseValueSchemas";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import type { RawCellFacts } from "./ClassTypes/RawState";
+import type { ActiveFactsRaw } from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 
@@ -38,8 +38,8 @@ export class ColumnMetaRaw<
   get activeTopValue(): CellValue {
     return this._activeFacts.topValue;
   }
-  private get _activeFacts(): RawCellFacts {
-    const facts = this.columnCellFacts.get(this.colIndex);
+  private get _activeFacts(): ActiveFactsRaw {
+    const facts = this.columnActiveFacts.get(this.colIndex);
     if (facts === undefined) {
       throw new Error(
         `No active facts for column index ${this.colIndex} of sheet ${this.sheetLabel}: ` +
@@ -88,7 +88,7 @@ export class ColumnMetaRaw<
     return this;
   }
   integrateActiveFacts(cell: GridCellSnapshot | undefined): void {
-    this.columnCellFacts.set(this.colIndex, {
+    this.columnActiveFacts.set(this.colIndex, {
       isFormula: cell?.isFormula ?? false,
       numberFormatType: cell?.numberFormatType,
       dataValidationConditionType: cell?.dataValidationConditionType,
@@ -97,7 +97,7 @@ export class ColumnMetaRaw<
   }
   // Gap-filling only, so a fact the payload described always wins.
   ensureActiveFacts(): void {
-    if (this.columnCellFacts.has(this.colIndex)) return;
+    if (this.columnActiveFacts.has(this.colIndex)) return;
     if (!this.primary.topCell.isActive) return; // no top data row to sample
     this.integrateActiveFacts(undefined);
   }

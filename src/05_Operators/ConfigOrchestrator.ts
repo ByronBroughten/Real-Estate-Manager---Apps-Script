@@ -2,9 +2,13 @@ import {
   clearSpreadsheetConfigOverlay,
   overlaySpreadsheetConfig,
 } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import { SpreadsheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import {
+  SpreadsheetNamedBase,
+  type SpreadsheetNamedProps,
+} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
+import { OperatorBase } from "./OperatorBase";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
@@ -24,26 +28,32 @@ export interface ConfigRegeneration {
  * npm run gen:configs is the only regeneration path.
  * docs/generated-data.md
  */
-export class ConfigOrchestrator extends SpreadsheetNamedBase {
+export class ConfigOrchestrator extends OperatorBase {
+  constructor(props: SpreadsheetNamedProps) {
+    super({
+      ...props,
+      configSyncState: OperatorBase.initConfigSyncState(),
+    });
+  }
   static init(): ConfigOrchestrator {
     return new ConfigOrchestrator(
-      ConfigOrchestrator.initSpreadsheetNamedProps(),
+      SpreadsheetNamedBase.initSpreadsheetNamedProps(),
     );
   }
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
   get spreadsheetConfigOperator() {
-    return new SpreadsheetConfigOperator(this.spreadsheetNamedProps);
+    return new SpreadsheetConfigOperator(this.operatorProps);
   }
   get columnConfigOperator() {
-    return new ColumnConfigOperator(this.spreadsheetNamedProps);
+    return new ColumnConfigOperator(this.operatorProps);
   }
   get sheetConfigOperator() {
-    return new SheetConfigOperator(this.spreadsheetNamedProps);
+    return new SheetConfigOperator(this.operatorProps);
   }
   get valueConfigOperator() {
-    return new ValueConfigOperator(this.spreadsheetNamedProps);
+    return new ValueConfigOperator(this.operatorProps);
   }
   // Returns the run status an endpoint should report, if there's one to make.
   syncConfigSheetRows(): string | undefined {

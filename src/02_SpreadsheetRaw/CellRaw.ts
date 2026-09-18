@@ -12,7 +12,7 @@ import type { GridCellSnapshot } from "../00_base/RawSource";
 import type { RgbColor } from "../00_base/RgbColor";
 import { CellRawBase } from "./ClassBases/CellRawBase";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
-import type { RowCellChange } from "./ClassTypes/RawState";
+import type { RowCellChange } from "./ClassTypes/StateRaw";
 import { SheetRaw } from "./SheetRaw";
 
 export class CellRaw<

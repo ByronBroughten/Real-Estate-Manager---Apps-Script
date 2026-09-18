@@ -16,7 +16,7 @@ import type {
   SheetDataValuesAll,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
+import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";

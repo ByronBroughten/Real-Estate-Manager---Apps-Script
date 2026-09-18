@@ -11,7 +11,7 @@ import type {
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import type { FindReplaceTerms, RowCellChange } from "./ClassTypes/RawState";
+import type { FindReplaceTerms, RowCellChange } from "./ClassTypes/StateRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetRaw } from "./SpreadsheetRaw";

@@ -7,7 +7,7 @@ export abstract class RowCommonIndexed extends RowIndexedBase {
     return this.activeValueArr.includes(value as CellValue);
   }
   prepFetchFull(): void {
-    this.preFetchGridRanges.push({
+    this.fetchTargets.push({
       row: this.rowIndex,
       column: "allDataColumns",
     });

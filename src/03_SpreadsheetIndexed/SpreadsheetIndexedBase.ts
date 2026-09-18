@@ -2,14 +2,14 @@ import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
 } from "../02_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
-import type { IndexedState } from "./ClassTypes/IndexedState";
+import type { StateIndexed } from "./ClassTypes/StateIndexed";
 
 export interface SpreadsheetIndexedProps extends SpreadsheetRawProps {
-  indexedState: IndexedState;
+  indexedState: StateIndexed;
 }
 
 export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
-  protected indexedState: IndexedState;
+  protected indexedState: StateIndexed;
   constructor({ indexedState, ...rest }: SpreadsheetIndexedProps) {
     super(rest);
     this.indexedState = indexedState;
@@ -28,7 +28,7 @@ export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
       },
     };
   }
-  get indexedSheetsState(): IndexedState["sheets"] {
+  get indexedSheetsState(): StateIndexed["sheets"] {
     return this.indexedState.sheets;
   }
 }

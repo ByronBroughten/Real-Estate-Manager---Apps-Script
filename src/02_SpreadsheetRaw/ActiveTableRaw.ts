@@ -1,20 +1,20 @@
 import { Val } from "../utils/Val";
 import type { SheetRawProps } from "./ClassBases/SheetRawBase";
 import type {
-  RawColumnDeclaredTypes,
-  RawColumnValidationConditionTypes,
-  RawColumnValidationValues,
-  RawKnownTable,
-  RawSheetState,
-  RawState,
-} from "./ClassTypes/RawState";
+  ColumnDeclaredTypesRaw,
+  ColumnValidationConditionTypesRaw,
+  ColumnValidationValuesRaw,
+  KnownTableRaw,
+  SheetStateRaw,
+  StateRaw,
+} from "./ClassTypes/StateRaw";
 
 export class ActiveTableRaw {
   readonly sheetGid: number;
-  private readonly rawState: RawState;
-  constructor({ sheetGid, rawState }: SheetRawProps) {
+  private readonly spreadsheetState: StateRaw;
+  constructor({ sheetGid, spreadsheetState }: SheetRawProps) {
     this.sheetGid = sheetGid;
-    this.rawState = rawState;
+    this.spreadsheetState = spreadsheetState;
   }
   get tableId(): string {
     return this._knownTable().tableId;
@@ -39,13 +39,13 @@ export class ActiveTableRaw {
   set endColumnIndex(endColumnIndex: number) {
     this._knownTable().endColumnIndex = endColumnIndex;
   }
-  get columnValidationValues(): RawColumnValidationValues {
+  get columnValidationValues(): ColumnValidationValuesRaw {
     return this._knownTable().columnValidationValues;
   }
-  get columnValidationConditionTypes(): RawColumnValidationConditionTypes {
+  get columnValidationConditionTypes(): ColumnValidationConditionTypesRaw {
     return this._knownTable().columnValidationConditionTypes;
   }
-  get columnDeclaredTypes(): RawColumnDeclaredTypes {
+  get columnDeclaredTypes(): ColumnDeclaredTypesRaw {
     return this._knownTable().columnDeclaredTypes;
   }
   get rowIndexesAreStale(): boolean {
@@ -82,13 +82,13 @@ export class ActiveTableRaw {
       );
     }
   }
-  private get sheetState(): RawSheetState {
+  private get sheetState(): SheetStateRaw {
     return Val.assert(
-      this.rawState.sheets.get(this.sheetGid),
+      this.spreadsheetState.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }
-  private _knownTable(): RawKnownTable {
+  private _knownTable(): KnownTableRaw {
     const knownTable = this.sheetState.knownTable;
     if (knownTable === null) {
       throw new Error(

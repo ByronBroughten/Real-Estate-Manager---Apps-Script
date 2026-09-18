@@ -1,0 +1,61 @@
+import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
+import {
+  SpreadsheetNamedBase,
+  type SpreadsheetNamedProps,
+} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+
+export type UntypedHeadersBySheetTitle = Map<string, string[]>;
+
+// Lives on operator props, not each collaborator, so getter rebuilds share it.
+export interface ConfigSyncState {
+  sheetConfigSync: {
+    prepFetchIsComplete: boolean;
+    syncedToSpreadsheet: boolean;
+  };
+  columnConfigSync: {
+    syncedToSpreadsheet: boolean;
+    untypedHeadersBySheetTitle: UntypedHeadersBySheetTitle;
+  };
+  valueConfigSync: { activeHeaders: Set<string> };
+  spreadsheetConfigSync: {
+    liveConfig: LiveSpreadsheetConfig | null;
+  };
+}
+
+export interface OperatorProps extends SpreadsheetNamedProps {
+  configSyncState: ConfigSyncState;
+}
+
+export class OperatorBase extends SpreadsheetNamedBase {
+  protected configSyncState: ConfigSyncState;
+  constructor({ configSyncState, ...rest }: OperatorProps) {
+    super(rest);
+    this.configSyncState = configSyncState;
+  }
+  get operatorProps(): OperatorProps {
+    return {
+      ...this.spreadsheetNamedProps,
+      configSyncState: this.configSyncState,
+    };
+  }
+  static initConfigSyncState(): ConfigSyncState {
+    return {
+      sheetConfigSync: {
+        prepFetchIsComplete: false,
+        syncedToSpreadsheet: false,
+      },
+      columnConfigSync: {
+        syncedToSpreadsheet: false,
+        untypedHeadersBySheetTitle: new Map(),
+      },
+      valueConfigSync: { activeHeaders: new Set() },
+      spreadsheetConfigSync: { liveConfig: null },
+    };
+  }
+  static initOperatorProps(): OperatorProps {
+    return {
+      ...SpreadsheetNamedBase.initSpreadsheetNamedProps(),
+      configSyncState: OperatorBase.initConfigSyncState(),
+    };
+  }
+}

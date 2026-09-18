@@ -5,7 +5,7 @@ import type { SheetGridRangeProps } from "../ClassTypes/AccessorsRaw";
 import type {
   SheetChangeProps,
   SheetChangesToSave,
-} from "../ClassTypes/RawState";
+} from "../ClassTypes/StateRaw";
 import type { SpreadsheetRaw } from "../SpreadsheetRaw";
 import { SheetRawBase } from "./SheetRawBase";
 
@@ -38,7 +38,7 @@ export abstract class SheetCommonRaw extends SheetRawBase {
     return this.allChangesToSave.get(this.sheetGid) as SheetChangesToSave;
   }
   private _ensureChangesToSaveExists(): void {
-    const sheetChangesToSave = this.rawState.changesToSave;
+    const sheetChangesToSave = this.spreadsheetState.changesToSave;
     const sheetGid = this.sheetGid;
     if (!sheetChangesToSave.has(sheetGid)) {
       sheetChangesToSave.set(sheetGid, {
@@ -56,7 +56,7 @@ export abstract class SheetCommonRaw extends SheetRawBase {
     return colIndex >= startColumnIndex && colIndex < endColumnIndex;
   }
   gatherFetchRange(gr: SheetGridRangeProps): this {
-    this.rawState.fetcherGridRanges.push({
+    this.spreadsheetState.fetcherGridRanges.push({
       sheetId: this.sheetGid,
       ...gr,
     });

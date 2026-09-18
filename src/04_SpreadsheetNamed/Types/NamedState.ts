@@ -1,31 +1,8 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
-import type { LiveSpreadsheetConfig } from "../../01_generatedConfigs/spreadsheetConfigTypes";
 import { Arr } from "../../utils/Arr";
 import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";
-
-export type RowIdsToIndexes = Record<string, number>;
-// The headers of the columns whose value name the last sync had to guess.
-export type UntypedHeadersBySheetTitle = Map<string, string[]>;
-export type SheetRowIdsToIndexes = { [SN in SheetName]?: RowIdsToIndexes };
-
-// Lives here, not as an instance field, so it survives a coordinator's
-// per-access getter rebuilds.
-export type SpreadsheetNamedState = {
-  sheetConfigSync: {
-    prepFetchIsComplete: boolean;
-    syncedToSpreadsheet: boolean;
-  };
-  columnConfigSync: {
-    syncedToSpreadsheet: boolean;
-    untypedHeadersBySheetTitle: UntypedHeadersBySheetTitle;
-  };
-  valueConfigSync: { activeHeaders: Set<string> };
-  spreadsheetConfigSync: {
-    liveConfig: LiveSpreadsheetConfig | null;
-  };
-};
 
 type SheetColumnNames<SN extends SheetName> = {
   [S in SN]?: ColumnSpecifierNamed<SN>;

@@ -3,10 +3,10 @@ import type { GridFetchRange, SpreadsheetSnapshot } from "../00_base/RawSource";
 import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
 import type {
   FindReplaceProps,
-  RawSheetState,
+  SheetStateRaw,
   RowChangesToSave,
   SheetChangesToSave,
-} from "./ClassTypes/RawState";
+} from "./ClassTypes/StateRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
@@ -47,20 +47,20 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return this.activeSheetGids.includes(sheetGid);
   }
   get activeSheetGids(): number[] {
-    return Array.from(this.rawState.sheets.keys());
+    return Array.from(this.spreadsheetState.sheets.keys());
   }
   get activeSheets(): SheetRaw[] {
     return Array.from(this.activeSheetGids, (sheetGid) => this.sheet(sheetGid));
   }
   sheet(sheetGid: number): SheetRaw {
     return new SheetRaw({
-      rawState: this.rawState,
+      spreadsheetState: this.spreadsheetState,
       sheetGid: sheetGid,
     });
   }
   sheetMeta(sheetGid: number): SheetMetaRaw {
     return new SheetMetaRaw({
-      rawState: this.rawState,
+      spreadsheetState: this.spreadsheetState,
       sheetGid: sheetGid,
     });
   }
@@ -72,7 +72,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return this.sheet(sheetGid).rowCommon(rowIndex);
   }
   ensureAllSheetPropertiesAreFetched() {
-    if (!this.rawState.allSheetPropertiesAreFetched) {
+    if (!this.spreadsheetState.allSheetPropertiesAreFetched) {
       this._fetchAndIntegrateAllSheetProperties();
     }
   }
@@ -82,11 +82,11 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return { activeSheetGids: this.activeSheetGids };
   }
   private _fetchAndIntegrateAllSheetProperties() {
-    const data = this.rawState.rawSource.fetchSheetProperties(
+    const data = this.spreadsheetState.rawSource.fetchSheetProperties(
       this.spreadsheetId,
     );
     this._addDataToState(data);
-    this.rawState.allSheetPropertiesAreFetched = true;
+    this.spreadsheetState.allSheetPropertiesAreFetched = true;
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
     this._fetchGatheredConditionalFormatRules();
@@ -96,7 +96,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     const data = this._fetchByGridRanges(includeProgrammaticFacts);
     this._addDataToState(data);
     this._finalizeGatheredFetches();
-    this.rawState.fetcherGridRanges = [];
+    this.spreadsheetState.fetcherGridRanges = [];
   }
   // One sheet by GID without Table-placement finalize, so a moved Table can wait for overlay.
   fetchSheetUsedGrid(sheetGid: number): void {
@@ -109,7 +109,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   // A sheet outside the config never promised to follow the layout.
   private _tablePlacement(sheetGid: number): TablePlacement {
-    const state = this.rawState.sheets.get(sheetGid);
+    const state = this.spreadsheetState.sheets.get(sheetGid);
     if (!state) {
       return { kind: "none" };
     }
@@ -132,7 +132,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   private _finalizeGatheredFetches(): void {
     const misplacedTables: MisplacedTable[] = [];
     const absentTables: SheetIdentity[] = [];
-    this.rawState.sheets.forEach((state, sheetGid) => {
+    this.spreadsheetState.sheets.forEach((state, sheetGid) => {
       // Above the early return, so a range that arrived incidentally is still judged.
       const placement = this._tablePlacement(sheetGid);
       if (placement.kind === "extra") {
@@ -169,7 +169,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
     this._reportTablePlacement({ misplacedTables, absentTables });
   }
-  private _finalizeFetchedCells(sheet: SheetRaw, state: RawSheetState): void {
+  private _finalizeFetchedCells(sheet: SheetRaw, state: SheetStateRaw): void {
     state.cellsToFinalize.forEach((colIndexes, rowIndex) => {
       const row = sheet.rowCommon(rowIndex);
       row.ensureStateExists();
@@ -182,7 +182,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   // After the backfills above, so a blank fact is sampled rather than built.
   private _ensureFetchedActiveFacts(
     sheet: SheetRaw,
-    state: RawSheetState,
+    state: SheetStateRaw,
   ): void {
     if (state.rowIndexesToFinalize.has(this.schema.topDataRowIdx)) {
       sheet.meta.ensureTableColumnsActiveFacts();
@@ -247,7 +247,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   private _sheetsWithExtraTables(): SheetIdentity[] {
     const extraTables: SheetIdentity[] = [];
-    this.rawState.sheets.forEach((state, sheetGid) => {
+    this.spreadsheetState.sheets.forEach((state, sheetGid) => {
       if (!state.hasExtraTables || !this.schema.isInSheetGids(sheetGid)) {
         return;
       }
@@ -293,16 +293,16 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     includeProgrammaticFacts: boolean,
     gridRanges: GridFetchRange[] = this.fetcherGridRanges,
   ): SpreadsheetSnapshot {
-    return this.rawState.rawSource.fetchGrid(this.spreadsheetId, gridRanges, {
+    return this.spreadsheetState.rawSource.fetchGrid(this.spreadsheetId, gridRanges, {
       includeProgrammaticFacts,
     });
   }
   private _fetchGatheredConditionalFormatRules(): void {
-    const gatheringGids = Array.from(this.rawSheetsState.entries())
+    const gatheringGids = Array.from(this.sheetsState.entries())
       .filter(([, state]) => state.gatherConditionalFormats)
       .map(([sheetGid]) => sheetGid);
     if (gatheringGids.length === 0) return;
-    this.rawState.rawSource
+    this.spreadsheetState.rawSource
       .fetchConditionalFormatRules(this.spreadsheetId)
       .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
       .forEach(({ sheetGid, rules }) =>
@@ -310,11 +310,11 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       );
   }
   private _fetchGatheredProtectedRanges(): void {
-    const gatheringGids = Array.from(this.rawSheetsState.entries())
+    const gatheringGids = Array.from(this.sheetsState.entries())
       .filter(([, state]) => state.gatherProtectedRanges)
       .map(([sheetGid]) => sheetGid);
     if (gatheringGids.length === 0) return;
-    this.rawState.rawSource
+    this.spreadsheetState.rawSource
       .fetchProtectedRanges(this.spreadsheetId)
       .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
       .forEach(({ sheetGid, protections }) =>
@@ -364,14 +364,14 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
   }
   // Scope can be allSheets, so one rule: every sheet's fetched cells go stale.
   private _invalidateFetchedCellState(): void {
-    this.rawSheetsState.forEach((_, sheetGid) =>
+    this.sheetsState.forEach((_, sheetGid) =>
       this.sheet(sheetGid).invalidateCellState(),
     );
   }
   // Abandons queued writes while local state still reflects them — terminal step only.
   discardQueuedChanges(): this {
-    this.rawState.changesToSave = new Map();
-    this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+    this.spreadsheetState.changesToSave = new Map();
+    this.spreadsheetState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
     return this;
   }
   private _sheetGidsWithRowDeletes(): Set<number> {
@@ -397,7 +397,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
         );
       }
     }
-    this.rawState.changesToSave = new Map();
+    this.spreadsheetState.changesToSave = new Map();
   }
   private _gatherRowRequests(sheetRowId: string, change: RowChangesToSave) {
     if (change.append && change.delete) {
@@ -478,7 +478,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return sheetGids;
   }
   private _sendUpdateRequests() {
-    const surs = this.rawState.updateRequests;
+    const surs = this.spreadsheetState.updateRequests;
     const operations = [
       ...surs.append,
       ...surs.insertColumn,
@@ -496,14 +496,14 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
       // Outside the ordering rules the queue was built around, so last.
       ...surs.raw,
     ];
-    this.rawState.rawSource.flush(this.spreadsheetId, operations);
-    this.rawState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
+    this.spreadsheetState.rawSource.flush(this.spreadsheetId, operations);
+    this.spreadsheetState.updateRequests = SpreadsheetRaw.initSortedUpdateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
   // or a later request's pre-computed startIndex lands on the wrong row.
   private _deleteOperationsDescending() {
-    return [...this.rawState.updateRequests.delete].sort((a, b) => {
+    return [...this.spreadsheetState.updateRequests.delete].sort((a, b) => {
       if (a.kind !== "deleteRows" || b.kind !== "deleteRows") {
         throw new Error("Queued delete is not a deleteRows operation.");
       }
@@ -511,7 +511,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     });
   }
   private _deleteConditionalFormatOperationsDescending() {
-    return [...this.rawState.updateRequests.deleteConditionalFormat].sort(
+    return [...this.spreadsheetState.updateRequests.deleteConditionalFormat].sort(
       (a, b) => {
         if (
           a.kind !== "deleteConditionalFormatRule" ||

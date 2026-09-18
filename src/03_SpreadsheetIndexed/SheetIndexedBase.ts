@@ -1,8 +1,8 @@
 import { Val } from "../utils/Val";
 import type {
-  IndexedSheetState,
-  PreFetchGridRange,
-} from "./ClassTypes/IndexedState";
+  SheetStateIndexed,
+  FetchTargetIndexed,
+} from "./ClassTypes/StateIndexed";
 import {
   SpreadsheetIndexedBase,
   type SpreadsheetIndexedProps,
@@ -27,30 +27,30 @@ export class SheetIndexedBase extends SpreadsheetIndexedBase {
   private _ensureSheetState() {
     if (!this.indexedSheetsState.has(this.sheetGid)) {
       this.indexedSheetsState.set(this.sheetGid, {
-        preFetchGridRanges: [],
+        fetchTargets: [],
         prepFetchConditionalFormats: false,
         prepFetchProtectedRanges: false,
       });
     }
   }
-  protected get sheetState(): IndexedSheetState {
+  protected get sheetState(): SheetStateIndexed {
     return Val.assert(
       this.indexedSheetsState.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }
-  get preFetchGridRanges(): PreFetchGridRange[] {
-    return this.sheetState.preFetchGridRanges;
+  get fetchTargets(): FetchTargetIndexed[] {
+    return this.sheetState.fetchTargets;
   }
   get isPreppedToFetch(): boolean {
     return (
-      this.preFetchGridRanges.length > 0 ||
+      this.fetchTargets.length > 0 ||
       this.sheetState.prepFetchConditionalFormats ||
       this.sheetState.prepFetchProtectedRanges
     );
   }
-  clearPreFetchGridRanges(): void {
-    this.sheetState.preFetchGridRanges = [];
+  clearFetchTargets(): void {
+    this.sheetState.fetchTargets = [];
     this.sheetState.prepFetchConditionalFormats = false;
     this.sheetState.prepFetchProtectedRanges = false;
   }

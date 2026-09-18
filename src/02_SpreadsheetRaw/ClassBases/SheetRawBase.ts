@@ -2,11 +2,11 @@ import type { SheetSnapshot, TableSnapshot } from "../../00_base/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
 import type {
-  RawColumnCellFacts,
-  RawColumnPropertiesState,
-  RawRowState,
-  RawSheetState,
-} from "../ClassTypes/RawState";
+  ColumnActiveFactsRaw,
+  ColumnPropertiesStateRaw,
+  RowStateRaw,
+  SheetStateRaw,
+} from "../ClassTypes/StateRaw";
 import {
   SpreadsheetRawBase,
   type SpreadsheetRawProps,
@@ -30,8 +30,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
     this._ensureSheetState();
   }
   private _ensureSheetState() {
-    if (!this.rawState.sheets.has(this.sheetGid)) {
-      this.rawState.sheets.set(this.sheetGid, {
+    if (!this.spreadsheetState.sheets.has(this.sheetGid)) {
+      this.spreadsheetState.sheets.set(this.sheetGid, {
         title: null,
         knownTable: null,
         hasExtraTables: false,
@@ -40,7 +40,7 @@ export class SheetRawBase extends SpreadsheetRawBase {
         isPrunedToSelection: false,
         rowStates: new Map(),
         reservedRowIndexes: new Set(),
-        columnCellFacts: new Map(),
+        columnActiveFacts: new Map(),
         rowIndexesToFinalize: new Set(),
         colIndexesToFinalize: new Set(),
         cellsToFinalize: new Map(),
@@ -91,8 +91,8 @@ export class SheetRawBase extends SpreadsheetRawBase {
   private _parseColumnProperties(
     table: TableSnapshot,
     startColumnIndex: number,
-  ): RawColumnPropertiesState {
-    const state: RawColumnPropertiesState = {
+  ): ColumnPropertiesStateRaw {
+    const state: ColumnPropertiesStateRaw = {
       columnValidationValues: new Map(),
       columnValidationConditionTypes: new Map(),
       columnDeclaredTypes: new Map(),
@@ -118,25 +118,25 @@ export class SheetRawBase extends SpreadsheetRawBase {
     });
     return state;
   }
-  protected get sheetState(): RawSheetState {
+  protected get sheetState(): SheetStateRaw {
     return Val.assert(
-      this.rawState.sheets.get(this.sheetGid),
+      this.spreadsheetState.sheets.get(this.sheetGid),
       `sheetState for sheetGid ${this.sheetGid}`,
     );
   }
-  getRowState(rowIndex: number): RawRowState {
+  getRowState(rowIndex: number): RowStateRaw {
     return Val.assert(
       this.sheetState.rowStates.get(rowIndex),
       `rowState for row ${rowIndex} on sheetGid ${this.sheetGid}`,
     );
   }
-  get columnCellFacts(): RawColumnCellFacts {
-    return this.sheetState.columnCellFacts;
+  get columnActiveFacts(): ColumnActiveFactsRaw {
+    return this.sheetState.columnActiveFacts;
   }
   get sheetLabel(): string {
     return `"${this.sheetState.title ?? "(untitled)"}" (gid ${this.sheetGid})`;
   }
-  get rowStates(): RawSheetState["rowStates"] {
+  get rowStates(): SheetStateRaw["rowStates"] {
     return this.sheetState.rowStates;
   }
   get sheetRawProps(): SheetRawProps {

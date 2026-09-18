@@ -10,14 +10,14 @@ import type { RgbColor } from "../../00_base/RgbColor";
 import type { CellValue, CellValueName } from "../../00_base/base";
 import type { GridRangeProps } from "./AccessorsRaw";
 
-export interface RawState {
+export interface StateRaw {
   allSheetPropertiesAreFetched: boolean;
   spreadsheetId: string | null;
   rawSource: RawSource;
   changesToSave: ChangesToSave;
   fetcherGridRanges: GridRangeProps[];
   updateRequests: Record<UpdateRequestName, LocalWriteOperation[]>;
-  sheets: RawSheetsState;
+  sheets: SheetsStateRaw;
 }
 
 const updateRequestNames = [
@@ -36,20 +36,20 @@ const updateRequestNames = [
 ] as const;
 export type UpdateRequestName = (typeof updateRequestNames)[number];
 
-export type RawSheetsState = Map<SheetId, RawSheetState>;
+export type SheetsStateRaw = Map<SheetId, SheetStateRaw>;
 
-export interface RawSheetState {
+export interface SheetStateRaw {
   title: string | null;
-  knownTable: RawKnownTable | null;
+  knownTable: KnownTableRaw | null;
   hasExtraTables: boolean;
   // A findReplace matches by content, so what it changed is unknowable locally.
   cellStateIsStale: boolean;
   hasFetchedColumnIds: boolean;
   isPrunedToSelection: boolean;
-  rowStates: RawRowStates;
+  rowStates: RowStatesRaw;
   // A row an append has handed out, so a second append can't reuse it.
   reservedRowIndexes: Set<RowIndex>;
-  columnCellFacts: RawColumnCellFacts;
+  columnActiveFacts: ColumnActiveFactsRaw;
   rowIndexesToFinalize: Set<RowIndex>;
   colIndexesToFinalize: Set<ColIndex>;
   cellsToFinalize: Map<RowIndex, Set<ColIndex>>;
@@ -61,23 +61,23 @@ export interface RawSheetState {
   protectedRangesAreStale: boolean;
 }
 
-export type RawRowStates = Map<RowIndex, RawRowState>;
-export type RawRowState = Map<ColIndex, CellValue>;
+export type RowStatesRaw = Map<RowIndex, RowStateRaw>;
+export type RowStateRaw = Map<ColIndex, CellValue>;
 
-export type RawColumnCellFacts = Map<ColIndex, RawCellFacts>;
-export interface RawCellFacts {
+export type ColumnActiveFactsRaw = Map<ColIndex, ActiveFactsRaw>;
+export interface ActiveFactsRaw {
   isFormula: boolean;
   numberFormatType: string | undefined;
   dataValidationConditionType: string | undefined;
   topValue: CellValue;
 }
 
-export interface RawColumnPropertiesState {
-  columnValidationValues: RawColumnValidationValues;
-  columnValidationConditionTypes: RawColumnValidationConditionTypes;
-  columnDeclaredTypes: RawColumnDeclaredTypes;
+export interface ColumnPropertiesStateRaw {
+  columnValidationValues: ColumnValidationValuesRaw;
+  columnValidationConditionTypes: ColumnValidationConditionTypesRaw;
+  columnDeclaredTypes: ColumnDeclaredTypesRaw;
 }
-export interface RawKnownTable extends RawColumnPropertiesState {
+export interface KnownTableRaw extends ColumnPropertiesStateRaw {
   tableId: string;
   startRowIndex: number; // tableHeaderRowIndex
   endRowIndex: number; // lastRowIndex + 1
@@ -86,10 +86,10 @@ export interface RawKnownTable extends RawColumnPropertiesState {
   rowIndexesAreStale: boolean;
   firstStaleColIndex: number | null;
 }
-export type RawColumnValidationValues = Map<ColIndex, string[]>;
-export type RawColumnValidationConditionTypes = Map<ColIndex, string>;
+export type ColumnValidationValuesRaw = Map<ColIndex, string[]>;
+export type ColumnValidationConditionTypesRaw = Map<ColIndex, string>;
 // Absent for a column left on Automatic, which is what makes it "untyped".
-export type RawColumnDeclaredTypes = Map<ColIndex, string>;
+export type ColumnDeclaredTypesRaw = Map<ColIndex, string>;
 
 type SheetId = number;
 type RowIndex = number;

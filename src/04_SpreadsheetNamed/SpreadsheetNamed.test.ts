@@ -21,12 +21,22 @@ import {
   type IsExactly,
 } from "../testSupport/typeAssertions";
 import type { DateSerial } from "../utils/Dat";
+import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
 import { SheetMetaNamed } from "./SheetMetaNamed";
 import { SheetNamed } from "./SheetNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
+
+describe("SpreadsheetNamed props", () => {
+  it("have no Named-state member", () => {
+    type HasNamedState = "namedState" extends keyof SpreadsheetNamedProps
+      ? true
+      : false;
+    assertType<IsExactly<HasNamedState, false>>(true);
+  });
+});
 
 // A mis-wired accessor still type-checks; the instance checks catch it.
 describe("SpreadsheetNamed navigation", () => {

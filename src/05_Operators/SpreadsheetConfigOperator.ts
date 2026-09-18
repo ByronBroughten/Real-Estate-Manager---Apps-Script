@@ -9,10 +9,13 @@ import {
   type UniformRowLayoutKey,
 } from "../01_generatedConfigs/makeConfigs";
 import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import {
+  OperatorBase,
+  type ConfigSyncState,
+  type OperatorProps,
+} from "./OperatorBase";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
 
@@ -27,19 +30,17 @@ const guaranteedColumns: readonly SpreadsheetConfigColumnName[] = [
 ];
 
 export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheetConfig"> {
-  constructor(props: SpreadsheetNamedProps) {
+  constructor(props: OperatorProps) {
     super({
       sheetName: "spreadsheetConfig",
       ...props,
     });
   }
   static init(): SpreadsheetConfigOperator {
-    return new SpreadsheetConfigOperator(
-      SpreadsheetConfigOperator.initSpreadsheetNamedProps(),
-    );
+    return new SpreadsheetConfigOperator(OperatorBase.initOperatorProps());
   }
-  get spreadsheetConfigSync(): SpreadsheetNamedState["spreadsheetConfigSync"] {
-    return this.namedState.spreadsheetConfigSync;
+  get spreadsheetConfigSync(): ConfigSyncState["spreadsheetConfigSync"] {
+    return this.configSyncState.spreadsheetConfigSync;
   }
   fetchLiveConfig(): LiveSpreadsheetConfig {
     this.ss.raw.fetchSheetUsedGrid(this.schema.sheetGid);
@@ -75,9 +76,8 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     const guaranteedHeaders = guaranteedColumns.map((columnName) =>
       this._header(columnName),
     );
-    const tableHeaderRowIndex = this._uniqueTableHeaderRowIndex(
-      guaranteedHeaders,
-    );
+    const tableHeaderRowIndex =
+      this._uniqueTableHeaderRowIndex(guaranteedHeaders);
     const colIndexByHeader = this._colIndexByHeader(
       tableHeaderRowIndex,
       guaranteedHeaders,
@@ -116,7 +116,10 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
         "tableHeaderRowIndexBase1",
       ),
     };
-    validateSpreadsheetLayoutIndexes(liveConfig, this._uniformRowLayoutLabels());
+    validateSpreadsheetLayoutIndexes(
+      liveConfig,
+      this._uniformRowLayoutLabels(),
+    );
     return liveConfig;
   }
   private _uniformRowLayoutLabels(): Record<UniformRowLayoutKey, string> {

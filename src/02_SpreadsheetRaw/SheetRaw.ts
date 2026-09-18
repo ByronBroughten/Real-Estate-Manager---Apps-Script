@@ -29,7 +29,7 @@ import {
   type ColumnFill,
   type FindReplaceTerms,
   type SortParameters,
-} from "./ClassTypes/RawState";
+} from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";

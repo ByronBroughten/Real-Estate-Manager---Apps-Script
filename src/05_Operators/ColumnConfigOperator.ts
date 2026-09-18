@@ -3,37 +3,36 @@ import {
   type ColumnConfigsGeneric,
 } from "../01_generatedConfigs/makeConfigs";
 import { type ValueName } from "../01_generatedConfigs/valueSchemas";
-import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import type {
-  SpreadsheetNamedState,
-  UntypedHeadersBySheetTitle,
-} from "../04_SpreadsheetNamed/Types/NamedState";
 import { Str } from "../utils/Str";
 import { columnConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import {
+  OperatorBase,
+  type ConfigSyncState,
+  type OperatorProps,
+  type UntypedHeadersBySheetTitle,
+} from "./OperatorBase";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
 export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
-  constructor(props: SpreadsheetNamedProps) {
+  constructor(props: OperatorProps) {
     super({
       sheetName: "columnConfig",
       ...props,
     });
   }
   static init() {
-    return new ColumnConfigOperator(
-      ColumnConfigOperator.initSpreadsheetNamedProps(),
-    );
+    return new ColumnConfigOperator(OperatorBase.initOperatorProps());
   }
-  get columnConfigSync(): SpreadsheetNamedState["columnConfigSync"] {
-    return this.namedState.columnConfigSync;
+  get columnConfigSync(): ConfigSyncState["columnConfigSync"] {
+    return this.configSyncState.columnConfigSync;
   }
   get sheetConfigOperator(): SheetConfigOperator {
-    return new SheetConfigOperator(this.spreadsheetNamedProps);
+    return new SheetConfigOperator(this.operatorProps);
   }
   get valueConfigOperator(): ValueConfigOperator {
-    return new ValueConfigOperator(this.spreadsheetNamedProps);
+    return new ValueConfigOperator(this.operatorProps);
   }
   private get untypedHeadersBySheetTitle(): UntypedHeadersBySheetTitle {
     return this.columnConfigSync.untypedHeadersBySheetTitle;

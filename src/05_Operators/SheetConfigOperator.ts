@@ -4,25 +4,26 @@ import {
   type IdPrefixLabel,
   type SheetConfigsBase,
 } from "../01_generatedConfigs/makeConfigs";
-import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
 import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import {
+  OperatorBase,
+  type ConfigSyncState,
+  type OperatorProps,
+} from "./OperatorBase";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
-  constructor(props: SpreadsheetNamedProps) {
+  constructor(props: OperatorProps) {
     super({
       sheetName: "sheetConfig",
       ...props,
     });
   }
   static init(): SheetConfigOperator {
-    return new SheetConfigOperator(
-      SheetConfigOperator.initSpreadsheetNamedProps(),
-    );
+    return new SheetConfigOperator(OperatorBase.initOperatorProps());
   }
-  get sheetConfigSync(): SpreadsheetNamedState["sheetConfigSync"] {
-    return this.namedState.sheetConfigSync;
+  get sheetConfigSync(): ConfigSyncState["sheetConfigSync"] {
+    return this.configSyncState.sheetConfigSync;
   }
   assertPrepFetchIsComplete() {
     if (!this.sheetConfigSync.prepFetchIsComplete) {

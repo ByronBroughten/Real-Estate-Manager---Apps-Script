@@ -3,38 +3,39 @@ import {
   makeImportLine,
   type ValueConfigsBase,
 } from "../01_generatedConfigs/makeConfigs";
-import type { SpreadsheetNamedProps } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
-import type { SpreadsheetNamedState } from "../04_SpreadsheetNamed/Types/NamedState";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import {
+  OperatorBase,
+  type ConfigSyncState,
+  type OperatorProps,
+} from "./OperatorBase";
 
 export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
-  constructor(props: SpreadsheetNamedProps) {
+  constructor(props: OperatorProps) {
     super({
       sheetName: "valueConfig",
       ...props,
     });
   }
-  get valueConfigSync(): SpreadsheetNamedState["valueConfigSync"] {
-    return this.namedState.valueConfigSync;
+  get valueConfigSync(): ConfigSyncState["valueConfigSync"] {
+    return this.configSyncState.valueConfigSync;
   }
   get activeHeaders(): Set<string> {
     return this.valueConfigSync.activeHeaders;
   }
   static init(): ValueConfigOperator {
-    return new ValueConfigOperator(
-      ValueConfigOperator.initSpreadsheetNamedProps(),
-    );
+    return new ValueConfigOperator(OperatorBase.initOperatorProps());
   }
   get columnConfigOperator(): ColumnConfigOperator {
-    return new ColumnConfigOperator(this.spreadsheetNamedProps);
+    return new ColumnConfigOperator(this.operatorProps);
   }
   fetchAfterColumnConfigSynced() {
     this.columnConfigOperator.assertSyncedToSpreadsheet();
     this.valueConfigSync.activeHeaders = new Set(
-      this.columnConfigOperator.activeValueTitles().filter(
-        (valueName) => !isBaseValueName(valueName),
-      ),
+      this.columnConfigOperator
+        .activeValueTitles()
+        .filter((valueName) => !isBaseValueName(valueName)),
     );
     this.activeHeaders.forEach((header) => {
       this.sheet.raw.columnByHeader(header).gatherFetchFull();

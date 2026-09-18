@@ -4,27 +4,27 @@ import { SpreadsheetSchema } from "../SpreadsheetSchema";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
   type ChangesToSave,
-  type RawSheetsState,
-  type RawState,
-} from "../ClassTypes/RawState";
+  type SheetsStateRaw,
+  type StateRaw,
+} from "../ClassTypes/StateRaw";
 
 export interface SpreadsheetRawProps {
-  rawState: RawState;
+  spreadsheetState: StateRaw;
 }
 
 export class SpreadsheetRawBase {
-  protected rawState: RawState;
+  protected spreadsheetState: StateRaw;
   constructor(props: SpreadsheetRawProps) {
-    this.rawState = props.rawState;
+    this.spreadsheetState = props.spreadsheetState;
   }
-  protected get rawSheetsState(): RawSheetsState {
-    return this.rawState.sheets;
+  protected get sheetsState(): SheetsStateRaw {
+    return this.spreadsheetState.sheets;
   }
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
   }
   get spreadsheetId(): string {
-    const cached = this.rawState.spreadsheetId;
+    const cached = this.spreadsheetState.spreadsheetId;
     if (cached !== null) return cached;
     const ssId = AppsScript.projectProperties("realEstateSpreadsheetId");
     if (!ssId) {
@@ -32,26 +32,26 @@ export class SpreadsheetRawBase {
         "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
       );
     }
-    this.rawState.spreadsheetId = ssId;
+    this.spreadsheetState.spreadsheetId = ssId;
     return ssId;
   }
   get fetcherGridRanges(): GridRangeProps[] {
-    return this.rawState.fetcherGridRanges;
+    return this.spreadsheetState.fetcherGridRanges;
   }
   get allChangesToSave(): ChangesToSave {
-    return this.rawState.changesToSave;
+    return this.spreadsheetState.changesToSave;
   }
-  get updateRequests(): RawState["updateRequests"] {
-    return this.rawState.updateRequests;
+  get updateRequests(): StateRaw["updateRequests"] {
+    return this.spreadsheetState.updateRequests;
   }
   get spreadsheetRawProps(): SpreadsheetRawProps {
     return {
-      rawState: this.rawState,
+      spreadsheetState: this.spreadsheetState,
     };
   }
   static initSpreadsheetRawProps(): SpreadsheetRawProps {
     return {
-      rawState: {
+      spreadsheetState: {
         allSheetPropertiesAreFetched: false,
         spreadsheetId: null,
         rawSource: installedRawSource(),
@@ -62,7 +62,7 @@ export class SpreadsheetRawBase {
       },
     };
   }
-  static initSortedUpdateRequests(): RawState["updateRequests"] {
+  static initSortedUpdateRequests(): StateRaw["updateRequests"] {
     return {
       append: [],
       update: [],

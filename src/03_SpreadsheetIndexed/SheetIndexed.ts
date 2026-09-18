@@ -10,7 +10,7 @@ import type {
   WholeSheetEditWarningDeclaration,
 } from "../00_base/ProtectedRange";
 import type { Value } from "../01_generatedConfigs/valueSchemas";
-import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
+import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { RowIndexed } from "./RowIndexed";

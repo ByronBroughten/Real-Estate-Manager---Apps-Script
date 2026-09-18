@@ -17,10 +17,10 @@ import {
 import type {
   FindReplaceTerms,
   RowCellChange,
-} from "../02_SpreadsheetRaw/ClassTypes/RawState";
+} from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import { CellIndexed } from "./CellIndexed";
-import type { CellChange } from "./ClassTypes/IndexedState";
+import type { CellChange } from "./ClassTypes/StateIndexed";
 import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
 import { SheetIndexed } from "./SheetIndexed";
@@ -59,7 +59,7 @@ export class ColumnIndexed<
     return this.prepFetchSpecific(this.cellIndexesActive);
   }
   prepFetchFull(): this {
-    this.preFetchGridRanges.push({ row: "allDataRows", column: this.columnId });
+    this.fetchTargets.push({ row: "allDataRows", column: this.columnId });
     return this;
   }
   // Through the cells, not straight to Raw, so the value name's blank is read here too.

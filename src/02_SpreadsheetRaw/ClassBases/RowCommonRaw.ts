@@ -4,7 +4,7 @@ import type {
   RowChangeProps,
   RowChangesToSave,
   RowChangeUpdateProps,
-} from "../ClassTypes/RawState";
+} from "../ClassTypes/StateRaw";
 import { CellRaw } from "../CellRaw";
 import { SheetRaw } from "../SheetRaw";
 import { RowRawBase } from "./RowRawBase";
@@ -78,7 +78,7 @@ export abstract class RowCommonRaw extends RowRawBase {
     return this.allChangesToSave.get(this.sheetRowId) as RowChangesToSave;
   }
   private _ensureChangesToSaveExists(): void {
-    const sheetChangesToSave = this.rawState.changesToSave;
+    const sheetChangesToSave = this.spreadsheetState.changesToSave;
     const sheetRowId = this.sheetRowId;
     if (!sheetChangesToSave.has(sheetRowId)) {
       sheetChangesToSave.set(sheetRowId, {

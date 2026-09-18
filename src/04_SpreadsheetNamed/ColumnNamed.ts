@@ -16,8 +16,8 @@ import type {
   ColumnValueName,
 } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/RawState";
-import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/IndexedState";
+import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
+import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/StateIndexed";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { CellNamed } from "./CellNamed";
 import { ColumnCommonNamed } from "./ColumnCommonNamed";

@@ -1,9 +1,6 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
-import type { SheetDataValues } from "../../01_generatedConfigs/columnConfigsTypes";
 import { SheetSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
-
-export type RowState<TN extends SheetName> = SheetDataValues<TN>;
 
 export interface RowNamedProps<
   TN extends SheetName,

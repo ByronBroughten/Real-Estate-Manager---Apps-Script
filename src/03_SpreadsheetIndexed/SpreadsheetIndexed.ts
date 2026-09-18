@@ -48,7 +48,7 @@ export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
     });
     this.raw.fetchAllGathered(includeProgrammaticFacts);
     sheetsPreppedForFetch.forEach((sheet) => {
-      sheet.clearPreFetchGridRanges();
+      sheet.clearFetchTargets();
     });
   }
 }

@@ -1,5 +1,5 @@
 import type { CellValue } from "../../00_base/base";
-import type { RawRowState } from "../ClassTypes/RawState";
+import type { RowStateRaw } from "../ClassTypes/StateRaw";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
 export interface RowRawProps extends SheetRawProps {
@@ -20,7 +20,7 @@ export class RowRawBase extends SheetRawBase {
   get isDataRow(): boolean {
     return this.rowIndex >= this.schema.topDataRowIdx;
   }
-  get rowState(): RawRowState {
+  get rowState(): RowStateRaw {
     return this.getRowState(this.rowIndex);
   }
   rowIsActive(): boolean {

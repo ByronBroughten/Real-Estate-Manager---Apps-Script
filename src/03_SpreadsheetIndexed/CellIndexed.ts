@@ -17,7 +17,7 @@ import {
 } from "../01_generatedConfigs/valueSchemas";
 import { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import { CellIndexedBase } from "./CellIndexedBase";
-import type { CellChange } from "./ClassTypes/IndexedState";
+import type { CellChange } from "./ClassTypes/StateIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 
 export class CellIndexed<
@@ -37,7 +37,7 @@ export class CellIndexed<
     return this.raw.isActive;
   }
   prepFetch(): this {
-    this.preFetchGridRanges.push({ row: this.rowIndex, column: this.columnId });
+    this.fetchTargets.push({ row: this.rowIndex, column: this.columnId });
     return this;
   }
   // Indexed is the lowest tier that knows the value name, so the blank is read here.
