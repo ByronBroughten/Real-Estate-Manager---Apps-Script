@@ -26,7 +26,7 @@ Map fragment disclosed from `README.md`. Read the heading the task needs.
 
 `npm run gen:configs` **writes** to the live Sheet Config/Column Config sheets and to business sheets' header rows (adding missing column IDs) before it regenerates the four local config files from live Spreadsheet Config plus the other config sheets (floor vs generated: [`docs/generated-data.md`](./generated-data.md)), and it has **standing permission** under four conditions, all of which must hold:
 
-- no uncommitted changes in `src/01_generatedConfigs/`;
+- no uncommitted changes in `src/01_SpreadsheetSchema/`, the generated folder included;
 - no uncommitted changes in `src/05_Operators/`, because the command now executes local, possibly unreviewed operator code against the live config sheets;
 - the agent reports what changed and the untyped-column count it returned;
 - it is never a blind fix for a type error whose cause has not been identified. An identified identity or incidental retarget goes through [retarget-after-gen-configs](../.claude/skills/retarget-after-gen-configs/SKILL.md); an unidentified one still means no patch.
@@ -77,10 +77,11 @@ This project also has a `gsheets` MCP server available, which can read and write
 
 ### Claude Code guardrails
 
-`.claude/settings.json` registers four Node hooks in `.claude/hooks/`, all fail-open (bad input allows the call), plus one project agent. The first two gate a call; the others add a reminder.
+`.claude/settings.json` registers five Node hooks in `.claude/hooks/`, all fail-open (bad input allows the call), plus one project agent. The first two gate a call; the others add a reminder.
 
 - **`bashReadGuard.mjs`** (PreToolUse, Bash) denies a Bash read of `columnConfigs.ts`, unless it is a grep or a `sed -n` range of at most 150 lines. It also denies a whole-file dump (`cat`, unbounded `head`/`tail`, `sed` without `-n`, `sed -n '1,$p'`) of a repo file over 150 lines. The deny message names the alternative. Piped input, small files, and anything under `.probe/`, `node_modules/` or outside the repo are not guarded. The classifier (`lib/bashReads.mjs`) is shared with `readCountNudge.mjs`.
 - **`masterCommitGuard.mjs`** (PreToolUse, Bash) turns a commit, merge, cherry-pick, revert or `am` on `master`/`main`, and a push that lands on either, into a permission prompt. It enforces the branch rule in [`agents/git-workflow.md`](./agents/git-workflow.md) against a skill that says to commit to the current branch. It follows a leading `cd` and `git -C`.
+- **`generatedEditWarning.mjs`** (PreToolUse, Edit/Write) warns, without blocking, before an edit inside `src/01_SpreadsheetSchema/generated/`: regenerate instead, unless the edit is to a config-sheet floor entry ([`docs/generated-data.md`](./generated-data.md)).
 - **`readCountNudge.mjs`** (PostToolUse on Read/Grep/Glob/Bash; reset on UserPromptSubmit) counts reads per turn: Read, Grep, Glob, and Bash calls the classifier calls reads. Edits, `tsc` and test runs are not counted. At 15 reads, and every 10 after, it reminds Claude to write findings down with `file:line`. Each subagent has its own count, and `repo-explorer` is exempt.
 - **`contextSizeNudge.mjs`** (UserPromptSubmit) estimates context from the transcript's last main-thread usage figures, falling back to bytes ÷ 4. It warns once past ~400k and once past ~1M; the second warning asks for a handoff ([`docs/agents/planning.md`](./agents/planning.md#handoffs)) and a fresh session.
 - **`.claude/agents/repo-explorer.md`** is a read-only (Read/Grep/Glob) Sonnet agent for sweeps of about 5+ files. It returns `file:line` plus verbatim quotes.

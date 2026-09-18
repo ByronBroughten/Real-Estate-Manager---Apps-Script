@@ -15,11 +15,11 @@ This was mined from the framework tiers. It does **not** govern business endpoin
 - Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this`.
 
 ```ts
-export class ConfigOrchestrator extends OperatorBase {
+export class ConfigOrchestrator extends SpreadsheetBaseOperator {
   constructor(props: SpreadsheetNamedProps) {
     super({
       ...props,
-      configSyncState: OperatorBase.initConfigSyncState(),
+      configSyncState: SpreadsheetBaseOperator.initConfigSyncState(),
     });
   }
   static init(): ConfigOrchestrator {
@@ -97,12 +97,12 @@ The criterion bites on the derived fact, not on row or cell addressing: `topCell
 
 ## A helper that never reads `this` is a module function
 
-A private helper with zero references to `this` depends on nothing the instance holds, so it leaves the class: an unexported function below the class, with the moved functions ordered by their first use in the class. Every private helper left in the class body then depends on instance state, and a reader can tell the two kinds of helper apart without reading each body. Keeping it unexported means the move doesn't widen the module's interface. `SchemaBase`'s `makeUniqueIdBase` is an example (#64).
+A private helper with zero references to `this` depends on nothing the instance holds, so it leaves the class: an unexported function below the class, with the moved functions ordered by their first use in the class. Every private helper left in the class body then depends on instance state, and a reader can tell the two kinds of helper apart without reading each body. Keeping it unexported means the move doesn't widen the module's interface. `SpreadsheetBaseSchema`'s `makeUniqueIdBase` is an example (#64).
 
 - **A helper whose arguments are one collaborator and that collaborator's state belongs on the collaborator**, not below the class. `SpreadsheetRaw._finalizeFetchedCells(sheet, state)` became `SheetRaw.finalizeFetchedCells()` (#64).
 - **A helper that reads `this` only to reach a collaborator stays a method.** Moving it out would mean passing the collaborator in, which is the threading this file warns against.
 - **A public method that happens not to read `this` stays put.** It is part of the class's interface, not a helper.
-- **A helper that only renames a function already in scope is deleted**, and its callers call that function. `SchemaBase.ssConfig` wrapped the imported `ssConfigGet` with the same signature.
+- **A helper that only renames a function already in scope is deleted**, and its callers call that function. `SpreadsheetBaseSchema.ssConfig` wrapped the imported `ssConfigGet` with the same signature.
 - **Helpers that share a subject and pass nothing to each other become an object bundle** named for the subject and written with method shorthand, so the names shorten and the group reads as one unit (`googleColor.fromRgb`, `uniformRows.index`).
 - **Helpers that keep passing the same value to each other become a helper class** that holds the value, in its own file, so their signatures stop threading it. This is the #22 lesson at a smaller scale. If the class touches tier state, it is a collaborator and follows the coordinator rules above: it extends the tier's Base class and is reached through a lazy getter.
 
@@ -118,7 +118,7 @@ Editing a file is the moment to remove, not preserve, a stub nothing calls, a pl
 
 A file named for a class holds only that class, so the file name tells a reader everything in it. There are no exceptions, custom `Error` subclasses included; `max-classes-per-file` enforces it. A helper type or free function that serves one class lives in that class's file.
 
-Splitting a class family can close an import cycle through an `extends` clause; [schema classes](../architecture/schema-classes.md) covers why that crashes and how `SchemaBase` breaks it.
+Splitting a class family can close an import cycle through an `extends` clause; [schema classes](../architecture/schema-classes.md) covers why that crashes and how `SpreadsheetBaseSchema` breaks it.
 
 ## Keep "why" comments across a refactor
 
