@@ -1,8 +1,5 @@
 import type { CellValue } from "../00_base/CellValues/cellValues";
-import {
-  getColumnTraitByName,
-  type ColumnName,
-} from "../01_generatedConfigs/columnConfigsTypes";
+import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import {
   makeImportLine,
   validateSpreadsheetLayoutIndexes,
@@ -11,6 +8,10 @@ import {
 import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import {
+  SpreadsheetConfigDataRow,
+  spreadsheetConfigHeader,
+} from "./SpreadsheetConfigDataRow";
 import {
   OperatorBase,
   type ConfigSyncState,
@@ -74,7 +75,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
   }
   private _translateFetchedGrid(): LiveSpreadsheetConfig {
     const guaranteedHeaders = guaranteedColumns.map((columnName) =>
-      this._header(columnName),
+      spreadsheetConfigHeader(columnName),
     );
     const tableHeaderRowIndex =
       this._uniqueTableHeaderRowIndex(guaranteedHeaders);
@@ -82,53 +83,22 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
       tableHeaderRowIndex,
       guaranteedHeaders,
     );
-    const dataRowIndex = tableHeaderRowIndex + 1;
+    const dataRow = new SpreadsheetConfigDataRow(
+      this._valueByHeader(tableHeaderRowIndex + 1, colIndexByHeader),
+    );
     const liveConfig = {
-      idDelimiter: this._stringCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "idDelimiter",
-      ),
-      idHeader: this._stringCell(dataRowIndex, colIndexByHeader, "idHeader"),
-      startTableColIndexBase0: this._indexCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "startTableColumnIndexBase1",
-      ),
-      columnIdRowIdxBase0: this._indexCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "columnIdRowIndexBase1",
-      ),
-      columnGroupHeadingRowIndexBase0: this._indexCell(
-        dataRowIndex,
-        colIndexByHeader,
+      idDelimiter: dataRow.stringCell("idDelimiter"),
+      idHeader: dataRow.stringCell("idHeader"),
+      startTableColIndexBase0: dataRow.indexCell("startTableColumnIndexBase1"),
+      columnIdRowIdxBase0: dataRow.indexCell("columnIdRowIndexBase1"),
+      columnGroupHeadingRowIndexBase0: dataRow.indexCell(
         "columnGroupHeadingRowIndexBase1",
       ),
-      actionRowIndexBase0: this._indexCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "actionRowIndexBase1",
-      ),
-      tableHeaderRowIndexBase0: this._indexCell(
-        dataRowIndex,
-        colIndexByHeader,
-        "tableHeaderRowIndexBase1",
-      ),
+      actionRowIndexBase0: dataRow.indexCell("actionRowIndexBase1"),
+      tableHeaderRowIndexBase0: dataRow.indexCell("tableHeaderRowIndexBase1"),
     };
-    validateSpreadsheetLayoutIndexes(
-      liveConfig,
-      this._uniformRowLayoutLabels(),
-    );
+    validateSpreadsheetLayoutIndexes(liveConfig, uniformRowLayoutLabels());
     return liveConfig;
-  }
-  private _uniformRowLayoutLabels(): Record<UniformRowLayoutKey, string> {
-    return {
-      columnIdRowIdxBase0: `Spreadsheet Config column "${this._header("columnIdRowIndexBase1")}"`,
-      columnGroupHeadingRowIndexBase0: `Spreadsheet Config column "${this._header("columnGroupHeadingRowIndexBase1")}"`,
-      actionRowIndexBase0: `Spreadsheet Config column "${this._header("actionRowIndexBase1")}"`,
-      tableHeaderRowIndexBase0: `Spreadsheet Config column "${this._header("tableHeaderRowIndexBase1")}"`,
-    };
   }
   private _uniqueTableHeaderRowIndex(guaranteedHeaders: string[]): number {
     const matchingRowIndexes = this.sheet.raw.activeRowIndexes.filter(
@@ -169,53 +139,16 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     }
     return colIndexByHeader;
   }
-  private _stringCell(
+  private _valueByHeader(
     dataRowIndex: number,
     colIndexByHeader: Map<string, number>,
-    columnName: SpreadsheetConfigColumnName,
-  ): string {
-    const header = this._header(columnName);
-    const value = this._nonBlankCell(dataRowIndex, colIndexByHeader, header);
-    if (typeof value !== "string") {
-      throw new Error(
-        `Spreadsheet Config column "${header}" must be text, got ${JSON.stringify(value)}.`,
-      );
-    }
-    return value;
-  }
-  private _indexCell(
-    dataRowIndex: number,
-    colIndexByHeader: Map<string, number>,
-    columnName: SpreadsheetConfigColumnName,
-  ): number {
-    const header = this._header(columnName);
-    const value = this._nonBlankCell(dataRowIndex, colIndexByHeader, header);
-    if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
-      throw new Error(
-        `Spreadsheet Config column "${header}" must be an integer ≥ 1, got ${JSON.stringify(value)}.`,
-      );
-    }
-    return value - 1;
-  }
-  private _nonBlankCell(
-    dataRowIndex: number,
-    colIndexByHeader: Map<string, number>,
-    header: string,
-  ): CellValue {
-    const colIndex = colIndexByHeader.get(header);
-    if (colIndex === undefined) {
-      throw new Error(
-        `Spreadsheet Config is missing guaranteed column "${header}".`,
-      );
-    }
-    const value = this._cellValueOrEmpty(dataRowIndex, colIndex);
-    if (value === "") {
-      throw new Error(`Spreadsheet Config column "${header}" is blank.`);
-    }
-    return value;
-  }
-  private _header(columnName: SpreadsheetConfigColumnName): string {
-    return getColumnTraitByName("spreadsheetConfig", columnName, "header");
+  ): Map<string, CellValue | ""> {
+    return new Map(
+      [...colIndexByHeader].map(([header, colIndex]) => [
+        header,
+        this._cellValueOrEmpty(dataRowIndex, colIndex),
+      ]),
+    );
   }
   private _cellValueOrEmpty(
     rowIndex: number,
@@ -227,4 +160,13 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     }
     return rowState.get(colIndex)?.value ?? "";
   }
+}
+
+function uniformRowLayoutLabels(): Record<UniformRowLayoutKey, string> {
+  return {
+    columnIdRowIdxBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("columnIdRowIndexBase1")}"`,
+    columnGroupHeadingRowIndexBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("columnGroupHeadingRowIndexBase1")}"`,
+    actionRowIndexBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("actionRowIndexBase1")}"`,
+    tableHeaderRowIndexBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("tableHeaderRowIndexBase1")}"`,
+  };
 }

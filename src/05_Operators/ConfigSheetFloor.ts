@@ -78,12 +78,12 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     const report: string[] = [];
     const declarations = [
       ...this._spreadsheetConfigDeclarations(feedbackColumnNames, report),
-      ...this._bookkeepingDeclarations(
+      ...floorDeclaration.bookkeeping(
         this.ss.sheet("sheetConfig"),
         floor.sheetConfigColumns,
       ),
-      this._formulaColumnDeclaration(this.ss.sheet("sheetConfig")),
-      ...this._bookkeepingDeclarations(
+      floorDeclaration.formulaColumn(this.ss.sheet("sheetConfig")),
+      ...floorDeclaration.bookkeeping(
         this.ss.sheet("columnConfig"),
         floor.columnConfigColumns,
       ),
@@ -116,107 +116,17 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       return [];
     }
     return [
-      ...this._bookkeepingDeclarations(sheet, [
+      ...floorDeclaration.bookkeeping(sheet, [
         "tableMenuSpace",
         ...feedbackColumnNames,
         ...floor.layoutColumns,
       ]),
-      this._dataCellDeclaration(tableMenuSpace),
+      floorDeclaration.dataCell(tableMenuSpace),
       ...feedbackColumnNames.map((columnName) =>
-        this._dataCellDeclaration(sheet.column(columnName)),
+        floorDeclaration.dataCell(sheet.column(columnName)),
       ),
-      ...this._groupHeadingDeclarations(sheet),
+      ...floorDeclaration.groupHeadings(sheet),
     ];
-  }
-  private _bookkeepingDeclarations<SN extends SheetNameSimple>(
-    sheet: SheetNamed<SN>,
-    columnNames: readonly ColumnName<SN>[],
-  ): FloorDeclaration[] {
-    return columnNames.flatMap((columnName) => {
-      const column = sheet.column(columnName);
-      return [
-        this._uniformCellDeclaration(column, "tableHeader", "header"),
-        this._uniformCellDeclaration(column, "columnId", "column ID"),
-      ];
-    });
-  }
-  private _groupHeadingDeclarations(
-    sheet: SheetNamed<"spreadsheetConfig">,
-  ): FloorDeclaration[] {
-    const declarations: FloorDeclaration[] = [];
-    let previousHeading = "";
-    this._columnsByIndex(sheet).forEach((column) => {
-      const heading = String(
-        column.meta.uniformCell("colGroupName").valueOrEmpty(),
-      );
-      const isGroupStart =
-        heading !== previousHeading &&
-        floor.groupHeadings.some((groupHeading) => groupHeading === heading);
-      previousHeading = heading;
-      if (!isGroupStart) return;
-      declarations.push(
-        this._uniformCellDeclaration(column, "colGroupName", "group heading"),
-      );
-    });
-    return declarations;
-  }
-  private _columnsByIndex<SN extends SheetNameSimple>(
-    sheet: SheetNamed<SN>,
-  ): ColumnNamed<SN>[] {
-    return sheet.schema.columnNames
-      .map((columnName) => sheet.column(columnName))
-      .sort((left, right) => left.meta.colIndex - right.meta.colIndex);
-  }
-  private _formulaColumnDeclaration(
-    sheet: SheetNamed<"sheetConfig">,
-  ): FloorDeclaration {
-    const column = sheet.column("idPrefixIsUniqueOrEmpty");
-    const startRowIndex = column.schema.topDataRowIdx;
-    const description = this._description(column, "data");
-    return {
-      description,
-      range: column.gridRangeFromRow(startRowIndex),
-      queueAdd: () =>
-        column.addEditWarningFromRow(startRowIndex, { description }),
-    };
-  }
-  private _dataCellDeclaration<
-    SN extends SheetNameSimple,
-    CN extends ColumnName<SN>,
-  >(column: ColumnNamed<SN, CN>): FloorDeclaration {
-    const rowIndex = column.schema.topDataRowIdx;
-    const cell = column.cell(rowIndex);
-    const description = this._description(column, "data");
-    return {
-      description,
-      range: cell.raw.gridRange,
-      queueAdd: () => cell.addEditWarning({ description }),
-    };
-  }
-  private _uniformCellDeclaration<
-    SN extends SheetNameSimple,
-    CN extends ColumnName<SN>,
-  >(
-    column: ColumnNamed<SN, CN>,
-    rowName: "tableHeader" | "columnId" | "colGroupName",
-    cellKind: FloorCellKind,
-  ): FloorDeclaration {
-    const cell = column.meta.uniformCell(rowName);
-    const description = this._description(column, cellKind);
-    return {
-      description,
-      range: cell.raw.gridRange,
-      queueAdd: () => cell.addEditWarning({ description }),
-    };
-  }
-  private _description<SN extends SheetNameSimple, CN extends ColumnName<SN>>(
-    column: ColumnNamed<SN, CN>,
-    cellKind: FloorCellKind,
-  ): string {
-    const header = String(
-      column.meta.uniformCell("tableHeader").valueOrEmpty(),
-    );
-    return `${floor.prefix} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
   }
   private _reconcile(declarations: FloorDeclaration[], report: string[]): void {
     const existing = this._floorProtections();
@@ -270,6 +180,91 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
         }),
     );
   }
+}
+
+const floorDeclaration = {
+  bookkeeping<SN extends SheetNameSimple>(
+    sheet: SheetNamed<SN>,
+    columnNames: readonly ColumnName<SN>[],
+  ): FloorDeclaration[] {
+    return columnNames.flatMap((columnName) => {
+      const column = sheet.column(columnName);
+      return [
+        floorDeclaration.uniformCell(column, "tableHeader", "header"),
+        floorDeclaration.uniformCell(column, "columnId", "column ID"),
+      ];
+    });
+  },
+  formulaColumn(sheet: SheetNamed<"sheetConfig">): FloorDeclaration {
+    const column = sheet.column("idPrefixIsUniqueOrEmpty");
+    const startRowIndex = column.schema.topDataRowIdx;
+    const description = floorDescription(column, "data");
+    return {
+      description,
+      range: column.gridRangeFromRow(startRowIndex),
+      queueAdd: () =>
+        column.addEditWarningFromRow(startRowIndex, { description }),
+    };
+  },
+  dataCell<SN extends SheetNameSimple, CN extends ColumnName<SN>>(
+    column: ColumnNamed<SN, CN>,
+  ): FloorDeclaration {
+    const rowIndex = column.schema.topDataRowIdx;
+    const cell = column.cell(rowIndex);
+    const description = floorDescription(column, "data");
+    return {
+      description,
+      range: cell.raw.gridRange,
+      queueAdd: () => cell.addEditWarning({ description }),
+    };
+  },
+  groupHeadings(sheet: SheetNamed<"spreadsheetConfig">): FloorDeclaration[] {
+    const declarations: FloorDeclaration[] = [];
+    let previousHeading = "";
+    columnsByIndex(sheet).forEach((column) => {
+      const heading = String(
+        column.meta.uniformCell("colGroupName").valueOrEmpty(),
+      );
+      const isGroupStart =
+        heading !== previousHeading &&
+        floor.groupHeadings.some((groupHeading) => groupHeading === heading);
+      previousHeading = heading;
+      if (!isGroupStart) return;
+      declarations.push(
+        floorDeclaration.uniformCell(column, "colGroupName", "group heading"),
+      );
+    });
+    return declarations;
+  },
+  uniformCell<SN extends SheetNameSimple, CN extends ColumnName<SN>>(
+    column: ColumnNamed<SN, CN>,
+    rowName: "tableHeader" | "columnId" | "colGroupName",
+    cellKind: FloorCellKind,
+  ): FloorDeclaration {
+    const cell = column.meta.uniformCell(rowName);
+    const description = floorDescription(column, cellKind);
+    return {
+      description,
+      range: cell.raw.gridRange,
+      queueAdd: () => cell.addEditWarning({ description }),
+    };
+  },
+};
+
+function floorDescription<
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+>(column: ColumnNamed<SN, CN>, cellKind: FloorCellKind): string {
+  const header = String(column.meta.uniformCell("tableHeader").valueOrEmpty());
+  return `${floor.prefix} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
+}
+
+function columnsByIndex<SN extends SheetNameSimple>(
+  sheet: SheetNamed<SN>,
+): ColumnNamed<SN>[] {
+  return sheet.schema.columnNames
+    .map((columnName) => sheet.column(columnName))
+    .sort((left, right) => left.meta.colIndex - right.meta.colIndex);
 }
 
 function floorMatchKey(description: string): string | undefined {

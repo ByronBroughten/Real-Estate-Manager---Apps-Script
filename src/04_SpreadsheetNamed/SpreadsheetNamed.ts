@@ -68,7 +68,7 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
     const standardizedProps = this._standardizeProps(props);
     this._prepFetchStandardizedProps(standardizedProps);
     this.fetchAllPrepped();
-    const sheetNames = this._sheetNamesFromReqProps(standardizedProps);
+    const sheetNames = sheetNamesFromReqProps(standardizedProps);
     return this.sheets(...sheetNames);
   }
   private _standardizeProps<SN extends SheetName>(
@@ -146,53 +146,10 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
       columnNames.forEach((columnName) => {
         const columnId = namedSheet.schema.columnByName(columnName).columnId;
         specifiers.forEach((specifier) => {
-          this._prepFetchRowSpecifier(indexedSheet, specifier, columnId);
+          prepFetchRowSpecifier(indexedSheet, specifier, columnId);
         });
       });
     });
-  }
-  private _prepFetchRowSpecifier(
-    sheet: SheetIndexed,
-    rowSpecifier: RowSpecifierName,
-    columnId: string,
-  ): void {
-    const schema = sheet.schema;
-    const column = sheet.column(columnId);
-    switch (rowSpecifier) {
-      case "activeRows":
-      case "data":
-        column.prepFetchFull();
-        break;
-      case "topDatum":
-        column.cell(schema.topDataRowIdx).prepFetch();
-        break;
-      case "actions":
-        column.cell(schema.actionRowIndex).prepFetch();
-        break;
-      case "columnIds":
-        column.cell(schema.colIdRowIndex).prepFetch();
-        break;
-      case "headers":
-        column.cell(schema.tableHeaderRowIndex).prepFetch();
-        break;
-      case "all":
-        column.cell(schema.tableHeaderRowIndex).prepFetch();
-        column.cell(schema.actionRowIndex).prepFetch();
-        column.cell(schema.colIdRowIndex).prepFetch();
-        column.prepFetchFull();
-        break;
-      default:
-        throw new Error(
-          `Invalid rowSpecifier: ${rowSpecifier as string}. Must be a valid RowSpecifierName.`,
-        );
-    }
-  }
-  private _sheetNamesFromReqProps<T extends SheetName>(
-    propsArr: FetchPropsStandardNamed<T>[],
-  ): Set<T> {
-    return propsArr.reduce((sheetNames, props) => {
-      return sheetNames.add(...Obj.keys(props.sheetColumnNames));
-    }, new Set() as Set<T>);
   }
   get sheetsOfSchema(): SheetNamed<SheetName>[] {
     return this.schema.sheetNames.map((sheetName) => this.sheet(sheetName));
@@ -242,5 +199,50 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
       }
       return false;
     }) as SheetNamed<SheetNameByGroup<"hasIdColumn">>[];
+  }
+}
+
+function sheetNamesFromReqProps<T extends SheetName>(
+  propsArr: FetchPropsStandardNamed<T>[],
+): Set<T> {
+  return propsArr.reduce((sheetNames, props) => {
+    return sheetNames.add(...Obj.keys(props.sheetColumnNames));
+  }, new Set() as Set<T>);
+}
+
+function prepFetchRowSpecifier(
+  sheet: SheetIndexed,
+  rowSpecifier: RowSpecifierName,
+  columnId: string,
+): void {
+  const schema = sheet.schema;
+  const column = sheet.column(columnId);
+  switch (rowSpecifier) {
+    case "activeRows":
+    case "data":
+      column.prepFetchFull();
+      break;
+    case "topDatum":
+      column.cell(schema.topDataRowIdx).prepFetch();
+      break;
+    case "actions":
+      column.cell(schema.actionRowIndex).prepFetch();
+      break;
+    case "columnIds":
+      column.cell(schema.colIdRowIndex).prepFetch();
+      break;
+    case "headers":
+      column.cell(schema.tableHeaderRowIndex).prepFetch();
+      break;
+    case "all":
+      column.cell(schema.tableHeaderRowIndex).prepFetch();
+      column.cell(schema.actionRowIndex).prepFetch();
+      column.cell(schema.colIdRowIndex).prepFetch();
+      column.prepFetchFull();
+      break;
+    default:
+      throw new Error(
+        `Invalid rowSpecifier: ${rowSpecifier as string}. Must be a valid RowSpecifierName.`,
+      );
   }
 }
