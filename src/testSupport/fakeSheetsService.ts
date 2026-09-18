@@ -70,7 +70,7 @@ export interface FakeSheetProperties {
      * A column's live data-validation condition values (e.g.
      * `["=valueConfig[Transaction Description]"]`), keyed by absolute
      * column index — read by `ColumnConfigOperator`'s valueName detection
-     * (`SheetRaw.columnValidationValues`). Omit for a table with no
+     * (`ColumnMetaRaw.valueValidationStrings`). Omit for a table with no
      * validated columns.
      */
     columnValidationValues?: Record<number, string[]>;

@@ -10,7 +10,7 @@ import type { BaseValueName } from "../00_base/baseValueSchemas";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
-import type { ActiveFactsRaw } from "./ClassTypes/StateRaw";
+import type { ActiveFactsRaw, ColumnStateRaw } from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 
@@ -39,7 +39,7 @@ export class ColumnMetaRaw<
     return this._activeFacts.topValue;
   }
   private get _activeFacts(): ActiveFactsRaw {
-    const facts = this.columnStates.get(this.colIndex)?.activeFacts;
+    const facts = this.columnState?.activeFacts;
     if (facts === undefined) {
       throw new Error(
         `No active facts for column index ${this.colIndex} of sheet ${this.sheetLabel}: ` +
@@ -50,17 +50,18 @@ export class ColumnMetaRaw<
     return facts;
   }
   get valueValidationStrings(): string[] {
-    return (
-      this.sheet.activeTable.columnValidationValues.get(this.colIndex) ?? []
-    );
+    return this._tableColumnState()?.validationValues ?? [];
   }
   get validationConditionType(): string | undefined {
-    return this.sheet.activeTable.columnValidationConditionTypes.get(
-      this.colIndex,
-    );
+    return this._tableColumnState()?.validationConditionType;
   }
   get activeDeclaredColumnType(): string | undefined {
-    return this.sheet.activeTable.columnDeclaredTypes.get(this.colIndex);
+    return this._tableColumnState()?.declaredType;
+  }
+  // Table column properties are only trustworthy once the Table itself is known.
+  private _tableColumnState(): ColumnStateRaw | undefined {
+    this.sheet.activeTable.assertKnown();
+    return this.columnState;
   }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
@@ -99,9 +100,7 @@ export class ColumnMetaRaw<
   }
   // Gap-filling only, so a fact the payload described always wins.
   ensureActiveFacts(): void {
-    if (this.columnStates.get(this.colIndex)?.activeFacts !== undefined) {
-      return;
-    }
+    if (this.columnState?.activeFacts !== undefined) return;
     if (!this.primary.topCell.isActive) return; // no top data row to sample
     this.integrateActiveFacts(undefined);
   }

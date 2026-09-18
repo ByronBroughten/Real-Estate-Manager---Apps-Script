@@ -777,11 +777,10 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(table.startRowIndex).toBe(TABLE_HEADER_ROW_INDEX);
     expect(table.startColumnIndex).toBe(START_TABLE_COL_INDEX);
     expect(table.endColumnIndex).toBeGreaterThan(START_TABLE_COL_INDEX);
-    expect(table.columnDeclaredTypes.get(0)).toBe("TEXT");
-    expect(table.columnValidationValues.get(0)).toEqual([
-      "=valueConfig[Notes]",
-    ]);
-    expect(table.columnValidationConditionTypes.get(0)).toBe("BOOLEAN");
+    const columnMeta = raw.sheet(111).meta.column(0);
+    expect(columnMeta.activeDeclaredColumnType).toBe("TEXT");
+    expect(columnMeta.valueValidationStrings).toEqual(["=valueConfig[Notes]"]);
+    expect(columnMeta.validationConditionType).toBe("BOOLEAN");
     expect(raw.sheet(111).isTableColIndex(START_TABLE_COL_INDEX)).toBe(true);
     expect(() => table.endRowIndex).toThrow(STALE_ROW_INDEXES);
     expect(() => {

@@ -1,4 +1,3 @@
-import { Val } from "../../utils/Val";
 import type { ColumnStateRaw } from "../ClassTypes/StateRaw";
 import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
 
@@ -12,11 +11,9 @@ export class ColumnRawBase extends SheetRawBase {
     super(rest);
     this.colIndex = colIndex;
   }
-  get columnState(): ColumnStateRaw {
-    return Val.assert(
-      this.sheetState.columnStates.get(this.colIndex),
-      `columnState for column ${this.colIndex} of sheetGid ${this.sheetGid}`,
-    );
+  // Absent until a fetch records a fact about this column.
+  get columnState(): ColumnStateRaw | undefined {
+    return this.sheetState.columnStates.get(this.colIndex);
   }
   get columnRawProps(): ColumnRawProps {
     return {

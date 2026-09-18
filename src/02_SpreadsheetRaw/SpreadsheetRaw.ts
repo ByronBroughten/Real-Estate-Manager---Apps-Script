@@ -283,7 +283,7 @@ export class SpreadsheetRaw extends SpreadsheetRawBase {
     return this.sheet(sheetGid).sheetLabel;
   }
   // isFormula/numberFormatType (from rowData.values.userEnteredValue/
-  // effectiveFormat) and columnValidationValues/columnDeclaredTypes (from
+  // effectiveFormat) and column validation values/declared types (from
   // tables.columnProperties) are read only by ColumnConfigOperator's
   // programmatic value correction — every other caller only ever needs effectiveValue, so
   // those fields are left out of the default fetch to avoid fetching them
