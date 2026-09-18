@@ -4,7 +4,7 @@ import type {
   UniformRowValueName,
 } from "../../00_base/CellValues/cellValues";
 import type { StrictOmit } from "../../utils/Obj";
-import { getUniformRowIndex } from "../Schema/SchemaBase";
+import { uniformRows } from "../Schema/uniformRows";
 import type { RowRawProps } from "./RowBaseRaw";
 import { RowCommonRaw } from "./RowCommonRaw";
 
@@ -23,7 +23,7 @@ export class UniformRowBaseRaw<
   constructor({ uniformRowName, ...rest }: RowUniformProps<UN>) {
     super({
       ...rest,
-      rowIndex: getUniformRowIndex(uniformRowName),
+      rowIndex: uniformRows.index(uniformRowName),
     });
     this.uniformRowName = uniformRowName;
     this.validateUniformState();

@@ -94,7 +94,7 @@ A private helper with zero references to `this` depends on nothing the instance 
 - **A helper that reads `this` only to reach a collaborator stays a method.** Moving it out would mean passing the collaborator in, which is the threading this file warns against.
 - **A public method that happens not to read `this` stays put.** It is part of the class's interface, not a helper.
 - **A helper that only renames a function already in scope is deleted**, and its callers call that function. `SchemaBase.ssConfig` wrapped the imported `ssConfigGet` with the same signature.
-- **Helpers that share a subject and pass nothing to each other become an object bundle** named for the subject and written with method shorthand, so the names shorten and the group reads as one unit (`googleColor.fromRgb`).
+- **Helpers that share a subject and pass nothing to each other become an object bundle** named for the subject and written with method shorthand, so the names shorten and the group reads as one unit (`googleColor.fromRgb`, `uniformRows.index`).
 - **Helpers that keep passing the same value to each other become a helper class** that holds the value, in its own file, so their signatures stop threading it. This is the #22 lesson at a smaller scale. If the class touches tier state, it is a collaborator and follows the coordinator rules above: it extends the tier's Base class and is reached through a lazy getter.
 
 ## Delete dead scaffolding you touch — with one exception

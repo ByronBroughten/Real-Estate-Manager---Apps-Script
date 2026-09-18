@@ -8,7 +8,7 @@ import type {
   EditWarningDeclaration,
   ProtectedRange,
 } from "../00_base/RawSource/ProtectedRange";
-import { getUniformRowIndex } from "../02_SpreadsheetRaw/Schema/SchemaBase";
+import { uniformRows } from "../02_SpreadsheetRaw/Schema/uniformRows";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
 import type { RowIndexedProps } from "./ClassBases/RowBaseIndexed";
@@ -28,7 +28,7 @@ export class UniformRowIndexed<
   constructor({ uniformRowName, ...rest }: UniformRowIndexedProps<UN>) {
     super({
       ...rest,
-      rowIndex: getUniformRowIndex(uniformRowName),
+      rowIndex: uniformRows.index(uniformRowName),
     });
     this.uniformRowName = uniformRowName;
     this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);

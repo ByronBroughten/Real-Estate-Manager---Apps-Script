@@ -11,25 +11,7 @@ import {
 } from "../../01_generatedConfigs/spreadsheetConfigTypes";
 import { Obj } from "../../utils/Obj";
 import { Str } from "../../utils/Str";
-
-function getUniformRowIndexes(): Record<UniformRowName, number> {
-  return {
-    columnId: ssConfigGet("columnIdRowIdxBase0"),
-    colGroupName: ssConfigGet("columnGroupHeadingRowIndexBase0"),
-    action: ssConfigGet("actionRowIndexBase0"),
-    tableHeader: ssConfigGet("tableHeaderRowIndexBase0"),
-  };
-}
-export function getUniformRowIndex(name: UniformRowName): number {
-  return getUniformRowIndexes()[name];
-}
-
-function rowIndexToUniformName(): Map<number, UniformRowName> {
-  const uniformRowIndexes = getUniformRowIndexes();
-  return new Map(
-    Obj.keys(uniformRowIndexes).map((name) => [uniformRowIndexes[name], name]),
-  ) as Map<number, UniformRowName>;
-}
+import { uniformRows } from "./uniformRows";
 
 export class SchemaBase {
   get codebaseNameDelimiter(): CodebaseNameDelimiter {
@@ -53,10 +35,10 @@ export class SchemaBase {
     return getUniformRowValueName(name);
   }
   uniformRowIndex(name: UniformRowName): number {
-    return getUniformRowIndex(name);
+    return uniformRows.index(name);
   }
   uniformRowNameByIndex(rowIndex: number): UniformRowName {
-    const uniformRowName = rowIndexToUniformName().get(rowIndex);
+    const uniformRowName = uniformRows.nameByIndex().get(rowIndex);
     if (!uniformRowName) {
       throw new Error(
         `Row index ${rowIndex} does not correspond to a known uniform row name.`,
@@ -65,7 +47,7 @@ export class SchemaBase {
     return uniformRowName;
   }
   isUniformRowIndex(rowIndex: number, rowName?: UniformRowName): boolean {
-    const isUniform = rowIndexToUniformName().has(rowIndex);
+    const isUniform = uniformRows.nameByIndex().has(rowIndex);
     if (rowName) {
       return isUniform && this.uniformRowNameByIndex(rowIndex) === rowName;
     } else {
@@ -76,9 +58,9 @@ export class SchemaBase {
     if (!this.isUniformRowIndex(rowIndex, rowName)) {
       throw new Error(
         `Row index ${rowIndex} is not a uniform row. Uniform rows are: ${Obj.keys(
-          getUniformRowIndexes(),
+          uniformRows.indexes(),
         )
-          .map((name) => `${name} (index ${getUniformRowIndexes()[name]})`)
+          .map((name) => `${name} (index ${uniformRows.indexes()[name]})`)
           .join(", ")}`,
       );
     }
@@ -127,13 +109,13 @@ export class SchemaBase {
     return ssConfigGet("startTableColIndexBase0");
   }
   get colIdRowIndex(): number {
-    return getUniformRowIndexes().columnId;
+    return uniformRows.indexes().columnId;
   }
   get tableHeaderRowIndex(): number {
-    return getUniformRowIndexes().tableHeader;
+    return uniformRows.indexes().tableHeader;
   }
   get actionRowIndex(): number {
-    return getUniformRowIndexes().action;
+    return uniformRows.indexes().action;
   }
   get topDataRowIdx(): number {
     return this.tableHeaderRowIndex + 1;
