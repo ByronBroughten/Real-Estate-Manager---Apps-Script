@@ -12,26 +12,25 @@ export class SpreadsheetConfigDataRow {
     this.valueByHeader = valueByHeader;
   }
   stringCell(columnName: SpreadsheetConfigColumnName): string {
-    const header = spreadsheetConfigHeader(columnName);
-    const value = this._nonBlankCell(header);
+    const value = this._nonBlankCell(columnName);
     if (typeof value !== "string") {
       throw new Error(
-        `Spreadsheet Config column "${header}" must be text, got ${JSON.stringify(value)}.`,
+        `${spreadsheetConfigColumnLabel(columnName)} must be text, got ${JSON.stringify(value)}.`,
       );
     }
     return value;
   }
   indexCell(columnName: SpreadsheetConfigColumnName): number {
-    const header = spreadsheetConfigHeader(columnName);
-    const value = this._nonBlankCell(header);
+    const value = this._nonBlankCell(columnName);
     if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
       throw new Error(
-        `Spreadsheet Config column "${header}" must be an integer ≥ 1, got ${JSON.stringify(value)}.`,
+        `${spreadsheetConfigColumnLabel(columnName)} must be an integer ≥ 1, got ${JSON.stringify(value)}.`,
       );
     }
     return value - 1;
   }
-  private _nonBlankCell(header: string): CellValue {
+  private _nonBlankCell(columnName: SpreadsheetConfigColumnName): CellValue {
+    const header = spreadsheetConfigHeader(columnName);
     const value = this.valueByHeader.get(header);
     if (value === undefined) {
       throw new Error(
@@ -39,7 +38,7 @@ export class SpreadsheetConfigDataRow {
       );
     }
     if (value === "") {
-      throw new Error(`Spreadsheet Config column "${header}" is blank.`);
+      throw new Error(`${spreadsheetConfigColumnLabel(columnName)} is blank.`);
     }
     return value;
   }
@@ -49,4 +48,10 @@ export function spreadsheetConfigHeader(
   columnName: SpreadsheetConfigColumnName,
 ): string {
   return getColumnTraitByName("spreadsheetConfig", columnName, "header");
+}
+
+export function spreadsheetConfigColumnLabel(
+  columnName: SpreadsheetConfigColumnName,
+): string {
+  return `Spreadsheet Config column "${spreadsheetConfigHeader(columnName)}"`;
 }

@@ -10,6 +10,7 @@ import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
   SpreadsheetConfigDataRow,
+  spreadsheetConfigColumnLabel,
   spreadsheetConfigHeader,
 } from "./SpreadsheetConfigDataRow";
 import {
@@ -164,9 +165,13 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
 
 function uniformRowLayoutLabels(): Record<UniformRowLayoutKey, string> {
   return {
-    columnIdRowIdxBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("columnIdRowIndexBase1")}"`,
-    columnGroupHeadingRowIndexBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("columnGroupHeadingRowIndexBase1")}"`,
-    actionRowIndexBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("actionRowIndexBase1")}"`,
-    tableHeaderRowIndexBase0: `Spreadsheet Config column "${spreadsheetConfigHeader("tableHeaderRowIndexBase1")}"`,
+    columnIdRowIdxBase0: spreadsheetConfigColumnLabel("columnIdRowIndexBase1"),
+    columnGroupHeadingRowIndexBase0: spreadsheetConfigColumnLabel(
+      "columnGroupHeadingRowIndexBase1",
+    ),
+    actionRowIndexBase0: spreadsheetConfigColumnLabel("actionRowIndexBase1"),
+    tableHeaderRowIndexBase0: spreadsheetConfigColumnLabel(
+      "tableHeaderRowIndexBase1",
+    ),
   };
 }

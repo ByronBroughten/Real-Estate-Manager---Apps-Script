@@ -235,10 +235,9 @@ function prepFetchRowSpecifier(
       column.cell(schema.tableHeaderRowIndex).prepFetch();
       break;
     case "all":
-      column.cell(schema.tableHeaderRowIndex).prepFetch();
-      column.cell(schema.actionRowIndex).prepFetch();
-      column.cell(schema.colIdRowIndex).prepFetch();
-      column.prepFetchFull();
+      (["headers", "actions", "columnIds", "data"] as const).forEach(
+        (specifier) => prepFetchRowSpecifier(sheet, specifier, columnId),
+      );
       break;
     default:
       throw new Error(
