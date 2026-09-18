@@ -2,7 +2,7 @@
 
 Open only the section or disclosed doc the task needs.
 
-Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./README.md#naming-vocabulary)); **STYLE.md** is code shape; **CONTEXT.md** is operator-facing words; **DESIGN.md** is why, including deliberate absences. Architecture mechanics: [`docs/architecture.md`](./docs/architecture.md) index, then one file. Hosts, MCP, live-sheet commands: [`docs/how-it-runs.md`](./docs/how-it-runs.md). A plan or spec includes the matching prose-file edit in its own scope.
+Four files, four jobs: **README.md** is the map (tiers + [Naming vocabulary](./README.md#naming-vocabulary)); **STYLE.md** is code shape; **CONTEXT.md** is operator-facing words; **DESIGN.md** is why, including deliberate absences. Why the agent tooling (hooks, gates, delegation) is shaped as it is goes in [`docs/agent-behavior-design.md`](./docs/agent-behavior-design.md), never DESIGN.md. Architecture mechanics: [`docs/architecture.md`](./docs/architecture.md) index, then one file. Hosts, MCP, live-sheet commands: [`docs/how-it-runs.md`](./docs/how-it-runs.md). A plan or spec includes the matching prose-file edit in its own scope.
 
 ## Guardrails
 

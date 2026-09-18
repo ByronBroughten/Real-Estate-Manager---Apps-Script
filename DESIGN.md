@@ -2,7 +2,7 @@
 
 Why this codebase is shaped the way it is — the reasoning that generalizes past the decision that produced it.
 
-The other prose files each answer a different question: README.md is the map (*what exists and where*; architecture mechanics in `docs/architecture/`, hosts in `docs/how-it-runs.md`, generated data in `docs/generated-data.md`, testing in `docs/testing.md`), STYLE.md is code shape (*what a class or a name looks like*), CONTEXT.md is the glossary (*what the words mean*), CLAUDE.md is the operating rules (*what an agent must not get wrong*). This file is the arguments underneath all four.
+The other prose files each answer a different question: README.md is the map (*what exists and where*; architecture mechanics in `docs/architecture/`, hosts in `docs/how-it-runs.md`, generated data in `docs/generated-data.md`, testing in `docs/testing.md`), STYLE.md is code shape (*what a class or a name looks like*), CONTEXT.md is the glossary (*what the words mean*), CLAUDE.md is the operating rules (*what an agent must not get wrong*). This file is the arguments underneath all four, for the codebase only; the arguments for how agents work on it live in [`docs/agent-behavior-design.md`](./docs/agent-behavior-design.md).
 
 **Every principle here cites the decisions that produced it.** A principle with no citation is a platitude and should be cut; a principle that can only cite one decision is probably premature — write the decision down and wait for the second instance. Candidates that haven't earned promotion yet are parked at the bottom.
 
