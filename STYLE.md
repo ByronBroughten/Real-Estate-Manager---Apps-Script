@@ -17,6 +17,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** `init` is how an outside caller builds one; `new` is how a class builds its own collaborators from props already on `this`; collaborators are lazy getters. Endpoints are exempt — a plain entry with module-private helpers, until a body turns unwieldy: 303 lines and eighteen free functions threading a collaborator through crossed that line and moved onto a business operator (#22).
 - **An Operator extends its subject's `*BaseNamed` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
 - **What an Operator holds as props is its identity; a per-run value is an argument to the method that needs it** — `OccupancyLedgerOperator` holds the spreadsheet, and `build` takes the occupancy row index.
+- **Split a coordinator into collaborators when its private helpers fall into groups that share nothing with each other**, not when it passes a method count. The coordinator keeps its public methods as one-line delegations, and the collaborators go in a subfolder named after it (`SpreadsheetRaw/`).
 - **A composition of collaborator calls that answers one domain question belongs on the collaborator**, under its own name. A parameter that its only caller already holds as its own state means the query belongs on the instance.
 - **Extract the shared piece when you can name the second caller**, not when it arrives.
 - **A member that samples the top data row for a column-wide fact belongs on the Meta column.** `topCell`/`topRow` stay primary.
@@ -40,6 +41,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **A name has to read to someone who has never opened this codebase** — never jargon named after the mechanism that sets it.
 - **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name**, and keeps it once a guard makes the operation safe.
 - **A constant is camelCase; two or more in one file that serve one purpose become one `as const` object named for that purpose** (`fieldMasks`, `layoutLimits`). Lint enforces the casing.
+- **A collaborator is named `<Subject><Role><Tier>`, the role the agent noun of a verb on the list below** (`SpreadsheetFlusherRaw`, `SpreadsheetTableValidatorRaw`). A job with no verb on the list gets a plain descriptive noun, never "Handler" or "Manager".
 - **Method names draw from one controlled verb vocabulary** — don't invent a new verb for a meaning already on this list:
   - `fetch` — actually hits the live Sheets API
   - `prep`/`gather` — queue state locally before a fetch (`prepFetchX` queues only; `gatherFetchX` queues _and_ fetches)

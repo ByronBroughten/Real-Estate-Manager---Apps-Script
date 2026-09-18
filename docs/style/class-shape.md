@@ -43,6 +43,15 @@ export class ConfigOrchestrator extends OperatorBase {
 
 Callers reach `orchestrator.sheetConfigOperator` on the instance. The method returns nothing.
 
+## Split a coordinator when its helpers share nothing
+
+A coordinator splits when its private helpers form groups that share no helpers with each other; each group becomes a collaborator. Method count doesn't decide it, because a long class whose helpers all call each other has no seam to cut along, and a short one with two unrelated jobs does. `SpreadsheetRaw` had 26 private helpers in three such groups: finishing a gathered fetch, checking that each sheet's Table is where the layout requires, and turning queued changes into a batch update and sending it. A reader looking for one job had to scroll through the other two (#67).
+
+- **Collaborators follow the coordinator rules above.** They extend the tier's Base class, are built with `new` from the coordinator's props, and are reached through lazy getters (`fetcher`, `flusher`). A collaborator that needs another reaches it the same way: `SpreadsheetFetcherRaw` builds its own `tableValidator`, because finishing a fetch is what decides which Tables to judge.
+- **The split is internal.** The coordinator keeps each public method as a one-line delegation, so no caller and no test changes, and the collaborators get no tests of their own: the coordinator's tests already cover them.
+- **Collaborators live in a subfolder named after their coordinator** (`02_SpreadsheetRaw/SpreadsheetRaw/`), so the tier root lists only the classes callers use. A base class serves a whole chain of classes, often across tiers, so it stays in `ClassBases/` and never goes in one coordinator's subfolder.
+- **A collaborator reaches back to the coordinator's shared surface through an `ss` getter**, as `SheetRaw` does, rather than copying `sheet(sheetGid)` into each collaborator. The import cycle this makes is safe because the coordinator is only used inside method bodies, never in an `extends` clause.
+
 ## An Operator extends a `*BaseNamed` and reaches its subject through a getter
 
 Whatever an Operator operates on — a sheet, a column — it extends that thing's `*BaseNamed` class and adds methods suited to that data structure. It does **not** extend the concrete class it works through, and it doesn't take one as a constructor argument: the subject is a lazy collaborator getter built from the props already on `this`, named for what it is (`ss`, `sheet`, `column`). `GenericSheetOperator extends SheetBaseNamed<SN>` with `ss`/`sheet`/`schema` getters is the reference shape — `sheet` is the primary (data) sheet, and the metadata view is `sheet.meta`; a column-scoped operator extends `ColumnBaseNamed<SN, CN>` and exposes a `column` getter the same way.

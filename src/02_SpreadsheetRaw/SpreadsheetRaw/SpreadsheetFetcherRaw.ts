@@ -1,0 +1,175 @@
+import type {
+  GridFetchRange,
+  SpreadsheetSnapshot,
+} from "../../00_base/RawSource/RawSource";
+import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
+import type { SheetStateRaw } from "../ClassTypes/StateRaw";
+import { SpreadsheetSchema } from "../Schema/SpreadsheetSchema";
+import type { SheetRaw } from "../SheetRaw";
+import { SpreadsheetRaw } from "../SpreadsheetRaw";
+import {
+  type MisplacedTable,
+  type SheetIdentity,
+  SpreadsheetTableValidatorRaw,
+} from "./SpreadsheetTableValidatorRaw";
+
+export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
+  get ss(): SpreadsheetRaw {
+    return new SpreadsheetRaw(this.spreadsheetRawProps);
+  }
+  get schema(): SpreadsheetSchema {
+    return new SpreadsheetSchema();
+  }
+  get tableValidator(): SpreadsheetTableValidatorRaw {
+    return new SpreadsheetTableValidatorRaw(this.spreadsheetRawProps);
+  }
+  ensureAllSheetPropertiesAreFetched() {
+    if (!this.spreadsheetStateRaw.allSheetPropertiesAreFetched) {
+      this._fetchAndIntegrateAllSheetProperties();
+    }
+  }
+  fetchAllSheetProperties() {
+    this._fetchAndIntegrateAllSheetProperties();
+    this.tableValidator.validateTablePlacement({
+      misplacedTables: [],
+      absentTables: [],
+    });
+    return { activeSheetGids: this.ss.activeSheetGids };
+  }
+  fetchAllGathered(includeProgrammaticFacts = false): void {
+    this._fetchGatheredConditionalFormatRules();
+    this._fetchGatheredProtectedRanges();
+    // An empty dataFilters list would fetch the whole spreadsheet's grid data.
+    if (this.fetcherGridRanges.length === 0) return;
+    const data = this._fetchByGridRanges(includeProgrammaticFacts);
+    this._addDataToState(data);
+    this._finalizeGatheredFetches();
+    this.spreadsheetStateRaw.fetchQueue.gridRanges = [];
+  }
+  // One sheet by GID without Table-placement finalize, so a moved Table can wait for overlay.
+  fetchSheetUsedGrid(sheetGid: number): void {
+    const data = this._fetchByGridRanges(false, [{ sheetId: sheetGid }]);
+    const sheets = data.sheets.filter((sheet) => sheet.sheetGid === sheetGid);
+    if (sheets.length === 0) {
+      throw new Error(`Sheet gid ${sheetGid} was missing from the Sheets get.`);
+    }
+    this._addDataToState({ sheets });
+  }
+  private _fetchAndIntegrateAllSheetProperties() {
+    const data = this.spreadsheetStateRaw.rawSource.fetchSheetProperties(
+      this.spreadsheetId,
+    );
+    this._addDataToState(data);
+    this.spreadsheetStateRaw.allSheetPropertiesAreFetched = true;
+  }
+  // Backfills cells for every range fetched this cycle so a Sheets
+  // response that omits empty cells (or whole blank rows) never leaves
+  // them looking merely "not yet fetched" to callers.
+  private _finalizeGatheredFetches(): void {
+    const misplacedTables: MisplacedTable[] = [];
+    const absentTables: SheetIdentity[] = [];
+    this.spreadsheetStateRaw.sheets.forEach((state, sheetGid) => {
+      // Above the early return, so a range that arrived incidentally is still judged.
+      const placement = this.tableValidator.tablePlacement(sheetGid);
+      if (placement.kind === "extra") {
+        return;
+      }
+      if (placement.kind === "misplaced") {
+        misplacedTables.push(placement);
+        return;
+      }
+      const sheet = this.ss.sheet(sheetGid);
+      const toFinalize = state.fetchQueue.toFinalize;
+      sheet.finalizeFetchedCells();
+      if (toFinalize.rows.size === 0 && toFinalize.columns.size === 0) {
+        return;
+      }
+      if (state.working.knownTable === null) {
+        absentTables.push({ sheetGid });
+        return;
+      }
+      if (toFinalize.rows.has(this.schema.colIdRowIndex)) {
+        state.working.hasFetchedColumnIds = true;
+      }
+      toFinalize.rows.forEach((rowIndex) => {
+        sheet.rowCommon(rowIndex).ensureFullActiveDataCells();
+      });
+      toFinalize.columns.forEach((colIndex) => {
+        sheet.column(colIndex).ensureFullActiveDataCells();
+      });
+      this._ensureFetchedActiveFacts(sheet, state);
+      toFinalize.rows.clear();
+      toFinalize.columns.clear();
+    });
+    if (absentTables.length > 0) {
+      // The probe is built from the constants under test, so a moved Table looks absent.
+      this.ensureAllSheetPropertiesAreFetched();
+    }
+    this.tableValidator.validateTablePlacement({
+      misplacedTables,
+      absentTables,
+    });
+  }
+  // After the backfills above, so a blank fact is sampled rather than built.
+  private _ensureFetchedActiveFacts(
+    sheet: SheetRaw,
+    state: SheetStateRaw,
+  ): void {
+    if (state.fetchQueue.toFinalize.rows.has(this.schema.topDataRowIdx)) {
+      sheet.meta.ensureTableColumnsActiveFacts();
+    }
+    state.fetchQueue.toFinalize.columns.forEach((colIndex) => {
+      if (!sheet.isTableColIndex(colIndex)) return;
+      sheet.meta.column(colIndex).ensureActiveFacts();
+    });
+  }
+  // isFormula/numberFormatType (from rowData.values.userEnteredValue/
+  // effectiveFormat) and column validation values/declared types (from
+  // tables.columnProperties) are read only by ColumnConfigOperator's
+  // programmatic value correction — every other caller only ever needs effectiveValue, so
+  // those fields are left out of the default fetch to avoid fetching them
+  // (and, for dataValidationRule, an unbounded list of validation values)
+  // wastefully on every ordinary read.
+  private _fetchByGridRanges(
+    includeProgrammaticFacts: boolean,
+    gridRanges: GridFetchRange[] = this.fetcherGridRanges,
+  ): SpreadsheetSnapshot {
+    return this.spreadsheetStateRaw.rawSource.fetchGrid(
+      this.spreadsheetId,
+      gridRanges,
+      {
+        includeProgrammaticFacts,
+      },
+    );
+  }
+  private _fetchGatheredConditionalFormatRules(): void {
+    const gatheringGids = Array.from(this.sheetsStateRaw.entries())
+      .filter(([, state]) => state.fetchQueue.gatherConditionalFormats)
+      .map(([sheetGid]) => sheetGid);
+    if (gatheringGids.length === 0) return;
+    this.spreadsheetStateRaw.rawSource
+      .fetchConditionalFormatRules(this.spreadsheetId)
+      .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
+      .forEach(({ sheetGid, rules }) =>
+        this.ss.sheet(sheetGid).integrateConditionalFormatRules(rules),
+      );
+  }
+  private _fetchGatheredProtectedRanges(): void {
+    const gatheringGids = Array.from(this.sheetsStateRaw.entries())
+      .filter(([, state]) => state.fetchQueue.gatherProtectedRanges)
+      .map(([sheetGid]) => sheetGid);
+    if (gatheringGids.length === 0) return;
+    this.spreadsheetStateRaw.rawSource
+      .fetchProtectedRanges(this.spreadsheetId)
+      .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
+      .forEach(({ sheetGid, protections }) =>
+        this.ss.sheet(sheetGid).integrateProtectedRanges(protections),
+      );
+  }
+  private _addDataToState(snapshot: SpreadsheetSnapshot) {
+    snapshot.sheets.forEach((sheetSnapshot) => {
+      const sheet = this.ss.sheet(sheetSnapshot.sheetGid);
+      sheet.integrateSheetState(sheetSnapshot);
+    });
+  }
+}
