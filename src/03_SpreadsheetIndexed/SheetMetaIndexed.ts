@@ -1,7 +1,7 @@
 import type { UniformRowName } from "../00_base/base";
 import { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
+import { SheetCommonIndexed } from "./ClassBases/SheetCommonIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
-import { SheetCommon } from "./SheetCommon";
 import { SheetIndexed } from "./SheetIndexed";
 import { UniformRowIndexed } from "./UniformRowIndexed";
 
@@ -10,7 +10,7 @@ export interface GatherDataPrerequisitesProps {
   includeProgrammaticFacts?: boolean;
 }
 
-export class SheetMetaIndexed extends SheetCommon {
+export class SheetMetaIndexed extends SheetCommonIndexed {
   get raw(): SheetMetaRaw {
     return new SheetMetaRaw(this.sheetIndexedProps);
   }

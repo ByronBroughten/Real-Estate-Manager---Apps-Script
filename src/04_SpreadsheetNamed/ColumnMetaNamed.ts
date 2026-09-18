@@ -12,7 +12,7 @@ import type {
 import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
 import { ColumnMetaIndexed } from "../03_SpreadsheetIndexed/ColumnMetaIndexed";
-import { ColumnCommonNamed } from "./ColumnCommonNamed";
+import { ColumnCommonNamed } from "./ClassBases/ColumnCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { SheetMetaNamed } from "./SheetMetaNamed";
 

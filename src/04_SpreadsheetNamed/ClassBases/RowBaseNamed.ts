@@ -1,6 +1,6 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import { SheetSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
-import { SheetNamedBase, type SheetNamedProps } from "./SheetNamedBase";
+import { SheetBaseNamed, type SheetNamedProps } from "./SheetBaseNamed";
 
 export interface RowNamedProps<
   TN extends SheetName,
@@ -8,7 +8,7 @@ export interface RowNamedProps<
   rowIndex: number;
 }
 
-export class RowNamedBase<TN extends SheetName> extends SheetNamedBase<TN> {
+export class RowBaseNamed<TN extends SheetName> extends SheetBaseNamed<TN> {
   readonly rowIndex: number;
   constructor({ rowIndex, ...props }: RowNamedProps<TN>) {
     super(props);

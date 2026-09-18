@@ -15,7 +15,7 @@ One line per rule. The reasoning and worked examples are one file away:
 ## Class shape
 
 - **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** `init` is how an outside caller builds one; `new` is how a class builds its own collaborators from props already on `this`; collaborators are lazy getters. Endpoints are exempt — a plain entry with module-private helpers, until a body turns unwieldy: 303 lines and eighteen free functions threading a collaborator through crossed that line and moved onto a business operator (#22).
-- **An Operator extends its subject's `*NamedBase` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
+- **An Operator extends its subject's `*BaseNamed` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
 - **What an Operator holds as props is its identity; a per-run value is an argument to the method that needs it** — `OccupancyLedgerOperator` holds the spreadsheet, and `build` takes the occupancy row index.
 - **A composition of collaborator calls that answers one domain question belongs on the collaborator**, under its own name. A parameter that its only caller already holds as its own state means the query belongs on the instance.
 - **Extract the shared piece when you can name the second caller**, not when it arrives.
@@ -94,4 +94,4 @@ One line per rule. The reasoning and worked examples are one file away:
   - PascalCase mirroring the exported class name (`SheetConfigOperator.ts`, `ConfigOrchestrator.ts`).
   - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions (`Str.ts` → `Str`, `Obj`, `Arr`, `Dat`, `Tim`, `Val`). A fat bundle's pieces split into a same-named subfolder (`utils/Obj/merge.ts`) and are re-assembled in the parent file.
   - camelCase for plain data/config or entry-point files (`columnConfigs.ts`, `businessEndpoints.ts`, `index.ts`).
-- **Tier subfolders**: `ClassBases/` for base classes + their prop interfaces; `Types/`/`ClassTypes/` for supporting state/shape types consumed by that tier's classes.
+- **Tier subfolders**: `ClassBases/` for base and Common classes + their prop interfaces; `Types/`/`ClassTypes/` for supporting state/shape types consumed by that tier's classes.

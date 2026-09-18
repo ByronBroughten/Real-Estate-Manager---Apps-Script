@@ -1,5 +1,5 @@
 import { Val } from "../utils/Val";
-import type { SheetRawProps } from "./ClassBases/SheetRawBase";
+import type { SheetRawProps } from "./ClassBases/SheetBaseRaw";
 import type {
   KnownTableRaw,
   SheetStateRaw,

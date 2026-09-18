@@ -12,12 +12,12 @@ import type {
 import type { Value } from "../01_generatedConfigs/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
+import { SheetCommonIndexed } from "./ClassBases/SheetCommonIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { RowIndexed } from "./RowIndexed";
-import { SheetCommon } from "./SheetCommon";
 import { SheetMetaIndexed } from "./SheetMetaIndexed";
 
-export class SheetIndexed extends SheetCommon {
+export class SheetIndexed extends SheetCommonIndexed {
   get meta(): SheetMetaIndexed {
     return new SheetMetaIndexed(this.sheetIndexedProps);
   }

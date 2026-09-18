@@ -22,9 +22,9 @@ import type { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { SheetIndexed } from "../03_SpreadsheetIndexed/SheetIndexed";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
+import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
-import { SheetCommon } from "./SheetCommon";
 import { SheetMetaNamed } from "./SheetMetaNamed";
 
 /**
@@ -36,7 +36,7 @@ import { SheetMetaNamed } from "./SheetMetaNamed";
  */
 export class SheetNamed<
   SN extends SheetName = SheetName,
-> extends SheetCommon<SN> {
+> extends SheetCommonNamed<SN> {
   get meta(): SheetMetaNamed<SN> {
     return new SheetMetaNamed(this.sheetNamedProps);
   }

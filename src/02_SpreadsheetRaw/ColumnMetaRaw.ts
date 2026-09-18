@@ -1,4 +1,3 @@
-import type { GridCellSnapshot } from "../00_base/RawSource";
 import type {
   CellValue,
   CellValueName,
@@ -7,16 +6,17 @@ import type {
   UniformRowValueName,
 } from "../00_base/base";
 import type { BaseValueName } from "../00_base/baseValueSchemas";
+import type { GridCellSnapshot } from "../00_base/RawSource";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
-import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
+import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
 import type { ActiveFactsRaw, ColumnStateRaw } from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 
 export class ColumnMetaRaw<
   VN extends CellValueName = CellValueName,
-> extends ColumnRawBase {
+> extends ColumnBaseRaw {
   get sheet(): SheetMetaRaw {
     return new SheetMetaRaw(this.sheetRawProps);
   }

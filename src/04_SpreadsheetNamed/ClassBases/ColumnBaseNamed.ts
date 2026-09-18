@@ -1,10 +1,10 @@
-import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
-import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
-import { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
+import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
+import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
+import { ColumnSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
 import {
-  SheetNamedBase,
+  SheetBaseNamed,
   type SheetNamedProps,
-} from "./ClassBases/SheetNamedBase";
+} from "./SheetBaseNamed";
 
 export interface ColumnNamedProps<
   TN extends SheetName,
@@ -13,10 +13,10 @@ export interface ColumnNamedProps<
   columnName: CN;
 }
 
-export class ColumnNamedBase<
+export class ColumnBaseNamed<
   TN extends SheetName,
   CN extends ColumnName<TN>,
-> extends SheetNamedBase<TN> {
+> extends SheetBaseNamed<TN> {
   readonly columnName: CN;
   constructor(props: ColumnNamedProps<TN, CN>) {
     super(props);

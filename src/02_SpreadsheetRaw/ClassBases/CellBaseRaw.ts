@@ -1,12 +1,12 @@
 import { Val } from "../../utils/Val";
 import type { CellStateRaw, RowStateRaw } from "../ClassTypes/StateRaw";
-import { ColumnRawBase, type ColumnRawProps } from "./ColumnRawBase";
+import { ColumnBaseRaw, type ColumnRawProps } from "./ColumnBaseRaw";
 
 export interface CellRawProps extends ColumnRawProps {
   rowIndex: number;
 }
 
-export class CellRawBase extends ColumnRawBase {
+export class CellBaseRaw extends ColumnBaseRaw {
   readonly rowIndex: number;
   constructor({ rowIndex, ...rest }: CellRawProps) {
     super(rest);

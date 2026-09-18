@@ -11,8 +11,8 @@ import type {
 import { getUniformRowIndex } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { UniformRowRaw } from "../02_SpreadsheetRaw/UniformRowRaw";
 import type { StrictOmit } from "../utils/Obj";
-import { RowCommonIndexed } from "./RowCommonIndexed";
-import type { RowIndexedProps } from "./RowIndexedBase";
+import type { RowIndexedProps } from "./ClassBases/RowBaseIndexed";
+import { RowCommonIndexed } from "./ClassBases/RowCommonIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 
 export interface UniformRowIndexedProps<

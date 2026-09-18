@@ -7,9 +7,9 @@ import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import type { ColumnSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed";
 import {
-  SpreadsheetNamedBase,
+  SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
-} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { baseEndpoints } from "./baseEndpoints";
 import { EndpointRun } from "./EndpointRun";
 import type { Endpoints } from "./Endpoints";
@@ -22,7 +22,7 @@ export type EventOrigin = {
 interface ApiProps extends SpreadsheetNamedProps {
   endpoints: Endpoints;
 }
-export class Api extends SpreadsheetNamedBase {
+export class Api extends SpreadsheetBaseNamed {
   readonly endpoints: Endpoints;
   constructor({ endpoints, ...rest }: ApiProps) {
     super(rest);
@@ -37,7 +37,7 @@ export class Api extends SpreadsheetNamedBase {
     }
     return new Api({
       endpoints,
-      ...SpreadsheetNamedBase.initSpreadsheetNamedProps(),
+      ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     });
   }
   get ssi(): SpreadsheetIndexed {

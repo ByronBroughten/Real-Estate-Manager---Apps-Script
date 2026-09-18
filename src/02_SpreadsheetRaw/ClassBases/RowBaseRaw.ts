@@ -1,12 +1,12 @@
 import type { CellValue } from "../../00_base/base";
 import type { RowStateRaw } from "../ClassTypes/StateRaw";
-import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
+import { SheetBaseRaw, type SheetRawProps } from "./SheetBaseRaw";
 
 export interface RowRawProps extends SheetRawProps {
   rowIndex: number;
 }
 
-export class RowRawBase extends SheetRawBase {
+export class RowBaseRaw extends SheetBaseRaw {
   readonly rowIndex;
   constructor({ rowIndex, ...rest }: RowRawProps) {
     super(rest);

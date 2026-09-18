@@ -20,7 +20,7 @@ import {
   type IsExactly,
 } from "../testSupport/typeAssertions";
 import type { DateSerial } from "../utils/Dat";
-import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetNamedBase";
+import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetBaseNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";

@@ -1,6 +1,6 @@
 import type { OpaqueRawRequest } from "../00_base/GoogleSheetsAPI";
 import type { GridFetchRange, SpreadsheetSnapshot } from "../00_base/RawSource";
-import { SpreadsheetRawBase } from "./ClassBases/SpreadsheetRawBase";
+import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetChanges,
   emptySheetWriteQueue,
@@ -47,9 +47,9 @@ interface SheetRowRef {
  * because they must sit below both consumer tiers.
  * docs/architecture/round-trips.md, schema-classes.md, class-chains.md
  */
-export class SpreadsheetRaw extends SpreadsheetRawBase {
+export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   static init(): SpreadsheetRaw {
-    return new SpreadsheetRaw(SpreadsheetRawBase.initSpreadsheetRawProps());
+    return new SpreadsheetRaw(SpreadsheetBaseRaw.initSpreadsheetRawProps());
   }
   gidIsActive(sheetGid: number): boolean {
     return this.activeSheetGids.includes(sheetGid);

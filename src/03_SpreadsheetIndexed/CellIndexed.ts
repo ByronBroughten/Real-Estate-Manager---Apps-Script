@@ -16,13 +16,13 @@ import {
   type VnToCvn,
 } from "../01_generatedConfigs/valueSchemas";
 import { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
-import { CellIndexedBase } from "./CellIndexedBase";
+import { CellBaseIndexed } from "./ClassBases/CellBaseIndexed";
 import type { CellChange } from "./ClassTypes/StateIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 
 export class CellIndexed<
   VN extends ValueName = ValueName,
-> extends CellIndexedBase<VN> {
+> extends CellBaseIndexed<VN> {
   get column(): ColumnIndexed<VN> {
     return new ColumnIndexed(this.cellIndexedProps);
   }

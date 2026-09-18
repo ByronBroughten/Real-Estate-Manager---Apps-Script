@@ -1,7 +1,7 @@
 import type { ColumnNameFiltered } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
-import { ColumnNamedBase } from "../04_SpreadsheetNamed/ColumnNamedBase";
+import { ColumnBaseNamed } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -16,7 +16,7 @@ export type CheckboxColumnName<SN extends SheetNameSimple> = ColumnNameFiltered<
 export class CheckboxColumnOperator<
   SN extends SheetNameSimple,
   CN extends CheckboxColumnName<SN>,
-> extends ColumnNamedBase<SN, CN> {
+> extends ColumnBaseNamed<SN, CN> {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }

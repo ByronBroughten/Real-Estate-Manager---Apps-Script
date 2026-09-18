@@ -1,7 +1,7 @@
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
-import { ColumnNamedBase } from "../04_SpreadsheetNamed/ColumnNamedBase";
+import { ColumnBaseNamed } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import type { SheetNameWithIdColumn } from "../04_SpreadsheetNamed/SheetNameGroups";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -15,7 +15,7 @@ export type RowIdByName =
 export class RowIdByNameOperator<
   SN extends SheetNameWithIdColumn,
   CN extends ColumnName<SN>,
-> extends ColumnNamedBase<SN, CN> {
+> extends ColumnBaseNamed<SN, CN> {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }

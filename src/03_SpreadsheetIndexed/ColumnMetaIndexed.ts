@@ -2,7 +2,7 @@ import type { UniformRowName, UniformRowValueName } from "../00_base/base";
 import type { ValueName, VnToCvn } from "../01_generatedConfigs/valueSchemas";
 import { ColumnMetaRaw } from "../02_SpreadsheetRaw/ColumnMetaRaw";
 import { CellIndexed } from "./CellIndexed";
-import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
+import { ColumnCommonIndexed } from "./ClassBases/ColumnCommonIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { SheetMetaIndexed } from "./SheetMetaIndexed";
 

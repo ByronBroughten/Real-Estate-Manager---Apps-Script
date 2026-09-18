@@ -8,11 +8,11 @@ import type {
   EditWarningDeclaration,
   ProtectedRange,
 } from "../00_base/ProtectedRange";
-import { UniformRowRawBase } from "./ClassBases/UniformRowRawBase";
+import { UniformRowBaseRaw } from "./ClassBases/UniformRowBaseRaw";
 
 export class UniformRowRaw<
   UN extends UniformRowName = UniformRowName,
-> extends UniformRowRawBase<UN> {
+> extends UniformRowBaseRaw<UN> {
   valueOrEmpty(colIndex: number): UniformRowValue<UN> | "" {
     return this.cell<UniformRowValueName<UN>>(colIndex).valueOrEmpty();
   }

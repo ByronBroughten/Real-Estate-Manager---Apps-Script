@@ -20,7 +20,7 @@ import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw"
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/StateIndexed";
 import { ColumnIndexed } from "../03_SpreadsheetIndexed/ColumnIndexed";
 import { CellNamed } from "./CellNamed";
-import { ColumnCommonNamed } from "./ColumnCommonNamed";
+import { ColumnCommonNamed } from "./ClassBases/ColumnCommonNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { SheetNamed } from "./SheetNamed";
 

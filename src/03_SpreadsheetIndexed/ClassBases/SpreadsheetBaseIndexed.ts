@@ -1,14 +1,14 @@
 import {
-  SpreadsheetRawBase,
+  SpreadsheetBaseRaw,
   type SpreadsheetRawProps,
-} from "../02_SpreadsheetRaw/ClassBases/SpreadsheetRawBase";
-import type { StateIndexed } from "./ClassTypes/StateIndexed";
+} from "../../02_SpreadsheetRaw/ClassBases/SpreadsheetBaseRaw";
+import type { StateIndexed } from "../ClassTypes/StateIndexed";
 
 export interface SpreadsheetIndexedProps extends SpreadsheetRawProps {
   spreadsheetStateIndexed: StateIndexed;
 }
 
-export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
+export class SpreadsheetBaseIndexed extends SpreadsheetBaseRaw {
   protected spreadsheetStateIndexed: StateIndexed;
   constructor({ spreadsheetStateIndexed, ...rest }: SpreadsheetIndexedProps) {
     super(rest);
@@ -22,7 +22,7 @@ export class SpreadsheetIndexedBase extends SpreadsheetRawBase {
   }
   static initSpreadsheetIndexedProps(): SpreadsheetIndexedProps {
     return {
-      ...SpreadsheetRawBase.initSpreadsheetRawProps(),
+      ...SpreadsheetBaseRaw.initSpreadsheetRawProps(),
       spreadsheetStateIndexed: {
         sheets: new Map(),
       },

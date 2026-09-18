@@ -8,9 +8,9 @@ import {
   type SheetStateRaw,
 } from "../ClassTypes/StateRaw";
 import {
-  SpreadsheetRawBase,
+  SpreadsheetBaseRaw,
   type SpreadsheetRawProps,
-} from "./SpreadsheetRawBase";
+} from "./SpreadsheetBaseRaw";
 
 export interface SheetRawProps extends SpreadsheetRawProps {
   sheetGid: number;
@@ -22,7 +22,7 @@ export class SheetRawNotFoundError extends Error {
   }
 }
 
-export class SheetRawBase extends SpreadsheetRawBase {
+export class SheetBaseRaw extends SpreadsheetBaseRaw {
   readonly sheetGid: number;
   constructor({ sheetGid, ...rest }: SheetRawProps) {
     super(rest);

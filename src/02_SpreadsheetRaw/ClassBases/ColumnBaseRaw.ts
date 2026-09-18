@@ -1,11 +1,11 @@
 import type { ColumnStateRaw } from "../ClassTypes/StateRaw";
-import { SheetRawBase, type SheetRawProps } from "./SheetRawBase";
+import { SheetBaseRaw, type SheetRawProps } from "./SheetBaseRaw";
 
 export interface ColumnRawProps extends SheetRawProps {
   colIndex: number;
 }
 
-export class ColumnRawBase extends SheetRawBase {
+export class ColumnBaseRaw extends SheetBaseRaw {
   readonly colIndex: number;
   constructor({ colIndex, ...rest }: ColumnRawProps) {
     super(rest);

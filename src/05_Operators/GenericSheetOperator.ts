@@ -1,7 +1,7 @@
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
-import { SheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
+import { SheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -15,7 +15,7 @@ export interface SheetOperatorProps<
 
 export class GenericSheetOperator<
   SN extends SheetNameSimple,
-> extends SheetNamedBase<SN> {
+> extends SheetBaseNamed<SN> {
   protected configSyncState: ConfigSyncState;
   constructor({ configSyncState, ...rest }: SheetOperatorProps<SN>) {
     super(rest);

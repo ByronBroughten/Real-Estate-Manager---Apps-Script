@@ -20,8 +20,8 @@ import type {
 } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import { CellIndexed } from "./CellIndexed";
+import { ColumnCommonIndexed } from "./ClassBases/ColumnCommonIndexed";
 import type { CellChange } from "./ClassTypes/StateIndexed";
-import { ColumnCommonIndexed } from "./ColumnCommonIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 

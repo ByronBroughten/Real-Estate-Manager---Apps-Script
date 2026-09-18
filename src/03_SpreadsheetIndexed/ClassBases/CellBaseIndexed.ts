@@ -1,6 +1,6 @@
-import type { ValueName } from "../01_generatedConfigs/valueSchemas";
-import type { ColumnIndexedProps } from "./ColumnIndexedBase";
-import { ColumnIndexedBase } from "./ColumnIndexedBase";
+import type { ValueName } from "../../01_generatedConfigs/valueSchemas";
+import type { ColumnIndexedProps } from "./ColumnBaseIndexed";
+import { ColumnBaseIndexed } from "./ColumnBaseIndexed";
 
 export interface CellIndexedProps<
   VN extends ValueName = ValueName,
@@ -8,9 +8,9 @@ export interface CellIndexedProps<
   rowIndex: number;
 }
 
-export class CellIndexedBase<
+export class CellBaseIndexed<
   VN extends ValueName = ValueName,
-> extends ColumnIndexedBase<VN> {
+> extends ColumnBaseIndexed<VN> {
   readonly rowIndex: number;
   constructor({ rowIndex, ...props }: CellIndexedProps<VN>) {
     super(props);

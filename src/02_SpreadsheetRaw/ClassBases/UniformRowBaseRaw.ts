@@ -5,8 +5,8 @@ import type {
 } from "../../00_base/base";
 import type { StrictOmit } from "../../utils/Obj";
 import { getUniformRowIndex } from "../SpreadsheetSchema";
+import type { RowRawProps } from "./RowBaseRaw";
 import { RowCommonRaw } from "./RowCommonRaw";
-import type { RowRawProps } from "./RowRawBase";
 
 export interface RowUniformProps<UN extends UniformRowName> extends StrictOmit<
   RowRawProps,
@@ -15,7 +15,7 @@ export interface RowUniformProps<UN extends UniformRowName> extends StrictOmit<
   uniformRowName: UN;
 }
 
-export class UniformRowRawBase<
+export class UniformRowBaseRaw<
   UN extends UniformRowName,
   VN extends UniformRowValueName<UN> = UniformRowValueName<UN>,
 > extends RowCommonRaw {

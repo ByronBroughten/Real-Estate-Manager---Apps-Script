@@ -1,8 +1,8 @@
 import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import {
-  SpreadsheetNamedBase,
+  SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
-} from "./SpreadsheetNamedBase";
+} from "./SpreadsheetBaseNamed";
 
 export interface SheetNamedProps<
   TN extends SheetName,
@@ -10,7 +10,7 @@ export interface SheetNamedProps<
   sheetName: TN;
 }
 
-export class SheetNamedBase<TN extends SheetName> extends SpreadsheetNamedBase {
+export class SheetBaseNamed<TN extends SheetName> extends SpreadsheetBaseNamed {
   readonly sheetName: TN;
   constructor({ sheetName, ...props }: SheetNamedProps<TN>) {
     super(props);

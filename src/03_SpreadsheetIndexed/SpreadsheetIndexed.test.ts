@@ -15,6 +15,7 @@ import {
   stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
+import { SpreadsheetBaseIndexed } from "./ClassBases/SpreadsheetBaseIndexed";
 import type { FetchTargetIndexed } from "./ClassTypes/StateIndexed";
 import { ColumnIndexed } from "./ColumnIndexed";
 import { ColumnMetaIndexed } from "./ColumnMetaIndexed";
@@ -22,7 +23,6 @@ import { RowIndexed } from "./RowIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 import { SheetMetaIndexed } from "./SheetMetaIndexed";
 import { SpreadsheetIndexed } from "./SpreadsheetIndexed";
-import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";
 
 const OCCUPANCY_GID = sheetConfigs.occupancy.sheetGid;
 const ID_COLUMN_ID = columnConfigs.occupancy.id.columnId;
@@ -32,7 +32,7 @@ describe("SpreadsheetIndexed navigation", () => {
   it("gives each accessor the class its return type names", () => {
     stubSheetsService();
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     const sheet = ssi.sheet(OCCUPANCY_GID);
     const sheetMeta = ssi.sheetMeta(OCCUPANCY_GID);
@@ -88,7 +88,7 @@ function stubOccupancyWithBlankRow() {
 
 function fetchedOccupancySheet(): SheetIndexed {
   const ssi = new SpreadsheetIndexed(
-    SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
   );
   const sheet = ssi.sheet(OCCUPANCY_GID);
   sheet.column(ID_COLUMN_ID).prepFetchFull();
@@ -139,7 +139,7 @@ describe("Indexed value accessors", () => {
       ],
     });
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     const sheet = ssi.sheet(OCCUPANCY_GID);
     sheet.column(ID_COLUMN_ID).prepFetchSpecific([BLANK_ROW_INDEX]);
@@ -224,7 +224,7 @@ function stubSheetConfigWithUnreadTopRow() {
 
 function fetchedSheetConfig(): SheetIndexed {
   const ssi = new SpreadsheetIndexed(
-    SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
   );
   const sheet = ssi.sheet(SHEET_CONFIG_GID);
   sheet.topRow.prepFetchFull();
@@ -234,7 +234,7 @@ function fetchedSheetConfig(): SheetIndexed {
 
 function unfetchedSheetConfig(): SheetIndexed {
   const ssi = new SpreadsheetIndexed(
-    SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+    SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
   );
   ssi.sheetMeta(SHEET_CONFIG_GID).ensureColumnIdsAreFetched();
   return ssi.sheet(SHEET_CONFIG_GID);
@@ -303,7 +303,7 @@ describe("RowIndexed.clearValues", () => {
     });
 
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     const sheet = ssi.sheet(SHEET_CONFIG_GID);
     sheet.topRow.prepFetchFull();
@@ -380,7 +380,7 @@ describe("SheetIndexed.appendRowDefault", () => {
     });
 
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     const sheet = ssi.sheet(SHEET_CONFIG_GID);
     sheet.topRow.prepFetchFull();
@@ -421,7 +421,7 @@ describe("Indexed formula writes", () => {
 
   it("refuses a formula write on a non-formula column", () => {
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     ssi.raw.fetchAllSheetProperties();
 
@@ -432,7 +432,7 @@ describe("Indexed formula writes", () => {
 
   it("queues a formula write on Formula test", () => {
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     ssi.raw.fetchAllSheetProperties();
 
@@ -498,7 +498,7 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
   it("resolves a full-row target to that row's table columns", () => {
     const { getByDataFilterCalls } = occupancyWithTwoColumns();
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     ssi.sheet(OCCUPANCY_GID).topRow.prepFetchFull();
     ssi.fetchAllPrepped();
@@ -518,7 +518,7 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
   it("resolves a full-data-column target to that column's data rows", () => {
     const { getByDataFilterCalls } = occupancyWithTwoColumns();
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     ssi.sheet(OCCUPANCY_GID).column(ID_COLUMN_ID).prepFetchFull();
     ssi.fetchAllPrepped();
@@ -538,7 +538,7 @@ describe("SpreadsheetIndexed.fetchAllPrepped / FetchTargetIndexed", () => {
   it("resolves a single-cell target to that cell's grid range", () => {
     const { getByDataFilterCalls } = occupancyWithTwoColumns();
     const ssi = new SpreadsheetIndexed(
-      SpreadsheetIndexedBase.initSpreadsheetIndexedProps(),
+      SpreadsheetBaseIndexed.initSpreadsheetIndexedProps(),
     );
     ssi
       .sheet(OCCUPANCY_GID)

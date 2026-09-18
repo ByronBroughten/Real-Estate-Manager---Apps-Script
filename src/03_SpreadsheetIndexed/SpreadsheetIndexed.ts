@@ -1,13 +1,13 @@
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
+import { SpreadsheetBaseIndexed } from "./ClassBases/SpreadsheetBaseIndexed";
 import { type ColumnIndexed } from "./ColumnIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 import {
   SheetMetaIndexed,
   type GatherDataPrerequisitesProps,
 } from "./SheetMetaIndexed";
-import { SpreadsheetIndexedBase } from "./SpreadsheetIndexedBase";
 
-export class SpreadsheetIndexed extends SpreadsheetIndexedBase {
+export class SpreadsheetIndexed extends SpreadsheetBaseIndexed {
   get raw(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }

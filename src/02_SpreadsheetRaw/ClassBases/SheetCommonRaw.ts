@@ -7,10 +7,10 @@ import type {
   SheetChangesToSave,
 } from "../ClassTypes/StateRaw";
 import type { SpreadsheetRaw } from "../SpreadsheetRaw";
-import { SheetRawBase } from "./SheetRawBase";
+import { SheetBaseRaw } from "./SheetBaseRaw";
 
-// Not on SheetRawBase: the row and column base classes hang off that.
-export abstract class SheetCommonRaw extends SheetRawBase {
+// Not on SheetBaseRaw: the row and column base classes hang off that.
+export abstract class SheetCommonRaw extends SheetBaseRaw {
   // Abstract: importing SpreadsheetRaw here would close an init-time cycle.
   abstract get ss(): SpreadsheetRaw;
   get activeTable(): ActiveTableRaw {

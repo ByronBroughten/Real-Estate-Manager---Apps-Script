@@ -2,8 +2,8 @@ import type { CellValue, NotEmpty } from "../00_base/base";
 import { type Value } from "../01_generatedConfigs/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { CellIndexed } from "./CellIndexed";
-import { RowCommonIndexed } from "./RowCommonIndexed";
-import type { RowIndexedProps } from "./RowIndexedBase";
+import type { RowIndexedProps } from "./ClassBases/RowBaseIndexed";
+import { RowCommonIndexed } from "./ClassBases/RowCommonIndexed";
 import { SheetIndexed } from "./SheetIndexed";
 
 export class RowIndexed extends RowCommonIndexed {

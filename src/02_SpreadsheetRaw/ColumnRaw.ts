@@ -10,7 +10,7 @@ import type {
 } from "../00_base/ProtectedRange";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
-import { ColumnRawBase } from "./ClassBases/ColumnRawBase";
+import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
 import type { FindReplaceTerms, RowCellChange } from "./ClassTypes/StateRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
@@ -18,7 +18,7 @@ import { SpreadsheetRaw } from "./SpreadsheetRaw";
 
 export class ColumnRaw<
   VN extends CellValueName = CellValueName,
-> extends ColumnRawBase {
+> extends ColumnBaseRaw {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }

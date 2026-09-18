@@ -1,5 +1,5 @@
-import { SheetNamedBase } from "../../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
-import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SheetBaseNamed";
+import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { RowNamed } from "../../04_SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -56,7 +56,7 @@ interface ExpenseReport {
   refusals: RowReports;
 }
 
-export class PropertyExpenseOperator extends SheetNamedBase<"propertyExpense"> {
+export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
   constructor(props: SpreadsheetNamedProps) {
     super({
       sheetName: "propertyExpense",

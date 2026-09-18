@@ -6,7 +6,7 @@ import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIndexed/Shee
 import { SpreadsheetIndexed } from "../03_SpreadsheetIndexed/SpreadsheetIndexed.js";
 import { Obj } from "../utils/Obj.js";
 import { Val } from "../utils/Val.js";
-import { SpreadsheetNamedBase } from "./ClassBases/SpreadsheetNamedBase.js";
+import { SpreadsheetBaseNamed } from "./ClassBases/SpreadsheetBaseNamed.js";
 import { SheetMetaNamed } from "./SheetMetaNamed.js";
 import { SheetNamed } from "./SheetNamed.js";
 import type { SheetNameByGroup } from "./SheetNameGroups.js";
@@ -20,7 +20,7 @@ import {
   type SheetColumnNamesStandard,
 } from "./Types/NamedState.js";
 
-export class SpreadsheetNamed extends SpreadsheetNamedBase {
+export class SpreadsheetNamed extends SpreadsheetBaseNamed {
   static init(): SpreadsheetNamed {
     return new SpreadsheetNamed(SpreadsheetNamed.initSpreadsheetNamedProps());
   }

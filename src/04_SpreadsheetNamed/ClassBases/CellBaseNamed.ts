@@ -1,6 +1,6 @@
-import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
 import type { ColumnName } from "../../01_generatedConfigs/columnConfigsTypes";
-import { ColumnNamedBase, type ColumnNamedProps } from "../ColumnNamedBase";
+import type { SheetName } from "../../01_generatedConfigs/sheetConfigsTypes";
+import { ColumnBaseNamed, type ColumnNamedProps } from "./ColumnBaseNamed";
 
 export interface CellNamedProps<
   TN extends SheetName,
@@ -9,10 +9,10 @@ export interface CellNamedProps<
   rowIndex: number;
 }
 
-export class CellNamedBase<
+export class CellBaseNamed<
   TN extends SheetName,
   CN extends ColumnName<TN>,
-> extends ColumnNamedBase<TN, CN> {
+> extends ColumnBaseNamed<TN, CN> {
   readonly rowIndex: number;
   constructor({ rowIndex, ...props }: CellNamedProps<TN, CN>) {
     super(props);

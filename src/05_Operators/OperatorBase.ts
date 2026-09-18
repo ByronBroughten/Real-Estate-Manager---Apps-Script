@@ -1,8 +1,8 @@
 import type { LiveSpreadsheetConfig } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import {
-  SpreadsheetNamedBase,
+  SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
-} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 
 export type UntypedHeadersBySheetTitle = Map<string, string[]>;
 
@@ -26,7 +26,7 @@ export interface OperatorProps extends SpreadsheetNamedProps {
   configSyncState: ConfigSyncState;
 }
 
-export class OperatorBase extends SpreadsheetNamedBase {
+export class OperatorBase extends SpreadsheetBaseNamed {
   protected configSyncState: ConfigSyncState;
   constructor({ configSyncState, ...rest }: OperatorProps) {
     super(rest);
@@ -54,7 +54,7 @@ export class OperatorBase extends SpreadsheetNamedBase {
   }
   static initOperatorProps(): OperatorProps {
     return {
-      ...SpreadsheetNamedBase.initSpreadsheetNamedProps(),
+      ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
       configSyncState: OperatorBase.initConfigSyncState(),
     };
   }

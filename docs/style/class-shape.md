@@ -24,7 +24,7 @@ export class ConfigOrchestrator extends OperatorBase {
   }
   static init(): ConfigOrchestrator {
     return new ConfigOrchestrator(
-      SpreadsheetNamedBase.initSpreadsheetNamedProps(),
+      SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     );
   }
   get sheetConfigOperator() {
@@ -43,9 +43,9 @@ export class ConfigOrchestrator extends OperatorBase {
 
 Callers reach `orchestrator.sheetConfigOperator` on the instance. The method returns nothing.
 
-## An Operator extends a `*NamedBase` and reaches its subject through a getter
+## An Operator extends a `*BaseNamed` and reaches its subject through a getter
 
-Whatever an Operator operates on — a sheet, a column — it extends that thing's `*NamedBase` class and adds methods suited to that data structure. It does **not** extend the concrete class it works through, and it doesn't take one as a constructor argument: the subject is a lazy collaborator getter built from the props already on `this`, named for what it is (`ss`, `sheet`, `column`). `GenericSheetOperator extends SheetNamedBase<SN>` with `ss`/`sheet`/`schema` getters is the reference shape — `sheet` is the primary (data) sheet, and the metadata view is `sheet.meta`; a column-scoped operator extends `ColumnNamedBase<SN, CN>` and exposes a `column` getter the same way.
+Whatever an Operator operates on — a sheet, a column — it extends that thing's `*BaseNamed` class and adds methods suited to that data structure. It does **not** extend the concrete class it works through, and it doesn't take one as a constructor argument: the subject is a lazy collaborator getter built from the props already on `this`, named for what it is (`ss`, `sheet`, `column`). `GenericSheetOperator extends SheetBaseNamed<SN>` with `ss`/`sheet`/`schema` getters is the reference shape — `sheet` is the primary (data) sheet, and the metadata view is `sheet.meta`; a column-scoped operator extends `ColumnBaseNamed<SN, CN>` and exposes a `column` getter the same way.
 
 Inheriting the concrete class instead would put its whole surface on the operator, which is the opposite of what the operator is for — it exists to offer a *narrower*, more specific set of methods than the general class does.
 
@@ -67,7 +67,7 @@ private _isActiveColumnId(sheetGid: number, columnId: string): boolean {
 
 Destructure a collaborator's getter directly when only one property is needed: `const { activeColumnIds } = this.ss.raw.sheetMeta(sheetGid);`.
 
-A container method that takes an index/id as a parameter, but is only ever called by code that already has that exact value as its own instance state, is a sign the query belongs on the instance instead — drop the parameter along with the method. `SheetRawBase.columnValidationValues(colIndex: number)` was deleted; its one caller always already had its own `colIndex`, so the query moved to `ColumnMetaRaw` as `get valueValidationStrings()`, reading `this.sheet.activeTable.columnValidationValues.get(this.colIndex)` (`ColumnMetaRaw.ts`). The parameter disappearing is what turns it into a getter (see the getter rule in [naming.md](./naming.md)).
+A container method that takes an index/id as a parameter, but is only ever called by code that already has that exact value as its own instance state, is a sign the query belongs on the instance instead — drop the parameter along with the method. `SheetBaseRaw.columnValidationValues(colIndex: number)` was deleted; its one caller always already had its own `colIndex`, so the query moved to `ColumnMetaRaw` as `get valueValidationStrings()`, reading `this.sheet.activeTable.columnValidationValues.get(this.colIndex)` (`ColumnMetaRaw.ts`). The parameter disappearing is what turns it into a getter (see the getter rule in [naming.md](./naming.md)).
 
 ## Extract the shared piece when the second caller is foreseen, not when it arrives
 
@@ -75,7 +75,7 @@ Keeping a helper private until a second call site actually exists is the wrong d
 
 ## Model state at the granularity the concept actually has
 
-The principle and its other instances live in DESIGN.md; what follows is where it lands on member placement. A member that **samples the top data row to derive a column-wide fact** belongs on the Meta column — that is membership criterion 2 of the Meta/primary axis (README.md, "Naming vocabulary"), and `isFormula`/`numberFormatType` are the case that produced it. They match `ColumnSchema.isFormula`, the schema-based trait, and are read off the column's top data-row cell only because that is how the API delivers them; so they live as `activeIsFormula`/`activeNumberFormatType` on `ColumnMetaRaw`, populated once per column by `SheetRaw._integrateSheetData`, not as per-row/per-cell state on `CellRaw`/`RowRawBase`.
+The principle and its other instances live in DESIGN.md; what follows is where it lands on member placement. A member that **samples the top data row to derive a column-wide fact** belongs on the Meta column — that is membership criterion 2 of the Meta/primary axis (README.md, "Naming vocabulary"), and `isFormula`/`numberFormatType` are the case that produced it. They match `ColumnSchema.isFormula`, the schema-based trait, and are read off the column's top data-row cell only because that is how the API delivers them; so they live as `activeIsFormula`/`activeNumberFormatType` on `ColumnMetaRaw`, populated once per column by `SheetRaw._integrateSheetData`, not as per-row/per-cell state on `CellRaw`/`RowBaseRaw`.
 
 The criterion bites on the derived fact, not on row or cell addressing: `topCell` and `topRow` stay primary, or a Meta class would end up handing out data rows.
 

@@ -6,7 +6,7 @@ import {
 import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import { ssConfigGet } from "../01_generatedConfigs/spreadsheetConfigTypes";
-import { SpreadsheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -64,7 +64,7 @@ interface FloorDeclaration {
  * base endpoints' feedback column names; the chore is the caller today.
  * docs/generated-data.md
  */
-export class ConfigSheetFloor extends SpreadsheetNamedBase {
+export class ConfigSheetFloor extends SpreadsheetBaseNamed {
   static init(): ConfigSheetFloor {
     return new ConfigSheetFloor(ConfigSheetFloor.initSpreadsheetNamedProps());
   }

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
-import { SpreadsheetNamedBase } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { EndpointRun } from "../06_API/EndpointRun";
 import {
   stubLogger,
@@ -353,7 +353,7 @@ function stubLedgerSpreadsheet({
 
 function runBuildLedger(): void {
   const run = new EndpointRun({
-    ...SpreadsheetNamedBase.initSpreadsheetNamedProps(),
+    ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     sheetName: "occupancy",
     entryColumnName: "buildLedgerTimeLastRan",
     endpoint: buildLedger,

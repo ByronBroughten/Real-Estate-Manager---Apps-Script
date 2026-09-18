@@ -11,11 +11,11 @@ import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { RowIndexed } from "../03_SpreadsheetIndexed/RowIndexed";
 import { Obj } from "../utils/Obj";
 import { CellNamed } from "./CellNamed";
-import { RowNamedBase } from "./ClassBases/RowNamedBase";
+import { RowBaseNamed } from "./ClassBases/RowBaseNamed";
 
 import { SheetNamed } from "./SheetNamed";
 
-export class RowNamed<SN extends SheetName> extends RowNamedBase<SN> {
+export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {
   get sheet(): SheetNamed<SN> {
     return new SheetNamed(this.sheetNamedProps);
   }

@@ -24,13 +24,13 @@ import type {
 } from "../01_generatedConfigs/valueSchemas";
 import type { CellRaw } from "../02_SpreadsheetRaw/CellRaw";
 import type { CellIndexed } from "../03_SpreadsheetIndexed/CellIndexed";
-import { CellNamedBase } from "./ClassBases/CellNamedBase";
+import { CellBaseNamed } from "./ClassBases/CellBaseNamed";
 import { ColumnNamed } from "./ColumnNamed";
 
 export class CellNamed<
   SN extends SheetName,
   CN extends ColumnName<SN> = ColumnName<SN>,
-> extends CellNamedBase<SN, CN> {
+> extends CellBaseNamed<SN, CN> {
   get column(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
   }

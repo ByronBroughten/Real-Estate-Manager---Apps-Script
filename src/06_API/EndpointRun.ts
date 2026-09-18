@@ -3,9 +3,9 @@ import type { ColumnName } from "../01_generatedConfigs/columnConfigsTypes";
 import type { SheetNameSimple } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { CellChange } from "../03_SpreadsheetIndexed/ClassTypes/StateIndexed";
 import {
-  SheetNamedBase,
+  SheetBaseNamed,
   type SheetNamedProps,
-} from "../04_SpreadsheetNamed/ClassBases/SheetNamedBase";
+} from "../04_SpreadsheetNamed/ClassBases/SheetBaseNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import {
@@ -72,7 +72,7 @@ export interface EndpointRunProps<
  */
 export class EndpointRun<
   SN extends SheetNameSimple = SheetNameSimple,
-> extends SheetNamedBase<SN> {
+> extends SheetBaseNamed<SN> {
   readonly entryColumnName: ColumnName<SN>;
   readonly endpoint: EndpointDispatched<SN>;
   constructor({ entryColumnName, endpoint, ...props }: EndpointRunProps<SN>) {

@@ -3,9 +3,9 @@ import {
   overlaySpreadsheetConfig,
 } from "../01_generatedConfigs/spreadsheetConfigTypes";
 import {
-  SpreadsheetNamedBase,
+  SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
-} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetNamedBase";
+} from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { OperatorBase } from "./OperatorBase";
@@ -37,7 +37,7 @@ export class ConfigOrchestrator extends OperatorBase {
   }
   static init(): ConfigOrchestrator {
     return new ConfigOrchestrator(
-      SpreadsheetNamedBase.initSpreadsheetNamedProps(),
+      SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     );
   }
   get ss(): SpreadsheetNamed {

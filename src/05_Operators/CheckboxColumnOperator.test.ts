@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_generatedConfigs/columnConfigs";
 import type { ColumnValueName } from "../01_generatedConfigs/columnConfigsTypes";
 import { sheetConfigs } from "../01_generatedConfigs/sheetConfigs";
-import type { ColumnNamedProps } from "../04_SpreadsheetNamed/ColumnNamedBase";
+import type { ColumnNamedProps } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import {
   stubLogger,

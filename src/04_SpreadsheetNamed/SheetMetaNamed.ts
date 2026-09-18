@@ -4,14 +4,14 @@ import type { SheetName } from "../01_generatedConfigs/sheetConfigsTypes";
 import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
 import { SheetMetaIndexed } from "../03_SpreadsheetIndexed/SheetMetaIndexed";
 import type { UniformRowIndexed } from "../03_SpreadsheetIndexed/UniformRowIndexed";
+import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
-import { SheetCommon } from "./SheetCommon";
 import { SheetNamed } from "./SheetNamed";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 export class SheetMetaNamed<
   SN extends SheetName = SheetName,
-> extends SheetCommon<SN> {
+> extends SheetCommonNamed<SN> {
   get spreadsheet(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }

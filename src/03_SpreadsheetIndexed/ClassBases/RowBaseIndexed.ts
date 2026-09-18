@@ -1,11 +1,11 @@
-import { SheetSchema } from "../02_SpreadsheetRaw/SpreadsheetSchema";
-import { SheetIndexedBase, type SheetIndexedProps } from "./SheetIndexedBase";
+import { SheetSchema } from "../../02_SpreadsheetRaw/SpreadsheetSchema";
+import { SheetBaseIndexed, type SheetIndexedProps } from "./SheetBaseIndexed";
 
 export interface RowIndexedProps extends SheetIndexedProps {
   rowIndex: number;
 }
 
-export class RowIndexedBase extends SheetIndexedBase {
+export class RowBaseIndexed extends SheetBaseIndexed {
   readonly rowIndex: number;
   constructor({ rowIndex, ...rest }: RowIndexedProps) {
     super(rest);

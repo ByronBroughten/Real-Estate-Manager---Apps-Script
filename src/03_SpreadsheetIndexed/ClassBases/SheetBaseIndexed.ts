@@ -1,18 +1,18 @@
-import { Val } from "../utils/Val";
+import { Val } from "../../utils/Val";
 import {
   emptySheetFetchQueueIndexed,
   type FetchTargetIndexed,
   type SheetStateIndexed,
-} from "./ClassTypes/StateIndexed";
+} from "../ClassTypes/StateIndexed";
 import {
-  SpreadsheetIndexedBase,
+  SpreadsheetBaseIndexed,
   type SpreadsheetIndexedProps,
-} from "./SpreadsheetIndexedBase";
+} from "./SpreadsheetBaseIndexed";
 
 export interface SheetIndexedProps extends SpreadsheetIndexedProps {
   sheetGid: number;
 }
-export class SheetIndexedBase extends SpreadsheetIndexedBase {
+export class SheetBaseIndexed extends SpreadsheetBaseIndexed {
   readonly sheetGid: number;
   constructor(props: SheetIndexedProps) {
     super(props);

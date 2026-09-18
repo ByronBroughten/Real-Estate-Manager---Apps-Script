@@ -13,7 +13,7 @@ export interface SpreadsheetRawProps {
   spreadsheetStateRaw: StateRaw;
 }
 
-export class SpreadsheetRawBase {
+export class SpreadsheetBaseRaw {
   protected spreadsheetStateRaw: StateRaw;
   constructor(props: SpreadsheetRawProps) {
     this.spreadsheetStateRaw = props.spreadsheetStateRaw;

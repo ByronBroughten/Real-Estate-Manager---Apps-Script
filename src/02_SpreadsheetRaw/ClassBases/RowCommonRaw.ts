@@ -8,9 +8,9 @@ import {
   type RowChangeUpdateProps,
 } from "../ClassTypes/StateRaw";
 import { SheetRaw } from "../SheetRaw";
-import { RowRawBase } from "./RowRawBase";
+import { RowBaseRaw } from "./RowBaseRaw";
 
-export abstract class RowCommonRaw extends RowRawBase {
+export abstract class RowCommonRaw extends RowBaseRaw {
   get sheet(): SheetRaw {
     return new SheetRaw(this.sheetRawProps);
   }
