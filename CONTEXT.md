@@ -51,8 +51,12 @@ Any protection the app finds on a sheet: an edit warning, an edit lock, or one i
 _Avoid_: protected range (that is Google's name for the API object)
 
 **Edit warning**:
-A prompt Sheets shows anyone, the owner included, before they change a cell the app depends on; the edit still goes through if they confirm.
+A prompt Sheets shows anyone, the owner included, before they change a cell the app depends on or the shape of a tab it depends on (renaming it, deleting it, inserting a column); the change still goes through if they confirm.
 _Avoid_: warning (that is a run state), protection
+
+**Editable range**:
+A part of a warned floor tab left free of its edit warning, where a person's edit sticks.
+_Avoid_: hole, unprotected range (that is Google's API field), exception
 
 **Edit lock**:
 A cell only the editors it names can change; a lock that names none stops nobody.
