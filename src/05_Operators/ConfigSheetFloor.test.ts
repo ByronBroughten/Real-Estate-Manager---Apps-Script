@@ -1,9 +1,14 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { EditProtection } from "../00_Source/RawSource/EditProtection";
 import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import {
+  clearSpreadsheetConfigOverlay,
+  overlaySpreadsheetConfig,
+  ssConfigGet,
+} from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   stubLogger,
   stubPropertiesService,
@@ -11,6 +16,7 @@ import {
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { ConfigSheetFloor } from "./ConfigSheetFloor";
 
@@ -43,6 +49,10 @@ const sscColumns = [
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
+});
+
+afterEach(() => {
+  clearSpreadsheetConfigOverlay();
 });
 
 function sscField<K extends (typeof sscColumns)[number]>(columnName: K) {
@@ -114,6 +124,26 @@ function matchingFloorDeclaredTypes(
   return declaredTypesByHeader(sheetName, headers);
 }
 
+function sheetAbsoluteTypes(
+  types: Record<number, string> | undefined,
+  startTableColIndex: number,
+): Record<number, string> | undefined {
+  if (types === undefined || startTableColIndex === 0) return types;
+  return Object.fromEntries(
+    Object.entries(types).map(([colIndex, columnType]) => [
+      Number(colIndex) + startTableColIndex,
+      columnType,
+    ]),
+  );
+}
+
+function padLeadingColumns(
+  row: readonly FakeCell[],
+  startTableColIndex: number,
+): FakeCell[] {
+  return [...Array.from({ length: startTableColIndex }, () => null), ...row];
+}
+
 function columnTypeUpdates(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {
@@ -145,10 +175,14 @@ function floorFixture(
       Record<(typeof sscColumns)[number], string>
     >;
     columnTypesAreUnset?: boolean;
+    startTableColIndex?: number;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
   } = {},
 ) {
+  const startTableColIndex = options.startTableColIndex ?? 0;
+  const pad = (row: readonly FakeCell[]) =>
+    padLeadingColumns(row, startTableColIndex);
   const sscOrder = options.spreadsheetConfigColumnOrder ?? sscColumns;
   const sscHeaders = sscOrder.map(
     (columnName) =>
@@ -188,18 +222,18 @@ function floorFixture(
         sheetId: spreadsheetConfigGid,
         title: "Spreadsheet Config",
         rows: buildGridRows({
-          0: sscOrder.map((columnName) => sscField(columnName).columnId),
-          1: groupHeadings,
-          3: sscHeaders,
-          4: dataRow,
+          0: pad(sscOrder.map((columnName) => sscField(columnName).columnId)),
+          1: pad(groupHeadings),
+          3: pad(sscHeaders),
+          4: pad(dataRow),
         }),
         table: {
+          startColumnIndex: startTableColIndex,
           endRowIndex: 5,
-          endColumnIndex: sscOrder.length,
-          columnDeclaredTypes: spreadsheetConfigDeclaredTypes(
-            sscOrder,
-            sscHeaders,
-            options,
+          endColumnIndex: startTableColIndex + sscOrder.length,
+          columnDeclaredTypes: sheetAbsoluteTypes(
+            spreadsheetConfigDeclaredTypes(sscOrder, sscHeaders, options),
+            startTableColIndex,
           ),
         },
         protectedRanges: options.spreadsheetConfigProtections,
@@ -208,22 +242,34 @@ function floorFixture(
         sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({
-          0: [
+          0: pad([
             sc.sheetGid.columnId,
             sc.sheetTitle.columnId,
             sc.letApiAccess.columnId,
-          ],
-          3: [sc.sheetGid.header, sc.sheetTitle.header, sc.letApiAccess.header],
-          4: [sheetConfigGid, "Sheet Config", true],
-          5: [columnConfigGid, "Column Config", true],
+          ]),
+          3: pad([
+            sc.sheetGid.header,
+            sc.sheetTitle.header,
+            sc.letApiAccess.header,
+          ]),
+          4: pad([sheetConfigGid, "Sheet Config", true]),
+          5: pad([columnConfigGid, "Column Config", true]),
         }),
         table: {
+          startColumnIndex: startTableColIndex,
           endRowIndex: 6,
-          endColumnIndex: 3,
-          columnDeclaredTypes: matchingFloorDeclaredTypes(
-            "sheetConfig",
-            [sc.sheetGid.header, sc.sheetTitle.header, sc.letApiAccess.header],
-            options.columnTypesAreUnset,
+          endColumnIndex: startTableColIndex + 3,
+          columnDeclaredTypes: sheetAbsoluteTypes(
+            matchingFloorDeclaredTypes(
+              "sheetConfig",
+              [
+                sc.sheetGid.header,
+                sc.sheetTitle.header,
+                sc.letApiAccess.header,
+              ],
+              options.columnTypesAreUnset,
+            ),
+            startTableColIndex,
           ),
         },
         protectedRanges: options.sheetConfigProtections,
@@ -232,38 +278,42 @@ function floorFixture(
         sheetId: columnConfigGid,
         title: "Column Config",
         rows: buildGridRows({
-          0: [
+          0: pad([
             cc.sheetGid.columnId,
             cc.columnId.columnId,
             cc.sheetTitle.columnId,
             cc.header.columnId,
             cc.emptyValueAllowed.columnId,
             cc.customDefaultValue.columnId,
-          ],
-          3: [
+          ]),
+          3: pad([
             cc.sheetGid.header,
             cc.columnId.header,
             cc.sheetTitle.header,
             cc.header.header,
             cc.emptyValueAllowed.header,
             cc.customDefaultValue.header,
-          ],
-          4: [],
+          ]),
+          4: pad([]),
         }),
         table: {
+          startColumnIndex: startTableColIndex,
           endRowIndex: 5,
-          endColumnIndex: 6,
-          columnDeclaredTypes: matchingFloorDeclaredTypes(
-            "columnConfig",
-            [
-              cc.sheetGid.header,
-              cc.columnId.header,
-              cc.sheetTitle.header,
-              cc.header.header,
-              cc.emptyValueAllowed.header,
-              cc.customDefaultValue.header,
-            ],
-            options.columnTypesAreUnset,
+          endColumnIndex: startTableColIndex + 6,
+          columnDeclaredTypes: sheetAbsoluteTypes(
+            matchingFloorDeclaredTypes(
+              "columnConfig",
+              [
+                cc.sheetGid.header,
+                cc.columnId.header,
+                cc.sheetTitle.header,
+                cc.header.header,
+                cc.emptyValueAllowed.header,
+                cc.customDefaultValue.header,
+              ],
+              options.columnTypesAreUnset,
+            ),
+            startTableColIndex,
           ),
         },
       },
@@ -510,15 +560,18 @@ describe("ConfigSheetFloor", () => {
 
     expect(report).toContain("Set column types:");
     expect(report).toContain(
-      `Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) TEXT`,
+      `Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) → TEXT`,
     );
-    expect(columnTypeUpdates(batchUpdateCalls)).toEqual([
-      {
-        tableId: `fake-table-${spreadsheetConfigGid}`,
-        columnIndex: 0,
-        columnType: "TEXT",
-      },
-    ]);
+    expect(columnTypeUpdates(batchUpdateCalls)).toContainEqual({
+      tableId: `fake-table-${spreadsheetConfigGid}`,
+      columnIndex: 0,
+      columnType: "TEXT",
+    });
+    expect(
+      (batchUpdateCalls[0]?.requests ?? []).filter(
+        (request) => request.updateTable !== undefined,
+      ),
+    ).toHaveLength(1);
   });
 
   it("leaves matching floor column types unchanged", () => {
@@ -539,5 +592,34 @@ describe("ConfigSheetFloor", () => {
         columnIndex: 5,
       }),
     );
+  });
+
+  it("does not queue column-type updates on a second run after setting them", () => {
+    const { batchUpdateCalls } = floorFixture({ columnTypesAreUnset: true });
+    applyFloor();
+
+    expect(columnTypeUpdates(batchUpdateCalls).length).toBeGreaterThan(0);
+    applyFloor();
+    expect(batchUpdateCalls).toHaveLength(1);
+  });
+
+  it("sets a drifted floor column type when the Table starts after column A", () => {
+    overlaySpreadsheetConfig({
+      ...spreadsheetConfig,
+      startTableColIndexBase0: 1,
+    });
+    const { batchUpdateCalls } = floorFixture({
+      startTableColIndex: 1,
+      spreadsheetConfigColumnTypes: { tableMenuSpace: "DOUBLE" },
+    });
+    applyFloor();
+
+    expect(columnTypeUpdates(batchUpdateCalls)).toContainEqual({
+      tableId: `fake-table-${spreadsheetConfigGid}`,
+      columnIndex: 0,
+      columnType: "TEXT",
+    });
+    applyFloor();
+    expect(batchUpdateCalls).toHaveLength(1);
   });
 });

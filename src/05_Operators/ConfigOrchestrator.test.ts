@@ -1,9 +1,12 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import {
+  clearSpreadsheetConfigOverlay,
+  ssConfigGet,
+} from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   stubLogger,
   stubPropertiesService,
@@ -21,6 +24,8 @@ const columnConfigGid = 2034522667;
 const draftGid = 777000111;
 const draftTitle = "Add Occ Payment Intention";
 const headerOnlyTableEndRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
+const tableHeaderRowIndex = ssConfigGet("tableHeaderRowIndexBase0");
+const startTableColIndex = ssConfigGet("startTableColIndexBase0");
 const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
   "sheetGid",
@@ -78,6 +83,10 @@ beforeEach(() => {
   stubLogger();
 });
 
+afterEach(() => {
+  clearSpreadsheetConfigOverlay();
+});
+
 function spreadsheetConfigSheet(
   idDelimiter: string,
   options: {
@@ -114,6 +123,8 @@ function spreadsheetConfigSheet(
       ...options.extraRows,
     }),
     table: {
+      startRowIndex: tableHeaderRowIndex,
+      startColumnIndex: startTableColIndex,
       endRowIndex: options.tableEndRowIndex ?? 5,
       endColumnIndex: sscColumns.length,
       columnDeclaredTypes: declaredTypesByHeader("spreadsheetConfig", headers),
@@ -196,6 +207,8 @@ function seedFixture(
           ...options.extraSheetConfigDataRows,
         }),
         table: {
+          startRowIndex: tableHeaderRowIndex,
+          startColumnIndex: startTableColIndex,
           endRowIndex: options.sheetConfigTableEndRowIndex ?? 5,
           columnDeclaredTypes: declaredTypesByHeader("sheetConfig", [
             sc.sheetGid.header,
@@ -222,6 +235,8 @@ function seedFixture(
           ],
         }),
         table: {
+          startRowIndex: tableHeaderRowIndex,
+          startColumnIndex: startTableColIndex,
           endRowIndex: 5,
           columnDeclaredTypes: {
             0: "DOUBLE",
@@ -438,9 +453,18 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
               sc.sheetTitle.columnId,
               sc.letApiAccess.columnId,
             ],
+            3: [
+              sc.sheetGid.header,
+              sc.sheetTitle.header,
+              sc.letApiAccess.header,
+            ],
             4: [columnConfigGid, "Column Config", true],
           }),
-          table: { endRowIndex: 5 },
+          table: {
+            startRowIndex: tableHeaderRowIndex,
+            startColumnIndex: startTableColIndex,
+            endRowIndex: 5,
+          },
         },
         {
           sheetId: columnConfigGid,
@@ -463,7 +487,11 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
             ],
             5: [columnConfigGid, "c:ccf:stale-gone", "Column Config", "Gone"],
           }),
-          table: { endRowIndex: 6 },
+          table: {
+            startRowIndex: tableHeaderRowIndex,
+            startColumnIndex: startTableColIndex,
+            endRowIndex: 6,
+          },
         },
       ],
     });

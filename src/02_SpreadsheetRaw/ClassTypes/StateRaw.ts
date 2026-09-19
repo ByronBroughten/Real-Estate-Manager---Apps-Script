@@ -19,6 +19,7 @@ import type {
   OpaqueRawWriteOperation,
   RawSource,
   SortOperation,
+  TableColumnSnapshot,
   UpdateCellOperation,
   UpdateTableColumnTypeOperation,
 } from "../../00_Source/RawSource/RawSource";
@@ -136,6 +137,7 @@ export interface KnownTableRaw {
   endRowIndex: number; // lastRowIndex + 1
   startColumnIndex: number;
   endColumnIndex: number; // lastColumnIndex + 1
+  columnProperties: TableColumnSnapshot[];
   rowIndexesAreStale: boolean;
   firstStaleColIndex: number | null;
 }

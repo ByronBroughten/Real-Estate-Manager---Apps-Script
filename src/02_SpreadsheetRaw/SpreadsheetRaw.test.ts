@@ -788,6 +788,32 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     }).toThrow(staleRowIndexes);
   });
 
+  it("keys declared column types by sheet column when the Table starts after column A", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          table: {
+            startColumnIndex: 1,
+            endRowIndex: 11,
+            endColumnIndex: 4,
+            columnDeclaredTypes: { 1: "TEXT" },
+            columnValidationValues: { 1: ["=valueConfig[Notes]"] },
+            columnValidationConditionTypes: { 1: "BOOLEAN" },
+          },
+        },
+      ],
+    });
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+
+    const columnMeta = raw.sheet(111).meta.column(1);
+    expect(columnMeta.activeDeclaredColumnType).toBe("TEXT");
+    expect(columnMeta.valueValidationStrings).toEqual(["=valueConfig[Notes]"]);
+    expect(columnMeta.validationConditionType).toBe("BOOLEAN");
+  });
+
   it("throws on per-cell value, formula, and colour writes after a flushed row delete", () => {
     const raw = sheetAfterFlushedDataRowDelete(true);
     const cell = raw.sheet(111).row(4).cell(0);

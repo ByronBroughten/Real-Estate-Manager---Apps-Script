@@ -117,7 +117,9 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
         return;
       }
       column.meta.updateDeclaredColumnType(seedColumn.columnType);
-      setTypes.push(`${floorColumnIdentity(column)} ${seedColumn.columnType}`);
+      setTypes.push(
+        `${floorColumnIdentity(column)} → ${seedColumn.columnType}`,
+      );
     });
   }
   private _spreadsheetConfigDeclarations(report: string[]): FloorDeclaration[] {

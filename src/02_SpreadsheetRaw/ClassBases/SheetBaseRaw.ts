@@ -62,6 +62,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     this.sheetState.working.knownTable = {
       tableId: table.tableId,
       ...range,
+      columnProperties: table.columnProperties,
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
       firstStaleColIndex: previous?.firstStaleColIndex ?? null,
     };
@@ -79,9 +80,9 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     startColumnIndex: number,
   ): void {
     this._clearColumnPropertyFields();
-    table.columnProperties.forEach((colProps, offset) => {
+    table.columnProperties.forEach((colProps) => {
       // The API omits columnIndex when it's zero, and states it table-relative.
-      const colIndex = colProps.columnIndex ?? startColumnIndex + offset;
+      const colIndex = startColumnIndex + (colProps.columnIndex ?? 0);
       const columnState = this._ensureColumnState(colIndex);
       if (colProps.dataValidationValues.length > 0) {
         columnState.validationValues = colProps.dataValidationValues;

@@ -70,6 +70,7 @@ export interface TableSnapshot {
 
 export interface TableColumnSnapshot {
   columnIndex?: number;
+  columnName?: string;
   columnType?: string;
   dataValidationValues: string[];
   dataValidationConditionType?: string;
@@ -107,6 +108,7 @@ export type LocalWriteOperation =
   | AddProtectedRangeOperation
   | DeleteProtectedRangeOperation
   | UpdateTableColumnTypeOperation
+  | UpdateTableColumnPropertiesOperation
   | OpaqueRawWriteOperation;
 
 export interface AppendRowsOperation {
@@ -193,6 +195,12 @@ export interface UpdateTableColumnTypeOperation {
   tableId: string;
   columnIndex: number;
   columnType: string;
+}
+
+export interface UpdateTableColumnPropertiesOperation {
+  kind: "updateTableColumnProperties";
+  tableId: string;
+  columnProperties: TableColumnSnapshot[];
 }
 
 export interface OpaqueRawWriteOperation {

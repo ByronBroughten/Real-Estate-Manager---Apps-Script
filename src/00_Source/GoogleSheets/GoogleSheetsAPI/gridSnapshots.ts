@@ -84,6 +84,9 @@ function toTableColumnSnapshot(
     .filter((value): value is string => value !== undefined);
   return {
     columnIndex: colProps.columnIndex,
+    ...(colProps.columnName !== undefined
+      ? { columnName: colProps.columnName }
+      : {}),
     columnType: colProps.columnType,
     dataValidationValues: values,
     dataValidationConditionType: colProps.dataValidationRule?.condition?.type,

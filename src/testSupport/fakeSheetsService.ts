@@ -88,6 +88,7 @@ export interface FakeSheetProperties {
      * valueName derivation consults before falling back to the top-row
      * sample. Omit a column here to leave it untyped (Automatic), which is
      * what the real API reports for a column whose type was never set.
+     * GET/replay convert this key to Google's table-relative `columnIndex`.
      */
     columnDeclaredTypes?: Record<number, string>;
   };
@@ -262,7 +263,20 @@ function fakeRowsToGoogleSheetData({
   return blocks;
 }
 
+function tableStartColumnIndex(
+  table: NonNullable<FakeSheetProperties["table"]>,
+): number {
+  return table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0");
+}
+
+function fakeCellHeader(cell: FakeCell | undefined): string | undefined {
+  if (cell === null || cell === undefined) return undefined;
+  const value = typeof cell === "object" ? cell.value : cell;
+  return typeof value === "string" && value !== "" ? value : undefined;
+}
+
 function fakeTableColumnProperties(
+  sheet: FakeSheetProperties,
   table: NonNullable<FakeSheetProperties["table"]>,
 ): GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined {
   const {
@@ -270,43 +284,48 @@ function fakeTableColumnProperties(
     columnValidationConditionTypes = {},
     columnDeclaredTypes = {},
   } = table;
-  const colIndexes = Array.from(
-    new Set([
-      ...Object.keys(columnValidationValues),
-      ...Object.keys(columnValidationConditionTypes),
-      ...Object.keys(columnDeclaredTypes),
-    ]),
-    Number,
-  ).sort((a, b) => a - b);
-  if (colIndexes.length === 0) {
+  const range = fakeTableRange(sheet, table);
+  const startColumnIndex = range.startColumnIndex ?? 0;
+  const endColumnIndex = range.endColumnIndex ?? startColumnIndex;
+  if (endColumnIndex <= startColumnIndex) {
     return undefined;
   }
-  return colIndexes.map((colIndex) => {
-    const colProps: GoogleAppsScript.Sheets.Schema.TableColumnProperties = {
-      columnIndex: colIndex,
-    };
-    const columnType = columnDeclaredTypes[colIndex];
-    if (columnType) {
-      colProps.columnType = columnType;
-    }
-    const values = columnValidationValues[colIndex];
-    const conditionType = columnValidationConditionTypes[colIndex];
-    if (values || conditionType) {
-      colProps.dataValidationRule = {
-        condition: {
-          ...(conditionType ? { type: conditionType } : {}),
-          ...(values
-            ? {
-                values: values.map((userEnteredValue) => ({
-                  userEnteredValue,
-                })),
-              }
-            : {}),
-        },
-      };
-    }
-    return colProps;
-  });
+  const headerRow = sheet.rows?.[range.startRowIndex ?? 0] ?? [];
+  return Array.from(
+    { length: endColumnIndex - startColumnIndex },
+    (_, tableRelativeIndex) => {
+      const colIndex = startColumnIndex + tableRelativeIndex;
+      const colProps: GoogleAppsScript.Sheets.Schema.TableColumnProperties = {};
+      if (tableRelativeIndex !== 0) {
+        colProps.columnIndex = tableRelativeIndex;
+      }
+      const columnName = fakeCellHeader(headerRow[colIndex]);
+      if (columnName !== undefined) {
+        colProps.columnName = columnName;
+      }
+      const columnType = columnDeclaredTypes[colIndex];
+      if (columnType) {
+        colProps.columnType = columnType;
+      }
+      const values = columnValidationValues[colIndex];
+      const conditionType = columnValidationConditionTypes[colIndex];
+      if (values || conditionType) {
+        colProps.dataValidationRule = {
+          condition: {
+            ...(conditionType ? { type: conditionType } : {}),
+            ...(values
+              ? {
+                  values: values.map((userEnteredValue) => ({
+                    userEnteredValue,
+                  })),
+                }
+              : {}),
+          },
+        };
+      }
+      return colProps;
+    },
+  );
 }
 
 function fakeTableRange(
@@ -317,8 +336,7 @@ function fakeTableRange(
     startRowIndex:
       table.startRowIndex ?? ssConfigGet("tableHeaderRowIndexBase0"),
     endRowIndex: table.endRowIndex,
-    startColumnIndex:
-      table.startColumnIndex ?? ssConfigGet("startTableColIndexBase0"),
+    startColumnIndex: tableStartColumnIndex(table),
     endColumnIndex:
       table.endColumnIndex ??
       Math.max(0, ...(sheet.rows ?? []).map((row) => row.length)),
@@ -340,7 +358,7 @@ function fakeSheetTables(
     {
       tableId: `fake-table-${sheet.sheetId}`,
       range: fakeTableRange(sheet, table),
-      columnProperties: fakeTableColumnProperties(table),
+      columnProperties: fakeTableColumnProperties(sheet, table),
     },
     ...extraTables.map((extraTable, extraIndex) => ({
       tableId: `fake-table-${sheet.sheetId}-extra-${extraIndex}`,
@@ -444,11 +462,13 @@ function replayUpdateTableRequest(
   const tableState = sheet.table;
   tableState.columnDeclaredTypes ??= {};
   const declaredTypes = tableState.columnDeclaredTypes;
+  const startColumnIndex = tableStartColumnIndex(tableState);
   (table.columnProperties ?? []).forEach((column) => {
-    if (column.columnIndex === undefined || column.columnType === undefined) {
+    if (column.columnType === undefined) {
       return;
     }
-    declaredTypes[column.columnIndex] = column.columnType;
+    declaredTypes[startColumnIndex + (column.columnIndex ?? 0)] =
+      column.columnType;
   });
 }
 

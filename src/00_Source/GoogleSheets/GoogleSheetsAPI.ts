@@ -7,6 +7,7 @@ import type {
   SheetConditionalFormatSnapshot,
   SheetEditProtectionSnapshot,
   SpreadsheetSnapshot,
+  TableColumnSnapshot,
 } from "../RawSource/RawSource";
 import { cellDataRequests } from "./GoogleSheetsAPI/cellData";
 import { googleConditionalFormatRule } from "./GoogleSheetsAPI/conditionalFormats";
@@ -36,7 +37,7 @@ const fieldMasks = {
   gridWithProgrammaticFacts:
     "sheets(" +
     "properties(sheetId,title)," +
-    "tables(tableId,range,columnProperties(columnIndex,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
+    "tables(tableId,range,columnProperties(columnIndex,columnName,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
     "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
     ")",
   gridWithoutProgrammaticFacts:
@@ -326,19 +327,20 @@ function localOperationToGoogleRequests(
         },
       ];
     case "updateTableColumnType":
+      throw new Error(
+        "updateTableColumnType must be combined into updateTableColumnProperties before flush.",
+      );
+    case "updateTableColumnProperties":
       return [
         {
           updateTable: {
             table: {
               tableId: operation.tableId,
-              columnProperties: [
-                {
-                  columnIndex: operation.columnIndex,
-                  columnType: operation.columnType,
-                },
-              ],
+              columnProperties: operation.columnProperties.map(
+                googleColumnProperties,
+              ),
             },
-            fields: "columnProperties.columnType",
+            fields: "columnProperties",
           },
         },
       ];
@@ -351,4 +353,36 @@ function localOperationToGoogleRequests(
       );
     }
   }
+}
+
+function googleColumnProperties(
+  column: TableColumnSnapshot,
+): GoogleAppsScript.Sheets.Schema.TableColumnProperties {
+  const colProps: GoogleAppsScript.Sheets.Schema.TableColumnProperties = {
+    columnIndex: column.columnIndex ?? 0,
+  };
+  if (column.columnName !== undefined) {
+    colProps.columnName = column.columnName;
+  }
+  if (column.columnType !== undefined) {
+    colProps.columnType = column.columnType;
+  }
+  const values = column.dataValidationValues ?? [];
+  if (column.dataValidationConditionType !== undefined || values.length > 0) {
+    colProps.dataValidationRule = {
+      condition: {
+        ...(column.dataValidationConditionType !== undefined
+          ? { type: column.dataValidationConditionType }
+          : {}),
+        ...(values.length > 0
+          ? {
+              values: values.map((userEnteredValue) => ({
+                userEnteredValue,
+              })),
+            }
+          : {}),
+      },
+    };
+  }
+  return colProps;
 }

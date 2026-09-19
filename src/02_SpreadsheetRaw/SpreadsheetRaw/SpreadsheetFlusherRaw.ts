@@ -1,3 +1,8 @@
+import type {
+  TableColumnSnapshot,
+  UpdateTableColumnPropertiesOperation,
+  UpdateTableColumnTypeOperation,
+} from "../../00_Source/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetChanges,
@@ -124,12 +129,75 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       ...requests.addConditionalFormat,
       ...requests.deleteProtectedRange,
       ...requests.addProtectedRange,
-      ...requests.updateTableColumnType,
+      ...this._tableColumnPropertiesOperations(),
       // Outside the ordering rules the queue was built around, so last.
       ...requests.raw,
     ];
     this.spreadsheetStateRaw.rawSource.flush(this.spreadsheetId, operations);
     this.spreadsheetStateRaw.writeQueue.updateRequests = emptyUpdateRequests();
+  }
+  private _tableColumnPropertiesOperations(): UpdateTableColumnPropertiesOperation[] {
+    const queued = this.updateRequests.updateTableColumnType;
+    if (queued.length === 0) return [];
+    const opsByTable = new Map<string, UpdateTableColumnTypeOperation[]>();
+    queued.forEach((operation) => {
+      const ops = opsByTable.get(operation.tableId) ?? [];
+      ops.push(operation);
+      opsByTable.set(operation.tableId, ops);
+    });
+    return Array.from(opsByTable, ([tableId, ops]) => ({
+      kind: "updateTableColumnProperties",
+      tableId,
+      columnProperties: this._columnPropertiesWithTypes(tableId, ops),
+    }));
+  }
+  private _columnPropertiesWithTypes(
+    tableId: string,
+    ops: UpdateTableColumnTypeOperation[],
+  ): TableColumnSnapshot[] {
+    const snapshot = this._knownTableColumnProperties(tableId);
+    const typeByIndex = new Map(
+      ops.map((operation) => [operation.columnIndex, operation.columnType]),
+    );
+    typeByIndex.forEach((_columnType, columnIndex) => {
+      if (
+        !snapshot.some((column) => (column.columnIndex ?? 0) === columnIndex)
+      ) {
+        throw new Error(
+          `Table ${tableId} has no fetched column at table index ${columnIndex}; refusing to replace column properties.`,
+        );
+      }
+    });
+    return snapshot.map((column) => {
+      const columnIndex = column.columnIndex ?? 0;
+      const columnName = column.columnName;
+      if (columnName === undefined) {
+        throw new Error(
+          `Table ${tableId} column ${columnIndex} has no columnName; refusing to replace column properties.`,
+        );
+      }
+      const columnType = typeByIndex.get(columnIndex) ?? column.columnType;
+      return {
+        columnIndex,
+        columnName,
+        ...(columnType !== undefined ? { columnType } : {}),
+        dataValidationValues: column.dataValidationValues,
+        dataValidationConditionType: column.dataValidationConditionType,
+      };
+    });
+  }
+  private _knownTableColumnProperties(tableId: string): TableColumnSnapshot[] {
+    for (const state of this.sheetsStateRaw.values()) {
+      const table = state.working.knownTable;
+      if (table?.tableId !== tableId) continue;
+      if (table.columnProperties.length === 0) {
+        throw new Error(
+          `Table ${tableId} has no fetched column properties; refusing to replace them.`,
+        );
+      }
+      return table.columnProperties;
+    }
+    throw new Error(`No fetched Table ${tableId}.`);
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
