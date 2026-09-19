@@ -5,7 +5,7 @@ description: Retarget hand-written sheet and column names onto the last generate
 
 Point the same live column or sheet (same column ID or sheet GID) at the new generated key. The live spreadsheet is the source of truth; the four generated config files from the last successful regen are the cache; hand-written names follow identity in that cache.
 
-Open [`docs/generated-data.md`](../../../docs/generated-data.md) now (grep the block, sampled vs declared, the floor, the one regen path). Leave regen-run permission and the untyped-column count with whoever ran `gen:configs`.
+Open [`docs/generated-data.md`](../../../docs/generated-data.md) now (grep the block, sampled vs declared, the floor, the one regen path). Leave regen-run permission, the floor report, and the untyped-column count with whoever ran `gen:configs`.
 
 ## Guardrails
 

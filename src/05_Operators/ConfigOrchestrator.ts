@@ -8,8 +8,9 @@ import {
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
-import { SpreadsheetBaseOperator } from "./SpreadsheetBaseOperator";
+import { ConfigSheetFloor } from "./ConfigSheetFloor";
 import { SheetConfigOperator } from "./SheetConfigOperator";
+import { SpreadsheetBaseOperator } from "./SpreadsheetBaseOperator";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
@@ -19,13 +20,15 @@ export interface ConfigRegeneration {
   columnConfigs: string;
   valueConfigs: string;
   untypedColumnsSummary: string | undefined;
+  floorReport: string;
 }
 
 /**
- * Coordinates Spreadsheet/Sheet/Column/Value Config: overlay live layout,
- * sync the live config sheets, one flush, then emit all four generated
- * files or none. Config maintenance is this Operator family, not Raw or Named.
- * npm run gen:configs is the only regeneration path.
+ * Coordinates Spreadsheet/Sheet/Column/Value Config: the config-sheet floor
+ * first (one extra flush), overlay live layout, sync the live config sheets,
+ * one more flush, then emit all four generated files or none. Config
+ * maintenance is this Operator family, not Raw or Named. npm run gen:configs
+ * is the only regeneration path.
  * docs/generated-data.md
  */
 export class ConfigOrchestrator extends SpreadsheetBaseOperator {
@@ -55,19 +58,30 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
   get valueConfigOperator() {
     return new ValueConfigOperator(this.operatorProps);
   }
+  get configSheetFloor() {
+    return new ConfigSheetFloor(this.spreadsheetNamedProps);
+  }
+  ensureConfigSheetFloor(): string {
+    return this.configSheetFloor.ensure();
+  }
   // Returns the run status an endpoint should report, if there's one to make.
   syncConfigSheetRows(): string | undefined {
-    return this._withLiveSpreadsheetConfig(() => this._syncConfigSheetRows());
+    return this._withFloorThenLiveConfig((floorReport) =>
+      combineConfigSyncReports(floorReport, this._syncConfigSheetRows()),
+    );
   }
   syncAndFlushConfigSheets(): string | undefined {
-    return this._withLiveSpreadsheetConfig(() => {
-      const summary = this._syncConfigSheetRows();
+    return this._withFloorThenLiveConfig((floorReport) => {
+      const summary = combineConfigSyncReports(
+        floorReport,
+        this._syncConfigSheetRows(),
+      );
       this.ss.batchUpdateGSheets();
       return summary;
     });
   }
   generateConfigFiles(): ConfigRegeneration {
-    return this._withLiveSpreadsheetConfig(() => {
+    return this._withFloorThenLiveConfig((floorReport) => {
       const untypedColumnsSummary = this._syncConfigSheetRows();
       this.ss.batchUpdateGSheets();
       this.valueConfigOperator.fetchAfterColumnConfigSynced();
@@ -77,8 +91,14 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
         columnConfigs: this.columnConfigOperator.toFileSource(),
         valueConfigs: this.valueConfigOperator.toFileSource(),
         untypedColumnsSummary,
+        floorReport,
       };
     });
+  }
+  private _withFloorThenLiveConfig<T>(body: (floorReport: string) => T): T {
+    const floorReport = this.ensureConfigSheetFloor();
+    this.ss.batchUpdateGSheets();
+    return this._withLiveSpreadsheetConfig(() => body(floorReport));
   }
   private _withLiveSpreadsheetConfig<T>(body: () => T): T {
     const liveConfig = this.spreadsheetConfigOperator.fetchLiveConfig();
@@ -100,4 +120,13 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
     this.columnConfigOperator.syncToSpreadsheet();
     return this.columnConfigOperator.untypedColumnsSummary();
   }
+}
+
+function combineConfigSyncReports(
+  floorReport: string,
+  untypedColumnsSummary: string | undefined,
+): string | undefined {
+  if (floorReport === "") return untypedColumnsSummary;
+  if (untypedColumnsSummary === undefined) return floorReport;
+  return `${floorReport} ${untypedColumnsSummary}`;
 }

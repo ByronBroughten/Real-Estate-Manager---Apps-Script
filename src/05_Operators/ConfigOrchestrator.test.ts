@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
+import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -19,8 +20,7 @@ const sheetConfigGid = 210603630;
 const columnConfigGid = 2034522667;
 const draftGid = 777000111;
 const draftTitle = "Add Occ Payment Intention";
-const headerOnlyTableEndRowIndex =
-  ssConfigGet("tableHeaderRowIndexBase0") + 1;
+const headerOnlyTableEndRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
 const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
   "sheetGid",
@@ -30,22 +30,22 @@ const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
 const ssc = columnConfigs.spreadsheetConfig;
 
-const spreadsheetConfigHeaders = [
-  ssc.idDelimiter.header,
-  ssc.idHeader.header,
-  ssc.startTableColumnIndexBase1.header,
-  ssc.columnIdRowIndexBase1.header,
-  ssc.columnGroupHeadingRowIndexBase1.header,
-  ssc.actionRowIndexBase1.header,
-  ssc.tableHeaderRowIndexBase1.header,
-];
+const sscColumns = [
+  "tableMenuSpace",
+  "fillRowIdsTimeLastRan",
+  "fillRowIdsRunStatus",
+  "syncConfigSheetRowsTimeLastRan",
+  "syncConfigSheetRowsRunStatus",
+  "idDelimiter",
+  "idHeader",
+  "startTableColumnIndexBase1",
+  "columnIdRowIndexBase1",
+  "columnGroupHeadingRowIndexBase1",
+  "actionRowIndexBase1",
+  "tableHeaderRowIndexBase1",
+] as const;
 
-const testSheetConfigRowWithApiAccess = [
-  testSheetGid,
-  "Test",
-  true,
-  "test",
-];
+const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true, "test"];
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
@@ -56,18 +56,42 @@ function spreadsheetConfigSheet(
   idDelimiter: string,
   options: {
     tableEndRowIndex?: number;
+    startTableColumnIndexBase1?: number;
     extraRows?: Record<number, readonly (string | number | boolean | null)[]>;
+    protectedRanges?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
   } = {},
 ) {
+  const headers = sscColumns.map((columnName) => ssc[columnName].header);
+  const groupHeadings = sscColumns.map((columnName) =>
+    spreadsheetConfigGroupHeading(ssc[columnName].header),
+  );
+  const dataRow = sscColumns.map((columnName) => {
+    if (columnName === "idDelimiter") return idDelimiter;
+    if (columnName === "idHeader") return "ID";
+    if (columnName === "startTableColumnIndexBase1") {
+      return options.startTableColumnIndexBase1 ?? 1;
+    }
+    if (columnName === "columnIdRowIndexBase1") return 1;
+    if (columnName === "columnGroupHeadingRowIndexBase1") return 2;
+    if (columnName === "actionRowIndexBase1") return 3;
+    if (columnName === "tableHeaderRowIndexBase1") return 4;
+    return "";
+  });
   return {
     sheetId: spreadsheetConfigGid,
     title: "Spreadsheet Config",
     rows: buildGridRows({
-      3: spreadsheetConfigHeaders,
-      4: [idDelimiter, "ID", 1, 1, 2, 3, 4],
+      0: sscColumns.map((columnName) => ssc[columnName].columnId),
+      1: groupHeadings,
+      3: headers,
+      4: dataRow,
       ...options.extraRows,
     }),
-    table: { endRowIndex: options.tableEndRowIndex ?? 5 },
+    table: {
+      endRowIndex: options.tableEndRowIndex ?? 5,
+      endColumnIndex: sscColumns.length,
+    },
+    protectedRanges: options.protectedRanges,
   };
 }
 
@@ -98,8 +122,7 @@ function headerOnlyDraftSheet(
   return {
     ...sheet,
     table: {
-      endRowIndex:
-        table === "header-only" ? headerOnlyTableEndRowIndex : 5,
+      endRowIndex: table === "header-only" ? headerOnlyTableEndRowIndex : 5,
     },
   };
 }
@@ -119,6 +142,8 @@ function seedFixture(
       readonly (string | number | boolean | null)[]
     >;
     sheetConfigTableEndRowIndex?: number;
+    startTableColumnIndexBase1?: number;
+    spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
   } = {},
 ) {
   const idDelimiter = options.idDelimiter ?? ":";
@@ -128,6 +153,8 @@ function seedFixture(
       spreadsheetConfigSheet(idDelimiter, {
         tableEndRowIndex: options.spreadsheetConfigTableEndRowIndex,
         extraRows: options.spreadsheetConfigExtraRows,
+        startTableColumnIndexBase1: options.startTableColumnIndexBase1,
+        protectedRanges: options.spreadsheetConfigProtections,
       }),
       {
         sheetId: sheetConfigGid,
@@ -138,6 +165,7 @@ function seedFixture(
             sc.sheetTitle.columnId,
             sc.letApiAccess.columnId,
             sc.idPrefix.columnId,
+            sc.idPrefixIsUniqueOrEmpty.columnId,
           ],
           4: testSheetConfigRowWithApiAccess,
           ...options.extraSheetConfigDataRows,
@@ -185,15 +213,60 @@ function seedFixture(
   });
 }
 
+function spreadsheetConfigGroupHeading(header: string): string {
+  const spreadsheetConfigSeed = configSheetFloorSeed.spreadsheetConfig;
+  const endpoint = Object.values(spreadsheetConfigSeed.endpoints).find(
+    (seededEndpoint) =>
+      seededEndpoint.timeLastRan.header === header ||
+      seededEndpoint.runStatus.header === header,
+  );
+  if (endpoint !== undefined) return endpoint.heading;
+  return (
+    spreadsheetConfigSeed.columns.find((column) => column.header === header)
+      ?.columnGroupHeading ?? ""
+  );
+}
+
+function floorWarningDescriptions(
+  requests: GoogleAppsScript.Sheets.Schema.Request[] | undefined,
+): string[] {
+  return (requests ?? []).flatMap((request) => {
+    const description = request.addProtectedRange?.protectedRange?.description;
+    return description === undefined ? [] : [description];
+  });
+}
+
+function driftedTableMenuSpaceDescription(): string {
+  return `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · data · warning`;
+}
+
+function driftedTableMenuSpaceProtection(): GoogleAppsScript.Sheets.Schema.ProtectedRange {
+  return {
+    protectedRangeId: 41,
+    description: driftedTableMenuSpaceDescription(),
+    warningOnly: true,
+    range: {
+      sheetId: spreadsheetConfigGid,
+      startRowIndex: 0,
+      endRowIndex: 1,
+      startColumnIndex: 0,
+      endColumnIndex: 1,
+    },
+  };
+}
+
 describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
-  it("flushes Sheet Config and Column Config changes in a single batchUpdate call", () => {
+  it("flushes the config-sheet floor, then Sheet Config and Column Config changes", () => {
     const { batchUpdateCalls } = seedFixture();
 
     const orchestrator = ConfigOrchestrator.init();
     orchestrator.syncAndFlushConfigSheets();
 
-    expect(batchUpdateCalls.length).toBe(1);
-    expect(batchUpdateCalls[0]?.requests?.length).toBeGreaterThan(0);
+    expect(batchUpdateCalls.length).toBe(2);
+    expect(floorWarningDescriptions(batchUpdateCalls[0]?.requests)).toContain(
+      driftedTableMenuSpaceDescription(),
+    );
+    expect(batchUpdateCalls[1]?.requests?.length).toBeGreaterThan(0);
     // The column ID gathered from the "test" sheet made it into a newly
     // appended Column Config row, which is part of what got flushed.
     expect(orchestrator.sheetConfigOperator.newSheetConfigs().test).toEqual({
@@ -210,6 +283,33 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
 
     expect(summary).toContain("1 column(s) across 1 sheet(s)");
     expect(typeof summary).toBe("string");
+  });
+
+  it("flushes floor warnings before the live Spreadsheet Config overlay is read", () => {
+    const { batchUpdateCalls } = seedFixture({
+      startTableColumnIndexBase1: 2,
+    });
+
+    expect(() =>
+      ConfigOrchestrator.init().syncAndFlushConfigSheets(),
+    ).toThrow();
+
+    expect(floorWarningDescriptions(batchUpdateCalls[0]?.requests)).toContain(
+      driftedTableMenuSpaceDescription(),
+    );
+  });
+
+  it("returns the floor report beside the untyped-column summary, as one line", () => {
+    seedFixture({
+      spreadsheetConfigProtections: [driftedTableMenuSpaceProtection()],
+    });
+
+    const summary = ConfigOrchestrator.init().syncConfigSheetRows();
+
+    expect(summary).toContain("Replaced drifted:");
+    expect(summary).toContain(driftedTableMenuSpaceDescription());
+    expect(summary).toContain("1 column(s) across 1 sheet(s)");
+    expect(summary).not.toContain("\n");
   });
 });
 
@@ -262,6 +362,20 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     ).toContain("1 column(s) across 1 sheet(s)");
   });
 
+  it("carries the floor report back beside the untyped-column summary", () => {
+    seedFixture({
+      spreadsheetConfigProtections: [driftedTableMenuSpaceProtection()],
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.floorReport).toBe(
+      `Replaced drifted: ${driftedTableMenuSpaceDescription()}`,
+    );
+    expect(parsed.untypedColumnsSummary).toContain(
+      "1 column(s) across 1 sheet(s)",
+    );
+  });
+
   it("still catalogs value titles after Column Config pruned a stale row of its own", () => {
     const columnIdRow = [
       cc.sheetGid.columnId,
@@ -283,6 +397,7 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
               sc.sheetTitle.columnId,
               sc.letApiAccess.columnId,
               sc.idPrefix.columnId,
+              sc.idPrefixIsUniqueOrEmpty.columnId,
             ],
             4: [columnConfigGid, "Column Config", true, "ccf"],
           }),
@@ -307,12 +422,7 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
               "Column Config",
               cc.sheetGid.header,
             ],
-            5: [
-              columnConfigGid,
-              "c:ccf:stale-gone",
-              "Column Config",
-              "Gone",
-            ],
+            5: [columnConfigGid, "c:ccf:stale-gone", "Column Config", "Gone"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -383,7 +493,9 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
       orchestrator.sheetConfigOperator.newSheetConfigs().addOccPaymentIntention,
     ).toBeUndefined();
     expect(
-      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(draftGid),
+      orchestrator.sheetConfigOperator.sheet
+        .column("sheetGid")
+        .hasValue(draftGid),
     ).toBe(true);
   });
 
@@ -443,7 +555,9 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     const orchestrator = ConfigOrchestrator.init();
     const parsed = orchestrator.generateConfigFiles();
     expect(
-      orchestrator.sheetConfigOperator.sheet.column("sheetGid").hasValue(draftGid),
+      orchestrator.sheetConfigOperator.sheet
+        .column("sheetGid")
+        .hasValue(draftGid),
     ).toBe(true);
     expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
   });

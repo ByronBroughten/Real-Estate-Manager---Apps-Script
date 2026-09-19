@@ -24,13 +24,6 @@ const ssc = columnConfigs.spreadsheetConfig;
 const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
 
-const feedback = [
-  "fillRowIdsTimeLastRan",
-  "fillRowIdsRunStatus",
-  "syncConfigSheetRowsTimeLastRan",
-  "syncConfigSheetRowsRunStatus",
-] as const;
-
 const sscColumns = [
   "tableMenuSpace",
   "fillRowIdsTimeLastRan",
@@ -164,11 +157,9 @@ function floorFixture(
   });
 }
 
-function applyFloor(
-  feedbackColumnNames: readonly (typeof feedback)[number][] = [...feedback],
-) {
+function applyFloor() {
   const floor = ConfigSheetFloor.init();
-  const report = floor.ensure(feedbackColumnNames);
+  const report = floor.ensure();
   floor.ss.batchUpdateGSheets();
   return { floor, report };
 }
@@ -247,26 +238,29 @@ describe("ConfigSheetFloor", () => {
     );
   });
 
-  it("protects only the feedback columns passed in", () => {
+  it("warns on the seeded endpoint feedback data cells", () => {
     floorFixture();
-    const { floor } = applyFloor(["fillRowIdsTimeLastRan"]);
+    const { floor } = applyFloor();
     const keys = keysOf(protectionsOf(floor, "spreadsheetConfig"));
 
     expect(keys).toContain(
       `${ssc.fillRowIdsTimeLastRan.columnId} · data · warning`,
     );
-    expect(keys).not.toContain(
+    expect(keys).toContain(
       `${ssc.fillRowIdsRunStatus.columnId} · data · warning`,
     );
-    expect(keys).not.toContain(
-      `${ssc.syncConfigSheetRowsTimeLastRan.columnId} · header · warning`,
+    expect(keys).toContain(
+      `${ssc.syncConfigSheetRowsTimeLastRan.columnId} · data · warning`,
+    );
+    expect(keys).toContain(
+      `${ssc.syncConfigSheetRowsRunStatus.columnId} · data · warning`,
     );
   });
 
   it("queues nothing on a second run", () => {
     const { batchUpdateCalls } = floorFixture();
     const { floor } = applyFloor();
-    floor.ensure([...feedback]);
+    floor.ensure();
     floor.ss.batchUpdateGSheets();
     expect(batchUpdateCalls).toHaveLength(1);
   });

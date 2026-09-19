@@ -30,8 +30,9 @@ interface FloorDeclaration {
 }
 
 /**
- * Declares edit warnings on the config-sheet floor cells. Callers pass the
- * framework endpoints' feedback column names; the chore is the caller today.
+ * Declares edit warnings on the config-sheet floor cells. ConfigOrchestrator
+ * runs this at the start of every config sync; the ensureConfigSheetFloor
+ * chore is the other caller.
  * docs/generated-data.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
@@ -41,11 +42,11 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  ensure(feedbackColumnNames: readonly SpreadsheetConfigColumnName[]): string {
+  ensure(): string {
     this._fetchFloorSheets();
     const report: string[] = [];
     const declarations = [
-      ...this._spreadsheetConfigDeclarations(feedbackColumnNames, report),
+      ...this._spreadsheetConfigDeclarations(report),
       ...floorDeclaration.bookkeeping(
         this.ss.sheet("sheetConfig"),
         floorColumnNames("sheetConfig"),
@@ -57,7 +58,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       ),
     ];
     this._reconcile(declarations, report);
-    return report.join("\n");
+    return report.join("; ");
   }
   private _fetchFloorSheets(): void {
     floorSheetNames().forEach((sheetName) => {
@@ -69,10 +70,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     });
     this.ss.fetchAllPrepped();
   }
-  private _spreadsheetConfigDeclarations(
-    feedbackColumnNames: readonly SpreadsheetConfigColumnName[],
-    report: string[],
-  ): FloorDeclaration[] {
+  private _spreadsheetConfigDeclarations(report: string[]): FloorDeclaration[] {
     const sheet = this.ss.sheet("spreadsheetConfig");
     const tableMenuSpaceHeader =
       configSheetFloorSeed.spreadsheetConfig.columns[0].header;
@@ -89,6 +87,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       );
       return [];
     }
+    const feedbackColumnNames = spreadsheetConfigFeedbackColumnNames();
     return [
       ...floorDeclaration.bookkeeping(sheet, [
         tableMenuSpaceName,
@@ -185,6 +184,15 @@ function floorSheetNames(): FloorSheetName[] {
   return Obj.keys(configSheetFloorSeed).filter(
     (sheetName): sheetName is FloorSheetName =>
       configSheetFloorSeed[sheetName].columns.length > 0,
+  );
+}
+
+function spreadsheetConfigFeedbackColumnNames(): SpreadsheetConfigColumnName[] {
+  return Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
+    (endpoint) => [
+      columnNameByHeader("spreadsheetConfig", endpoint.timeLastRan.header),
+      columnNameByHeader("spreadsheetConfig", endpoint.runStatus.header),
+    ],
   );
 }
 

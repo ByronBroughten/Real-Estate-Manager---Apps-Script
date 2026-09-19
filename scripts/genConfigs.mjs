@@ -21,6 +21,7 @@ class ConfigFilesGenerator {
       columnConfigs,
       valueConfigs,
       untypedColumnsSummary,
+      floorReport,
     } = await this._generate();
 
     // Write nothing until all four are confirmed good; a subset would go stale.
@@ -32,6 +33,9 @@ class ConfigFilesGenerator {
     console.log(`Wrote ${this.path.sheetConfigs}`);
     console.log(`Wrote ${this.path.columnConfigs}`);
     console.log(`Wrote ${this.path.valueConfigs}`);
+    if (floorReport !== "") {
+      console.log(`\ngen:configs: ${floorReport}`);
+    }
     console.log(
       `\ngen:configs: ${untypedColumnsSummary ?? "every column is declared; no value name was guessed."}`,
     );
