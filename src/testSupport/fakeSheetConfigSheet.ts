@@ -16,6 +16,9 @@ import {
  *
  * The column ids are the real committed ones, and the default columnId row
  * lists every column the config declares so clear / blank / wipe resolve each.
+ * ID prefix and its uniqueness helper are leftover live columns: generated
+ * configs still list them until a person deletes them from the sheet; config
+ * sync neither reads nor restores them.
  */
 const sheetConfigColumns = columnConfigs.sheetConfig;
 
@@ -41,13 +44,7 @@ export const filledSheetConfigRow: FakeCell[] = [
 ];
 
 /** The blank row: nothing in any non-formula column, formula cell still live. */
-export const blankSheetConfigRow: FakeCell[] = [
-  null,
-  null,
-  null,
-  null,
-  true,
-];
+export const blankSheetConfigRow: FakeCell[] = [null, null, null, null, true];
 
 /**
  * Stubs the Sheets service with just this sheet, its data rows keyed by

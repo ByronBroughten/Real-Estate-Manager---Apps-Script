@@ -27,12 +27,7 @@ const sheetConfigColumnIdRow = [
   sc.idPrefix.columnId,
 ];
 
-const existingPropertyConfigRow = [
-  propertyGid,
-  "Property",
-  true,
-  "prp",
-];
+const existingPropertyConfigRow = [propertyGid, "Property", true, "prp"];
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
@@ -100,9 +95,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     // A newly-discovered sheet gets a Sheet Config row appended, but stays
     // excluded from the generated file until a human sets letApiAccess.
     expect(sheetConfigs.brandNewSheet).toBeUndefined();
-    expect(operator.sheet.column("sheetGid").hasValue(newSheetGid)).toBe(
-      true,
-    );
+    expect(operator.sheet.column("sheetGid").hasValue(newSheetGid)).toBe(true);
   });
 
   it("resolves sheetGid -> sheetName for a sheet not yet in any deployed config", () => {
@@ -134,7 +127,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(operator.sheetNamesByGid().get(newSheetGid)).toBe("brandNewSheet");
     expect(operator.toFileSource().split("\n")).toContain(
-      '  "brandNewSheet": { "sheetGid": 999002, "idPrefix": "", "hasIdColumn": false }',
+      '  "brandNewSheet": { "sheetGid": 999002, "idPrefix": "bns", "hasIdColumn": false }',
     );
   });
 
@@ -192,7 +185,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     expect(operator.toFileSource()).toContain("makeSheetConfigs({})");
   });
 
-  it("generates a config for an API-access sheet whose id prefix has never been filled in", () => {
+  it("assigns an ID prefix from the tab title when a Let api access sheet has no column IDs", () => {
     stubSheetsService({
       sheets: [
         {
@@ -218,7 +211,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(operator.newSheetConfigs().property).toEqual({
       sheetGid: propertyGid,
-      idPrefix: "",
+      idPrefix: "prp",
       hasIdColumn: false,
     });
   });
@@ -306,7 +299,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(true);
   });
 
-  it("throws when two sheets share a non-empty ID prefix, named by sheet title", () => {
+  it("throws when two sheets share a sampled ID prefix, named by sheet title", () => {
     stubSheetsService({
       sheets: [
         {
@@ -322,13 +315,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
         {
           sheetId: propertyGid,
           title: "Property",
-          rows: buildGridRows({ 3: [] }),
+          rows: buildGridRows({ 0: ["c:prp:aaa"], 3: [] }),
           table: { endRowIndex: 5 },
         },
         {
           sheetId: unitGid,
           title: "Unit",
-          rows: buildGridRows({ 3: [] }),
+          rows: buildGridRows({ 0: ["c:prp:bbb"], 3: [] }),
           table: { endRowIndex: 5 },
         },
       ],

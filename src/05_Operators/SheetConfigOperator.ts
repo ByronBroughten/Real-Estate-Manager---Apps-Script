@@ -1,9 +1,12 @@
 import {
+  makeIdPrefixFromTitle,
   makeImportLine,
   validateIdPrefixesAreUnique,
   type IdPrefixLabel,
   type SheetConfigsBase,
 } from "../01_SpreadsheetSchema/makeConfigs";
+import { sheetConfigsByGid } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { Val } from "../utils/Val";
 import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
@@ -40,12 +43,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     }
   }
   prepFetchForSync() {
-    this.sheet.prepFetchColumnsFull(
-      "sheetGid",
-      "sheetTitle",
-      "idPrefix",
-      "letApiAccess",
-    );
+    this.sheet.prepFetchColumnsFull("sheetGid", "sheetTitle", "letApiAccess");
     this.sheetConfigSync.prepFetchIsComplete = true;
   }
   syncToSpreadsheet() {
@@ -97,13 +95,45 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     return gids;
   }
+  idPrefix(sheetGid: number): string {
+    return Val.assert(this._idPrefixesBySheetGid().get(sheetGid), "ID prefix");
+  }
+  private _idPrefixesBySheetGid(): Map<number, string> {
+    const prefixesInUse = new Set<string>();
+    const assigned = new Map<number, string>();
+    this.sheetGidsApiAccesses().forEach((sheetGid) => {
+      const sampled = this.ss.raw.sheetMeta(sheetGid).activeIdPrefix();
+      if (sampled === undefined) return;
+      prefixesInUse.add(sampled);
+      assigned.set(sheetGid, sampled);
+    });
+    this.sheetGidsApiAccesses().forEach((sheetGid) => {
+      if (assigned.has(sheetGid)) return;
+      const generated = makeIdPrefixFromTitle(
+        this.ss.raw.sheet(sheetGid).title,
+        prefixesInUse,
+      );
+      prefixesInUse.add(generated);
+      assigned.set(sheetGid, generated);
+    });
+    return assigned;
+  }
+  idPrefixChangeReport(): string | undefined {
+    const changes: string[] = [];
+    this.sheetGidsApiAccesses().forEach((sheetGid) => {
+      const previous = sheetConfigsByGid.get(sheetGid);
+      if (previous === undefined) return;
+      const sampled = this.ss.raw.sheetMeta(sheetGid).activeIdPrefix();
+      if (sampled === undefined || sampled === previous.idPrefix) return;
+      changes.push(
+        `Sheet "${this.ss.raw.sheet(sheetGid).title}" sampled ID prefix "${sampled}" differs from last generated "${previous.idPrefix}".`,
+      );
+    });
+    if (changes.length === 0) return undefined;
+    return changes.join(" ");
+  }
   newSheetConfigs(): SheetConfigsBase {
-    const col = this.sheet.columns(
-      "sheetGid",
-      "sheetTitle",
-      "idPrefix",
-      "letApiAccess",
-    );
+    const col = this.sheet.columns("sheetGid", "sheetTitle", "letApiAccess");
     const sheetConfigs: SheetConfigsBase = {};
     const idPrefixLabels: IdPrefixLabel[] = [];
     this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
@@ -112,7 +142,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       const title = col.sheetTitle.value(rowIndex);
       const sheetName = this.schema.titleToName(title);
       const sheetGid = col.sheetGid.value(rowIndex);
-      const idPrefix = col.idPrefix.valueOrEmpty(rowIndex);
+      const idPrefix = this.idPrefix(sheetGid);
       sheetConfigs[sheetName] = {
         sheetGid,
         idPrefix,

@@ -51,7 +51,6 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
         this.ss.sheet("sheetConfig"),
         floorColumnNames("sheetConfig"),
       ),
-      floorDeclaration.formulaColumn(this.ss.sheet("sheetConfig")),
       ...floorDeclaration.bookkeeping(
         this.ss.sheet("columnConfig"),
         floorColumnNames("columnConfig"),
@@ -218,17 +217,6 @@ const floorDeclaration = {
         floorDeclaration.uniformCell(column, "columnId", "column ID"),
       ];
     });
-  },
-  formulaColumn(sheet: SheetNamed<"sheetConfig">): FloorDeclaration {
-    const column = sheet.column("idPrefixIsUniqueOrEmpty");
-    const startRowIndex = column.schema.topDataRowIdx;
-    const description = floorDescription(column, "data");
-    return {
-      description,
-      range: column.gridRangeFromRow(startRowIndex),
-      queueAdd: () =>
-        column.addEditWarningFromRow(startRowIndex, { description }),
-    };
   },
   dataCell<SN extends SheetNameSimple, CN extends ColumnName<SN>>(
     column: ColumnNamed<SN, CN>,

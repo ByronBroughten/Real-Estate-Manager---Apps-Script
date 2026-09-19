@@ -39,9 +39,6 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
   private get untypedHeadersBySheetTitle(): UntypedHeadersBySheetTitle {
     return this.columnConfigSync.untypedHeadersBySheetTitle;
   }
-  get sheetConfigSheet(): SheetConfigOperator["sheet"] {
-    return this.sheetConfigOperator.sheet;
-  }
   // Derived fresh each call, not cached — a stored field goes stale across
   // this coordinator's per-access getter rebuilds.
   private get sheetGidsApiAccesses(): Set<number> {
@@ -135,20 +132,10 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     return this.sheetGidsApiAccesses.has(sheetGid);
   }
   private _addMissingColumnIds(): this {
-    const col = this.sheetConfigSheet.columns(
-      "sheetGid",
-      "letApiAccess",
-      "idPrefix",
-    );
     let idsAdded = 0;
-
-    this.sheetConfigSheet.rowIndexesActiveWithData.forEach((rowIndex) => {
-      const sheetGid = col.sheetGid.value(rowIndex);
-      if (this._isSheetGidApiAccesses(sheetGid)) {
-        const idPrefix = col.idPrefix.value(rowIndex);
-        const sheet = this.ss.raw.sheetMeta(sheetGid);
-        idsAdded += sheet.addMissingColumnIds(idPrefix);
-      }
+    this.sheetGidsApiAccesses.forEach((sheetGid) => {
+      const idPrefix = this.sheetConfigOperator.idPrefix(sheetGid);
+      idsAdded += this.ss.raw.sheetMeta(sheetGid).addMissingColumnIds(idPrefix);
     });
     Logger.log(
       `ensureColumnIds: prepared to add ${idsAdded} missing column ID(s)`,

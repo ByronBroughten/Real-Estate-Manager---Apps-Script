@@ -129,6 +129,17 @@ export class SpreadsheetBaseSchema {
   makeRowIdFromPrefix(idPrefix: string): string {
     return this.makeId("r", this._makeSheetDimensionId(idPrefix));
   }
+  idPrefixOfColumnId(columnId: string): string {
+    const delimiter = this.idDelimiter;
+    const parts = columnId.split(delimiter);
+    const idPrefix = parts[1];
+    if (parts.length !== 3 || parts[0] !== "c" || !idPrefix || !parts[2]) {
+      throw new Error(
+        `Invalid column ID: ${columnId}. Must be in the format "c${delimiter}<idPrefix>${delimiter}<suffix>"`,
+      );
+    }
+    return idPrefix;
+  }
   private _makeSheetDimensionId(idPrefix: string): string {
     if (!idPrefix) {
       throw new Error(`Attempted to make id for sheet without an idPrefix`);

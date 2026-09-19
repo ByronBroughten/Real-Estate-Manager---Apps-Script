@@ -30,6 +30,26 @@ export class SheetMetaRaw extends SheetCommonRaw {
   get activeColumnIds(): string[] {
     return this._tableColumnIds().filter((columnId) => columnId !== "");
   }
+  activeIdPrefix(): string | undefined {
+    const columnIdsByPrefix = this._columnIdsByIdPrefix();
+    if (columnIdsByPrefix.size === 0) return undefined;
+    if (columnIdsByPrefix.size > 1) {
+      throw new Error(
+        mixedIdPrefixMessage(this.primary.title, columnIdsByPrefix),
+      );
+    }
+    return columnIdsByPrefix.keys().next().value;
+  }
+  private _columnIdsByIdPrefix(): Map<string, string[]> {
+    const columnIdsByPrefix = new Map<string, string[]>();
+    this.activeColumnIds.forEach((columnId) => {
+      const idPrefix = this.schema.idPrefixOfColumnId(columnId);
+      const columnIds = columnIdsByPrefix.get(idPrefix) ?? [];
+      columnIds.push(columnId);
+      columnIdsByPrefix.set(idPrefix, columnIds);
+    });
+    return columnIdsByPrefix;
+  }
   columnIdAt(colIndex: number): string {
     if (this.isTableColIndex(colIndex)) {
       return this._columnIdInTable(colIndex);
@@ -124,4 +144,21 @@ export class SheetMetaRaw extends SheetCommonRaw {
       this._columnIdInTable(colIndex),
     );
   }
+}
+
+function mixedIdPrefixMessage(
+  sheetTitle: string,
+  columnIdsByPrefix: Map<string, string[]>,
+): string {
+  const prefixParts = [...columnIdsByPrefix.entries()].map(
+    ([idPrefix, columnIds]) =>
+      `"${idPrefix}" (${columnIds.length} column${
+        columnIds.length === 1 ? "" : "s"
+      }: ${columnIds.join(", ")})`,
+  );
+  return (
+    `Sheet "${sheetTitle}" has column IDs with more than one ID prefix: ` +
+    `${prefixParts.join("; ")}. Clear the stray column ID cells so the next ` +
+    `sync can mint new ones.`
+  );
 }

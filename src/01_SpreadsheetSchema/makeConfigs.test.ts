@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import {
+  makeIdPrefixFromTitle,
   makeSheetConfigs,
   makeSpreadsheetConfig,
 } from "./makeConfigs";
@@ -53,9 +54,7 @@ describe("overlaySpreadsheetConfig", () => {
         ...validLayout,
         actionRowIndexBase0: 1,
       }),
-    ).toThrow(
-      /Column group heading row index base 1.*Action row index base 1/,
-    );
+    ).toThrow(/Column group heading row index base 1.*Action row index base 1/);
   });
 });
 
@@ -69,24 +68,68 @@ describe("makeSheetConfigs", () => {
     ).toThrow(/property.*unit.*"prp"/);
   });
 
-  it("loads two sheets whose ID prefixes are empty", () => {
-    expect(
+  it("throws when a sheet has an empty ID prefix", () => {
+    expect(() =>
       makeSheetConfigs({
         notes: { sheetGid: 1, idPrefix: "", hasIdColumn: false },
-        log: { sheetGid: 2, idPrefix: "", hasIdColumn: false },
       }),
-    ).toEqual({
-      notes: { sheetGid: 1, idPrefix: "", hasIdColumn: false },
-      log: { sheetGid: 2, idPrefix: "", hasIdColumn: false },
-    });
+    ).toThrow(/notes.*no ID prefix/);
+  });
+});
+
+describe("makeIdPrefixFromTitle", () => {
+  it("abbreviates a one-word title to the first letter plus consonants, up to 3", () => {
+    expect(makeIdPrefixFromTitle("Property", new Set())).toBe("prp");
+    expect(makeIdPrefixFromTitle("Unit", new Set())).toBe("unt");
+    expect(makeIdPrefixFromTitle("Household", new Set())).toBe("hsh");
   });
 
-  it("loads one empty ID prefix beside a filled one", () => {
+  it("takes the first letter of each word and tops up from the last word's consonants to 3", () => {
+    expect(makeIdPrefixFromTitle("Occupancy Terms", new Set())).toBe("otr");
+  });
+
+  it("keeps a title shorter than 3 consonants", () => {
+    expect(makeIdPrefixFromTitle("Id", new Set())).toBe("id");
+  });
+
+  it("steps up with the next consonant on a collision, then a number suffix", () => {
+    expect(makeIdPrefixFromTitle("Property", new Set(["prp"]))).toBe("prpr");
     expect(
-      makeSheetConfigs({
-        notes: { sheetGid: 1, idPrefix: "", hasIdColumn: false },
-        property: { sheetGid: 2, idPrefix: "prp", hasIdColumn: true },
-      }).property.idPrefix,
-    ).toBe("prp");
+      makeIdPrefixFromTitle(
+        "Property",
+        new Set(["prp", "prpr", "prprt", "prprty"]),
+      ),
+    ).toBe("prp2");
+    expect(
+      makeIdPrefixFromTitle(
+        "Property",
+        new Set(["prp", "prpr", "prprt", "prprty", "prp2"]),
+      ),
+    ).toBe("prp3");
+  });
+
+  it("uses s plus a number suffix when the title has no letters", () => {
+    expect(makeIdPrefixFromTitle("2024", new Set())).toBe("s");
+    expect(makeIdPrefixFromTitle("2024", new Set(["s"]))).toBe("s2");
+  });
+
+  it("drops punctuation and digits before abbreviating", () => {
+    expect(makeIdPrefixFromTitle("Unit-2B!", new Set())).toBe("unt");
+  });
+
+  it("returns only lowercase letters and digits", () => {
+    const prefixes = [
+      makeIdPrefixFromTitle("Property", new Set()),
+      makeIdPrefixFromTitle("Occupancy Terms", new Set()),
+      makeIdPrefixFromTitle("2024", new Set(["s"])),
+      makeIdPrefixFromTitle("Unit-2B!", new Set()),
+      makeIdPrefixFromTitle(
+        "Property",
+        new Set(["prp", "prpr", "prprt", "prprty"]),
+      ),
+    ];
+    prefixes.forEach((prefix) => {
+      expect(prefix).toMatch(/^[a-z0-9]+$/);
+    });
   });
 });

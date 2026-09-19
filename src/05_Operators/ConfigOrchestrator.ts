@@ -21,6 +21,7 @@ export interface ConfigRegeneration {
   valueConfigs: string;
   untypedColumnsSummary: string | undefined;
   floorReport: string;
+  idPrefixReport: string | undefined;
 }
 
 /**
@@ -92,6 +93,7 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
         valueConfigs: this.valueConfigOperator.toFileSource(),
         untypedColumnsSummary,
         floorReport,
+        idPrefixReport: this.sheetConfigOperator.idPrefixChangeReport(),
       };
     });
   }

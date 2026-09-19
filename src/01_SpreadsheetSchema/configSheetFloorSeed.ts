@@ -34,8 +34,6 @@ export const configSheetFloorSeed = {
     columns: [
       { header: "Sheet GID", columnGroupHeading: "" },
       { header: "Sheet title", columnGroupHeading: "" },
-      { header: "ID prefix", columnGroupHeading: "" },
-      { header: "ID prefix is unique or empty", columnGroupHeading: "" },
       { header: "Let api access", columnGroupHeading: "" },
     ],
   },

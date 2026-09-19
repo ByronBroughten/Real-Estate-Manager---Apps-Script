@@ -334,12 +334,12 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
 
     const parsed = ConfigOrchestrator.init().generateConfigFiles();
     expect(parsed.spreadsheetConfig).toContain('idDelimiter: "|"');
-    expect(parsed.columnConfigs).toMatch(/c\|test\|/);
+    expect(parsed.columnConfigs).toMatch(/c\|tst\|/);
     expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
   });
 
   it("clears the live layout after the call returns", () => {
-    seedFixture({ idDelimiter: "|" });
+    seedFixture({ idDelimiter: "|", testColumnId: "" });
 
     ConfigOrchestrator.init().generateConfigFiles();
     expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
@@ -639,5 +639,251 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     });
 
     expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).not.toThrow();
+  });
+});
+
+describe("ConfigOrchestrator.generateConfigFiles ID prefix", () => {
+  const propertyGid = 888001;
+  const propertiesGid = 888002;
+
+  function letApiAccessSheet(options: {
+    sheetId: number;
+    title: string;
+    columnIds?: readonly string[];
+    headers?: readonly string[];
+  }): FakeSheetProperties {
+    const headers = options.headers ?? ["Name"];
+    const columnIds = options.columnIds ?? headers.map(() => "");
+    return {
+      sheetId: options.sheetId,
+      title: options.title,
+      rows: buildGridRows({
+        0: columnIds,
+        3: headers,
+        4: [],
+      }),
+      table: { endRowIndex: 5 },
+    };
+  }
+
+  function sheetConfigRow(props: {
+    sheetId: number;
+    title: string;
+    leftoverIdPrefix: string;
+  }) {
+    return [props.sheetId, props.title, true, props.leftoverIdPrefix];
+  }
+
+  it("assigns a generated prefix to a new Let api access sheet and mints column IDs with it", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({ sheetId: propertyGid, title: "Property" }),
+      ],
+      extraSheetConfigDataRows: {
+        5: sheetConfigRow({
+          sheetId: propertyGid,
+          title: "Property",
+          leftoverIdPrefix: "zzzz",
+        }),
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain(
+      `"property": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false }`,
+    );
+    expect(parsed.columnConfigs).toMatch(/c:prp:/);
+  });
+
+  it("samples an existing sheet's prefix from its column IDs, whatever the tab title is now", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({
+          sheetId: propertyGid,
+          title: "Renamed Tab",
+          columnIds: ["c:prp:abc1234"],
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: sheetConfigRow({
+          sheetId: propertyGid,
+          title: "Renamed Tab",
+          leftoverIdPrefix: "zzzz",
+        }),
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain(
+      `"renamedTab": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false }`,
+    );
+  });
+
+  it("mints blank column ID cells on an existing sheet with the sampled prefix", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({
+          sheetId: propertyGid,
+          title: "Property",
+          columnIds: ["c:prp:abc1234", ""],
+          headers: ["Name", "Notes"],
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: sheetConfigRow({
+          sheetId: propertyGid,
+          title: "Property",
+          leftoverIdPrefix: "zzzz",
+        }),
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    const minted = parsed.columnConfigs.match(/c:prp:[^"]+/g) ?? [];
+    expect(minted).toHaveLength(2);
+    expect(minted).toContain("c:prp:abc1234");
+  });
+
+  it("stops when one sheet's column IDs carry mixed prefixes, naming the sheet and stray IDs", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({
+          sheetId: propertyGid,
+          title: "Property",
+          columnIds: ["c:prp:abc1234", "c:unt:xyz1234"],
+          headers: ["Name", "Notes"],
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: sheetConfigRow({
+          sheetId: propertyGid,
+          title: "Property",
+          leftoverIdPrefix: "prp",
+        }),
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).toThrow(
+      /Property.*c:unt:xyz1234/,
+    );
+  });
+
+  it("stops when two sheets share a sampled prefix, named by sheet title", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({
+          sheetId: propertyGid,
+          title: "Property",
+          columnIds: ["c:prp:aaa1111"],
+        }),
+        letApiAccessSheet({
+          sheetId: propertiesGid,
+          title: "Unit",
+          columnIds: ["c:prp:bbb2222"],
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: sheetConfigRow({
+          sheetId: propertyGid,
+          title: "Property",
+          leftoverIdPrefix: "prp",
+        }),
+        6: sheetConfigRow({
+          sheetId: propertiesGid,
+          title: "Unit",
+          leftoverIdPrefix: "unt",
+        }),
+      },
+      sheetConfigTableEndRowIndex: 7,
+    });
+
+    expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow(
+      /Property.*Unit.*"prp"/,
+    );
+  });
+
+  it("reports a sampled prefix that differs from the last generated sheet configs without failing", () => {
+    seedFixture({ testColumnId: "c:zzz:xyz123" });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.idPrefixReport).toBe(
+      'Sheet "Test" sampled ID prefix "zzz" differs from last generated "test".',
+    );
+    expect(parsed.sheetConfigs).toContain('"idPrefix": "zzz"');
+  });
+
+  it("gives a tab without Let api access no prefix and no column IDs", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({
+          sheetId: propertyGid,
+          title: "Property",
+          columnIds: [""],
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: [propertyGid, "Property", false, "prp"],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).not.toContain("property");
+    expect(parsed.columnConfigs).not.toMatch(/c:prp:/);
+  });
+
+  it("avoids prefixes sampled from other Let api access sheets in the same run", () => {
+    seedFixture({
+      extraSheets: [
+        letApiAccessSheet({
+          sheetId: propertyGid,
+          title: "Household",
+          columnIds: ["c:prp:abc1234"],
+        }),
+        letApiAccessSheet({
+          sheetId: propertiesGid,
+          title: "Property",
+        }),
+      ],
+      extraSheetConfigDataRows: {
+        5: sheetConfigRow({
+          sheetId: propertyGid,
+          title: "Household",
+          leftoverIdPrefix: "hsh",
+        }),
+        6: sheetConfigRow({
+          sheetId: propertiesGid,
+          title: "Property",
+          leftoverIdPrefix: "zzzz",
+        }),
+      },
+      sheetConfigTableEndRowIndex: 7,
+    });
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain(
+      `"household": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false }`,
+    );
+    expect(parsed.sheetConfigs).toContain(
+      `"property": { "sheetGid": ${propertiesGid}, "idPrefix": "prpr", "hasIdColumn": false }`,
+    );
+  });
+
+  it("ignores leftover ID prefix columns on Sheet Config and does not restore them", () => {
+    const { batchUpdateCalls } = seedFixture();
+
+    const parsed = ConfigOrchestrator.init().generateConfigFiles();
+    expect(parsed.sheetConfigs).toContain('"idPrefix": "test"');
+    expect(parsed.idPrefixReport).toBeUndefined();
+    expect(
+      floorWarningDescriptions(batchUpdateCalls[0]?.requests).join("\n"),
+    ).not.toContain(sc.idPrefixIsUniqueOrEmpty.columnId);
+    expect(
+      floorWarningDescriptions(batchUpdateCalls[0]?.requests).join("\n"),
+    ).not.toContain(sc.idPrefix.columnId);
   });
 });

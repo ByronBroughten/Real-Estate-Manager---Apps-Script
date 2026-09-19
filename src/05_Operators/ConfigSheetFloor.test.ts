@@ -187,7 +187,7 @@ function keysOf(protections: EditProtection[]): string[] {
 }
 
 describe("ConfigSheetFloor", () => {
-  it("warns on every floor cell, locks none, and writes the formula column open-ended", () => {
+  it("warns on every floor cell and locks none", () => {
     floorFixture();
     const { floor } = applyFloor();
 
@@ -196,7 +196,7 @@ describe("ConfigSheetFloor", () => {
     const columnConfig = protectionsOf(floor, "columnConfig");
     const all = [...spreadsheet, ...sheetConfig, ...columnConfig];
 
-    expect(all).toHaveLength(53);
+    expect(all).toHaveLength(48);
     expect(all.every((protection) => protection.kind === "warning")).toBe(true);
     expect(all.some((protection) => protection.kind === "lock")).toBe(false);
 
@@ -214,22 +214,13 @@ describe("ConfigSheetFloor", () => {
       `${ssc.idHeader.columnId} · data · warning`,
     );
 
-    const formula = sheetConfig.find(
-      (protection) =>
-        protection.kind !== "unmodelable" &&
-        floorKey(protection.description) ===
-          `${sc.idPrefixIsUniqueOrEmpty.columnId} · data · warning`,
+    const sheetConfigKeys = keysOf(sheetConfig);
+    expect(sheetConfigKeys).not.toContain(
+      `${sc.idPrefix.columnId} · header · warning`,
     );
-    expect(formula?.kind).toBe("warning");
-    if (formula === undefined || formula.kind === "unmodelable") {
-      throw new Error("formula column warning");
-    }
-    expect(formula.range).toEqual({
-      sheetId: sheetConfigGid,
-      startRowIndex: topDataRowIndex,
-      startColumnIndex: 3,
-      endColumnIndex: 4,
-    });
+    expect(sheetConfigKeys).not.toContain(
+      `${sc.idPrefixIsUniqueOrEmpty.columnId} · data · warning`,
+    );
 
     const columnKeys = keysOf(columnConfig);
     expect(columnKeys).toContain(`${cc.header.columnId} · header · warning`);

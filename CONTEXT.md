@@ -39,7 +39,7 @@ A data row with nothing in any of the columns you fill in yourself. It is what t
 _Avoid_: empty row, placeholder row, spare row
 
 **ID prefix**:
-The short code on Sheet Config that every row ID and column ID on that sheet begins with. Two sheets must not share a non-empty one; a sheet that does not mint IDs may leave it blank.
+The short, readable code every row ID and column ID on a sheet begins with, so you can tell at a glance which sheet an ID belongs to. The app gives one to every sheet it knows about, taken from the tab title. No two sheets share one, and renaming the tab doesn't change it.
 _Avoid_: sheet prefix, ID code
 
 **Let api access**:
@@ -59,7 +59,7 @@ A cell only the editors it names can change; a lock that names none stops nobody
 _Avoid_: protection, lock
 
 **Config-sheet floor**:
-Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, the ID-prefix check formula and highlight, and the framework endpoints' columns. Edits to it are overwritten and reported.
+Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, and the framework endpoints' columns. Edits to it are overwritten and reported.
 _Avoid_: minimum floor, minimum headers, floor sheet
 
 **Floor seed**:
