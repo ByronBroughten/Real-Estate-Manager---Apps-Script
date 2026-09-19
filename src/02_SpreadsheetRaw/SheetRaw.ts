@@ -28,6 +28,7 @@ import {
   type FindReplaceTerms,
   type SortParameters,
   type UpdateTableColumnTypeOperation,
+  type TableIdentityRaw,
 } from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
@@ -92,6 +93,31 @@ export class SheetRaw extends SheetCommonRaw {
       );
     }
     return this.sheetState.working.title;
+  }
+  updateTitle(title: string): this {
+    this.updateRequests.updateSheetTitle.push({
+      kind: "updateSheetTitle",
+      sheetId: this.sheetGid,
+      title,
+    });
+    this.sheetState.working.title = title;
+    return this;
+  }
+  get tables(): TableIdentityRaw[] {
+    return this.sheetState.working.tables;
+  }
+  updateTableName(name: string): this {
+    const tableId = this.activeTable.tableId;
+    this.updateRequests.updateTableName.push({
+      kind: "updateTableName",
+      tableId,
+      name,
+    });
+    this.activeTable.updateName(name);
+    this.sheetState.working.tables = this.sheetState.working.tables.map(
+      (table) => (table.tableId === tableId ? { ...table, name } : table),
+    );
+    return this;
   }
   get activeRowIndexes(): number[] {
     const indexes = Array.from(this.sheetState.working.rowStates.keys());

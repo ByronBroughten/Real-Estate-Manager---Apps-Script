@@ -66,6 +66,7 @@ function toTableSnapshot(
   const range = table.range;
   return {
     tableId: Val.assert(table.tableId, "tableId"),
+    name: table.name ?? "",
     startRowIndex: Val.assert(range?.startRowIndex, "startRowIndex"),
     endRowIndex: Val.assert(range?.endRowIndex, "endRowIndex"),
     startColumnIndex: Val.assert(range?.startColumnIndex, "startColumnIndex"),

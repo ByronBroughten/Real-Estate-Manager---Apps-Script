@@ -282,6 +282,31 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("updateTable t1 2 cols Name: TEXT, ID: — [columnProperties]");
   });
 
+  it("names a Table rename", () => {
+    expect(
+      onlyLine({
+        updateTable: {
+          table: { tableId: "t1", name: "spreadsheetConfig" },
+          fields: "name",
+        },
+      }),
+    ).toBe("updateTable t1 name spreadsheetConfig [name]");
+  });
+
+  it("names a tab title restore", () => {
+    expect(
+      onlyLine({
+        updateSheetProperties: {
+          properties: {
+            sheetId: occupancyGid,
+            title: "Spreadsheet Config",
+          },
+          fields: "title",
+        },
+      }),
+    ).toBe("updateSheetProperties occupancy title Spreadsheet Config [title]");
+  });
+
   it("renders a request the framework does not model as its own verb and JSON", () => {
     const line = onlyLine({
       addSheet: { properties: { title: "x" } },

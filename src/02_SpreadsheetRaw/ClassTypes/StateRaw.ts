@@ -23,6 +23,8 @@ import type {
   TableColumnType,
   UpdateCellOperation,
   UpdateTableColumnPropertiesOperation,
+  UpdateSheetTitleOperation,
+  UpdateTableNameOperation,
 } from "../../00_Source/RawSource/RawSource";
 import type { RgbColor } from "../../00_Source/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
@@ -56,6 +58,8 @@ export interface UpdateRequests {
   addConditionalFormat: AddConditionalFormatRuleOperation[];
   deleteProtectedRange: DeleteProtectedRangeOperation[];
   addProtectedRange: AddProtectedRangeOperation[];
+  updateSheetTitle: UpdateSheetTitleOperation[];
+  updateTableName: UpdateTableNameOperation[];
   updateTableColumnType: UpdateTableColumnTypeOperation[];
   updateTableColumnProperties: UpdateTableColumnPropertiesOperation[];
   raw: OpaqueRawWriteOperation[];
@@ -81,6 +85,7 @@ export interface SheetStateRaw {
 export interface SheetWorkingStateRaw {
   title: string | null;
   knownTable: KnownTableRaw | null;
+  tables: TableIdentityRaw[];
   hasExtraTables: boolean;
   // A findReplace matches by content, so what it changed is unknowable locally.
   cellStateIsStale: boolean;
@@ -144,6 +149,7 @@ export interface ActiveFactsRaw {
 
 export interface KnownTableRaw {
   tableId: string;
+  name: string;
   startRowIndex: number; // tableHeaderRowIndex
   endRowIndex: number; // lastRowIndex + 1
   startColumnIndex: number;
@@ -151,6 +157,11 @@ export interface KnownTableRaw {
   columnProperties: TableColumnSnapshot[];
   rowIndexesAreStale: boolean;
   firstStaleColIndex: number | null;
+}
+
+export interface TableIdentityRaw {
+  tableId: string;
+  name: string;
 }
 
 type SheetId = number;
@@ -244,6 +255,8 @@ export function emptyUpdateRequests(): UpdateRequests {
     addConditionalFormat: [],
     deleteProtectedRange: [],
     addProtectedRange: [],
+    updateSheetTitle: [],
+    updateTableName: [],
     updateTableColumnType: [],
     updateTableColumnProperties: [],
     raw: [],
@@ -290,6 +303,7 @@ export function emptySheetWorkingState(): SheetWorkingStateRaw {
   return {
     title: null,
     knownTable: null,
+    tables: [],
     hasExtraTables: false,
     cellStateIsStale: false,
     hasFetchedColumnIds: false,

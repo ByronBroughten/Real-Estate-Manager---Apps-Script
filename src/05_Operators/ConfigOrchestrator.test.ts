@@ -123,6 +123,7 @@ function spreadsheetConfigSheet(
       ...options.extraRows,
     }),
     table: {
+      name: configSheetFloorSeed.spreadsheetConfig.tableName,
       startRowIndex: tableHeaderRowIndex,
       startColumnIndex: startTableColIndex,
       endRowIndex: options.tableEndRowIndex ?? 5,
@@ -203,10 +204,12 @@ function seedFixture(
             sc.sheetTitle.columnId,
             sc.letApiAccess.columnId,
           ],
+          3: [sc.sheetGid.header, sc.sheetTitle.header, sc.letApiAccess.header],
           4: testSheetConfigRowWithApiAccess,
           ...options.extraSheetConfigDataRows,
         }),
         table: {
+          name: configSheetFloorSeed.sheetConfig.tableName,
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: options.sheetConfigTableEndRowIndex ?? 5,
@@ -233,8 +236,17 @@ function seedFixture(
             cc.customDefaultValue.columnId,
             cc.emptyValueAllowed.columnId,
           ],
+          3: [
+            cc.sheetGid.header,
+            cc.columnId.header,
+            cc.sheetTitle.header,
+            cc.header.header,
+            cc.customDefaultValue.header,
+            cc.emptyValueAllowed.header,
+          ],
         }),
         table: {
+          name: configSheetFloorSeed.columnConfig.tableName,
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
@@ -464,6 +476,7 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
             4: [columnConfigGid, "Column Config", true],
           }),
           table: {
+            name: configSheetFloorSeed.sheetConfig.tableName,
             startRowIndex: tableHeaderRowIndex,
             startColumnIndex: startTableColIndex,
             endRowIndex: 5,
@@ -491,6 +504,7 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
             5: [columnConfigGid, "c:ccf:stale-gone", "Column Config", "Gone"],
           }),
           table: {
+            name: configSheetFloorSeed.columnConfig.tableName,
             startRowIndex: tableHeaderRowIndex,
             startColumnIndex: startTableColIndex,
             endRowIndex: 6,

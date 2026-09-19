@@ -39,6 +39,10 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     if (!tables) {
       return;
     }
+    this.sheetState.working.tables = tables.map((table) => ({
+      tableId: table.tableId,
+      name: table.name,
+    }));
     if (tables.length > 1) {
       this.sheetState.working.hasExtraTables = true;
       this.sheetState.working.knownTable = null;
@@ -47,6 +51,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     }
     this.sheetState.working.hasExtraTables = false;
     if (tables.length === 0) {
+      this.sheetState.working.knownTable = null;
       return;
     }
     const table = Val.assert(tables[0], "table");
@@ -61,6 +66,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     const previous = this.sheetState.working.knownTable;
     this.sheetState.working.knownTable = {
       tableId: table.tableId,
+      name: table.name,
       ...range,
       columnProperties: table.columnProperties,
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,

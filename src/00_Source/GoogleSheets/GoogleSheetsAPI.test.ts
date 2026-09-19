@@ -130,6 +130,12 @@ describe("GoogleSheetsAPI write mapping", () => {
       },
       { kind: "deleteProtectedRange", sheetId: 111, protectedRangeId: 7 },
       {
+        kind: "updateSheetTitle",
+        sheetId: 111,
+        title: "Spreadsheet Config",
+      },
+      { kind: "updateTableName", tableId: "tbl", name: "spreadsheetConfig" },
+      {
         kind: "updateTableColumnProperties",
         tableId: "tbl",
         columnProperties: [
@@ -260,6 +266,18 @@ describe("GoogleSheetsAPI write mapping", () => {
         },
       },
       { deleteProtectedRange: { protectedRangeId: 7 } },
+      {
+        updateSheetProperties: {
+          properties: { sheetId: 111, title: "Spreadsheet Config" },
+          fields: "title",
+        },
+      },
+      {
+        updateTable: {
+          table: { tableId: "tbl", name: "spreadsheetConfig" },
+          fields: "name",
+        },
+      },
       {
         updateTable: {
           table: {
@@ -519,6 +537,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
           tables: [
             {
               tableId: "tbl",
+              name: "",
               startRowIndex: 3,
               endRowIndex: 11,
               startColumnIndex: 0,
@@ -1229,7 +1248,8 @@ describe("GoogleSheetsAPI HTTP transport", () => {
 
   it("sends one GET for sheet properties, carrying the field mask", () => {
     const { api, transport } = seedApi();
-    const fields = "sheets(properties(sheetId,title),tables(tableId,range))";
+    const fields =
+      "sheets(properties(sheetId,title),tables(tableId,name,range))";
 
     api.fetchSheetProperties(spreadsheetId);
 

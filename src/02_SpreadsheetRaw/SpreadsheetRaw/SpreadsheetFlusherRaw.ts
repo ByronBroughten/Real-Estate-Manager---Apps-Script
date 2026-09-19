@@ -131,7 +131,9 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
   private _sendUpdateRequests() {
     const requests = this.updateRequests;
     const operations = [
-      // First, so a header write in the same batch renames the column rather than being reverted.
+      ...requests.updateSheetTitle,
+      ...requests.updateTableName,
+      // First among column writes, so a header write in the same batch renames the column rather than being reverted.
       ...requests.updateTableColumnProperties,
       ...requests.append,
       ...requests.insertColumn,

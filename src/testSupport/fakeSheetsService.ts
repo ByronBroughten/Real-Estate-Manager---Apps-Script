@@ -67,6 +67,11 @@ export interface FakeSheetProperties {
     startRowIndex?: number;
     startColumnIndex?: number;
     /**
+     * The Table's name in Sheets. Omit to leave it unnamed in the payload,
+     * which the adapter stores as "".
+     */
+    name?: string;
+    /**
      * A column's live data-validation condition values (e.g.
      * `["=valueConfig[Transaction Description]"]`), keyed by absolute
      * column index — read by `ColumnConfigOperator`'s valueName detection
@@ -97,6 +102,7 @@ export interface FakeSheetProperties {
     endColumnIndex?: number;
     startRowIndex?: number;
     startColumnIndex?: number;
+    name?: string;
   }[]; // Extra Tables besides `table`; the filter hatch still withholds every Table.
   /**
    * The sheet's conditional format rules, in Sheets order. Returned by both
@@ -357,11 +363,13 @@ function fakeSheetTables(
   return [
     {
       tableId: `fake-table-${sheet.sheetId}`,
+      ...(table.name !== undefined ? { name: table.name } : {}),
       range: fakeTableRange(sheet, table),
       columnProperties: fakeTableColumnProperties(sheet, table),
     },
     ...extraTables.map((extraTable, extraIndex) => ({
       tableId: `fake-table-${sheet.sheetId}-extra-${extraIndex}`,
+      ...(extraTable.name !== undefined ? { name: extraTable.name } : {}),
       range: fakeTableRange(sheet, extraTable),
     })),
   ];

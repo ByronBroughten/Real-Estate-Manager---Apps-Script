@@ -17,6 +17,7 @@ import {
   buildGridRows,
   stubSheetsService,
   type FakeCell,
+  type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
 import { ConfigSheetFloor } from "./ConfigSheetFloor";
 
@@ -173,10 +174,88 @@ function columnTypeUpdates(
   });
 }
 
+function firstFlushRequests(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+): GoogleAppsScript.Sheets.Schema.Request[] {
+  return batchUpdateCalls[0]?.requests ?? [];
+}
+
+function sheetTitleUpdates(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+    const properties = request.updateSheetProperties?.properties;
+    if (properties?.sheetId === undefined || properties.title === undefined) {
+      return [];
+    }
+    return [{ sheetId: properties.sheetId, title: properties.title }];
+  });
+}
+
+function tableNameUpdates(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+    const table = request.updateTable?.table;
+    if (
+      request.updateTable?.fields !== "name" ||
+      table?.tableId === undefined ||
+      table.name === undefined
+    ) {
+      return [];
+    }
+    return [{ tableId: table.tableId, name: table.name }];
+  });
+}
+
+function cellUpdates(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+    const update = request.updateCells;
+    const range = update?.range;
+    if (
+      range?.sheetId === undefined ||
+      range.startRowIndex === undefined ||
+      range.startColumnIndex === undefined
+    ) {
+      return [];
+    }
+    return [
+      {
+        sheetId: range.sheetId,
+        rowIndex: range.startRowIndex,
+        colIndex: range.startColumnIndex,
+        value: update?.rows?.[0]?.values?.[0]?.userEnteredValue?.stringValue,
+      },
+    ];
+  });
+}
+
+function spreadsheetConfigGroupHeading(header: string): string {
+  const spreadsheetConfigSeed = configSheetFloorSeed.spreadsheetConfig;
+  const endpoint = Object.values(spreadsheetConfigSeed.endpoints).find(
+    (seededEndpoint) =>
+      seededEndpoint.timeLastRan.header === header ||
+      seededEndpoint.runStatus.header === header,
+  );
+  if (endpoint !== undefined) return endpoint.heading;
+  return (
+    spreadsheetConfigSeed.columns.find((column) => column.header === header)
+      ?.columnGroupHeading ?? ""
+  );
+}
+
 function floorFixture(
   options: {
     spreadsheetConfigColumnOrder?: readonly (typeof sscColumns)[number][];
     spreadsheetConfigHeaders?: Partial<
+      Record<(typeof sscColumns)[number], string>
+    >;
+    spreadsheetConfigColumnIds?: Partial<
+      Record<(typeof sscColumns)[number], string>
+    >;
+    spreadsheetConfigGroupHeadings?: Partial<
       Record<(typeof sscColumns)[number], string>
     >;
     spreadsheetConfigColumnTypes?: Partial<
@@ -187,6 +266,17 @@ function floorFixture(
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     columnConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+    spreadsheetConfigTitle?: string;
+    spreadsheetConfigTableName?: string;
+    valueConfig?: {
+      title?: string;
+      tableName?: string;
+    };
+    extraSheets?: FakeSheetProperties[];
+    omitSpreadsheetConfigTable?: boolean;
+    spreadsheetConfigExtraTables?: NonNullable<
+      FakeSheetProperties["extraTables"]
+    >;
     extraSpreadsheetConfigColumn?: {
       columnId: string;
       header: string;
@@ -203,22 +293,16 @@ function floorFixture(
       options.spreadsheetConfigHeaders?.[columnName] ??
       sscField(columnName).header,
   );
-  const groupHeadings = sscOrder.map((columnName) => {
-    if (
-      columnName === "fillRowIdsTimeLastRan" ||
-      columnName === "fillRowIdsRunStatus"
-    ) {
-      return "Fill Row IDs";
-    }
-    if (
-      columnName === "syncConfigSheetRowsTimeLastRan" ||
-      columnName === "syncConfigSheetRowsRunStatus"
-    ) {
-      return "Sync Config Sheet Rows";
-    }
-    if (columnName === "tableMenuSpace") return "";
-    return "Spreadsheet Rules";
-  });
+  const sscColumnIds = sscOrder.map(
+    (columnName) =>
+      options.spreadsheetConfigColumnIds?.[columnName] ??
+      sscField(columnName).columnId,
+  );
+  const groupHeadings = sscOrder.map(
+    (columnName) =>
+      options.spreadsheetConfigGroupHeadings?.[columnName] ??
+      spreadsheetConfigGroupHeading(sscField(columnName).header),
+  );
   const extraColumn = options.extraSpreadsheetConfigColumn;
   const dataRow = sscOrder.map((columnName) => {
     if (columnName === "idDelimiter") return ":";
@@ -235,32 +319,37 @@ function floorFixture(
     sheets: [
       {
         sheetId: spreadsheetConfigGid,
-        title: "Spreadsheet Config",
+        title: options.spreadsheetConfigTitle ?? "Spreadsheet Config",
         rows: buildGridRows({
-          0: pad(
-            withExtraColumn(
-              sscOrder.map((columnName) => sscField(columnName).columnId),
-              extraColumn?.columnId,
-            ),
-          ),
+          0: pad(withExtraColumn(sscColumnIds, extraColumn?.columnId)),
           1: pad(
             withExtraColumn(groupHeadings, extraColumn?.groupHeading ?? ""),
           ),
           3: pad(withExtraColumn(sscHeaders, extraColumn?.header)),
           4: pad(withExtraColumn(dataRow, "")),
         }),
-        table: {
-          startColumnIndex: startTableColIndex,
-          endRowIndex: 5,
-          endColumnIndex:
-            startTableColIndex +
-            sscOrder.length +
-            (extraColumn === undefined ? 0 : 1),
-          columnTypes: sheetAbsoluteTypes(
-            spreadsheetConfigFixtureColumnTypes(sscOrder, sscHeaders, options),
-            startTableColIndex,
-          ),
-        },
+        table: options.omitSpreadsheetConfigTable
+          ? undefined
+          : {
+              name:
+                options.spreadsheetConfigTableName ??
+                configSheetFloorSeed.spreadsheetConfig.tableName,
+              startColumnIndex: startTableColIndex,
+              endRowIndex: 5,
+              endColumnIndex:
+                startTableColIndex +
+                sscOrder.length +
+                (extraColumn === undefined ? 0 : 1),
+              columnTypes: sheetAbsoluteTypes(
+                spreadsheetConfigFixtureColumnTypes(
+                  sscOrder,
+                  sscHeaders,
+                  options,
+                ),
+                startTableColIndex,
+              ),
+            },
+        extraTables: options.spreadsheetConfigExtraTables,
         protectedRanges: options.spreadsheetConfigProtections,
       },
       {
@@ -281,6 +370,7 @@ function floorFixture(
           5: pad([columnConfigGid, "Column Config", true]),
         }),
         table: {
+          name: configSheetFloorSeed.sheetConfig.tableName,
           startColumnIndex: startTableColIndex,
           endRowIndex: 6,
           endColumnIndex: startTableColIndex + 3,
@@ -322,6 +412,7 @@ function floorFixture(
           4: pad([]),
         }),
         table: {
+          name: configSheetFloorSeed.columnConfig.tableName,
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
           endColumnIndex: startTableColIndex + 6,
@@ -345,9 +436,16 @@ function floorFixture(
       },
       {
         sheetId: valueConfigGid,
-        title: "Value Config",
-        table: { endRowIndex: 5 },
+        title:
+          options.valueConfig?.title ?? configSheetFloorSeed.valueConfig.title,
+        table: {
+          name:
+            options.valueConfig?.tableName ??
+            configSheetFloorSeed.valueConfig.tableName,
+          endRowIndex: 5,
+        },
       },
+      ...(options.extraSheets ?? []),
     ],
   });
 }
@@ -664,5 +762,177 @@ describe("ConfigSheetFloor", () => {
     });
     applyFloor();
     expect(batchUpdateCalls).toHaveLength(1);
+  });
+
+  it("renames a drifted floor tab back and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigTitle: "Old Spreadsheet Config",
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain(
+      'Restored tab titles: "Old Spreadsheet Config" → Spreadsheet Config',
+    );
+    expect(sheetTitleUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: spreadsheetConfigGid,
+      title: "Spreadsheet Config",
+    });
+  });
+
+  it("renames Value Config's tab back and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      valueConfig: { title: "Values" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain('Restored tab titles: "Values" → Value Config');
+    expect(sheetTitleUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: valueConfigGid,
+      title: "Value Config",
+    });
+  });
+
+  it("renames a wrongly named floor Table and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigTableName: "wrongTable",
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain(
+      `Restored Table names: Spreadsheet Config's Table "wrongTable" → spreadsheetConfig`,
+    );
+    expect(tableNameUpdates(batchUpdateCalls)).toContainEqual({
+      tableId: `fake-table-${spreadsheetConfigGid}`,
+      name: "spreadsheetConfig",
+    });
+  });
+
+  it("renames Value Config's Table back to valueConfig", () => {
+    const { batchUpdateCalls } = floorFixture({
+      valueConfig: { tableName: "values" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain(
+      `Restored Table names: Value Config's Table "values" → valueConfig`,
+    );
+    expect(tableNameUpdates(batchUpdateCalls)).toContainEqual({
+      tableId: `fake-table-${valueConfigGid}`,
+      name: "valueConfig",
+    });
+  });
+
+  it("throws naming the tab when a floor title sits on the wrong GID, and flushes nothing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigTitle: "Old Spreadsheet Config",
+      extraSheets: [
+        {
+          sheetId: 999001,
+          title: "Spreadsheet Config",
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    expect(() => applyFloor()).toThrow(
+      'A tab titled "Spreadsheet Config" is not the floor tab.',
+    );
+    expect(batchUpdateCalls).toHaveLength(0);
+  });
+
+  it("throws naming the tab when a floor tab has no Table, and flushes nothing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSpreadsheetConfigTable: true,
+    });
+
+    expect(() => applyFloor()).toThrow(
+      'Floor tab "Spreadsheet Config" has no Table.',
+    );
+    expect(batchUpdateCalls).toHaveLength(0);
+  });
+
+  it("throws naming the tab when several Tables are present and none has the floor name, and flushes nothing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigTableName: "firstWrong",
+      spreadsheetConfigExtraTables: [{ endRowIndex: 5, name: "secondWrong" }],
+    });
+
+    expect(() => applyFloor()).toThrow(
+      'Floor tab "Spreadsheet Config" has several Tables and none is named spreadsheetConfig.',
+    );
+    expect(batchUpdateCalls).toHaveLength(0);
+  });
+
+  it("overwrites a drifted floor header and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigHeaders: { tableMenuSpace: "Menu spacer" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain("Restored headers:");
+    expect(report).toContain(
+      `Spreadsheet Config · Menu spacer (${ssc.tableMenuSpace.columnId}) → Table menu space`,
+    );
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: spreadsheetConfigGid,
+      rowIndex: 3,
+      colIndex: 0,
+      value: "Table menu space",
+    });
+  });
+
+  it("overwrites a drifted floor column ID and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigColumnIds: { tableMenuSpace: "c:sscf:drifted" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain("Restored column IDs:");
+    expect(report).toContain(
+      `Spreadsheet Config · Table menu space (c:sscf:drifted) → ${ssc.tableMenuSpace.columnId}`,
+    );
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: spreadsheetConfigGid,
+      rowIndex: 0,
+      colIndex: 0,
+      value: ssc.tableMenuSpace.columnId,
+    });
+  });
+
+  it("overwrites a drifted floor group heading and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigGroupHeadings: { idHeader: "Rules" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain("Restored group headings:");
+    expect(report).toContain(
+      `Spreadsheet Config · ID header (${ssc.idHeader.columnId}) → Spreadsheet Rules`,
+    );
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: spreadsheetConfigGid,
+      rowIndex: 1,
+      colIndex: sscColumns.indexOf("idHeader"),
+      value: "Spreadsheet Rules",
+    });
+  });
+
+  it("leaves an extra non-floor column's header, column ID and group heading alone", () => {
+    const { batchUpdateCalls } = floorFixture({
+      extraSpreadsheetConfigColumn: {
+        columnId: "c:sscf:notes",
+        header: "Notes",
+        groupHeading: "Mine",
+      },
+    });
+    applyFloor();
+
+    const extraColIndex = sscColumns.length;
+    expect(cellUpdates(batchUpdateCalls)).not.toContainEqual(
+      expect.objectContaining({
+        sheetId: spreadsheetConfigGid,
+        colIndex: extraColIndex,
+      }),
+    );
   });
 });

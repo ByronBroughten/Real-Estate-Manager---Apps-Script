@@ -61,6 +61,7 @@ export interface SheetEditProtectionSnapshot {
 
 export interface TableSnapshot {
   tableId: string;
+  name: string;
   startRowIndex: number;
   endRowIndex: number;
   startColumnIndex: number;
@@ -125,6 +126,8 @@ export type LocalWriteOperation =
   | DeleteConditionalFormatRuleOperation
   | AddProtectedRangeOperation
   | DeleteProtectedRangeOperation
+  | UpdateSheetTitleOperation
+  | UpdateTableNameOperation
   | UpdateTableColumnPropertiesOperation
   | OpaqueRawWriteOperation;
 
@@ -205,6 +208,18 @@ export interface DeleteProtectedRangeOperation {
   kind: "deleteProtectedRange";
   sheetId: number;
   protectedRangeId: number;
+}
+
+export interface UpdateSheetTitleOperation {
+  kind: "updateSheetTitle";
+  sheetId: number;
+  title: string;
+}
+
+export interface UpdateTableNameOperation {
+  kind: "updateTableName";
+  tableId: string;
+  name: string;
 }
 
 // Replaces the Table's whole column list, so it carries every column.

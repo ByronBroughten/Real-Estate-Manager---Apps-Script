@@ -95,6 +95,8 @@ function body(verb: RequestVerb, request: GoogleUpdateRequest): string {
       return requestBody.deleteProtectedRange(request.deleteProtectedRange);
     case "updateTable":
       return requestBody.updateTable(request.updateTable);
+    case "updateSheetProperties":
+      return requestBody.updateSheetProperties(request.updateSheetProperties);
     default:
       return requestBody.raw(request, verb);
   }
@@ -240,6 +242,14 @@ const requestBody = {
     update: GoogleAppsScript.Sheets.Schema.UpdateTableRequest | undefined,
   ): string {
     const table = update?.table;
+    if (update?.fields === "name") {
+      return columns(
+        table?.tableId ?? "(no table)",
+        "name",
+        table?.name ?? "",
+        label.fields(update.fields),
+      );
+    }
     const columnProperties = [...(table?.columnProperties ?? [])].sort(
       (a, b) => (a.columnIndex ?? 0) - (b.columnIndex ?? 0),
     );
@@ -252,6 +262,18 @@ const requestBody = {
             `${column.columnName ?? `col ${column.columnIndex ?? 0}`}: ${column.columnType ?? "—"}`,
         )
         .join(", "),
+      label.fields(update?.fields),
+    );
+  },
+  updateSheetProperties(
+    update:
+      GoogleAppsScript.Sheets.Schema.UpdateSheetPropertiesRequest | undefined,
+  ): string {
+    const properties = update?.properties;
+    return columns(
+      label.sheet(properties?.sheetId),
+      "title",
+      properties?.title ?? "",
       label.fields(update?.fields),
     );
   },

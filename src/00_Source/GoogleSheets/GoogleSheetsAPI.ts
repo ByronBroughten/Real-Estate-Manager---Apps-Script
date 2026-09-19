@@ -30,19 +30,20 @@ interface FieldsArg {
 const sheetsApiBase = "https://sheets.googleapis.com/v4/spreadsheets";
 
 const fieldMasks = {
-  sheetProperties: "sheets(properties(sheetId,title),tables(tableId,range))",
+  sheetProperties:
+    "sheets(properties(sheetId,title),tables(tableId,name,range))",
   conditionalFormats: "sheets(properties(sheetId),conditionalFormats)",
   protectedRanges: "sheets(properties(sheetId),protectedRanges)",
   gridWithProgrammaticFacts:
     "sheets(" +
     "properties(sheetId,title)," +
-    "tables(tableId,range,columnProperties(columnIndex,columnName,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
+    "tables(tableId,name,range,columnProperties(columnIndex,columnName,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
     "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
     ")",
   gridWithoutProgrammaticFacts:
     "sheets(" +
     "properties(sheetId,title)," +
-    "tables(tableId,range)," +
+    "tables(tableId,name,range)," +
     "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue)))" +
     ")",
 } as const;
@@ -322,6 +323,30 @@ function localOperationToGoogleRequests(
         {
           deleteProtectedRange: {
             protectedRangeId: operation.protectedRangeId,
+          },
+        },
+      ];
+    case "updateSheetTitle":
+      return [
+        {
+          updateSheetProperties: {
+            properties: {
+              sheetId: operation.sheetId,
+              title: operation.title,
+            },
+            fields: "title",
+          },
+        },
+      ];
+    case "updateTableName":
+      return [
+        {
+          updateTable: {
+            table: {
+              tableId: operation.tableId,
+              name: operation.name,
+            },
+            fields: "name",
           },
         },
       ];
