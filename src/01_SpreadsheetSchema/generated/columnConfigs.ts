@@ -412,9 +412,7 @@ export const columnConfigs = makeColumnConfigs({
   "sheetConfig": {
     "sheetGid": { "columnId": "c:scf:WgnoW8d", "header": "Sheet GID", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "sheetTitle": { "columnId": "c:scf:0Ctj9xZ", "header": "Sheet title", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "letApiAccess": { "columnId": "c:scf:GOJ0ixi", "header": "Let api access", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "idPrefix": { "columnId": "c:scf:3dZ5h-J", "header": "ID prefix", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "idPrefixIsUniqueOrEmpty": { "columnId": "c:scf:cK5WM0v", "header": "ID prefix is unique or empty", "valueName": "boolean", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
+    "letApiAccess": { "columnId": "c:scf:GOJ0ixi", "header": "Let api access", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "splitReceipt": {
     "name": { "columnId": "c:srct:CHhpNpt", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -425,10 +423,6 @@ export const columnConfigs = makeColumnConfigs({
     "amountAllocated": { "columnId": "c:srct:b97l0T7", "header": "Amount allocated", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "spreadsheetConfig": {
-    "idDelimiter": { "columnId": "c:scf:8uxVA53", "header": "ID delimiter", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "columnIdRowIndexBase1": { "columnId": "c:scf:Kt9oKSY", "header": "Column ID row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "actionRowIndexBase1": { "columnId": "c:scf:GKSJHu0", "header": "Action row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "tableHeaderRowIndexBase1": { "columnId": "c:scf:58r8zkF", "header": "Table header row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "idHeader": { "columnId": "c:sscf:XOpXA8U", "header": "ID header", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "startTableColumnIndexBase1": { "columnId": "c:sscf:RtBaCIb", "header": "Start table column index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "columnGroupHeadingRowIndexBase1": { "columnId": "c:sscf:Tm9zOUP", "header": "Column group heading row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -436,7 +430,11 @@ export const columnConfigs = makeColumnConfigs({
     "fillRowIdsTimeLastRan": { "columnId": "c:sscf:eV73Th5", "header": "Fill row IDs, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "fillRowIdsRunStatus": { "columnId": "c:sscf:ebB4-9S", "header": "Fill row IDs, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "syncConfigSheetRowsTimeLastRan": { "columnId": "c:sscf:pLBSdae", "header": "Sync config sheet rows, time last ran", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "syncConfigSheetRowsRunStatus": { "columnId": "c:sscf:W-JABu_", "header": "Sync config sheet rows, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "syncConfigSheetRowsRunStatus": { "columnId": "c:sscf:W-JABu_", "header": "Sync config sheet rows, run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "idDelimiter": { "columnId": "c:sscf:8uxVA53", "header": "ID delimiter", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "columnIdRowIndexBase1": { "columnId": "c:sscf:Kt9oKSY", "header": "Column ID row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "actionRowIndexBase1": { "columnId": "c:sscf:GKSJHu0", "header": "Action row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "tableHeaderRowIndexBase1": { "columnId": "c:sscf:58r8zkF", "header": "Table header row index base 1", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "subPayAllocation": {
     "name": { "columnId": "c:spa:BS1Efgp", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -553,15 +551,15 @@ export const columnConfigs = makeColumnConfigs({
     "updateDate": { "columnId": "c:swr:2GsBCol", "header": "Update date", "valueName": "date", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "test": {
-    "name": { "columnId": "c:tst:Xr9XZGV", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "id": { "columnId": "c:tst:-uGn8dY", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "num": { "columnId": "c:tst:VzKaUqz", "header": "Num", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "dropdown": { "columnId": "c:tst:cQEliR8", "header": "Dropdown", "valueName": "yesOrNo", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "dateFormula": { "columnId": "c:test:HL-G329", "header": "Date Formula", "valueName": "date", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "conditionalFormatting": { "columnId": "c:test:KLMZlb4", "header": "Conditional Formatting", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "formulaTest": { "columnId": "c:test:R8Vj_m9", "header": "Formula test", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "columnCurrency": { "columnId": "c:test:__ygD9v", "header": "Column currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "active": { "columnId": "c:test:l7FWcC_", "header": "Active", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+    "active": { "columnId": "c:test:l7FWcC_", "header": "Active", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "name": { "columnId": "c:test:Xr9XZGV", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
+    "id": { "columnId": "c:test:-uGn8dY", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "num": { "columnId": "c:test:VzKaUqz", "header": "Num", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "dropdown": { "columnId": "c:test:cQEliR8", "header": "Dropdown", "valueName": "yesOrNo", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
   "unit": {
     "name": { "columnId": "c:unt:jC9vwrI", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },

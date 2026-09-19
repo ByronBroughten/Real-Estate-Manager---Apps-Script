@@ -24,10 +24,9 @@ const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
   sc.sheetTitle.columnId,
   sc.letApiAccess.columnId,
-  sc.idPrefix.columnId,
 ];
 
-const existingPropertyConfigRow = [propertyGid, "Property", true, "prp"];
+const existingPropertyConfigRow = [propertyGid, "Property", true];
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
@@ -109,7 +108,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
             // A human already turned on API access for this sheet, but no
             // deploy has run since — this run's own live sync is the only
             // place the mapping exists.
-            4: [newSheetGid, "Brand New Sheet", true, ""],
+            4: [newSheetGid, "Brand New Sheet", true],
           }),
           table: { endRowIndex: 5 },
         },
@@ -170,7 +169,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
             4: existingPropertyConfigRow,
-            5: [newSheetGid, "Gone", true, "gon"],
+            5: [newSheetGid, "Gone", true],
           }),
           table: { endRowIndex: 6 },
         },
@@ -193,7 +192,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", true, null],
+            4: [propertyGid, "Property", true],
           }),
           table: { endRowIndex: 5 },
         },
@@ -224,7 +223,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Stale Title", true, "prp"],
+            4: [propertyGid, "Stale Title", true],
           }),
           table: { endRowIndex: 5 },
         },
@@ -252,7 +251,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Stale Title", false, "prp"],
+            4: [propertyGid, "Stale Title", false],
           }),
           table: { endRowIndex: 5 },
         },
@@ -280,7 +279,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", true, "prp"],
+            4: [propertyGid, "Property", true],
           }),
           table: { endRowIndex: 5 },
         },
@@ -307,8 +306,8 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", true, "prp"],
-            5: [unitGid, "Unit", true, "prp"],
+            4: [propertyGid, "Property", true],
+            5: [unitGid, "Unit", true],
           }),
           table: { endRowIndex: 6 },
         },

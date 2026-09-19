@@ -309,7 +309,6 @@ describe("RowIdentified.clearValues", () => {
       [0, ""],
       [1, ""],
       [2, ""],
-      [3, ""],
     ]);
     expect(sheet.topRow.isBlank).toBe(true);
   });
@@ -366,7 +365,7 @@ describe("SheetIdentified.appendRowDefault", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: columnIdRow,
-            4: [null, null, null, true],
+            4: [null, null],
           }),
           table: { endRowIndex: 5 },
         },
@@ -385,7 +384,6 @@ describe("SheetIdentified.appendRowDefault", () => {
     expect(writtenValuesByColIndex(batchUpdateCalls)).toEqual([
       [0, ""],
       [1, ""],
-      [2, ""],
     ]);
   });
 });

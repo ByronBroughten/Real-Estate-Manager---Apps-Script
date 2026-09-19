@@ -9,42 +9,26 @@ import {
 /**
  * A fake "Sheet Config" sheet, for tests about behaviour that reads or writes
  * a whole row rather than one named cell — clearing, the blank test, the wipe,
- * append reuse. Sheet Config earns the job by being the smallest real sheet
- * that has both non-formula columns and a formula column
- * (`idPrefixIsUniqueOrEmpty`), so a test can assert that a formula cell was
- * left alone without asserting over thirty columns.
+ * append reuse. Sheet Config earns the job by being the smallest real sheet.
  *
  * The column ids are the real committed ones, and the default columnId row
  * lists every column the config declares so clear / blank / wipe resolve each.
- * ID prefix and its uniqueness helper are leftover live columns: generated
- * configs still list them until a person deletes them from the sheet; config
- * sync neither reads nor restores them.
  */
 const sheetConfigColumns = columnConfigs.sheetConfig;
 
 export const sheetConfigGid = sheetConfigs.sheetConfig.sheetGid;
-export const sheetConfigFormulaColumnId =
-  sheetConfigColumns.idPrefixIsUniqueOrEmpty.columnId;
 
 export const sheetConfigColumnIdRow = [
   sheetConfigColumns.sheetGid.columnId,
   sheetConfigColumns.sheetTitle.columnId,
   sheetConfigColumns.letApiAccess.columnId,
-  sheetConfigColumns.idPrefix.columnId,
-  sheetConfigFormulaColumnId,
 ];
 
-/** Every non-formula column filled in; the formula column shows its result. */
-export const filledSheetConfigRow: FakeCell[] = [
-  999001,
-  "Property",
-  true,
-  "prp",
-  true,
-];
+/** Every non-formula column filled in. */
+export const filledSheetConfigRow: FakeCell[] = [999001, "Property", true];
 
-/** The blank row: nothing in any non-formula column, formula cell still live. */
-export const blankSheetConfigRow: FakeCell[] = [null, null, null, null, true];
+/** The blank row: nothing in any non-formula column. */
+export const blankSheetConfigRow: FakeCell[] = [null, null, null];
 
 /**
  * Stubs the Sheets service with just this sheet, its data rows keyed by

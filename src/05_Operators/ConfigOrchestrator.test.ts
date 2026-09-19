@@ -45,7 +45,7 @@ const sscColumns = [
   "tableHeaderRowIndexBase1",
 ] as const;
 
-const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true, "test"];
+const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true];
 
 beforeEach(() => {
   stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
@@ -164,8 +164,6 @@ function seedFixture(
             sc.sheetGid.columnId,
             sc.sheetTitle.columnId,
             sc.letApiAccess.columnId,
-            sc.idPrefix.columnId,
-            sc.idPrefixIsUniqueOrEmpty.columnId,
           ],
           4: testSheetConfigRowWithApiAccess,
           ...options.extraSheetConfigDataRows,
@@ -396,10 +394,8 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
               sc.sheetGid.columnId,
               sc.sheetTitle.columnId,
               sc.letApiAccess.columnId,
-              sc.idPrefix.columnId,
-              sc.idPrefixIsUniqueOrEmpty.columnId,
             ],
-            4: [columnConfigGid, "Column Config", true, "ccf"],
+            4: [columnConfigGid, "Column Config", true],
           }),
           table: { endRowIndex: 5 },
         },

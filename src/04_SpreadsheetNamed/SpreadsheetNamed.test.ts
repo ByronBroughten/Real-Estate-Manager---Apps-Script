@@ -354,7 +354,6 @@ function fetchedSheetConfig(): SpreadsheetNamed {
     "sheetGid",
     "sheetTitle",
     "letApiAccess",
-    "idPrefix",
   );
   ss.fetchAllPrepped();
   return ss;
@@ -488,12 +487,14 @@ describe("SheetNamed.appendRowWithVals", () => {
     });
 
     const ss = fetchedSheetConfig();
-    const row = ss.sheet("sheetConfig").appendRowWithVals({ idPrefix: "prp" });
+    const row = ss.sheet("sheetConfig").appendRowWithVals({
+      sheetTitle: "Property",
+    });
     ss.batchUpdateGSheets();
 
     expect(row.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
-    expect(row.value("idPrefix")).toBe("prp");
+    expect(row.value("sheetTitle")).toBe("Property");
   });
 
   it("appends beneath a one-row sheet that still holds data", () => {
@@ -502,7 +503,9 @@ describe("SheetNamed.appendRowWithVals", () => {
     });
 
     const ss = fetchedSheetConfig();
-    const row = ss.sheet("sheetConfig").appendRowWithVals({ idPrefix: "unt" });
+    const row = ss
+      .sheet("sheetConfig")
+      .appendRowWithVals({ sheetTitle: "Unit" });
     ss.batchUpdateGSheets();
 
     expect(row.rowIndex).toBe(topDataRowIndex + 1);
@@ -516,8 +519,8 @@ describe("SheetNamed.appendRowWithVals", () => {
 
     const ss = fetchedSheetConfig();
     const sheet = ss.sheet("sheetConfig");
-    const first = sheet.appendRowWithVals({ idPrefix: "one" });
-    const second = sheet.appendRowWithVals({ idPrefix: "two" });
+    const first = sheet.appendRowWithVals({ sheetTitle: "one" });
+    const second = sheet.appendRowWithVals({ sheetTitle: "two" });
     ss.batchUpdateGSheets();
 
     expect([first.rowIndex, second.rowIndex]).toEqual([
@@ -535,14 +538,14 @@ describe("SheetNamed.appendRowWithVals", () => {
 
     const ss = fetchedSheetConfig();
     const sheet = ss.sheet("sheetConfig");
-    sheet.appendRowWithVals({ idPrefix: "one" });
+    sheet.appendRowWithVals({ sheetTitle: "one" });
     sheet.DELETE_ALL_DATA_ROWS();
-    const rebuilt = sheet.appendRowWithVals({ idPrefix: "two" });
+    const rebuilt = sheet.appendRowWithVals({ sheetTitle: "two" });
     ss.batchUpdateGSheets();
 
     expect(rebuilt.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
-    expect(rebuilt.value("idPrefix")).toBe("two");
+    expect(rebuilt.value("sheetTitle")).toBe("two");
   });
 
   it("reuses the row a wipe just cleared, so the wipe and rebuild leave only rebuilt rows", () => {
@@ -554,7 +557,7 @@ describe("SheetNamed.appendRowWithVals", () => {
     const ss = fetchedSheetConfig();
     const sheet = ss.sheet("sheetConfig");
     sheet.DELETE_ALL_DATA_ROWS();
-    const row = sheet.appendRowWithVals({ idPrefix: "new" });
+    const row = sheet.appendRowWithVals({ sheetTitle: "new" });
     ss.batchUpdateGSheets();
 
     expect(row.rowIndex).toBe(topDataRowIndex);
@@ -693,7 +696,6 @@ describe("SheetNamed.appendRowWithAllVals", () => {
           sheetGid: number | "";
           sheetTitle: string;
           letApiAccess: boolean;
-          idPrefix: string;
         }
       >
     >(true);
@@ -710,7 +712,6 @@ describe("SheetNamed.appendRowWithAllVals", () => {
       sheetGid: 999001,
       sheetTitle: "Property",
       letApiAccess: true,
-      idPrefix: "prp",
       // @ts-expect-error a formula column cannot be written to
       idPrefixIsUniqueOrEmpty: true,
     };
@@ -724,13 +725,7 @@ describe("SheetNamed.appendRowWithAllVals", () => {
         "active",
         "id",
       ],
-      [
-        "sheetGid",
-        "sheetTitle",
-        "letApiAccess",
-        "idPrefix",
-        "idPrefixIsUniqueOrEmpty",
-      ],
+      ["sheetGid", "sheetTitle", "letApiAccess", "idPrefixIsUniqueOrEmpty"],
     ]);
   });
 });
@@ -817,8 +812,8 @@ function stubTestSheetForFormulaWrite() {
         title: "Test",
         rows: buildGridRows({
           0: testColumnIdRow,
-          4: [null, "r:test:1", 10, null, null, null, 11],
-          5: [null, "r:test:2", 20, null, null, null, 21],
+          4: [null, null, 11, null, null, null, "r:test:1", 10, null],
+          5: [null, null, 21, null, null, null, "r:test:2", 20, null],
         }),
         table: { endRowIndex: 6 },
       },

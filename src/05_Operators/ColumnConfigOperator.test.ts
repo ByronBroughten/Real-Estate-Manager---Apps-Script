@@ -28,7 +28,6 @@ const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
   sc.sheetTitle.columnId,
   sc.letApiAccess.columnId,
-  sc.idPrefix.columnId,
 ];
 const columnConfigColumnIdRow = [
   cc.sheetGid.columnId,
@@ -97,19 +96,9 @@ function stubGroupedColumnConfigSheets(): void {
         title: "Column Config",
         rows: buildGridRows({
           0: columnConfigColumnIdRow,
-          4: [
-            propertyGid,
-            "c:prp:aaa",
-            "Property",
-            "Rent Amount",
-          ],
+          4: [propertyGid, "c:prp:aaa", "Property", "Rent Amount"],
           5: [propertyGid, "c:prp:bbb", "Property", "Notes"],
-          6: [
-            newSheetGid,
-            "c:999002:ccc",
-            "Brand New Sheet",
-            "Some Field",
-          ],
+          6: [newSheetGid, "c:999002:ccc", "Brand New Sheet", "Some Field"],
         }),
         table: { endRowIndex: 7 },
       },
@@ -237,14 +226,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
               null,
               true,
             ],
-            5: [
-              propertyGid,
-              "c:prp:bbb",
-              "Property",
-              "Notes",
-              null,
-              false,
-            ],
+            5: [propertyGid, "c:prp:bbb", "Property", "Notes", null, false],
           }),
           table: { endRowIndex: 6 },
         },
@@ -346,18 +328,8 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
-            4: [
-              propertyGid,
-              "c:prp:aaa",
-              "Property",
-              "Rent Amount",
-            ],
-            5: [
-              propertyGid,
-              "c:prp:bbb",
-              "Property",
-              "Rent  Amount",
-            ],
+            4: [propertyGid, "c:prp:aaa", "Property", "Rent Amount"],
+            5: [propertyGid, "c:prp:bbb", "Property", "Rent  Amount"],
           }),
           table: { endRowIndex: 6 },
         },
@@ -381,12 +353,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
 });
 
 describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", () => {
-  const testSheetConfigRowWithApiAccess = [
-    testSheetGid,
-    "Test",
-    true,
-    "test",
-  ];
+  const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true];
 
   function seedSheetConfigFixture() {
     return {
@@ -595,12 +562,7 @@ function syncColumnsUnderTest({
     0: columnConfigColumnIdRow,
   };
   columnIds.forEach((columnId, index) => {
-    columnConfigRows[4 + index] = [
-      testSheetGid,
-      columnId,
-      "Test",
-      "",
-    ];
+    columnConfigRows[4 + index] = [testSheetGid, columnId, "Test", ""];
   });
   stubSheetsService({
     sheets: [
@@ -609,7 +571,7 @@ function syncColumnsUnderTest({
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
-          4: [testSheetGid, "Test", true, "test"],
+          4: [testSheetGid, "Test", true],
         }),
         table: { endRowIndex: 5 },
       },
