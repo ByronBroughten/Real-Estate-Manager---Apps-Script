@@ -59,8 +59,16 @@ A cell only the editors it names can change; a lock that names none stops nobody
 _Avoid_: protection, lock
 
 **Config-sheet floor**:
-The cells on Spreadsheet Config, Sheet Config and Column Config that the app depends on and nobody edits by hand. The generated config entries for the config sheets mirror it.
-_Avoid_: minimum headers, floor sheet
+Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, the ID-prefix check formula and highlight, and the framework endpoints' columns. Edits to it are overwritten and reported.
+_Avoid_: minimum floor, minimum headers, floor sheet
+
+**Floor seed**:
+The app's own declaration of what the config-sheet floor looks like. It holds structure only; a floor tab or column keeps the identity it was created with.
+_Avoid_: template, default config
+
+**Seeded value**:
+A cell or column the floor seed fills once, when it creates the tab or Table, and never restores — such as Spreadsheet Config's layout values or Value Config's example column.
+_Avoid_: initial value (too close to Custom default value)
 
 ### Endpoints
 
