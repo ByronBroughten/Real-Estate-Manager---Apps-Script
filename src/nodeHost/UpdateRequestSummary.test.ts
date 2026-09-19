@@ -265,21 +265,21 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("deleteProtectedRange (no sheet) id 11");
   });
 
-  it("names a table column properties update", () => {
+  it("lists every column of a table column properties update in index order as Name: TYPE", () => {
     expect(
       onlyLine({
         updateTable: {
           table: {
             tableId: "t1",
             columnProperties: [
-              { columnIndex: 0, columnName: "Name", columnType: "TEXT" },
               { columnIndex: 1, columnName: "ID" },
+              { columnName: "Name", columnType: "TEXT" },
             ],
           },
           fields: "columnProperties",
         },
       }),
-    ).toBe("updateTable t1 2 cols TEXT [columnProperties]");
+    ).toBe("updateTable t1 2 cols Name: TEXT, ID: — [columnProperties]");
   });
 
   it("renders a request the framework does not model as its own verb and JSON", () => {

@@ -62,6 +62,7 @@ export class ColumnMetaRaw<
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.updateRequests.updateTableColumnType.push({
       kind: "updateTableColumnType",
+      sheetId: this.sheetGid,
       tableId: this.sheet.activeTable.tableId,
       // Google's Table columnIndex is table-relative; colIndex is sheet-absolute.
       columnIndex: this.colIndex - this.sheet.activeTable.startColumnIndex,

@@ -2486,3 +2486,184 @@ describe("SheetRaw.activeTable", () => {
     );
   });
 });
+
+describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
+  function stubTypedTable(
+    table: Partial<NonNullable<FakeSheetProperties["table"]>> = {},
+  ) {
+    return stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            [tableHeaderRowIndex]: ["Name", "ID", "Amount"],
+          }),
+          table: {
+            endRowIndex: tableEndRowIndex,
+            endColumnIndex: startTableColIndex + 3,
+            columnDeclaredTypes: { [startTableColIndex]: "TEXT" },
+            ...table,
+          },
+        },
+      ],
+    });
+  }
+
+  function fetchedRaw(): SpreadsheetRaw {
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    return raw;
+  }
+
+  it("sends one full-list updateTable first in the batch, carrying every column's name and type", () => {
+    const { batchUpdateCalls } = stubTypedTable();
+    const raw = fetchedRaw();
+    raw.sheet(111).appendDataRow();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 2)
+      .updateDeclaredColumnType("DOUBLE");
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 1)
+      .updateDeclaredColumnType("TEXT");
+    raw.batchUpdateGSheets();
+
+    const requests = batchUpdateCalls[0]?.requests ?? [];
+    expect(requests.filter((request) => request.updateTable)).toHaveLength(1);
+    expect(requests[0]).toEqual({
+      updateTable: {
+        table: {
+          tableId: "fake-table-111",
+          columnProperties: [
+            { columnIndex: 0, columnName: "Name", columnType: "TEXT" },
+            { columnIndex: 1, columnName: "ID", columnType: "TEXT" },
+            { columnIndex: 2, columnName: "Amount", columnType: "DOUBLE" },
+          ],
+        },
+        fields: "columnProperties",
+      },
+    });
+    expect(requests[1]?.appendCells).toBeDefined();
+  });
+
+  it("keeps an untouched column's name and type through the full-list replace", () => {
+    stubTypedTable();
+    const raw = fetchedRaw();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 2)
+      .updateDeclaredColumnType("DOUBLE");
+    raw.batchUpdateGSheets();
+    raw.fetchAllSheetProperties();
+
+    expect(
+      raw.sheet(111).meta.column(startTableColIndex).activeDeclaredColumnType,
+    ).toBe("TEXT");
+    expect(
+      raw.sheet(111).meta.column(startTableColIndex + 1)
+        .activeDeclaredColumnType,
+    ).toBeUndefined();
+    expect(
+      raw.sheet(111).meta.column(startTableColIndex + 2)
+        .activeDeclaredColumnType,
+    ).toBe("DOUBLE");
+  });
+
+  it("fake: a columnProperties update replaces the whole list, so a column left out loses its type", () => {
+    stubTypedTable();
+    const raw = fetchedRaw();
+    raw.gatherRawRequest({
+      updateTable: {
+        table: {
+          tableId: "fake-table-111",
+          columnProperties: [
+            { columnIndex: 2, columnName: "Amount", columnType: "DOUBLE" },
+          ],
+        },
+        fields: "columnProperties",
+      },
+    });
+    raw.batchUpdateGSheets();
+    raw.fetchAllSheetProperties();
+
+    expect(
+      raw.sheet(111).meta.column(startTableColIndex).activeDeclaredColumnType,
+    ).toBeUndefined();
+    expect(
+      raw.sheet(111).meta.column(startTableColIndex + 2)
+        .activeDeclaredColumnType,
+    ).toBe("DOUBLE");
+  });
+
+  it("fake: rejects a columnProperties update carrying a column with no columnName", () => {
+    stubTypedTable();
+    const raw = fetchedRaw();
+    raw.gatherRawRequest({
+      updateTable: {
+        table: {
+          tableId: "fake-table-111",
+          columnProperties: [{ columnIndex: 2, columnType: "DOUBLE" }],
+        },
+        fields: "columnProperties",
+      },
+    });
+
+    expect(() => raw.batchUpdateGSheets()).toThrow(/columnName/);
+  });
+
+  it("refuses before sending anything when a column on the Table has a validation rule, naming the Table and those columns", () => {
+    const { batchUpdateCalls } = stubTypedTable({
+      columnValidationValues: { [startTableColIndex + 1]: ["a", "b"] },
+      columnValidationConditionTypes: {
+        [startTableColIndex + 1]: "ONE_OF_LIST",
+      },
+    });
+    const raw = fetchedRaw();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 2)
+      .updateDeclaredColumnType("DOUBLE");
+
+    expect(() => raw.batchUpdateGSheets()).toThrow(
+      /fake-table-111.*Leases.*ID/,
+    );
+    expect(batchUpdateCalls).toEqual([]);
+  });
+
+  it("refuses when the same flush inserts a column on that sheet", () => {
+    const { batchUpdateCalls } = stubTypedTable();
+    const raw = fetchedRaw();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 2)
+      .updateDeclaredColumnType("DOUBLE");
+    raw.sheet(111).addSheetChangeToSave({
+      action: "insertColumn",
+      startColumnIndex: startTableColIndex + 3,
+    });
+
+    expect(() => raw.batchUpdateGSheets()).toThrow(/inserts a column/);
+    expect(batchUpdateCalls).toEqual([]);
+  });
+
+  it("refuses a second update after a flush until the Table is refetched", () => {
+    const { batchUpdateCalls } = stubTypedTable();
+    const raw = fetchedRaw();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 2)
+      .updateDeclaredColumnType("DOUBLE");
+    raw.batchUpdateGSheets();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 1)
+      .updateDeclaredColumnType("TEXT");
+
+    expect(() => raw.batchUpdateGSheets()).toThrow(
+      /no fetched column properties/,
+    );
+    expect(batchUpdateCalls).toHaveLength(1);
+  });
+});

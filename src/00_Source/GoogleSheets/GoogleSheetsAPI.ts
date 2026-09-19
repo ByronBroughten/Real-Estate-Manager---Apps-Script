@@ -7,7 +7,6 @@ import type {
   SheetConditionalFormatSnapshot,
   SheetEditProtectionSnapshot,
   SpreadsheetSnapshot,
-  TableColumnSnapshot,
 } from "../RawSource/RawSource";
 import { cellDataRequests } from "./GoogleSheetsAPI/cellData";
 import { googleConditionalFormatRule } from "./GoogleSheetsAPI/conditionalFormats";
@@ -326,19 +325,13 @@ function localOperationToGoogleRequests(
           },
         },
       ];
-    case "updateTableColumnType":
-      throw new Error(
-        "updateTableColumnType must be combined into updateTableColumnProperties before flush.",
-      );
     case "updateTableColumnProperties":
       return [
         {
           updateTable: {
             table: {
               tableId: operation.tableId,
-              columnProperties: operation.columnProperties.map(
-                googleColumnProperties,
-              ),
+              columnProperties: operation.columnProperties,
             },
             fields: "columnProperties",
           },
@@ -353,36 +346,4 @@ function localOperationToGoogleRequests(
       );
     }
   }
-}
-
-function googleColumnProperties(
-  column: TableColumnSnapshot,
-): GoogleAppsScript.Sheets.Schema.TableColumnProperties {
-  const colProps: GoogleAppsScript.Sheets.Schema.TableColumnProperties = {
-    columnIndex: column.columnIndex ?? 0,
-  };
-  if (column.columnName !== undefined) {
-    colProps.columnName = column.columnName;
-  }
-  if (column.columnType !== undefined) {
-    colProps.columnType = column.columnType;
-  }
-  const values = column.dataValidationValues ?? [];
-  if (column.dataValidationConditionType !== undefined || values.length > 0) {
-    colProps.dataValidationRule = {
-      condition: {
-        ...(column.dataValidationConditionType !== undefined
-          ? { type: column.dataValidationConditionType }
-          : {}),
-        ...(values.length > 0
-          ? {
-              values: values.map((userEnteredValue) => ({
-                userEnteredValue,
-              })),
-            }
-          : {}),
-      },
-    };
-  }
-  return colProps;
 }

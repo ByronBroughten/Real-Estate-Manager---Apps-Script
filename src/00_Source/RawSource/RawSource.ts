@@ -107,7 +107,6 @@ export type LocalWriteOperation =
   | DeleteConditionalFormatRuleOperation
   | AddProtectedRangeOperation
   | DeleteProtectedRangeOperation
-  | UpdateTableColumnTypeOperation
   | UpdateTableColumnPropertiesOperation
   | OpaqueRawWriteOperation;
 
@@ -190,17 +189,17 @@ export interface DeleteProtectedRangeOperation {
   protectedRangeId: number;
 }
 
-export interface UpdateTableColumnTypeOperation {
-  kind: "updateTableColumnType";
-  tableId: string;
-  columnIndex: number;
-  columnType: string;
-}
-
+// Replaces the Table's whole column list, so it carries every column.
 export interface UpdateTableColumnPropertiesOperation {
   kind: "updateTableColumnProperties";
   tableId: string;
-  columnProperties: TableColumnSnapshot[];
+  columnProperties: TableColumnPropertiesUpdate[];
+}
+
+export interface TableColumnPropertiesUpdate {
+  columnIndex: number;
+  columnName: string;
+  columnType?: string;
 }
 
 export interface OpaqueRawWriteOperation {

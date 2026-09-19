@@ -449,27 +449,59 @@ function replaySheetRequest(
   return replayProtectedRangeRequest(sheets, request, nextProtectedRangeId);
 }
 
+// Like the live API: the sent list replaces the Table's, and every column needs a name.
 function replayUpdateTableRequest(
   sheets: FakeSheetProperties[],
   request: GoogleAppsScript.Sheets.Schema.Request,
 ): void {
-  const table = request.updateTable?.table;
-  if (table?.tableId === undefined) return;
+  const update = request.updateTable;
+  const table = update?.table;
+  if (table?.tableId === undefined || update?.fields !== "columnProperties") {
+    return;
+  }
   const sheet = sheets.find(
     (candidate) => `fake-table-${candidate.sheetId}` === table.tableId,
   );
   if (sheet?.table === undefined) return;
   const tableState = sheet.table;
-  tableState.columnDeclaredTypes ??= {};
-  const declaredTypes = tableState.columnDeclaredTypes;
   const startColumnIndex = tableStartColumnIndex(tableState);
-  (table.columnProperties ?? []).forEach((column) => {
-    if (column.columnType === undefined) {
-      return;
+  const headerRowIndex =
+    tableState.startRowIndex ?? ssConfigGet("tableHeaderRowIndexBase0");
+  const columnProperties = table.columnProperties ?? [];
+  columnProperties.forEach((column) => {
+    if (column.columnName === undefined || column.columnName === "") {
+      throw new Error(
+        `Invalid requests[0].updateTable: column ${column.columnIndex ?? 0} has no columnName.`,
+      );
     }
-    declaredTypes[startColumnIndex + (column.columnIndex ?? 0)] =
-      column.columnType;
   });
+  tableState.columnDeclaredTypes = {};
+  tableState.columnValidationValues = {};
+  tableState.columnValidationConditionTypes = {};
+  const {
+    columnDeclaredTypes,
+    columnValidationValues,
+    columnValidationConditionTypes,
+  } = tableState;
+  const rows = [...(sheet.rows ?? [])];
+  const headerRow = [...(rows[headerRowIndex] ?? [])];
+  columnProperties.forEach((column) => {
+    const colIndex = startColumnIndex + (column.columnIndex ?? 0);
+    headerRow[colIndex] = column.columnName ?? null;
+    if (column.columnType !== undefined) {
+      columnDeclaredTypes[colIndex] = column.columnType;
+    }
+    const condition = column.dataValidationRule?.condition;
+    if (condition?.type !== undefined) {
+      columnValidationConditionTypes[colIndex] = condition.type;
+    }
+    const values = (condition?.values ?? []).flatMap((value) =>
+      value.userEnteredValue === undefined ? [] : [value.userEnteredValue],
+    );
+    if (values.length > 0) columnValidationValues[colIndex] = values;
+  });
+  rows[headerRowIndex] = Array.from(headerRow, (cell) => cell ?? null);
+  sheet.rows = rows;
 }
 
 function replayProtectedRangeRequest(

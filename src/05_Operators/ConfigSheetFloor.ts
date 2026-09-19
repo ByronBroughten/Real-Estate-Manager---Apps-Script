@@ -32,7 +32,7 @@ interface FloorDeclaration {
 interface EnsureSheetColumnTypesProps<SN extends FloorSheetName> {
   sheetName: SN;
   columns: readonly { header: string; columnType: string }[];
-  setTypes: string[];
+  typeChangeLines: string[];
 }
 
 /**
@@ -78,7 +78,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
   }
   private _ensureColumnTypes(report: string[]): void {
-    const setTypes: string[] = [];
+    const typeChangeLines: string[] = [];
     this._ensureSheetColumnTypes({
       sheetName: "spreadsheetConfig",
       columns: [
@@ -87,26 +87,26 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
           (endpoint) => [endpoint.timeLastRan, endpoint.runStatus],
         ),
       ],
-      setTypes,
+      typeChangeLines,
     });
     this._ensureSheetColumnTypes({
       sheetName: "sheetConfig",
       columns: configSheetFloorSeed.sheetConfig.columns,
-      setTypes,
+      typeChangeLines,
     });
     this._ensureSheetColumnTypes({
       sheetName: "columnConfig",
       columns: configSheetFloorSeed.columnConfig.columns,
-      setTypes,
+      typeChangeLines,
     });
-    if (setTypes.length > 0) {
-      report.push(`Set column types: ${setTypes.join("; ")}`);
+    if (typeChangeLines.length > 0) {
+      report.push(`Set column types: ${typeChangeLines.join("; ")}`);
     }
   }
   private _ensureSheetColumnTypes<SN extends FloorSheetName>({
     sheetName,
     columns,
-    setTypes,
+    typeChangeLines,
   }: EnsureSheetColumnTypesProps<SN>): void {
     const sheet = this.ss.sheet(sheetName);
     columns.forEach((seedColumn) => {
@@ -117,7 +117,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
         return;
       }
       column.meta.updateDeclaredColumnType(seedColumn.columnType);
-      setTypes.push(
+      typeChangeLines.push(
         `${floorColumnIdentity(column)} → ${seedColumn.columnType}`,
       );
     });

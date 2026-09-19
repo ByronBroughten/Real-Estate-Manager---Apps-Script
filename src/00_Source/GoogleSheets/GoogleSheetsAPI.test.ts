@@ -137,7 +137,6 @@ describe("GoogleSheetsAPI write mapping", () => {
             columnIndex: 2,
             columnName: "Amount",
             columnType: "TEXT",
-            dataValidationValues: [],
           },
         ],
       },

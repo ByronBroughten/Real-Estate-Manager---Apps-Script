@@ -21,7 +21,6 @@ import type {
   SortOperation,
   TableColumnSnapshot,
   UpdateCellOperation,
-  UpdateTableColumnTypeOperation,
 } from "../../00_Source/RawSource/RawSource";
 import type { RgbColor } from "../../00_Source/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
@@ -57,6 +56,15 @@ export interface UpdateRequests {
   addProtectedRange: AddProtectedRangeOperation[];
   updateTableColumnType: UpdateTableColumnTypeOperation[];
   raw: OpaqueRawWriteOperation[];
+}
+
+// Queue-only: the flusher folds each Table's into one updateTableColumnProperties.
+export interface UpdateTableColumnTypeOperation {
+  kind: "updateTableColumnType";
+  sheetId: number;
+  tableId: string;
+  columnIndex: number;
+  columnType: string;
 }
 
 export type SheetsStateRaw = Map<SheetId, SheetStateRaw>;

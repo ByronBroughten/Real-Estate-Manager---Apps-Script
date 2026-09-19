@@ -240,23 +240,18 @@ const requestBody = {
     update: GoogleAppsScript.Sheets.Schema.UpdateTableRequest | undefined,
   ): string {
     const table = update?.table;
-    const columnProperties = table?.columnProperties ?? [];
-    const typed = columnProperties.flatMap((column) =>
-      column.columnType === undefined ? [] : [column.columnType],
+    const columnProperties = [...(table?.columnProperties ?? [])].sort(
+      (a, b) => (a.columnIndex ?? 0) - (b.columnIndex ?? 0),
     );
-    if (columnProperties.length <= 1) {
-      const column = columnProperties[0];
-      return columns(
-        table?.tableId ?? "(no table)",
-        column?.columnIndex === undefined ? "" : `col ${column.columnIndex}`,
-        column?.columnType ?? "",
-        label.fields(update?.fields),
-      );
-    }
     return columns(
       table?.tableId ?? "(no table)",
       `${columnProperties.length} cols`,
-      typed.join(", "),
+      columnProperties
+        .map(
+          (column) =>
+            `${column.columnName ?? `col ${column.columnIndex ?? 0}`}: ${column.columnType ?? "—"}`,
+        )
+        .join(", "),
       label.fields(update?.fields),
     );
   },
