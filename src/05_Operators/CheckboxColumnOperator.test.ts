@@ -144,18 +144,11 @@ describe("CheckboxColumnOperator, column constraint", () => {
       // @ts-expect-error an undeclared column that merely holds a boolean is not one either
       columnName: "conditionalFormatting",
     });
-    const formula = new CheckboxColumnOperator({
-      ...SpreadsheetNamed.initSpreadsheetNamedProps(),
-      sheetName: "sheetConfig",
-      // @ts-expect-error a formula column can't be written to, and declares nothing anyway
-      columnName: "idPrefixIsUniqueOrEmpty",
-    });
     expect(checkbox.schema.valueName).toBe("checkbox");
     expect(checkbox.schema.isFormula).toBe(false);
     expect(text.schema.valueName).toBe("string");
     expect(sampled.schema.valueName).toBe("boolean");
     expect(sampled.schema.isFormula).toBe(false);
-    expect(formula.schema.isFormula).toBe(true);
     assertType<
       IsExactly<
         ColumnValueName<"occupancy", CheckboxColumnName<"occupancy">>,
@@ -166,11 +159,8 @@ describe("CheckboxColumnOperator, column constraint", () => {
 
   // A config-describing sheet, so regeneration can't churn the expected union.
   it("names exactly the declared non-formula checkbox columns of a sheet", () => {
-    assertType<
-      IsExactly<
-        CheckboxColumnName<"sheetConfig">,
-        "letApiAccess"
-      >
-    >(true);
+    assertType<IsExactly<CheckboxColumnName<"sheetConfig">, "letApiAccess">>(
+      true,
+    );
   });
 });

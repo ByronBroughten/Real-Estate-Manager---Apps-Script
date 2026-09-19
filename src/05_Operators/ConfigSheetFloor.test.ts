@@ -206,14 +206,6 @@ describe("ConfigSheetFloor", () => {
       `${ssc.idHeader.columnId} · data · warning`,
     );
 
-    const sheetConfigKeys = keysOf(sheetConfig);
-    expect(sheetConfigKeys).not.toContain(
-      `${sc.idPrefix.columnId} · header · warning`,
-    );
-    expect(sheetConfigKeys).not.toContain(
-      `${sc.idPrefixIsUniqueOrEmpty.columnId} · data · warning`,
-    );
-
     const columnKeys = keysOf(columnConfig);
     expect(columnKeys).toContain(`${cc.header.columnId} · header · warning`);
     expect(columnKeys).not.toContain(

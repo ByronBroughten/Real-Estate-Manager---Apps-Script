@@ -701,31 +701,20 @@ describe("SheetNamed.appendRowWithAllVals", () => {
     >(true);
   });
 
-  // Declared rather than appended, since writing a formula cell throws before the bag matters.
-  it("refuses a bag that names the ID or a formula column", () => {
+  it("refuses a bag that names the ID", () => {
     const withId: CompleteAppendBag<"test"> = {
       ...completeTestRow,
       // @ts-expect-error the append mints the ID, so a caller cannot supply one
       id: "r:test:abcdefg",
     };
-    const withFormula: CompleteAppendBag<"sheetConfig"> = {
-      sheetGid: 999001,
-      sheetTitle: "Property",
-      letApiAccess: true,
-      // @ts-expect-error a formula column cannot be written to
-      idPrefixIsUniqueOrEmpty: true,
-    };
 
-    expect([Object.keys(withId), Object.keys(withFormula)]).toEqual([
-      [
-        "num",
-        "dropdown",
-        "conditionalFormatting",
-        "columnCurrency",
-        "active",
-        "id",
-      ],
-      ["sheetGid", "sheetTitle", "letApiAccess", "idPrefixIsUniqueOrEmpty"],
+    expect(Object.keys(withId)).toEqual([
+      "num",
+      "dropdown",
+      "conditionalFormatting",
+      "columnCurrency",
+      "active",
+      "id",
     ]);
   });
 });

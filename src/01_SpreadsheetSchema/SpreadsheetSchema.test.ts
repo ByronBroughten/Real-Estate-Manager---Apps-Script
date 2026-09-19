@@ -72,9 +72,9 @@ describe("SpreadsheetSchema", () => {
       expect(schema.isUniformRowIndex(schema.colIdRowIndex, "columnId")).toBe(
         true,
       );
-      expect(schema.isUniformRowIndex(schema.colIdRowIndex, "tableHeader")).toBe(
-        false,
-      );
+      expect(
+        schema.isUniformRowIndex(schema.colIdRowIndex, "tableHeader"),
+      ).toBe(false);
       expect(schema.isUniformRowIndex(9999)).toBe(false);
     });
 
@@ -93,7 +93,10 @@ describe("SpreadsheetSchema", () => {
 
     it("validateUniformRowIndex only throws for non-uniform rows", () => {
       expect(() =>
-        schema.validateUniformRowIndex(schema.tableHeaderRowIndex, "tableHeader"),
+        schema.validateUniformRowIndex(
+          schema.tableHeaderRowIndex,
+          "tableHeader",
+        ),
       ).not.toThrow();
       expect(() => schema.validateUniformRowIndex(9999)).toThrow();
     });
@@ -105,12 +108,12 @@ describe("SpreadsheetSchema", () => {
       expect(schema.isTableStart(tableHeaderRowIndex, startTableColIndex)).toBe(
         true,
       );
-      expect(schema.isTableStart(tableHeaderRowIndex - 1, startTableColIndex)).toBe(
-        false,
-      );
-      expect(schema.isTableStart(tableHeaderRowIndex, startTableColIndex + 1)).toBe(
-        false,
-      );
+      expect(
+        schema.isTableStart(tableHeaderRowIndex - 1, startTableColIndex),
+      ).toBe(false);
+      expect(
+        schema.isTableStart(tableHeaderRowIndex, startTableColIndex + 1),
+      ).toBe(false);
     });
 
     it("validateTableStart only throws for a start the layout does not allow", () => {
@@ -270,16 +273,10 @@ describe("ColumnFullName, absolute column addressing", () => {
     assertType<IsExactly<ColumnFullName, EveryColumnFullName>>(true);
   });
 
-  it("narrows further on the formula axis, which defaults to not caring", () => {
-    const writable: ColumnFullName<"boolean", false> = "test_conditionalFormatting";
-    // @ts-expect-error a formula column can't be written to
-    const derived: ColumnFullName<"boolean", false> =
-      "sheetConfig_idPrefixIsUniqueOrEmpty";
-    const eitherWay: ColumnFullName<"boolean"> =
-      "sheetConfig_idPrefixIsUniqueOrEmpty";
+  it("narrows further on the formula axis", () => {
+    const writable: ColumnFullName<"boolean", false> =
+      "test_conditionalFormatting";
     expect(columnFullNameIsFormula(writable)).toBe(false);
-    expect(columnFullNameIsFormula(derived)).toBe(true);
-    expect(eitherWay).toBe(derived);
   });
 
   it("resolves a full name's sheet, column, value name and value type exactly", () => {

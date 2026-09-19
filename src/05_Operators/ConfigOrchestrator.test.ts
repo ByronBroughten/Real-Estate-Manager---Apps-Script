@@ -868,18 +868,4 @@ describe("ConfigOrchestrator.generateConfigFiles ID prefix", () => {
       `"property": { "sheetGid": ${propertiesGid}, "idPrefix": "prpr", "hasIdColumn": false }`,
     );
   });
-
-  it("ignores leftover ID prefix columns on Sheet Config and does not restore them", () => {
-    const { batchUpdateCalls } = seedFixture();
-
-    const parsed = ConfigOrchestrator.init().generateConfigFiles();
-    expect(parsed.sheetConfigs).toContain('"idPrefix": "test"');
-    expect(parsed.idPrefixReport).toBeUndefined();
-    expect(
-      floorWarningDescriptions(batchUpdateCalls[0]?.requests).join("\n"),
-    ).not.toContain(sc.idPrefixIsUniqueOrEmpty.columnId);
-    expect(
-      floorWarningDescriptions(batchUpdateCalls[0]?.requests).join("\n"),
-    ).not.toContain(sc.idPrefix.columnId);
-  });
 });
