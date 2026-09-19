@@ -1,3 +1,24 @@
+import type { TableColumnType } from "../00_Source/RawSource/RawSource";
+
+export interface FloorSeedColumn {
+  header: string;
+  columnType: TableColumnType;
+}
+
+interface FloorSeedSheet {
+  title: string;
+  tableName: string;
+  columns: readonly (FloorSeedColumn & { columnGroupHeading: string })[];
+  endpoints?: Record<
+    string,
+    {
+      heading: string;
+      timeLastRan: FloorSeedColumn;
+      runStatus: FloorSeedColumn;
+    }
+  >;
+}
+
 export const configSheetFloorSeed = {
   spreadsheetConfig: {
     title: "Spreadsheet Config",
@@ -95,4 +116,4 @@ export const configSheetFloorSeed = {
     tableName: "valueConfig",
     columns: [],
   },
-} as const;
+} as const satisfies Record<string, FloorSeedSheet>;

@@ -69,12 +69,30 @@ export interface TableSnapshot {
 }
 
 export interface TableColumnSnapshot {
-  columnIndex?: number;
+  columnIndex: number;
   columnName?: string;
   columnType?: string;
   dataValidationValues: string[];
   dataValidationConditionType?: string;
 }
+
+// Google's Table column type enum, for writes; reads stay string so an unknown type resends unchanged.
+export type TableColumnType =
+  | "COLUMN_TYPE_UNSPECIFIED"
+  | "DOUBLE"
+  | "CURRENCY"
+  | "PERCENT"
+  | "DATE"
+  | "TIME"
+  | "DATE_TIME"
+  | "TEXT"
+  | "BOOLEAN"
+  | "DROPDOWN"
+  | "FILES_CHIP"
+  | "PEOPLE_CHIP"
+  | "FINANCE_CHIP"
+  | "PLACE_CHIP"
+  | "RATINGS_CHIP";
 
 export interface GridBlockSnapshot {
   startColumn: number;

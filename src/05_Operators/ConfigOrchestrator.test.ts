@@ -64,7 +64,7 @@ function floorSeedType(
     .find((entry) => entry.header === header)?.columnType;
 }
 
-function declaredTypesByHeader(
+function columnTypesByHeader(
   sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
   headers: readonly string[],
 ): Record<number, string> {
@@ -127,7 +127,7 @@ function spreadsheetConfigSheet(
       startColumnIndex: startTableColIndex,
       endRowIndex: options.tableEndRowIndex ?? 5,
       endColumnIndex: sscColumns.length,
-      columnDeclaredTypes: declaredTypesByHeader("spreadsheetConfig", headers),
+      columnTypes: columnTypesByHeader("spreadsheetConfig", headers),
     },
     protectedRanges: options.protectedRanges,
   };
@@ -210,7 +210,7 @@ function seedFixture(
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: options.sheetConfigTableEndRowIndex ?? 5,
-          columnDeclaredTypes: declaredTypesByHeader("sheetConfig", [
+          columnTypes: columnTypesByHeader("sheetConfig", [
             sc.sheetGid.header,
             sc.sheetTitle.header,
             sc.letApiAccess.header,
@@ -238,7 +238,7 @@ function seedFixture(
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
-          columnDeclaredTypes: {
+          columnTypes: {
             0: "DOUBLE",
             1: "TEXT",
             2: "TEXT",

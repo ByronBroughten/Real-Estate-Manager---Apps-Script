@@ -72,7 +72,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     this.sheetState.working.columnStates.forEach((columnState) => {
       delete columnState.validationValues;
       delete columnState.validationConditionType;
-      delete columnState.declaredType;
+      delete columnState.columnType;
     });
   }
   private _parseColumnProperties(
@@ -81,8 +81,8 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
   ): void {
     this._clearColumnPropertyFields();
     table.columnProperties.forEach((colProps) => {
-      // The API omits columnIndex when it's zero, and states it table-relative.
-      const colIndex = startColumnIndex + (colProps.columnIndex ?? 0);
+      // The API states columnIndex table-relative.
+      const colIndex = startColumnIndex + colProps.columnIndex;
       const columnState = this._ensureColumnState(colIndex);
       if (colProps.dataValidationValues.length > 0) {
         columnState.validationValues = colProps.dataValidationValues;
@@ -92,7 +92,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
           colProps.dataValidationConditionType;
       }
       if (colProps.columnType !== undefined) {
-        columnState.declaredType = colProps.columnType;
+        columnState.columnType = colProps.columnType;
       }
     });
   }

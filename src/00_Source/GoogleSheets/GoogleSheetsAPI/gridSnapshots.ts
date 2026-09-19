@@ -83,7 +83,8 @@ function toTableColumnSnapshot(
     .map((conditionValue) => conditionValue.userEnteredValue)
     .filter((value): value is string => value !== undefined);
   return {
-    columnIndex: colProps.columnIndex,
+    // The API omits columnIndex when it's zero.
+    columnIndex: colProps.columnIndex ?? 0,
     ...(colProps.columnName !== undefined
       ? { columnName: colProps.columnName }
       : {}),

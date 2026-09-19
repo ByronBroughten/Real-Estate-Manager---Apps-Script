@@ -1010,4 +1010,14 @@ describe("Named formula writes", () => {
 
     expect(formulaWriteTypeGate).toEqual(expect.any(Function));
   });
+
+  it("rejects a misspelled column type at the type level", () => {
+    function columnTypeGate(column: ColumnNamed<"test", "num">) {
+      column.meta.updateColumnType("DOUBLE");
+      // @ts-expect-error DOUBEL is not a Table column type
+      column.meta.updateColumnType("DOUBEL");
+    }
+
+    expect(columnTypeGate).toEqual(expect.any(Function));
+  });
 });

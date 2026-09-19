@@ -84,13 +84,13 @@ export interface FakeSheetProperties {
     /**
      * A column's declared Sheets column type (e.g. `"CURRENCY"`, `"DATE"`,
      * `"BOOLEAN"`), keyed by absolute column index — read by
-     * `ColumnMetaRaw.activeDeclaredColumnType`, which `ColumnConfigOperator`'s
+     * `ColumnMetaRaw.activeColumnType`, which `ColumnConfigOperator`'s
      * valueName derivation consults before falling back to the top-row
      * sample. Omit a column here to leave it untyped (Automatic), which is
      * what the real API reports for a column whose type was never set.
      * GET/replay convert this key to Google's table-relative `columnIndex`.
      */
-    columnDeclaredTypes?: Record<number, string>;
+    columnTypes?: Record<number, string>;
   };
   extraTables?: readonly {
     endRowIndex: number;
@@ -282,7 +282,7 @@ function fakeTableColumnProperties(
   const {
     columnValidationValues = {},
     columnValidationConditionTypes = {},
-    columnDeclaredTypes = {},
+    columnTypes = {},
   } = table;
   const range = fakeTableRange(sheet, table);
   const startColumnIndex = range.startColumnIndex ?? 0;
@@ -303,7 +303,7 @@ function fakeTableColumnProperties(
       if (columnName !== undefined) {
         colProps.columnName = columnName;
       }
-      const columnType = columnDeclaredTypes[colIndex];
+      const columnType = columnTypes[colIndex];
       if (columnType) {
         colProps.columnType = columnType;
       }
@@ -475,11 +475,11 @@ function replayUpdateTableRequest(
       );
     }
   });
-  tableState.columnDeclaredTypes = {};
+  tableState.columnTypes = {};
   tableState.columnValidationValues = {};
   tableState.columnValidationConditionTypes = {};
   const {
-    columnDeclaredTypes,
+    columnTypes,
     columnValidationValues,
     columnValidationConditionTypes,
   } = tableState;
@@ -489,7 +489,7 @@ function replayUpdateTableRequest(
     const colIndex = startColumnIndex + (column.columnIndex ?? 0);
     headerRow[colIndex] = column.columnName ?? null;
     if (column.columnType !== undefined) {
-      columnDeclaredTypes[colIndex] = column.columnType;
+      columnTypes[colIndex] = column.columnType;
     }
     const condition = column.dataValidationRule?.condition;
     if (condition?.type !== undefined) {

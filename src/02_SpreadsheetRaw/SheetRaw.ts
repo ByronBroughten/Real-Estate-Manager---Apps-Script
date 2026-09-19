@@ -14,9 +14,12 @@ import {
 import type {
   GridRangeProps,
   SheetSnapshot,
+  TableColumnPropertiesUpdate,
+  TableColumnSnapshot,
 } from "../00_Source/RawSource/RawSource";
 import type { Value } from "../01_SpreadsheetSchema/valueSchemas";
 import { Arr } from "../utils/Arr";
+import { Val } from "../utils/Val";
 import { assertValueAndFormulaExclusive } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
@@ -24,6 +27,7 @@ import {
   type ColumnFill,
   type FindReplaceTerms,
   type SortParameters,
+  type UpdateTableColumnTypeOperation,
 } from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";
@@ -441,6 +445,87 @@ export class SheetRaw extends SheetCommonRaw {
       this.ensureColIndexIsStale(startColumnIndex);
     }
   }
+  gatherColumnTypesRequest(ops: UpdateTableColumnTypeOperation[]): void {
+    this._assertColumnTypesUpdateAllowed(ops);
+    this.updateRequests.updateTableColumnProperties.push({
+      kind: "updateTableColumnProperties",
+      tableId: this.activeTable.tableId,
+      columnProperties: this._columnTypesColumnProperties(ops),
+    });
+  }
+  markColumnPropertiesStale(): void {
+    this.activeTable.markColumnPropertiesStale();
+  }
+  private _assertColumnTypesUpdateAllowed(
+    ops: UpdateTableColumnTypeOperation[],
+  ): void {
+    const tableId = Val.assert(ops[0], "queued column type").tableId;
+    const tableLabel = this._tableLabel(tableId);
+    if (
+      this.sheetState.working.knownTable === null ||
+      this.activeTable.tableId !== tableId ||
+      ops.some((operation) => operation.tableId !== tableId)
+    ) {
+      throw new Error(`${tableLabel} is not the fetched Table on that sheet.`);
+    }
+    const fetched = this.activeTable.columnProperties;
+    if (fetched.length === 0) {
+      throw new Error(
+        `${tableLabel} has no fetched column properties; refetch it before setting a column type.`,
+      );
+    }
+    if (
+      this.updateRequests.insertColumn.some(
+        ({ sheetId }) => sheetId === this.sheetGid,
+      )
+    ) {
+      throw new Error(
+        `Refusing to set column types on ${tableLabel}: the same flush inserts a column on that sheet.`,
+      );
+    }
+    const validated = fetched.filter(
+      (column) =>
+        column.dataValidationConditionType !== undefined ||
+        column.dataValidationValues.length > 0,
+    );
+    if (validated.length > 0) {
+      throw new Error(
+        `Refusing to set column types on ${tableLabel}: it would reset the dropdown style and colours on its validated columns ${validated.map(columnLabel).join(", ")}.`,
+      );
+    }
+    ops.forEach(({ columnIndex }) => {
+      if (!fetched.some((column) => column.columnIndex === columnIndex)) {
+        throw new Error(
+          `${tableLabel} has no fetched ${tableColumnLabel(columnIndex)}.`,
+        );
+      }
+    });
+  }
+  // Full list, since a partial columnProperties replaces the rest.
+  private _columnTypesColumnProperties(
+    ops: UpdateTableColumnTypeOperation[],
+  ): TableColumnPropertiesUpdate[] {
+    const typeByIndex = new Map<number, string>(
+      ops.map((operation) => [operation.columnIndex, operation.columnType]),
+    );
+    return this.activeTable.columnProperties.map((column) => {
+      const { columnIndex } = column;
+      if (column.columnName === undefined) {
+        throw new Error(
+          `${this._tableLabel(this.activeTable.tableId)} ${tableColumnLabel(columnIndex)} has no columnName; refusing to replace column properties.`,
+        );
+      }
+      const columnType = typeByIndex.get(columnIndex) ?? column.columnType;
+      return {
+        columnIndex,
+        columnName: column.columnName,
+        ...(columnType !== undefined ? { columnType } : {}),
+      };
+    });
+  }
+  private _tableLabel(tableId: string): string {
+    return `Table ${tableId} on "${this.title}"`;
+  }
   gatherSortRequest({ colIdxToSortBy, sortOrder }: SortParameters): void {
     this.updateRequests.sort.push({
       kind: "sort",
@@ -462,4 +547,12 @@ export class SheetRaw extends SheetCommonRaw {
     }
     return row;
   }
+}
+
+function columnLabel(column: TableColumnSnapshot): string {
+  return column.columnName ?? tableColumnLabel(column.columnIndex);
+}
+
+function tableColumnLabel(columnIndex: number): string {
+  return `table column ${columnIndex}`;
 }

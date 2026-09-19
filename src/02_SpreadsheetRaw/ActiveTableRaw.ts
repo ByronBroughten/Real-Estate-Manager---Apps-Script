@@ -1,3 +1,4 @@
+import type { TableColumnSnapshot } from "../00_Source/RawSource/RawSource";
 import { Val } from "../utils/Val";
 import type { SheetRawProps } from "./ClassBases/SheetBaseRaw";
 import type {
@@ -36,6 +37,9 @@ export class ActiveTableRaw {
   set endColumnIndex(endColumnIndex: number) {
     this._knownTable().endColumnIndex = endColumnIndex;
   }
+  get columnProperties(): TableColumnSnapshot[] {
+    return this._knownTable().columnProperties;
+  }
   get rowIndexesAreStale(): boolean {
     return this._knownTable().rowIndexesAreStale;
   }
@@ -50,6 +54,10 @@ export class ActiveTableRaw {
   }
   clearRowIndexStale(): void {
     this._knownTable().rowIndexesAreStale = false;
+  }
+  // The sent list is now the Table's, and what was fetched no longer is.
+  markColumnPropertiesStale(): void {
+    this._knownTable().columnProperties = [];
   }
   assertKnown(): void {
     this._knownTable();

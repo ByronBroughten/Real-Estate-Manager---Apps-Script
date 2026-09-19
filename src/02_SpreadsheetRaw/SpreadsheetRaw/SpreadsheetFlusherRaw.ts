@@ -1,8 +1,3 @@
-import type {
-  TableColumnSnapshot,
-  UpdateTableColumnPropertiesOperation,
-} from "../../00_Source/RawSource/RawSource";
-import { Val } from "../../utils/Val";
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetChanges,
@@ -34,7 +29,9 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       this.updateRequests.updateTableColumnType.map(({ sheetId }) => sheetId),
     );
     this._sendUpdateRequests();
-    this._clearFetchedColumnProperties(sheetGidsWithColumnTypeUpdates);
+    sheetGidsWithColumnTypeUpdates.forEach((sheetGid) =>
+      this.ss.sheet(sheetGid).markColumnPropertiesStale(),
+    );
     // Row indexes only actually shift once the deletes have been sent.
     sheetGidsWithRowDeletes.forEach((sheetGid) =>
       this.ss.sheet(sheetGid).markRowIndexesStale(),
@@ -56,6 +53,19 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       state.writeQueue.sheet = emptySheetChanges();
       state.writeQueue.rows = new Map();
     });
+    // After the sheet queues, so the insert-column refusal sees this flush's inserts.
+    this._gatherColumnTypesRequests();
+  }
+  private _gatherColumnTypesRequests() {
+    const opsBySheet = new Map<number, UpdateTableColumnTypeOperation[]>();
+    this.updateRequests.updateTableColumnType.forEach((operation) => {
+      const ops = opsBySheet.get(operation.sheetId) ?? [];
+      ops.push(operation);
+      opsBySheet.set(operation.sheetId, ops);
+    });
+    opsBySheet.forEach((ops, sheetGid) =>
+      this.ss.sheet(sheetGid).gatherColumnTypesRequest(ops),
+    );
   }
   private _gatherSheetRequests(sheetGid: number, change: SheetChangesToSave) {
     if (change.insertColumn !== null) {
@@ -122,7 +132,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     const requests = this.updateRequests;
     const operations = [
       // First, so a header write in the same batch renames the column rather than being reverted.
-      ...this._tableColumnPropertiesOperations(),
+      ...requests.updateTableColumnProperties,
       ...requests.append,
       ...requests.insertColumn,
       // Fills go before updates, so a per-cell write on a filled column wins.
@@ -141,94 +151,6 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     ];
     this.spreadsheetStateRaw.rawSource.flush(this.spreadsheetId, operations);
     this.spreadsheetStateRaw.writeQueue.updateRequests = emptyUpdateRequests();
-  }
-  private _tableColumnPropertiesOperations(): UpdateTableColumnPropertiesOperation[] {
-    const opsBySheet = new Map<number, UpdateTableColumnTypeOperation[]>();
-    this.updateRequests.updateTableColumnType.forEach((operation) => {
-      const ops = opsBySheet.get(operation.sheetId) ?? [];
-      ops.push(operation);
-      opsBySheet.set(operation.sheetId, ops);
-    });
-    return Array.from(opsBySheet, ([sheetGid, ops]) =>
-      this._tableColumnPropertiesOperation(sheetGid, ops),
-    );
-  }
-  private _tableColumnPropertiesOperation(
-    sheetGid: number,
-    ops: UpdateTableColumnTypeOperation[],
-  ): UpdateTableColumnPropertiesOperation {
-    const { title, knownTable } = Val.assert(
-      this.sheetsStateRaw.get(sheetGid),
-      `sheet state ${sheetGid}`,
-    ).working;
-    const tableId = Val.assert(ops[0], "queued column type").tableId;
-    const tableLabel = `Table ${tableId} on "${title}"`;
-    if (
-      knownTable?.tableId !== tableId ||
-      ops.some((operation) => operation.tableId !== tableId)
-    ) {
-      throw new Error(`${tableLabel} is not the fetched Table on that sheet.`);
-    }
-    const snapshot = knownTable.columnProperties;
-    if (snapshot.length === 0) {
-      throw new Error(
-        `${tableLabel} has no fetched column properties; refetch it before setting a column type.`,
-      );
-    }
-    if (
-      this.updateRequests.insertColumn.some((op) => op.sheetId === sheetGid)
-    ) {
-      throw new Error(
-        `Refusing to set column types on ${tableLabel}: the same flush inserts a column on that sheet.`,
-      );
-    }
-    const validated = snapshot.filter(
-      (column) =>
-        column.dataValidationConditionType !== undefined ||
-        column.dataValidationValues.length > 0,
-    );
-    if (validated.length > 0) {
-      throw new Error(
-        `Refusing to set column types on ${tableLabel}: it would reset the dropdown style and colours on its validated columns ${validated.map(columnLabel).join(", ")}.`,
-      );
-    }
-    const typeByIndex = new Map(
-      ops.map((operation) => [operation.columnIndex, operation.columnType]),
-    );
-    typeByIndex.forEach((_columnType, columnIndex) => {
-      if (
-        !snapshot.some((column) => (column.columnIndex ?? 0) === columnIndex)
-      ) {
-        throw new Error(
-          `${tableLabel} has no fetched ${tableColumnLabel(columnIndex)}.`,
-        );
-      }
-    });
-    return {
-      kind: "updateTableColumnProperties",
-      tableId: knownTable.tableId,
-      columnProperties: snapshot.map((column) => {
-        const columnIndex = column.columnIndex ?? 0;
-        if (column.columnName === undefined) {
-          throw new Error(
-            `${tableLabel} ${tableColumnLabel(columnIndex)} has no columnName; refusing to replace column properties.`,
-          );
-        }
-        const columnType = typeByIndex.get(columnIndex) ?? column.columnType;
-        return {
-          columnIndex,
-          columnName: column.columnName,
-          ...(columnType !== undefined ? { columnType } : {}),
-        };
-      }),
-    };
-  }
-  // The sent list is now the Table's, and what was fetched no longer is.
-  private _clearFetchedColumnProperties(sheetGids: Set<number>) {
-    sheetGids.forEach((sheetGid) => {
-      const knownTable = this.sheetsStateRaw.get(sheetGid)?.working.knownTable;
-      if (knownTable) knownTable.columnProperties = [];
-    });
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
@@ -250,12 +172,4 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       this.ss.sheet(sheetGid).invalidateCellState(),
     );
   }
-}
-
-function columnLabel(column: TableColumnSnapshot): string {
-  return column.columnName ?? tableColumnLabel(column.columnIndex ?? 0);
-}
-
-function tableColumnLabel(columnIndex: number): string {
-  return `table column ${columnIndex}`;
 }

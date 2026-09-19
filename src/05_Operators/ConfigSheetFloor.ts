@@ -9,7 +9,10 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
-import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  type FloorSeedColumn,
+} from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
@@ -27,12 +30,6 @@ interface FloorDeclaration {
   range: ProtectionGridRange;
   unprotectedRanges: ProtectionGridRange[];
   queueAdd: () => void;
-}
-
-interface EnsureSheetColumnTypesProps<SN extends FloorSheetName> {
-  sheetName: SN;
-  columns: readonly { header: string; columnType: string }[];
-  typeChangeLines: string[];
 }
 
 /**
@@ -70,48 +67,27 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
   }
   private _ensureColumnTypes(report: string[]): void {
-    const typeChangeLines: string[] = [];
-    this._ensureSheetColumnTypes({
-      sheetName: "spreadsheetConfig",
-      columns: [
-        ...configSheetFloorSeed.spreadsheetConfig.columns,
-        ...Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
-          (endpoint) => [endpoint.timeLastRan, endpoint.runStatus],
-        ),
-      ],
-      typeChangeLines,
-    });
-    this._ensureSheetColumnTypes({
-      sheetName: "sheetConfig",
-      columns: configSheetFloorSeed.sheetConfig.columns,
-      typeChangeLines,
-    });
-    this._ensureSheetColumnTypes({
-      sheetName: "columnConfig",
-      columns: configSheetFloorSeed.columnConfig.columns,
-      typeChangeLines,
-    });
+    const typeChangeLines = floorSheetNames().flatMap((sheetName) =>
+      this._ensureSheetColumnTypes(sheetName, floorSeedColumns(sheetName)),
+    );
     if (typeChangeLines.length > 0) {
       report.push(`Set column types: ${typeChangeLines.join("; ")}`);
     }
   }
-  private _ensureSheetColumnTypes<SN extends FloorSheetName>({
-    sheetName,
-    columns,
-    typeChangeLines,
-  }: EnsureSheetColumnTypesProps<SN>): void {
+  private _ensureSheetColumnTypes<SN extends FloorSheetName>(
+    sheetName: SN,
+    columns: readonly FloorSeedColumn[],
+  ): string[] {
     const sheet = this.ss.sheet(sheetName);
-    columns.forEach((seedColumn) => {
+    return columns.flatMap((seedColumn) => {
       const column = sheet.column(
         columnNameByHeader(sheetName, seedColumn.header),
       );
-      if (column.meta.activeDeclaredColumnType === seedColumn.columnType) {
-        return;
+      if (column.meta.activeColumnType === seedColumn.columnType) {
+        return [];
       }
-      column.meta.updateDeclaredColumnType(seedColumn.columnType);
-      typeChangeLines.push(
-        `${floorColumnIdentity(column)} → ${seedColumn.columnType}`,
-      );
+      column.meta.updateColumnType(seedColumn.columnType);
+      return [`${floorColumnIdentity(column)} → ${seedColumn.columnType}`];
     });
   }
   private _sheetDeclaration<SN extends FloorSheetName>(
@@ -362,6 +338,20 @@ function floorSheetNames(): FloorSheetName[] {
     (sheetName): sheetName is FloorSheetName =>
       configSheetFloorSeed[sheetName].columns.length > 0,
   );
+}
+
+function floorSeedColumns(
+  sheetName: FloorSheetName,
+): readonly FloorSeedColumn[] {
+  if (sheetName !== "spreadsheetConfig") {
+    return configSheetFloorSeed[sheetName].columns;
+  }
+  return [
+    ...configSheetFloorSeed.spreadsheetConfig.columns,
+    ...Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
+      (endpoint) => [endpoint.timeLastRan, endpoint.runStatus],
+    ),
+  ];
 }
 
 function spreadsheetConfigFeedbackColumnNames(): SpreadsheetConfigColumnName[] {

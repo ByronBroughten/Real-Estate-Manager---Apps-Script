@@ -76,7 +76,7 @@ function floorSeedType(
     .find((entry) => entry.header === header)?.columnType;
 }
 
-function declaredTypesByHeader(
+function columnTypesByHeader(
   sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
   headers: readonly string[],
   overrides: Record<string, string> = {},
@@ -89,7 +89,7 @@ function declaredTypesByHeader(
   return types;
 }
 
-function spreadsheetConfigDeclaredTypes(
+function spreadsheetConfigFixtureColumnTypes(
   sscOrder: readonly (typeof sscColumns)[number][],
   sscHeaders: readonly string[],
   options: {
@@ -115,16 +115,16 @@ function spreadsheetConfigDeclaredTypes(
       ],
     ),
   );
-  return declaredTypesByHeader("spreadsheetConfig", sscHeaders, typeOverrides);
+  return columnTypesByHeader("spreadsheetConfig", sscHeaders, typeOverrides);
 }
 
-function matchingFloorDeclaredTypes(
+function matchingFloorColumnTypes(
   sheetName: "sheetConfig" | "columnConfig",
   headers: readonly string[],
   columnTypesAreUnset: boolean | undefined,
 ): Record<number, string> | undefined {
   if (columnTypesAreUnset) return undefined;
-  return declaredTypesByHeader(sheetName, headers);
+  return columnTypesByHeader(sheetName, headers);
 }
 
 function sheetAbsoluteTypes(
@@ -256,8 +256,8 @@ function floorFixture(
             startTableColIndex +
             sscOrder.length +
             (extraColumn === undefined ? 0 : 1),
-          columnDeclaredTypes: sheetAbsoluteTypes(
-            spreadsheetConfigDeclaredTypes(sscOrder, sscHeaders, options),
+          columnTypes: sheetAbsoluteTypes(
+            spreadsheetConfigFixtureColumnTypes(sscOrder, sscHeaders, options),
             startTableColIndex,
           ),
         },
@@ -284,8 +284,8 @@ function floorFixture(
           startColumnIndex: startTableColIndex,
           endRowIndex: 6,
           endColumnIndex: startTableColIndex + 3,
-          columnDeclaredTypes: sheetAbsoluteTypes(
-            matchingFloorDeclaredTypes(
+          columnTypes: sheetAbsoluteTypes(
+            matchingFloorColumnTypes(
               "sheetConfig",
               [
                 sc.sheetGid.header,
@@ -325,8 +325,8 @@ function floorFixture(
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
           endColumnIndex: startTableColIndex + 6,
-          columnDeclaredTypes: sheetAbsoluteTypes(
-            matchingFloorDeclaredTypes(
+          columnTypes: sheetAbsoluteTypes(
+            matchingFloorColumnTypes(
               "columnConfig",
               [
                 cc.sheetGid.header,

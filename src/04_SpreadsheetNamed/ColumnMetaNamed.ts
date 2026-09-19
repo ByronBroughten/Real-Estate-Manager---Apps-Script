@@ -6,6 +6,7 @@ import type {
   EditLockDeclaration,
   EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
+import type { TableColumnType } from "../00_Source/RawSource/RawSource";
 import type {
   ColumnFullName,
   ColumnName,
@@ -44,11 +45,11 @@ export class ColumnMetaNamed<
   get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
     return this.schema.fullName;
   }
-  get activeDeclaredColumnType(): string | undefined {
-    return this.identified.activeDeclaredColumnType;
+  get activeColumnType(): string | undefined {
+    return this.identified.activeColumnType;
   }
-  updateDeclaredColumnType(declaredType: string): this {
-    this.identified.updateDeclaredColumnType(declaredType);
+  updateColumnType(columnType: TableColumnType): this {
+    this.identified.updateColumnType(columnType);
     return this;
   }
   uniformCell<UN extends UniformRowName>(

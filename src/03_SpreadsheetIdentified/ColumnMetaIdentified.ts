@@ -2,6 +2,7 @@ import type {
   UniformRowName,
   UniformRowValueName,
 } from "../00_Source/CellValues/cellValues";
+import type { TableColumnType } from "../00_Source/RawSource/RawSource";
 import type { ValueName, VnToCvn } from "../01_SpreadsheetSchema/valueSchemas";
 import { ColumnMetaRaw } from "../02_SpreadsheetRaw/ColumnMetaRaw";
 import { CellIdentified } from "./CellIdentified";
@@ -24,11 +25,11 @@ export class ColumnMetaIdentified<
   get primary(): ColumnIdentified<VN> {
     return new ColumnIdentified(this.columnIdentifiedProps);
   }
-  get activeDeclaredColumnType(): string | undefined {
-    return this.raw.activeDeclaredColumnType;
+  get activeColumnType(): string | undefined {
+    return this.raw.activeColumnType;
   }
-  updateDeclaredColumnType(declaredType: string): this {
-    this.raw.updateDeclaredColumnType(declaredType);
+  updateColumnType(columnType: TableColumnType): this {
+    this.raw.updateColumnType(columnType);
     return this;
   }
   uniformCell<UN extends UniformRowName>(

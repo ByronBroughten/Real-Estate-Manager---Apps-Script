@@ -751,7 +751,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
           table: {
             endRowIndex: 11,
             endColumnIndex: 3,
-            columnDeclaredTypes: { 0: "TEXT" },
+            columnTypes: { 0: "TEXT" },
             columnValidationValues: { 0: ["=valueConfig[Notes]"] },
             columnValidationConditionTypes: { 0: "BOOLEAN" },
           },
@@ -778,7 +778,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(table.startColumnIndex).toBe(startTableColIndex);
     expect(table.endColumnIndex).toBeGreaterThan(startTableColIndex);
     const columnMeta = raw.sheet(111).meta.column(0);
-    expect(columnMeta.activeDeclaredColumnType).toBe("TEXT");
+    expect(columnMeta.activeColumnType).toBe("TEXT");
     expect(columnMeta.valueValidationStrings).toEqual(["=valueConfig[Notes]"]);
     expect(columnMeta.validationConditionType).toBe("BOOLEAN");
     expect(raw.sheet(111).isTableColIndex(startTableColIndex)).toBe(true);
@@ -798,7 +798,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
             startColumnIndex: 1,
             endRowIndex: 11,
             endColumnIndex: 4,
-            columnDeclaredTypes: { 1: "TEXT" },
+            columnTypes: { 1: "TEXT" },
             columnValidationValues: { 1: ["=valueConfig[Notes]"] },
             columnValidationConditionTypes: { 1: "BOOLEAN" },
           },
@@ -809,7 +809,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     raw.fetchAllSheetProperties();
 
     const columnMeta = raw.sheet(111).meta.column(1);
-    expect(columnMeta.activeDeclaredColumnType).toBe("TEXT");
+    expect(columnMeta.activeColumnType).toBe("TEXT");
     expect(columnMeta.valueValidationStrings).toEqual(["=valueConfig[Notes]"]);
     expect(columnMeta.validationConditionType).toBe("BOOLEAN");
   });
@@ -2487,7 +2487,7 @@ describe("SheetRaw.activeTable", () => {
   });
 });
 
-describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
+describe("ColumnMetaRaw.updateColumnType", () => {
   function stubTypedTable(
     table: Partial<NonNullable<FakeSheetProperties["table"]>> = {},
   ) {
@@ -2502,7 +2502,7 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
           table: {
             endRowIndex: tableEndRowIndex,
             endColumnIndex: startTableColIndex + 3,
-            columnDeclaredTypes: { [startTableColIndex]: "TEXT" },
+            columnTypes: { [startTableColIndex]: "TEXT" },
             ...table,
           },
         },
@@ -2523,11 +2523,11 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 2)
-      .updateDeclaredColumnType("DOUBLE");
+      .updateColumnType("DOUBLE");
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 1)
-      .updateDeclaredColumnType("TEXT");
+      .updateColumnType("TEXT");
     raw.batchUpdateGSheets();
 
     const requests = batchUpdateCalls[0]?.requests ?? [];
@@ -2554,21 +2554,39 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 2)
-      .updateDeclaredColumnType("DOUBLE");
+      .updateColumnType("DOUBLE");
     raw.batchUpdateGSheets();
     raw.fetchAllSheetProperties();
 
     expect(
-      raw.sheet(111).meta.column(startTableColIndex).activeDeclaredColumnType,
+      raw.sheet(111).meta.column(startTableColIndex).activeColumnType,
     ).toBe("TEXT");
     expect(
-      raw.sheet(111).meta.column(startTableColIndex + 1)
-        .activeDeclaredColumnType,
+      raw.sheet(111).meta.column(startTableColIndex + 1).activeColumnType,
     ).toBeUndefined();
     expect(
-      raw.sheet(111).meta.column(startTableColIndex + 2)
-        .activeDeclaredColumnType,
+      raw.sheet(111).meta.column(startTableColIndex + 2).activeColumnType,
     ).toBe("DOUBLE");
+  });
+
+  it("sends a sibling column's type back unchanged when it is one the framework does not name", () => {
+    const { batchUpdateCalls } = stubTypedTable({
+      columnTypes: { [startTableColIndex]: "FUTURE_CHIP" },
+    });
+    const raw = fetchedRaw();
+    raw
+      .sheet(111)
+      .meta.column(startTableColIndex + 2)
+      .updateColumnType("DOUBLE");
+    raw.batchUpdateGSheets();
+
+    expect(
+      batchUpdateCalls[0]?.requests?.[0]?.updateTable?.table?.columnProperties,
+    ).toEqual([
+      { columnIndex: 0, columnName: "Name", columnType: "FUTURE_CHIP" },
+      { columnIndex: 1, columnName: "ID" },
+      { columnIndex: 2, columnName: "Amount", columnType: "DOUBLE" },
+    ]);
   });
 
   it("fake: a columnProperties update replaces the whole list, so a column left out loses its type", () => {
@@ -2589,11 +2607,10 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
     raw.fetchAllSheetProperties();
 
     expect(
-      raw.sheet(111).meta.column(startTableColIndex).activeDeclaredColumnType,
+      raw.sheet(111).meta.column(startTableColIndex).activeColumnType,
     ).toBeUndefined();
     expect(
-      raw.sheet(111).meta.column(startTableColIndex + 2)
-        .activeDeclaredColumnType,
+      raw.sheet(111).meta.column(startTableColIndex + 2).activeColumnType,
     ).toBe("DOUBLE");
   });
 
@@ -2624,7 +2641,7 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 2)
-      .updateDeclaredColumnType("DOUBLE");
+      .updateColumnType("DOUBLE");
 
     expect(() => raw.batchUpdateGSheets()).toThrow(
       /fake-table-111.*Leases.*ID/,
@@ -2638,7 +2655,7 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 2)
-      .updateDeclaredColumnType("DOUBLE");
+      .updateColumnType("DOUBLE");
     raw.sheet(111).addSheetChangeToSave({
       action: "insertColumn",
       startColumnIndex: startTableColIndex + 3,
@@ -2654,12 +2671,12 @@ describe("ColumnMetaRaw.updateDeclaredColumnType", () => {
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 2)
-      .updateDeclaredColumnType("DOUBLE");
+      .updateColumnType("DOUBLE");
     raw.batchUpdateGSheets();
     raw
       .sheet(111)
       .meta.column(startTableColIndex + 1)
-      .updateDeclaredColumnType("TEXT");
+      .updateColumnType("TEXT");
 
     expect(() => raw.batchUpdateGSheets()).toThrow(
       /no fetched column properties/,

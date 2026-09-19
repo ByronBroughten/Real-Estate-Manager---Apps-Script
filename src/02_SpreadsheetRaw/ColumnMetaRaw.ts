@@ -6,7 +6,10 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../00_Source/CellValues/cellValues";
-import type { GridCellSnapshot } from "../00_Source/RawSource/RawSource";
+import type {
+  GridCellSnapshot,
+  TableColumnType,
+} from "../00_Source/RawSource/RawSource";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
@@ -55,10 +58,10 @@ export class ColumnMetaRaw<
   get validationConditionType(): string | undefined {
     return this._tableColumnState()?.validationConditionType;
   }
-  get activeDeclaredColumnType(): string | undefined {
-    return this._tableColumnState()?.declaredType;
+  get activeColumnType(): string | undefined {
+    return this._tableColumnState()?.columnType;
   }
-  updateDeclaredColumnType(declaredType: string): this {
+  updateColumnType(columnType: TableColumnType): this {
     this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
     this.updateRequests.updateTableColumnType.push({
       kind: "updateTableColumnType",
@@ -66,9 +69,9 @@ export class ColumnMetaRaw<
       tableId: this.sheet.activeTable.tableId,
       // Google's Table columnIndex is table-relative; colIndex is sheet-absolute.
       columnIndex: this.colIndex - this.sheet.activeTable.startColumnIndex,
-      columnType: declaredType,
+      columnType,
     });
-    this._ensureColumnState(this.colIndex).declaredType = declaredType;
+    this._ensureColumnState(this.colIndex).columnType = columnType;
     return this;
   }
   // Table column properties are only trustworthy once the Table itself is known.
@@ -127,7 +130,7 @@ export class ColumnMetaRaw<
     }
     return (
       this.activeValidationValueTitle() ??
-      this._declaredColumnTypeValueName() ??
+      this._columnTypeValueName() ??
       this._booleanValidationValueName() ??
       this._compatibleNumberFormatValueName()
     );
@@ -140,9 +143,9 @@ export class ColumnMetaRaw<
     }
     return null;
   }
-  private _declaredColumnTypeValueName(): FrameworkValueName | null {
-    const columnType = this.activeDeclaredColumnType;
-    if (columnType === undefined) {
+  private _columnTypeValueName(): FrameworkValueName | null {
+    const columnType = this.activeColumnType;
+    if (columnType === undefined || !isNamedColumnType(columnType)) {
       return null;
     }
     return columnTypeValueNames[columnType] ?? null;
@@ -189,7 +192,9 @@ export class ColumnMetaRaw<
 }
 
 // DROPDOWN and COLUMN_TYPE_UNSPECIFIED are absent: neither says what a column holds.
-const columnTypeValueNames: Record<string, FrameworkValueName> = {
+const columnTypeValueNames: Partial<
+  Record<TableColumnType, FrameworkValueName>
+> = {
   DOUBLE: "number",
   CURRENCY: "number",
   PERCENT: "number",
@@ -205,6 +210,12 @@ const columnTypeValueNames: Record<string, FrameworkValueName> = {
   // Declaring the type is what earns the never-blank guarantee; a sampled boolean doesn't.
   BOOLEAN: "checkbox",
 };
+
+function isNamedColumnType(
+  columnType: string,
+): columnType is keyof typeof columnTypeValueNames {
+  return Object.hasOwn(columnTypeValueNames, columnType);
+}
 
 const numberFormatValueNames: Record<string, PrimitiveValueName> = {
   DATE: "date",

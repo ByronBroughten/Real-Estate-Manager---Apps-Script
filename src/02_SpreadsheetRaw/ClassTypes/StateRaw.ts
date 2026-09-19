@@ -20,7 +20,9 @@ import type {
   RawSource,
   SortOperation,
   TableColumnSnapshot,
+  TableColumnType,
   UpdateCellOperation,
+  UpdateTableColumnPropertiesOperation,
 } from "../../00_Source/RawSource/RawSource";
 import type { RgbColor } from "../../00_Source/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
@@ -55,16 +57,17 @@ export interface UpdateRequests {
   deleteProtectedRange: DeleteProtectedRangeOperation[];
   addProtectedRange: AddProtectedRangeOperation[];
   updateTableColumnType: UpdateTableColumnTypeOperation[];
+  updateTableColumnProperties: UpdateTableColumnPropertiesOperation[];
   raw: OpaqueRawWriteOperation[];
 }
 
-// Queue-only: the flusher folds each Table's into one updateTableColumnProperties.
+// Queue-only: the sheet gathers each Table's into one updateTableColumnProperties.
 export interface UpdateTableColumnTypeOperation {
   kind: "updateTableColumnType";
   sheetId: number;
   tableId: string;
   columnIndex: number;
-  columnType: string;
+  columnType: TableColumnType;
 }
 
 export type SheetsStateRaw = Map<SheetId, SheetStateRaw>;
@@ -130,7 +133,7 @@ export interface ColumnStateRaw {
   validationValues?: string[];
   validationConditionType?: string;
   // Absent for a column left on Automatic, which is what makes it "untyped".
-  declaredType?: string;
+  columnType?: string;
 }
 export interface ActiveFactsRaw {
   isFormula: boolean;
@@ -242,6 +245,7 @@ export function emptyUpdateRequests(): UpdateRequests {
     deleteProtectedRange: [],
     addProtectedRange: [],
     updateTableColumnType: [],
+    updateTableColumnProperties: [],
     raw: [],
   };
 }

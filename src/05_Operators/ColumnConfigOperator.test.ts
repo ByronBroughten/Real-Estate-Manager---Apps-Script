@@ -544,7 +544,7 @@ interface ColumnsUnderTest {
   headers: string[];
   topDataRow?: FakeCell[];
   topDataRowAbsence?: "rowsWithNoGridData" | "rowsWithNoGridBlock";
-  columnDeclaredTypes?: Record<number, string>;
+  columnTypes?: Record<number, string>;
   columnValidationValues?: Record<number, string[]>;
   columnValidationConditionTypes?: Record<number, string>;
 }
@@ -553,7 +553,7 @@ function syncColumnsUnderTest({
   headers,
   topDataRow = [],
   topDataRowAbsence,
-  columnDeclaredTypes,
+  columnTypes,
   columnValidationValues,
   columnValidationConditionTypes,
 }: ColumnsUnderTest): ColumnConfigOperator {
@@ -588,7 +588,7 @@ function syncColumnsUnderTest({
         ...(topDataRowAbsence ? { [topDataRowAbsence]: [4] } : {}),
         table: {
           endRowIndex: 5,
-          columnDeclaredTypes,
+          columnTypes,
           columnValidationValues,
           columnValidationConditionTypes,
         },
@@ -630,7 +630,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
         "Owner",
         "Active",
       ],
-      columnDeclaredTypes: {
+      columnTypes: {
         0: "CURRENCY",
         1: "DOUBLE",
         2: "PERCENT",
@@ -720,7 +720,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     const operator = syncColumnsUnderTest({
       headers: ["Amount"],
       topDataRow: ["not a number at all"],
-      columnDeclaredTypes: { 0: "CURRENCY" },
+      columnTypes: { 0: "CURRENCY" },
     });
 
     expect(valueTitles(operator, 1)).toEqual(["number"]);
@@ -730,7 +730,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
   it("prefers the declared type over an empty top data row", () => {
     const operator = syncColumnsUnderTest({
       headers: ["Purchase Price", "Closing Date"],
-      columnDeclaredTypes: { 0: "CURRENCY", 1: "DATE" },
+      columnTypes: { 0: "CURRENCY", 1: "DATE" },
     });
 
     expect(valueTitles(operator, 2)).toEqual(["number", "date"]);
@@ -741,7 +741,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     const operator = syncColumnsUnderTest({
       headers: ["ID"],
       topDataRow: ["test:abc"],
-      columnDeclaredTypes: { 0: "TEXT" },
+      columnTypes: { 0: "TEXT" },
     });
 
     expect(valueTitles(operator, 1)).toEqual(["id"]);
@@ -752,7 +752,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     const operator = syncColumnsUnderTest({
       headers: ["Description"],
       topDataRow: ["Rent (base)"],
-      columnDeclaredTypes: { 0: "DROPDOWN" },
+      columnTypes: { 0: "DROPDOWN" },
       columnValidationValues: {
         0: ["=valueConfig[Transaction Description]"],
       },
@@ -766,7 +766,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     const operator = syncColumnsUnderTest({
       headers: ["Property Ref"],
       topDataRow: ["prp:abc123"],
-      columnDeclaredTypes: { 0: "DROPDOWN" },
+      columnTypes: { 0: "DROPDOWN" },
     });
 
     expect(valueTitles(operator, 1)).toEqual(["string"]);
@@ -867,7 +867,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     const operator = syncColumnsUnderTest({
       headers: ["Amount"],
       topDataRow: [{ value: 42, numberFormatType: "NUMBER" }],
-      columnDeclaredTypes: { 0: "DROPDOWN" },
+      columnTypes: { 0: "DROPDOWN" },
     });
 
     expect(valueTitles(operator, 1)).toEqual(["number"]);
@@ -901,7 +901,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
     const operator = syncColumnsUnderTest({
       headers: ["Amount", "Notes", "Moved In"],
       topDataRow: [42, "a note"],
-      columnDeclaredTypes: { 2: "DATE" },
+      columnTypes: { 2: "DATE" },
     });
 
     expect(operator.untypedColumnsSummary()).toBe(
@@ -913,7 +913,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> declared column types", () =
   it("summarises nothing when every column declares its type", () => {
     const operator = syncColumnsUnderTest({
       headers: ["Amount", "Notes"],
-      columnDeclaredTypes: { 0: "CURRENCY", 1: "TEXT" },
+      columnTypes: { 0: "CURRENCY", 1: "TEXT" },
     });
 
     expect(operator.untypedColumnsSummary()).toBeUndefined();
@@ -924,7 +924,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> a sheet whose only data row 
   it("completes the sync and fills in every identity cell", () => {
     const operator = syncBlankSheetUnderTest({
       headers: ["Biller Name", "Amount"],
-      columnDeclaredTypes: { 1: "CURRENCY" },
+      columnTypes: { 1: "CURRENCY" },
     });
     const col = operator.sheet.columns("sheetTitle", "header");
     const emitted = operator.newColumnConfigs().test;
@@ -956,7 +956,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> a sheet whose only data row 
   it("stays silent for a blank sheet whose columns all declare their type", () => {
     const operator = syncBlankSheetUnderTest({
       headers: ["Amount"],
-      columnDeclaredTypes: { 0: "CURRENCY" },
+      columnTypes: { 0: "CURRENCY" },
     });
 
     expect(operator.untypedColumnsSummary()).toBeUndefined();

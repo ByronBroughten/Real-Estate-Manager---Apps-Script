@@ -563,6 +563,36 @@ describe("GoogleSheetsAPI payload mapping", () => {
     });
   });
 
+  it("reads a Table column with no columnIndex as index 0", () => {
+    const { api } = recordingSheets({
+      sheets: [
+        {
+          properties: { sheetId: 111, title: "Leases" },
+          tables: [
+            {
+              tableId: "tbl",
+              range: {
+                startRowIndex: 3,
+                endRowIndex: 11,
+                startColumnIndex: 2,
+                endColumnIndex: 4,
+              },
+              columnProperties: [
+                { columnName: "Name", columnType: "TEXT" },
+                { columnIndex: 1, columnName: "Amount" },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    const columns =
+      api.fetchSheetProperties(spreadsheetId).sheets[0]?.tables?.[0]
+        ?.columnProperties;
+    expect(columns?.map((column) => column.columnIndex)).toEqual([0, 1]);
+  });
+
   it("maps a boolean rule, a multi-range rule and an unmodelable rule in list order", () => {
     const pink = { red: 0.95686275, green: 0.8, blue: 0.8 };
     const { api } = recordingSheets({
