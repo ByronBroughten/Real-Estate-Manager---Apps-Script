@@ -20,9 +20,6 @@ export class ActiveTableRaw {
   get name(): string {
     return this._knownTable().name;
   }
-  updateName(name: string): void {
-    this._knownTable().name = name;
-  }
   get startRowIndex(): number {
     return this._knownTable().startRowIndex;
   }

@@ -113,10 +113,7 @@ export class SheetRaw extends SheetCommonRaw {
       tableId,
       name,
     });
-    this.activeTable.updateName(name);
-    this.sheetState.working.tables = this.sheetState.working.tables.map(
-      (table) => (table.tableId === tableId ? { ...table, name } : table),
-    );
+    this._updateWorkingTableName(tableId, name);
     return this;
   }
   get activeRowIndexes(): number[] {

@@ -779,6 +779,30 @@ describe("ConfigSheetFloor", () => {
     });
   });
 
+  it("names a restored tab by its seed title in the rest of the report", () => {
+    floorFixture({
+      spreadsheetConfigTitle: "Old Spreadsheet Config",
+      spreadsheetConfigHeaders: { tableMenuSpace: "Menu spacer" },
+      spreadsheetConfigColumnTypes: { idHeader: "DOUBLE" },
+      extraSpreadsheetConfigColumn: {
+        columnId: "c:sscf:notes",
+        header: "Notes",
+      },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain(
+      `Spreadsheet Config · Menu spacer (${ssc.tableMenuSpace.columnId}) → Table menu space`,
+    );
+    expect(report).toContain(
+      `Spreadsheet Config · ID header (${ssc.idHeader.columnId}) → TEXT`,
+    );
+    expect(report).toContain(
+      "Covered added columns: Spreadsheet Config · Notes",
+    );
+    expect(report).not.toContain("Old Spreadsheet Config ·");
+  });
+
   it("renames Value Config's tab back and reports it", () => {
     const { batchUpdateCalls } = floorFixture({
       valueConfig: { title: "Values" },

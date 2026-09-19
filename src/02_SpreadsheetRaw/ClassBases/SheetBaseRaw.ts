@@ -32,6 +32,10 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     }
   }
   protected _initSheetState(sheet: SheetSnapshot): void {
+    this._integrateSheetProperties(sheet);
+    this._integrateQueuedSheetProperties();
+  }
+  private _integrateSheetProperties(sheet: SheetSnapshot): void {
     if (sheet.title) {
       this.sheetState.working.title = sheet.title;
     }
@@ -73,6 +77,35 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
       firstStaleColIndex: previous?.firstStaleColIndex ?? null,
     };
     this._parseColumnProperties(table, range.startColumnIndex);
+  }
+  // Queued properties outlive a re-fetch until the flush sends them.
+  private _integrateQueuedSheetProperties(): void {
+    const working = this.sheetState.working;
+    this.updateRequests.updateSheetTitle.forEach(({ sheetId, title }) => {
+      if (sheetId === this.sheetGid) working.title = title;
+    });
+    this.updateRequests.updateTableName.forEach(({ tableId, name }) => {
+      this._updateWorkingTableName(tableId, name);
+    });
+    const knownTable = working.knownTable;
+    if (knownTable === null) return;
+    this.updateRequests.updateTableColumnType.forEach(
+      ({ tableId, columnIndex, columnType }) => {
+        if (tableId !== knownTable.tableId) return;
+        this._ensureColumnState(
+          knownTable.startColumnIndex + columnIndex,
+        ).columnType = columnType;
+      },
+    );
+  }
+  protected _updateWorkingTableName(tableId: string, name: string): void {
+    const working = this.sheetState.working;
+    working.tables = working.tables.map((table) =>
+      table.tableId === tableId ? { ...table, name } : table,
+    );
+    if (working.knownTable?.tableId === tableId) {
+      working.knownTable.name = name;
+    }
   }
   private _clearColumnPropertyFields(): void {
     this.sheetState.working.columnStates.forEach((columnState) => {

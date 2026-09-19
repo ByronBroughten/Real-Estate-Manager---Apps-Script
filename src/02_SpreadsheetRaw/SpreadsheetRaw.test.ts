@@ -1313,6 +1313,129 @@ describe("queued writes outlive a same-run re-fetch", () => {
 
     expect(raw.sheet(111).topRow.valueOrEmpty(1)).toBe("queued");
   });
+
+  function stubNamedTables() {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: 111,
+          title: "Leases",
+          rows: buildGridRows({
+            0: ["c:lse:aaa", "c:lse:bbb"],
+            [tableHeaderRowIndex]: ["ID", "Status"],
+          }),
+          table: {
+            name: "leases",
+            endRowIndex: topDataRowIndex + 1,
+            columnTypes: { 1: "TEXT" },
+          },
+        },
+        {
+          sheetId: 222,
+          title: "Units",
+          rows: buildGridRows({ [tableHeaderRowIndex]: ["ID"] }),
+          table: { name: "units", endRowIndex: topDataRowIndex + 1 },
+        },
+      ],
+    });
+  }
+
+  it("keeps a queued tab title after a re-fetch of the sheet properties", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTitle("Renamed");
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(111).title).toBe("Renamed");
+  });
+
+  it("keeps a queued Table name on the known Table and in the sheet's Tables after a re-fetch", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTableName("renamedLeases");
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(111).activeTable.name).toBe("renamedLeases");
+    expect(raw.sheet(111).tables).toEqual([
+      { tableId: "fake-table-111", name: "renamedLeases" },
+    ]);
+  });
+
+  it("keeps a queued column type after a re-fetch of the sheet properties", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheetMeta(111).column(1).updateColumnType("DOUBLE");
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheetMeta(111).column(1).activeColumnType).toBe("DOUBLE");
+  });
+
+  it("lets the last of two queued tab titles win after a re-fetch", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTitle("First");
+    raw.sheet(111).updateTitle("Second");
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(111).title).toBe("Second");
+  });
+
+  it("lets the last of two queued Table names win after a re-fetch", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTableName("firstLeases");
+    raw.sheet(111).updateTableName("secondLeases");
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(111).activeTable.name).toBe("secondLeases");
+  });
+
+  it("leaves another sheet's queued title alone on a re-fetch of one sheet", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(222).updateTitle("Renamed");
+    raw.fetchSheetUsedGrid(111);
+
+    expect(raw.sheet(222).title).toBe("Renamed");
+  });
+
+  it("applies a sheet's queued title to that sheet only", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTitle("Renamed");
+    raw.fetchAllSheetProperties();
+
+    expect(raw.sheet(222).title).toBe("Units");
+  });
+
+  it("integrates the live title and Table name after the flush has cleared the queue", () => {
+    stubNamedTables();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTitle("Renamed");
+    raw.sheet(111).updateTableName("renamedLeases");
+    raw.batchUpdateGSheets();
+    raw.fetchAllSheetProperties();
+
+    // The fake does not replay renames, so the live sheet still has the old ones.
+    expect(raw.sheet(111).title).toBe("Leases");
+    expect(raw.sheet(111).activeTable.name).toBe("leases");
+  });
 });
 
 describe("CellRaw.updateValue", () => {
