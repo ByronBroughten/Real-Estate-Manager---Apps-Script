@@ -3,57 +3,25 @@ import {
   type ModelableEditProtection,
   type ProtectionGridRange,
 } from "../00_Source/RawSource/EditProtection";
-import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import {
+  getColumnTraitByName,
+  getSheetColumnNames,
+  type ColumnName,
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
+import { Obj } from "../utils/Obj";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
 type FloorCellKind = "header" | "column ID" | "group heading" | "data";
-type FloorSheetName = "spreadsheetConfig" | "sheetConfig" | "columnConfig";
+type FloorSheetName = Exclude<keyof typeof configSheetFloorSeed, "valueConfig">;
 
-const floor = {
-  sheetNames: ["spreadsheetConfig", "sheetConfig", "columnConfig"],
-  prefix: "Config-sheet floor",
-  groupHeadings: [
-    "Fill Row IDs",
-    "Sync Config Sheet Rows",
-    "Spreadsheet Rules",
-  ],
-  layoutColumns: [
-    "idDelimiter",
-    "idHeader",
-    "startTableColumnIndexBase1",
-    "columnIdRowIndexBase1",
-    "columnGroupHeadingRowIndexBase1",
-    "actionRowIndexBase1",
-    "tableHeaderRowIndexBase1",
-  ],
-  sheetConfigColumns: [
-    "sheetGid",
-    "sheetTitle",
-    "idPrefix",
-    "idPrefixIsUniqueOrEmpty",
-    "letApiAccess",
-  ],
-  columnConfigColumns: [
-    "sheetGid",
-    "columnId",
-    "sheetTitle",
-    "header",
-    "emptyValueAllowed",
-  ],
-} as const satisfies {
-  sheetNames: readonly FloorSheetName[];
-  prefix: string;
-  groupHeadings: readonly string[];
-  layoutColumns: readonly SpreadsheetConfigColumnName[];
-  sheetConfigColumns: readonly ColumnName<"sheetConfig">[];
-  columnConfigColumns: readonly ColumnName<"columnConfig">[];
-};
+const floorWarningPrefix = "Config-sheet floor";
 
 interface FloorDeclaration {
   description: string;
@@ -80,19 +48,19 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       ...this._spreadsheetConfigDeclarations(feedbackColumnNames, report),
       ...floorDeclaration.bookkeeping(
         this.ss.sheet("sheetConfig"),
-        floor.sheetConfigColumns,
+        floorColumnNames("sheetConfig"),
       ),
       floorDeclaration.formulaColumn(this.ss.sheet("sheetConfig")),
       ...floorDeclaration.bookkeeping(
         this.ss.sheet("columnConfig"),
-        floor.columnConfigColumns,
+        floorColumnNames("columnConfig"),
       ),
     ];
     this._reconcile(declarations, report);
     return report.join("\n");
   }
   private _fetchFloorSheets(): void {
-    floor.sheetNames.forEach((sheetName) => {
+    floorSheetNames().forEach((sheetName) => {
       const sheet = this.ss.sheet(sheetName);
       sheet.meta.uniformRow("columnId").prepFetchFull();
       sheet.meta.uniformRow("tableHeader").prepFetchFull();
@@ -106,7 +74,13 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     report: string[],
   ): FloorDeclaration[] {
     const sheet = this.ss.sheet("spreadsheetConfig");
-    const tableMenuSpace = sheet.column("tableMenuSpace");
+    const tableMenuSpaceHeader =
+      configSheetFloorSeed.spreadsheetConfig.columns[0].header;
+    const tableMenuSpaceName = columnNameByHeader(
+      "spreadsheetConfig",
+      tableMenuSpaceHeader,
+    );
+    const tableMenuSpace = sheet.column(tableMenuSpaceName);
     if (
       tableMenuSpace.meta.colIndex !== ssConfigGet("startTableColIndexBase0")
     ) {
@@ -117,9 +91,11 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     }
     return [
       ...floorDeclaration.bookkeeping(sheet, [
-        "tableMenuSpace",
+        tableMenuSpaceName,
         ...feedbackColumnNames,
-        ...floor.layoutColumns,
+        ...floorColumnNames("spreadsheetConfig").filter(
+          (columnName) => columnName !== tableMenuSpaceName,
+        ),
       ]),
       floorDeclaration.dataCell(tableMenuSpace),
       ...feedbackColumnNames.map((columnName) =>
@@ -162,14 +138,14 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     }
   }
   private _removeProtection(protection: ModelableEditProtection): void {
-    floor.sheetNames.forEach((sheetName) => {
+    floorSheetNames().forEach((sheetName) => {
       const sheet = this.ss.sheet(sheetName);
       if (sheet.schema.sheetGid !== protection.range.sheetId) return;
       sheet.removeEditProtectionById(protection.id);
     });
   }
   private _floorProtections(): ModelableEditProtection[] {
-    return floor.sheetNames.flatMap((sheetName) =>
+    return floorSheetNames().flatMap((sheetName) =>
       this.ss
         .sheet(sheetName)
         .editProtections()
@@ -180,6 +156,46 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
         }),
     );
   }
+}
+
+function floorColumnNames<SN extends FloorSheetName>(
+  sheetName: SN,
+): ColumnName<SN>[] {
+  return configSheetFloorSeed[sheetName].columns.map((column) =>
+    columnNameByHeader(sheetName, column.header),
+  );
+}
+
+function columnNameByHeader<SN extends FloorSheetName>(
+  sheetName: SN,
+  header: string,
+): ColumnName<SN> {
+  const columnName = getSheetColumnNames(sheetName).find(
+    (name) => getColumnTraitByName(sheetName, name, "header") === header,
+  );
+  if (columnName === undefined) {
+    throw new Error(
+      `Floor seed header ${JSON.stringify(header)} is not a column on ${sheetName}.`,
+    );
+  }
+  return columnName;
+}
+
+function floorSheetNames(): FloorSheetName[] {
+  return Obj.keys(configSheetFloorSeed).filter(
+    (sheetName): sheetName is FloorSheetName =>
+      configSheetFloorSeed[sheetName].columns.length > 0,
+  );
+}
+
+function spreadsheetConfigGroupHeadings(): readonly string[] {
+  const spreadsheetConfig = configSheetFloorSeed.spreadsheetConfig;
+  return [
+    ...spreadsheetConfig.columns.map((column) => column.columnGroupHeading),
+    ...Obj.values(spreadsheetConfig.endpoints).map(
+      (endpoint) => endpoint.heading,
+    ),
+  ].filter((heading) => heading !== "");
 }
 
 const floorDeclaration = {
@@ -227,7 +243,9 @@ const floorDeclaration = {
       );
       const isGroupStart =
         heading !== previousHeading &&
-        floor.groupHeadings.some((groupHeading) => groupHeading === heading);
+        spreadsheetConfigGroupHeadings().some(
+          (groupHeading) => groupHeading === heading,
+        );
       previousHeading = heading;
       if (!isGroupStart) return;
       declarations.push(
@@ -256,7 +274,7 @@ function floorDescription<
   CN extends ColumnName<SN>,
 >(column: ColumnNamed<SN, CN>, cellKind: FloorCellKind): string {
   const header = String(column.meta.uniformCell("tableHeader").valueOrEmpty());
-  return `${floor.prefix} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
+  return `${floorWarningPrefix} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
 }
 
 function columnsByIndex<SN extends SheetNameSimple>(
@@ -269,7 +287,7 @@ function columnsByIndex<SN extends SheetNameSimple>(
 
 function floorMatchKey(description: string): string | undefined {
   const parts = description.split(" · ");
-  if (parts.length !== 5 || parts[0] !== floor.prefix) return undefined;
+  if (parts.length !== 5 || parts[0] !== floorWarningPrefix) return undefined;
   const columnId = parts[2]?.match(/\(([^)]+)\)$/)?.[1];
   if (columnId === undefined) return undefined;
   return `${columnId} · ${parts[3]} · ${parts[4]}`;
