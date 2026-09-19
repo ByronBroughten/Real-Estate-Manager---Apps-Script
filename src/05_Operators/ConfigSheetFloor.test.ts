@@ -887,6 +887,17 @@ describe("ConfigSheetFloor", () => {
     expect(batchUpdateCalls).toHaveLength(0);
   });
 
+  it("throws naming the tab when several Tables are present and one has the floor name, and flushes nothing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigExtraTables: [{ endRowIndex: 5, name: "extra" }],
+    });
+
+    expect(() => applyFloor()).toThrow(
+      '1 sheet(s) have more than one Table — delete the extras so each sheet has exactly one: "Spreadsheet Config"',
+    );
+    expect(batchUpdateCalls).toHaveLength(0);
+  });
+
   it("overwrites a drifted floor header and reports it", () => {
     const { batchUpdateCalls } = floorFixture({
       spreadsheetConfigHeaders: { tableMenuSpace: "Menu spacer" },
