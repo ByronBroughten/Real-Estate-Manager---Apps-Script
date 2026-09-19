@@ -36,6 +36,7 @@ Open only the section or disclosed doc the task needs.
 | Branches, landing a spec, closing an issue, `backup/*` branches | [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md) |
 | Design, grilling, specs, an offered ADR, a long session's handoff | [`docs/agents/planning.md`](./docs/agents/planning.md) |
 | Editing a prose doc: which file a fact belongs in | [`docs/agents/prose-files.md`](./docs/agents/prose-files.md) |
+| Running `/to-tickets`, or writing a `ready-for-agent` issue | [`docs/agents/tickets.md`](./docs/agents/tickets.md) |
 | Issues and labels | [`docs/agents/issue-tracker.md`](./docs/agents/issue-tracker.md), [`docs/agents/triage-labels.md`](./docs/agents/triage-labels.md) |
 | Domain vs architecture vocabulary | [`docs/agents/domain.md`](./docs/agents/domain.md) |
 | A slash-named skill not in the listing | `.claude/skills/<name>/SKILL.md` (this repo's own), else the `mattpocock-skills` plugin (`mattpocock-skills:<name>`). Never a similarly-named substitute. `grill-with-docs` means grilling + domain-modeling. |
