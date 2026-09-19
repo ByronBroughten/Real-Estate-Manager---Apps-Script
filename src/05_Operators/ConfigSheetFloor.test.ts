@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import type { EditProtection } from "../00_Source/RawSource/EditProtection";
+import type { ModelableEditProtection } from "../00_Source/RawSource/EditProtection";
 import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
@@ -26,7 +26,10 @@ const spreadsheetConfigGid = getSheetTraitByName(
 );
 const sheetConfigGid = getSheetTraitByName("sheetConfig", "sheetGid");
 const columnConfigGid = getSheetTraitByName("columnConfig", "sheetGid");
+const valueConfigGid = getSheetTraitByName("valueConfig", "sheetGid");
+const actionRowIndex = ssConfigGet("actionRowIndexBase0");
 const topDataRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
+const floorWarningPrefix = "Config-sheet floor";
 const ssc = columnConfigs.spreadsheetConfig;
 const sc = columnConfigs.sheetConfig;
 const cc = columnConfigs.columnConfig;
@@ -144,6 +147,11 @@ function padLeadingColumns(
   return [...Array.from({ length: startTableColIndex }, () => null), ...row];
 }
 
+function withExtraColumn<T>(row: T[], extra: T | undefined): T[] {
+  if (extra === undefined) return row;
+  return [...row, extra];
+}
+
 function columnTypeUpdates(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {
@@ -178,6 +186,12 @@ function floorFixture(
     startTableColIndex?: number;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+    columnConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+    extraSpreadsheetConfigColumn?: {
+      columnId: string;
+      header: string;
+      groupHeading?: string;
+    };
   } = {},
 ) {
   const startTableColIndex = options.startTableColIndex ?? 0;
@@ -205,6 +219,7 @@ function floorFixture(
     if (columnName === "tableMenuSpace") return "";
     return "Spreadsheet Rules";
   });
+  const extraColumn = options.extraSpreadsheetConfigColumn;
   const dataRow = sscOrder.map((columnName) => {
     if (columnName === "idDelimiter") return ":";
     if (columnName === "idHeader") return "ID";
@@ -222,15 +237,25 @@ function floorFixture(
         sheetId: spreadsheetConfigGid,
         title: "Spreadsheet Config",
         rows: buildGridRows({
-          0: pad(sscOrder.map((columnName) => sscField(columnName).columnId)),
-          1: pad(groupHeadings),
-          3: pad(sscHeaders),
-          4: pad(dataRow),
+          0: pad(
+            withExtraColumn(
+              sscOrder.map((columnName) => sscField(columnName).columnId),
+              extraColumn?.columnId,
+            ),
+          ),
+          1: pad(
+            withExtraColumn(groupHeadings, extraColumn?.groupHeading ?? ""),
+          ),
+          3: pad(withExtraColumn(sscHeaders, extraColumn?.header)),
+          4: pad(withExtraColumn(dataRow, "")),
         }),
         table: {
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
-          endColumnIndex: startTableColIndex + sscOrder.length,
+          endColumnIndex:
+            startTableColIndex +
+            sscOrder.length +
+            (extraColumn === undefined ? 0 : 1),
           columnDeclaredTypes: sheetAbsoluteTypes(
             spreadsheetConfigDeclaredTypes(sscOrder, sscHeaders, options),
             startTableColIndex,
@@ -316,6 +341,12 @@ function floorFixture(
             startTableColIndex,
           ),
         },
+        protectedRanges: options.columnConfigProtections,
+      },
+      {
+        sheetId: valueConfigGid,
+        title: "Value Config",
+        table: { endRowIndex: 5 },
       },
     ],
   });
@@ -331,28 +362,85 @@ function applyFloor() {
 function protectionsOf(
   floor: ConfigSheetFloor,
   sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
-) {
+): ModelableEditProtection[] {
   const sheet = floor.ss.sheet(sheetName);
   sheet.prepFetchEditProtections();
   floor.ss.fetchAllPrepped({ skipFetchingProperties: true });
-  return sheet.editProtections();
+  return sheet
+    .editProtections()
+    .flatMap((protection) =>
+      protection.kind === "unmodelable" ? [] : [protection],
+    );
 }
 
-function floorKey(description: string): string {
-  const parts = description.split(" · ");
-  const columnId = parts[2]?.match(/\(([^)]+)\)$/)?.[1] ?? "";
-  return `${columnId} · ${parts[3]} · ${parts[4]}`;
+function floorWarningDescription(title: string): string {
+  return `${floorWarningPrefix} · ${title} · warning`;
 }
 
-function keysOf(protections: EditProtection[]): string[] {
-  return protections.flatMap((protection) =>
-    protection.kind === "unmodelable" ? [] : [floorKey(protection.description)],
-  );
+function addedProtectedRanges(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return (batchUpdateCalls[0]?.requests ?? []).flatMap((request) => {
+    const protection = request.addProtectedRange?.protectedRange;
+    return protection === undefined ? [] : [protection];
+  });
 }
+
+function deletedProtectionIds(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return (batchUpdateCalls[0]?.requests ?? []).flatMap((request) => {
+    const id = request.deleteProtectedRange?.protectedRangeId;
+    return id === undefined ? [] : [id];
+  });
+}
+
+const spreadsheetConfigLayoutRange = {
+  sheetId: spreadsheetConfigGid,
+  startRowIndex: topDataRowIndex,
+  startColumnIndex: 5,
+  endColumnIndex: 12,
+};
+const spreadsheetConfigSelectorRanges = [
+  {
+    sheetId: spreadsheetConfigGid,
+    startRowIndex: actionRowIndex,
+    endRowIndex: actionRowIndex + 1,
+    startColumnIndex: 1,
+    endColumnIndex: 2,
+  },
+  {
+    sheetId: spreadsheetConfigGid,
+    startRowIndex: actionRowIndex,
+    endRowIndex: actionRowIndex + 1,
+    startColumnIndex: 3,
+    endColumnIndex: 4,
+  },
+];
+const spreadsheetConfigEditableRanges = [
+  ...spreadsheetConfigSelectorRanges,
+  spreadsheetConfigLayoutRange,
+];
+const sheetConfigEditableRanges = [
+  {
+    sheetId: sheetConfigGid,
+    startRowIndex: topDataRowIndex,
+    startColumnIndex: 2,
+    endColumnIndex: 3,
+  },
+];
+const columnConfigEditableRanges = [
+  {
+    sheetId: columnConfigGid,
+    startRowIndex: topDataRowIndex,
+    startColumnIndex: 4,
+    endColumnIndex: 6,
+  },
+];
 
 describe("ConfigSheetFloor", () => {
-  it("warns on every floor cell and locks none", () => {
-    floorFixture();
+  it("puts one whole-sheet warning on each of Spreadsheet Config, Sheet Config and Column Config, with editable ranges where an edit sticks, and locks none", () => {
+    const { batchUpdateCalls } = floorFixture();
     const { floor } = applyFloor();
 
     const spreadsheet = protectionsOf(floor, "spreadsheetConfig");
@@ -360,48 +448,36 @@ describe("ConfigSheetFloor", () => {
     const columnConfig = protectionsOf(floor, "columnConfig");
     const all = [...spreadsheet, ...sheetConfig, ...columnConfig];
 
-    expect(all).toHaveLength(48);
+    expect(all).toHaveLength(3);
     expect(all.every((protection) => protection.kind === "warning")).toBe(true);
     expect(all.some((protection) => protection.kind === "lock")).toBe(false);
 
-    const spreadsheetKeys = keysOf(spreadsheet);
-    expect(spreadsheetKeys).toContain(
-      `${ssc.tableMenuSpace.columnId} · data · warning`,
+    expect(spreadsheet[0]).toMatchObject({
+      description: floorWarningDescription("Spreadsheet Config"),
+      range: { sheetId: spreadsheetConfigGid },
+    });
+    expect(spreadsheet[0]?.unprotectedRanges).toEqual(
+      spreadsheetConfigEditableRanges,
     );
-    expect(spreadsheetKeys).toContain(
-      `${ssc.fillRowIdsTimeLastRan.columnId} · group heading · warning`,
+    expect(sheetConfig[0]).toMatchObject({
+      description: floorWarningDescription("Sheet Config"),
+      range: { sheetId: sheetConfigGid },
+    });
+    expect(sheetConfig[0]?.unprotectedRanges).toEqual(
+      sheetConfigEditableRanges,
     );
-    expect(spreadsheetKeys).toContain(
-      `${ssc.idDelimiter.columnId} · group heading · warning`,
+    expect(columnConfig[0]).toMatchObject({
+      description: floorWarningDescription("Column Config"),
+      range: { sheetId: columnConfigGid },
+    });
+    expect(columnConfig[0]?.unprotectedRanges).toEqual(
+      columnConfigEditableRanges,
     );
-    expect(spreadsheetKeys).not.toContain(
-      `${ssc.idHeader.columnId} · data · warning`,
-    );
-
-    const columnKeys = keysOf(columnConfig);
-    expect(columnKeys).toContain(`${cc.header.columnId} · header · warning`);
-    expect(columnKeys).not.toContain(
-      `${cc.customDefaultValue.columnId} · header · warning`,
-    );
-  });
-
-  it("warns on the seeded endpoint feedback data cells", () => {
-    floorFixture();
-    const { floor } = applyFloor();
-    const keys = keysOf(protectionsOf(floor, "spreadsheetConfig"));
-
-    expect(keys).toContain(
-      `${ssc.fillRowIdsTimeLastRan.columnId} · data · warning`,
-    );
-    expect(keys).toContain(
-      `${ssc.fillRowIdsRunStatus.columnId} · data · warning`,
-    );
-    expect(keys).toContain(
-      `${ssc.syncConfigSheetRowsTimeLastRan.columnId} · data · warning`,
-    );
-    expect(keys).toContain(
-      `${ssc.syncConfigSheetRowsRunStatus.columnId} · data · warning`,
-    );
+    expect(
+      addedProtectedRanges(batchUpdateCalls).map(
+        (protection) => protection.range?.sheetId,
+      ),
+    ).not.toContain(valueConfigGid);
   });
 
   it("queues nothing on a second run", () => {
@@ -412,56 +488,67 @@ describe("ConfigSheetFloor", () => {
     expect(batchUpdateCalls).toHaveLength(1);
   });
 
-  it("replaces a drifted floor protection and reports it", () => {
-    const driftedDescription = `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · data · warning`;
+  it("covers a column added beside the floor and reports it", () => {
+    floorFixture({
+      extraSpreadsheetConfigColumn: {
+        columnId: "c:sscf:notes",
+        header: "Notes",
+        groupHeading: "Mine",
+      },
+    });
+    const { floor, report } = applyFloor();
+
+    expect(report).toContain("Covered added columns:");
+    expect(report).toContain("Spreadsheet Config · Notes");
+    expect(
+      protectionsOf(floor, "spreadsheetConfig")[0]?.unprotectedRanges,
+    ).toEqual([
+      ...spreadsheetConfigSelectorRanges,
+      { ...spreadsheetConfigLayoutRange, endColumnIndex: 13 },
+    ]);
+  });
+
+  it("replaces a drifted whole-sheet warning and reports it", () => {
+    const driftedDescription = floorWarningDescription("Spreadsheet Config");
     floorFixture({
       spreadsheetConfigProtections: [
         {
           protectedRangeId: 41,
           description: driftedDescription,
           warningOnly: true,
-          range: {
-            sheetId: spreadsheetConfigGid,
-            startRowIndex: 0,
-            endRowIndex: 1,
-            startColumnIndex: 0,
-            endColumnIndex: 1,
-          },
+          range: { sheetId: spreadsheetConfigGid },
+          unprotectedRanges: [
+            {
+              sheetId: spreadsheetConfigGid,
+              startRowIndex: 0,
+              endRowIndex: 1,
+              startColumnIndex: 0,
+              endColumnIndex: 1,
+            },
+          ],
         },
       ],
     });
     const { floor, report } = applyFloor();
-    const data = protectionsOf(floor, "spreadsheetConfig").find(
-      (protection) =>
-        protection.kind !== "unmodelable" &&
-        floorKey(protection.description) ===
-          `${ssc.tableMenuSpace.columnId} · data · warning`,
-    );
 
     expect(report).toContain("Replaced drifted:");
     expect(report).toContain(driftedDescription);
-    expect(data).toMatchObject({
-      range: {
-        startRowIndex: topDataRowIndex,
-        endRowIndex: topDataRowIndex + 1,
-        startColumnIndex: 0,
-        endColumnIndex: 1,
-      },
-    });
+    expect(
+      protectionsOf(floor, "spreadsheetConfig")[0]?.unprotectedRanges,
+    ).toEqual(spreadsheetConfigEditableRanges);
   });
 
-  it("recognises a renamed header by column ID and does not add a duplicate", () => {
+  it("leaves a hand-set protection untouched", () => {
     const { batchUpdateCalls } = floorFixture({
-      spreadsheetConfigHeaders: { tableMenuSpace: "Menu spacer" },
-      spreadsheetConfigProtections: [
+      sheetConfigProtections: [
         {
-          protectedRangeId: 42,
-          description: `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · header · warning`,
+          protectedRangeId: 99,
+          description: "Hand-set",
           warningOnly: true,
           range: {
-            sheetId: spreadsheetConfigGid,
-            startRowIndex: 3,
-            endRowIndex: 4,
+            sheetId: sheetConfigGid,
+            startRowIndex: 0,
+            endRowIndex: 1,
             startColumnIndex: 0,
             endColumnIndex: 1,
           },
@@ -469,87 +556,43 @@ describe("ConfigSheetFloor", () => {
       ],
     });
     const { floor } = applyFloor();
-    const headers = keysOf(protectionsOf(floor, "spreadsheetConfig")).filter(
-      (key) => key === `${ssc.tableMenuSpace.columnId} · header · warning`,
-    );
 
-    expect(headers).toHaveLength(1);
-    const addedHeaders = (batchUpdateCalls[0]?.requests ?? []).filter(
-      (request) =>
-        request.addProtectedRange?.protectedRange?.description?.includes(
-          `${ssc.tableMenuSpace.columnId}) · header · warning`,
-        ),
+    expect(deletedProtectionIds(batchUpdateCalls)).not.toContain(99);
+    expect(protectionsOf(floor, "sheetConfig")).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: 99, description: "Hand-set" }),
+        expect.objectContaining({
+          description: floorWarningDescription("Sheet Config"),
+        }),
+      ]),
     );
-    expect(addedHeaders).toHaveLength(0);
   });
 
-  it("removes extra floor matches for the same key and reports them", () => {
-    const description = `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · data · warning`;
-    const inPlace = {
-      sheetId: spreadsheetConfigGid,
-      startRowIndex: topDataRowIndex,
-      endRowIndex: topDataRowIndex + 1,
-      startColumnIndex: 0,
-      endColumnIndex: 1,
-    };
-    floorFixture({
+  it("removes leftover per-cell floor warnings", () => {
+    const { batchUpdateCalls } = floorFixture({
       spreadsheetConfigProtections: [
         {
-          protectedRangeId: 51,
-          description,
-          warningOnly: true,
-          range: inPlace,
-        },
-        {
-          protectedRangeId: 52,
-          description,
+          protectedRangeId: 41,
+          description: `${floorWarningPrefix} · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · data · warning`,
           warningOnly: true,
           range: {
-            ...inPlace,
-            startRowIndex: 0,
-            endRowIndex: 1,
+            sheetId: spreadsheetConfigGid,
+            startRowIndex: topDataRowIndex,
+            endRowIndex: topDataRowIndex + 1,
+            startColumnIndex: 0,
+            endColumnIndex: 1,
           },
         },
       ],
     });
-    const { floor, report } = applyFloor();
-    const data = protectionsOf(floor, "spreadsheetConfig").filter(
-      (protection) =>
-        protection.kind !== "unmodelable" &&
-        floorKey(protection.description) ===
-          `${ssc.tableMenuSpace.columnId} · data · warning`,
-    );
+    const { floor } = applyFloor();
 
-    expect(report).toContain("Removed duplicates:");
-    expect(report).toContain(description);
-    expect(data).toHaveLength(1);
-    expect(data[0]).toMatchObject({ range: inPlace });
-  });
-
-  it("reports a misplaced Table menu space and adds nothing for Spreadsheet Config", () => {
-    floorFixture({
-      spreadsheetConfigColumnOrder: [
-        "idDelimiter",
-        "tableMenuSpace",
-        "fillRowIdsTimeLastRan",
-        "fillRowIdsRunStatus",
-        "syncConfigSheetRowsTimeLastRan",
-        "syncConfigSheetRowsRunStatus",
-        "idHeader",
-        "startTableColumnIndexBase1",
-        "columnIdRowIndexBase1",
-        "columnGroupHeadingRowIndexBase1",
-        "actionRowIndexBase1",
-        "tableHeaderRowIndexBase1",
-      ],
+    expect(deletedProtectionIds(batchUpdateCalls)).toContain(41);
+    expect(protectionsOf(floor, "spreadsheetConfig")).toHaveLength(1);
+    expect(protectionsOf(floor, "spreadsheetConfig")[0]).toMatchObject({
+      description: floorWarningDescription("Spreadsheet Config"),
+      range: { sheetId: spreadsheetConfigGid },
     });
-    const { floor, report } = applyFloor();
-
-    expect(report).toContain(
-      "Table menu space is not the first Spreadsheet Config Table column; nothing was added for that sheet.",
-    );
-    expect(protectionsOf(floor, "spreadsheetConfig")).toHaveLength(0);
-    expect(protectionsOf(floor, "sheetConfig").length).toBeGreaterThan(0);
   });
 
   it("sets a floor column whose type differs from the seed and reports it", () => {

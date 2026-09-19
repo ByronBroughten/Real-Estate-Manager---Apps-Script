@@ -1,5 +1,6 @@
 import {
   protectionRangeEqual,
+  protectionRangesEqual,
   type ModelableEditProtection,
   type ProtectionGridRange,
 } from "../00_Source/RawSource/EditProtection";
@@ -9,16 +10,14 @@ import {
   type ColumnName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
+import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
-type FloorCellKind = "header" | "column ID" | "group heading" | "data";
 type FloorSheetName = Exclude<keyof typeof configSheetFloorSeed, "valueConfig">;
 
 const floorWarningPrefix = "Config-sheet floor";
@@ -26,6 +25,7 @@ const floorWarningPrefix = "Config-sheet floor";
 interface FloorDeclaration {
   description: string;
   range: ProtectionGridRange;
+  unprotectedRanges: ProtectionGridRange[];
   queueAdd: () => void;
 }
 
@@ -36,10 +36,11 @@ interface EnsureSheetColumnTypesProps<SN extends FloorSheetName> {
 }
 
 /**
- * Declares edit warnings on the config-sheet floor cells and sets floor
- * columns back to their seeded types. ConfigOrchestrator runs this at the
- * start of every config sync; the ensureConfigSheetFloor chore is the other
- * caller.
+ * Declares one whole-sheet edit warning on Spreadsheet Config, Sheet
+ * Config and Column Config, with editable ranges where an edit sticks,
+ * and sets floor columns back to their seeded types. ConfigOrchestrator
+ * runs this at the start of every config sync; the
+ * ensureConfigSheetFloor chore is the other caller.
  * docs/generated-data.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
@@ -53,17 +54,9 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     this._fetchFloorSheets();
     const report: string[] = [];
     this._ensureColumnTypes(report);
-    const declarations = [
-      ...this._spreadsheetConfigDeclarations(report),
-      ...floorDeclaration.bookkeeping(
-        this.ss.sheet("sheetConfig"),
-        floorColumnNames("sheetConfig"),
-      ),
-      ...floorDeclaration.bookkeeping(
-        this.ss.sheet("columnConfig"),
-        floorColumnNames("columnConfig"),
-      ),
-    ];
+    const declarations = floorSheetNames().map((sheetName) =>
+      this._sheetDeclaration(sheetName, report),
+    );
     this._reconcile(declarations, report);
     return report.join("; ");
   }
@@ -72,7 +65,6 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       const sheet = this.ss.sheet(sheetName);
       sheet.meta.uniformRow("columnId").prepFetchFull();
       sheet.meta.uniformRow("tableHeader").prepFetchFull();
-      sheet.meta.uniformRow("colGroupName").prepFetchFull();
       sheet.prepFetchEditProtections();
     });
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
@@ -122,78 +114,60 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       );
     });
   }
-  private _spreadsheetConfigDeclarations(report: string[]): FloorDeclaration[] {
-    const sheet = this.ss.sheet("spreadsheetConfig");
-    const tableMenuSpaceHeader =
-      configSheetFloorSeed.spreadsheetConfig.columns[0].header;
-    const tableMenuSpaceName = columnNameByHeader(
-      "spreadsheetConfig",
-      tableMenuSpaceHeader,
-    );
-    const tableMenuSpace = sheet.column(tableMenuSpaceName);
-    if (
-      tableMenuSpace.meta.colIndex !== ssConfigGet("startTableColIndexBase0")
-    ) {
-      report.push(
-        "Table menu space is not the first Spreadsheet Config Table column; nothing was added for that sheet.",
-      );
-      return [];
+  private _sheetDeclaration<SN extends FloorSheetName>(
+    sheetName: SN,
+    report: string[],
+  ): FloorDeclaration {
+    const sheet = this.ss.sheet(sheetName);
+    const description = floorWarningDescription(sheetName);
+    const extraColumnLines = extraColumnReportLines(sheet, sheetName);
+    if (extraColumnLines.length > 0) {
+      report.push(`Covered added columns: ${extraColumnLines.join("; ")}`);
     }
-    const feedbackColumnNames = spreadsheetConfigFeedbackColumnNames();
-    return [
-      ...floorDeclaration.bookkeeping(sheet, [
-        tableMenuSpaceName,
-        ...feedbackColumnNames,
-        ...floorColumnNames("spreadsheetConfig").filter(
-          (columnName) => columnName !== tableMenuSpaceName,
-        ),
-      ]),
-      floorDeclaration.dataCell(tableMenuSpace),
-      ...feedbackColumnNames.map((columnName) =>
-        floorDeclaration.dataCell(sheet.column(columnName)),
-      ),
-      ...floorDeclaration.groupHeadings(sheet),
-    ];
+    const unprotectedRanges = editableRanges(sheet, sheetName);
+    return {
+      description,
+      range: sheet.raw.wholeSheetGridRange,
+      unprotectedRanges,
+      queueAdd: () =>
+        sheet.addEditWarningWholeSheet({ description, unprotectedRanges }),
+    };
   }
   private _reconcile(declarations: FloorDeclaration[], report: string[]): void {
     const existing = this._floorProtections();
+    const claimed = new Set<number>();
+    const removed = new Set<number>();
     const drifted: string[] = [];
-    const duplicates: string[] = [];
     declarations.forEach((declaration) => {
-      const key = floorMatchKey(declaration.description);
       const matches = existing.filter(
-        (protection) => floorMatchKey(protection.description) === key,
+        (protection) => protection.description === declaration.description,
       );
-      const inPlace = matches.find((protection) =>
-        protectionRangeEqual(protection.range, declaration.range),
+      const inPlace = matches.find(
+        (protection) =>
+          protectionRangeEqual(protection.range, declaration.range) &&
+          protectionRangesEqual(
+            protection.unprotectedRanges,
+            declaration.unprotectedRanges,
+          ),
       );
       if (inPlace !== undefined) {
-        matches.forEach((protection) => {
-          if (protection.id === inPlace.id) return;
-          this._removeProtection(protection);
-          duplicates.push(protection.description);
-        });
+        claimed.add(inPlace.id);
         return;
       }
       matches.forEach((protection) => {
         this._removeProtection(protection);
+        removed.add(protection.id);
         drifted.push(protection.description);
       });
       declaration.queueAdd();
     });
+    existing.forEach((protection) => {
+      if (claimed.has(protection.id) || removed.has(protection.id)) return;
+      this._removeProtection(protection);
+    });
     if (drifted.length > 0) {
       report.push(`Replaced drifted: ${drifted.join("; ")}`);
     }
-    if (duplicates.length > 0) {
-      report.push(`Removed duplicates: ${duplicates.join("; ")}`);
-    }
-  }
-  private _removeProtection(protection: ModelableEditProtection): void {
-    floorSheetNames().forEach((sheetName) => {
-      const sheet = this.ss.sheet(sheetName);
-      if (sheet.schema.sheetGid !== protection.range.sheetId) return;
-      sheet.removeEditProtectionById(protection.id);
-    });
   }
   private _floorProtections(): ModelableEditProtection[] {
     return floorSheetNames().flatMap((sheetName) =>
@@ -202,19 +176,170 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
         .editProtections()
         .flatMap((protection) => {
           if (protection.kind === "unmodelable") return [];
-          if (floorMatchKey(protection.description) === undefined) return [];
+          if (!protection.description.startsWith(floorWarningPrefix)) {
+            return [];
+          }
           return [protection];
         }),
     );
   }
+  private _removeProtection(protection: ModelableEditProtection): void {
+    floorSheetNames().forEach((sheetName) => {
+      const sheet = this.ss.sheet(sheetName);
+      if (sheet.schema.sheetGid !== protection.range.sheetId) return;
+      sheet.removeEditProtectionById(protection.id);
+    });
+  }
 }
 
-function floorColumnNames<SN extends FloorSheetName>(
+function floorWarningDescription(sheetName: FloorSheetName): string {
+  return `${floorWarningPrefix} · ${configSheetFloorSeed[sheetName].title} · warning`;
+}
+
+function extraColumnReportLines<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+): string[] {
+  return extraColumnIndexes(sheet, sheetName).map(
+    (colIndex) =>
+      `${sheet.raw.title} · ${String(sheet.raw.meta.tableHeaderRow.valueOrEmpty(colIndex))}`,
+  );
+}
+
+function extraColumnIndexes<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+): number[] {
+  const namedIndexes = new Set(liveColumnIndexes(sheet, sheetName).values());
+  return sheet.raw.fullTableColIndexes.filter(
+    (colIndex) => !namedIndexes.has(colIndex),
+  );
+}
+
+function editableRanges<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+): ProtectionGridRange[] {
+  const liveIndexes = liveColumnIndexes(sheet, sheetName);
+  const editableDataColIndexes = [
+    ...editableDataColumnNames(sheetName).flatMap((columnName) => {
+      const colIndex = liveIndexes.get(columnName);
+      return colIndex === undefined ? [] : [colIndex];
+    }),
+    ...extraColumnIndexes(sheet, sheetName),
+  ];
+  const sheetId = sheet.schema.sheetGid;
+  const ranges = [
+    ...columnEditableRanges({
+      sheetId,
+      startRowIndex: sheet.schema.actionRowIndex,
+      endRowIndex: sheet.schema.actionRowIndex + 1,
+      colIndexes:
+        sheetName === "spreadsheetConfig"
+          ? spreadsheetConfigSelectorIndexes(liveIndexes)
+          : [],
+    }),
+    ...columnEditableRanges({
+      sheetId,
+      startRowIndex: sheet.schema.topDataRowIdx,
+      colIndexes: editableDataColIndexes,
+    }),
+  ];
+  return ranges.sort(compareProtectionRanges);
+}
+
+function liveColumnIndexes<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+): Map<ColumnName<SN>, number> {
+  const indexes = new Map<ColumnName<SN>, number>();
+  const meta = sheet.raw.meta;
+  getSheetColumnNames(sheetName).forEach((columnName) => {
+    const columnId = getColumnTraitByName(sheetName, columnName, "columnId");
+    const header = getColumnTraitByName(sheetName, columnName, "header");
+    const byId = meta.fullTableColIndexes.find(
+      (colIndex) => String(meta.colIdRow.valueOrEmpty(colIndex)) === columnId,
+    );
+    if (byId !== undefined) {
+      indexes.set(columnName, byId);
+      return;
+    }
+    const byHeader = meta.fullTableColIndexes.find(
+      (colIndex) =>
+        String(meta.tableHeaderRow.valueOrEmpty(colIndex)) === header,
+    );
+    if (byHeader !== undefined) indexes.set(columnName, byHeader);
+  });
+  return indexes;
+}
+
+function editableDataColumnNames<SN extends FloorSheetName>(
   sheetName: SN,
 ): ColumnName<SN>[] {
-  return configSheetFloorSeed[sheetName].columns.map((column) =>
-    columnNameByHeader(sheetName, column.header),
+  const excluded = new Set<string>(excludedDataColumnNames(sheetName));
+  return getSheetColumnNames(sheetName).filter(
+    (columnName) => !excluded.has(columnName),
   );
+}
+
+function excludedDataColumnNames(sheetName: FloorSheetName): readonly string[] {
+  const bySheet = {
+    spreadsheetConfig: [
+      "tableMenuSpace",
+      ...spreadsheetConfigFeedbackColumnNames(),
+    ],
+    sheetConfig: ["sheetGid", "sheetTitle"],
+    columnConfig: ["sheetGid", "columnId", "sheetTitle", "header"],
+  } satisfies Record<FloorSheetName, readonly string[]>;
+  return bySheet[sheetName];
+}
+
+function spreadsheetConfigSelectorIndexes(
+  liveIndexes: ReadonlyMap<string, number>,
+): number[] {
+  return Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
+    (endpoint) => {
+      const colIndex = liveIndexes.get(
+        columnNameByHeader("spreadsheetConfig", endpoint.timeLastRan.header),
+      );
+      return colIndex === undefined ? [] : [colIndex];
+    },
+  );
+}
+
+interface ColumnEditableRangeProps {
+  sheetId: number;
+  startRowIndex: number;
+  endRowIndex?: number;
+  colIndexes: number[];
+}
+
+function columnEditableRanges({
+  sheetId,
+  startRowIndex,
+  endRowIndex,
+  colIndexes,
+}: ColumnEditableRangeProps): ProtectionGridRange[] {
+  return Arr.contiguousRanges(colIndexes).map((range) => ({
+    sheetId,
+    startRowIndex,
+    ...(endRowIndex === undefined ? {} : { endRowIndex }),
+    startColumnIndex: range.startIndex,
+    endColumnIndex: range.endIndex,
+  }));
+}
+
+function compareProtectionRanges(
+  left: ProtectionGridRange,
+  right: ProtectionGridRange,
+): number {
+  const leftRow = "startRowIndex" in left ? left.startRowIndex : -1;
+  const rightRow = "startRowIndex" in right ? right.startRowIndex : -1;
+  if (leftRow !== rightRow) return leftRow - rightRow;
+  const leftCol = "startColumnIndex" in left ? (left.startColumnIndex ?? 0) : 0;
+  const rightCol =
+    "startColumnIndex" in right ? (right.startColumnIndex ?? 0) : 0;
+  return leftCol - rightCol;
 }
 
 function columnNameByHeader<SN extends FloorSheetName>(
@@ -248,103 +373,10 @@ function spreadsheetConfigFeedbackColumnNames(): SpreadsheetConfigColumnName[] {
   );
 }
 
-function spreadsheetConfigGroupHeadings(): readonly string[] {
-  const spreadsheetConfig = configSheetFloorSeed.spreadsheetConfig;
-  return [
-    ...spreadsheetConfig.columns.map((column) => column.columnGroupHeading),
-    ...Obj.values(spreadsheetConfig.endpoints).map(
-      (endpoint) => endpoint.heading,
-    ),
-  ].filter((heading) => heading !== "");
-}
-
-const floorDeclaration = {
-  bookkeeping<SN extends SheetNameSimple>(
-    sheet: SheetNamed<SN>,
-    columnNames: readonly ColumnName<SN>[],
-  ): FloorDeclaration[] {
-    return columnNames.flatMap((columnName) => {
-      const column = sheet.column(columnName);
-      return [
-        floorDeclaration.uniformCell(column, "tableHeader", "header"),
-        floorDeclaration.uniformCell(column, "columnId", "column ID"),
-      ];
-    });
-  },
-  dataCell<SN extends SheetNameSimple, CN extends ColumnName<SN>>(
-    column: ColumnNamed<SN, CN>,
-  ): FloorDeclaration {
-    const rowIndex = column.schema.topDataRowIdx;
-    const cell = column.cell(rowIndex);
-    const description = floorDescription(column, "data");
-    return {
-      description,
-      range: cell.raw.gridRange,
-      queueAdd: () => cell.addEditWarning({ description }),
-    };
-  },
-  groupHeadings(sheet: SheetNamed<"spreadsheetConfig">): FloorDeclaration[] {
-    const declarations: FloorDeclaration[] = [];
-    let previousHeading = "";
-    columnsByIndex(sheet).forEach((column) => {
-      const heading = String(
-        column.meta.uniformCell("colGroupName").valueOrEmpty(),
-      );
-      const isGroupStart =
-        heading !== previousHeading &&
-        spreadsheetConfigGroupHeadings().some(
-          (groupHeading) => groupHeading === heading,
-        );
-      previousHeading = heading;
-      if (!isGroupStart) return;
-      declarations.push(
-        floorDeclaration.uniformCell(column, "colGroupName", "group heading"),
-      );
-    });
-    return declarations;
-  },
-  uniformCell<SN extends SheetNameSimple, CN extends ColumnName<SN>>(
-    column: ColumnNamed<SN, CN>,
-    rowName: "tableHeader" | "columnId" | "colGroupName",
-    cellKind: FloorCellKind,
-  ): FloorDeclaration {
-    const cell = column.meta.uniformCell(rowName);
-    const description = floorDescription(column, cellKind);
-    return {
-      description,
-      range: cell.raw.gridRange,
-      queueAdd: () => cell.addEditWarning({ description }),
-    };
-  },
-};
-
 function floorColumnIdentity<
-  SN extends SheetNameSimple,
+  SN extends FloorSheetName,
   CN extends ColumnName<SN>,
 >(column: ColumnNamed<SN, CN>): string {
   const header = String(column.meta.uniformCell("tableHeader").valueOrEmpty());
   return `${column.sheet.raw.title} · ${header} (${column.columnId})`;
-}
-
-function floorDescription<
-  SN extends SheetNameSimple,
-  CN extends ColumnName<SN>,
->(column: ColumnNamed<SN, CN>, cellKind: FloorCellKind): string {
-  return `${floorWarningPrefix} · ${floorColumnIdentity(column)} · ${cellKind} · warning`;
-}
-
-function columnsByIndex<SN extends SheetNameSimple>(
-  sheet: SheetNamed<SN>,
-): ColumnNamed<SN>[] {
-  return sheet.schema.columnNames
-    .map((columnName) => sheet.column(columnName))
-    .sort((left, right) => left.meta.colIndex - right.meta.colIndex);
-}
-
-function floorMatchKey(description: string): string | undefined {
-  const parts = description.split(" · ");
-  if (parts.length !== 5 || parts[0] !== floorWarningPrefix) return undefined;
-  const columnId = parts[2]?.match(/\(([^)]+)\)$/)?.[1];
-  if (columnId === undefined) return undefined;
-  return `${columnId} · ${parts[3]} · ${parts[4]}`;
 }

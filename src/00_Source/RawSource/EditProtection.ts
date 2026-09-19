@@ -124,7 +124,7 @@ export function editProtectionsEqual(
   return editProtectionContentsEqual(left, right);
 }
 
-function protectionRangesEqual(
+export function protectionRangesEqual(
   left: ProtectionGridRange[],
   right: ProtectionGridRange[],
 ): boolean {

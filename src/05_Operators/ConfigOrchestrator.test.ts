@@ -292,22 +292,25 @@ function floorWarningDescriptions(
   });
 }
 
-function driftedTableMenuSpaceDescription(): string {
-  return `Config-sheet floor · Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) · data · warning`;
+function driftedFloorWarningDescription(): string {
+  return "Config-sheet floor · Spreadsheet Config · warning";
 }
 
-function driftedTableMenuSpaceProtection(): GoogleAppsScript.Sheets.Schema.ProtectedRange {
+function driftedFloorWarningProtection(): GoogleAppsScript.Sheets.Schema.ProtectedRange {
   return {
     protectedRangeId: 41,
-    description: driftedTableMenuSpaceDescription(),
+    description: driftedFloorWarningDescription(),
     warningOnly: true,
-    range: {
-      sheetId: spreadsheetConfigGid,
-      startRowIndex: 0,
-      endRowIndex: 1,
-      startColumnIndex: 0,
-      endColumnIndex: 1,
-    },
+    range: { sheetId: spreadsheetConfigGid },
+    unprotectedRanges: [
+      {
+        sheetId: spreadsheetConfigGid,
+        startRowIndex: 0,
+        endRowIndex: 1,
+        startColumnIndex: 0,
+        endColumnIndex: 1,
+      },
+    ],
   };
 }
 
@@ -320,7 +323,7 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
 
     expect(batchUpdateCalls.length).toBe(2);
     expect(floorWarningDescriptions(batchUpdateCalls[0]?.requests)).toContain(
-      driftedTableMenuSpaceDescription(),
+      driftedFloorWarningDescription(),
     );
     expect(batchUpdateCalls[1]?.requests?.length).toBeGreaterThan(0);
     // The column ID gathered from the "test" sheet made it into a newly
@@ -351,19 +354,19 @@ describe("ConfigOrchestrator.syncAndFlushConfigSheets", () => {
     ).toThrow();
 
     expect(floorWarningDescriptions(batchUpdateCalls[0]?.requests)).toContain(
-      driftedTableMenuSpaceDescription(),
+      driftedFloorWarningDescription(),
     );
   });
 
   it("returns the floor report beside the untyped-column summary, as one line", () => {
     seedFixture({
-      spreadsheetConfigProtections: [driftedTableMenuSpaceProtection()],
+      spreadsheetConfigProtections: [driftedFloorWarningProtection()],
     });
 
     const summary = ConfigOrchestrator.init().syncConfigSheetRows();
 
     expect(summary).toContain("Replaced drifted:");
-    expect(summary).toContain(driftedTableMenuSpaceDescription());
+    expect(summary).toContain(driftedFloorWarningDescription());
     expect(summary).toContain("1 column(s) across 1 sheet(s)");
     expect(summary).not.toContain("\n");
   });
@@ -420,12 +423,12 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
 
   it("carries the floor report back beside the untyped-column summary", () => {
     seedFixture({
-      spreadsheetConfigProtections: [driftedTableMenuSpaceProtection()],
+      spreadsheetConfigProtections: [driftedFloorWarningProtection()],
     });
 
     const parsed = ConfigOrchestrator.init().generateConfigFiles();
     expect(parsed.floorReport).toBe(
-      `Replaced drifted: ${driftedTableMenuSpaceDescription()}`,
+      `Replaced drifted: ${driftedFloorWarningDescription()}`,
     );
     expect(parsed.untypedColumnsSummary).toContain(
       "1 column(s) across 1 sheet(s)",
