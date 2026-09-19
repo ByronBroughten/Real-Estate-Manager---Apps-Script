@@ -265,15 +265,27 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("deleteProtectedRange (no sheet) id 11");
   });
 
+  it("names a table column type update", () => {
+    expect(
+      onlyLine({
+        updateTable: {
+          table: {
+            tableId: "t1",
+            columnProperties: [{ columnIndex: 2, columnType: "TEXT" }],
+          },
+          fields: "columnProperties.columnType",
+        },
+      }),
+    ).toBe("updateTable t1 col 2 TEXT [columnProperties.columnType]");
+  });
+
   it("renders a request the framework does not model as its own verb and JSON", () => {
     const line = onlyLine({
-      updateTable: {
-        table: { tableId: "t" },
-      },
+      addSheet: { properties: { title: "x" } },
     } as OpaqueRawRequest);
 
-    expect(line).toContain("updateTable");
-    expect(line).toContain('"tableId":"t"');
+    expect(line).toContain("addSheet");
+    expect(line).toContain('"title":"x"');
   });
 
   it("is empty when nothing was queued", () => {

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import type { EditProtection } from "../00_Source/RawSource/EditProtection";
+import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
@@ -48,12 +49,102 @@ function sscField<K extends (typeof sscColumns)[number]>(columnName: K) {
   return ssc[columnName];
 }
 
+function floorSeedType(
+  sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
+  header: string,
+): string | undefined {
+  const column = configSheetFloorSeed[sheetName].columns.find(
+    (entry) => entry.header === header,
+  );
+  if (column !== undefined) return column.columnType;
+  if (sheetName !== "spreadsheetConfig") return undefined;
+  return Object.values(configSheetFloorSeed.spreadsheetConfig.endpoints)
+    .flatMap((endpoint) => [endpoint.timeLastRan, endpoint.runStatus])
+    .find((entry) => entry.header === header)?.columnType;
+}
+
+function declaredTypesByHeader(
+  sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
+  headers: readonly string[],
+  overrides: Record<string, string> = {},
+): Record<number, string> {
+  const types: Record<number, string> = {};
+  headers.forEach((header, colIndex) => {
+    const columnType = overrides[header] ?? floorSeedType(sheetName, header);
+    if (columnType !== undefined) types[colIndex] = columnType;
+  });
+  return types;
+}
+
+function spreadsheetConfigDeclaredTypes(
+  sscOrder: readonly (typeof sscColumns)[number][],
+  sscHeaders: readonly string[],
+  options: {
+    columnTypesAreUnset?: boolean;
+    spreadsheetConfigColumnTypes?: Partial<
+      Record<(typeof sscColumns)[number], string>
+    >;
+  },
+): Record<number, string> {
+  if (options.columnTypesAreUnset) {
+    const types: Record<number, string> = {};
+    sscOrder.forEach((columnName, colIndex) => {
+      const columnType = options.spreadsheetConfigColumnTypes?.[columnName];
+      if (columnType !== undefined) types[colIndex] = columnType;
+    });
+    return types;
+  }
+  const typeOverrides = Object.fromEntries(
+    Object.entries(options.spreadsheetConfigColumnTypes ?? {}).map(
+      ([columnName, columnType]) => [
+        sscField(columnName as (typeof sscColumns)[number]).header,
+        columnType,
+      ],
+    ),
+  );
+  return declaredTypesByHeader("spreadsheetConfig", sscHeaders, typeOverrides);
+}
+
+function matchingFloorDeclaredTypes(
+  sheetName: "sheetConfig" | "columnConfig",
+  headers: readonly string[],
+  columnTypesAreUnset: boolean | undefined,
+): Record<number, string> | undefined {
+  if (columnTypesAreUnset) return undefined;
+  return declaredTypesByHeader(sheetName, headers);
+}
+
+function columnTypeUpdates(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return (batchUpdateCalls[0]?.requests ?? []).flatMap((request) => {
+    const table = request.updateTable?.table;
+    if (table?.tableId === undefined) return [];
+    return (table.columnProperties ?? []).flatMap((column) => {
+      if (column.columnIndex === undefined || column.columnType === undefined) {
+        return [];
+      }
+      return [
+        {
+          tableId: table.tableId,
+          columnIndex: column.columnIndex,
+          columnType: column.columnType,
+        },
+      ];
+    });
+  });
+}
+
 function floorFixture(
   options: {
     spreadsheetConfigColumnOrder?: readonly (typeof sscColumns)[number][];
     spreadsheetConfigHeaders?: Partial<
       Record<(typeof sscColumns)[number], string>
     >;
+    spreadsheetConfigColumnTypes?: Partial<
+      Record<(typeof sscColumns)[number], string>
+    >;
+    columnTypesAreUnset?: boolean;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
   } = {},
@@ -102,7 +193,15 @@ function floorFixture(
           3: sscHeaders,
           4: dataRow,
         }),
-        table: { endRowIndex: 5, endColumnIndex: sscOrder.length },
+        table: {
+          endRowIndex: 5,
+          endColumnIndex: sscOrder.length,
+          columnDeclaredTypes: spreadsheetConfigDeclaredTypes(
+            sscOrder,
+            sscHeaders,
+            options,
+          ),
+        },
         protectedRanges: options.spreadsheetConfigProtections,
       },
       {
@@ -118,7 +217,15 @@ function floorFixture(
           4: [sheetConfigGid, "Sheet Config", true],
           5: [columnConfigGid, "Column Config", true],
         }),
-        table: { endRowIndex: 6, endColumnIndex: 3 },
+        table: {
+          endRowIndex: 6,
+          endColumnIndex: 3,
+          columnDeclaredTypes: matchingFloorDeclaredTypes(
+            "sheetConfig",
+            [sc.sheetGid.header, sc.sheetTitle.header, sc.letApiAccess.header],
+            options.columnTypesAreUnset,
+          ),
+        },
         protectedRanges: options.sheetConfigProtections,
       },
       {
@@ -143,7 +250,22 @@ function floorFixture(
           ],
           4: [],
         }),
-        table: { endRowIndex: 5, endColumnIndex: 6 },
+        table: {
+          endRowIndex: 5,
+          endColumnIndex: 6,
+          columnDeclaredTypes: matchingFloorDeclaredTypes(
+            "columnConfig",
+            [
+              cc.sheetGid.header,
+              cc.columnId.header,
+              cc.sheetTitle.header,
+              cc.header.header,
+              cc.emptyValueAllowed.header,
+              cc.customDefaultValue.header,
+            ],
+            options.columnTypesAreUnset,
+          ),
+        },
       },
     ],
   });
@@ -378,5 +500,44 @@ describe("ConfigSheetFloor", () => {
     );
     expect(protectionsOf(floor, "spreadsheetConfig")).toHaveLength(0);
     expect(protectionsOf(floor, "sheetConfig").length).toBeGreaterThan(0);
+  });
+
+  it("sets a floor column whose type differs from the seed and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigColumnTypes: { tableMenuSpace: "DOUBLE" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain("Set column types:");
+    expect(report).toContain(
+      `Spreadsheet Config · Table menu space (${ssc.tableMenuSpace.columnId}) TEXT`,
+    );
+    expect(columnTypeUpdates(batchUpdateCalls)).toEqual([
+      {
+        tableId: `fake-table-${spreadsheetConfigGid}`,
+        columnIndex: 0,
+        columnType: "TEXT",
+      },
+    ]);
+  });
+
+  it("leaves matching floor column types unchanged", () => {
+    const { batchUpdateCalls } = floorFixture();
+    const { report } = applyFloor();
+
+    expect(report).not.toContain("Set column types:");
+    expect(columnTypeUpdates(batchUpdateCalls)).toEqual([]);
+  });
+
+  it("does not set a type on Custom default value", () => {
+    const { batchUpdateCalls } = floorFixture({ columnTypesAreUnset: true });
+    applyFloor();
+
+    expect(columnTypeUpdates(batchUpdateCalls)).not.toContainEqual(
+      expect.objectContaining({
+        tableId: `fake-table-${columnConfigGid}`,
+        columnIndex: 5,
+      }),
+    );
   });
 });

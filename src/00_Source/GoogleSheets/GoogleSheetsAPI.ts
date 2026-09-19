@@ -325,6 +325,23 @@ function localOperationToGoogleRequests(
           },
         },
       ];
+    case "updateTableColumnType":
+      return [
+        {
+          updateTable: {
+            table: {
+              tableId: operation.tableId,
+              columnProperties: [
+                {
+                  columnIndex: operation.columnIndex,
+                  columnType: operation.columnType,
+                },
+              ],
+            },
+            fields: "columnProperties.columnType",
+          },
+        },
+      ];
     case "raw":
       return [operation.request as OpaqueRawRequest];
     default: {

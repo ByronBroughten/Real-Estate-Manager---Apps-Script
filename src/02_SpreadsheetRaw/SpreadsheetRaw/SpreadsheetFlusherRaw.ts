@@ -124,6 +124,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       ...requests.addConditionalFormat,
       ...requests.deleteProtectedRange,
       ...requests.addProtectedRange,
+      ...requests.updateTableColumnType,
       // Outside the ordering rules the queue was built around, so last.
       ...requests.raw,
     ];

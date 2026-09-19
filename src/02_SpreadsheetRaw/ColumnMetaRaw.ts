@@ -58,6 +58,18 @@ export class ColumnMetaRaw<
   get activeDeclaredColumnType(): string | undefined {
     return this._tableColumnState()?.declaredType;
   }
+  updateDeclaredColumnType(declaredType: string): this {
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
+    this.updateRequests.updateTableColumnType.push({
+      kind: "updateTableColumnType",
+      tableId: this.sheet.activeTable.tableId,
+      // Google's Table columnIndex is table-relative; colIndex is sheet-absolute.
+      columnIndex: this.colIndex - this.sheet.activeTable.startColumnIndex,
+      columnType: declaredType,
+    });
+    this._ensureColumnState(this.colIndex).declaredType = declaredType;
+    return this;
+  }
   // Table column properties are only trustworthy once the Table itself is known.
   private _tableColumnState(): ColumnStateRaw | undefined {
     this.sheet.activeTable.assertKnown();

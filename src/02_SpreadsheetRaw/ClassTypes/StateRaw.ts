@@ -20,6 +20,7 @@ import type {
   RawSource,
   SortOperation,
   UpdateCellOperation,
+  UpdateTableColumnTypeOperation,
 } from "../../00_Source/RawSource/RawSource";
 import type { RgbColor } from "../../00_Source/RawSource/RgbColor";
 import type { GridRangeProps } from "./AccessorsRaw";
@@ -53,6 +54,7 @@ export interface UpdateRequests {
   addConditionalFormat: AddConditionalFormatRuleOperation[];
   deleteProtectedRange: DeleteProtectedRangeOperation[];
   addProtectedRange: AddProtectedRangeOperation[];
+  updateTableColumnType: UpdateTableColumnTypeOperation[];
   raw: OpaqueRawWriteOperation[];
 }
 
@@ -229,6 +231,7 @@ export function emptyUpdateRequests(): UpdateRequests {
     addConditionalFormat: [],
     deleteProtectedRange: [],
     addProtectedRange: [],
+    updateTableColumnType: [],
     raw: [],
   };
 }

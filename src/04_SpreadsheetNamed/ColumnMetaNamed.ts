@@ -44,6 +44,13 @@ export class ColumnMetaNamed<
   get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {
     return this.schema.fullName;
   }
+  get activeDeclaredColumnType(): string | undefined {
+    return this.identified.activeDeclaredColumnType;
+  }
+  updateDeclaredColumnType(declaredType: string): this {
+    this.identified.updateDeclaredColumnType(declaredType);
+    return this;
+  }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
   ): CellIdentified<UniformRowValueName<UN>> {

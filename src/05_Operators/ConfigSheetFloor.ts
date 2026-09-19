@@ -29,10 +29,17 @@ interface FloorDeclaration {
   queueAdd: () => void;
 }
 
+interface EnsureSheetColumnTypesProps<SN extends FloorSheetName> {
+  sheetName: SN;
+  columns: readonly { header: string; columnType: string }[];
+  setTypes: string[];
+}
+
 /**
- * Declares edit warnings on the config-sheet floor cells. ConfigOrchestrator
- * runs this at the start of every config sync; the ensureConfigSheetFloor
- * chore is the other caller.
+ * Declares edit warnings on the config-sheet floor cells and sets floor
+ * columns back to their seeded types. ConfigOrchestrator runs this at the
+ * start of every config sync; the ensureConfigSheetFloor chore is the other
+ * caller.
  * docs/generated-data.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
@@ -45,6 +52,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
   ensure(): string {
     this._fetchFloorSheets();
     const report: string[] = [];
+    this._ensureColumnTypes(report);
     const declarations = [
       ...this._spreadsheetConfigDeclarations(report),
       ...floorDeclaration.bookkeeping(
@@ -67,7 +75,50 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       sheet.meta.uniformRow("colGroupName").prepFetchFull();
       sheet.prepFetchEditProtections();
     });
-    this.ss.fetchAllPrepped();
+    this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
+  }
+  private _ensureColumnTypes(report: string[]): void {
+    const setTypes: string[] = [];
+    this._ensureSheetColumnTypes({
+      sheetName: "spreadsheetConfig",
+      columns: [
+        ...configSheetFloorSeed.spreadsheetConfig.columns,
+        ...Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
+          (endpoint) => [endpoint.timeLastRan, endpoint.runStatus],
+        ),
+      ],
+      setTypes,
+    });
+    this._ensureSheetColumnTypes({
+      sheetName: "sheetConfig",
+      columns: configSheetFloorSeed.sheetConfig.columns,
+      setTypes,
+    });
+    this._ensureSheetColumnTypes({
+      sheetName: "columnConfig",
+      columns: configSheetFloorSeed.columnConfig.columns,
+      setTypes,
+    });
+    if (setTypes.length > 0) {
+      report.push(`Set column types: ${setTypes.join("; ")}`);
+    }
+  }
+  private _ensureSheetColumnTypes<SN extends FloorSheetName>({
+    sheetName,
+    columns,
+    setTypes,
+  }: EnsureSheetColumnTypesProps<SN>): void {
+    const sheet = this.ss.sheet(sheetName);
+    columns.forEach((seedColumn) => {
+      const column = sheet.column(
+        columnNameByHeader(sheetName, seedColumn.header),
+      );
+      if (column.meta.activeDeclaredColumnType === seedColumn.columnType) {
+        return;
+      }
+      column.meta.updateDeclaredColumnType(seedColumn.columnType);
+      setTypes.push(`${floorColumnIdentity(column)} ${seedColumn.columnType}`);
+    });
   }
   private _spreadsheetConfigDeclarations(report: string[]): FloorDeclaration[] {
     const sheet = this.ss.sheet("spreadsheetConfig");
@@ -265,12 +316,19 @@ const floorDeclaration = {
   },
 };
 
+function floorColumnIdentity<
+  SN extends SheetNameSimple,
+  CN extends ColumnName<SN>,
+>(column: ColumnNamed<SN, CN>): string {
+  const header = String(column.meta.uniformCell("tableHeader").valueOrEmpty());
+  return `${column.sheet.raw.title} · ${header} (${column.columnId})`;
+}
+
 function floorDescription<
   SN extends SheetNameSimple,
   CN extends ColumnName<SN>,
 >(column: ColumnNamed<SN, CN>, cellKind: FloorCellKind): string {
-  const header = String(column.meta.uniformCell("tableHeader").valueOrEmpty());
-  return `${floorWarningPrefix} · ${column.sheet.raw.title} · ${header} (${column.columnId}) · ${cellKind} · warning`;
+  return `${floorWarningPrefix} · ${floorColumnIdentity(column)} · ${cellKind} · warning`;
 }
 
 function columnsByIndex<SN extends SheetNameSimple>(

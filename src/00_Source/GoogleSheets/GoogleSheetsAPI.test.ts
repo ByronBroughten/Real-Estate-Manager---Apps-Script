@@ -129,6 +129,12 @@ describe("GoogleSheetsAPI write mapping", () => {
         },
       },
       { kind: "deleteProtectedRange", sheetId: 111, protectedRangeId: 7 },
+      {
+        kind: "updateTableColumnType",
+        tableId: "tbl",
+        columnIndex: 2,
+        columnType: "TEXT",
+      },
       { kind: "raw", request: { updateTable: { table: { tableId: "t" } } } },
     ];
 
@@ -249,6 +255,15 @@ describe("GoogleSheetsAPI write mapping", () => {
         },
       },
       { deleteProtectedRange: { protectedRangeId: 7 } },
+      {
+        updateTable: {
+          table: {
+            tableId: "tbl",
+            columnProperties: [{ columnIndex: 2, columnType: "TEXT" }],
+          },
+          fields: "columnProperties.columnType",
+        },
+      },
       { updateTable: { table: { tableId: "t" } } },
     ]);
   });

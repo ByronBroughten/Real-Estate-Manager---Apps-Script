@@ -106,6 +106,7 @@ export type LocalWriteOperation =
   | DeleteConditionalFormatRuleOperation
   | AddProtectedRangeOperation
   | DeleteProtectedRangeOperation
+  | UpdateTableColumnTypeOperation
   | OpaqueRawWriteOperation;
 
 export interface AppendRowsOperation {
@@ -185,6 +186,13 @@ export interface DeleteProtectedRangeOperation {
   kind: "deleteProtectedRange";
   sheetId: number;
   protectedRangeId: number;
+}
+
+export interface UpdateTableColumnTypeOperation {
+  kind: "updateTableColumnType";
+  tableId: string;
+  columnIndex: number;
+  columnType: string;
 }
 
 export interface OpaqueRawWriteOperation {

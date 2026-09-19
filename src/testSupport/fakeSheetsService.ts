@@ -427,7 +427,29 @@ function replaySheetRequest(
   nextProtectedRangeId: () => number,
 ): GoogleAppsScript.Sheets.Schema.Response {
   replayConditionalFormatRequest(sheets, request);
+  replayUpdateTableRequest(sheets, request);
   return replayProtectedRangeRequest(sheets, request, nextProtectedRangeId);
+}
+
+function replayUpdateTableRequest(
+  sheets: FakeSheetProperties[],
+  request: GoogleAppsScript.Sheets.Schema.Request,
+): void {
+  const table = request.updateTable?.table;
+  if (table?.tableId === undefined) return;
+  const sheet = sheets.find(
+    (candidate) => `fake-table-${candidate.sheetId}` === table.tableId,
+  );
+  if (sheet?.table === undefined) return;
+  const tableState = sheet.table;
+  tableState.columnDeclaredTypes ??= {};
+  const declaredTypes = tableState.columnDeclaredTypes;
+  (table.columnProperties ?? []).forEach((column) => {
+    if (column.columnIndex === undefined || column.columnType === undefined) {
+      return;
+    }
+    declaredTypes[column.columnIndex] = column.columnType;
+  });
 }
 
 function replayProtectedRangeRequest(

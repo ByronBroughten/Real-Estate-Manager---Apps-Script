@@ -93,6 +93,8 @@ function body(verb: RequestVerb, request: GoogleUpdateRequest): string {
       return requestBody.addProtectedRange(request.addProtectedRange);
     case "deleteProtectedRange":
       return requestBody.deleteProtectedRange(request.deleteProtectedRange);
+    case "updateTable":
+      return requestBody.updateTable(request.updateTable);
     default:
       return requestBody.raw(request, verb);
   }
@@ -232,6 +234,18 @@ const requestBody = {
       `id ${remove?.protectedRangeId ?? ""}`,
       "",
       "",
+    );
+  },
+  updateTable(
+    update: GoogleAppsScript.Sheets.Schema.UpdateTableRequest | undefined,
+  ): string {
+    const table = update?.table;
+    const column = table?.columnProperties?.[0];
+    return columns(
+      table?.tableId ?? "(no table)",
+      column?.columnIndex === undefined ? "" : `col ${column.columnIndex}`,
+      column?.columnType ?? "",
+      label.fields(update?.fields),
     );
   },
   // The opening's own line format: no type layer to read it through.

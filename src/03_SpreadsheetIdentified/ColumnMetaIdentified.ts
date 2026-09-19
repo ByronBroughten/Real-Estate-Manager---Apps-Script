@@ -24,6 +24,13 @@ export class ColumnMetaIdentified<
   get primary(): ColumnIdentified<VN> {
     return new ColumnIdentified(this.columnIdentifiedProps);
   }
+  get activeDeclaredColumnType(): string | undefined {
+    return this.raw.activeDeclaredColumnType;
+  }
+  updateDeclaredColumnType(declaredType: string): this {
+    this.raw.updateDeclaredColumnType(declaredType);
+    return this;
+  }
   uniformCell<UN extends UniformRowName>(
     rowName: UN,
   ): CellIdentified<UniformRowValueName<UN>> {

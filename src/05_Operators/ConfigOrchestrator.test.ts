@@ -45,6 +45,32 @@ const sscColumns = [
   "tableHeaderRowIndexBase1",
 ] as const;
 
+function floorSeedType(
+  sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
+  header: string,
+): string | undefined {
+  const column = configSheetFloorSeed[sheetName].columns.find(
+    (entry) => entry.header === header,
+  );
+  if (column !== undefined) return column.columnType;
+  if (sheetName !== "spreadsheetConfig") return undefined;
+  return Object.values(configSheetFloorSeed.spreadsheetConfig.endpoints)
+    .flatMap((endpoint) => [endpoint.timeLastRan, endpoint.runStatus])
+    .find((entry) => entry.header === header)?.columnType;
+}
+
+function declaredTypesByHeader(
+  sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
+  headers: readonly string[],
+): Record<number, string> {
+  const types: Record<number, string> = {};
+  headers.forEach((header, colIndex) => {
+    const columnType = floorSeedType(sheetName, header);
+    if (columnType !== undefined) types[colIndex] = columnType;
+  });
+  return types;
+}
+
 const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true];
 
 beforeEach(() => {
@@ -90,6 +116,7 @@ function spreadsheetConfigSheet(
     table: {
       endRowIndex: options.tableEndRowIndex ?? 5,
       endColumnIndex: sscColumns.length,
+      columnDeclaredTypes: declaredTypesByHeader("spreadsheetConfig", headers),
     },
     protectedRanges: options.protectedRanges,
   };
@@ -168,7 +195,14 @@ function seedFixture(
           4: testSheetConfigRowWithApiAccess,
           ...options.extraSheetConfigDataRows,
         }),
-        table: { endRowIndex: options.sheetConfigTableEndRowIndex ?? 5 },
+        table: {
+          endRowIndex: options.sheetConfigTableEndRowIndex ?? 5,
+          columnDeclaredTypes: declaredTypesByHeader("sheetConfig", [
+            sc.sheetGid.header,
+            sc.sheetTitle.header,
+            sc.letApiAccess.header,
+          ]),
+        },
       },
       {
         sheetId: columnConfigGid,
@@ -187,7 +221,16 @@ function seedFixture(
             cc.emptyValueAllowed.columnId,
           ],
         }),
-        table: { endRowIndex: 5 },
+        table: {
+          endRowIndex: 5,
+          columnDeclaredTypes: {
+            0: "DOUBLE",
+            1: "TEXT",
+            2: "TEXT",
+            3: "TEXT",
+            5: "BOOLEAN",
+          },
+        },
       },
       {
         sheetId: testSheetGid,
