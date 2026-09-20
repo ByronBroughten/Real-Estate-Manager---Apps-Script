@@ -108,12 +108,12 @@ export class SheetMetaRaw extends SheetCommonRaw {
     return this.schema.makeColIdFromPrefix(idPrefix);
   }
   insertColumnAtEnd(props: { idPrefix: string; header: string }): number {
-    const columnIndex = this.activeTable.endColumnIndex;
-    this.column(columnIndex).initUniformCells(props);
+    const columnIndex = this.nextEndColumnInsertIndex;
     this.addSheetChangeToSave({
       action: "insertColumn",
       startColumnIndex: columnIndex,
     });
+    this.column(columnIndex).initUniformCells(props);
     return columnIndex;
   }
   // Only table columns: a fact is always reached through a column ID.

@@ -187,7 +187,7 @@ export interface RowCellChange<VN extends CellValueName = CellValueName> {
 }
 export type SheetChangesToSave = {
   sort: null | SortParameters;
-  insertColumn: null | ColIndex;
+  insertColumn: SheetChangePropsObj["insertColumn"][];
   fills: ColumnFill[];
 };
 // One contiguous run of a column's cells: value/colour as repeatCell, formula as pasteData.
@@ -272,7 +272,7 @@ export function emptySpreadsheetWriteQueue(): SpreadsheetWriteQueueRaw {
 }
 
 export function emptySheetChanges(): SheetChangesToSave {
-  return { sort: null, insertColumn: null, fills: [] };
+  return { sort: null, insertColumn: [], fills: [] };
 }
 
 export function emptyRowChanges(): RowChangesToSave {

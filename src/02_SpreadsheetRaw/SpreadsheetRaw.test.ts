@@ -1524,7 +1524,7 @@ describe("CellRaw.updateValue", () => {
 
 describe("SheetRaw column insert", () => {
   function stubThreeColumnTable() {
-    stubSheetsService({
+    return stubSheetsService({
       sheets: [
         {
           sheetId: 111,
@@ -1585,6 +1585,111 @@ describe("SheetRaw column insert", () => {
     expect(() => raw.sheet(111).row(5).cell(2).updateValue("right")).toThrow(
       "Column index 2 is stale. First stale column index is 1.",
     );
+  });
+
+  function insertDimensionRequests(
+    batchUpdateCalls: { requests?: object[] }[],
+  ): object[] {
+    return batchUpdateCalls
+      .flatMap(({ requests = [] }) => requests)
+      .filter((request) => "insertDimension" in request);
+  }
+
+  function insertColumnRequest(startIndex: number) {
+    return {
+      insertDimension: {
+        range: {
+          sheetId: 111,
+          dimension: "COLUMNS",
+          startIndex,
+          endIndex: startIndex + 1,
+        },
+        inheritFromBefore: false,
+      },
+    };
+  }
+
+  it("sends two end inserts on one sheet as two insertDimension requests in queue order", () => {
+    const { batchUpdateCalls } = stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    const first = raw
+      .sheetMeta(111)
+      .insertColumnAtEnd({ idPrefix: "lse", header: "First" });
+    const second = raw
+      .sheetMeta(111)
+      .insertColumnAtEnd({ idPrefix: "lse", header: "Second" });
+    raw.batchUpdateGSheets();
+
+    expect([first, second]).toEqual([3, 4]);
+    expect(raw.sheet(111).activeTable.endColumnIndex).toBe(5);
+    expect(insertDimensionRequests(batchUpdateCalls)).toEqual([
+      insertColumnRequest(3),
+      insertColumnRequest(4),
+    ]);
+  });
+
+  it("refuses a mid-Table insert queued beside another insert on that sheet, and sends only the first", () => {
+    const { batchUpdateCalls } = stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheetMeta(111).insertColumnAtEnd({ idPrefix: "lse", header: "New" });
+
+    expect(() =>
+      raw.sheet(111).addSheetChangeToSave({
+        action: "insertColumn",
+        startColumnIndex: 1,
+      }),
+    ).toThrow(
+      'Refusing to queue a column insert at 1 on "Leases" (gid 111): it already has a column insert queued, so the next must land at the Table end, 4.',
+    );
+    raw.batchUpdateGSheets();
+
+    expect(insertDimensionRequests(batchUpdateCalls)).toEqual([
+      insertColumnRequest(3),
+    ]);
+  });
+
+  it("refuses a second insert queued beside a mid-Table insert on that sheet, and sends only the first", () => {
+    const { batchUpdateCalls } = stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).addSheetChangeToSave({
+      action: "insertColumn",
+      startColumnIndex: 1,
+    });
+
+    expect(() =>
+      raw.sheetMeta(111).insertColumnAtEnd({ idPrefix: "lse", header: "New" }),
+    ).toThrow(
+      'Refusing to queue a column insert on "Leases" (gid 111): a mid-Table column insert is already queued.',
+    );
+    raw.batchUpdateGSheets();
+
+    expect(insertDimensionRequests(batchUpdateCalls)).toEqual([
+      insertColumnRequest(1),
+    ]);
+  });
+
+  it("refuses a second Table-end insert that skips past the end plus the inserts already queued", () => {
+    stubThreeColumnTable();
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).addSheetChangeToSave({
+      action: "insertColumn",
+      startColumnIndex: 3,
+    });
+
+    expect(() =>
+      raw.sheet(111).addSheetChangeToSave({
+        action: "insertColumn",
+        startColumnIndex: 5,
+      }),
+    ).toThrow("the next must land at the Table end, 4.");
   });
 
   it("still reads a cell whose column index became stale, because reads do not consult the watermark", () => {
