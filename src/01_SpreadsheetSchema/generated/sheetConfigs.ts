@@ -29,5 +29,12 @@ export const sheetConfigs = makeSheetConfigs({
   "occupancyYear": { "sheetGid": 1452711715, "idPrefix": "oyr", "hasIdColumn": true },
   "occupancyLedger": { "sheetGid": 731807482, "idPrefix": "old", "hasIdColumn": false },
   "variable": { "sheetGid": 695651834, "idPrefix": "vrb", "hasIdColumn": false },
+  "furnace": { "sheetGid": 1237193065, "idPrefix": "frn", "hasIdColumn": true },
+  "resident": { "sheetGid": 1934805379, "idPrefix": "rsd", "hasIdColumn": true },
+  "pet": { "sheetGid": 560379920, "idPrefix": "pt", "hasIdColumn": true },
+  "nonResidentPayer": { "sheetGid": 471889863, "idPrefix": "npy", "hasIdColumn": true },
+  "biller": { "sheetGid": 1536785367, "idPrefix": "bll", "hasIdColumn": true },
+  "businessExpense": { "sheetGid": 41846794, "idPrefix": "bex", "hasIdColumn": true },
+  "propertyYear": { "sheetGid": 802789198, "idPrefix": "pyr", "hasIdColumn": true },
   "splitReceipt": { "sheetGid": 1231483768, "idPrefix": "srct", "hasIdColumn": true }
 });
