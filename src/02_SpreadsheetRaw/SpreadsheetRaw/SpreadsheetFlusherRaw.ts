@@ -68,9 +68,9 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     );
   }
   private _gatherSheetRequests(sheetGid: number, change: SheetChangesToSave) {
-    if (change.insertColumn !== null) {
-      this.ss.sheet(sheetGid).gatherInsertColumnRequest(change.insertColumn);
-    }
+    change.insertColumn.forEach(({ startColumnIndex }) => {
+      this.ss.sheet(sheetGid).gatherInsertColumnRequest(startColumnIndex);
+    });
     if (change.sort !== null) {
       this.ss.sheet(sheetGid).gatherSortRequest(change.sort);
     }
