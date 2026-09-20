@@ -125,9 +125,11 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     syncSheetConfigOperator(operator);
 
     expect(operator.sheetNamesByGid().get(newSheetGid)).toBe("brandNewSheet");
-    expect(operator.toFileSource().split("\n")).toContain(
-      '  "brandNewSheet": { "sheetGid": 999002, "idPrefix": "bns", "hasIdColumn": false }',
-    );
+    expect(operator.newSheetConfigs().brandNewSheet).toEqual({
+      sheetGid: newSheetGid,
+      idPrefix: "bns",
+      hasIdColumn: false,
+    });
   });
 
   // A checkbox nobody has ever touched reads blank, not false.
@@ -156,7 +158,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     syncSheetConfigOperator(operator);
 
     expect(operator.newSheetConfigs().property).toBeUndefined();
-    expect(operator.sheetGidsApiAccesses()).toEqual([]);
+    expect(operator.sheetGidsApiAccesses()).toEqual([sheetConfigGid]);
   });
 
   // Every seeded row names a sheet that no longer exists, so the prune reaches the last one.
@@ -180,8 +182,12 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(() => syncSheetConfigOperator(operator)).not.toThrow();
     expect(operator.sheet.row(5).isBlank).toBe(true);
-    expect(operator.newSheetConfigs()).toEqual({});
-    expect(operator.toFileSource()).toContain("makeSheetConfigs({})");
+    expect(operator.newSheetConfigs().property).toBeUndefined();
+    expect(operator.newSheetConfigs().sheetConfig).toEqual({
+      sheetGid: sheetConfigGid,
+      idPrefix: "scf",
+      hasIdColumn: false,
+    });
   });
 
   it("assigns an ID prefix from the tab title when a Let api access sheet has no column IDs", () => {

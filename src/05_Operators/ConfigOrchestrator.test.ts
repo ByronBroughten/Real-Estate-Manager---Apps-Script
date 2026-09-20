@@ -116,7 +116,9 @@ function spreadsheetConfigSheet(
     sheetId: spreadsheetConfigGid,
     title: "Spreadsheet Config",
     rows: buildGridRows({
-      0: sscColumns.map((columnName) => ssc[columnName].columnId),
+      0: sscColumns.map((columnName) =>
+        ssc[columnName].columnId.split(":").join(idDelimiter),
+      ),
       1: groupHeadings,
       3: headers,
       4: dataRow,
@@ -213,6 +215,7 @@ function seedFixture(
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: options.sheetConfigTableEndRowIndex ?? 5,
+          endColumnIndex: startTableColIndex + 3,
           columnTypes: columnTypesByHeader("sheetConfig", [
             sc.sheetGid.header,
             sc.sheetTitle.header,
@@ -250,11 +253,13 @@ function seedFixture(
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
+          endColumnIndex: startTableColIndex + 6,
           columnTypes: {
             0: "DOUBLE",
             1: "TEXT",
             2: "TEXT",
             3: "TEXT",
+            4: "TEXT",
             5: "BOOLEAN",
           },
         },
@@ -306,6 +311,21 @@ function floorWarningDescriptions(
 
 function driftedFloorWarningDescription(): string {
   return "Config-sheet floor · Spreadsheet Config · warning";
+}
+
+function sheetConfigLetApiAccess(
+  orchestrator: ConfigOrchestrator,
+  sheetGid: number,
+): boolean | "" {
+  const sheet = orchestrator.sheetConfigOperator.sheet;
+  const col = sheet.columns("sheetGid", "letApiAccess");
+  const rowIndex = sheet.rowIndexesActiveWithData.find(
+    (index) => col.sheetGid.value(index) === sheetGid,
+  );
+  if (rowIndex === undefined) {
+    throw new Error(`No Sheet Config row for gid ${sheetGid}`);
+  }
+  return col.letApiAccess.valueOrEmpty(rowIndex);
 }
 
 function driftedFloorWarningProtection(): GoogleAppsScript.Sheets.Schema.ProtectedRange {
@@ -701,6 +721,60 @@ describe("ConfigOrchestrator.syncConfigSheetRows Let api access", () => {
     });
 
     expect(() => ConfigOrchestrator.init().syncConfigSheetRows()).not.toThrow();
+  });
+
+  it("writes an unticked Let api access on a floor tab back to TRUE and names the tab", () => {
+    seedFixture({
+      extraSheetConfigDataRows: {
+        5: [spreadsheetConfigGid, "Spreadsheet Config", false, ""],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const orchestrator = ConfigOrchestrator.init();
+    const report = orchestrator.syncConfigSheetRows();
+
+    expect(sheetConfigLetApiAccess(orchestrator, spreadsheetConfigGid)).toBe(
+      true,
+    );
+    expect(report).toContain(
+      "Sheet Config · Let api access · Spreadsheet Config → TRUE",
+    );
+  });
+
+  it("appends a missing floor-tab row with Let api access TRUE", () => {
+    seedFixture();
+
+    const orchestrator = ConfigOrchestrator.init();
+    const report = orchestrator.syncConfigSheetRows();
+
+    expect(
+      orchestrator.sheetConfigOperator.sheet
+        .column("sheetGid")
+        .hasValue(spreadsheetConfigGid),
+    ).toBe(true);
+    expect(sheetConfigLetApiAccess(orchestrator, spreadsheetConfigGid)).toBe(
+      true,
+    );
+    expect(report).toContain(
+      "Sheet Config · Let api access · Spreadsheet Config → TRUE",
+    );
+  });
+
+  it("leaves a non-floor tab's unticked Let api access alone", () => {
+    seedFixture({
+      extraSheets: [headerOnlyDraftSheet({ table: "with-data-row" })],
+      extraSheetConfigDataRows: {
+        5: [draftGid, draftTitle, false, "aopi"],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    const orchestrator = ConfigOrchestrator.init();
+    const report = orchestrator.syncConfigSheetRows();
+
+    expect(sheetConfigLetApiAccess(orchestrator, draftGid)).toBe(false);
+    expect(report ?? "").not.toContain(draftTitle);
   });
 
   it("fails when a Let api access sheet has no Table", () => {

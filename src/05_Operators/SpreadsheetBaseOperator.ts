@@ -11,10 +11,12 @@ export interface ConfigSyncState {
   sheetConfigSync: {
     prepFetchIsComplete: boolean;
     syncedToSpreadsheet: boolean;
+    declaredCellReportLines: string[];
   };
   columnConfigSync: {
     syncedToSpreadsheet: boolean;
     untypedHeadersBySheetTitle: UntypedHeadersBySheetTitle;
+    declaredCellReportLines: string[];
   };
   valueConfigSync: { activeHeaders: Set<string> };
   spreadsheetConfigSync: {
@@ -43,10 +45,12 @@ export class SpreadsheetBaseOperator extends SpreadsheetBaseNamed {
       sheetConfigSync: {
         prepFetchIsComplete: false,
         syncedToSpreadsheet: false,
+        declaredCellReportLines: [],
       },
       columnConfigSync: {
         syncedToSpreadsheet: false,
         untypedHeadersBySheetTitle: new Map(),
+        declaredCellReportLines: [],
       },
       valueConfigSync: { activeHeaders: new Set() },
       spreadsheetConfigSync: { liveConfig: null },

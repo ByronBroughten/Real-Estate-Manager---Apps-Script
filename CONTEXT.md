@@ -70,6 +70,10 @@ _Avoid_: minimum floor, minimum headers, floor sheet
 The app's own declaration of what the config-sheet floor looks like. It holds structure only; a floor tab or column keeps the identity it was created with.
 _Avoid_: template, default config
 
+**Self-describing row**:
+A Sheet Config or Column Config row describing a config-sheet floor tab or floor column; its declared cell is enforced from the floor seed.
+_Avoid_: config-about-config row
+
 **Seeded value**:
 A cell or column the floor seed fills once, when it creates the tab or Table, and never restores — such as Spreadsheet Config's layout values or Value Config's example column.
 _Avoid_: initial value (too close to Custom default value)

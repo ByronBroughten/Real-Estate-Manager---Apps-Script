@@ -68,15 +68,12 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
   // Returns the run status an endpoint should report, if there's one to make.
   syncConfigSheetRows(): string | undefined {
     return this._withFloorThenLiveConfig((floorReport) =>
-      combineConfigSyncReports(floorReport, this._syncConfigSheetRows()),
+      this._combinedSyncReport(floorReport),
     );
   }
   syncAndFlushConfigSheets(): string | undefined {
     return this._withFloorThenLiveConfig((floorReport) => {
-      const summary = combineConfigSyncReports(
-        floorReport,
-        this._syncConfigSheetRows(),
-      );
+      const summary = this._combinedSyncReport(floorReport);
       this.ss.batchUpdateGSheets();
       return summary;
     });
@@ -122,13 +119,23 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
     this.columnConfigOperator.syncToSpreadsheet();
     return this.columnConfigOperator.untypedColumnsSummary();
   }
+  private _combinedSyncReport(floorReport: string): string | undefined {
+    const untypedColumnsSummary = this._syncConfigSheetRows();
+    return combineConfigSyncReports(
+      floorReport,
+      this.sheetConfigOperator.declaredCellReport(),
+      this.columnConfigOperator.declaredCellReport(),
+      untypedColumnsSummary,
+    );
+  }
 }
 
 function combineConfigSyncReports(
-  floorReport: string,
-  untypedColumnsSummary: string | undefined,
+  ...parts: Array<string | undefined>
 ): string | undefined {
-  if (floorReport === "") return untypedColumnsSummary;
-  if (untypedColumnsSummary === undefined) return floorReport;
-  return `${floorReport} ${untypedColumnsSummary}`;
+  const present = parts.filter(
+    (part): part is string => part !== undefined && part !== "",
+  );
+  if (present.length === 0) return undefined;
+  return present.join(" ");
 }

@@ -11,6 +11,7 @@ import {
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
+  floorSeedColumns,
   type FloorSeedColumn,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -482,20 +483,6 @@ function floorSheetNames(): FloorSheetName[] {
     (sheetName): sheetName is FloorSheetName =>
       configSheetFloorSeed[sheetName].columns.length > 0,
   );
-}
-
-function floorSeedColumns(
-  sheetName: FloorSheetName,
-): readonly FloorSeedColumn[] {
-  if (sheetName !== "spreadsheetConfig") {
-    return configSheetFloorSeed[sheetName].columns;
-  }
-  return [
-    ...configSheetFloorSeed.spreadsheetConfig.columns,
-    ...Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
-      (endpoint) => [endpoint.timeLastRan, endpoint.runStatus],
-    ),
-  ];
 }
 
 function floorColumnsToRestore<SN extends FloorSheetName>(

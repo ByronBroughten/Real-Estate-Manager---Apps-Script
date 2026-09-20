@@ -1,3 +1,8 @@
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import {
+  configSheetFloorSeed,
+  floorTabSeedByGid,
+} from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import {
   makeIdPrefixFromTitle,
   makeImportLine,
@@ -69,18 +74,51 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
   }
   private _updateProgrammaticValues(): void {
-    const col = this.sheet.columns("sheetGid", "sheetTitle");
+    const col = this.sheet.columns("sheetGid", "sheetTitle", "letApiAccess");
+    const reportLines = this.sheetConfigSync.declaredCellReportLines;
+    reportLines.length = 0;
     let updatedValues = 0;
     this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
-      const sheetTitle = col.sheetTitle.valueOrEmpty(rowIndex);
       const sheetGid = col.sheetGid.value(rowIndex);
       const activeSheet = this.ss.raw.sheet(sheetGid);
-      if (sheetTitle !== activeSheet.title) {
+      if (col.sheetTitle.valueOrEmpty(rowIndex) !== activeSheet.title) {
         col.sheetTitle.cell(rowIndex).updateValue(activeSheet.title);
+        updatedValues++;
+      }
+      if (
+        this._updateSelfDescribingLetApiAccess({
+          rowIndex,
+          sheetGid,
+          sheetTitle: activeSheet.title,
+        })
+      ) {
         updatedValues++;
       }
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Sheet Config cells.`);
+  }
+  private _updateSelfDescribingLetApiAccess({
+    rowIndex,
+    sheetGid,
+    sheetTitle,
+  }: {
+    rowIndex: number;
+    sheetGid: number;
+    sheetTitle: string;
+  }): boolean {
+    const seed = floorTabSeedByGid(sheetGid);
+    if (seed === undefined) return false;
+    const letApiAccess = this.sheet.column("letApiAccess");
+    if (letApiAccess.valueOrEmpty(rowIndex) === seed.letApiAccess) return false;
+    letApiAccess.cell(rowIndex).updateValue(seed.letApiAccess);
+    this.sheetConfigSync.declaredCellReportLines.push(
+      `${configSheetFloorSeed.sheetConfig.title} · ${getColumnTraitByName(
+        "sheetConfig",
+        "letApiAccess",
+        "header",
+      )} · ${sheetTitle} → ${seed.letApiAccess ? "TRUE" : "FALSE"}`,
+    );
+    return true;
   }
   isSheetGidApiAccess(sheetGid: number): boolean {
     return this.sheetGidsApiAccesses().includes(sheetGid);
@@ -131,6 +169,11 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     if (changes.length === 0) return undefined;
     return changes.join(" ");
+  }
+  declaredCellReport(): string | undefined {
+    const lines = this.sheetConfigSync.declaredCellReportLines;
+    if (lines.length === 0) return undefined;
+    return lines.join(" ");
   }
   newSheetConfigs(): SheetConfigsBase {
     const col = this.sheet.columns("sheetGid", "sheetTitle", "letApiAccess");

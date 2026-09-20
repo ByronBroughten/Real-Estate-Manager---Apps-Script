@@ -1,3 +1,8 @@
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import {
+  configSheetFloorSeed,
+  floorSeedColumnById,
+} from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import {
   makeImportLine,
   type ColumnConfigsGeneric,
@@ -117,6 +122,11 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     }
     return sentences.join(" ");
   }
+  declaredCellReport(): string | undefined {
+    const lines = this.columnConfigSync.declaredCellReportLines;
+    if (lines.length === 0) return undefined;
+    return lines.join(" ");
+  }
   // Derived, since blank facts are deliberately indistinguishable from real ones.
   private _blankSampleSheetTitles(): string[] {
     const titles: string[] = [];
@@ -193,7 +203,10 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       "columnId",
       "sheetTitle",
       "header",
+      "emptyValueAllowed",
     );
+    const reportLines = this.columnConfigSync.declaredCellReportLines;
+    reportLines.length = 0;
     let updatedValues = 0;
     this.untypedHeadersBySheetTitle.clear();
     this.sheet.rowIndexesActiveWithData.forEach((rowIndex) => {
@@ -214,11 +227,56 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
+      if (
+        this._updateSelfDescribingEmptyValueAllowed({
+          rowIndex,
+          sheetGid,
+          columnId,
+          sheetTitle: actualSheetTitle,
+          header: actualHeader,
+        })
+      ) {
+        updatedValues++;
+      }
+
       if (describedColumn.activeDeclaredValueTitle() === null) {
         this._recordUntypedColumn(actualSheetTitle, actualHeader);
       }
     });
     Logger.log(`Corrected ${updatedValues} inaccurate Column Config cell(s).`);
+  }
+  private _updateSelfDescribingEmptyValueAllowed({
+    rowIndex,
+    sheetGid,
+    columnId,
+    sheetTitle,
+    header,
+  }: {
+    rowIndex: number;
+    sheetGid: number;
+    columnId: string;
+    sheetTitle: string;
+    header: string;
+  }): boolean {
+    const seedColumn = floorSeedColumnById(sheetGid, columnId);
+    if (seedColumn === undefined) return false;
+    const emptyValueAllowed = this.sheet.column("emptyValueAllowed");
+    if (
+      emptyValueAllowed.valueOrEmpty(rowIndex) === seedColumn.emptyValueAllowed
+    ) {
+      return false;
+    }
+    emptyValueAllowed.cell(rowIndex).updateValue(seedColumn.emptyValueAllowed);
+    this.columnConfigSync.declaredCellReportLines.push(
+      `${configSheetFloorSeed.columnConfig.title} · ${getColumnTraitByName(
+        "columnConfig",
+        "emptyValueAllowed",
+        "header",
+      )} · ${sheetTitle} · ${header} → ${
+        seedColumn.emptyValueAllowed ? "TRUE" : "FALSE"
+      }`,
+    );
+    return true;
   }
   private _recordUntypedColumn(sheetTitle: string, header: string): void {
     const headers = this.untypedHeadersBySheetTitle.get(sheetTitle) ?? [];

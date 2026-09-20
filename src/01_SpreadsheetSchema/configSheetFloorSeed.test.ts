@@ -77,3 +77,25 @@ describe("configSheetFloorSeed column types", () => {
     );
   });
 });
+
+describe("configSheetFloorSeed declared cells", () => {
+  it("declares Let api access true per floor tab and Empty value allowed false per floor column, endpoints included", () => {
+    expect(configSheetFloorSeed.spreadsheetConfig.letApiAccess).toBe(true);
+    expect(configSheetFloorSeed.sheetConfig.letApiAccess).toBe(true);
+    expect(configSheetFloorSeed.columnConfig.letApiAccess).toBe(true);
+    expect(configSheetFloorSeed.valueConfig.letApiAccess).toBe(true);
+
+    const floorColumns = [
+      ...configSheetFloorSeed.spreadsheetConfig.columns,
+      ...Object.values(
+        configSheetFloorSeed.spreadsheetConfig.endpoints,
+      ).flatMap((endpoint) => [endpoint.timeLastRan, endpoint.runStatus]),
+      ...configSheetFloorSeed.sheetConfig.columns,
+      ...configSheetFloorSeed.columnConfig.columns,
+    ];
+    expect(floorColumns.length).toBeGreaterThan(0);
+    floorColumns.forEach((column) => {
+      expect(column.emptyValueAllowed).toBe(false);
+    });
+  });
+});

@@ -29,6 +29,16 @@ const sheetConfigColumnIdRow = [
   sc.sheetTitle.columnId,
   sc.letApiAccess.columnId,
 ];
+const sheetConfigHeaderRow = [
+  sc.sheetGid.header,
+  sc.sheetTitle.header,
+  sc.letApiAccess.header,
+];
+const sheetConfigColumnTypes = {
+  0: "DOUBLE",
+  1: "TEXT",
+  2: "BOOLEAN",
+} as const;
 const columnConfigColumnIdRow = [
   cc.sheetGid.columnId,
   cc.columnId.columnId,
@@ -37,6 +47,22 @@ const columnConfigColumnIdRow = [
   cc.customDefaultValue.columnId,
   cc.emptyValueAllowed.columnId,
 ];
+const columnConfigHeaderRow = [
+  cc.sheetGid.header,
+  cc.columnId.header,
+  cc.sheetTitle.header,
+  cc.header.header,
+  cc.customDefaultValue.header,
+  cc.emptyValueAllowed.header,
+];
+const columnConfigColumnTypes = {
+  0: "DOUBLE",
+  1: "TEXT",
+  2: "TEXT",
+  3: "TEXT",
+  4: "TEXT",
+  5: "BOOLEAN",
+} as const;
 
 const freshlyAppendedRowMissingHeaderAndValueName = [
   propertyGid,
@@ -86,6 +112,7 @@ function stubGroupedColumnConfigSheets(): void {
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
+          3: sheetConfigHeaderRow,
           4: [propertyGid, "Property", true, ""],
           5: [newSheetGid, "Brand New Sheet", true, ""],
         }),
@@ -96,6 +123,7 @@ function stubGroupedColumnConfigSheets(): void {
         title: "Column Config",
         rows: buildGridRows({
           0: columnConfigColumnIdRow,
+          3: columnConfigHeaderRow,
           4: [propertyGid, "c:prp:aaa", "Property", "Rent Amount"],
           5: [propertyGid, "c:prp:bbb", "Property", "Notes"],
           6: [newSheetGid, "c:999002:ccc", "Brand New Sheet", "Some Field"],
@@ -209,6 +237,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
             4: [propertyGid, "Property", true, ""],
           }),
           table: { endRowIndex: 5 },
@@ -218,6 +247,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: [
               propertyGid,
               "c:prp:aaa",
@@ -263,6 +293,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: freshlyAppendedRowMissingHeaderAndValueName,
           }),
           table: { endRowIndex: 5 },
@@ -294,6 +325,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: rowReferencingUnresolvableSheet,
           }),
           table: { endRowIndex: 5 },
@@ -319,6 +351,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
             4: [propertyGid, "Property", true, ""],
           }),
           table: { endRowIndex: 5 },
@@ -328,6 +361,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: [propertyGid, "c:prp:aaa", "Property", "Rent Amount"],
             5: [propertyGid, "c:prp:bbb", "Property", "Rent  Amount"],
           }),
@@ -361,9 +395,10 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
       title: "Sheet Config",
       rows: buildGridRows({
         0: sheetConfigColumnIdRow,
+        3: sheetConfigHeaderRow,
         4: testSheetConfigRowWithApiAccess,
       }),
-      table: { endRowIndex: 5 },
+      table: { endRowIndex: 5, columnTypes: sheetConfigColumnTypes },
     };
   }
 
@@ -376,6 +411,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: [
               testSheetGid,
               "c:test:corr01",
@@ -432,6 +468,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: [testSheetGid, "c:test:corr05", null, null],
           }),
           table: { endRowIndex: 5 },
@@ -461,6 +498,77 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     });
   });
 
+  it("writes a floor column's ticked Empty value allowed back to FALSE and leaves a business column's tick", () => {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: sheetConfigGid,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
+            4: [testSheetGid, "Test", true],
+            5: [sheetConfigGid, "Sheet Config", true],
+          }),
+          table: {
+            endRowIndex: 6,
+            endColumnIndex: 3,
+            columnTypes: sheetConfigColumnTypes,
+          },
+        },
+        {
+          sheetId: columnConfigGid,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
+            4: [testSheetGid, "c:test:corr01", "Test", "Amount", null, true],
+            5: [
+              sheetConfigGid,
+              sc.sheetGid.columnId,
+              "Sheet Config",
+              sc.sheetGid.header,
+              null,
+              true,
+            ],
+          }),
+          table: { endRowIndex: 6, columnTypes: columnConfigColumnTypes },
+        },
+        {
+          sheetId: testSheetGid,
+          title: "Test",
+          rows: buildGridRows({
+            0: ["c:test:corr01"],
+            3: ["Amount"],
+            4: [42],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+
+    const operator = ColumnConfigOperator.init();
+    syncColumnConfigOperator(operator);
+    const col = operator.sheet.columns("columnId", "emptyValueAllowed");
+    const businessRow = operator.sheet.rowIndexesActiveWithData.find(
+      (rowIndex) => col.columnId.value(rowIndex) === "c:test:corr01",
+    );
+    const floorRow = operator.sheet.rowIndexesActiveWithData.find(
+      (rowIndex) => col.columnId.value(rowIndex) === sc.sheetGid.columnId,
+    );
+
+    expect(businessRow).toBeDefined();
+    expect(floorRow).toBeDefined();
+    if (businessRow === undefined || floorRow === undefined) {
+      throw new Error("Expected business and floor Column Config rows.");
+    }
+    expect(col.emptyValueAllowed.value(businessRow)).toBe(true);
+    expect(col.emptyValueAllowed.value(floorRow)).toBe(false);
+    expect(operator.declaredCellReport()).toContain(
+      `Column Config · Empty value allowed · Sheet Config · ${sc.sheetGid.header} → FALSE`,
+    );
+  });
+
   it("detects a named valueConfig from the column's live data-validation formula", () => {
     stubSheetsService({
       sheets: [
@@ -470,6 +578,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: [testSheetGid, "c:test:corr03", "Test", "Description"],
           }),
           table: { endRowIndex: 5 },
@@ -496,7 +605,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
     syncColumnConfigOperator(operator);
     const identity = operator.sheet.columns("sheetTitle", "header");
 
-    expect(operator.activeValueTitles()).toEqual(["Transaction Description"]);
+    expect(valueTitles(operator, 1)).toEqual(["Transaction Description"]);
     expect(operator.newColumnConfigs().test?.description?.valueName).toBe(
       "transactionDescription",
     );
@@ -513,6 +622,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
           title: "Column Config",
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
             4: [testSheetGid, "c:test:corr04", "Test", "Move-in Date"],
           }),
           table: { endRowIndex: 5 },
@@ -560,6 +670,7 @@ function syncColumnsUnderTest({
   const columnIds = headers.map((_, index) => `c:test:col${index}`);
   const columnConfigRows: Record<number, FakeCell[]> = {
     0: columnConfigColumnIdRow,
+    3: columnConfigHeaderRow,
   };
   columnIds.forEach((columnId, index) => {
     columnConfigRows[4 + index] = [testSheetGid, columnId, "Test", ""];
@@ -571,15 +682,19 @@ function syncColumnsUnderTest({
         title: "Sheet Config",
         rows: buildGridRows({
           0: sheetConfigColumnIdRow,
+          3: sheetConfigHeaderRow,
           4: [testSheetGid, "Test", true],
         }),
-        table: { endRowIndex: 5 },
+        table: { endRowIndex: 5, columnTypes: sheetConfigColumnTypes },
       },
       {
         sheetId: columnConfigGid,
         title: "Column Config",
         rows: buildGridRows(columnConfigRows),
-        table: { endRowIndex: Math.max(5, 4 + columnIds.length) },
+        table: {
+          endRowIndex: Math.max(5, 4 + columnIds.length),
+          columnTypes: columnConfigColumnTypes,
+        },
       },
       {
         sheetId: testSheetGid,
@@ -601,7 +716,16 @@ function syncColumnsUnderTest({
 }
 
 function valueTitles(operator: ColumnConfigOperator, count: number) {
-  const titles = operator.activeValueTitles();
+  const col = operator.sheet.columns("sheetGid", "columnId");
+  const titles = operator.sheet.rowIndexesActiveWithData.flatMap((rowIndex) => {
+    if (col.sheetGid.valueOrEmpty(rowIndex) !== testSheetGid) return [];
+    return [
+      operator.ss.raw
+        .sheetMeta(testSheetGid)
+        .columnByActiveId(col.columnId.value(rowIndex))
+        .activeValueTitle(),
+    ];
+  });
   expect(titles).toHaveLength(count);
   return titles;
 }
@@ -994,6 +1118,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
             // Api-access sheet: gets a missing column ID filled in.
             4: [testSheetGid, "Test", true, "tst"],
 
@@ -1004,7 +1129,10 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
         {
           sheetId: columnConfigGid,
           title: "Column Config",
-          rows: buildGridRows({ 0: columnConfigColumnIdRow }),
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
+          }),
           table: { endRowIndex: 5 },
         },
         {
@@ -1036,6 +1164,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
             4: [testSheetGid, "Test", true, "tst"],
           }),
           table: { endRowIndex: 5 },
@@ -1043,7 +1172,10 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
         {
           sheetId: columnConfigGid,
           title: "Column Config",
-          rows: buildGridRows({ 0: columnConfigColumnIdRow }),
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
+          }),
           table: { endRowIndex: 5 },
         },
         {
@@ -1072,15 +1204,6 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _addMissingColumnIds", () =>
 });
 
 describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
-  const columnConfigHeaderRow = [
-    "Sheet GID",
-    "Column ID",
-    "Sheet title",
-    "Header",
-    "Custom default value",
-    "Empty value allowed",
-  ];
-
   function seedColumnConfigDescribingItselfBelowABlankTopDataRow() {
     stubSheetsService({
       sheets: [
@@ -1089,9 +1212,14 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
             4: [columnConfigGid, "Column Config", true, "ccf"],
           }),
-          table: { endRowIndex: 5 },
+          table: {
+            endRowIndex: 5,
+            endColumnIndex: 3,
+            columnTypes: sheetConfigColumnTypes,
+          },
         },
         {
           sheetId: columnConfigGid,
@@ -1107,14 +1235,18 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
               "Stale Header",
             ],
           }),
-          table: { endRowIndex: 6 },
+          table: {
+            endRowIndex: 6,
+            columnTypes: columnConfigColumnTypes,
+          },
         },
       ],
     });
   }
 
-  // No sheet has API access, so every Column Config row is stale and nothing is appended.
-  function seedColumnConfigWhoseEveryRowIsStale() {
+  // Column Config's own Let api access starts off; the correction pass ticks
+  // it, so its floor columns stay and a stale business row is pruned.
+  function seedColumnConfigWithAStaleBusinessRow() {
     stubSheetsService({
       sheets: [
         {
@@ -1122,9 +1254,14 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
             4: [columnConfigGid, "Column Config", false, "ccf"],
           }),
-          table: { endRowIndex: 5 },
+          table: {
+            endRowIndex: 5,
+            endColumnIndex: 3,
+            columnTypes: sheetConfigColumnTypes,
+          },
         },
         {
           sheetId: columnConfigGid,
@@ -1132,25 +1269,29 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
           rows: buildGridRows({
             0: columnConfigColumnIdRow,
             3: columnConfigHeaderRow,
-            4: [columnConfigGid, cc.sheetGid.columnId, "Column Config"],
-            5: [columnConfigGid, cc.header.columnId, "Column Config"],
+            4: [unresolvableGid, "c:???:eee", "Ghost", "Orphan Field"],
+            5: [columnConfigGid, cc.sheetGid.columnId, "Column Config"],
           }),
-          table: { endRowIndex: 6 },
+          table: {
+            endRowIndex: 6,
+            columnTypes: columnConfigColumnTypes,
+          },
         },
       ],
     });
   }
 
-  it("leaves one blank row rather than none when it prunes every row", () => {
-    seedColumnConfigWhoseEveryRowIsStale();
+  it("prunes a stale business row and keeps floor-column rows", () => {
+    seedColumnConfigWithAStaleBusinessRow();
 
     const operator = ColumnConfigOperator.init();
 
     expect(() => syncColumnConfigOperator(operator)).not.toThrow();
-    expect(operator.sheet.rowIndexesActive).toEqual([5]);
-    expect(operator.sheet.row(5).isBlank).toBe(true);
-    expect(operator.newColumnConfigs()).toEqual({});
-    expect(operator.toFileSource()).toContain("makeColumnConfigs({})");
+    expect(operator.sheet.column("columnId").hasValue("c:???:eee")).toBe(false);
+    expect(operator.sheet.column("sheetGid").hasValue(columnConfigGid)).toBe(
+      true,
+    );
+    expect(operator.newColumnConfigs().columnConfig).toBeDefined();
   });
 
   it("still resolves programmatic values for a sheet whose own top data row it pruned", () => {
@@ -1165,7 +1306,7 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _pruneColumnRows", () => {
     expect(col.sheetTitle.value(5)).toBe("Column Config");
     expect(col.header.value(5)).toBe("Sheet GID");
     expect(emitted?.sheetGid).toMatchObject({
-      valueName: "string",
+      valueName: "number",
       isFormula: false,
     });
   });
