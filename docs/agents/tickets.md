@@ -8,10 +8,11 @@ The reader is an implementer that has not seen the parent spec, the grilling or 
 
 - **Split by constraint, not by user story.** A ticket has one seam and one new fact. It changes flush semantics only through a name table settled by grilling (below), and never more than one. A ticket that is wide but mechanical stays whole; file count is not a reason to split.
 - **A new Google request kind gets its own adapter ticket, and that ticket lands first.** The ticket that uses the request never invents the write path.
+- **A host capability `src/` has never called gets its wrapper's file named, and a Done-when box for the fake.** The ticket that first reaches an Apps Script global — a toast, a new trigger kind — never leaves the wrapper's home or the fake's update to the implementer.
 - **A guard lands with the write it guards, or before it.** A refusal or fail-closed check never waits for a later ticket, since a live `gen:configs` run between the two tickets would write unguarded.
 - **Resolve every design fork before the label goes on.** The implementer never picks between two readings. An open fork goes back to the developer as a grilling question.
-- **A slice that teaches the flusher a new gather/send shape is grilled first.** Its name table (queue op, gather method, place in the send order) goes into the ticket.
-- **A coordinator about to grow another group of private helpers that shares nothing with the rest gets a prefactor ticket** that splits out a collaborator first (STYLE.md, "Class shape"). The implementer is never asked to volunteer the split.
+- **A slice that teaches the flusher a new gather/send shape is grilled first.** Its name table — queue op, where the op is held, gather method, place in the send order — goes into the ticket. A row that doesn't apply is answered "none" and says why: a spreadsheet-level op like `addSheet` has no gather method, because the flusher gathers by walking the sheets it already has. A row that doesn't fit is never a reason to drop the table.
+- **A coordinator about to grow another group of private helpers that shares nothing with the rest gets a prefactor ticket** that splits out a collaborator first (STYLE.md, "Class shape"). The implementer is never asked to volunteer the split. Every later ticket that lands a helper in that group names the collaborator's file in Copy this, so four tickets don't each put their helpers wherever their implementer felt like.
 - **Do the research yourself and write down the answer**, with its source (`file:line`, a probe, an issue). No ticket says "find out X" or "read from the code".
 - **Each existing behaviour the slice relies on is pinned by a named test.** Where no test pins it, a prefactor ticket writes that test first, so a bug in it turns up as a planned blocker rather than mid-slice.
 
@@ -68,4 +69,6 @@ File paths, method names and quoted rules are expected. Still set the native sub
 ## Self-check before publishing
 
 - Could a cold session finish this ticket without opening the parent, STYLE.md in full, or any file Copy this doesn't name? If not, inline what it would have to go and find.
+- Open every `file:line` the ticket cites and check the line says what the ticket says it says. Cite a type at its definition, never at an import or a field that uses it.
+- For each Done-when box, check the named test's harness can observe what the box asserts. A box about send order doesn't go in a test that hands the API its operation array.
 - Search the ticket's own prose for a synonym of each Words term ("declared type" for **column type**, say). Replace every hit.
