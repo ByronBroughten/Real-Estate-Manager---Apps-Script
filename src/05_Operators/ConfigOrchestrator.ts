@@ -22,6 +22,7 @@ export interface ConfigRegeneration {
   untypedColumnsSummary: string | undefined;
   floorReport: string;
   idPrefixReport: string | undefined;
+  declaredCellReport: string | undefined;
 }
 
 /**
@@ -91,6 +92,7 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
         untypedColumnsSummary,
         floorReport,
         idPrefixReport: this.sheetConfigOperator.idPrefixChangeReport(),
+        declaredCellReport: this._declaredCellReport(),
       };
     });
   }
@@ -123,9 +125,14 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
     const untypedColumnsSummary = this._syncConfigSheetRows();
     return combineConfigSyncReports(
       floorReport,
+      this._declaredCellReport(),
+      untypedColumnsSummary,
+    );
+  }
+  private _declaredCellReport(): string | undefined {
+    return combineConfigSyncReports(
       this.sheetConfigOperator.declaredCellReport(),
       this.columnConfigOperator.declaredCellReport(),
-      untypedColumnsSummary,
     );
   }
 }

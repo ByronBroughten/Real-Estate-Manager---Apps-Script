@@ -116,9 +116,7 @@ function spreadsheetConfigSheet(
     sheetId: spreadsheetConfigGid,
     title: "Spreadsheet Config",
     rows: buildGridRows({
-      0: sscColumns.map((columnName) =>
-        ssc[columnName].columnId.split(":").join(idDelimiter),
-      ),
+      0: sscColumns.map((columnName) => ssc[columnName].columnId),
       1: groupHeadings,
       3: headers,
       4: dataRow,
@@ -465,6 +463,19 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     expect(parsed.untypedColumnsSummary).toContain(
       "1 column(s) across 1 sheet(s)",
     );
+  });
+
+  it("carries the declared-cell report back, since no run status cell will show it", () => {
+    seedFixture({
+      extraSheetConfigDataRows: {
+        5: [spreadsheetConfigGid, "Spreadsheet Config", false, ""],
+      },
+      sheetConfigTableEndRowIndex: 6,
+    });
+
+    expect(
+      ConfigOrchestrator.init().generateConfigFiles().declaredCellReport,
+    ).toContain("Sheet Config · Let api access · Spreadsheet Config → TRUE");
   });
 
   it("still catalogs value titles after Column Config pruned a stale row of its own", () => {

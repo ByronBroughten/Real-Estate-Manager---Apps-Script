@@ -23,6 +23,7 @@ class ConfigFilesGenerator {
       untypedColumnsSummary,
       floorReport,
       idPrefixReport,
+      declaredCellReport,
     } = await this._generate();
 
     // Write nothing until all four are confirmed good; a subset would go stale.
@@ -39,6 +40,9 @@ class ConfigFilesGenerator {
     }
     if (idPrefixReport !== undefined) {
       console.log(`\ngen:configs: ${idPrefixReport}`);
+    }
+    if (declaredCellReport !== undefined) {
+      console.log(`\ngen:configs: ${declaredCellReport}`);
     }
     console.log(
       `\ngen:configs: ${untypedColumnsSummary ?? "every column is declared; no value name was guessed."}`,

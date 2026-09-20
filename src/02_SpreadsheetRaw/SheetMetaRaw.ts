@@ -43,12 +43,8 @@ export class SheetMetaRaw extends SheetCommonRaw {
   private _columnIdsByIdPrefix(): Map<string, string[]> {
     const columnIdsByPrefix = new Map<string, string[]>();
     this.activeColumnIds.forEach((columnId) => {
-      const delimiter = this.schema.idDelimiter;
-      const parts = columnId.split(delimiter);
-      const idPrefix = parts[1];
-      if (parts.length !== 3 || parts[0] !== "c" || !idPrefix || !parts[2]) {
-        return;
-      }
+      const idPrefix = this.schema.idPrefixOfColumnIdOrUndefined(columnId);
+      if (idPrefix === undefined) return;
       const columnIds = columnIdsByPrefix.get(idPrefix) ?? [];
       columnIds.push(columnId);
       columnIdsByPrefix.set(idPrefix, columnIds);

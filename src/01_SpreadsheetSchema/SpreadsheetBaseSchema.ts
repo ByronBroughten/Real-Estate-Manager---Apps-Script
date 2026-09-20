@@ -129,14 +129,12 @@ export class SpreadsheetBaseSchema {
   makeRowIdFromPrefix(idPrefix: string): string {
     return this.makeId("r", this._makeSheetDimensionId(idPrefix));
   }
-  idPrefixOfColumnId(columnId: string): string {
-    const delimiter = this.idDelimiter;
-    const parts = columnId.split(delimiter);
+  // Undefined for an id minted under a different delimiter, which parses as one part.
+  idPrefixOfColumnIdOrUndefined(columnId: string): string | undefined {
+    const parts = columnId.split(this.idDelimiter);
     const idPrefix = parts[1];
     if (parts.length !== 3 || parts[0] !== "c" || !idPrefix || !parts[2]) {
-      throw new Error(
-        `Invalid column ID: ${columnId}. Must be in the format "c${delimiter}<idPrefix>${delimiter}<suffix>"`,
-      );
+      return undefined;
     }
     return idPrefix;
   }

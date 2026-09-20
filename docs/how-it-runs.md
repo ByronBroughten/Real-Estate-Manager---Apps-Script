@@ -24,11 +24,11 @@ Map fragment disclosed from `README.md`. Read the heading the task needs.
 
 `npm run tsc` (type-checking only) is always safe to run freely, and so is `npm run chore <name>` without `--send`, which cannot write (see "The chore and its dry run").
 
-`npm run gen:configs` **writes** to the live Sheet Config/Column Config sheets and to business sheets' header rows (adding missing column IDs) before it regenerates the four local config files from live Spreadsheet Config plus the other config sheets (floor vs generated: [`docs/generated-data.md`](./generated-data.md)). It prints the floor report — a one-line summary of what the config-sheet floor created, overwrote or left behind — beside the untyped-columns summary, and it has **standing permission** under four conditions, all of which must hold:
+`npm run gen:configs` **writes** to the live Sheet Config/Column Config sheets and to business sheets' header rows (adding missing column IDs) before it regenerates the four local config files from live Spreadsheet Config plus the other config sheets (floor vs generated: [`docs/generated-data.md`](./generated-data.md)). It prints the floor report — a one-line summary of what the config-sheet floor created, overwrote or left behind — beside the untyped-columns summary and the declared-cell report, which names any self-describing row whose declared cell it wrote back to the floor seed, and it has **standing permission** under four conditions, all of which must hold:
 
 - no uncommitted changes in `src/01_SpreadsheetSchema/`, the generated folder included;
 - no uncommitted changes in `src/05_Operators/`, because the command now executes local, possibly unreviewed operator code against the live config sheets;
-- the agent reports what changed, the floor report, and the untyped-column count it returned;
+- the agent reports what changed, the floor report, the declared-cell report, and the untyped-column count it returned;
 - it is never a blind fix for a type error whose cause has not been identified. An identified identity or incidental retarget goes through [retarget-after-gen-configs](../.claude/skills/retarget-after-gen-configs/SKILL.md); an unidentified one still means no patch.
 
 ### The chore and its dry run
