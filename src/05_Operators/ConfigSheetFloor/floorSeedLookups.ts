@@ -9,6 +9,12 @@ import { Obj } from "../../utils/Obj";
 export type FloorTabName = keyof typeof configSheetFloorSeed;
 export type FloorSheetName = Exclude<FloorTabName, "valueConfig">;
 
+export interface FloorColumnRestore {
+  header: string;
+  columnId: string;
+  groupHeading: string;
+}
+
 export function columnNameByHeader<SN extends FloorSheetName>(
   sheetName: SN,
   header: string,
@@ -29,4 +35,48 @@ export function floorSheetNames(): FloorSheetName[] {
     (sheetName): sheetName is FloorSheetName =>
       configSheetFloorSeed[sheetName].columns.length > 0,
   );
+}
+
+export function spreadsheetConfigFeedbackColumnNames(): ColumnName<"spreadsheetConfig">[] {
+  return Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
+    (endpoint) => [
+      columnNameByHeader("spreadsheetConfig", endpoint.timeLastRan.header),
+      columnNameByHeader("spreadsheetConfig", endpoint.runStatus.header),
+    ],
+  );
+}
+
+export function floorColumnsToRestore<SN extends FloorSheetName>(
+  sheetName: SN,
+): FloorColumnRestore[] {
+  const seedColumns = configSheetFloorSeed[sheetName].columns.map((column) =>
+    floorColumnRestore(sheetName, {
+      header: column.header,
+      groupHeading: column.columnGroupHeading,
+    }),
+  );
+  if (sheetName !== "spreadsheetConfig") return seedColumns;
+  const endpointColumns = Obj.values(
+    configSheetFloorSeed.spreadsheetConfig.endpoints,
+  ).flatMap((endpoint) =>
+    [endpoint.timeLastRan, endpoint.runStatus].map((column) =>
+      floorColumnRestore("spreadsheetConfig", {
+        header: column.header,
+        groupHeading: endpoint.heading,
+      }),
+    ),
+  );
+  return [...seedColumns, ...endpointColumns];
+}
+
+export function floorColumnRestore<SN extends FloorSheetName>(
+  sheetName: SN,
+  { header, groupHeading }: Pick<FloorColumnRestore, "header" | "groupHeading">,
+): FloorColumnRestore {
+  const columnName = columnNameByHeader(sheetName, header);
+  return {
+    header,
+    columnId: getColumnTraitByName(sheetName, columnName, "columnId"),
+    groupHeading,
+  };
 }

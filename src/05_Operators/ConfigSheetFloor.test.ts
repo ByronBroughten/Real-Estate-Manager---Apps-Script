@@ -20,6 +20,9 @@ import {
   type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
 import { ConfigSheetFloor } from "./ConfigSheetFloor";
+import { floorSheetNames } from "./ConfigSheetFloor/floorSeedLookups";
+import { floorRecreatableColumns } from "./ConfigSheetFloor/FloorTabColumnCreator";
+import { selfDescribingRowColumns } from "./ConfigSheetFloor/FloorTabEditWarning";
 
 const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
@@ -232,6 +235,16 @@ function cellUpdates(
   });
 }
 
+function columnInserts(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+    const range = request.insertDimension?.range;
+    if (range?.dimension !== "COLUMNS") return [];
+    return [{ sheetId: range.sheetId, startIndex: range.startIndex }];
+  });
+}
+
 function spreadsheetConfigGroupHeading(header: string): string {
   const spreadsheetConfigSeed = configSheetFloorSeed.spreadsheetConfig;
   const endpoint = Object.values(spreadsheetConfigSeed.endpoints).find(
@@ -245,6 +258,16 @@ function spreadsheetConfigGroupHeading(header: string): string {
       ?.columnGroupHeading ?? ""
   );
 }
+
+const sheetConfigColumns = ["sheetGid", "sheetTitle", "letApiAccess"] as const;
+const columnConfigColumns = [
+  "sheetGid",
+  "columnId",
+  "sheetTitle",
+  "header",
+  "emptyValueAllowed",
+  "customDefaultValue",
+] as const;
 
 const businessSheetGid = 9001;
 const defaultSheetConfigGids = [
@@ -290,6 +313,8 @@ function floorFixture(
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     columnConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+    sheetConfigColumnOrder?: readonly (typeof sheetConfigColumns)[number][];
+    columnConfigColumnOrder?: readonly (typeof columnConfigColumns)[number][];
     sheetConfigHeaders?: Partial<Record<keyof typeof sc, string>>;
     sheetConfigColumnIds?: Partial<Record<keyof typeof sc, string>>;
     columnConfigColumnIds?: Partial<Record<keyof typeof cc, string>>;
@@ -333,9 +358,10 @@ function floorFixture(
       spreadsheetConfigGroupHeading(sscField(columnName).header),
   );
   const extraColumn = options.extraSpreadsheetConfigColumn;
-  const sheetConfigHeaders = (
-    ["sheetGid", "sheetTitle", "letApiAccess"] as const
-  ).map(
+  const scOrder = options.sheetConfigColumnOrder ?? sheetConfigColumns;
+  const ccOrder = options.columnConfigColumnOrder ?? columnConfigColumns;
+  const ccHeaders = ccOrder.map((columnName) => cc[columnName].header);
+  const sheetConfigHeaders = scOrder.map(
     (columnName) =>
       options.sheetConfigHeaders?.[columnName] ?? sc[columnName].header,
   );
@@ -397,7 +423,7 @@ function floorFixture(
         title: "Sheet Config",
         rows: buildGridRows({
           0: pad(
-            (["sheetGid", "sheetTitle", "letApiAccess"] as const).map(
+            scOrder.map(
               (columnName) =>
                 options.sheetConfigColumnIds?.[columnName] ??
                 sc[columnName].columnId,
@@ -406,14 +432,21 @@ function floorFixture(
           3: pad(sheetConfigHeaders),
           ...dataRowsFrom(
             topDataRowIndex,
-            sheetConfigGids.map((gid) => pad([gid, `Tab ${gid}`, true])),
+            sheetConfigGids.map((gid) => {
+              const cells = {
+                sheetGid: gid,
+                sheetTitle: `Tab ${gid}`,
+                letApiAccess: true,
+              };
+              return pad(scOrder.map((columnName) => cells[columnName]));
+            }),
           ),
         }),
         table: {
           name: configSheetFloorSeed.sheetConfig.tableName,
           startColumnIndex: startTableColIndex,
           endRowIndex: topDataRowIndex + sheetConfigGids.length,
-          endColumnIndex: startTableColIndex + 3,
+          endColumnIndex: startTableColIndex + scOrder.length,
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
               "sheetConfig",
@@ -430,52 +463,37 @@ function floorFixture(
         title: "Column Config",
         rows: buildGridRows({
           0: pad(
-            (
-              [
-                "sheetGid",
-                "columnId",
-                "sheetTitle",
-                "header",
-                "emptyValueAllowed",
-                "customDefaultValue",
-              ] as const
-            ).map(
+            ccOrder.map(
               (columnName) =>
                 options.columnConfigColumnIds?.[columnName] ??
                 cc[columnName].columnId,
             ),
           ),
-          3: pad([
-            cc.sheetGid.header,
-            cc.columnId.header,
-            cc.sheetTitle.header,
-            cc.header.header,
-            cc.emptyValueAllowed.header,
-            cc.customDefaultValue.header,
-          ]),
+          3: pad(ccHeaders),
           ...dataRowsFrom(
             topDataRowIndex,
-            columnConfigRows.map(({ sheetGid, columnId }) =>
-              pad([sheetGid, columnId, "", "", false, ""]),
-            ),
+            columnConfigRows.map(({ sheetGid, columnId }) => {
+              const cells = {
+                sheetGid,
+                columnId,
+                sheetTitle: "",
+                header: "",
+                emptyValueAllowed: false,
+                customDefaultValue: "",
+              };
+              return pad(ccOrder.map((columnName) => cells[columnName]));
+            }),
           ),
         }),
         table: {
           name: configSheetFloorSeed.columnConfig.tableName,
           startColumnIndex: startTableColIndex,
           endRowIndex: topDataRowIndex + columnConfigRows.length,
-          endColumnIndex: startTableColIndex + 6,
+          endColumnIndex: startTableColIndex + ccOrder.length,
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
               "columnConfig",
-              [
-                cc.sheetGid.header,
-                cc.columnId.header,
-                cc.sheetTitle.header,
-                cc.header.header,
-                cc.emptyValueAllowed.header,
-                cc.customDefaultValue.header,
-              ],
+              ccHeaders,
               options.columnTypesAreUnset,
             ),
             startTableColIndex,
@@ -1213,5 +1231,207 @@ describe("ConfigSheetFloor", () => {
       colIndex: 0,
       value: "Not used",
     });
+  });
+
+  it("recreates a missing Column Config Header column at the Table end with its header, column ID and heading, and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnConfigColumnOrder: [
+        "sheetGid",
+        "columnId",
+        "sheetTitle",
+        "emptyValueAllowed",
+        "customDefaultValue",
+      ],
+    });
+    const { report } = applyFloor();
+
+    expect(columnInserts(batchUpdateCalls)).toEqual([
+      { sheetId: columnConfigGid, startIndex: 5 },
+    ]);
+    const writes = cellUpdates(batchUpdateCalls).filter(
+      (update) => update.sheetId === columnConfigGid && update.colIndex === 5,
+    );
+    expect(
+      writes
+        .map(({ rowIndex, value }) => ({ rowIndex, value }))
+        .sort((left, right) => left.rowIndex - right.rowIndex),
+    ).toEqual([
+      { rowIndex: 0, value: cc.header.columnId },
+      { rowIndex: 1, value: "" },
+      { rowIndex: 3, value: cc.header.header },
+    ]);
+    expect(report).toContain(
+      `Recreated columns: Column Config · ${cc.header.header} (${cc.header.columnId})`,
+    );
+  });
+
+  it("recreates two missing columns on one tab as two Table-end inserts, in seed order", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnConfigColumnOrder: [
+        "sheetGid",
+        "columnId",
+        "emptyValueAllowed",
+        "customDefaultValue",
+      ],
+    });
+    applyFloor();
+
+    expect(columnInserts(batchUpdateCalls)).toEqual([
+      { sheetId: columnConfigGid, startIndex: 4 },
+      { sheetId: columnConfigGid, startIndex: 5 },
+    ]);
+    const headerWrites = cellUpdates(batchUpdateCalls).filter(
+      (update) => update.sheetId === columnConfigGid && update.rowIndex === 3,
+    );
+    expect(headerWrites).toEqual([
+      expect.objectContaining({ colIndex: 4, value: cc.sheetTitle.header }),
+      expect.objectContaining({ colIndex: 5, value: cc.header.header }),
+    ]);
+  });
+
+  it("sends no column-type update for a sheet in the flush that inserts a column on it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnTypesAreUnset: true,
+      columnConfigColumnOrder: [
+        "sheetGid",
+        "columnId",
+        "sheetTitle",
+        "emptyValueAllowed",
+        "customDefaultValue",
+      ],
+    });
+    applyFloor();
+
+    expect(columnInserts(batchUpdateCalls)).toEqual([
+      { sheetId: columnConfigGid, startIndex: 5 },
+    ]);
+    expect(columnTypeUpdates(batchUpdateCalls)).not.toContainEqual(
+      expect.objectContaining({ tableId: `fake-table-${columnConfigGid}` }),
+    );
+  });
+
+  it("does not re-insert a column whose header drifted but whose column ID is intact", () => {
+    const { batchUpdateCalls } = floorFixture({
+      sheetConfigHeaders: { sheetTitle: "Tab name" },
+    });
+    const { report } = applyFloor();
+
+    expect(columnInserts(batchUpdateCalls)).toEqual([]);
+    expect(report).not.toContain("Recreated columns:");
+    expect(report).toContain("Restored headers:");
+  });
+
+  it.each([
+    {
+      column: sc.sheetGid.header,
+      options: { sheetConfigColumnOrder: ["sheetTitle", "letApiAccess"] },
+    },
+    {
+      column: sc.letApiAccess.header,
+      options: { sheetConfigColumnOrder: ["sheetGid", "sheetTitle"] },
+    },
+    {
+      column: cc.columnId.header,
+      options: {
+        columnConfigColumnOrder: [
+          "sheetGid",
+          "sheetTitle",
+          "header",
+          "emptyValueAllowed",
+          "customDefaultValue",
+        ],
+      },
+    },
+    {
+      column: cc.emptyValueAllowed.header,
+      options: {
+        columnConfigColumnOrder: [
+          "sheetGid",
+          "columnId",
+          "sheetTitle",
+          "header",
+          "customDefaultValue",
+        ],
+      },
+    },
+    {
+      column: ssc.idHeader.header,
+      options: {
+        spreadsheetConfigColumnOrder: sscColumns.filter(
+          (columnName) => columnName !== "idHeader",
+        ),
+      },
+    },
+    {
+      column: ssc.tableMenuSpace.header,
+      options: {
+        spreadsheetConfigColumnOrder: sscColumns.filter(
+          (columnName) => columnName !== "tableMenuSpace",
+        ),
+      },
+    },
+    {
+      column: ssc.tableMenuSpace.header,
+      options: {
+        spreadsheetConfigColumnOrder: [
+          "fillRowIdsTimeLastRan",
+          "tableMenuSpace",
+          ...sscColumns.filter(
+            (columnName) =>
+              columnName !== "tableMenuSpace" &&
+              columnName !== "fillRowIdsTimeLastRan",
+          ),
+        ],
+      },
+    },
+  ] as const)(
+    "throws naming $column when it can't be recreated, and flushes nothing",
+    ({ column, options }) => {
+      const { batchUpdateCalls } = floorFixture(options);
+
+      expect(() => applyFloor()).toThrow(`"${column}"`);
+      expect(batchUpdateCalls).toHaveLength(0);
+    },
+  );
+
+  it("makes two grid reads and sends no batch update from inside ensure when nothing is missing", () => {
+    const { batchUpdateCalls, getByDataFilterCalls } = floorFixture();
+    ConfigSheetFloor.init().ensure();
+
+    expect(getByDataFilterCalls).toHaveLength(2);
+    expect(batchUpdateCalls).toHaveLength(0);
+  });
+
+  it("skips a recreated column the refetch still lacks in the label, data-value, column-type and edit-warning steps, without throwing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnTypesAreUnset: true,
+      columnConfigColumnOrder: [
+        "sheetGid",
+        "columnId",
+        "sheetTitle",
+        "emptyValueAllowed",
+        "customDefaultValue",
+      ],
+    });
+    const { floor, report } = applyFloor();
+
+    expect(batchUpdateCalls).toHaveLength(2);
+    expect(report).toContain("Set column types:");
+    expect(report).not.toContain(`(${cc.header.columnId}) → TEXT`);
+    expect(report).not.toContain("Restored headers:");
+    expect(protectionsOf(floor, "columnConfig")).toHaveLength(1);
+  });
+
+  it("never lets a recreatable column be one of a self-describing row's identity or declared columns", () => {
+    floorSheetNames().forEach((sheetName) => {
+      const selfDescribing: readonly string[] =
+        selfDescribingRowColumns(sheetName);
+      expect(
+        floorRecreatableColumns(sheetName).filter((columnName) =>
+          selfDescribing.includes(columnName),
+        ),
+      ).toEqual([]);
+    });
+    expect(selfDescribingRowColumns("columnConfig")).toContain("columnId");
   });
 });

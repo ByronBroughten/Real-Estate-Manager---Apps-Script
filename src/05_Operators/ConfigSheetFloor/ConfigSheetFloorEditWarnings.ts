@@ -25,7 +25,8 @@ interface FloorTabDeclaration {
  * Config, Sheet Config and Column Config each get one, and any that drifted
  * or no floor tab declares is removed. ConfigSheetFloor runs this after its restores.
  * Each tab's declaration and the rules table live in FloorTabEditWarning; the
- * live column lookup is floorColumnLocation; seed lookups are floorSeedLookups.
+ * live column lookup is floorColumnLocation; seed lookups are floorSeedLookups;
+ * ConfigSheetFloorCreator recreates missing floor columns before this runs.
  * docs/generated-data.md
  */
 export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {

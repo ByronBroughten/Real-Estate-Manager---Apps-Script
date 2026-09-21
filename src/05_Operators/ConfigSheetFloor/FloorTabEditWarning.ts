@@ -17,7 +17,11 @@ import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
 import { Arr } from "../../utils/Arr";
 import { Obj } from "../../utils/Obj";
 import { liveColIndex } from "./floorColumnLocation";
-import { columnNameByHeader, type FloorSheetName } from "./floorSeedLookups";
+import {
+  columnNameByHeader,
+  spreadsheetConfigFeedbackColumnNames,
+  type FloorSheetName,
+} from "./floorSeedLookups";
 
 export const floorWarningPrefix = "Config-sheet floor";
 
@@ -165,6 +169,14 @@ export class FloorTabEditWarning<
   }
 }
 
+export function selfDescribingRowColumns<SN extends FloorSheetName>(
+  sheetName: SN,
+): readonly ColumnName<SN>[] {
+  const rule = floorTabRules()[sheetName].selfDescribingRow;
+  if (rule === null) return [];
+  return [...rule.identityColumns, rule.declaredColumn];
+}
+
 function floorTabRules(): { [SN in FloorSheetName]: FloorTabRules<SN> } {
   return {
     spreadsheetConfig: {
@@ -198,15 +210,6 @@ function floorTabRules(): { [SN in FloorSheetName]: FloorTabRules<SN> } {
       },
     },
   };
-}
-
-function spreadsheetConfigFeedbackColumnNames(): ColumnName<"spreadsheetConfig">[] {
-  return Obj.values(configSheetFloorSeed.spreadsheetConfig.endpoints).flatMap(
-    (endpoint) => [
-      columnNameByHeader("spreadsheetConfig", endpoint.timeLastRan.header),
-      columnNameByHeader("spreadsheetConfig", endpoint.runStatus.header),
-    ],
-  );
 }
 
 function spreadsheetConfigTimeLastRanColumnNames(): ColumnName<"spreadsheetConfig">[] {
