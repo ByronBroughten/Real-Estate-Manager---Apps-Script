@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
+import type { GoogleRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
 const occupancyGid = getSheetTraitByName("occupancy", "sheetGid");
 const unknownGid = 999999;
 
-function onlyLine(request: OpaqueRawRequest): string {
+function onlyLine(request: GoogleRequest): string {
   const [line] = UpdateRequestSummary.init([request]).lines;
   return (line ?? "").replace(/\s+/g, " ").trim();
 }

@@ -80,15 +80,22 @@ describe("NodeHost.ensureGlobals", () => {
     expect(host.summary.count).toBe(1);
   });
 
-  it("serves the spreadsheet id the framework reads from its script property", () => {
-    seedHost(true);
+  it("reads the spreadsheet it was given", () => {
+    const { transport } = seedHost(true);
 
-    expect(SpreadsheetRaw.init().spreadsheetId).toBe(spreadsheetId);
+    SpreadsheetRaw.init().fetchAllSheetProperties();
+
+    expect(transport.mock.calls[0]?.[0].url).toContain(`/${spreadsheetId}?`);
   });
 
-  it("installs PropertiesService and Logger only, not a Sheets global", () => {
+  it("installs Logger only, not a Sheets or PropertiesService global", () => {
     seedHost(true);
 
-    expect((globalThis as { Sheets?: unknown }).Sheets).toBeUndefined();
+    const globals = globalThis as {
+      Sheets?: unknown;
+      PropertiesService?: unknown;
+    };
+    expect(globals.Sheets).toBeUndefined();
+    expect(globals.PropertiesService).toBeUndefined();
   });
 });

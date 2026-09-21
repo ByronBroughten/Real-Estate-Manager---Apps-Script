@@ -1,8 +1,10 @@
 import { Val } from "../../utils/Val";
+import { AppsScript } from "./AppsScript";
 import type {
   GridFetchOptions,
   GridFetchRange,
   LocalWriteOperation,
+  OpaqueRawRequest,
   RawSource,
   SheetConditionalFormatSnapshot,
   SheetEditProtectionSnapshot,
@@ -13,7 +15,15 @@ import { googleConditionalFormatRule } from "./GoogleSheetsAPI/conditionalFormat
 import { googleGrid } from "./GoogleSheetsAPI/gridSnapshots";
 import { googleProtectedRange } from "./GoogleSheetsAPI/protectedRanges";
 
-export type OpaqueRawRequest = GoogleAppsScript.Sheets.Schema.Request;
+export type GoogleRequest = GoogleAppsScript.Sheets.Schema.Request;
+
+export function googleRawRequest(request: GoogleRequest): OpaqueRawRequest {
+  return request as unknown as OpaqueRawRequest;
+}
+
+function unwrapRawRequest(request: OpaqueRawRequest): GoogleRequest {
+  return request as unknown as GoogleRequest;
+}
 
 // Naming a verb here obliges UpdateRequestSummary to give it a line format.
 export type ModeledRequestVerb =
@@ -35,7 +45,7 @@ export type ModeledRequestVerb =
   | "pasteData";
 
 export type ModeledRequest = {
-  [RV in ModeledRequestVerb]: Required<Pick<OpaqueRawRequest, RV>>;
+  [RV in ModeledRequestVerb]: Required<Pick<GoogleRequest, RV>>;
 }[ModeledRequestVerb];
 
 type GoogleSpreadsheet = GoogleAppsScript.Sheets.Schema.Spreadsheet;
@@ -83,7 +93,7 @@ export interface GoogleSheetsAPIHttpProps {
   spreadsheetId: string;
   transport: SheetsHttpTransport;
   isDryRun: boolean;
-  reportRequests: (requests: OpaqueRawRequest[]) => void;
+  reportRequests: (requests: GoogleRequest[]) => void;
 }
 
 export interface SheetsAdvancedTransport {
@@ -112,29 +122,45 @@ export interface SheetsAdvancedTransport {
  */
 export class GoogleSheetsAPI implements RawSource {
   private sheets: SheetsAdvancedTransport;
-  constructor(sheets: SheetsAdvancedTransport) {
+  private spreadsheetId: string;
+  constructor(sheets: SheetsAdvancedTransport, spreadsheetId: string) {
     this.sheets = sheets;
+    this.spreadsheetId = spreadsheetId;
   }
-  static init(sheets: SheetsAdvancedTransport): GoogleSheetsAPI {
-    return new GoogleSheetsAPI(sheets);
+  static init(
+    sheets: SheetsAdvancedTransport,
+    spreadsheetId: string,
+  ): GoogleSheetsAPI {
+    return new GoogleSheetsAPI(sheets, spreadsheetId);
   }
   static forAppsScript(): GoogleSheetsAPI {
+    const spreadsheetId = AppsScript.projectProperties(
+      "realEstateSpreadsheetId",
+    );
+    if (!spreadsheetId) {
+      throw new Error(
+        "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
+      );
+    }
     return GoogleSheetsAPI.init(
       Val.assert(Sheets, "Sheets (enable the Advanced Sheets Service)"),
+      spreadsheetId,
     );
   }
   static initHttp(props: GoogleSheetsAPIHttpProps): GoogleSheetsAPI {
-    return GoogleSheetsAPI.init(httpSheetsTransport(props));
+    return GoogleSheetsAPI.init(
+      httpSheetsTransport(props),
+      props.spreadsheetId,
+    );
   }
-  fetchSheetProperties(spreadsheetId: string): SpreadsheetSnapshot {
+  fetchSheetProperties(): SpreadsheetSnapshot {
     return googleGrid.toSpreadsheetSnapshot(
-      this.sheets.Spreadsheets.get(spreadsheetId, {
+      this.sheets.Spreadsheets.get(this.spreadsheetId, {
         fields: fieldMasks.sheetProperties,
       }),
     );
   }
   fetchGrid(
-    spreadsheetId: string,
     gridRanges: GridFetchRange[],
     options: GridFetchOptions,
   ): SpreadsheetSnapshot {
@@ -144,7 +170,7 @@ export class GoogleSheetsAPI implements RawSource {
           dataFilters: gridRanges.map((gr) => ({ gridRange: gr })),
           includeGridData: true,
         },
-        spreadsheetId,
+        this.spreadsheetId,
         {
           fields: gridFields(options),
         },
@@ -152,10 +178,8 @@ export class GoogleSheetsAPI implements RawSource {
     );
   }
   // getByDataFilter never returns conditionalFormats, so rules take a plain get.
-  fetchConditionalFormatRules(
-    spreadsheetId: string,
-  ): SheetConditionalFormatSnapshot[] {
-    const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
+  fetchConditionalFormatRules(): SheetConditionalFormatSnapshot[] {
+    const spreadsheet = this.sheets.Spreadsheets.get(this.spreadsheetId, {
       fields: fieldMasks.conditionalFormats,
     });
     return Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
@@ -169,8 +193,8 @@ export class GoogleSheetsAPI implements RawSource {
     );
   }
   // Assumed to drop protectedRanges the same way until the probe says otherwise.
-  fetchEditProtections(spreadsheetId: string): SheetEditProtectionSnapshot[] {
-    const spreadsheet = this.sheets.Spreadsheets.get(spreadsheetId, {
+  fetchEditProtections(): SheetEditProtectionSnapshot[] {
+    const spreadsheet = this.sheets.Spreadsheets.get(this.spreadsheetId, {
       fields: fieldMasks.protectedRanges,
     });
     return Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
@@ -182,12 +206,12 @@ export class GoogleSheetsAPI implements RawSource {
       }),
     );
   }
-  flush(spreadsheetId: string, operations: LocalWriteOperation[]): void {
+  flush(operations: LocalWriteOperation[]): void {
     const requests = operations.flatMap(localOperationToGoogleRequests);
     if (requests.length === 0) return;
     const response = this.sheets.Spreadsheets.batchUpdate(
       { requests },
-      spreadsheetId,
+      this.spreadsheetId,
     );
     googleProtectedRange.validateAddReplies(response, requests);
   }
@@ -200,11 +224,6 @@ function httpSheetsTransport(
   const send = <T>(request: SheetsHttpRequest): T =>
     props.transport(request) as T;
   const url = (spreadsheetId: string, suffix: string, fields?: string) => {
-    if (spreadsheetId !== props.spreadsheetId) {
-      throw new Error(
-        `The Node host is bound to spreadsheet "${props.spreadsheetId}" but was asked for "${spreadsheetId}".`,
-      );
-    }
     const query = fields ? `?fields=${encodeURIComponent(fields)}` : "";
     return `${sheetsApiBase}/${spreadsheetId}${suffix}${query}`;
   };
@@ -245,8 +264,8 @@ function gridFields(options: GridFetchOptions): string {
 
 function localOperationToGoogleRequests(
   operation: LocalWriteOperation,
-): OpaqueRawRequest[] {
-  if (operation.kind === "raw") return [operation.request as OpaqueRawRequest];
+): GoogleRequest[] {
+  if (operation.kind === "raw") return [unwrapRawRequest(operation.request)];
   return modeledOperationToGoogleRequests(operation);
 }
 

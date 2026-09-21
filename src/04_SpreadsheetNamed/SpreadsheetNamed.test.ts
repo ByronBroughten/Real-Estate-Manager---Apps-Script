@@ -4,7 +4,6 @@ import type { ColumnIsFormula } from "../01_SpreadsheetSchema/columnConfigsTypes
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   blankSheetConfigRow,
   filledSheetConfigRow,
@@ -138,7 +137,6 @@ function fetchedOccupancySheet(): SheetNamed<"occupancy"> {
 
 describe("Named value accessors", () => {
   beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
     stubOccupancyWithBlankRow();
   });
 
@@ -377,10 +375,6 @@ function appendRequestCount(
 }
 
 describe("SheetNamed.rowByValue", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("returns the one row whose column holds the value", () => {
     stubOccupancyWithBlankRow();
 
@@ -444,10 +438,6 @@ function stubOccupancyWithDuplicateIds() {
 }
 
 describe("SheetNamed.DELETE_ALL_DATA_ROWS", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("deletes every data row but the top one, and leaves that one blank", () => {
     const { batchUpdateCalls } = stubSheetConfigSheet({
       4: filledSheetConfigRow,
@@ -477,10 +467,6 @@ describe("SheetNamed.DELETE_ALL_DATA_ROWS", () => {
 });
 
 describe("SheetNamed.appendRowWithVals", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("reuses the blank row of an emptied sheet rather than appending beneath it", () => {
     const { batchUpdateCalls } = stubSheetConfigSheet({
       4: blankSheetConfigRow,
@@ -614,10 +600,6 @@ const completeTestRow: CompleteAppendBag<"test"> = {
 };
 
 describe("SheetNamed.appendRowWithAllVals", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("mints the row ID itself, from a bag that cannot name one", () => {
     stubTestSheetWithBlankRow();
 
@@ -740,7 +722,6 @@ function fetchedAddExpenseRow(): RowNamed<"addPropertyExpense"> {
 
 describe("RowNamed.blankRequiredColumnNames", () => {
   beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
     stubAddPropertyExpenseSheet();
   });
 
@@ -792,10 +773,6 @@ function stubTestSheetForFormulaWrite() {
 }
 
 describe("Named formula writes", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("sends one pasteData PASTE_FORMULA for every Test Formula test data row", () => {
     const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
 

@@ -1,7 +1,7 @@
-import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import type {
   AddSheetOperation,
   AddTableOperation,
+  OpaqueRawRequest,
   UpdateCellOperation,
 } from "../00_Source/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";

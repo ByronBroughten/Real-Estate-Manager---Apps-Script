@@ -8,6 +8,8 @@ type BatchUpdateResponse =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetResponse;
 type GoogleCellData = GoogleAppsScript.Sheets.Schema.CellData;
 
+export const fakeSpreadsheetId = "fake-spreadsheet";
+
 /** A single cell's value, in the same terms `CellRaw` reads/writes them.
  * `null` (or a short row) represents an empty cell. */
 export type FakeCellValue = string | number | boolean | null;
@@ -447,7 +449,7 @@ export function stubSheetsService(
     },
   };
 
-  installRawSource(GoogleSheetsAPI.init(service));
+  installRawSource(GoogleSheetsAPI.init(service, fakeSpreadsheetId));
 
   return { batchUpdateCalls, getByDataFilterCalls, getCalls };
 }

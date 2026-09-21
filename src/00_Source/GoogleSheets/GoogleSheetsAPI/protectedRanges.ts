@@ -5,7 +5,7 @@ import {
   type EditProtectionContent,
   type ProtectionGridRange,
 } from "../../RawSource/EditProtection";
-import type { OpaqueRawRequest } from "../GoogleSheetsAPI";
+import type { GoogleRequest } from "../GoogleSheetsAPI";
 import { googleGrid } from "./gridSnapshots";
 
 type GoogleProtectedRange = GoogleAppsScript.Sheets.Schema.ProtectedRange;
@@ -70,7 +70,7 @@ export const googleProtectedRange = {
   },
   validateAddReplies(
     response: BatchUpdateResponse,
-    requests: OpaqueRawRequest[],
+    requests: GoogleRequest[],
   ): void {
     const replies = response.replies;
     if (replies === undefined) return;
