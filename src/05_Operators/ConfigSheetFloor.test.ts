@@ -262,6 +262,7 @@ function floorFixture(
       Record<(typeof sscColumns)[number], string>
     >;
     columnTypesAreUnset?: boolean;
+    tableMenuSpaceValue?: string;
     startTableColIndex?: number;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
@@ -305,6 +306,9 @@ function floorFixture(
   );
   const extraColumn = options.extraSpreadsheetConfigColumn;
   const dataRow = sscOrder.map((columnName) => {
+    if (columnName === "tableMenuSpace") {
+      return options.tableMenuSpaceValue ?? "Not used";
+    }
     if (columnName === "idDelimiter") return ":";
     if (columnName === "idHeader") return "ID";
     if (columnName === "startTableColumnIndexBase1") return 1;
@@ -969,5 +973,48 @@ describe("ConfigSheetFloor", () => {
         colIndex: extraColIndex,
       }),
     );
+  });
+
+  it("writes Not used into a blank Table menu space data cell and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({ tableMenuSpaceValue: "" });
+    const { report } = applyFloor();
+
+    expect(report).toContain('Restored Table menu space: "" → Not used');
+    const dataCellUpdates = cellUpdates(batchUpdateCalls).filter(
+      (update) => update.rowIndex === topDataRowIndex,
+    );
+    expect(dataCellUpdates).toEqual([
+      {
+        sheetId: spreadsheetConfigGid,
+        rowIndex: topDataRowIndex,
+        colIndex: 0,
+        value: "Not used",
+      },
+    ]);
+  });
+
+  it("queues no Table menu space update when the cell already reads Not used", () => {
+    const { batchUpdateCalls } = floorFixture();
+    const { report } = applyFloor();
+
+    expect(report).not.toContain("Table menu space");
+    expect(
+      cellUpdates(batchUpdateCalls).filter(
+        (update) => update.rowIndex === topDataRowIndex,
+      ),
+    ).toEqual([]);
+  });
+
+  it("overwrites an edited Table menu space data cell and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({ tableMenuSpaceValue: "notes" });
+    const { report } = applyFloor();
+
+    expect(report).toContain('Restored Table menu space: "notes" → Not used');
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: spreadsheetConfigGid,
+      rowIndex: topDataRowIndex,
+      colIndex: 0,
+      value: "Not used",
+    });
   });
 });

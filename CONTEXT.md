@@ -63,11 +63,11 @@ A cell only the editors it names can change; a lock that names none stops nobody
 _Avoid_: protection, lock
 
 **Config-sheet floor**:
-Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, and the framework endpoints' columns. Edits to it are overwritten and reported. A column type is restored only on a Table with no dropdown or other validated column; otherwise the run stops and names those columns, because restoring a type resets every dropdown's style and colours on that Table.
+Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, Spreadsheet Config's Table menu space data cell, and the framework endpoints' columns. Edits to it are overwritten and reported. A column type is restored only on a Table with no dropdown or other validated column; otherwise the run stops and names those columns, because restoring a type resets every dropdown's style and colours on that Table.
 _Avoid_: minimum floor, minimum headers, floor sheet
 
 **Floor seed**:
-The app's own declaration of what the config-sheet floor looks like. It holds structure only; a floor tab or column keeps the identity it was created with.
+The app's own declaration of what the config-sheet floor looks like. It holds structure, plus Table menu space's data value; a floor tab or column keeps the identity it was created with.
 _Avoid_: template, default config
 
 **Self-describing row**:

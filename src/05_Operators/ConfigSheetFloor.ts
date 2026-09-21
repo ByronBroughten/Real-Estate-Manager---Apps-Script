@@ -31,7 +31,7 @@ interface FloorColumnRestore {
 
 /**
  * Restores floor tab titles, Table names, headers, column IDs, group
- * headings and column types, and has ConfigSheetFloorEditWarnings declare
+ * headings, data values and column types, and has ConfigSheetFloorEditWarnings declare
  * the edit warnings. ConfigOrchestrator
  * runs this at the start of every config sync; the
  * ensureConfigSheetFloor chore is the other caller.
@@ -52,6 +52,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     this._ensureTitlesAndTables(report);
     this._fetchFloorSheets();
     this._ensureColumnLabels(report);
+    this._ensureDataValues(report);
     this._ensureColumnTypes(report);
     report.push(...this.editWarnings.ensure());
     return report.join("; ");
@@ -117,6 +118,9 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       sheet.meta.uniformRow("columnId").prepFetchFull();
       sheet.meta.uniformRow("tableHeader").prepFetchFull();
       sheet.meta.uniformRow("colGroupName").prepFetchFull();
+      if (floorDataValueColumns(sheetName).length > 0) {
+        sheet.row(sheet.schema.topDataRowIdx).prepFetchFull();
+      }
       sheet.prepFetchEditProtections();
     });
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
@@ -175,6 +179,38 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       report.push(`Restored group headings: ${groupHeadingLines.join("; ")}`);
     }
   }
+  private _ensureDataValues(report: string[]): void {
+    floorSheetNames().forEach((sheetName) => {
+      this._ensureSheetDataValues(sheetName, report);
+    });
+  }
+  private _ensureSheetDataValues<SN extends FloorSheetName>(
+    sheetName: SN,
+    report: string[],
+  ): void {
+    const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
+    if (!this.ss.raw.gidIsActive(sheetGid)) return;
+    const sheet = this.ss.sheet(sheetName);
+    if (sheet.raw.tables.length !== 1) return;
+    const row = sheet.raw.row(sheet.schema.topDataRowIdx);
+    floorDataValueColumns(sheetName).forEach((seedColumn) => {
+      const colIndex = liveFloorColIndex(
+        sheet.raw.meta,
+        floorColumnRestore(sheetName, {
+          header: seedColumn.header,
+          groupHeading: "",
+        }),
+      );
+      if (colIndex === undefined) return;
+      const liveValue = String(row.cell(colIndex).valueOrEmpty());
+      const { dataValue } = seedColumn;
+      if (liveValue === dataValue) return;
+      row.updateValue(colIndex, dataValue);
+      report.push(
+        `Restored ${seedColumn.header}: "${liveValue}" → ${dataValue}`,
+      );
+    });
+  }
   private _ensureColumnTypes(report: string[]): void {
     const typeChangeLines = floorSheetNames().flatMap((sheetName) =>
       this._ensureSheetColumnTypes(sheetName, floorSeedColumns(sheetName)),
@@ -205,6 +241,17 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
 
 function floorTabNames(): FloorTabName[] {
   return Obj.keys(configSheetFloorSeed);
+}
+
+type FloorDataValueColumn = FloorSeedColumn & { dataValue: string };
+
+function floorDataValueColumns(
+  sheetName: FloorSheetName,
+): FloorDataValueColumn[] {
+  return floorSeedColumns(sheetName).filter(
+    (seedColumn): seedColumn is FloorDataValueColumn =>
+      seedColumn.dataValue !== undefined,
+  );
 }
 
 function assertFloorTable(sheet: SheetRaw, tableName: string): void {
