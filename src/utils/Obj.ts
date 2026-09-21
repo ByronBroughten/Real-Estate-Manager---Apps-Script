@@ -235,6 +235,18 @@ export const Obj = {
   entries<O extends object>(obj: O): Entries<Full<O>> {
     return Object.entries(obj) as unknown as Entries<Full<O>>;
   },
+  mapValues<O extends object, R>(
+    obj: O,
+    fn: (value: O[keyof O], key: keyof O) => R,
+  ): { [K in keyof O]: R } {
+    return Obj.keys(obj).reduce(
+      (mapped, key) => {
+        mapped[key] = fn(obj[key], key);
+        return mapped;
+      },
+      {} as { [K in keyof O]: R },
+    );
+  },
   propKeysOfValue<O extends object, V extends O[keyof O]>(
     obj: O,
     value: V,

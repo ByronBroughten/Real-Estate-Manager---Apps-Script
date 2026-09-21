@@ -1,5 +1,4 @@
 import type { CellValue } from "../../00_Source/CellValues/cellValues";
-import type { ColumnName } from "../../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
   floorSeedColumns,
@@ -7,10 +6,14 @@ import {
   type FloorTabName,
 } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
+import {
+  spreadsheetConfigIndexHeaders,
+  spreadsheetConfigTextHeaders,
+} from "../../01_SpreadsheetSchema/spreadsheetConfigFields";
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import { spreadsheetConfigHeader } from "../SpreadsheetConfigDataRow";
+import { Obj } from "../../utils/Obj";
 import { floorSheetNames, type FloorSheetName } from "./floorSeedLookups";
 import { FloorTabColumnCreator } from "./FloorTabColumnCreator";
 
@@ -100,20 +103,25 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
     columns: readonly CreatedTableColumn[],
   ): void {
     const headers = columns.map((column) => column.header);
-    seededLayoutValues().forEach(({ header, value }) => {
-      const columnIndex = headers.indexOf(header);
-      if (columnIndex === -1) {
-        throw new Error(
-          `Spreadsheet Config seed has no column "${header}" to seed its layout value into.`,
-        );
-      }
-      this.ss.raw.gatherAddedSheetCellRequest({
-        sheetId: sheetGid,
-        rowIndex: ssConfigGet("tableHeaderRowIndexBase0") + 1,
-        colIndex: ssConfigGet("startTableColIndexBase0") + columnIndex,
-        value,
+    seededLayoutValues()
+      .map(({ header, value }) => {
+        const columnIndex = headers.indexOf(header);
+        if (columnIndex === -1) {
+          throw new Error(
+            `Spreadsheet Config seed has no column "${header}" to seed its layout value into.`,
+          );
+        }
+        return { columnIndex, value };
+      })
+      .sort((a, b) => a.columnIndex - b.columnIndex)
+      .forEach(({ columnIndex, value }) => {
+        this.ss.raw.gatherAddedSheetCellRequest({
+          sheetId: sheetGid,
+          rowIndex: ssConfigGet("tableHeaderRowIndexBase0") + 1,
+          colIndex: ssConfigGet("startTableColIndexBase0") + columnIndex,
+          value,
+        });
       });
-    });
   }
   // The add-Table's columnName writes the header, so no header cell is written.
   private _seedExampleColumn(sheetGid: number, topDataRowIdx: number): void {
@@ -158,35 +166,14 @@ function createdDataRowCount(sheetName: FloorTabName): number {
 
 // Read through ssConfigGet, the same layout that placed the created Table.
 function seededLayoutValues(): { header: string; value: CellValue }[] {
-  const layoutValues: {
-    columnName: ColumnName<"spreadsheetConfig">;
-    value: CellValue;
-  }[] = [
-    { columnName: "idHeader", value: ssConfigGet("idHeader") },
-    { columnName: "idDelimiter", value: ssConfigGet("idDelimiter") },
-    {
-      columnName: "startTableColumnIndexBase1",
-      value: ssConfigGet("startTableColIndexBase0") + 1,
-    },
-    {
-      columnName: "columnIdRowIndexBase1",
-      value: ssConfigGet("columnIdRowIdxBase0") + 1,
-    },
-    {
-      columnName: "columnGroupHeadingRowIndexBase1",
-      value: ssConfigGet("columnGroupHeadingRowIndexBase0") + 1,
-    },
-    {
-      columnName: "actionRowIndexBase1",
-      value: ssConfigGet("actionRowIndexBase0") + 1,
-    },
-    {
-      columnName: "tableHeaderRowIndexBase1",
-      value: ssConfigGet("tableHeaderRowIndexBase0") + 1,
-    },
+  return [
+    ...Obj.keys(spreadsheetConfigTextHeaders).map((key) => ({
+      header: spreadsheetConfigTextHeaders[key],
+      value: ssConfigGet(key),
+    })),
+    ...Obj.keys(spreadsheetConfigIndexHeaders).map((key) => ({
+      header: spreadsheetConfigIndexHeaders[key],
+      value: ssConfigGet(key) + 1,
+    })),
   ];
-  return layoutValues.map(({ columnName, value }) => ({
-    header: spreadsheetConfigHeader(columnName),
-    value,
-  }));
 }

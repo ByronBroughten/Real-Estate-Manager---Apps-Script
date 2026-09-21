@@ -1,11 +1,14 @@
 import type { CellValue } from "../00_Source/CellValues/cellValues";
-import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   makeImportLine,
   validateSpreadsheetLayoutIndexes,
-  type UniformRowLayoutKey,
 } from "../01_SpreadsheetSchema/makeConfigs";
+import {
+  spreadsheetConfigIndexHeaders,
+  spreadsheetConfigTextHeaders,
+} from "../01_SpreadsheetSchema/spreadsheetConfigFields";
 import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import { Obj } from "../utils/Obj";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
@@ -13,22 +16,11 @@ import {
   type ConfigSyncState,
   type OperatorProps,
 } from "./SpreadsheetBaseOperator";
-import {
-  SpreadsheetConfigDataRow,
-  spreadsheetConfigColumnLabel,
-  spreadsheetConfigHeader,
-} from "./SpreadsheetConfigDataRow";
+import { SpreadsheetConfigDataRow } from "./SpreadsheetConfigDataRow";
 
-type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
-
-const guaranteedColumns: readonly SpreadsheetConfigColumnName[] = [
-  "idDelimiter",
-  "idHeader",
-  "startTableColumnIndexBase1",
-  "columnIdRowIndexBase1",
-  "columnGroupHeadingRowIndexBase1",
-  "actionRowIndexBase1",
-  "tableHeaderRowIndexBase1",
+const guaranteedHeaders: string[] = [
+  ...Obj.values(spreadsheetConfigTextHeaders),
+  ...Obj.values(spreadsheetConfigIndexHeaders),
 ];
 
 export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheetConfig"> {
@@ -77,9 +69,6 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     }
   }
   private _translateFetchedGrid(): LiveSpreadsheetConfig {
-    const guaranteedHeaders = guaranteedColumns.map((columnName) =>
-      spreadsheetConfigHeader(columnName),
-    );
     const tableHeaderRowIndex =
       this._uniqueTableHeaderRowIndex(guaranteedHeaders);
     const colIndexByHeader = this._colIndexByHeader(
@@ -89,18 +78,15 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     const dataRow = new SpreadsheetConfigDataRow(
       this._valueByHeader(tableHeaderRowIndex + 1, colIndexByHeader),
     );
-    const liveConfig = {
-      idDelimiter: dataRow.stringCell("idDelimiter"),
-      idHeader: dataRow.stringCell("idHeader"),
-      startTableColIndexBase0: dataRow.indexCell("startTableColumnIndexBase1"),
-      columnIdRowIdxBase0: dataRow.indexCell("columnIdRowIndexBase1"),
-      columnGroupHeadingRowIndexBase0: dataRow.indexCell(
-        "columnGroupHeadingRowIndexBase1",
+    const liveConfig: LiveSpreadsheetConfig = {
+      ...Obj.mapValues(spreadsheetConfigTextHeaders, (header) =>
+        dataRow.stringCell(header),
       ),
-      actionRowIndexBase0: dataRow.indexCell("actionRowIndexBase1"),
-      tableHeaderRowIndexBase0: dataRow.indexCell("tableHeaderRowIndexBase1"),
+      ...Obj.mapValues(spreadsheetConfigIndexHeaders, (header) =>
+        dataRow.indexCell(header),
+      ),
     };
-    validateSpreadsheetLayoutIndexes(liveConfig, uniformRowLayoutLabels());
+    validateSpreadsheetLayoutIndexes(liveConfig);
     return liveConfig;
   }
   private _uniqueTableHeaderRowIndex(guaranteedHeaders: string[]): number {
@@ -163,17 +149,4 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     }
     return rowState.get(colIndex)?.value ?? "";
   }
-}
-
-function uniformRowLayoutLabels(): Record<UniformRowLayoutKey, string> {
-  return {
-    columnIdRowIdxBase0: spreadsheetConfigColumnLabel("columnIdRowIndexBase1"),
-    columnGroupHeadingRowIndexBase0: spreadsheetConfigColumnLabel(
-      "columnGroupHeadingRowIndexBase1",
-    ),
-    actionRowIndexBase0: spreadsheetConfigColumnLabel("actionRowIndexBase1"),
-    tableHeaderRowIndexBase0: spreadsheetConfigColumnLabel(
-      "tableHeaderRowIndexBase1",
-    ),
-  };
 }

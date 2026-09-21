@@ -5,6 +5,10 @@ import {
   getSheetColumnNames,
 } from "./columnConfigsTypes";
 import { sheetConfigsByGid } from "./sheetConfigsTypes";
+import {
+  spreadsheetConfigIndexHeaders,
+  spreadsheetConfigTextHeaders,
+} from "./spreadsheetConfigFields";
 
 export type FloorColumnType = Extract<
   TableColumnType,
@@ -18,11 +22,13 @@ export interface FloorSeedColumn {
   dataValue?: string;
 }
 
+type FloorSeedGroupedColumn = FloorSeedColumn & { columnGroupHeading: string };
+
 interface FloorSeedSheet {
   title: string;
   tableName: string;
   letApiAccess: boolean;
-  columns: readonly (FloorSeedColumn & { columnGroupHeading: string })[];
+  columns: readonly FloorSeedGroupedColumn[];
   endpoints?: Record<
     string,
     {
@@ -35,6 +41,15 @@ interface FloorSeedSheet {
     header: string;
     columnType: FloorColumnType;
     seededValues: readonly string[];
+  };
+}
+
+function indexSeedColumn(header: string): FloorSeedGroupedColumn {
+  return {
+    header,
+    columnGroupHeading: "",
+    columnType: "DOUBLE",
+    emptyValueAllowed: false,
   };
 }
 
@@ -52,47 +67,18 @@ export const configSheetFloorSeed = {
         dataValue: "Not used",
       },
       {
-        header: "ID header",
+        header: spreadsheetConfigTextHeaders.idHeader,
         columnGroupHeading: "Spreadsheet Rules",
         columnType: "TEXT",
         emptyValueAllowed: false,
       },
       {
-        header: "ID delimiter",
+        header: spreadsheetConfigTextHeaders.idDelimiter,
         columnGroupHeading: "",
         columnType: "TEXT",
         emptyValueAllowed: false,
       },
-      {
-        header: "Start table column index base 1",
-        columnGroupHeading: "",
-        columnType: "DOUBLE",
-        emptyValueAllowed: false,
-      },
-      {
-        header: "Column ID row index base 1",
-        columnGroupHeading: "",
-        columnType: "DOUBLE",
-        emptyValueAllowed: false,
-      },
-      {
-        header: "Column group heading row index base 1",
-        columnGroupHeading: "",
-        columnType: "DOUBLE",
-        emptyValueAllowed: false,
-      },
-      {
-        header: "Action row index base 1",
-        columnGroupHeading: "",
-        columnType: "DOUBLE",
-        emptyValueAllowed: false,
-      },
-      {
-        header: "Table header row index base 1",
-        columnGroupHeading: "",
-        columnType: "DOUBLE",
-        emptyValueAllowed: false,
-      },
+      ...Obj.values(spreadsheetConfigIndexHeaders).map(indexSeedColumn),
     ],
     endpoints: {
       spreadsheetConfig_fillRowIdsTimeLastRan: {

@@ -23,6 +23,7 @@ import { ConfigSheetFloor } from "./ConfigSheetFloor";
 import { floorSheetNames } from "./ConfigSheetFloor/floorSeedLookups";
 import { floorRecreatableColumns } from "./ConfigSheetFloor/FloorTabColumnCreator";
 import { selfDescribingRowColumns } from "./ConfigSheetFloor/FloorTabEditWarning";
+import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 
 const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
@@ -1602,6 +1603,40 @@ describe("ConfigSheetFloor", () => {
     }));
 
     expect(spreadsheetConfigCellUpdates(batchUpdateCalls)).toEqual(expected);
+  });
+
+  it("fetches a created Spreadsheet Config back as the generated spreadsheetConfig", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const table = addTableRequests(batchUpdateCalls)[0];
+    const startColIndex = table?.range?.startColumnIndex ?? 0;
+    const rowsByIndex: Record<number, FakeCell[]> = {
+      [table?.range?.startRowIndex ?? 0]: (table?.columnProperties ?? []).map(
+        (column) => column.columnName ?? null,
+      ),
+    };
+    spreadsheetConfigCellUpdates(batchUpdateCalls).forEach(
+      ({ rowIndex, colIndex, value }) => {
+        const row = (rowsByIndex[rowIndex] ??= []);
+        row[colIndex - startColIndex] = value ?? null;
+      },
+    );
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: spreadsheetConfigGid,
+          title: configSheetFloorSeed.spreadsheetConfig.title,
+          rows: buildGridRows(rowsByIndex),
+        },
+      ],
+    });
+
+    expect(SpreadsheetConfigOperator.init().fetchLiveConfig()).toEqual(
+      spreadsheetConfig,
+    );
   });
 
   it("sends a created Spreadsheet Config's seeded values in the same batch as, and after, its add-sheet and add-Table", () => {
