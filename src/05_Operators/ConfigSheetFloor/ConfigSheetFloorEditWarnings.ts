@@ -9,7 +9,12 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
-import { configSheetFloorSeed } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  floorSeedColumnById,
+  floorTabSeedByGid,
+} from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { SheetNamed } from "../../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -22,6 +27,9 @@ import {
 } from "./floorSeedLookups";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
+
+// Sheet indexes of the columns that say whose row it is, gathered with the floor's fetch.
+export type IdentityColIndexes = Map<FloorSheetName, number[]>;
 
 const floorWarningPrefix = "Config-sheet floor";
 
@@ -42,16 +50,17 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  ensure(): string[] {
+  ensure(identityColIndexes: IdentityColIndexes): string[] {
     const report: string[] = [];
     const declarations = floorSheetNames().map((sheetName) =>
-      this._sheetDeclaration(sheetName, report),
+      this._sheetDeclaration(sheetName, identityColIndexes, report),
     );
     this._reconcile(declarations, report);
     return report;
   }
   private _sheetDeclaration<SN extends FloorSheetName>(
     sheetName: SN,
+    identityColIndexes: IdentityColIndexes,
     report: string[],
   ): FloorDeclaration {
     const sheet = this.ss.sheet(sheetName);
@@ -60,7 +69,11 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
     if (extraColumnLines.length > 0) {
       report.push(`Covered added columns: ${extraColumnLines.join("; ")}`);
     }
-    const unprotectedRanges = editableRanges(sheet, sheetName);
+    const unprotectedRanges = editableRanges(
+      sheet,
+      sheetName,
+      this._carvedRowIndexesByColIndex(sheetName, identityColIndexes),
+    );
     return {
       description,
       range: sheet.raw.wholeSheetGridRange,
@@ -68,6 +81,80 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
       queueAdd: () =>
         sheet.addEditWarningWholeSheet({ description, unprotectedRanges }),
     };
+  }
+  // Before the floor's fetch, so these ride it: a drifted column ID leaves only the Table header to find them by.
+  gatherIdentityColumns(): IdentityColIndexes {
+    const identityColIndexes: IdentityColIndexes = new Map();
+    const identities = [
+      this._identityColumns("sheetConfig", ["sheetGid"]),
+      this._identityColumns("columnConfig", ["sheetGid", "columnId"]),
+    ];
+    identities.forEach((identity) => {
+      if (identity === undefined) return;
+      const { sheet, sheetName, colIndexes } = identity;
+      colIndexes.forEach((colIndex) => {
+        sheet.raw.column(colIndex).gatherFetchFull();
+      });
+      identityColIndexes.set(sheetName, colIndexes);
+    });
+    return identityColIndexes;
+  }
+  private _identityColumns<SN extends "sheetConfig" | "columnConfig">(
+    sheetName: SN,
+    columnNames: ColumnName<SN>[],
+  ):
+    { sheet: SheetNamed<SN>; sheetName: SN; colIndexes: number[] } | undefined {
+    if (!this.ss.raw.gidIsActive(getSheetTraitByName(sheetName, "sheetGid"))) {
+      return undefined;
+    }
+    const sheet = this.ss.sheet(sheetName);
+    if (sheet.raw.tables.length !== 1) return undefined;
+    const colIndexes = tableColIndexesByHeader(sheet, sheetName, columnNames);
+    return colIndexes === undefined
+      ? undefined
+      : { sheet, sheetName, colIndexes };
+  }
+  // Row indexes as fetched, before the sync moves rows.
+  private _carvedRowIndexesByColIndex(
+    sheetName: FloorSheetName,
+    identityColIndexes: IdentityColIndexes,
+  ): Map<number, number[]> {
+    if (sheetName === "sheetConfig") {
+      const sheet = this.ss.sheet("sheetConfig");
+      const [sheetGidCol] = identityColIndexes.get("sheetConfig") ?? [];
+      if (sheetGidCol === undefined) return new Map();
+      return carveOut(sheet, "sheetConfig", "letApiAccess", (rowIndex) => {
+        const sheetGid = sheet.raw.column(sheetGidCol).valueOrEmpty(rowIndex);
+        return (
+          typeof sheetGid === "number" &&
+          floorTabSeedByGid(sheetGid) !== undefined
+        );
+      });
+    }
+    if (sheetName === "columnConfig") {
+      const sheet = this.ss.sheet("columnConfig");
+      const [sheetGidCol, columnIdCol] =
+        identityColIndexes.get("columnConfig") ?? [];
+      if (sheetGidCol === undefined || columnIdCol === undefined) {
+        return new Map();
+      }
+      return carveOut(
+        sheet,
+        "columnConfig",
+        "emptyValueAllowed",
+        (rowIndex) => {
+          const sheetGid = sheet.raw.column(sheetGidCol).valueOrEmpty(rowIndex);
+          const columnId = String(
+            sheet.raw.column(columnIdCol).valueOrEmpty(rowIndex),
+          );
+          return (
+            typeof sheetGid === "number" &&
+            floorSeedColumnById(sheetGid, columnId) !== undefined
+          );
+        },
+      );
+    }
+    return new Map();
   }
   private _reconcile(declarations: FloorDeclaration[], report: string[]): void {
     const existing = this._floorProtections();
@@ -152,9 +239,23 @@ function extraColumnIndexes<SN extends FloorSheetName>(
   );
 }
 
+function carveOut<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+  columnName: ColumnName<SN>,
+  isSelfDescribingRow: (rowIndex: number) => boolean,
+): Map<number, number[]> {
+  const colIndex = liveColumnIndexes(sheet, sheetName).get(columnName);
+  if (colIndex === undefined) return new Map();
+  return new Map([
+    [colIndex, sheet.raw.rowIndexesFull.filter(isSelfDescribingRow)],
+  ]);
+}
+
 function editableRanges<SN extends FloorSheetName>(
   sheet: SheetNamed<SN>,
   sheetName: SN,
+  carvedRowIndexesByColIndex: ReadonlyMap<number, readonly number[]>,
 ): ProtectionGridRange[] {
   const liveIndexes = liveColumnIndexes(sheet, sheetName);
   const editableDataColIndexes = [
@@ -179,6 +280,7 @@ function editableRanges<SN extends FloorSheetName>(
       sheetId,
       startRowIndex: sheet.schema.topDataRowIdx,
       colIndexes: editableDataColIndexes,
+      carvedRowIndexesByColIndex,
     }),
   ];
   return ranges.sort(compareProtectionRanges);
@@ -207,6 +309,24 @@ function liveColumnIndexes<SN extends FloorSheetName>(
     if (byHeader !== undefined) indexes.set(columnName, byHeader);
   });
   return indexes;
+}
+
+function tableColIndexesByHeader<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+  columnNames: ColumnName<SN>[],
+): number[] | undefined {
+  const table = sheet.raw.activeTable;
+  const colIndexes = columnNames.flatMap((columnName) => {
+    const header = getColumnTraitByName(sheetName, columnName, "header");
+    const column = table.columnProperties.find(
+      (colProps) => colProps.columnName === header,
+    );
+    return column === undefined
+      ? []
+      : [table.startColumnIndex + column.columnIndex];
+  });
+  return colIndexes.length === columnNames.length ? colIndexes : undefined;
 }
 
 function editableDataColumnNames<SN extends FloorSheetName>(
@@ -248,6 +368,12 @@ interface ColumnEditableRangeProps {
   startRowIndex: number;
   endRowIndex?: number;
   colIndexes: number[];
+  carvedRowIndexesByColIndex?: ReadonlyMap<number, readonly number[]>;
+}
+
+interface RowSpan {
+  startRowIndex: number;
+  endRowIndex?: number;
 }
 
 function columnEditableRanges({
@@ -255,14 +381,70 @@ function columnEditableRanges({
   startRowIndex,
   endRowIndex,
   colIndexes,
+  carvedRowIndexesByColIndex = new Map(),
 }: ColumnEditableRangeProps): ProtectionGridRange[] {
-  return Arr.contiguousRanges(colIndexes).map((range) => ({
-    sheetId,
-    startRowIndex,
-    ...(endRowIndex === undefined ? {} : { endRowIndex }),
-    startColumnIndex: range.startIndex,
-    endColumnIndex: range.endIndex,
-  }));
+  const colIndexesBySpans = new Map<
+    string,
+    { spans: RowSpan[]; colIndexes: number[] }
+  >();
+  colIndexes.forEach((colIndex) => {
+    const spans = uncarvedRowSpans({
+      startRowIndex,
+      endRowIndex,
+      carvedRowIndexes: carvedRowIndexesByColIndex.get(colIndex) ?? [],
+    });
+    const key = spansKey(spans);
+    const group = colIndexesBySpans.get(key) ?? { spans, colIndexes: [] };
+    group.colIndexes.push(colIndex);
+    colIndexesBySpans.set(key, group);
+  });
+  return [...colIndexesBySpans.values()].flatMap((group) =>
+    Arr.contiguousRanges(group.colIndexes).flatMap((range) =>
+      group.spans.map((span) => ({
+        sheetId,
+        startRowIndex: span.startRowIndex,
+        ...(span.endRowIndex === undefined
+          ? {}
+          : { endRowIndex: span.endRowIndex }),
+        startColumnIndex: range.startIndex,
+        endColumnIndex: range.endIndex,
+      })),
+    ),
+  );
+}
+
+// Columns with identical spans share a key, so their ranges merge.
+function spansKey(spans: readonly RowSpan[]): string {
+  return JSON.stringify(spans);
+}
+
+function uncarvedRowSpans({
+  startRowIndex,
+  endRowIndex,
+  carvedRowIndexes,
+}: {
+  startRowIndex: number;
+  endRowIndex?: number;
+  carvedRowIndexes: readonly number[];
+}): RowSpan[] {
+  const carved = Arr.contiguousRanges(
+    carvedRowIndexes.filter(
+      (rowIndex) =>
+        rowIndex >= startRowIndex &&
+        (endRowIndex === undefined || rowIndex < endRowIndex),
+    ),
+  );
+  const spanStarts = [startRowIndex, ...carved.map((range) => range.endIndex)];
+  const spanEnds = [...carved.map((range) => range.startIndex), endRowIndex];
+  return spanStarts.flatMap((start, i) => {
+    const end = spanEnds[i];
+    if (end !== undefined && end <= start) return [];
+    return [
+      end === undefined
+        ? { startRowIndex: start }
+        : { startRowIndex: start, endRowIndex: end },
+    ];
+  });
 }
 
 function compareProtectionRanges(

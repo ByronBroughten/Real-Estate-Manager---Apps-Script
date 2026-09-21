@@ -55,7 +55,7 @@ A prompt Sheets shows anyone, the owner included, before they change a cell the 
 _Avoid_: warning (that is a run state), protection
 
 **Editable range**:
-A part of a warned floor tab left free of its edit warning, where a person's edit sticks.
+A part of a warned floor tab left free of its edit warning, where a person's edit sticks. It skips a self-describing row's declared cell, so an edit there prompts.
 _Avoid_: hole, unprotected range (that is Google's API field), exception
 
 **Edit lock**:
