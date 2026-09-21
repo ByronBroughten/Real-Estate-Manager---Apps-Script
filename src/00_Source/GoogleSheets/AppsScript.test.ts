@@ -28,6 +28,16 @@ describe("AppsScript.trigger", () => {
     ]);
   });
 
+  it("addOnChange schedules an onChange trigger for the given function, alongside the existing triggers", () => {
+    const { triggers } = stubScriptAndSpreadsheetApp();
+    AppsScript.trigger.addOnEdit("triggerOnEdit");
+    AppsScript.trigger.addOnChange("triggerOnChange");
+    expect(triggers).toEqual([
+      { handlerFunction: "triggerOnEdit", kind: "onEdit" },
+      { handlerFunction: "triggerOnChange", kind: "onChange" },
+    ]);
+  });
+
   it("addFirstOfMonth schedules a month-day-1 trigger", () => {
     const { triggers } = stubScriptAndSpreadsheetApp();
     AppsScript.trigger.addFirstOfMonth("monthlyJob");
@@ -52,5 +62,13 @@ describe("AppsScript.trigger", () => {
 
     AppsScript.trigger.deleteAllTriggers();
     expect(triggers).toHaveLength(0);
+  });
+});
+
+describe("AppsScript.toast", () => {
+  it("shows the message on the active spreadsheet", () => {
+    const { toasts } = stubScriptAndSpreadsheetApp();
+    AppsScript.toast("Value Config was deleted.");
+    expect(toasts).toEqual(["Value Config was deleted."]);
   });
 });

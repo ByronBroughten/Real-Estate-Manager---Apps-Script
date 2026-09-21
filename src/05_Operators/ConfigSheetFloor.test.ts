@@ -12,6 +12,7 @@ import {
 import {
   stubLogger,
   stubPropertiesService,
+  stubScriptAndSpreadsheetApp,
 } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
@@ -1002,6 +1003,20 @@ describe("ConfigSheetFloor", () => {
       sheetId: valueConfigGid,
       title: "Value Config",
     });
+  });
+
+  it("toasts a renamed Value Config off freshly fetched sheet properties and sends no batch update", () => {
+    const { batchUpdateCalls, getCalls } = floorFixture({
+      valueConfig: { title: "Values" },
+    });
+    const { toasts } = stubScriptAndSpreadsheetApp();
+    ConfigSheetFloor.init().toastOnChange("OTHER");
+
+    expect(getCalls).toHaveLength(1);
+    expect(toasts).toEqual([
+      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
+    ]);
+    expect(batchUpdateCalls).toHaveLength(0);
   });
 
   it("renames a wrongly named floor Table and reports it", () => {

@@ -2,6 +2,9 @@ export class AppsScript {
   static projectProperties(key: string): string | null {
     return PropertiesService.getScriptProperties().getProperty(key);
   }
+  static toast(message: string): void {
+    SpreadsheetApp.getActive().toast(message);
+  }
   static get trigger() {
     return {
       deleteAllTriggers(): void {
@@ -14,6 +17,12 @@ export class AppsScript {
         ScriptApp.newTrigger(fnName)
           .forSpreadsheet(SpreadsheetApp.getActive())
           .onEdit()
+          .create();
+      },
+      addOnChange(fnName: string): void {
+        ScriptApp.newTrigger(fnName)
+          .forSpreadsheet(SpreadsheetApp.getActive())
+          .onChange()
           .create();
       },
       addFirstOfMonth: function (fnName: string) {

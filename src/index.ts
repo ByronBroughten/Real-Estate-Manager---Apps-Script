@@ -1,3 +1,4 @@
+import { ConfigSheetFloor } from "./05_Operators/ConfigSheetFloor.js";
 import { Api } from "./06_API/Api.js";
 import { businessEndpoints } from "./businessEndpoints.js";
 
@@ -9,4 +10,9 @@ function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
   if (Api.isSuspectedApiCall(e)) {
     Api.init(businessEndpoints).handleSheetOnEditEvent(e);
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Apps Script calls it as a global trigger
+function triggerOnChange(e: GoogleAppsScript.Events.SheetsOnChange) {
+  ConfigSheetFloor.init().toastOnChange(e.changeType);
 }

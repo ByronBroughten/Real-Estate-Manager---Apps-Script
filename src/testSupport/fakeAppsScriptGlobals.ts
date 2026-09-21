@@ -29,7 +29,11 @@ export function stubPropertiesService(
   return scriptProperties;
 }
 
-export type FakeTriggerKind = "onEdit" | "monthDay" | "everyMinutes";
+export type FakeTriggerKind =
+  | "onEdit"
+  | "onChange"
+  | "monthDay"
+  | "everyMinutes";
 
 export interface FakeTrigger {
   handlerFunction: string;
@@ -40,10 +44,15 @@ export interface FakeTrigger {
 /**
  * Stubs `ScriptApp` and `SpreadsheetApp` with just enough of a fluent trigger
  * builder to cover AppsScript.trigger's usage. Created triggers are tracked
- * in the returned array so tests can assert on what was scheduled/deleted.
+ * in the returned array so tests can assert on what was scheduled/deleted,
+ * and every toast message shown on the active spreadsheet in `toasts`.
  */
-export function stubScriptAndSpreadsheetApp(): { triggers: FakeTrigger[] } {
+export function stubScriptAndSpreadsheetApp(): {
+  triggers: FakeTrigger[];
+  toasts: string[];
+} {
   const triggers: FakeTrigger[] = [];
+  const toasts: string[] = [];
 
   function record(trigger: FakeTrigger): FakeTrigger {
     triggers.push(trigger);
@@ -55,6 +64,9 @@ export function stubScriptAndSpreadsheetApp(): { triggers: FakeTrigger[] } {
       forSpreadsheet: (_spreadsheet: unknown) => ({
         onEdit: () => ({
           create: () => record({ handlerFunction, kind: "onEdit" }),
+        }),
+        onChange: () => ({
+          create: () => record({ handlerFunction, kind: "onChange" }),
         }),
       }),
       timeBased: () => ({
@@ -83,8 +95,12 @@ export function stubScriptAndSpreadsheetApp(): { triggers: FakeTrigger[] } {
     },
   });
   vi.stubGlobal("SpreadsheetApp", {
-    getActive: () => ({}),
+    getActive: () => ({
+      toast: (message: string) => {
+        toasts.push(message);
+      },
+    }),
   });
 
-  return { triggers };
+  return { triggers, toasts };
 }
