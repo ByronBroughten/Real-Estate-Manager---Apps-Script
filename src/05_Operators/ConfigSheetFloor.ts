@@ -123,7 +123,20 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       }
       sheet.prepFetchEditProtections();
     });
+    this._prepFetchIdentityColumns();
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
+  }
+  private _prepFetchIdentityColumns(): void {
+    if (
+      this.ss.raw.gidIsActive(getSheetTraitByName("sheetConfig", "sheetGid"))
+    ) {
+      this.ss.sheet("sheetConfig").column("sheetGid").prepFetchFull();
+    }
+    if (
+      this.ss.raw.gidIsActive(getSheetTraitByName("columnConfig", "sheetGid"))
+    ) {
+      this.ss.sheet("columnConfig").column("columnId").prepFetchFull();
+    }
   }
   private _ensureColumnLabels(report: string[]): void {
     const headerLines: string[] = [];

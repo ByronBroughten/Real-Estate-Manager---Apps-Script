@@ -17,7 +17,9 @@ import { Arr } from "../../utils/Arr";
 import { Obj } from "../../utils/Obj";
 import {
   columnNameByHeader,
+  floorColumnIds,
   floorSheetNames,
+  floorTabGids,
   type FloorSheetName,
 } from "./floorSeedLookups";
 
@@ -60,7 +62,11 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
     if (extraColumnLines.length > 0) {
       report.push(`Covered added columns: ${extraColumnLines.join("; ")}`);
     }
-    const unprotectedRanges = editableRanges(sheet, sheetName);
+    const unprotectedRanges = editableRanges(
+      sheet,
+      sheetName,
+      this._carvedRowIndexesByColIndex(sheetName),
+    );
     return {
       description,
       range: sheet.raw.wholeSheetGridRange,
@@ -68,6 +74,29 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
       queueAdd: () =>
         sheet.addEditWarningWholeSheet({ description, unprotectedRanges }),
     };
+  }
+  // Computed before the sync moves rows: a protection's range shifts with a row deleted above it, and appended rows land below.
+  private _carvedRowIndexesByColIndex(
+    sheetName: FloorSheetName,
+  ): Map<number, number[]> {
+    if (sheetName === "sheetConfig") {
+      const sheet = this.ss.sheet("sheetConfig");
+      const gids = floorTabGids();
+      return carveOut(sheet, "sheetConfig", "letApiAccess", (rowIndex) => {
+        const sheetGid = sheet.column("sheetGid").raw.valueOrEmpty(rowIndex);
+        return typeof sheetGid === "number" && gids.has(sheetGid);
+      });
+    }
+    if (sheetName === "columnConfig") {
+      const sheet = this.ss.sheet("columnConfig");
+      const columnIds = floorColumnIds();
+      return carveOut(sheet, "columnConfig", "emptyValueAllowed", (rowIndex) =>
+        columnIds.has(
+          String(sheet.column("columnId").raw.valueOrEmpty(rowIndex)),
+        ),
+      );
+    }
+    return new Map();
   }
   private _reconcile(declarations: FloorDeclaration[], report: string[]): void {
     const existing = this._floorProtections();
@@ -152,9 +181,23 @@ function extraColumnIndexes<SN extends FloorSheetName>(
   );
 }
 
+function carveOut<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+  columnName: ColumnName<SN>,
+  isSelfDescribingRow: (rowIndex: number) => boolean,
+): Map<number, number[]> {
+  const colIndex = liveColumnIndexes(sheet, sheetName).get(columnName);
+  if (colIndex === undefined) return new Map();
+  return new Map([
+    [colIndex, sheet.raw.rowIndexesFull.filter(isSelfDescribingRow)],
+  ]);
+}
+
 function editableRanges<SN extends FloorSheetName>(
   sheet: SheetNamed<SN>,
   sheetName: SN,
+  carvedRowIndexesByColIndex: ReadonlyMap<number, readonly number[]>,
 ): ProtectionGridRange[] {
   const liveIndexes = liveColumnIndexes(sheet, sheetName);
   const editableDataColIndexes = [
@@ -179,6 +222,7 @@ function editableRanges<SN extends FloorSheetName>(
       sheetId,
       startRowIndex: sheet.schema.topDataRowIdx,
       colIndexes: editableDataColIndexes,
+      carvedRowIndexesByColIndex,
     }),
   ];
   return ranges.sort(compareProtectionRanges);
@@ -248,6 +292,12 @@ interface ColumnEditableRangeProps {
   startRowIndex: number;
   endRowIndex?: number;
   colIndexes: number[];
+  carvedRowIndexesByColIndex?: ReadonlyMap<number, readonly number[]>;
+}
+
+interface RowSpan {
+  startRowIndex: number;
+  endRowIndex?: number;
 }
 
 function columnEditableRanges({
@@ -255,14 +305,65 @@ function columnEditableRanges({
   startRowIndex,
   endRowIndex,
   colIndexes,
+  carvedRowIndexesByColIndex = new Map(),
 }: ColumnEditableRangeProps): ProtectionGridRange[] {
-  return Arr.contiguousRanges(colIndexes).map((range) => ({
-    sheetId,
-    startRowIndex,
-    ...(endRowIndex === undefined ? {} : { endRowIndex }),
-    startColumnIndex: range.startIndex,
-    endColumnIndex: range.endIndex,
-  }));
+  const colIndexesBySpans = new Map<
+    string,
+    { spans: RowSpan[]; colIndexes: number[] }
+  >();
+  colIndexes.forEach((colIndex) => {
+    const spans = uncarvedRowSpans({
+      startRowIndex,
+      endRowIndex,
+      carvedRowIndexes: carvedRowIndexesByColIndex.get(colIndex) ?? [],
+    });
+    const key = JSON.stringify(spans);
+    const group = colIndexesBySpans.get(key) ?? { spans, colIndexes: [] };
+    group.colIndexes.push(colIndex);
+    colIndexesBySpans.set(key, group);
+  });
+  return [...colIndexesBySpans.values()].flatMap((group) =>
+    Arr.contiguousRanges(group.colIndexes).flatMap((range) =>
+      group.spans.map((span) => ({
+        sheetId,
+        startRowIndex: span.startRowIndex,
+        ...(span.endRowIndex === undefined
+          ? {}
+          : { endRowIndex: span.endRowIndex }),
+        startColumnIndex: range.startIndex,
+        endColumnIndex: range.endIndex,
+      })),
+    ),
+  );
+}
+
+function uncarvedRowSpans({
+  startRowIndex,
+  endRowIndex,
+  carvedRowIndexes,
+}: {
+  startRowIndex: number;
+  endRowIndex?: number;
+  carvedRowIndexes: readonly number[];
+}): RowSpan[] {
+  const carved = Arr.contiguousRanges(
+    carvedRowIndexes.filter(
+      (rowIndex) =>
+        rowIndex >= startRowIndex &&
+        (endRowIndex === undefined || rowIndex < endRowIndex),
+    ),
+  );
+  const spanStarts = [startRowIndex, ...carved.map((range) => range.endIndex)];
+  const spanEnds = [...carved.map((range) => range.startIndex), endRowIndex];
+  return spanStarts.flatMap((start, i) => {
+    const end = spanEnds[i];
+    if (end !== undefined && end <= start) return [];
+    return [
+      end === undefined
+        ? { startRowIndex: start }
+        : { startRowIndex: start, endRowIndex: end },
+    ];
+  });
 }
 
 function compareProtectionRanges(

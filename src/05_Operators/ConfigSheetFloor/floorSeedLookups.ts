@@ -3,7 +3,11 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
-import { configSheetFloorSeed } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  floorSeedColumns,
+} from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { Obj } from "../../utils/Obj";
 
 export type FloorTabName = keyof typeof configSheetFloorSeed;
@@ -28,5 +32,27 @@ export function floorSheetNames(): FloorSheetName[] {
   return Obj.keys(configSheetFloorSeed).filter(
     (sheetName): sheetName is FloorSheetName =>
       configSheetFloorSeed[sheetName].columns.length > 0,
+  );
+}
+
+export function floorTabGids(): Set<number> {
+  return new Set(
+    Obj.keys(configSheetFloorSeed).map((tabName) =>
+      getSheetTraitByName(tabName, "sheetGid"),
+    ),
+  );
+}
+
+export function floorColumnIds(): Set<string> {
+  return new Set(
+    floorSheetNames().flatMap((sheetName) =>
+      floorSeedColumns(sheetName).map((seedColumn) =>
+        getColumnTraitByName(
+          sheetName,
+          columnNameByHeader(sheetName, seedColumn.header),
+          "columnId",
+        ),
+      ),
+    ),
   );
 }

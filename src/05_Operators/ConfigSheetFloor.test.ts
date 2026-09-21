@@ -246,6 +246,29 @@ function spreadsheetConfigGroupHeading(header: string): string {
   );
 }
 
+const businessSheetGid = 9001;
+const defaultSheetConfigGids = [
+  businessSheetGid,
+  spreadsheetConfigGid,
+  sheetConfigGid,
+  columnConfigGid,
+  valueConfigGid,
+];
+const defaultColumnConfigColumnIds = [
+  "c:biz:one",
+  sc.letApiAccess.columnId,
+  "c:biz:two",
+  cc.emptyValueAllowed.columnId,
+  cc.header.columnId,
+];
+
+function dataRowsFrom(
+  topRowIndex: number,
+  rows: readonly FakeCell[][],
+): Record<number, FakeCell[]> {
+  return Object.fromEntries(rows.map((row, i) => [topRowIndex + i, row]));
+}
+
 function floorFixture(
   options: {
     spreadsheetConfigColumnOrder?: readonly (typeof sscColumns)[number][];
@@ -267,6 +290,8 @@ function floorFixture(
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     columnConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+    sheetConfigGids?: readonly number[];
+    columnConfigColumnIds?: readonly string[];
     spreadsheetConfigTitle?: string;
     spreadsheetConfigTableName?: string;
     valueConfig?: {
@@ -305,6 +330,9 @@ function floorFixture(
       spreadsheetConfigGroupHeading(sscField(columnName).header),
   );
   const extraColumn = options.extraSpreadsheetConfigColumn;
+  const sheetConfigGids = options.sheetConfigGids ?? defaultSheetConfigGids;
+  const columnConfigColumnIds =
+    options.columnConfigColumnIds ?? defaultColumnConfigColumnIds;
   const dataRow = sscOrder.map((columnName) => {
     if (columnName === "tableMenuSpace") {
       return options.tableMenuSpaceValue ?? "Not used";
@@ -370,13 +398,15 @@ function floorFixture(
             sc.sheetTitle.header,
             sc.letApiAccess.header,
           ]),
-          4: pad([sheetConfigGid, "Sheet Config", true]),
-          5: pad([columnConfigGid, "Column Config", true]),
+          ...dataRowsFrom(
+            topDataRowIndex,
+            sheetConfigGids.map((gid) => pad([gid, `Tab ${gid}`, true])),
+          ),
         }),
         table: {
           name: configSheetFloorSeed.sheetConfig.tableName,
           startColumnIndex: startTableColIndex,
-          endRowIndex: 6,
+          endRowIndex: topDataRowIndex + sheetConfigGids.length,
           endColumnIndex: startTableColIndex + 3,
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
@@ -413,12 +443,17 @@ function floorFixture(
             cc.emptyValueAllowed.header,
             cc.customDefaultValue.header,
           ]),
-          4: pad([]),
+          ...dataRowsFrom(
+            topDataRowIndex,
+            columnConfigColumnIds.map((columnId) =>
+              pad(["", columnId, "", "", false, ""]),
+            ),
+          ),
         }),
         table: {
           name: configSheetFloorSeed.columnConfig.tableName,
           startColumnIndex: startTableColIndex,
-          endRowIndex: 5,
+          endRowIndex: topDataRowIndex + columnConfigColumnIds.length,
           endColumnIndex: startTableColIndex + 6,
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
@@ -527,6 +562,13 @@ const sheetConfigEditableRanges = [
   {
     sheetId: sheetConfigGid,
     startRowIndex: topDataRowIndex,
+    endRowIndex: topDataRowIndex + 1,
+    startColumnIndex: 2,
+    endColumnIndex: 3,
+  },
+  {
+    sheetId: sheetConfigGid,
+    startRowIndex: topDataRowIndex + defaultSheetConfigGids.length,
     startColumnIndex: 2,
     endColumnIndex: 3,
   },
@@ -535,8 +577,28 @@ const columnConfigEditableRanges = [
   {
     sheetId: columnConfigGid,
     startRowIndex: topDataRowIndex,
+    endRowIndex: topDataRowIndex + 1,
     startColumnIndex: 4,
+    endColumnIndex: 5,
+  },
+  {
+    sheetId: columnConfigGid,
+    startRowIndex: topDataRowIndex,
+    startColumnIndex: 5,
     endColumnIndex: 6,
+  },
+  {
+    sheetId: columnConfigGid,
+    startRowIndex: topDataRowIndex + 2,
+    endRowIndex: topDataRowIndex + 3,
+    startColumnIndex: 4,
+    endColumnIndex: 5,
+  },
+  {
+    sheetId: columnConfigGid,
+    startRowIndex: topDataRowIndex + 5,
+    startColumnIndex: 4,
+    endColumnIndex: 5,
   },
 ];
 
@@ -587,6 +649,63 @@ describe("ConfigSheetFloor", () => {
     const { floor } = applyFloor();
     floor.ensure();
     floor.ss.batchUpdateGSheets();
+    expect(batchUpdateCalls).toHaveLength(1);
+  });
+
+  it("carves the four floor rows out of Sheet Config's Let api access column, leaving a bounded range above and an open-ended one below", () => {
+    floorFixture();
+    const { floor } = applyFloor();
+
+    expect(protectionsOf(floor, "sheetConfig")[0]?.unprotectedRanges).toEqual(
+      sheetConfigEditableRanges,
+    );
+  });
+
+  it("carves Column Config's Empty value allowed at each floor column's row and leaves a business column's row and Custom default value editable", () => {
+    floorFixture();
+    const { floor } = applyFloor();
+
+    expect(protectionsOf(floor, "columnConfig")[0]?.unprotectedRanges).toEqual(
+      columnConfigEditableRanges,
+    );
+  });
+
+  it("keeps Column Config's two editable columns merged while no floor column has a row", () => {
+    floorFixture({ columnConfigColumnIds: ["c:biz:one"] });
+    const { floor } = applyFloor();
+
+    expect(protectionsOf(floor, "columnConfig")[0]?.unprotectedRanges).toEqual([
+      {
+        sheetId: columnConfigGid,
+        startRowIndex: topDataRowIndex,
+        startColumnIndex: 4,
+        endColumnIndex: 6,
+      },
+    ]);
+  });
+
+  it("leaves a floor tab's row uncarved when Sheet Config holds none for it, and does not throw", () => {
+    floorFixture({ sheetConfigGids: [businessSheetGid] });
+    const { floor } = applyFloor();
+
+    expect(protectionsOf(floor, "sheetConfig")[0]?.unprotectedRanges).toEqual([
+      {
+        sheetId: sheetConfigGid,
+        startRowIndex: topDataRowIndex,
+        startColumnIndex: 2,
+        endColumnIndex: 3,
+      },
+    ]);
+  });
+
+  it("queues no protection change on a second sync against the fixture the first one left", () => {
+    const { batchUpdateCalls } = floorFixture();
+    applyFloor();
+    expect(batchUpdateCalls).toHaveLength(1);
+
+    const second = applyFloor();
+
+    expect(second.report).toBe("");
     expect(batchUpdateCalls).toHaveLength(1);
   });
 
