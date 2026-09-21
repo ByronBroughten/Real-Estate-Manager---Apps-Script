@@ -35,7 +35,7 @@ interface FloorColumnRestore {
 /**
  * Restores floor tab titles, Table names, headers, column IDs, group
  * headings, data values and column types, and has ConfigSheetFloorEditWarnings declare
- * the edit warnings. ConfigOrchestrator
+ * the edit warnings. ConfigCoordinator
  * runs this at the start of every config sync; the
  * ensureConfigSheetFloor chore is the other caller.
  * docs/generated-data.md

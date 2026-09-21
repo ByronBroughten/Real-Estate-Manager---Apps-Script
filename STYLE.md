@@ -63,7 +63,7 @@ One line per rule. The reasoning and worked examples are one file away:
 
 - **Default to no comments.** When a block would need a comment saying _what_ it does, pull it into a small private method whose name says it — `SheetConfigOperator._updateAll` → `_deleteStaleSheetConfigs`/`_appendMissingSheetConfigs`/`_updateProgrammaticValues`.
 - **A comment is one line, trailing or immediately above its line, and explains a "why not the obvious thing"**, never restating what the line already says — `action: "boolean", // Should perhaps be "boolean" | "string"`. If the why doesn't fit on one short line, cut it; it belongs in a commit message or PR description.
-- **The one multi-line exception is a file-level navigation block**: 5–10 lines immediately above the exported class, stating this file's job and where neighbouring work lives, so an agent opens the right sibling instead of the whole tier. `SpreadsheetRaw`, `SheetRaw`, `EndpointRun`, `SheetNamed`, `ConfigOrchestrator` and `ConfigSheetFloorEditWarnings` are the current set.
+- **The one multi-line exception is a file-level navigation block**: 5–10 lines immediately above the exported class, stating this file's job and where neighbouring work lives, so an agent opens the right sibling instead of the whole tier. `SpreadsheetRaw`, `SheetRaw`, `EndpointRun`, `SheetNamed`, `ConfigCoordinator` and `ConfigSheetFloorEditWarnings` are the current set.
 
 ## Error handling & validation
 
@@ -102,7 +102,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **`import type` for a type-only import line; inline the `type` modifier only when a value and its types share one module** (`import { vsc, type ValueSchemaBase } from "./valueSchema"`) — don't split one module's import into two lines just to separate value from type.
 - **No barrel/index files.** `src/index.ts` is the Apps Script entry point, not a re-export barrel — every other file is imported directly by path.
 - **File naming:**
-  - PascalCase mirroring the exported class name (`SheetConfigOperator.ts`, `ConfigOrchestrator.ts`).
+  - PascalCase mirroring the exported class name (`SheetConfigOperator.ts`, `ConfigCoordinator.ts`).
   - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions (`Str.ts` → `Str`, `Obj`, `Arr`, `Dat`, `Tim`, `Val`). A fat bundle's pieces split into a same-named subfolder (`utils/Obj/merge.ts`) and are re-assembled in the parent file.
   - camelCase for plain data/config or entry-point files (`columnConfigs.ts`, `businessEndpoints.ts`, `index.ts`).
   - A long module's helpers split by subject into a same-named subfolder of camelCase files, each exporting camelCase bundles written with method shorthand (`GoogleSheets/GoogleSheetsAPI/cellData.ts` → `cellDataRequests`).

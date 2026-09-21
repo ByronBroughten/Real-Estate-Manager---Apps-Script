@@ -58,9 +58,9 @@ class ConfigFilesGenerator {
 
   async _generate() {
     await startNodeHost({ isDryRun: false });
-    const { ConfigOrchestrator } =
-      await import("../src/05_Operators/ConfigOrchestrator.ts");
-    return ConfigOrchestrator.init().generateConfigFiles();
+    const { ConfigCoordinator } =
+      await import("../src/05_Operators/ConfigCoordinator.ts");
+    return ConfigCoordinator.init().generateConfigFiles();
   }
 
   _runTsc() {

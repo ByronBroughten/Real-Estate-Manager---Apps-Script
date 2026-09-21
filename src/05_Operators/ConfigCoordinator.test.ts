@@ -16,7 +16,7 @@ import {
   stubSheetsService,
   type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
-import { ConfigOrchestrator } from "./ConfigOrchestrator";
+import { ConfigOrchestrator } from "./ConfigCoordinator";
 
 const testSheetGid = 2089200354;
 const sheetConfigGid = 210603630;

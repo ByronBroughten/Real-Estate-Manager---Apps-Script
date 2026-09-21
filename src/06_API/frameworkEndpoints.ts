@@ -1,5 +1,5 @@
 import type { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import { ConfigOrchestrator } from "../05_Operators/ConfigOrchestrator";
+import { ConfigCoordinator } from "../05_Operators/ConfigCoordinator";
 import type { Endpoint } from "./Endpoints";
 
 type SeededFrameworkEndpoints = {
@@ -11,7 +11,7 @@ type SeededFrameworkEndpoints = {
 export const frameworkEndpoints = {
   spreadsheetConfig_syncConfigSheetRowsTimeLastRan: {
     action: (ss) =>
-      new ConfigOrchestrator(ss.spreadsheetNamedProps).syncConfigSheetRows(),
+      new ConfigCoordinator(ss.spreadsheetNamedProps).syncConfigSheetRows(),
     timeLastRan: "syncConfigSheetRowsTimeLastRan",
     runStatus: "syncConfigSheetRowsRunStatus",
   },

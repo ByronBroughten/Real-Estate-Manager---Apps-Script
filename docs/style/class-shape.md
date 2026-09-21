@@ -11,19 +11,19 @@ This was mined from the framework tiers. It does **not** govern business endpoin
 
 **What unwieldy meant, the one time it was crossed.** `buildLedger.ts` was 303 lines holding eighteen free functions, and almost every one of them existed to thread a collaborator through: the spreadsheet appeared in six of their signatures, the occupancy id in three, and a map of charges keyed by id in one more (#22). The number is the threshold's first data point, not its definition — what made it unwieldy was the threading, and the win was signatures rather than lines, since the body came out about the same length as `OccupancyLedgerOperator`.
 
-- **`init`** is how a caller outside the class builds one; **`new`** is how a class builds its own collaborators from props already on `this`. `init` takes whatever the caller already holds — nothing at all for an entry point that starts a run (`ConfigOrchestrator.init()`), or a live collaborator whose state must be shared, as when an endpoint action builds an operator from the `ss` it was handed — and assembles the props itself. A collaborator reached from props already on `this` skips `init` and is constructed directly in a getter: `new ColumnConfigOperator(this.operatorProps)` when the collaborator needs config-sync state, otherwise `new SpreadsheetNamed(this.spreadsheetNamedProps)`. Either way the real constructor just takes a `props` object.
+- **`init`** is how a caller outside the class builds one; **`new`** is how a class builds its own collaborators from props already on `this`. `init` takes whatever the caller already holds — nothing at all for an entry point that starts a run (`ConfigCoordinator.init()`), or a live collaborator whose state must be shared, as when an endpoint action builds an operator from the `ss` it was handed — and assembles the props itself. A collaborator reached from props already on `this` skips `init` and is constructed directly in a getter: `new ColumnConfigOperator(this.operatorProps)` when the collaborator needs config-sync state, otherwise `new SpreadsheetNamed(this.spreadsheetNamedProps)`. Either way the real constructor just takes a `props` object.
 - Collaborators (`ss`, `sheetConfigOperator`, `schema`, etc.) are lazy getters built from shared props on `this`.
 
 ```ts
-export class ConfigOrchestrator extends SpreadsheetBaseOperator {
+export class ConfigCoordinator extends SpreadsheetBaseOperator {
   constructor(props: SpreadsheetNamedProps) {
     super({
       ...props,
       configSyncState: SpreadsheetBaseOperator.initConfigSyncState(),
     });
   }
-  static init(): ConfigOrchestrator {
-    return new ConfigOrchestrator(
+  static init(): ConfigCoordinator {
+    return new ConfigCoordinator(
       SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     );
   }

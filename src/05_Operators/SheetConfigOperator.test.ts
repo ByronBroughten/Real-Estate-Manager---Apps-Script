@@ -39,7 +39,7 @@ beforeEach(() => {
 // standalone SheetConfigOperator test has to prep it itself.
 //
 // fetchAllSheetProperties() has to run first, matching
-// ConfigOrchestrator.syncAndFlushConfigSheets's order — it's what populates
+// ConfigCoordinator.syncAndFlushConfigSheets's order — it's what populates
 // ss.raw.activeSheetGids (the catalogue walk, and hence
 // skipFetchingProperties below) with every live sheet, including ones with
 // no Sheet Config row yet.
