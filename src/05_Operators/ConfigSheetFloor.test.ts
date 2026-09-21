@@ -1559,7 +1559,7 @@ describe("ConfigSheetFloor", () => {
     expect(report).toContain(`Created tabs: ${seed.title}`);
   });
 
-  it("seeds a created Spreadsheet Config's data row with the generated layout values in base 1, after its add-sheet and add-Table in the same batch", () => {
+  it("seeds a created Spreadsheet Config's data row with the generated layout values in base 1", () => {
     const { batchUpdateCalls } = floorFixture({
       omitSheetGids: [spreadsheetConfigGid],
     });
