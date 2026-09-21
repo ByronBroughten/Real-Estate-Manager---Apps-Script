@@ -5,7 +5,7 @@ import type {
   UpdateCellOperation,
 } from "../../RawSource/RawSource";
 import type { RgbColor } from "../../RawSource/RgbColor";
-import type { OpaqueRawRequest } from "../GoogleSheetsAPI";
+import type { ModeledRequest } from "../GoogleSheetsAPI";
 import { googleColor } from "./googleColor";
 
 type GoogleCellData = GoogleAppsScript.Sheets.Schema.CellData;
@@ -21,7 +21,7 @@ type CellDataChange = {
 };
 
 export const cellDataRequests = {
-  fill(operation: FillOperation): OpaqueRawRequest[] {
+  fill(operation: FillOperation): ModeledRequest[] {
     return formulaAndCellDataRequests(
       operation,
       {
@@ -45,7 +45,7 @@ export const cellDataRequests = {
       }),
     );
   },
-  updateCell(operation: UpdateCellOperation): OpaqueRawRequest[] {
+  updateCell(operation: UpdateCellOperation): ModeledRequest[] {
     return formulaAndCellDataRequests(
       operation,
       {
@@ -79,9 +79,9 @@ function formulaAndCellDataRequests(
     columnIndex: number;
     rowCount: number;
   },
-  cellRequest: (cell: GoogleCellData, fields: string) => OpaqueRawRequest,
-): OpaqueRawRequest[] {
-  const requests: OpaqueRawRequest[] = [];
+  cellRequest: (cell: GoogleCellData, fields: string) => ModeledRequest,
+): ModeledRequest[] {
+  const requests: ModeledRequest[] = [];
   if (change.formula !== undefined) {
     requests.push(
       formulaPasteDataRequest({ ...pasteProps, formula: change.formula }),
@@ -100,7 +100,7 @@ function formulaPasteDataRequest(props: {
   columnIndex: number;
   formula: string;
   rowCount: number;
-}): OpaqueRawRequest {
+}): ModeledRequest {
   const field = `"${props.formula.replaceAll('"', '""')}"`;
   return {
     pasteData: {

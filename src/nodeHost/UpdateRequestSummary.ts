@@ -1,4 +1,7 @@
-import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
+import type {
+  ModeledRequestVerb,
+  OpaqueRawRequest,
+} from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { sheetConfigsByGid } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 
@@ -64,49 +67,21 @@ function requestVerb(request: GoogleUpdateRequest): RequestVerb | null {
   return Obj.keys(request)[0] ?? null;
 }
 
-// Every request kind the framework models owes this a line format.
 function body(verb: RequestVerb, request: GoogleUpdateRequest): string {
-  switch (verb) {
-    case "updateCells":
-      return requestBody.updateCells(request.updateCells);
-    case "repeatCell":
-      return requestBody.repeatCell(request.repeatCell);
-    case "appendCells":
-      return requestBody.appendCells(request.appendCells);
-    case "insertDimension":
-      return requestBody.dimension(request.insertDimension?.range, "insert");
-    case "deleteDimension":
-      return requestBody.dimension(request.deleteDimension?.range, "delete");
-    case "sortRange":
-      return requestBody.sortRange(request.sortRange);
-    case "findReplace":
-      return requestBody.findReplace(request.findReplace);
-    case "pasteData":
-      return requestBody.pasteData(request.pasteData);
-    case "addConditionalFormatRule":
-      return requestBody.addConditionalFormat(request.addConditionalFormatRule);
-    case "deleteConditionalFormatRule":
-      return requestBody.deleteConditionalFormat(
-        request.deleteConditionalFormatRule,
-      );
-    case "addProtectedRange":
-      return requestBody.addProtectedRange(request.addProtectedRange);
-    case "deleteProtectedRange":
-      return requestBody.deleteProtectedRange(request.deleteProtectedRange);
-    case "addSheet":
-      return requestBody.addSheet(request.addSheet);
-    case "addTable":
-      return requestBody.addTable(request.addTable);
-    case "updateTable":
-      return requestBody.updateTable(request.updateTable);
-    case "updateSheetProperties":
-      return requestBody.updateSheetProperties(request.updateSheetProperties);
-    default:
-      return requestBody.raw(request, verb);
-  }
+  if (Obj.isKey(requestBody, verb)) return modeledBody(verb, request);
+  return rawBody(request, verb);
 }
 
-const requestBody = {
+function modeledBody<RV extends ModeledRequestVerb>(
+  verb: RV,
+  request: GoogleUpdateRequest,
+): string {
+  return requestBody[verb](request[verb]);
+}
+
+const requestBody: {
+  [RV in ModeledRequestVerb]: (inner: GoogleUpdateRequest[RV]) => string;
+} = {
   updateCells(
     updateCells: GoogleAppsScript.Sheets.Schema.UpdateCellsRequest | undefined,
   ): string {
@@ -138,20 +113,15 @@ const requestBody = {
       label.fields(appendCells?.fields),
     );
   },
-  dimension(
-    range: DimensionRange | undefined,
-    verb: "insert" | "delete",
+  insertDimension(
+    insert: GoogleAppsScript.Sheets.Schema.InsertDimensionRequest | undefined,
   ): string {
-    const dimension = (range?.dimension ?? "ROWS").toLowerCase();
-    const startIndex = range?.startIndex ?? 0;
-    const endIndex = range?.endIndex ?? startIndex;
-    const span = label.dimensionSpan(dimension, startIndex, endIndex);
-    return columns(
-      `${label.sheet(range?.sheetId)}!${span}`,
-      `${verb} ${endIndex - startIndex} ${dimension}`,
-      "",
-      "",
-    );
+    return dimensionBody(insert?.range, "insert");
+  },
+  deleteDimension(
+    remove: GoogleAppsScript.Sheets.Schema.DeleteDimensionRequest | undefined,
+  ): string {
+    return dimensionBody(remove?.range, "delete");
   },
   sortRange(
     sortRange: GoogleAppsScript.Sheets.Schema.SortRangeRequest | undefined,
@@ -198,7 +168,7 @@ const requestBody = {
       pasteData?.type ?? "",
     );
   },
-  addConditionalFormat(
+  addConditionalFormatRule(
     add:
       | GoogleAppsScript.Sheets.Schema.AddConditionalFormatRuleRequest
       | undefined,
@@ -207,7 +177,7 @@ const requestBody = {
     const conditionType = add?.rule?.booleanRule?.condition?.type ?? "";
     return columns(label.range(range), "prepend", conditionType, "");
   },
-  deleteConditionalFormat(
+  deleteConditionalFormatRule(
     remove:
       | GoogleAppsScript.Sheets.Schema.DeleteConditionalFormatRuleRequest
       | undefined,
@@ -298,20 +268,38 @@ const requestBody = {
       label.fields(update?.fields),
     );
   },
-  // The opening's own line format: no type layer to read it through.
-  raw(request: GoogleUpdateRequest, verb: RequestVerb): string {
-    const inner = request[verb];
-    const json = JSON.stringify(inner ?? {});
-    return columns(
-      label.sheet(sheetIdOf(inner)),
-      "",
-      json.length > layoutLimits.maxRawChars
-        ? `${json.slice(0, layoutLimits.maxRawChars)}…`
-        : json,
-      "",
-    );
-  },
 };
+
+// The opening's own line format: no type layer to read it through.
+// The opening's own line format: no type layer to read it through.
+function rawBody(request: GoogleUpdateRequest, verb: RequestVerb): string {
+  const inner = request[verb];
+  const json = JSON.stringify(inner ?? {});
+  return columns(
+    label.sheet(sheetIdOf(inner)),
+    "",
+    json.length > layoutLimits.maxRawChars
+      ? `${json.slice(0, layoutLimits.maxRawChars)}…`
+      : json,
+    "",
+  );
+}
+
+function dimensionBody(
+  range: DimensionRange | undefined,
+  verb: "insert" | "delete",
+): string {
+  const dimension = (range?.dimension ?? "ROWS").toLowerCase();
+  const startIndex = range?.startIndex ?? 0;
+  const endIndex = range?.endIndex ?? startIndex;
+  const span = label.dimensionSpan(dimension, startIndex, endIndex);
+  return columns(
+    `${label.sheet(range?.sheetId)}!${span}`,
+    `${verb} ${endIndex - startIndex} ${dimension}`,
+    "",
+    "",
+  );
+}
 
 function columns(
   subject: string,
