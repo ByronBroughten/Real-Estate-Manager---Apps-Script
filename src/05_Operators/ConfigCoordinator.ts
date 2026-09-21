@@ -134,7 +134,10 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
   }
   // Resolves column IDs through the last generated configs, so it's sound only after the identity guard.
   private _assertFloorMatchesSeed(): void {
-    makeSheetConfigs(this.sheetConfigOperator.newSheetConfigs(), floorSeedLookup);
+    makeSheetConfigs(
+      this.sheetConfigOperator.newSheetConfigs(),
+      floorSeedLookup,
+    );
     makeColumnConfigs(
       this.columnConfigOperator.newColumnConfigs(),
       floorSeedLookup,
