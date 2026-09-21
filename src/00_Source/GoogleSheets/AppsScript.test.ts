@@ -19,6 +19,23 @@ describe("AppsScript.projectProperties", () => {
   });
 });
 
+describe("AppsScript.sheetChange", () => {
+  it("decodes REMOVE_GRID as sheetRemoved", () => {
+    expect(AppsScript.sheetChange("REMOVE_GRID")).toBe("sheetRemoved");
+  });
+
+  it("decodes OTHER as other", () => {
+    expect(AppsScript.sheetChange("OTHER")).toBe("other");
+  });
+
+  it.each(["INSERT_ROW", "EDIT"] as const)(
+    "ignores %s by returning null",
+    (changeType) => {
+      expect(AppsScript.sheetChange(changeType)).toBeNull();
+    },
+  );
+});
+
 describe("AppsScript.trigger", () => {
   it("addOnEdit schedules an onEdit trigger for the given function", () => {
     const { triggers } = stubScriptAndSpreadsheetApp();

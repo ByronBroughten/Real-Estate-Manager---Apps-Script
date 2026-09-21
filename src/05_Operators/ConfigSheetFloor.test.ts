@@ -12,7 +12,6 @@ import {
 import {
   stubLogger,
   stubPropertiesService,
-  stubScriptAndSpreadsheetApp,
 } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
@@ -1005,17 +1004,16 @@ describe("ConfigSheetFloor", () => {
     });
   });
 
-  it("toasts a renamed Value Config off freshly fetched sheet properties and sends no batch update", () => {
+  it("returns the toast for a renamed Value Config off freshly fetched sheet properties and sends no batch update", () => {
     const { batchUpdateCalls, getCalls } = floorFixture({
       valueConfig: { title: "Values" },
     });
-    const { toasts } = stubScriptAndSpreadsheetApp();
-    ConfigSheetFloor.init().toastOnChange("OTHER");
+    const message = ConfigSheetFloor.init().changeToast("other");
 
-    expect(getCalls).toHaveLength(1);
-    expect(toasts).toEqual([
+    expect(message).toBe(
       "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
-    ]);
+    );
+    expect(getCalls).toHaveLength(1);
     expect(batchUpdateCalls).toHaveLength(0);
   });
 

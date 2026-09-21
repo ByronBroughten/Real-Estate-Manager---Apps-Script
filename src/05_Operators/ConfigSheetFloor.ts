@@ -1,4 +1,4 @@
-import { AppsScript } from "../00_Source/GoogleSheets/AppsScript";
+import type { SheetChange } from "../00_Source/PlatformEvents/sheetChange";
 import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
@@ -18,10 +18,7 @@ import {
   ConfigSheetFloorEditWarnings,
   type IdentityColIndexes,
 } from "./ConfigSheetFloor/ConfigSheetFloorEditWarnings";
-import {
-  floorChangeToast,
-  type SheetsChangeType,
-} from "./ConfigSheetFloor/floorChangeToast";
+import { floorChangeToast } from "./ConfigSheetFloor/floorChangeToast";
 import { liveColIndex } from "./ConfigSheetFloor/floorColumnLocation";
 import {
   columnNameByHeader,
@@ -39,8 +36,8 @@ import {
  * the edit warnings. ConfigCoordinator
  * runs this at the start of every config sync; the
  * ensureConfigSheetFloor chore is the other caller.
- * toastOnChange has floorChangeToast decide whether an On change event
- * renamed or deleted Value Config, the one floor tab with no edit warning.
+ * changeToast has floorChangeToast decide the toast message for an On change
+ * event that renamed or deleted Value Config, the one floor tab with no edit warning.
  * docs/generated-data.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
@@ -73,7 +70,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     report.push(...this.editWarnings.ensure(identityColIndexes));
     return report.join("; ");
   }
-  toastOnChange(changeType: SheetsChangeType): void {
+  changeToast(change: SheetChange): string | null {
     this.ss.raw.fetchAllSheetProperties();
     const liveTitlesByGid = new Map(
       this.ss.raw.activeSheetGids.flatMap((sheetGid) =>
@@ -82,8 +79,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
           : [[sheetGid, this.ss.raw.sheet(sheetGid).title] as const],
       ),
     );
-    const message = floorChangeToast(changeType, liveTitlesByGid);
-    if (message !== null) AppsScript.toast(message);
+    return floorChangeToast(change, liveTitlesByGid);
   }
   private _ensureTitlesAndTables(report: string[]): void {
     this.ss.raw.ensureAllSheetPropertiesAreFetched();

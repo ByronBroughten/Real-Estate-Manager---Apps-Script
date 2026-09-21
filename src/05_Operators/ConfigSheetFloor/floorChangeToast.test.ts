@@ -35,7 +35,7 @@ function liveTitles(
 describe("floorChangeToast", () => {
   it("says a renamed Value Config's title is managed and will revert on the next config sync", () => {
     const message = floorChangeToast(
-      "OTHER",
+      "other",
       liveTitles({ [valueConfigGid]: "Values" }),
     );
     expect(message).toBe(
@@ -45,7 +45,7 @@ describe("floorChangeToast", () => {
 
   it("tells whoever deleted Value Config to undo now, because the next config sync recreates it empty", () => {
     const message = floorChangeToast(
-      "REMOVE_GRID",
+      "sheetRemoved",
       liveTitles({ [valueConfigGid]: null }),
     );
     expect(message).toBe(
@@ -55,7 +55,7 @@ describe("floorChangeToast", () => {
 
   it("says nothing when a business tab is renamed", () => {
     expect(
-      floorChangeToast("OTHER", liveTitles({ [businessSheetGid]: "Leases" })),
+      floorChangeToast("other", liveTitles({ [businessSheetGid]: "Leases" })),
     ).toBeNull();
   });
 
@@ -65,19 +65,21 @@ describe("floorChangeToast", () => {
     ["Column Config", columnConfigGid],
   ])("says nothing when warned %s is renamed", (title, sheetGid) => {
     expect(
-      floorChangeToast("OTHER", liveTitles({ [sheetGid]: `Old ${title}` })),
+      floorChangeToast("other", liveTitles({ [sheetGid]: `Old ${title}` })),
     ).toBeNull();
   });
 
   it("says nothing when a business tab is deleted", () => {
     expect(
-      floorChangeToast("REMOVE_GRID", liveTitles({ [businessSheetGid]: null })),
+      floorChangeToast(
+        "sheetRemoved",
+        liveTitles({ [businessSheetGid]: null }),
+      ),
     ).toBeNull();
   });
 
   it("says nothing for a change that renames or deletes nothing", () => {
-    expect(floorChangeToast("OTHER", liveTitles())).toBeNull();
-    expect(floorChangeToast("REMOVE_GRID", liveTitles())).toBeNull();
-    expect(floorChangeToast("INSERT_ROW", liveTitles())).toBeNull();
+    expect(floorChangeToast("other", liveTitles())).toBeNull();
+    expect(floorChangeToast("sheetRemoved", liveTitles())).toBeNull();
   });
 });

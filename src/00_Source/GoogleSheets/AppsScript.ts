@@ -1,6 +1,15 @@
+import type { SheetChange } from "../PlatformEvents/sheetChange";
+
 export class AppsScript {
   static projectProperties(key: string): string | null {
     return PropertiesService.getScriptProperties().getProperty(key);
+  }
+  static sheetChange(
+    changeType: GoogleAppsScript.Events.SheetsOnChange["changeType"],
+  ): SheetChange | null {
+    if (changeType === "REMOVE_GRID") return "sheetRemoved";
+    if (changeType === "OTHER") return "other";
+    return null;
   }
   static toast(message: string): void {
     SpreadsheetApp.getActive().toast(message);
