@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { ModelableEditProtection } from "../00_Source/RawSource/EditProtection";
-import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  floorSeedColumns,
+} from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -179,6 +182,32 @@ function firstFlushRequests(
   return batchUpdateCalls[0]?.requests ?? [];
 }
 
+function seededCellsOn(
+  requests: GoogleAppsScript.Sheets.Schema.Request[],
+  sheetId: number,
+) {
+  return requests.flatMap((request) => {
+    const update = request.updateCells;
+    const range = update?.range;
+    if (
+      range?.sheetId !== sheetId ||
+      range.startRowIndex === undefined ||
+      range.startColumnIndex === undefined
+    ) {
+      return [];
+    }
+    const cell = update?.rows?.[0]?.values?.[0]?.userEnteredValue;
+    return [
+      {
+        sheetId,
+        rowIndex: range.startRowIndex,
+        colIndex: range.startColumnIndex,
+        value: cell?.stringValue ?? cell?.numberValue,
+      },
+    ];
+  });
+}
+
 function sheetTitleUpdates(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {
@@ -332,6 +361,9 @@ function floorFixture(
     >;
     columnTypesAreUnset?: boolean;
     tableMenuSpaceValue?: string;
+    spreadsheetConfigLayoutValues?: Partial<
+      Record<(typeof sscColumns)[number], string | number>
+    >;
     startTableColIndex?: number;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
@@ -392,6 +424,8 @@ function floorFixture(
   const sheetConfigGids = options.sheetConfigGids ?? defaultSheetConfigGids;
   const columnConfigRows = options.columnConfigRows ?? defaultColumnConfigRows;
   const dataRow = sscOrder.map((columnName) => {
+    const layoutValue = options.spreadsheetConfigLayoutValues?.[columnName];
+    if (layoutValue !== undefined) return layoutValue;
     if (columnName === "tableMenuSpace") {
       return options.tableMenuSpaceValue ?? "Not used";
     }
@@ -1505,6 +1539,155 @@ describe("ConfigSheetFloor", () => {
       endColumnIndex:
         startColIndex + configSheetFloorSeed.sheetConfig.columns.length,
     });
+  });
+
+  it("creates a missing Spreadsheet Config at its GID with a Table carrying every seed column, the endpoint feedback columns included, and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    const { report } = applyFloor();
+    const seed = configSheetFloorSeed.spreadsheetConfig;
+
+    expect(addSheetRequests(batchUpdateCalls)).toEqual([
+      expect.objectContaining({
+        sheetId: spreadsheetConfigGid,
+        title: seed.title,
+      }),
+    ]);
+    const tables = addTableRequests(batchUpdateCalls);
+    expect(tables.map((table) => table.name)).toEqual([seed.tableName]);
+    expect(tables[0]?.columnProperties).toEqual(
+      floorSeedColumns("spreadsheetConfig").map((column, columnIndex) => ({
+        columnIndex,
+        columnName: column.header,
+        columnType: column.columnType,
+      })),
+    );
+    expect(
+      tables[0]?.columnProperties?.map((column) => column.columnName),
+    ).toEqual(
+      expect.arrayContaining([
+        ssc.fillRowIdsTimeLastRan.header,
+        ssc.fillRowIdsRunStatus.header,
+        ssc.syncConfigSheetRowsTimeLastRan.header,
+        ssc.syncConfigSheetRowsRunStatus.header,
+      ]),
+    );
+    expect(report).toContain(`Created tabs: ${seed.title}`);
+  });
+
+  it("seeds a created Spreadsheet Config's data row with the generated layout values in base 1, after its add-sheet and add-Table in the same batch", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const table = addTableRequests(batchUpdateCalls)[0];
+    const colIndexOf = (header: string) =>
+      (table?.range?.startColumnIndex ?? 0) +
+      (table?.columnProperties?.find((column) => column.columnName === header)
+        ?.columnIndex ?? -1);
+    const dataRowIndex = (table?.range?.startRowIndex ?? 0) + 1;
+    const expected = [
+      { header: ssc.idHeader.header, value: spreadsheetConfig.idHeader },
+      { header: ssc.idDelimiter.header, value: spreadsheetConfig.idDelimiter },
+      {
+        header: ssc.startTableColumnIndexBase1.header,
+        value: spreadsheetConfig.startTableColIndexBase0 + 1,
+      },
+      {
+        header: ssc.columnIdRowIndexBase1.header,
+        value: spreadsheetConfig.columnIdRowIdxBase0 + 1,
+      },
+      {
+        header: ssc.columnGroupHeadingRowIndexBase1.header,
+        value: spreadsheetConfig.columnGroupHeadingRowIndexBase0 + 1,
+      },
+      {
+        header: ssc.actionRowIndexBase1.header,
+        value: spreadsheetConfig.actionRowIndexBase0 + 1,
+      },
+      {
+        header: ssc.tableHeaderRowIndexBase1.header,
+        value: spreadsheetConfig.tableHeaderRowIndexBase0 + 1,
+      },
+    ].map(({ header, value }) => ({
+      sheetId: spreadsheetConfigGid,
+      rowIndex: dataRowIndex,
+      colIndex: colIndexOf(header),
+      value,
+    }));
+
+    expect(batchUpdateCalls.length).toBeGreaterThan(0);
+    const requests = firstFlushRequests(batchUpdateCalls);
+    const seeded = seededCellsOn(requests, spreadsheetConfigGid);
+    expect(seeded).toEqual(expected);
+    const addTableAt = requests.findIndex(
+      (request) => request.addTable?.table?.name === "spreadsheetConfig",
+    );
+    const addSheetAt = requests.findIndex(
+      (request) =>
+        request.addSheet?.properties?.sheetId === spreadsheetConfigGid,
+    );
+    const firstSeedAt = requests.findIndex(
+      (request) => request.updateCells?.range?.sheetId === spreadsheetConfigGid,
+    );
+    expect(addSheetAt).toBeGreaterThanOrEqual(0);
+    expect(addTableAt).toBeGreaterThan(addSheetAt);
+    expect(firstSeedAt).toBeGreaterThan(addTableAt);
+  });
+
+  it("writes nothing into a created Spreadsheet Config's Table menu space data cell", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const tableMenuSpaceColIndex =
+      addTableRequests(batchUpdateCalls)[0]?.range?.startColumnIndex;
+    expect(
+      batchUpdateCalls.flatMap((call) =>
+        seededCellsOn(call.requests ?? [], spreadsheetConfigGid).filter(
+          (cell) => cell.colIndex === tableMenuSpaceColIndex,
+        ),
+      ),
+    ).toEqual([]);
+  });
+
+  it("writes nothing into a created Spreadsheet Config's action row, and no data validation", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const requests = batchUpdateCalls.flatMap((call) => call.requests ?? []);
+    expect(
+      seededCellsOn(requests, spreadsheetConfigGid).filter(
+        (cell) => cell.rowIndex === actionRowIndex,
+      ),
+    ).toEqual([]);
+    expect(requests.filter((request) => request.setDataValidation)).toEqual([]);
+  });
+
+  it("leaves an existing Spreadsheet Config's changed layout values alone", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigLayoutValues: {
+        idHeader: "Key",
+        idDelimiter: "-",
+        startTableColumnIndexBase1: 2,
+      },
+    });
+    const { report } = applyFloor();
+
+    expect(addSheetRequests(batchUpdateCalls)).toEqual([]);
+    expect(
+      batchUpdateCalls.flatMap((call) =>
+        seededCellsOn(call.requests ?? [], spreadsheetConfigGid).filter(
+          (cell) => cell.rowIndex === topDataRowIndex,
+        ),
+      ),
+    ).toEqual([]);
+    expect(report).not.toContain("Created tabs");
   });
 
   it("skips a created tab the refetch still lacks in the label, data-value, column-type and edit-warning steps, without throwing", () => {
