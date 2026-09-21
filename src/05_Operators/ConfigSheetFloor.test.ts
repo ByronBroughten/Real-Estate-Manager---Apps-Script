@@ -245,6 +245,33 @@ function columnInserts(
   });
 }
 
+function addSheetRequests(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+    const properties = request.addSheet?.properties;
+    return properties === undefined ? [] : [properties];
+  });
+}
+
+function addTableRequests(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+    const table = request.addTable?.table;
+    return table === undefined ? [] : [table];
+  });
+}
+
+function requestsOnSheet(
+  requests: GoogleAppsScript.Sheets.Schema.Request[],
+  sheetId: number,
+): GoogleAppsScript.Sheets.Schema.Request[] {
+  return requests.filter((request) =>
+    JSON.stringify(request).includes(`"sheetId":${sheetId}`),
+  );
+}
+
 function spreadsheetConfigGroupHeading(header: string): string {
   const spreadsheetConfigSeed = configSheetFloorSeed.spreadsheetConfig;
   const endpoint = Object.values(spreadsheetConfigSeed.endpoints).find(
@@ -327,6 +354,7 @@ function floorFixture(
       tableName?: string;
     };
     extraSheets?: FakeSheetProperties[];
+    omitSheetGids?: readonly number[];
     omitSpreadsheetConfigTable?: boolean;
     spreadsheetConfigExtraTables?: NonNullable<
       FakeSheetProperties["extraTables"]
@@ -513,7 +541,7 @@ function floorFixture(
         },
       },
       ...(options.extraSheets ?? []),
-    ],
+    ].filter((sheet) => !options.omitSheetGids?.includes(sheet.sheetId)),
   });
 }
 
@@ -1419,6 +1447,69 @@ describe("ConfigSheetFloor", () => {
     expect(report).toContain("Set column types:");
     expect(report).not.toContain(`(${cc.header.columnId}) → TEXT`);
     expect(report).not.toContain("Restored headers:");
+    expect(protectionsOf(floor, "columnConfig")).toHaveLength(1);
+  });
+
+  it.each([
+    { sheetName: "sheetConfig", sheetGid: sheetConfigGid },
+    { sheetName: "columnConfig", sheetGid: columnConfigGid },
+  ] as const)(
+    "creates a missing $sheetName tab at its GID with its seed title and Table, and reports it",
+    ({ sheetName, sheetGid }) => {
+      const { batchUpdateCalls } = floorFixture({ omitSheetGids: [sheetGid] });
+      const { report } = applyFloor();
+      const seed = configSheetFloorSeed[sheetName];
+
+      expect(addSheetRequests(batchUpdateCalls)).toEqual([
+        expect.objectContaining({ sheetId: sheetGid, title: seed.title }),
+      ]);
+      const tables = addTableRequests(batchUpdateCalls);
+      expect(tables.map((table) => table.name)).toEqual([seed.tableName]);
+      expect(tables[0]?.columnProperties).toEqual(
+        seed.columns.map((column, columnIndex) => ({
+          columnIndex,
+          columnName: column.header,
+          columnType: column.columnType,
+        })),
+      );
+      expect(report).toContain(`Created tabs: ${seed.title}`);
+    },
+  );
+
+  it("places a created Table's header row, first column and one data row by the generated layout", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [sheetConfigGid],
+    });
+    applyFloor();
+
+    const headerRowIndex = spreadsheetConfig.tableHeaderRowIndexBase0;
+    const startColIndex = spreadsheetConfig.startTableColIndexBase0;
+    const table = addTableRequests(batchUpdateCalls)[0];
+    expect(
+      table?.columnProperties?.map((column) => column.columnIndex),
+    ).toEqual([0, 1, 2]);
+    expect(table?.range).toEqual({
+      sheetId: sheetConfigGid,
+      startRowIndex: headerRowIndex,
+      endRowIndex: headerRowIndex + 2,
+      startColumnIndex: startColIndex,
+      endColumnIndex:
+        startColIndex + configSheetFloorSeed.sheetConfig.columns.length,
+    });
+  });
+
+  it("skips a created tab the refetch still lacks in the label, data-value, column-type and edit-warning steps, without throwing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnTypesAreUnset: true,
+      omitSheetGids: [sheetConfigGid],
+    });
+    const { floor, report } = applyFloor();
+
+    expect(batchUpdateCalls).toHaveLength(2);
+    const laterRequests = batchUpdateCalls[1]?.requests ?? [];
+    expect(requestsOnSheet(laterRequests, sheetConfigGid)).toEqual([]);
+    expect(report).toContain("Set column types:");
+    expect(report).not.toContain("Sheet Config ·");
     expect(protectionsOf(floor, "columnConfig")).toHaveLength(1);
   });
 
