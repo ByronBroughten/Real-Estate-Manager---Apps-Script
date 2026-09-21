@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { configSheetFloorSeed } from "./configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  type FloorSeedColumn,
+} from "./configSheetFloorSeed";
 
 function seedColumn(
   sheetName: "spreadsheetConfig" | "sheetConfig" | "columnConfig",
   header: string,
-) {
+): FloorSeedColumn {
   const column = configSheetFloorSeed[sheetName].columns.find(
     (entry) => entry.header === header,
   );
@@ -96,6 +99,27 @@ describe("configSheetFloorSeed declared cells", () => {
     expect(floorColumns.length).toBeGreaterThan(0);
     floorColumns.forEach((column) => {
       expect(column.emptyValueAllowed).toBe(false);
+    });
+  });
+});
+
+describe("configSheetFloorSeed data values", () => {
+  it("declares Not used as Table menu space's data value", () => {
+    expect(seedColumn("spreadsheetConfig", "Table menu space").dataValue).toBe(
+      "Not used",
+    );
+  });
+
+  it("declares no data value on any other floor column", () => {
+    const otherColumns = [
+      ...configSheetFloorSeed.spreadsheetConfig.columns.filter(
+        (column) => column.header !== "Table menu space",
+      ),
+      ...configSheetFloorSeed.sheetConfig.columns,
+      ...configSheetFloorSeed.columnConfig.columns,
+    ];
+    otherColumns.forEach((column) => {
+      expect(column).not.toHaveProperty("dataValue");
     });
   });
 });

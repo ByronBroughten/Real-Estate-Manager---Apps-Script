@@ -102,6 +102,7 @@ function spreadsheetConfigSheet(
     spreadsheetConfigGroupHeading(ssc[columnName].header),
   );
   const dataRow = sscColumns.map((columnName) => {
+    if (columnName === "tableMenuSpace") return "Not used";
     if (columnName === "idDelimiter") return idDelimiter;
     if (columnName === "idHeader") return options.idHeader ?? "ID";
     if (columnName === "startTableColumnIndexBase1") {

@@ -10,6 +10,7 @@ export interface FloorSeedColumn {
   header: string;
   columnType: TableColumnType;
   emptyValueAllowed: boolean;
+  dataValue?: string;
 }
 
 interface FloorSeedSheet {
@@ -38,6 +39,7 @@ export const configSheetFloorSeed = {
         columnGroupHeading: "",
         columnType: "TEXT",
         emptyValueAllowed: false,
+        dataValue: "Not used",
       },
       {
         header: "ID header",
