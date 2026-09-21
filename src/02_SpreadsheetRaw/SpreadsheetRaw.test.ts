@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CellValue } from "../00_Source/CellValues/cellValues";
+import type { AddTableOperation } from "../00_Source/RawSource/RawSource";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
@@ -967,7 +968,7 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     rowCount: 20,
     columnCount: 6,
   };
-  const addTableProps = {
+  const addTableProps: Omit<AddTableOperation, "kind"> = {
     name: "spreadsheetConfig",
     range: {
       sheetId: 555,
@@ -977,7 +978,7 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
       endColumnIndex: 3,
     },
     columnProperties: [
-      { columnIndex: 1, columnName: "Name", columnType: "TEXT" as const },
+      { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
     ],
   };
 
@@ -1022,7 +1023,7 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     ]);
   });
 
-  it("puts one operation on the spreadsheet's write queue per queue method, and a flush empties both lists", () => {
+  it("puts one operation on the spreadsheet's write queue per queue method", () => {
     stubSheetsService();
 
     const raw = SpreadsheetRaw.init();
@@ -1035,7 +1036,14 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     expect(raw.updateRequests.addTable).toEqual([
       { kind: "addTable", ...addTableProps },
     ]);
+  });
 
+  it("empties both lists on a flush", () => {
+    stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.gatherAddTableRequest(addTableProps);
     raw.batchUpdateGSheets();
 
     expect(raw.updateRequests.addSheet).toEqual([]);

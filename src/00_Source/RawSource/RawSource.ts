@@ -147,10 +147,10 @@ export interface AddTableOperation {
   kind: "addTable";
   name: string;
   range: GridRangeProps;
-  columnProperties: AddTableColumnProperties[];
+  columnProperties: TableColumnPropertiesAdd[];
 }
 
-export interface AddTableColumnProperties {
+export interface TableColumnPropertiesAdd {
   columnIndex: number;
   columnName: string;
   columnType: TableColumnType;

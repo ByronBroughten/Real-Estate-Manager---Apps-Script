@@ -307,13 +307,53 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("updateSheetProperties occupancy title Spreadsheet Config [title]");
   });
 
-  it("renders a request the framework does not model as its own verb and JSON", () => {
-    const line = onlyLine({
-      addSheet: { properties: { title: "x" } },
-    } as OpaqueRawRequest);
+  it("names the GID as a number, the title and the grid size of an added tab", () => {
+    expect(
+      onlyLine({
+        addSheet: {
+          properties: {
+            sheetId: occupancyGid,
+            title: "Spreadsheet Config",
+            gridProperties: { rowCount: 20, columnCount: 6 },
+          },
+        },
+      }),
+    ).toBe(
+      `addSheet gid ${occupancyGid} add tab Spreadsheet Config (20 rows × 6 cols)`,
+    );
+  });
 
-    expect(line).toContain("addSheet");
-    expect(line).toContain('"title":"x"');
+  it("names the GID as a number, the range, the name and every column of an added Table", () => {
+    expect(
+      onlyLine({
+        addTable: {
+          table: {
+            name: "spreadsheetConfig",
+            range: {
+              sheetId: occupancyGid,
+              startRowIndex: 2,
+              endRowIndex: 5,
+              startColumnIndex: 1,
+              endColumnIndex: 3,
+            },
+            columnProperties: [
+              { columnIndex: 2, columnName: "Amount", columnType: "CURRENCY" },
+              { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
+            ],
+          },
+        },
+      }),
+    ).toBe(
+      `addTable gid ${occupancyGid}!B3:C5 add 2 cols spreadsheetConfig (Name: TEXT, Amount: CURRENCY)`,
+    );
+  });
+
+  it("renders a request the framework does not model as its own verb and JSON", () => {
+    const line = onlyLine({ deleteSheet: { sheetId: unknownGid } });
+
+    expect(line).toContain("deleteSheet");
+    expect(line).toContain(`gid ${unknownGid}`);
+    expect(line).toContain(`"sheetId":${unknownGid}`);
   });
 
   it("is empty when nothing was queued", () => {

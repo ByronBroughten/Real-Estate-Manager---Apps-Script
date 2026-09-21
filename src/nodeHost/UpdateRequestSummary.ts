@@ -93,6 +93,10 @@ function body(verb: RequestVerb, request: GoogleUpdateRequest): string {
       return requestBody.addProtectedRange(request.addProtectedRange);
     case "deleteProtectedRange":
       return requestBody.deleteProtectedRange(request.deleteProtectedRange);
+    case "addSheet":
+      return requestBody.addSheet(request.addSheet);
+    case "addTable":
+      return requestBody.addTable(request.addTable);
     case "updateTable":
       return requestBody.updateTable(request.updateTable);
     case "updateSheetProperties":
@@ -238,6 +242,31 @@ const requestBody = {
       "",
     );
   },
+  // The tab isn't fetched yet, so the GID prints as a number rather than a config name.
+  addSheet(
+    add: GoogleAppsScript.Sheets.Schema.AddSheetRequest | undefined,
+  ): string {
+    const properties = add?.properties;
+    const grid = properties?.gridProperties;
+    return columns(
+      gidLabel(properties?.sheetId),
+      "add tab",
+      `${properties?.title ?? ""} (${grid?.rowCount ?? 0} rows × ${grid?.columnCount ?? 0} cols)`,
+      "",
+    );
+  },
+  addTable(
+    add: GoogleAppsScript.Sheets.Schema.AddTableRequest | undefined,
+  ): string {
+    const table = add?.table;
+    const columnProperties = table?.columnProperties;
+    return columns(
+      label.range(table?.range, gidLabel(table?.range?.sheetId)),
+      `add ${columnProperties?.length ?? 0} cols`,
+      `${table?.name ?? ""} (${label.tableColumns(columnProperties)})`,
+      "",
+    );
+  },
   updateTable(
     update: GoogleAppsScript.Sheets.Schema.UpdateTableRequest | undefined,
   ): string {
@@ -250,18 +279,10 @@ const requestBody = {
         label.fields(update.fields),
       );
     }
-    const columnProperties = [...(table?.columnProperties ?? [])].sort(
-      (a, b) => (a.columnIndex ?? 0) - (b.columnIndex ?? 0),
-    );
     return columns(
       table?.tableId ?? "(no table)",
-      `${columnProperties.length} cols`,
-      columnProperties
-        .map(
-          (column) =>
-            `${column.columnName ?? `col ${column.columnIndex ?? 0}`}: ${column.columnType ?? "—"}`,
-        )
-        .join(", "),
+      `${table?.columnProperties?.length ?? 0} cols`,
+      label.tableColumns(table?.columnProperties),
       label.fields(update?.fields),
     );
   },
@@ -310,21 +331,37 @@ function columns(
 
 const label = {
   // An absent bound really is open-ended, so it renders open rather than as one cell.
-  range(range: GoogleGridRange | undefined): string {
+  range(
+    range: GoogleGridRange | undefined,
+    sheetLabelOverride?: string,
+  ): string {
     if (!range) return "(no range)";
+    const sheetLabel = sheetLabelOverride ?? label.sheet(range.sheetId);
     const hasBound =
       range.startRowIndex !== undefined ||
       range.endRowIndex !== undefined ||
       range.startColumnIndex !== undefined ||
       range.endColumnIndex !== undefined;
     if (!hasBound) {
-      return `${label.sheet(range.sheetId)}!sheet`;
+      return `${sheetLabel}!sheet`;
     }
     const { startRowIndex = 0, endRowIndex, endColumnIndex } = range;
     const startCell = `${colLetters(range.startColumnIndex ?? 0)}${startRowIndex + 1}`;
     const endColumn =
       endColumnIndex === undefined ? "" : colLetters(endColumnIndex - 1);
-    return `${label.sheet(range.sheetId)}!${startCell}:${endColumn}${endRowIndex ?? ""}`;
+    return `${sheetLabel}!${startCell}:${endColumn}${endRowIndex ?? ""}`;
+  },
+  tableColumns(
+    columnProperties:
+      GoogleAppsScript.Sheets.Schema.TableColumnProperties[] | undefined,
+  ): string {
+    return [...(columnProperties ?? [])]
+      .sort((a, b) => (a.columnIndex ?? 0) - (b.columnIndex ?? 0))
+      .map(
+        (column) =>
+          `${column.columnName ?? `col ${column.columnIndex ?? 0}`}: ${column.columnType ?? "—"}`,
+      )
+      .join(", ");
   },
   values(rows: RowData[] | undefined): string {
     const values = (rows ?? []).flatMap((row) =>
@@ -368,6 +405,10 @@ const label = {
     return flags.join(", ");
   },
 };
+
+function gidLabel(sheetGid: number | undefined): string {
+  return sheetGid === undefined ? "(no sheet)" : `gid ${sheetGid}`;
+}
 
 function cellCount(rows: RowData[] | undefined): number {
   return (rows ?? []).reduce(
