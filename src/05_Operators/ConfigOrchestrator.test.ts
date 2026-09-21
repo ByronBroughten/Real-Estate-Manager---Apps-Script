@@ -90,6 +90,7 @@ afterEach(() => {
 function spreadsheetConfigSheet(
   idDelimiter: string,
   options: {
+    idHeader?: string;
     tableEndRowIndex?: number;
     startTableColumnIndexBase1?: number;
     extraRows?: Record<number, readonly (string | number | boolean | null)[]>;
@@ -102,7 +103,7 @@ function spreadsheetConfigSheet(
   );
   const dataRow = sscColumns.map((columnName) => {
     if (columnName === "idDelimiter") return idDelimiter;
-    if (columnName === "idHeader") return "ID";
+    if (columnName === "idHeader") return options.idHeader ?? "ID";
     if (columnName === "startTableColumnIndexBase1") {
       return options.startTableColumnIndexBase1 ?? 1;
     }
@@ -169,6 +170,7 @@ function headerOnlyDraftSheet(
 function seedFixture(
   options: {
     idDelimiter?: string;
+    idHeader?: string;
     testColumnId?: string;
     spreadsheetConfigTableEndRowIndex?: number;
     spreadsheetConfigExtraRows?: Record<
@@ -190,6 +192,7 @@ function seedFixture(
   return stubSheetsService({
     sheets: [
       spreadsheetConfigSheet(idDelimiter, {
+        idHeader: options.idHeader,
         tableEndRowIndex: options.spreadsheetConfigTableEndRowIndex,
         extraRows: options.spreadsheetConfigExtraRows,
         startTableColumnIndexBase1: options.startTableColumnIndexBase1,
@@ -418,20 +421,26 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
   });
 
-  it("emits the live Spreadsheet Config values and uses them for new column IDs", () => {
+  it("refuses a live ID delimiter change, since the floor tabs' column IDs keep the old one", () => {
     seedFixture({ idDelimiter: "|", testColumnId: "" });
 
+    expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow(
+      'Floor tab "sheetConfig" ID prefix was "scf" and is now "scnf".',
+    );
+  });
+
+  it("emits the live Spreadsheet Config values", () => {
+    seedFixture({ idHeader: "Key" });
+
     const parsed = ConfigOrchestrator.init().generateConfigFiles();
-    expect(parsed.spreadsheetConfig).toContain('idDelimiter: "|"');
-    expect(parsed.columnConfigs).toMatch(/c\|tst\|/);
-    expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
+    expect(parsed.spreadsheetConfig).toContain('idHeader: "Key"');
   });
 
   it("clears the live layout after the call returns", () => {
-    seedFixture({ idDelimiter: "|", testColumnId: "" });
+    seedFixture({ idHeader: "Key" });
 
     ConfigOrchestrator.init().generateConfigFiles();
-    expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
+    expect(ssConfigGet("idHeader")).toBe(spreadsheetConfig.idHeader);
   });
 
   it("clears the live layout when later work throws", () => {
@@ -545,6 +554,70 @@ describe("ConfigOrchestrator.generateConfigFiles", () => {
     });
 
     expect(() => ConfigOrchestrator.init().generateConfigFiles()).not.toThrow();
+  });
+
+  describe("floor identity", () => {
+    const valueConfigFloorGid = getSheetTraitByName("valueConfig", "sheetGid");
+    const movedValueConfigGid = 999000111;
+
+    function valueConfigTab(options: {
+      sheetId: number;
+      title: string;
+      columnId?: string;
+    }): FakeSheetProperties {
+      return {
+        sheetId: options.sheetId,
+        title: options.title,
+        rows: buildGridRows({
+          0: [options.columnId ?? ""],
+          3: ["Value title"],
+          4: [],
+        }),
+        table: { endRowIndex: 5 },
+      };
+    }
+
+    function seedValueConfigTab(tab: FakeSheetProperties) {
+      seedFixture({
+        extraSheets: [tab],
+        extraSheetConfigDataRows: { 5: [tab.sheetId, tab.title, true, ""] },
+        sheetConfigTableEndRowIndex: 6,
+      });
+    }
+
+    it("throws naming the floor tab, its previous GID and its new one, and returns no file source", () => {
+      seedValueConfigTab(
+        valueConfigTab({ sheetId: movedValueConfigGid, title: "Value config" }),
+      );
+
+      expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow(
+        `Floor tab "valueConfig" GID was ${valueConfigFloorGid} and is now ${movedValueConfigGid}.`,
+      );
+    });
+
+    it("throws when a floor tab's ID prefix changed", () => {
+      seedValueConfigTab(
+        valueConfigTab({
+          sheetId: valueConfigFloorGid,
+          title: "Value Config",
+          columnId: "c:zzz:abc1234",
+        }),
+      );
+
+      expect(() => ConfigOrchestrator.init().generateConfigFiles()).toThrow(
+        'Floor tab "valueConfig" ID prefix was "vcf" and is now "zzz".',
+      );
+    });
+
+    it("still only reports a non-floor sheet's changed ID prefix", () => {
+      seedFixture({ testColumnId: "c:zzz:xyz123" });
+
+      expect(
+        ConfigOrchestrator.init().generateConfigFiles().idPrefixReport,
+      ).toBe(
+        'Sheet "Test" sampled ID prefix "zzz" differs from last generated "test".',
+      );
+    });
   });
 });
 
