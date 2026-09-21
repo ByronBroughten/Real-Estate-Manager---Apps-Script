@@ -1,13 +1,11 @@
 import type { CellValue } from "../00_Source/CellValues/cellValues";
-import {
-  makeImportLine,
-  validateSpreadsheetLayoutIndexes,
-} from "../01_SpreadsheetSchema/makeConfigs";
+import { makeImportLine } from "../01_SpreadsheetSchema/makeConfigs";
 import {
   spreadsheetConfigIndexHeaders,
   spreadsheetConfigTextHeaders,
 } from "../01_SpreadsheetSchema/spreadsheetConfigFields";
 import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import { uniformRowLayout } from "../01_SpreadsheetSchema/uniformRowLayout";
 import { Obj } from "../utils/Obj";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
@@ -86,7 +84,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
         dataRow.indexCell(header),
       ),
     };
-    validateSpreadsheetLayoutIndexes(liveConfig);
+    uniformRowLayout.validate(liveConfig);
     return liveConfig;
   }
   private _uniqueTableHeaderRowIndex(guaranteedHeaders: string[]): number {

@@ -4,10 +4,11 @@ import {
   floorTabSeedByGid,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import {
-  makeIdPrefixFromTitle,
-  makeImportLine,
-  validateIdPrefixesAreUnique,
+  idPrefixes,
   type IdPrefixLabel,
+} from "../01_SpreadsheetSchema/idPrefixes";
+import {
+  makeImportLine,
   type SheetConfigsBase,
 } from "../01_SpreadsheetSchema/makeConfigs";
 import { sheetConfigsByGid } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -147,7 +148,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     this.sheetGidsApiAccesses().forEach((sheetGid) => {
       if (assigned.has(sheetGid)) return;
-      const generated = makeIdPrefixFromTitle(
+      const generated = idPrefixes.fromTitle(
         this.ss.raw.sheet(sheetGid).title,
         prefixesInUse,
       );
@@ -195,7 +196,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       };
       idPrefixLabels.push({ label: title, idPrefix });
     });
-    validateIdPrefixesAreUnique(idPrefixLabels);
+    idPrefixes.assertUnique(idPrefixLabels);
     return sheetConfigs;
   }
   sheetNamesByGid(): Map<number, string> {

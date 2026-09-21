@@ -1,8 +1,9 @@
+import { idPrefixes } from "./idPrefixes";
 import type { SheetNameSimple } from "./sheetConfigsTypes";
 import {
-  spreadsheetConfigColumnLabel,
-  spreadsheetConfigIndexHeaders,
-} from "./spreadsheetConfigFields";
+  uniformRowLayout,
+  type UniformRowLayoutIndexes,
+} from "./uniformRowLayout";
 import type { Value, ValueName } from "./valueSchemas";
 
 export function makeImportLine(
@@ -15,139 +16,14 @@ export function makeImportLine(
   return `import { ${configMagerName} } from "../makeConfigs";`;
 }
 
-export function makeStructuredConfig<S, const T extends S>(
-  _structure: S,
-  t: T,
-): T {
+function makeStructuredConfig<S, const T extends S>(_structure: S, t: T): T {
   return t;
-}
-
-export interface UniformRowLayoutIndexes {
-  columnIdRowIdxBase0: number;
-  columnGroupHeadingRowIndexBase0: number;
-  actionRowIndexBase0: number;
-  tableHeaderRowIndexBase0: number;
-}
-
-export type UniformRowLayoutKey = keyof UniformRowLayoutIndexes;
-
-const uniformRowLayoutKeys: readonly UniformRowLayoutKey[] = [
-  "columnIdRowIdxBase0",
-  "columnGroupHeadingRowIndexBase0",
-  "actionRowIndexBase0",
-  "tableHeaderRowIndexBase0",
-];
-
-export const uniformRowLayoutLabels = uniformRowLayoutColumnLabels();
-
-function uniformRowLayoutColumnLabels(): Record<UniformRowLayoutKey, string> {
-  return uniformRowLayoutKeys.reduce(
-    (labels, key) => {
-      labels[key] = spreadsheetConfigColumnLabel(
-        spreadsheetConfigIndexHeaders[key],
-      );
-      return labels;
-    },
-    {} as Record<UniformRowLayoutKey, string>,
-  );
-}
-
-export function validateSpreadsheetLayoutIndexes(
-  config: UniformRowLayoutIndexes,
-  labels: Record<UniformRowLayoutKey, string> = uniformRowLayoutLabels,
-): void {
-  const firstDataRowIndex = config.tableHeaderRowIndexBase0 + 1;
-  const nameByIndex = new Map<number, string>();
-  uniformRowLayoutKeys.forEach((key) => {
-    const index = config[key];
-    const label = labels[key];
-    if (typeof index !== "number" || !Number.isInteger(index) || index < 0) {
-      throw new Error(
-        `${label} must be an integer ≥ 0, got ${JSON.stringify(index)}.`,
-      );
-    }
-    const existing = nameByIndex.get(index);
-    if (existing !== undefined) {
-      throw new Error(`${existing} and ${label} must not share a row.`);
-    }
-    if (index === firstDataRowIndex) {
-      throw new Error(`${label} must not land on the first data row.`);
-    }
-    nameByIndex.set(index, label);
-  });
-}
-
-export interface IdPrefixLabel {
-  label: string;
-  idPrefix: string;
-}
-
-export function validateIdPrefixesAreUnique(
-  idPrefixLabels: ReadonlyArray<IdPrefixLabel>,
-): void {
-  const labelByPrefix = new Map<string, string>();
-  idPrefixLabels.forEach(({ label, idPrefix }) => {
-    if (!idPrefix) {
-      throw new Error(`Sheet "${label}" has no ID prefix.`);
-    }
-    const existing = labelByPrefix.get(idPrefix);
-    if (existing !== undefined) {
-      throw new Error(
-        `Sheets "${existing}" and "${label}" share ID prefix "${idPrefix}".`,
-      );
-    }
-    labelByPrefix.set(idPrefix, label);
-  });
-}
-
-const vowels = new Set(["a", "e", "i", "o", "u"]);
-
-export function makeIdPrefixFromTitle(
-  title: string,
-  prefixesInUse: ReadonlySet<string>,
-): string {
-  const { base, remainingConsonants } = idPrefixBaseAndRemaining(title);
-  if (!prefixesInUse.has(base)) return base;
-  let candidate = base;
-  for (const letter of remainingConsonants) {
-    candidate += letter;
-    if (!prefixesInUse.has(candidate)) return candidate;
-  }
-  for (let n = 2; ; n++) {
-    const numbered = `${base}${n}`;
-    if (!prefixesInUse.has(numbered)) return numbered;
-  }
-}
-
-function idPrefixBaseAndRemaining(title: string): {
-  base: string;
-  remainingConsonants: string;
-} {
-  const titleWords = title
-    .toLowerCase()
-    .replace(/[^a-z ]/g, "")
-    .split(" ")
-    .filter((word) => word !== "");
-  const lastWord = titleWords.at(-1);
-  if (lastWord === undefined) return { base: "s", remainingConsonants: "" };
-  const initials = titleWords.map((word) => word.charAt(0)).join("");
-  const afterFirst = [...lastWord.slice(1)]
-    .filter((letter) => !vowels.has(letter))
-    .join("");
-  if (initials.length >= 3) {
-    return { base: initials, remainingConsonants: afterFirst };
-  }
-  const base = (initials + afterFirst).slice(0, 3);
-  return {
-    base,
-    remainingConsonants: afterFirst.slice(base.length - initials.length),
-  };
 }
 
 export function makeSpreadsheetConfig<
   T extends UniformRowLayoutIndexes & Record<string, string | number>,
 >(config: T): T {
-  validateSpreadsheetLayoutIndexes(config);
+  uniformRowLayout.validate(config);
   return config;
 }
 
@@ -160,7 +36,7 @@ export type SheetConfigsBase = Record<string, SheetConfigStored>;
 export function makeSheetConfigs<T extends SheetConfigsBase>(
   sheetConfigs: T,
 ): T {
-  validateIdPrefixesAreUnique(
+  idPrefixes.assertUnique(
     Object.entries(sheetConfigs).map(([label, config]) => ({
       label,
       idPrefix: config.idPrefix,
@@ -179,7 +55,7 @@ export function makeValueConfigs<const T extends ValueConfigsBase>(
   );
 }
 
-export interface ColumnConfigLiteral {
+interface ColumnConfigLiteral {
   columnId: string;
   header: string;
   isFormula: boolean;
@@ -192,8 +68,8 @@ export interface ColumnConfigStored<
   customDefaultValue: Value<VN> | null;
 }
 
-export type TableColumnConfigs = Record<string, ColumnConfigStored>;
-export type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
+type TableColumnConfigs = Record<string, ColumnConfigStored>;
+type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
 export type ColumnConfigsGeneric = Record<string, TableColumnConfigs>;
 
 export function makeColumnConfigs<T extends ColumnConfigsBase>(
