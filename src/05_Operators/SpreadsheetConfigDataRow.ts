@@ -1,36 +1,30 @@
 import type { CellValue } from "../00_Source/CellValues/cellValues";
-import {
-  getColumnTraitByName,
-  type ColumnName,
-} from "../01_SpreadsheetSchema/columnConfigsTypes";
-
-type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
+import { spreadsheetConfigColumnLabel } from "../01_SpreadsheetSchema/spreadsheetConfigFields";
 
 export class SpreadsheetConfigDataRow {
   private valueByHeader: Map<string, CellValue | "">;
   constructor(valueByHeader: Map<string, CellValue | "">) {
     this.valueByHeader = valueByHeader;
   }
-  stringCell(columnName: SpreadsheetConfigColumnName): string {
-    const value = this._nonBlankCell(columnName);
+  stringCell(header: string): string {
+    const value = this._nonBlankCell(header);
     if (typeof value !== "string") {
       throw new Error(
-        `${spreadsheetConfigColumnLabel(columnName)} must be text, got ${JSON.stringify(value)}.`,
+        `${spreadsheetConfigColumnLabel(header)} must be text, got ${JSON.stringify(value)}.`,
       );
     }
     return value;
   }
-  indexCell(columnName: SpreadsheetConfigColumnName): number {
-    const value = this._nonBlankCell(columnName);
+  indexCell(header: string): number {
+    const value = this._nonBlankCell(header);
     if (typeof value !== "number" || !Number.isInteger(value) || value < 1) {
       throw new Error(
-        `${spreadsheetConfigColumnLabel(columnName)} must be an integer ≥ 1, got ${JSON.stringify(value)}.`,
+        `${spreadsheetConfigColumnLabel(header)} must be an integer ≥ 1, got ${JSON.stringify(value)}.`,
       );
     }
     return value - 1;
   }
-  private _nonBlankCell(columnName: SpreadsheetConfigColumnName): CellValue {
-    const header = spreadsheetConfigHeader(columnName);
+  private _nonBlankCell(header: string): CellValue {
     const value = this.valueByHeader.get(header);
     if (value === undefined) {
       throw new Error(
@@ -38,20 +32,8 @@ export class SpreadsheetConfigDataRow {
       );
     }
     if (value === "") {
-      throw new Error(`${spreadsheetConfigColumnLabel(columnName)} is blank.`);
+      throw new Error(`${spreadsheetConfigColumnLabel(header)} is blank.`);
     }
     return value;
   }
-}
-
-export function spreadsheetConfigHeader(
-  columnName: SpreadsheetConfigColumnName,
-): string {
-  return getColumnTraitByName("spreadsheetConfig", columnName, "header");
-}
-
-export function spreadsheetConfigColumnLabel(
-  columnName: SpreadsheetConfigColumnName,
-): string {
-  return `Spreadsheet Config column "${spreadsheetConfigHeader(columnName)}"`;
 }

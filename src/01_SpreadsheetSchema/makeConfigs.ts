@@ -1,4 +1,8 @@
 import type { SheetNameSimple } from "./sheetConfigsTypes";
+import {
+  spreadsheetConfigColumnLabel,
+  spreadsheetConfigIndexHeaders,
+} from "./spreadsheetConfigFields";
 import type { Value, ValueName } from "./valueSchemas";
 
 export function makeImportLine(
@@ -34,14 +38,19 @@ const uniformRowLayoutKeys: readonly UniformRowLayoutKey[] = [
   "tableHeaderRowIndexBase0",
 ];
 
-export const uniformRowLayoutLabels: Record<UniformRowLayoutKey, string> = {
-  columnIdRowIdxBase0: 'Spreadsheet Config column "Column ID row index base 1"',
-  columnGroupHeadingRowIndexBase0:
-    'Spreadsheet Config column "Column group heading row index base 1"',
-  actionRowIndexBase0: 'Spreadsheet Config column "Action row index base 1"',
-  tableHeaderRowIndexBase0:
-    'Spreadsheet Config column "Table header row index base 1"',
-};
+export const uniformRowLayoutLabels = uniformRowLayoutColumnLabels();
+
+function uniformRowLayoutColumnLabels(): Record<UniformRowLayoutKey, string> {
+  return uniformRowLayoutKeys.reduce(
+    (labels, key) => {
+      labels[key] = spreadsheetConfigColumnLabel(
+        spreadsheetConfigIndexHeaders[key],
+      );
+      return labels;
+    },
+    {} as Record<UniformRowLayoutKey, string>,
+  );
+}
 
 export function validateSpreadsheetLayoutIndexes(
   config: UniformRowLayoutIndexes,
