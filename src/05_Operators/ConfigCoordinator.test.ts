@@ -92,6 +92,7 @@ function spreadsheetConfigSheet(
   options: {
     idHeader?: string;
     tableEndRowIndex?: number;
+    fillRowIdsRunStatusColumnId?: string;
     startTableColumnIndexBase1?: number;
     extraRows?: Record<number, readonly (string | number | boolean | null)[]>;
     protectedRanges?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
@@ -118,7 +119,11 @@ function spreadsheetConfigSheet(
     sheetId: spreadsheetConfigGid,
     title: "Spreadsheet Config",
     rows: buildGridRows({
-      0: sscColumns.map((columnName) => ssc[columnName].columnId),
+      0: sscColumns.map((columnName) =>
+        columnName === "fillRowIdsRunStatus"
+          ? (options.fillRowIdsRunStatusColumnId ?? ssc[columnName].columnId)
+          : ssc[columnName].columnId,
+      ),
       1: groupHeadings,
       3: headers,
       4: dataRow,
@@ -173,11 +178,13 @@ function seedFixture(
     idDelimiter?: string;
     idHeader?: string;
     testColumnId?: string;
+    fillRowIdsRunStatusColumnId?: string;
     spreadsheetConfigTableEndRowIndex?: number;
     spreadsheetConfigExtraRows?: Record<
       number,
       readonly (string | number | boolean | null)[]
     >;
+    valueConfigSheet?: FakeSheetProperties;
     extraSheets?: FakeSheetProperties[];
     extraSheetConfigDataRows?: Record<
       number,
@@ -195,6 +202,7 @@ function seedFixture(
       spreadsheetConfigSheet(idDelimiter, {
         idHeader: options.idHeader,
         tableEndRowIndex: options.spreadsheetConfigTableEndRowIndex,
+        fillRowIdsRunStatusColumnId: options.fillRowIdsRunStatusColumnId,
         extraRows: options.spreadsheetConfigExtraRows,
         startTableColumnIndexBase1: options.startTableColumnIndexBase1,
         protectedRanges: options.spreadsheetConfigProtections,
@@ -283,9 +291,47 @@ function seedFixture(
         }),
         table: { endRowIndex: 5 },
       },
+      options.valueConfigSheet ?? floorValueConfigTab(),
       ...(options.extraSheets ?? []),
     ],
   });
+}
+
+const valueConfigFloorGid = getSheetTraitByName("valueConfig", "sheetGid");
+
+function floorValueConfigTab(): FakeSheetProperties {
+  return {
+    ...valueConfigTab({
+      sheetId: valueConfigFloorGid,
+      title: "Value Config",
+      columnId: "c:vcf:abc1234",
+    }),
+    table: {
+      name: configSheetFloorSeed.valueConfig.tableName,
+      startRowIndex: tableHeaderRowIndex,
+      startColumnIndex: startTableColIndex,
+      endRowIndex: 5,
+      endColumnIndex: startTableColIndex + 1,
+      columnTypes: { 0: "TEXT" },
+    },
+  };
+}
+
+function valueConfigTab(options: {
+  sheetId: number;
+  title: string;
+  columnId?: string;
+}): FakeSheetProperties {
+  return {
+    sheetId: options.sheetId,
+    title: options.title,
+    rows: buildGridRows({
+      0: [options.columnId ?? ""],
+      3: ["Value title"],
+      4: [],
+    }),
+    table: { endRowIndex: 5 },
+  };
 }
 
 function spreadsheetConfigGroupHeading(header: string): string {
@@ -549,6 +595,7 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
             endRowIndex: 6,
           },
         },
+        floorValueConfigTab(),
       ],
     });
 
@@ -556,29 +603,11 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
   });
 
   describe("floor identity", () => {
-    const valueConfigFloorGid = getSheetTraitByName("valueConfig", "sheetGid");
     const movedValueConfigGid = 999000111;
-
-    function valueConfigTab(options: {
-      sheetId: number;
-      title: string;
-      columnId?: string;
-    }): FakeSheetProperties {
-      return {
-        sheetId: options.sheetId,
-        title: options.title,
-        rows: buildGridRows({
-          0: [options.columnId ?? ""],
-          3: ["Value title"],
-          4: [],
-        }),
-        table: { endRowIndex: 5 },
-      };
-    }
 
     function seedValueConfigTab(tab: FakeSheetProperties) {
       seedFixture({
-        extraSheets: [tab],
+        valueConfigSheet: tab,
         extraSheetConfigDataRows: { 5: [tab.sheetId, tab.title, true, ""] },
         sheetConfigTableEndRowIndex: 6,
       });
@@ -605,6 +634,14 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
 
       expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
         'Floor tab "valueConfig" ID prefix was "vcf" and is now "zzz".',
+      );
+    });
+
+    it("fails a floor column's changed column ID with the identity guard's message, before the floor seed check", () => {
+      seedFixture({ fillRowIdsRunStatusColumnId: "c:sscf:moved01" });
+
+      expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
+        `Floor column "Fill row IDs, run status" on "spreadsheetConfig" had column ID "${ssc.fillRowIdsRunStatus.columnId}" and is now "c:sscf:moved01".`,
       );
     });
 

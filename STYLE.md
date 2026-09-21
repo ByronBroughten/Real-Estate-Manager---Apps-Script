@@ -84,6 +84,7 @@ One line per rule. The reasoning and worked examples are one file away:
 - **`as` casts narrow data that's already runtime-safe; they never substitute for validation.** External values (Sheets cell data) go through `Val.validate.*`/`Val.is.*`. The three accepted cast idioms are in the reasoning file.
 - **A registry keyed by a finite name union takes a plain `: Type` annotation, not `makeStructuredConfig`**, which lets an unknown key through beside a valid one. Keep `makeStructuredConfig` for the generated config files.
 - **A per-kind lookup table is keyed by the finite union its producer returns, never a `switch` with a `default` over a wider type.** A `default` over an optional-keyed type (Google's `Request`) compiles with any case missing.
+- **An optional parameter that switches a function to a second job means it should be a second function.** Don't add an overload to loosen a constraint for one caller.
 - **Use the named type that already exists instead of an inline shape**, for a field or return type as well as a param bag: `TableIdentityRaw`, not `{ tableId: string; name: string }`.
 - **Custom generic utility types live in `utils/Obj.ts`**, PascalCase, one clear transform per name (`StrictOmit`, `DistributiveOmit`, `StrictPick`, `PickStartsWith`).
 

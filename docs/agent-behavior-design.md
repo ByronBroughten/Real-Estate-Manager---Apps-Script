@@ -33,3 +33,4 @@ _Instances:_ a `--send` needs a yes that names that chore, and a gsheets write n
 ## Not yet promoted
 
 - **End a fat session with a written handoff, not a longer turn.** Past a size threshold, a finished diagnosis is written down (the conclusion, the files and ranges to open, the hypotheses ruled out) and a fresh session starts from it. A small diagnosis in a lean session skips this. _Cited by:_ #53.
+- **A spec whose premise fails is escalated, not worked around.** When a ticket's placement can only be met with plumbing that exists to get around it, the conflict goes to the developer before the code is written, not into a departure note afterward. _Cited by:_ #84.

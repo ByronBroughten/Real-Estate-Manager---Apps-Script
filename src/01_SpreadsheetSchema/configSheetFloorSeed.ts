@@ -6,9 +6,14 @@ import {
 } from "./columnConfigsTypes";
 import { sheetConfigsByGid } from "./sheetConfigsTypes";
 
+export type FloorColumnType = Extract<
+  TableColumnType,
+  "TEXT" | "DOUBLE" | "BOOLEAN"
+>;
+
 export interface FloorSeedColumn {
   header: string;
-  columnType: TableColumnType;
+  columnType: FloorColumnType;
   emptyValueAllowed: boolean;
   dataValue?: string;
 }
@@ -222,7 +227,13 @@ export function floorSeedColumnById(
   if (sheetConfig === undefined || !isFloorTabName(sheetConfig.sheetName)) {
     return undefined;
   }
-  const sheetName = sheetConfig.sheetName;
+  return floorSeedColumnInSheet(sheetConfig.sheetName, columnId);
+}
+
+export function floorSeedColumnInSheet(
+  sheetName: FloorTabName,
+  columnId: string,
+): FloorSeedColumn | undefined {
   return floorSeedColumns(sheetName).find((seedColumn) => {
     const columnName = getSheetColumnNames(sheetName).find(
       (name) =>
@@ -231,4 +242,8 @@ export function floorSeedColumnById(
     if (columnName === undefined) return false;
     return getColumnTraitByName(sheetName, columnName, "columnId") === columnId;
   });
+}
+
+export function floorColumnLabel(sheetName: string, header: string): string {
+  return `Floor column "${header}" on "${sheetName}"`;
 }

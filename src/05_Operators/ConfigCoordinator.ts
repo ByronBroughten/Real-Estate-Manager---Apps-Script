@@ -1,4 +1,5 @@
 import { columnConfigsByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { assertFloorMatchesSeed } from "../01_SpreadsheetSchema/floorSeedCheck";
 import { sheetConfigsByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   clearSpreadsheetConfigOverlay,
@@ -88,6 +89,7 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
       this.ss.batchUpdateGSheets();
       this.valueConfigOperator.fetchAfterColumnConfigSynced();
       this._assertFloorIdentityUnchanged();
+      this._assertFloorMatchesSeed();
       return {
         spreadsheetConfig: this.spreadsheetConfigOperator.toFileSource(),
         sheetConfigs: this.sheetConfigOperator.toFileSource(),
@@ -125,6 +127,12 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
         columnConfigs: this.columnConfigOperator.newColumnConfigs(),
       },
     });
+  }
+  private _assertFloorMatchesSeed(): void {
+    assertFloorMatchesSeed(
+      this.sheetConfigOperator.newSheetConfigs(),
+      this.columnConfigOperator.newColumnConfigs(),
+    );
   }
   private _syncConfigSheetRows(): string | undefined {
     this.ss.fetchAllSheetProperties();
