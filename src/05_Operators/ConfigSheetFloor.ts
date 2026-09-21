@@ -8,7 +8,6 @@ import {
   type FloorSeedColumn,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import type { SheetMetaRaw } from "../02_SpreadsheetRaw/SheetMetaRaw";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
@@ -19,6 +18,7 @@ import {
   ConfigSheetFloorEditWarnings,
   type IdentityColIndexes,
 } from "./ConfigSheetFloor/ConfigSheetFloorEditWarnings";
+import { liveColIndex } from "./ConfigSheetFloor/floorColumnLocation";
 import {
   columnNameByHeader,
   floorSheetNames,
@@ -141,7 +141,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       if (sheet.raw.tables.length !== 1) return;
       const meta = sheet.raw.meta;
       floorColumnsToRestore(sheetName).forEach((floorColumn) => {
-        const colIndex = liveFloorColIndex(meta, floorColumn);
+        const colIndex = liveColIndex(meta, floorColumn);
         if (colIndex === undefined) return;
         const liveHeader = String(meta.tableHeaderRow.valueOrEmpty(colIndex));
         if (liveHeader !== floorColumn.header) {
@@ -199,7 +199,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     if (sheet.raw.tables.length !== 1) return;
     const row = sheet.raw.row(sheet.schema.topDataRowIdx);
     floorDataValueColumns(sheetName).forEach((seedColumn) => {
-      const colIndex = liveFloorColIndex(
+      const colIndex = liveColIndex(
         sheet.raw.meta,
         floorColumnRestore(sheetName, {
           header: seedColumn.header,
@@ -306,22 +306,6 @@ function floorColumnRestore<SN extends FloorSheetName>(
     columnId: getColumnTraitByName(sheetName, columnName, "columnId"),
     groupHeading,
   };
-}
-
-function liveFloorColIndex(
-  meta: SheetMetaRaw,
-  floorColumn: FloorColumnRestore,
-): number | undefined {
-  const colIndexes = meta.fullTableColIndexes;
-  const byId = colIndexes.find(
-    (colIndex) =>
-      String(meta.colIdRow.valueOrEmpty(colIndex)) === floorColumn.columnId,
-  );
-  if (byId !== undefined) return byId;
-  return colIndexes.find(
-    (colIndex) =>
-      String(meta.tableHeaderRow.valueOrEmpty(colIndex)) === floorColumn.header,
-  );
 }
 
 function floorColumnIdentity<
