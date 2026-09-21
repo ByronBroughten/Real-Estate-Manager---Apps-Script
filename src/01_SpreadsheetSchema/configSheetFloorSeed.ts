@@ -227,10 +227,10 @@ export function floorSeedColumnById(
   if (sheetConfig === undefined || !isFloorTabName(sheetConfig.sheetName)) {
     return undefined;
   }
-  return floorSeedColumnByName(sheetConfig.sheetName, columnId);
+  return floorSeedColumnInSheet(sheetConfig.sheetName, columnId);
 }
 
-function floorSeedColumnByName(
+function floorSeedColumnInSheet(
   sheetName: FloorTabName,
   columnId: string,
 ): FloorSeedColumn | undefined {
@@ -257,5 +257,5 @@ export interface FloorSeedLookup {
 export const floorSeedLookup: FloorSeedLookup = {
   tabNames: Obj.keys(configSheetFloorSeed),
   columns: floorSeedColumns,
-  columnById: floorSeedColumnByName,
+  columnById: floorSeedColumnInSheet,
 };

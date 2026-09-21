@@ -124,7 +124,7 @@ describe("makeColumnConfigs", () => {
     header.header = "Heading";
 
     expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
-      `Floor column "header" (column ID "${header.columnId}") on "columnConfig" has header "Heading" where the floor seed has "Header".`,
+      `Floor column "Header" on "columnConfig" (column ID "${header.columnId}") has header "Heading" where the floor seed has "Header".`,
     );
   });
 
@@ -134,7 +134,17 @@ describe("makeColumnConfigs", () => {
     sheetGid.valueName = "string";
 
     expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
-      `Floor column "sheetGid" (column ID "${sheetGid.columnId}") on "sheetConfig" has valueName "string" where the floor seed's column type DOUBLE implies "number".`,
+      `Floor column "Sheet GID" on "sheetConfig" (column ID "${sheetGid.columnId}") has valueName "string" where the floor seed's column type DOUBLE implies "number".`,
+    );
+  });
+
+  it("throws when a BOOLEAN floor column's valueName isn't checkbox", () => {
+    const configs = floorColumnConfigs();
+    const letApiAccess = floorColumn(configs, "sheetConfig", "letApiAccess");
+    letApiAccess.valueName = "boolean";
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
+      `Floor column "Let api access" on "sheetConfig" (column ID "${letApiAccess.columnId}") has valueName "boolean" where the floor seed's column type BOOLEAN implies "checkbox".`,
     );
   });
 
@@ -144,7 +154,7 @@ describe("makeColumnConfigs", () => {
     idHeader.emptyValueAllowed = true;
 
     expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
-      `Floor column "idHeader" (column ID "${idHeader.columnId}") on "spreadsheetConfig" has emptyValueAllowed true where the floor seed has false.`,
+      `Floor column "ID header" on "spreadsheetConfig" (column ID "${idHeader.columnId}") has emptyValueAllowed true where the floor seed has false.`,
     );
   });
 

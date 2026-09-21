@@ -167,7 +167,7 @@ export function makeSheetConfigs<T extends SheetConfigsBase>(
   return sheetConfigs;
 }
 
-export function validateFloorTabEntries(
+function validateFloorTabEntries(
   sheetConfigs: SheetConfigsBase,
   floorSeed: FloorSeedLookup,
 ): void {
@@ -223,13 +223,17 @@ export function makeColumnConfigs<T extends ColumnConfigsGeneric>(
   return makeStructuredConfig({} as ColumnConfigsGeneric, columnConfigs);
 }
 
+export function floorColumnLabel(sheetName: string, header: string): string {
+  return `Floor column "${header}" on "${sheetName}"`;
+}
+
 const floorColumnTypeValueNames: Record<FloorColumnType, ValueName> = {
   TEXT: "string",
   DOUBLE: "number",
   BOOLEAN: "checkbox",
 };
 
-export function validateFloorColumnEntries(
+function validateFloorColumnEntries(
   columnConfigs: ColumnConfigsGeneric,
   floorSeed: FloorSeedLookup,
 ): void {
@@ -237,11 +241,11 @@ export function validateFloorColumnEntries(
     const matched = new Set<FloorSeedColumn>();
     const entryMismatches = Object.entries(
       columnConfigs[sheetName] ?? {},
-    ).flatMap(([columnName, column]) => {
+    ).flatMap(([, column]) => {
       const seedColumn = floorSeed.columnById(sheetName, column.columnId);
       if (seedColumn === undefined) return [];
       matched.add(seedColumn);
-      const label = `Floor column "${columnName}" (column ID "${column.columnId}") on "${sheetName}"`;
+      const label = `${floorColumnLabel(sheetName, seedColumn.header)} (column ID "${column.columnId}")`;
       return floorColumnMismatches(label, column, seedColumn);
     });
     const missing = floorSeed
@@ -249,7 +253,7 @@ export function validateFloorColumnEntries(
       .filter((seedColumn) => !matched.has(seedColumn))
       .map(
         ({ header }) =>
-          `Floor column "${header}" on "${sheetName}" has no floor entry.`,
+          `${floorColumnLabel(sheetName, header)} has no floor entry.`,
       );
     return [...entryMismatches, ...missing];
   });

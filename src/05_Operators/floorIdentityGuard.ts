@@ -3,9 +3,10 @@ import {
   floorSeedColumns,
   type FloorTabName,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import type {
-  ColumnConfigsGeneric,
-  SheetConfigsBase,
+import {
+  floorColumnLabel,
+  type ColumnConfigsGeneric,
+  type SheetConfigsBase,
 } from "../01_SpreadsheetSchema/makeConfigs";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
@@ -67,7 +68,7 @@ function floorColumnIdentityChanges(
       if (previousColumn === undefined || nextColumn === undefined) return [];
       if (nextColumn.columnId === previousColumn.columnId) return [];
       return [
-        `Floor column "${header}" on "${sheetName}" had column ID "${previousColumn.columnId}" and is now "${nextColumn.columnId}".`,
+        `${floorColumnLabel(sheetName, header)} had column ID "${previousColumn.columnId}" and is now "${nextColumn.columnId}".`,
       ];
     });
   });

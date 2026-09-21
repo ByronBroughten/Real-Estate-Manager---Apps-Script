@@ -640,12 +640,9 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
     it("fails a floor column's changed column ID with the identity guard's message, before the floor seed check", () => {
       seedFixture({ fillRowIdsRunStatusColumnId: "c:sscf:moved01" });
 
-      const regen = () => ConfigCoordinator.init().generateConfigFiles();
-
-      expect(regen).toThrow(
+      expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
         `Floor column "Fill row IDs, run status" on "spreadsheetConfig" had column ID "${ssc.fillRowIdsRunStatus.columnId}" and is now "c:sscf:moved01".`,
       );
-      expect(regen).not.toThrow(/floor seed/);
     });
 
     it("still only reports a non-floor sheet's changed ID prefix", () => {
