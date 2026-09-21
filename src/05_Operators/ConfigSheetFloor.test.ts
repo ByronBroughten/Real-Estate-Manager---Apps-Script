@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { ModelableEditProtection } from "../00_Source/RawSource/EditProtection";
-import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  floorSeedColumns,
+} from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -220,15 +223,24 @@ function cellUpdates(
     ) {
       return [];
     }
+    const userEnteredValue = update?.rows?.[0]?.values?.[0]?.userEnteredValue;
     return [
       {
         sheetId: range.sheetId,
         rowIndex: range.startRowIndex,
         colIndex: range.startColumnIndex,
-        value: update?.rows?.[0]?.values?.[0]?.userEnteredValue?.stringValue,
+        value: userEnteredValue?.stringValue ?? userEnteredValue?.numberValue,
       },
     ];
   });
+}
+
+function spreadsheetConfigCellUpdates(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return cellUpdates(batchUpdateCalls).filter(
+    (update) => update.sheetId === spreadsheetConfigGid,
+  );
 }
 
 function columnInserts(
@@ -332,6 +344,9 @@ function floorFixture(
     >;
     columnTypesAreUnset?: boolean;
     tableMenuSpaceValue?: string;
+    spreadsheetConfigLayoutValues?: Partial<
+      Record<(typeof sscColumns)[number], string | number>
+    >;
     startTableColIndex?: number;
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
@@ -392,6 +407,8 @@ function floorFixture(
   const sheetConfigGids = options.sheetConfigGids ?? defaultSheetConfigGids;
   const columnConfigRows = options.columnConfigRows ?? defaultColumnConfigRows;
   const dataRow = sscOrder.map((columnName) => {
+    const layoutValue = options.spreadsheetConfigLayoutValues?.[columnName];
+    if (layoutValue !== undefined) return layoutValue;
     if (columnName === "tableMenuSpace") {
       return options.tableMenuSpaceValue ?? "Not used";
     }
@@ -1505,6 +1522,162 @@ describe("ConfigSheetFloor", () => {
       endColumnIndex:
         startColIndex + configSheetFloorSeed.sheetConfig.columns.length,
     });
+  });
+
+  it("creates a missing Spreadsheet Config at its GID with a Table carrying every seed column, the endpoint feedback columns included, and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    const { report } = applyFloor();
+    const seed = configSheetFloorSeed.spreadsheetConfig;
+
+    expect(addSheetRequests(batchUpdateCalls)).toEqual([
+      expect.objectContaining({
+        sheetId: spreadsheetConfigGid,
+        title: seed.title,
+      }),
+    ]);
+    const tables = addTableRequests(batchUpdateCalls);
+    expect(tables.map((table) => table.name)).toEqual([seed.tableName]);
+    expect(tables[0]?.columnProperties).toEqual(
+      floorSeedColumns("spreadsheetConfig").map((column, columnIndex) => ({
+        columnIndex,
+        columnName: column.header,
+        columnType: column.columnType,
+      })),
+    );
+    expect(
+      tables[0]?.columnProperties?.map((column) => column.columnName),
+    ).toEqual(
+      expect.arrayContaining([
+        ssc.fillRowIdsTimeLastRan.header,
+        ssc.fillRowIdsRunStatus.header,
+        ssc.syncConfigSheetRowsTimeLastRan.header,
+        ssc.syncConfigSheetRowsRunStatus.header,
+      ]),
+    );
+    expect(report).toContain(`Created tabs: ${seed.title}`);
+  });
+
+  it("seeds a created Spreadsheet Config's data row with the generated layout values in base 1", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const table = addTableRequests(batchUpdateCalls)[0];
+    const colIndexOf = (header: string) =>
+      (table?.range?.startColumnIndex ?? 0) +
+      (table?.columnProperties?.find((column) => column.columnName === header)
+        ?.columnIndex ?? -1);
+    const dataRowIndex = (table?.range?.startRowIndex ?? 0) + 1;
+    const expected = [
+      { header: ssc.idHeader.header, value: spreadsheetConfig.idHeader },
+      { header: ssc.idDelimiter.header, value: spreadsheetConfig.idDelimiter },
+      {
+        header: ssc.startTableColumnIndexBase1.header,
+        value: spreadsheetConfig.startTableColIndexBase0 + 1,
+      },
+      {
+        header: ssc.columnIdRowIndexBase1.header,
+        value: spreadsheetConfig.columnIdRowIdxBase0 + 1,
+      },
+      {
+        header: ssc.columnGroupHeadingRowIndexBase1.header,
+        value: spreadsheetConfig.columnGroupHeadingRowIndexBase0 + 1,
+      },
+      {
+        header: ssc.actionRowIndexBase1.header,
+        value: spreadsheetConfig.actionRowIndexBase0 + 1,
+      },
+      {
+        header: ssc.tableHeaderRowIndexBase1.header,
+        value: spreadsheetConfig.tableHeaderRowIndexBase0 + 1,
+      },
+    ].map(({ header, value }) => ({
+      sheetId: spreadsheetConfigGid,
+      rowIndex: dataRowIndex,
+      colIndex: colIndexOf(header),
+      value,
+    }));
+
+    expect(spreadsheetConfigCellUpdates(batchUpdateCalls)).toEqual(expected);
+  });
+
+  it("sends a created Spreadsheet Config's seeded values in the same batch as, and after, its add-sheet and add-Table", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const requests = firstFlushRequests(batchUpdateCalls);
+    const addSheetAt = requests.findIndex(
+      (request) =>
+        request.addSheet?.properties?.sheetId === spreadsheetConfigGid,
+    );
+    const addTableAt = requests.findIndex(
+      (request) =>
+        request.addTable?.table?.name ===
+        configSheetFloorSeed.spreadsheetConfig.tableName,
+    );
+    const seedAts = requests.flatMap((request, index) =>
+      request.updateCells?.range?.sheetId === spreadsheetConfigGid
+        ? [index]
+        : [],
+    );
+    expect(addSheetAt).toBeGreaterThanOrEqual(0);
+    expect(addTableAt).toBeGreaterThan(addSheetAt);
+    expect(seedAts).toHaveLength(7);
+    expect(Math.min(...seedAts)).toBeGreaterThan(addTableAt);
+  });
+
+  it("writes nothing into a created Spreadsheet Config's Table menu space data cell", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const tableMenuSpaceColIndex =
+      addTableRequests(batchUpdateCalls)[0]?.range?.startColumnIndex;
+    expect(
+      spreadsheetConfigCellUpdates(batchUpdateCalls).filter(
+        (cell) => cell.colIndex === tableMenuSpaceColIndex,
+      ),
+    ).toEqual([]);
+  });
+
+  it("writes nothing into a created Spreadsheet Config's action row, and no data validation", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
+    const requests = batchUpdateCalls.flatMap((call) => call.requests ?? []);
+    expect(
+      spreadsheetConfigCellUpdates(batchUpdateCalls).filter(
+        (cell) => cell.rowIndex === actionRowIndex,
+      ),
+    ).toEqual([]);
+    expect(requests.filter((request) => request.setDataValidation)).toEqual([]);
+  });
+
+  it("leaves an existing Spreadsheet Config's changed layout values alone", () => {
+    const { batchUpdateCalls } = floorFixture({
+      spreadsheetConfigLayoutValues: {
+        idHeader: "Key",
+        idDelimiter: "-",
+        startTableColumnIndexBase1: 2,
+      },
+    });
+    const { report } = applyFloor();
+
+    expect(addSheetRequests(batchUpdateCalls)).toEqual([]);
+    expect(
+      spreadsheetConfigCellUpdates(batchUpdateCalls).filter(
+        (cell) => cell.rowIndex === topDataRowIndex,
+      ),
+    ).toEqual([]);
+    expect(report).not.toContain("Created tabs");
   });
 
   it("skips a created tab the refetch still lacks in the label, data-value, column-type and edit-warning steps, without throwing", () => {

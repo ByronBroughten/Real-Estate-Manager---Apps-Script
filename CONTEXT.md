@@ -67,7 +67,7 @@ Everything on the four config sheets that the app guarantees and restores on eac
 _Avoid_: minimum floor, minimum headers, floor sheet
 
 **Floor seed**:
-The app's own declaration of what the config-sheet floor looks like. It holds structure, plus Table menu space's data value; a floor tab or column keeps the identity it was created with.
+The app's own declaration of what the config-sheet floor looks like. It holds structure, plus Table menu space's data value; a floor tab or column keeps the identity it was created with. A tab it creates also gets its seeded values; Spreadsheet Config's layout values come from the generated layout record, not from the seed.
 _Avoid_: template, default config
 
 **Self-describing row**:
