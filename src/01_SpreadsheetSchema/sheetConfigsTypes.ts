@@ -1,5 +1,5 @@
 import { Obj } from "../utils/Obj";
-import type { SheetConfigStored } from "./makeConfigs";
+import type { SheetConfigsBase, SheetConfigStored } from "./makeConfigs";
 import { sheetConfigs } from "./generated/sheetConfigs";
 
 // Post-sheetConfigs
@@ -39,3 +39,6 @@ export function getSheetTraitByGid<K extends keyof SheetConfig>(
 ): SheetConfig[K] {
   return sheetConfigsByGid.get(sheetGid)![key];
 }
+
+// The generated literal read by an arbitrary name, where an entry may be absent.
+export const sheetConfigsByName: SheetConfigsBase = sheetConfigs;

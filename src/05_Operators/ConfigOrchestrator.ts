@@ -1,3 +1,5 @@
+import { columnConfigsByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { sheetConfigsByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   clearSpreadsheetConfigOverlay,
   overlaySpreadsheetConfig,
@@ -9,6 +11,7 @@ import {
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { ConfigSheetFloor } from "./ConfigSheetFloor";
+import { assertFloorIdentityUnchanged } from "./floorIdentityGuard";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 import { SpreadsheetBaseOperator } from "./SpreadsheetBaseOperator";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
@@ -84,6 +87,7 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
       const untypedColumnsSummary = this._syncConfigSheetRows();
       this.ss.batchUpdateGSheets();
       this.valueConfigOperator.fetchAfterColumnConfigSynced();
+      this._assertFloorIdentityUnchanged();
       return {
         spreadsheetConfig: this.spreadsheetConfigOperator.toFileSource(),
         sheetConfigs: this.sheetConfigOperator.toFileSource(),
@@ -109,6 +113,18 @@ export class ConfigOrchestrator extends SpreadsheetBaseOperator {
     } finally {
       clearSpreadsheetConfigOverlay();
     }
+  }
+  private _assertFloorIdentityUnchanged(): void {
+    assertFloorIdentityUnchanged({
+      previous: {
+        sheetConfigs: sheetConfigsByName,
+        columnConfigs: columnConfigsByName,
+      },
+      next: {
+        sheetConfigs: this.sheetConfigOperator.newSheetConfigs(),
+        columnConfigs: this.columnConfigOperator.newColumnConfigs(),
+      },
+    });
   }
   private _syncConfigSheetRows(): string | undefined {
     this.ss.fetchAllSheetProperties();

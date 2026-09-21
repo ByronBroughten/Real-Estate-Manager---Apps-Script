@@ -5,7 +5,7 @@ import type {
 import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./generated/columnConfigs";
-import type { ColumnConfigStored } from "./makeConfigs";
+import type { ColumnConfigsGeneric, ColumnConfigStored } from "./makeConfigs";
 import {
   configSheetNames,
   getSheetTraitByName,
@@ -14,6 +14,9 @@ import {
 import { type Value, type ValueName, type ValueSchema } from "./valueSchemas";
 
 export type ColumnConfigs = typeof columnConfigs;
+
+// The generated literal read by an arbitrary name, where an entry may be absent.
+export const columnConfigsByName: ColumnConfigsGeneric = columnConfigs;
 
 export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
   SN extends SheetNameSimple ? keyof ColumnConfigs[SN] : never;
