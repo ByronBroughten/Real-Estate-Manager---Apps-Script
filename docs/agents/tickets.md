@@ -51,7 +51,6 @@ One paragraph about one seam. The API fact most likely to go wrong comes first, 
 - [ ] (one box per test)
 - [ ] `<prose file>` "<section>": <the edit>
 - [ ] `npm run tsc`, `npm test` and `npm run lint` pass
-- [ ] Close with a comment mapping each box above to the `it()` that covers it, or "not done"
 
 ## Live effect
 

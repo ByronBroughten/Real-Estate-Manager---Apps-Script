@@ -2,6 +2,18 @@
 
 - **Commit or push only when asked.** A skill's approval step covers its edits, not a commit. Ask before committing, and ask which branch to use.
 - **Implement a spec on a branch named for it**: `issue-<n>-<short-slug>`. If other work is already in flight, ask which branch to use.
-- **After a spec is implemented**, ask in one question whether to land that branch on `master` (merge and push), close the implemented issue or sub-issue (`gh issue close <n>`), and only after those things delete the branch, naming the branch and the number. Example: "Should I merge issue-63-base-layout into master and push, close #63, and only after those things delete the branch?"
+- **After a spec is implemented**, do not ask whether to land it. End your reply with a wrap-up prompt in one fenced block for the developer to hand to a fresh agent, and do not merge, push, close or delete anything yourself. Fill in the branch, the number and the closing comment:
+
+  ````
+  Wrap up issue-<n>-<slug> (#<n>), in this order, stopping at the first failure and reporting it:
+  1. Confirm the working tree is clean and the branch's work is committed.
+  2. Merge the branch into master with a merge commit titled "Merge issue-<n>-<slug> into master (#<n>)", then run `npm run tsc`, `npm test` and `npm run lint`.
+  3. Push master.
+  4. `gh issue close <n> --comment "<what landed, one or two sentences, plus any box left undone>"`.
+  5. Only after steps 3 and 4 succeed, delete the branch locally and on the remote if it exists.
+  This message is the developer's yes to merge, push, close and delete for this branch and issue only.
+  ````
+
+  Add a line above the block if the checks were not all green or a box in the issue is undone, so the developer sees it before handing the prompt on.
 - **A `backup/*` branch is single-session scaffolding.** Take one before a history rewrite, retire it once the rewrite is verified, and say so. If a stale one exists, report it with its ahead/behind counts before starting other git work.
-- Commit messages and `gh` writes from a dispatched agent go back to the main session: [`delegation.md`](./delegation.md).
+- Commit messages and `gh` writes from a dispatched agent go back to the main session: [`delegation.md`](./delegation.md). The wrap-up prompt is the exception: it is the developer's own hand-off to a separate session, not a dispatch.
