@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
+  type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
 
@@ -13,28 +15,54 @@ const spreadsheetConfigGid = getSheetTraitByName(
   "sheetGid",
 );
 const ssc = columnConfigs.spreadsheetConfig;
-
-const spreadsheetConfigHeaders = [
-  ssc.idDelimiter.header,
-  ssc.idHeader.header,
-  ssc.startTableColumnIndexBase1.header,
-  ssc.columnIdRowIndexBase1.header,
-  ssc.columnGroupHeadingRowIndexBase1.header,
-  ssc.actionRowIndexBase1.header,
-  ssc.tableHeaderRowIndexBase1.header,
+const spreadsheetConfigColumns = [
+  ssc.idDelimiter,
+  ssc.idHeader,
+  ssc.startTableColumnIndexBase1,
+  ssc.columnIdRowIndexBase1,
+  ssc.columnGroupHeadingRowIndexBase1,
+  ssc.actionRowIndexBase1,
+  ssc.tableHeaderRowIndexBase1,
 ];
+const columnIdRow = spreadsheetConfigColumns.map((column) => column.columnId);
+const tableHeaderRow = spreadsheetConfigColumns.map((column) => column.header);
 
-const matchingCommittedFileValues = [":", "ID", 1, 1, 2, 3, 4] as const;
+const columnIdRowIndex = spreadsheetConfig.columnIdRowIdxBase0;
+const tableHeaderRowIndex = spreadsheetConfig.tableHeaderRowIndexBase0;
+const firstDataRowIndex = tableHeaderRowIndex + 1;
+
+const compiledValues = [":", "ID", 1, 1, 2, 3, 4] as const;
+
+function refusal(...lines: string[]): string {
+  return [
+    'Spreadsheet Config layout values other than "ID header" are fixed; put back:',
+    ...lines,
+  ].join("\n");
+}
 
 function stubSpreadsheetConfigSheet(
-  rowsByIndex: Record<number, readonly (string | number | boolean | null)[]>,
+  rowsByIndex: Record<number, FakeCell[]>,
+  extraColumn?: { columnId: string; header: string },
 ) {
+  const lastRowIndex = Math.max(
+    tableHeaderRowIndex,
+    ...Object.keys(rowsByIndex).map(Number),
+  );
   return stubSheetsService({
     sheets: [
       {
         sheetId: spreadsheetConfigGid,
         title: "Spreadsheet Config",
-        rows: buildGridRows(rowsByIndex),
+        rows: buildGridRows({
+          [columnIdRowIndex]: extraColumn
+            ? [...columnIdRow, extraColumn.columnId]
+            : columnIdRow,
+          [tableHeaderRowIndex]: extraColumn
+            ? [...tableHeaderRow, extraColumn.header]
+            : tableHeaderRow,
+          ...rowsByIndex,
+        }),
+        table: { endRowIndex: lastRowIndex + 1 },
       },
     ],
   });
@@ -51,18 +79,15 @@ beforeEach(() => {
 });
 
 describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
-  it("emits makeSpreadsheetConfig of the live row with base-1 indexes minus one", () => {
-    const { getByDataFilterCalls } = stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: ["|", "ID", 1, 1, 2, 3, 4],
-    });
+  it("emits makeSpreadsheetConfig of the first data row with base-1 indexes minus one", () => {
+    stubSpreadsheetConfigSheet({ [firstDataRowIndex]: [...compiledValues] });
 
     expect(fetchedOperator().toFileSource()).toBe(
       [
         `import { makeSpreadsheetConfig } from "../makeConfigs";`,
         ``,
         `export const spreadsheetConfig = makeSpreadsheetConfig({`,
-        `  idDelimiter: "|",`,
+        `  idDelimiter: ":",`,
         `  idHeader: "ID",`,
         `  startTableColIndexBase0: 0,`,
         `  columnIdRowIdxBase0: 0,`,
@@ -73,128 +98,95 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
         ``,
       ].join("\n"),
     );
-    expect(getByDataFilterCalls[0]).toMatchObject({
-      dataFilters: [{ gridRange: { sheetId: spreadsheetConfigGid } }],
+  });
+
+  it("emits an edited ID header as written", () => {
+    stubSpreadsheetConfigSheet({
+      [firstDataRowIndex]: [":", "Row ID", 1, 1, 2, 3, 4],
     });
+
+    expect(fetchedOperator().toFileSource()).toContain('idHeader: "Row ID"');
+  });
+
+  it("refuses an edited ID delimiter, naming it with the live and expected values", () => {
+    stubSpreadsheetConfigSheet({
+      [firstDataRowIndex]: ["|", "ID", 1, 1, 2, 3, 4],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      refusal('Spreadsheet Config column "ID delimiter" is "|"; expected ":".'),
+    );
+  });
+
+  it("refuses every edited index in one error, in base 1", () => {
+    stubSpreadsheetConfigSheet({
+      [firstDataRowIndex]: [":", "ID", 2, 1, 2, 3, 5],
+    });
+
+    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
+      refusal(
+        'Spreadsheet Config column "Start table column index base 1" is 2; expected 1.',
+        'Spreadsheet Config column "Table header row index base 1" is 5; expected 4.',
+      ),
+    );
   });
 
   it("ignores an extra column that is not in the closed map", () => {
-    stubSpreadsheetConfigSheet({
-      3: [...spreadsheetConfigHeaders, "Notes"],
-      4: [...matchingCommittedFileValues, "ignore me"],
-    });
+    stubSpreadsheetConfigSheet(
+      { [firstDataRowIndex]: [...compiledValues, "ignore me"] },
+      { columnId: "notes", header: "Notes" },
+    );
 
     expect(fetchedOperator().toFileSource()).toContain('idDelimiter: ":"');
     expect(fetchedOperator().toFileSource()).not.toContain("Notes");
   });
 
-  it("throws when the header row is not uniquely findable", () => {
-    stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      6: spreadsheetConfigHeaders,
-      4: [...matchingCommittedFileValues],
-      7: [...matchingCommittedFileValues],
-    });
-
-    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
-    );
-  });
-
   it("throws when there are no data rows", () => {
-    stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-    });
+    stubSpreadsheetConfigSheet({});
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
+      `Sheet "Spreadsheet Config" (gid ${spreadsheetConfigGid}) Table must have at least one data row.`,
     );
   });
 
   it("reads the first data row as the Table header row plus one, not a later filled row", () => {
     stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      5: [...matchingCommittedFileValues],
+      [firstDataRowIndex + 1]: [...compiledValues],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
+      `Column "idDelimiter" of sheet "spreadsheetConfig" is empty in row ${firstDataRowIndex}.`,
     );
   });
 
   it("does not treat a second filled row as a fetch-time error", () => {
     stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: [...matchingCommittedFileValues],
-      5: ["x", "", "", "", "", "", ""],
+      [firstDataRowIndex]: [...compiledValues],
+      [firstDataRowIndex + 1]: ["x", "", "", "", "", "", ""],
     });
 
     expect(fetchedOperator().toFileSource()).toContain('idDelimiter: ":"');
   });
 
-  it("throws when a guaranteed header is missing", () => {
-    stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders.slice(1),
-      4: ["ID", 1, 1, 2, 3, 4],
-    });
-
-    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
-    );
-  });
-
   it("throws when a guaranteed cell is blank", () => {
     stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: ["", "ID", 1, 1, 2, 3, 4],
+      [firstDataRowIndex]: ["", "ID", 1, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
+      `Column "idDelimiter" of sheet "spreadsheetConfig" is empty in row ${firstDataRowIndex}.`,
     );
   });
 
-  it("throws when an index is not an integer ≥ 1", () => {
+  it("refuses a non-numeric index, naming it", () => {
     stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: [":", "ID", 0, 1, 2, 3, 4],
+      [firstDataRowIndex]: [":", "ID", "one", 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
-    );
-  });
-
-  it("throws when an index is not an integer", () => {
-    stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: [":", "ID", 1.5, 1, 2, 3, 4],
-    });
-
-    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Spreadsheet Config/,
-    );
-  });
-
-  it("throws when two uniform-row indexes share a number", () => {
-    stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: [":", "ID", 1, 1, 2, 1, 4],
-    });
-
-    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Column ID row index base 1.*Action row index base 1/,
-    );
-  });
-
-  it("throws when a uniform-row index lands on the first data row", () => {
-    stubSpreadsheetConfigSheet({
-      3: spreadsheetConfigHeaders,
-      4: [":", "ID", 1, 5, 2, 3, 4],
-    });
-
-    expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
-      /Column ID row index base 1.*first data row/,
+      refusal(
+        'Spreadsheet Config column "Start table column index base 1" is "one"; expected 1.',
+      ),
     );
   });
 });
