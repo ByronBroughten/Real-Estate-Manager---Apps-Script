@@ -1,7 +1,4 @@
-import {
-  getColumnTraitByName,
-  type ColumnName,
-} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
   floorSeedColumns,
@@ -14,6 +11,7 @@ import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
+import { ConfigSheetFloorCreator } from "./ConfigSheetFloor/ConfigSheetFloorCreator";
 import {
   ConfigSheetFloorEditWarnings,
   type IdentityColIndexes,
@@ -21,20 +19,17 @@ import {
 import { liveColIndex } from "./ConfigSheetFloor/floorColumnLocation";
 import {
   columnNameByHeader,
+  floorColumnRestore,
+  floorColumnsToRestore,
   floorSheetNames,
   type FloorSheetName,
   type FloorTabName,
 } from "./ConfigSheetFloor/floorSeedLookups";
 
-interface FloorColumnRestore {
-  header: string;
-  columnId: string;
-  groupHeading: string;
-}
-
 /**
  * Restores floor tab titles, Table names, headers, column IDs, group
- * headings, data values and column types, and has ConfigSheetFloorEditWarnings declare
+ * headings, data values and column types, has ConfigSheetFloorCreator
+ * recreate missing floor columns, and has ConfigSheetFloorEditWarnings declare
  * the edit warnings. ConfigCoordinator
  * runs this at the start of every config sync; the
  * ensureConfigSheetFloor chore is the other caller.
@@ -50,10 +45,20 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
   private get editWarnings(): ConfigSheetFloorEditWarnings {
     return new ConfigSheetFloorEditWarnings(this.spreadsheetNamedProps);
   }
+  private get creator(): ConfigSheetFloorCreator {
+    return new ConfigSheetFloorCreator(this.spreadsheetNamedProps);
+  }
   ensure(): string {
     const report: string[] = [];
     this._ensureTitlesAndTables(report);
-    const identityColIndexes = this._fetchFloorSheets();
+    let identityColIndexes = this._fetchFloorSheets();
+    const createdLines = this.creator.createMissing();
+    if (createdLines.length > 0) {
+      report.push(...createdLines);
+      this.ss.batchUpdateGSheets();
+      this.ss.fetchAllSheetProperties();
+      identityColIndexes = this._fetchFloorSheets();
+    }
     this._ensureColumnLabels(report);
     this._ensureDataValues(report);
     this._ensureColumnTypes(report);
@@ -232,6 +237,14 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     if (!this.ss.raw.gidIsActive(sheetGid)) return [];
     const sheet = this.ss.sheet(sheetName);
     return columns.flatMap((seedColumn) => {
+      const colIndex = liveColIndex(
+        sheet.raw.meta,
+        floorColumnRestore(sheetName, {
+          header: seedColumn.header,
+          groupHeading: "",
+        }),
+      );
+      if (colIndex === undefined) return [];
       const column = sheet.column(
         columnNameByHeader(sheetName, seedColumn.header),
       );
@@ -271,41 +284,6 @@ function assertFloorTable(sheet: SheetRaw, tableName: string): void {
       `Floor tab "${sheet.title}" has several Tables and none is named ${tableName}.`,
     );
   }
-}
-
-function floorColumnsToRestore<SN extends FloorSheetName>(
-  sheetName: SN,
-): FloorColumnRestore[] {
-  const seedColumns = configSheetFloorSeed[sheetName].columns.map((column) =>
-    floorColumnRestore(sheetName, {
-      header: column.header,
-      groupHeading: column.columnGroupHeading,
-    }),
-  );
-  if (sheetName !== "spreadsheetConfig") return seedColumns;
-  const endpointColumns = Obj.values(
-    configSheetFloorSeed.spreadsheetConfig.endpoints,
-  ).flatMap((endpoint) =>
-    [endpoint.timeLastRan, endpoint.runStatus].map((column) =>
-      floorColumnRestore("spreadsheetConfig", {
-        header: column.header,
-        groupHeading: endpoint.heading,
-      }),
-    ),
-  );
-  return [...seedColumns, ...endpointColumns];
-}
-
-function floorColumnRestore<SN extends FloorSheetName>(
-  sheetName: SN,
-  { header, groupHeading }: Pick<FloorColumnRestore, "header" | "groupHeading">,
-): FloorColumnRestore {
-  const columnName = columnNameByHeader(sheetName, header);
-  return {
-    header,
-    columnId: getColumnTraitByName(sheetName, columnName, "columnId"),
-    groupHeading,
-  };
 }
 
 function floorColumnIdentity<
