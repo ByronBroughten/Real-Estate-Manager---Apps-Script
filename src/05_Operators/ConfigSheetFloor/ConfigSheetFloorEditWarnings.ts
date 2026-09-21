@@ -9,7 +9,12 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
-import { configSheetFloorSeed } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  floorSeedColumnById,
+  floorTabSeedByGid,
+} from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import type { SheetNamed } from "../../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
@@ -17,13 +22,14 @@ import { Arr } from "../../utils/Arr";
 import { Obj } from "../../utils/Obj";
 import {
   columnNameByHeader,
-  floorColumnIds,
   floorSheetNames,
-  floorTabGids,
   type FloorSheetName,
 } from "./floorSeedLookups";
 
 type SpreadsheetConfigColumnName = ColumnName<"spreadsheetConfig">;
+
+// Sheet indexes of the columns that say whose row it is, gathered with the floor's fetch.
+export type IdentityColIndexes = Map<FloorSheetName, number[]>;
 
 const floorWarningPrefix = "Config-sheet floor";
 
@@ -44,16 +50,17 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  ensure(): string[] {
+  ensure(identityColIndexes: IdentityColIndexes): string[] {
     const report: string[] = [];
     const declarations = floorSheetNames().map((sheetName) =>
-      this._sheetDeclaration(sheetName, report),
+      this._sheetDeclaration(sheetName, identityColIndexes, report),
     );
     this._reconcile(declarations, report);
     return report;
   }
   private _sheetDeclaration<SN extends FloorSheetName>(
     sheetName: SN,
+    identityColIndexes: IdentityColIndexes,
     report: string[],
   ): FloorDeclaration {
     const sheet = this.ss.sheet(sheetName);
@@ -65,7 +72,7 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
     const unprotectedRanges = editableRanges(
       sheet,
       sheetName,
-      this._carvedRowIndexesByColIndex(sheetName),
+      this._carvedRowIndexesByColIndex(sheetName, identityColIndexes),
     );
     return {
       description,
@@ -75,25 +82,76 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
         sheet.addEditWarningWholeSheet({ description, unprotectedRanges }),
     };
   }
-  // Computed before the sync moves rows: a protection's range shifts with a row deleted above it, and appended rows land below.
+  // Before the floor's fetch, so these ride it: a drifted column ID leaves only the Table header to find them by.
+  gatherIdentityColumns(): IdentityColIndexes {
+    const identityColIndexes: IdentityColIndexes = new Map();
+    const identities = [
+      this._identityColumns("sheetConfig", ["sheetGid"]),
+      this._identityColumns("columnConfig", ["sheetGid", "columnId"]),
+    ];
+    identities.forEach((identity) => {
+      if (identity === undefined) return;
+      const { sheet, sheetName, colIndexes } = identity;
+      colIndexes.forEach((colIndex) => {
+        sheet.raw.column(colIndex).gatherFetchFull();
+      });
+      identityColIndexes.set(sheetName, colIndexes);
+    });
+    return identityColIndexes;
+  }
+  private _identityColumns<SN extends "sheetConfig" | "columnConfig">(
+    sheetName: SN,
+    columnNames: ColumnName<SN>[],
+  ):
+    { sheet: SheetNamed<SN>; sheetName: SN; colIndexes: number[] } | undefined {
+    if (!this.ss.raw.gidIsActive(getSheetTraitByName(sheetName, "sheetGid"))) {
+      return undefined;
+    }
+    const sheet = this.ss.sheet(sheetName);
+    if (sheet.raw.tables.length !== 1) return undefined;
+    const colIndexes = tableColIndexesByHeader(sheet, sheetName, columnNames);
+    return colIndexes === undefined
+      ? undefined
+      : { sheet, sheetName, colIndexes };
+  }
+  // Row indexes as fetched, before the sync moves rows.
   private _carvedRowIndexesByColIndex(
     sheetName: FloorSheetName,
+    identityColIndexes: IdentityColIndexes,
   ): Map<number, number[]> {
     if (sheetName === "sheetConfig") {
       const sheet = this.ss.sheet("sheetConfig");
-      const gids = floorTabGids();
+      const [sheetGidCol] = identityColIndexes.get("sheetConfig") ?? [];
+      if (sheetGidCol === undefined) return new Map();
       return carveOut(sheet, "sheetConfig", "letApiAccess", (rowIndex) => {
-        const sheetGid = sheet.column("sheetGid").raw.valueOrEmpty(rowIndex);
-        return typeof sheetGid === "number" && gids.has(sheetGid);
+        const sheetGid = sheet.raw.column(sheetGidCol).valueOrEmpty(rowIndex);
+        return (
+          typeof sheetGid === "number" &&
+          floorTabSeedByGid(sheetGid) !== undefined
+        );
       });
     }
     if (sheetName === "columnConfig") {
       const sheet = this.ss.sheet("columnConfig");
-      const columnIds = floorColumnIds();
-      return carveOut(sheet, "columnConfig", "emptyValueAllowed", (rowIndex) =>
-        columnIds.has(
-          String(sheet.column("columnId").raw.valueOrEmpty(rowIndex)),
-        ),
+      const [sheetGidCol, columnIdCol] =
+        identityColIndexes.get("columnConfig") ?? [];
+      if (sheetGidCol === undefined || columnIdCol === undefined) {
+        return new Map();
+      }
+      return carveOut(
+        sheet,
+        "columnConfig",
+        "emptyValueAllowed",
+        (rowIndex) => {
+          const sheetGid = sheet.raw.column(sheetGidCol).valueOrEmpty(rowIndex);
+          const columnId = String(
+            sheet.raw.column(columnIdCol).valueOrEmpty(rowIndex),
+          );
+          return (
+            typeof sheetGid === "number" &&
+            floorSeedColumnById(sheetGid, columnId) !== undefined
+          );
+        },
       );
     }
     return new Map();
@@ -253,6 +311,24 @@ function liveColumnIndexes<SN extends FloorSheetName>(
   return indexes;
 }
 
+function tableColIndexesByHeader<SN extends FloorSheetName>(
+  sheet: SheetNamed<SN>,
+  sheetName: SN,
+  columnNames: ColumnName<SN>[],
+): number[] | undefined {
+  const table = sheet.raw.activeTable;
+  const colIndexes = columnNames.flatMap((columnName) => {
+    const header = getColumnTraitByName(sheetName, columnName, "header");
+    const column = table.columnProperties.find(
+      (colProps) => colProps.columnName === header,
+    );
+    return column === undefined
+      ? []
+      : [table.startColumnIndex + column.columnIndex];
+  });
+  return colIndexes.length === columnNames.length ? colIndexes : undefined;
+}
+
 function editableDataColumnNames<SN extends FloorSheetName>(
   sheetName: SN,
 ): ColumnName<SN>[] {
@@ -317,7 +393,7 @@ function columnEditableRanges({
       endRowIndex,
       carvedRowIndexes: carvedRowIndexesByColIndex.get(colIndex) ?? [],
     });
-    const key = JSON.stringify(spans);
+    const key = spansKey(spans);
     const group = colIndexesBySpans.get(key) ?? { spans, colIndexes: [] };
     group.colIndexes.push(colIndex);
     colIndexesBySpans.set(key, group);
@@ -335,6 +411,11 @@ function columnEditableRanges({
       })),
     ),
   );
+}
+
+// Columns with identical spans share a key, so their ranges merge.
+function spansKey(spans: readonly RowSpan[]): string {
+  return JSON.stringify(spans);
 }
 
 function uncarvedRowSpans({

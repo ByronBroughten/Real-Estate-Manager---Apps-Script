@@ -254,12 +254,12 @@ const defaultSheetConfigGids = [
   columnConfigGid,
   valueConfigGid,
 ];
-const defaultColumnConfigColumnIds = [
-  "c:biz:one",
-  sc.letApiAccess.columnId,
-  "c:biz:two",
-  cc.emptyValueAllowed.columnId,
-  cc.header.columnId,
+const defaultColumnConfigRows = [
+  { sheetGid: businessSheetGid, columnId: "c:biz:one" },
+  { sheetGid: sheetConfigGid, columnId: sc.letApiAccess.columnId },
+  { sheetGid: businessSheetGid, columnId: "c:biz:two" },
+  { sheetGid: columnConfigGid, columnId: cc.emptyValueAllowed.columnId },
+  { sheetGid: columnConfigGid, columnId: cc.header.columnId },
 ];
 
 function dataRowsFrom(
@@ -290,8 +290,11 @@ function floorFixture(
     spreadsheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     sheetConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
     columnConfigProtections?: GoogleAppsScript.Sheets.Schema.ProtectedRange[];
+    sheetConfigHeaders?: Partial<Record<keyof typeof sc, string>>;
+    sheetConfigColumnIds?: Partial<Record<keyof typeof sc, string>>;
+    columnConfigColumnIds?: Partial<Record<keyof typeof cc, string>>;
     sheetConfigGids?: readonly number[];
-    columnConfigColumnIds?: readonly string[];
+    columnConfigRows?: readonly { sheetGid: number; columnId: string }[];
     spreadsheetConfigTitle?: string;
     spreadsheetConfigTableName?: string;
     valueConfig?: {
@@ -330,9 +333,14 @@ function floorFixture(
       spreadsheetConfigGroupHeading(sscField(columnName).header),
   );
   const extraColumn = options.extraSpreadsheetConfigColumn;
+  const sheetConfigHeaders = (
+    ["sheetGid", "sheetTitle", "letApiAccess"] as const
+  ).map(
+    (columnName) =>
+      options.sheetConfigHeaders?.[columnName] ?? sc[columnName].header,
+  );
   const sheetConfigGids = options.sheetConfigGids ?? defaultSheetConfigGids;
-  const columnConfigColumnIds =
-    options.columnConfigColumnIds ?? defaultColumnConfigColumnIds;
+  const columnConfigRows = options.columnConfigRows ?? defaultColumnConfigRows;
   const dataRow = sscOrder.map((columnName) => {
     if (columnName === "tableMenuSpace") {
       return options.tableMenuSpaceValue ?? "Not used";
@@ -388,16 +396,14 @@ function floorFixture(
         sheetId: sheetConfigGid,
         title: "Sheet Config",
         rows: buildGridRows({
-          0: pad([
-            sc.sheetGid.columnId,
-            sc.sheetTitle.columnId,
-            sc.letApiAccess.columnId,
-          ]),
-          3: pad([
-            sc.sheetGid.header,
-            sc.sheetTitle.header,
-            sc.letApiAccess.header,
-          ]),
+          0: pad(
+            (["sheetGid", "sheetTitle", "letApiAccess"] as const).map(
+              (columnName) =>
+                options.sheetConfigColumnIds?.[columnName] ??
+                sc[columnName].columnId,
+            ),
+          ),
+          3: pad(sheetConfigHeaders),
           ...dataRowsFrom(
             topDataRowIndex,
             sheetConfigGids.map((gid) => pad([gid, `Tab ${gid}`, true])),
@@ -411,11 +417,7 @@ function floorFixture(
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
               "sheetConfig",
-              [
-                sc.sheetGid.header,
-                sc.sheetTitle.header,
-                sc.letApiAccess.header,
-              ],
+              sheetConfigHeaders,
               options.columnTypesAreUnset,
             ),
             startTableColIndex,
@@ -427,14 +429,22 @@ function floorFixture(
         sheetId: columnConfigGid,
         title: "Column Config",
         rows: buildGridRows({
-          0: pad([
-            cc.sheetGid.columnId,
-            cc.columnId.columnId,
-            cc.sheetTitle.columnId,
-            cc.header.columnId,
-            cc.emptyValueAllowed.columnId,
-            cc.customDefaultValue.columnId,
-          ]),
+          0: pad(
+            (
+              [
+                "sheetGid",
+                "columnId",
+                "sheetTitle",
+                "header",
+                "emptyValueAllowed",
+                "customDefaultValue",
+              ] as const
+            ).map(
+              (columnName) =>
+                options.columnConfigColumnIds?.[columnName] ??
+                cc[columnName].columnId,
+            ),
+          ),
           3: pad([
             cc.sheetGid.header,
             cc.columnId.header,
@@ -445,15 +455,15 @@ function floorFixture(
           ]),
           ...dataRowsFrom(
             topDataRowIndex,
-            columnConfigColumnIds.map((columnId) =>
-              pad(["", columnId, "", "", false, ""]),
+            columnConfigRows.map(({ sheetGid, columnId }) =>
+              pad([sheetGid, columnId, "", "", false, ""]),
             ),
           ),
         }),
         table: {
           name: configSheetFloorSeed.columnConfig.tableName,
           startColumnIndex: startTableColIndex,
-          endRowIndex: topDataRowIndex + columnConfigColumnIds.length,
+          endRowIndex: topDataRowIndex + columnConfigRows.length,
           endColumnIndex: startTableColIndex + 6,
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
@@ -652,6 +662,13 @@ describe("ConfigSheetFloor", () => {
     expect(batchUpdateCalls).toHaveLength(1);
   });
 
+  it("fetches the floor's grid in the same two reads it took before the carve read identity columns", () => {
+    const { getByDataFilterCalls } = floorFixture();
+    applyFloor();
+
+    expect(getByDataFilterCalls).toHaveLength(2);
+  });
+
   it("carves the four floor rows out of Sheet Config's Let api access column, leaving a bounded range above and an open-ended one below", () => {
     floorFixture();
     const { floor } = applyFloor();
@@ -671,7 +688,9 @@ describe("ConfigSheetFloor", () => {
   });
 
   it("keeps Column Config's two editable columns merged while no floor column has a row", () => {
-    floorFixture({ columnConfigColumnIds: ["c:biz:one"] });
+    floorFixture({
+      columnConfigRows: [{ sheetGid: businessSheetGid, columnId: "c:biz:one" }],
+    });
     const { floor } = applyFloor();
 
     expect(protectionsOf(floor, "columnConfig")[0]?.unprotectedRanges).toEqual([
@@ -1054,6 +1073,65 @@ describe("ConfigSheetFloor", () => {
       rowIndex: 0,
       colIndex: 0,
       value: ssc.tableMenuSpace.columnId,
+    });
+  });
+
+  it("overwrites a drifted Sheet GID column ID on Sheet Config without throwing, and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      sheetConfigColumnIds: { sheetGid: "c:scf:drifted" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain(
+      `Sheet Config · ${sc.sheetGid.header} (c:scf:drifted) → ${sc.sheetGid.columnId}`,
+    );
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: sheetConfigGid,
+      rowIndex: 0,
+      colIndex: 0,
+      value: sc.sheetGid.columnId,
+    });
+  });
+
+  it("overwrites a drifted Column ID column ID on Column Config without throwing, and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnConfigColumnIds: { columnId: "c:ccf:drifted" },
+    });
+    const { report } = applyFloor();
+
+    expect(report).toContain(
+      `Column Config · ${cc.columnId.header} (c:ccf:drifted) → ${cc.columnId.columnId}`,
+    );
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: columnConfigGid,
+      rowIndex: 0,
+      colIndex: 1,
+      value: cc.columnId.columnId,
+    });
+  });
+
+  it("carves nothing on Sheet Config the sync its Sheet GID header has drifted, and restores the header without throwing", () => {
+    const { batchUpdateCalls } = floorFixture({
+      sheetConfigHeaders: { sheetGid: "Tab gid" },
+    });
+    const { floor, report } = applyFloor();
+
+    expect(protectionsOf(floor, "sheetConfig")[0]?.unprotectedRanges).toEqual([
+      {
+        sheetId: sheetConfigGid,
+        startRowIndex: topDataRowIndex,
+        startColumnIndex: 2,
+        endColumnIndex: 3,
+      },
+    ]);
+    expect(report).toContain(
+      `Sheet Config · Tab gid (${sc.sheetGid.columnId}) → ${sc.sheetGid.header}`,
+    );
+    expect(cellUpdates(batchUpdateCalls)).toContainEqual({
+      sheetId: sheetConfigGid,
+      rowIndex: 3,
+      colIndex: 0,
+      value: sc.sheetGid.header,
     });
   });
 

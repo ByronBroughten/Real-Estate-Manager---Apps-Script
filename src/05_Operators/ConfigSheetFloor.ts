@@ -15,7 +15,10 @@ import type { ColumnNamed } from "../04_SpreadsheetNamed/ColumnNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
-import { ConfigSheetFloorEditWarnings } from "./ConfigSheetFloor/ConfigSheetFloorEditWarnings";
+import {
+  ConfigSheetFloorEditWarnings,
+  type IdentityColIndexes,
+} from "./ConfigSheetFloor/ConfigSheetFloorEditWarnings";
 import {
   columnNameByHeader,
   floorSheetNames,
@@ -50,11 +53,11 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
   ensure(): string {
     const report: string[] = [];
     this._ensureTitlesAndTables(report);
-    this._fetchFloorSheets();
+    const identityColIndexes = this._fetchFloorSheets();
     this._ensureColumnLabels(report);
     this._ensureDataValues(report);
     this._ensureColumnTypes(report);
-    report.push(...this.editWarnings.ensure());
+    report.push(...this.editWarnings.ensure(identityColIndexes));
     return report.join("; ");
   }
   private _ensureTitlesAndTables(report: string[]): void {
@@ -110,7 +113,8 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       }
     });
   }
-  private _fetchFloorSheets(): void {
+  private _fetchFloorSheets(): IdentityColIndexes {
+    const identityColIndexes = this.editWarnings.gatherIdentityColumns();
     floorSheetNames().forEach((sheetName) => {
       const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
       if (!this.ss.raw.gidIsActive(sheetGid)) return;
@@ -123,20 +127,8 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       }
       sheet.prepFetchEditProtections();
     });
-    this._prepFetchIdentityColumns();
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
-  }
-  private _prepFetchIdentityColumns(): void {
-    if (
-      this.ss.raw.gidIsActive(getSheetTraitByName("sheetConfig", "sheetGid"))
-    ) {
-      this.ss.sheet("sheetConfig").column("sheetGid").prepFetchFull();
-    }
-    if (
-      this.ss.raw.gidIsActive(getSheetTraitByName("columnConfig", "sheetGid"))
-    ) {
-      this.ss.sheet("columnConfig").column("columnId").prepFetchFull();
-    }
+    return identityColIndexes;
   }
   private _ensureColumnLabels(report: string[]): void {
     const headerLines: string[] = [];
