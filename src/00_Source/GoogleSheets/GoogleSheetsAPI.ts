@@ -326,6 +326,33 @@ function localOperationToGoogleRequests(
           },
         },
       ];
+    case "addSheet":
+      return [
+        {
+          addSheet: {
+            properties: {
+              sheetId: operation.sheetId,
+              title: operation.title,
+              gridProperties: {
+                rowCount: operation.rowCount,
+                columnCount: operation.columnCount,
+              },
+            },
+          },
+        },
+      ];
+    case "addTable":
+      return [
+        {
+          addTable: {
+            table: {
+              name: operation.name,
+              range: operation.range,
+              columnProperties: operation.columnProperties,
+            },
+          },
+        },
+      ];
     case "updateSheetTitle":
       return [
         {

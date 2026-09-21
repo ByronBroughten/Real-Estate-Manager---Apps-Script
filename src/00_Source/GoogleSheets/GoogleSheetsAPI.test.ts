@@ -1,6 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { assertType, type IsExactly } from "../../testSupport/typeAssertions";
-import type { LocalWriteOperation } from "../RawSource/RawSource";
+import type {
+  AddSheetOperation,
+  AddTableOperation,
+  LocalWriteOperation,
+} from "../RawSource/RawSource";
 import type { RgbColor } from "../RawSource/RgbColor";
 import {
   GoogleSheetsAPI,
@@ -10,6 +14,29 @@ import {
 
 const spreadsheetId = "spreadsheet-under-test";
 const lightGreen: RgbColor = { red: 0.851, green: 0.918, blue: 0.827 };
+
+const addSheetOperation: AddSheetOperation = {
+  kind: "addSheet",
+  sheetId: 555,
+  title: "Spreadsheet Config",
+  rowCount: 20,
+  columnCount: 6,
+};
+const addTableOperation: AddTableOperation = {
+  kind: "addTable",
+  name: "spreadsheetConfig",
+  range: {
+    sheetId: 555,
+    startRowIndex: 2,
+    endRowIndex: 5,
+    startColumnIndex: 1,
+    endColumnIndex: 3,
+  },
+  columnProperties: [
+    { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
+    { columnIndex: 2, columnName: "Amount", columnType: "CURRENCY" },
+  ],
+};
 
 type BatchUpdateRequest =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
@@ -473,6 +500,58 @@ describe("GoogleSheetsAPI write mapping", () => {
         (request) => Object.keys(request)[0],
       ),
     ).toEqual(["updateCells", "updateTable"]);
+  });
+
+  it("maps an add-sheet operation onto one addSheet request carrying its sheetId, title and grid size", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(spreadsheetId, [addSheetOperation]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addSheet: {
+          properties: {
+            sheetId: 555,
+            title: "Spreadsheet Config",
+            gridProperties: { rowCount: 20, columnCount: 6 },
+          },
+        },
+      },
+    ]);
+  });
+
+  it("maps an add-Table operation onto one addTable request carrying its name, range and columns, and no tableId", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(spreadsheetId, [addTableOperation]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addTable: {
+          table: {
+            name: "spreadsheetConfig",
+            range: addTableOperation.range,
+            columnProperties: addTableOperation.columnProperties,
+          },
+        },
+      },
+    ]);
+    expect(
+      batchUpdateCalls[0]?.requests?.[0]?.addTable?.table,
+    ).not.toHaveProperty("tableId");
+  });
+
+  it("maps an add-sheet and an add-Table handed together onto two requests in that order, and nothing else", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(spreadsheetId, [addSheetOperation, addTableOperation]);
+
+    expect(batchUpdateCalls).toHaveLength(1);
+    expect(
+      (batchUpdateCalls[0]?.requests ?? []).map((request) =>
+        Object.keys(request),
+      ),
+    ).toEqual([["addSheet"], ["addTable"]]);
   });
 });
 

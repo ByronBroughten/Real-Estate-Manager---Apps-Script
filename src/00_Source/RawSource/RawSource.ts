@@ -115,6 +115,8 @@ export interface GridCellSnapshot {
 }
 
 export type LocalWriteOperation =
+  | AddSheetOperation
+  | AddTableOperation
   | AppendRowsOperation
   | InsertColumnOperation
   | FillOperation
@@ -130,6 +132,29 @@ export type LocalWriteOperation =
   | UpdateTableNameOperation
   | UpdateTableColumnPropertiesOperation
   | OpaqueRawWriteOperation;
+
+// Always at a given GID: Google refuses one another tab already holds (#74).
+export interface AddSheetOperation {
+  kind: "addSheet";
+  sheetId: number;
+  title: string;
+  rowCount: number;
+  columnCount: number;
+}
+
+// Carries no tableId: Google assigns one, and the floor matches the Table by name.
+export interface AddTableOperation {
+  kind: "addTable";
+  name: string;
+  range: GridRangeProps;
+  columnProperties: TableColumnPropertiesAdd[];
+}
+
+export interface TableColumnPropertiesAdd {
+  columnIndex: number;
+  columnName: string;
+  columnType: TableColumnType;
+}
 
 export interface AppendRowsOperation {
   kind: "appendRows";

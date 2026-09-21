@@ -7,6 +7,8 @@ import type { EditProtection } from "../../00_Source/RawSource/EditProtection";
 import type {
   AddConditionalFormatRuleOperation,
   AddProtectedRangeOperation,
+  AddSheetOperation,
+  AddTableOperation,
   AppendRowsOperation,
   DeleteConditionalFormatRuleOperation,
   DeleteProtectedRangeOperation,
@@ -47,6 +49,8 @@ export interface SpreadsheetWriteQueueRaw {
 }
 
 export interface UpdateRequests {
+  addSheet: AddSheetOperation[];
+  addTable: AddTableOperation[];
   append: AppendRowsOperation[];
   update: UpdateCellOperation[];
   delete: DeleteRowsOperation[];
@@ -244,6 +248,8 @@ export function makeRowRange(
 
 export function emptyUpdateRequests(): UpdateRequests {
   return {
+    addSheet: [],
+    addTable: [],
     append: [],
     update: [],
     delete: [],
