@@ -3,6 +3,7 @@ import {
   protectionRangesEqual,
   type ModelableEditProtection,
 } from "../../00_Source/RawSource/EditProtection";
+import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
 import { floorSheetNames, type FloorSheetName } from "./floorSeedLookups";
@@ -26,7 +27,7 @@ interface FloorTabDeclaration {
  * or no floor tab declares is removed. ConfigSheetFloor runs this after its restores.
  * Each tab's declaration and the rules table live in FloorTabEditWarning; the
  * live column lookup is floorColumnLocation; seed lookups are floorSeedLookups;
- * ConfigSheetFloorCreator recreates missing floor columns before this runs.
+ * ConfigSheetFloorCreator creates missing floor tabs and columns before this runs.
  * docs/generated-data.md
  */
 export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
@@ -44,7 +45,7 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
   }
   ensure(identityColIndexes: IdentityColIndexes): string[] {
     const report: string[] = [];
-    const tabs = floorSheetNames().map((sheetName) =>
+    const tabs = this._activeFloorSheetNames().map((sheetName) =>
       this._floorTab(sheetName),
     );
     tabs.forEach((tab) => {
@@ -107,8 +108,14 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
       report.push(`Replaced drifted: ${drifted.join("; ")}`);
     }
   }
+  // A floor tab created this run is still absent after the refetch under a fake or dry run.
+  private _activeFloorSheetNames(): FloorSheetName[] {
+    return floorSheetNames().filter((sheetName) =>
+      this.ss.raw.gidIsActive(getSheetTraitByName(sheetName, "sheetGid")),
+    );
+  }
   private _floorProtections(): ModelableEditProtection[] {
-    return floorSheetNames().flatMap((sheetName) =>
+    return this._activeFloorSheetNames().flatMap((sheetName) =>
       this.ss
         .sheet(sheetName)
         .editProtections()
