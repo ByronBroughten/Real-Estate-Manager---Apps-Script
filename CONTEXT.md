@@ -34,6 +34,10 @@ _Avoid_: header row, title row, top row, row 1
 The first row of the Table's data, always the row immediately below the Table header row. That index is not stored separately.
 _Avoid_: data start, top data row, row 5
 
+**Layout value**:
+One of Spreadsheet Config's cells saying where the bookkeeping rows and the Table sit and how IDs are written. All but ID header are fixed for now: a config sync refuses a changed one and names it, with the value it expects.
+_Avoid_: layout setting, layout constant, spreadsheet config value
+
 **Blank row**:
 A data row with nothing in any of the columns you fill in yourself. It is what the app leaves when it deletes everything on a sheet: emptying the sheet completely would take the formulas, number formats, validation and colours with it, since a new row copies those from the rows already there. The formula cells still show whatever their formulas make of an empty row, so the row reads as a live row rather than a gap. The next row the app adds to that sheet goes into the blank row rather than beneath it, so it never sits stranded above your data.
 _Avoid_: empty row, placeholder row, spare row
@@ -75,7 +79,7 @@ A Sheet Config or Column Config row describing a config-sheet floor tab or floor
 _Avoid_: config-about-config row
 
 **Seeded value**:
-A cell or column the floor seed fills once, when it creates the tab or Table, and never restores — such as Spreadsheet Config's layout values or Value Config's example column.
+A cell or column the floor seed fills once, when it creates the tab or Table, and never restores — such as Spreadsheet Config's **layout values** or Value Config's example column.
 _Avoid_: initial value (too close to Custom default value)
 
 ### Endpoints
