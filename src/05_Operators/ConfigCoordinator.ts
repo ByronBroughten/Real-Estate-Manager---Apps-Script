@@ -36,15 +36,15 @@ export interface ConfigRegeneration {
  * is the only regeneration path.
  * docs/generated-data.md
  */
-export class ConfigOrchestrator extends SpreadsheetBaseOperator {
+export class ConfigCoordinator extends SpreadsheetBaseOperator {
   constructor(props: SpreadsheetNamedProps) {
     super({
       ...props,
       configSyncState: SpreadsheetBaseOperator.initConfigSyncState(),
     });
   }
-  static init(): ConfigOrchestrator {
-    return new ConfigOrchestrator(
+  static init(): ConfigCoordinator {
+    return new ConfigCoordinator(
       SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     );
   }
