@@ -29,6 +29,10 @@ Test files are separately mid-migration off `as` via the `migrate-to-shoehorn` s
 
 `makeStructuredConfig` infers the literal into a type parameter. That inference accepts an unknown key without error whenever at least one _valid_ key sits beside it in the same literal. A bogus key on its own does error, which is exactly what makes the hole easy to miss. That's how `occupancy_buildLedgerRunTimeLastRan` (no such column) reached the endpoint map and still passed `npm run tsc`. `export const businessEndpoints: Endpoints = { ... }` restores excess-property checking and reports the typo with a "did you mean". Keep `makeStructuredConfig` for the generated config files, where the generator supplies the keys instead of a hand-typed literal.
 
+## Lookup tables are keyed by the producer's union
+
+`UpdateRequestSummary` once dispatched on a `switch` over the keys of Google's `Request`, whose every member is optional, ending in a `default` that printed raw JSON. The builders returned that same wide type, so nothing tied the kinds they produced to the cases the switch handled: a new kind compiled and silently rendered as JSON. The fix names the kinds on the producer side (`ModeledRequestVerb` in `GoogleSheetsAPI.ts`), types the builders to return only `ModeledRequest`, and annotates the formatter table with a mapped type over that union, so a missing or mistyped formatter fails `tsc`. The `default` survives only for requests the framework doesn't build. It is the same move as the plain registry annotation above: let the type, not the reader, carry the list of keys.
+
 ## Where utility types live
 
 `NotEmpty<V>` is the one deliberate exception to `utils/Obj.ts`: it sits in `00_Source/CellValues/cellValues.ts` beside the wire value types, because the blank it removes is the cell blank those types define, not a general structural transform (#12).
