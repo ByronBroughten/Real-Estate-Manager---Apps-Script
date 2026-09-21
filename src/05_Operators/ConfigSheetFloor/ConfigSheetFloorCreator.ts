@@ -3,6 +3,7 @@ import type { ColumnName } from "../../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
   floorSeedColumns,
+  type FloorSeedColumn,
 } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
@@ -21,9 +22,8 @@ const creatableFloorTabNames = [
 
 /**
  * Creates a missing Spreadsheet Config, Sheet Config or Column Config tab at
- * its generated GID, with its seeded Table placed by the generated layout and
- * Spreadsheet Config's layout values seeded from that layout, and recreates missing
- * floor columns at their Table's end, with the generated column ID, seeded
+ * its generated GID, with its seeded Table placed by the generated layout, and
+ * recreates missing floor columns at their Table's end, with the generated column ID, seeded
  * header and group heading, failing closed on a missing column the sync can't
  * refill. ConfigSheetFloor runs this right after its fetch and flushes only
  * when it reports something. Each tab's recreatable table and insert live in
@@ -83,17 +83,29 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
           })),
         });
       if (sheetName === "spreadsheetConfig") {
-        const headers = columns.map((column) => column.header);
-        seededLayoutValues().forEach(({ header, value }) => {
-          this.ss.raw.gatherAddedSheetCellRequest({
-            sheetId: sheetGid,
-            rowIndex: headerRowIdx + 1,
-            colIndex: startColIdx + headers.indexOf(header),
-            value,
-          });
-        });
+        this._seedLayoutValues(sheetGid, columns);
       }
       return [seed.title];
+    });
+  }
+  private _seedLayoutValues(
+    sheetGid: number,
+    columns: readonly FloorSeedColumn[],
+  ): void {
+    const headers = columns.map((column) => column.header);
+    seededLayoutValues().forEach(({ header, value }) => {
+      const columnIndex = headers.indexOf(header);
+      if (columnIndex === -1) {
+        throw new Error(
+          `Spreadsheet Config seed has no column "${header}" to seed its layout value into.`,
+        );
+      }
+      this.ss.raw.gatherAddedSheetCellRequest({
+        sheetId: sheetGid,
+        rowIndex: ssConfigGet("tableHeaderRowIndexBase0") + 1,
+        colIndex: ssConfigGet("startTableColIndexBase0") + columnIndex,
+        value,
+      });
     });
   }
   private _floorTab(

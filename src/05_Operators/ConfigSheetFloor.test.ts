@@ -182,32 +182,6 @@ function firstFlushRequests(
   return batchUpdateCalls[0]?.requests ?? [];
 }
 
-function seededCellsOn(
-  requests: GoogleAppsScript.Sheets.Schema.Request[],
-  sheetId: number,
-) {
-  return requests.flatMap((request) => {
-    const update = request.updateCells;
-    const range = update?.range;
-    if (
-      range?.sheetId !== sheetId ||
-      range.startRowIndex === undefined ||
-      range.startColumnIndex === undefined
-    ) {
-      return [];
-    }
-    const cell = update?.rows?.[0]?.values?.[0]?.userEnteredValue;
-    return [
-      {
-        sheetId,
-        rowIndex: range.startRowIndex,
-        colIndex: range.startColumnIndex,
-        value: cell?.stringValue ?? cell?.numberValue,
-      },
-    ];
-  });
-}
-
 function sheetTitleUpdates(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {
@@ -249,15 +223,24 @@ function cellUpdates(
     ) {
       return [];
     }
+    const userEnteredValue = update?.rows?.[0]?.values?.[0]?.userEnteredValue;
     return [
       {
         sheetId: range.sheetId,
         rowIndex: range.startRowIndex,
         colIndex: range.startColumnIndex,
-        value: update?.rows?.[0]?.values?.[0]?.userEnteredValue?.stringValue,
+        value: userEnteredValue?.stringValue ?? userEnteredValue?.numberValue,
       },
     ];
   });
+}
+
+function spreadsheetConfigCellUpdates(
+  batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
+) {
+  return cellUpdates(batchUpdateCalls).filter(
+    (update) => update.sheetId === spreadsheetConfigGid,
+  );
 }
 
 function columnInserts(
@@ -1618,23 +1601,34 @@ describe("ConfigSheetFloor", () => {
       value,
     }));
 
-    expect(batchUpdateCalls.length).toBeGreaterThan(0);
+    expect(spreadsheetConfigCellUpdates(batchUpdateCalls)).toEqual(expected);
+  });
+
+  it("sends a created Spreadsheet Config's seeded values in the same batch as, and after, its add-sheet and add-Table", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [spreadsheetConfigGid],
+    });
+    applyFloor();
+
     const requests = firstFlushRequests(batchUpdateCalls);
-    const seeded = seededCellsOn(requests, spreadsheetConfigGid);
-    expect(seeded).toEqual(expected);
-    const addTableAt = requests.findIndex(
-      (request) => request.addTable?.table?.name === "spreadsheetConfig",
-    );
     const addSheetAt = requests.findIndex(
       (request) =>
         request.addSheet?.properties?.sheetId === spreadsheetConfigGid,
     );
-    const firstSeedAt = requests.findIndex(
-      (request) => request.updateCells?.range?.sheetId === spreadsheetConfigGid,
+    const addTableAt = requests.findIndex(
+      (request) =>
+        request.addTable?.table?.name ===
+        configSheetFloorSeed.spreadsheetConfig.tableName,
+    );
+    const seedAts = requests.flatMap((request, index) =>
+      request.updateCells?.range?.sheetId === spreadsheetConfigGid
+        ? [index]
+        : [],
     );
     expect(addSheetAt).toBeGreaterThanOrEqual(0);
     expect(addTableAt).toBeGreaterThan(addSheetAt);
-    expect(firstSeedAt).toBeGreaterThan(addTableAt);
+    expect(seedAts).toHaveLength(7);
+    expect(Math.min(...seedAts)).toBeGreaterThan(addTableAt);
   });
 
   it("writes nothing into a created Spreadsheet Config's Table menu space data cell", () => {
@@ -1646,10 +1640,8 @@ describe("ConfigSheetFloor", () => {
     const tableMenuSpaceColIndex =
       addTableRequests(batchUpdateCalls)[0]?.range?.startColumnIndex;
     expect(
-      batchUpdateCalls.flatMap((call) =>
-        seededCellsOn(call.requests ?? [], spreadsheetConfigGid).filter(
-          (cell) => cell.colIndex === tableMenuSpaceColIndex,
-        ),
+      spreadsheetConfigCellUpdates(batchUpdateCalls).filter(
+        (cell) => cell.colIndex === tableMenuSpaceColIndex,
       ),
     ).toEqual([]);
   });
@@ -1662,7 +1654,7 @@ describe("ConfigSheetFloor", () => {
 
     const requests = batchUpdateCalls.flatMap((call) => call.requests ?? []);
     expect(
-      seededCellsOn(requests, spreadsheetConfigGid).filter(
+      spreadsheetConfigCellUpdates(batchUpdateCalls).filter(
         (cell) => cell.rowIndex === actionRowIndex,
       ),
     ).toEqual([]);
@@ -1681,10 +1673,8 @@ describe("ConfigSheetFloor", () => {
 
     expect(addSheetRequests(batchUpdateCalls)).toEqual([]);
     expect(
-      batchUpdateCalls.flatMap((call) =>
-        seededCellsOn(call.requests ?? [], spreadsheetConfigGid).filter(
-          (cell) => cell.rowIndex === topDataRowIndex,
-        ),
+      spreadsheetConfigCellUpdates(batchUpdateCalls).filter(
+        (cell) => cell.rowIndex === topDataRowIndex,
       ),
     ).toEqual([]);
     expect(report).not.toContain("Created tabs");
