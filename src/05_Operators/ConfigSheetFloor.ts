@@ -5,6 +5,7 @@ import {
   floorSeedColumns,
   floorTabSeedByGid,
   type FloorSeedColumn,
+  type FloorTabName,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
@@ -26,7 +27,6 @@ import {
   floorColumnsToRestore,
   floorSheetNames,
   type FloorSheetName,
-  type FloorTabName,
 } from "./ConfigSheetFloor/floorSeedLookups";
 
 /**

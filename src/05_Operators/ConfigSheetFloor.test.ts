@@ -1680,6 +1680,110 @@ describe("ConfigSheetFloor", () => {
     expect(report).not.toContain("Created tabs");
   });
 
+  it("creates a missing Value Config at its GID with a Table of one example column and two data rows, and reports it", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [valueConfigGid],
+    });
+    const { report } = applyFloor();
+    const seed = configSheetFloorSeed.valueConfig;
+
+    expect(addSheetRequests(batchUpdateCalls)).toEqual([
+      expect.objectContaining({ sheetId: valueConfigGid, title: seed.title }),
+    ]);
+    const tables = addTableRequests(batchUpdateCalls);
+    expect(tables.map((table) => table.name)).toEqual(["valueConfig"]);
+    expect(tables[0]?.columnProperties).toEqual([
+      { columnIndex: 0, columnName: "Example value", columnType: "TEXT" },
+    ]);
+    const headerRowIndex = spreadsheetConfig.tableHeaderRowIndexBase0;
+    const startColIndex = spreadsheetConfig.startTableColIndexBase0;
+    expect(tables[0]?.range).toEqual({
+      sheetId: valueConfigGid,
+      startRowIndex: headerRowIndex,
+      endRowIndex: headerRowIndex + 3,
+      startColumnIndex: startColIndex,
+      endColumnIndex: startColIndex + 1,
+    });
+    expect(report).toContain(`Created tabs: ${seed.title}`);
+  });
+
+  it("sends a created Value Config's sample members and a vcf column ID, and no header write, in the same batch as and after its add-sheet and add-Table", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [valueConfigGid],
+    });
+    applyFloor();
+
+    const requests = firstFlushRequests(batchUpdateCalls);
+    const addSheetAt = requests.findIndex(
+      (request) => request.addSheet?.properties?.sheetId === valueConfigGid,
+    );
+    const addTableAt = requests.findIndex(
+      (request) => request.addTable?.table?.name === "valueConfig",
+    );
+    const seedAts = requests.flatMap((request, index) =>
+      request.updateCells?.range?.sheetId === valueConfigGid ? [index] : [],
+    );
+    expect(addSheetAt).toBeGreaterThanOrEqual(0);
+    expect(addTableAt).toBeGreaterThan(addSheetAt);
+    expect(seedAts).toHaveLength(3);
+    expect(Math.min(...seedAts)).toBeGreaterThan(addTableAt);
+
+    const startColIndex = spreadsheetConfig.startTableColIndexBase0;
+    const valueConfigCells = cellUpdates(batchUpdateCalls).filter(
+      (cell) => cell.sheetId === valueConfigGid,
+    );
+    expect(valueConfigCells).toEqual([
+      {
+        sheetId: valueConfigGid,
+        rowIndex: spreadsheetConfig.columnIdRowIdxBase0,
+        colIndex: startColIndex,
+        value: expect.stringMatching(/^c:vcf:/),
+      },
+      ...configSheetFloorSeed.valueConfig.exampleColumn.seededValues.map(
+        (value, memberIndex) => ({
+          sheetId: valueConfigGid,
+          rowIndex: topDataRowIndex + memberIndex,
+          colIndex: startColIndex,
+          value,
+        }),
+      ),
+    ]);
+    expect(
+      valueConfigCells.filter(
+        (cell) => cell.rowIndex === spreadsheetConfig.tableHeaderRowIndexBase0,
+      ),
+    ).toEqual([]);
+  });
+
+  it("gives an existing Value Config whose example column was deleted no example column back", () => {
+    const { batchUpdateCalls } = floorFixture();
+    applyFloor();
+
+    const requests = batchUpdateCalls.flatMap((call) => call.requests ?? []);
+    expect(requestsOnSheet(requests, valueConfigGid)).toEqual([]);
+  });
+
+  it("gives a created Value Config no edit-protection request", () => {
+    const { batchUpdateCalls } = floorFixture({
+      omitSheetGids: [valueConfigGid],
+    });
+    applyFloor();
+
+    expect(
+      addedProtectedRanges(batchUpdateCalls).map(
+        (protection) => protection.range?.sheetId,
+      ),
+    ).not.toContain(valueConfigGid);
+  });
+
+  it("names exactly Spreadsheet Config, Sheet Config and Column Config as the warned floor tabs", () => {
+    expect(floorSheetNames()).toEqual([
+      "spreadsheetConfig",
+      "sheetConfig",
+      "columnConfig",
+    ]);
+  });
+
   it("skips a created tab the refetch still lacks in the label, data-value, column-type and edit-warning steps, without throwing", () => {
     const { batchUpdateCalls } = floorFixture({
       columnTypesAreUnset: true,

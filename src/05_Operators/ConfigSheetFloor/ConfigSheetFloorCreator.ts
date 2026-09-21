@@ -4,6 +4,7 @@ import {
   configSheetFloorSeed,
   floorSeedColumns,
   type FloorSeedColumn,
+  type FloorTabName,
 } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
@@ -13,19 +14,22 @@ import { spreadsheetConfigHeader } from "../SpreadsheetConfigDataRow";
 import { floorSheetNames, type FloorSheetName } from "./floorSeedLookups";
 import { FloorTabColumnCreator } from "./FloorTabColumnCreator";
 
-// Value Config also seeds values, so its creation is #99.
 const creatableFloorTabNames = [
   "spreadsheetConfig",
   "sheetConfig",
   "columnConfig",
-] as const satisfies readonly FloorSheetName[];
+  "valueConfig",
+] as const satisfies readonly FloorTabName[];
+
+type CreatedTableColumn = Pick<FloorSeedColumn, "header" | "columnType">;
 
 /**
- * Creates a missing Spreadsheet Config, Sheet Config or Column Config tab at
- * its generated GID, with its seeded Table placed by the generated layout, and
+ * Creates a missing floor tab at its generated GID, with its seeded Table
+ * placed by the generated layout, and
  * recreates missing floor columns at their Table's end, with the generated column ID, seeded
  * header and group heading, failing closed on a missing column the sync can't
- * refill. ConfigSheetFloor runs this right after its fetch and flushes only
+ * refill. A created Value Config gets only its example column, minted with its
+ * generated ID prefix. ConfigSheetFloor runs this right after its fetch and flushes only
  * when it reports something. Each tab's recreatable table and insert live in
  * FloorTabColumnCreator.
  * docs/generated-data.md
@@ -57,8 +61,8 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
       const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
       if (this.ss.raw.gidIsActive(sheetGid)) return [];
       const seed = configSheetFloorSeed[sheetName];
-      const columns = floorSeedColumns(sheetName);
-      const endRowIdx = headerRowIdx + 2;
+      const columns = createdTableColumns(sheetName);
+      const endRowIdx = headerRowIdx + 1 + createdDataRowCount(sheetName);
       const endColIdx = startColIdx + columns.length;
       this.ss.raw
         .gatherAddSheetRequest({
@@ -85,12 +89,15 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
       if (sheetName === "spreadsheetConfig") {
         this._seedLayoutValues(sheetGid, columns);
       }
+      if (sheetName === "valueConfig") {
+        this._seedExampleColumn(sheetGid);
+      }
       return [seed.title];
     });
   }
   private _seedLayoutValues(
     sheetGid: number,
-    columns: readonly FloorSeedColumn[],
+    columns: readonly CreatedTableColumn[],
   ): void {
     const headers = columns.map((column) => column.header);
     seededLayoutValues().forEach(({ header, value }) => {
@@ -108,6 +115,25 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
       });
     });
   }
+  // Its header rides the add-Table's columnName, so only the column ID and members are written.
+  private _seedExampleColumn(sheetGid: number): void {
+    const colIndex = ssConfigGet("startTableColIndexBase0");
+    const idPrefix = getSheetTraitByName("valueConfig", "idPrefix");
+    this.ss.raw.gatherAddedSheetCellRequest({
+      sheetId: sheetGid,
+      rowIndex: ssConfigGet("columnIdRowIdxBase0"),
+      colIndex,
+      value: this.ss.schema.makeColIdFromPrefix(idPrefix),
+    });
+    exampleColumn().seededValues.forEach((value, memberIndex) => {
+      this.ss.raw.gatherAddedSheetCellRequest({
+        sheetId: sheetGid,
+        rowIndex: ssConfigGet("tableHeaderRowIndexBase0") + 1 + memberIndex,
+        colIndex,
+        value,
+      });
+    });
+  }
   private _floorTab(
     sheetName: FloorSheetName,
   ): FloorTabColumnCreator<FloorSheetName> {
@@ -116,6 +142,22 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
       sheetName,
     });
   }
+}
+
+function exampleColumn() {
+  return configSheetFloorSeed.valueConfig.exampleColumn;
+}
+
+function createdTableColumns(
+  sheetName: FloorTabName,
+): readonly CreatedTableColumn[] {
+  if (sheetName === "valueConfig") return [exampleColumn()];
+  return floorSeedColumns(sheetName);
+}
+
+function createdDataRowCount(sheetName: FloorTabName): number {
+  if (sheetName === "valueConfig") return exampleColumn().seededValues.length;
+  return 1;
 }
 
 // Read through ssConfigGet, the same layout that placed the created Table.
