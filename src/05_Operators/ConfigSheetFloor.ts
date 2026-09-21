@@ -1,7 +1,9 @@
+import type { SheetChange } from "../00_Source/PlatformEvents/sheetChange";
 import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
   floorSeedColumns,
+  floorTabSeedByGid,
   type FloorSeedColumn,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -16,6 +18,7 @@ import {
   ConfigSheetFloorEditWarnings,
   type IdentityColIndexes,
 } from "./ConfigSheetFloor/ConfigSheetFloorEditWarnings";
+import { floorChangeToast } from "./ConfigSheetFloor/floorChangeToast";
 import { liveColIndex } from "./ConfigSheetFloor/floorColumnLocation";
 import {
   columnNameByHeader,
@@ -33,6 +36,8 @@ import {
  * the edit warnings. ConfigCoordinator
  * runs this at the start of every config sync; the
  * ensureConfigSheetFloor chore is the other caller.
+ * changeToast has floorChangeToast decide the toast message for an On change
+ * event that renamed or deleted Value Config, the one floor tab with no edit warning.
  * docs/generated-data.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
@@ -64,6 +69,17 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     this._ensureColumnTypes(report);
     report.push(...this.editWarnings.ensure(identityColIndexes));
     return report.join("; ");
+  }
+  changeToast(change: SheetChange): string | null {
+    this.ss.raw.fetchAllSheetProperties();
+    const liveTitlesByGid = new Map(
+      this.ss.raw.activeSheetGids.flatMap((sheetGid) =>
+        floorTabSeedByGid(sheetGid) === undefined
+          ? []
+          : [[sheetGid, this.ss.raw.sheet(sheetGid).title] as const],
+      ),
+    );
+    return floorChangeToast(change, liveTitlesByGid);
   }
   private _ensureTitlesAndTables(report: string[]): void {
     this.ss.raw.ensureAllSheetPropertiesAreFetched();

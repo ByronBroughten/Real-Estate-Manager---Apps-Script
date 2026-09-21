@@ -153,6 +153,8 @@ export interface FakeSheetsService {
   batchUpdateCalls: BatchUpdateRequest[];
   /** Every resource object passed to `Sheets.Spreadsheets.getByDataFilter`, in call order. */
   getByDataFilterCalls: object[];
+  /** The params of every `Sheets.Spreadsheets.get` call, in call order. */
+  getCalls: { fields?: string }[];
 }
 
 /**
@@ -381,6 +383,7 @@ export function stubSheetsService(
   const sheets = options.sheets ?? [];
   const batchUpdateCalls: BatchUpdateRequest[] = [];
   const getByDataFilterCalls: object[] = [];
+  const getCalls: { fields?: string }[] = [];
   let nextProtectedRangeId =
     Math.max(
       0,
@@ -419,8 +422,10 @@ export function stubSheetsService(
 
   const service = {
     Spreadsheets: {
-      get: (_spreadsheetId: string, params?: { fields?: string }) =>
-        sheetsResponse(false, params?.fields),
+      get: (_spreadsheetId: string, params?: { fields?: string }) => {
+        getCalls.push(params ?? {});
+        return sheetsResponse(false, params?.fields);
+      },
       getByDataFilter: (
         resource: object,
         _spreadsheetId: string,
@@ -444,7 +449,7 @@ export function stubSheetsService(
 
   installRawSource(GoogleSheetsAPI.init(service));
 
-  return { batchUpdateCalls, getByDataFilterCalls };
+  return { batchUpdateCalls, getByDataFilterCalls, getCalls };
 }
 
 function replaySheetRequest(

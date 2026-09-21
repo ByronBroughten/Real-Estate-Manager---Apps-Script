@@ -16,7 +16,7 @@ Open only the section or disclosed doc the task needs.
 
 - **Regenerate, never hand-edit,** the data in `src/01_SpreadsheetSchema/generated/`. Fix a sheet-shape bug on the sheet, then regenerate. The one exception is the config-sheet floor: [`docs/generated-data.md`](./docs/generated-data.md).
 - **Read the block, not the file.** Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that one object. `sheetConfigs.ts` is the sheet list. A long test file works the same way: open only the `describe` block you are changing.
-- **`src/` is host-neutral TypeScript**, `nodeHost/` included, with no Node or DOM APIs. The Node-specific half lives in `scripts/*.mjs`.
+- **`src/` is host-neutral TypeScript**, `nodeHost/` included, with no Node or DOM APIs, and platform-neutral outside `src/00_Source/GoogleSheets/` and the entry points; lint holds both. The Node-specific half lives in `scripts/*.mjs`.
 - **Commit or push only when asked. Implement a spec on its `issue-<n>-<slug>` branch**, even when a skill says to commit to the current branch. Branch rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
 ## Read by task

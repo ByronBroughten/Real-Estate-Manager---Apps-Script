@@ -19,12 +19,39 @@ describe("AppsScript.projectProperties", () => {
   });
 });
 
+describe("AppsScript.sheetChange", () => {
+  it("decodes REMOVE_GRID as sheetRemoved", () => {
+    expect(AppsScript.sheetChange("REMOVE_GRID")).toBe("sheetRemoved");
+  });
+
+  it("decodes OTHER as other", () => {
+    expect(AppsScript.sheetChange("OTHER")).toBe("other");
+  });
+
+  it.each(["INSERT_ROW", "EDIT"] as const)(
+    "ignores %s by returning null",
+    (changeType) => {
+      expect(AppsScript.sheetChange(changeType)).toBeNull();
+    },
+  );
+});
+
 describe("AppsScript.trigger", () => {
   it("addOnEdit schedules an onEdit trigger for the given function", () => {
     const { triggers } = stubScriptAndSpreadsheetApp();
     AppsScript.trigger.addOnEdit("triggerOnEdit");
     expect(triggers).toEqual([
       { handlerFunction: "triggerOnEdit", kind: "onEdit" },
+    ]);
+  });
+
+  it("addOnChange schedules an onChange trigger for the given function, alongside the existing triggers", () => {
+    const { triggers } = stubScriptAndSpreadsheetApp();
+    AppsScript.trigger.addOnEdit("triggerOnEdit");
+    AppsScript.trigger.addOnChange("triggerOnChange");
+    expect(triggers).toEqual([
+      { handlerFunction: "triggerOnEdit", kind: "onEdit" },
+      { handlerFunction: "triggerOnChange", kind: "onChange" },
     ]);
   });
 
@@ -52,5 +79,13 @@ describe("AppsScript.trigger", () => {
 
     AppsScript.trigger.deleteAllTriggers();
     expect(triggers).toHaveLength(0);
+  });
+});
+
+describe("AppsScript.toast", () => {
+  it("shows the message on the active spreadsheet", () => {
+    const { toasts } = stubScriptAndSpreadsheetApp();
+    AppsScript.toast("Value Config was deleted.");
+    expect(toasts).toEqual(["Value Config was deleted."]);
   });
 });

@@ -1004,6 +1004,19 @@ describe("ConfigSheetFloor", () => {
     });
   });
 
+  it("returns the toast for a renamed Value Config off freshly fetched sheet properties and sends no batch update", () => {
+    const { batchUpdateCalls, getCalls } = floorFixture({
+      valueConfig: { title: "Values" },
+    });
+    const message = ConfigSheetFloor.init().changeToast("other");
+
+    expect(message).toBe(
+      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
+    );
+    expect(getCalls).toHaveLength(1);
+    expect(batchUpdateCalls).toHaveLength(0);
+  });
+
   it("renames a wrongly named floor Table and reports it", () => {
     const { batchUpdateCalls } = floorFixture({
       spreadsheetConfigTableName: "wrongTable",
