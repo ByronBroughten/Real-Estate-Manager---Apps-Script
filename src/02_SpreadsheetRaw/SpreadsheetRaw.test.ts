@@ -1049,6 +1049,96 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     expect(raw.updateRequests.addSheet).toEqual([]);
     expect(raw.updateRequests.addTable).toEqual([]);
   });
+
+  const seededCell = {
+    sheetId: 555,
+    rowIndex: 3,
+    colIndex: 1,
+    value: "Example",
+  };
+
+  it("refuses a seeded value for a GID with no add-sheet queued, naming the GID, and queues nothing", () => {
+    stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+
+    expect(() => raw.gatherAddedSheetCellRequest(seededCell)).toThrow(
+      "Added-sheet cell write refused: no addSheet for GID 555 is queued in this flush.",
+    );
+    expect(raw.updateRequests.update).toEqual([]);
+  });
+
+  it("refuses a seeded value after the create flush has sent that GID's add-sheet", () => {
+    stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.batchUpdateGSheets();
+
+    expect(() => raw.gatherAddedSheetCellRequest(seededCell)).toThrow(
+      "no addSheet for GID 555",
+    );
+  });
+
+  it("sends the add-sheet, then the add-Table, then the seeded value's updateCells in one batch", () => {
+    const { batchUpdateCalls } = stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.gatherAddTableRequest(addTableProps);
+    raw.gatherAddedSheetCellRequest(seededCell);
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toHaveLength(1);
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addSheet: {
+          properties: {
+            sheetId: 555,
+            title: "Spreadsheet Config",
+            gridProperties: { rowCount: 20, columnCount: 6 },
+          },
+        },
+      },
+      {
+        addTable: {
+          table: {
+            name: "spreadsheetConfig",
+            range: addTableProps.range,
+            columnProperties: addTableProps.columnProperties,
+          },
+        },
+      },
+      {
+        updateCells: {
+          range: {
+            sheetId: 555,
+            startRowIndex: 3,
+            endRowIndex: 4,
+            startColumnIndex: 1,
+            endColumnIndex: 2,
+          },
+          rows: [
+            { values: [{ userEnteredValue: { stringValue: "Example" } }] },
+          ],
+          fields: "userEnteredValue",
+        },
+      },
+    ]);
+  });
+
+  it("drops a queued seeded value on discardQueuedChanges", () => {
+    const { batchUpdateCalls } = stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.gatherAddedSheetCellRequest(seededCell);
+    raw.discardQueuedChanges();
+    raw.batchUpdateGSheets();
+
+    expect(raw.updateRequests.update).toEqual([]);
+    expect(batchUpdateCalls).toEqual([]);
+  });
 });
 
 describe("RowRaw.delete", () => {

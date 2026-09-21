@@ -2,6 +2,7 @@ import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI
 import type {
   AddSheetOperation,
   AddTableOperation,
+  UpdateCellOperation,
 } from "../00_Source/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import {
@@ -84,6 +85,22 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   }
   gatherAddTableRequest(props: Omit<AddTableOperation, "kind">): this {
     this.updateRequests.addTable.push({ kind: "addTable", ...props });
+    return this;
+  }
+  // A seeded value on a tab this flush adds; an existing tab writes through CellRaw.
+  gatherAddedSheetCellRequest(
+    props: Required<
+      Pick<UpdateCellOperation, "sheetId" | "rowIndex" | "colIndex" | "value">
+    >,
+  ): this {
+    if (
+      !this.updateRequests.addSheet.some((op) => op.sheetId === props.sheetId)
+    ) {
+      throw new Error(
+        `Added-sheet cell write refused: no addSheet for GID ${props.sheetId} is queued in this flush.`,
+      );
+    }
+    this.updateRequests.update.push({ kind: "updateCell", ...props });
     return this;
   }
   // Matches by content rather than by coordinate, so no local mirror is possible.
