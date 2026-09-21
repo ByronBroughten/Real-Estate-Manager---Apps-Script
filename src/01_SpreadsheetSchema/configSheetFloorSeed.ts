@@ -6,9 +6,14 @@ import {
 } from "./columnConfigsTypes";
 import { sheetConfigsByGid } from "./sheetConfigsTypes";
 
+export type FloorColumnType = Extract<
+  TableColumnType,
+  "TEXT" | "DOUBLE" | "BOOLEAN"
+>;
+
 export interface FloorSeedColumn {
   header: string;
-  columnType: TableColumnType;
+  columnType: FloorColumnType;
   emptyValueAllowed: boolean;
   dataValue?: string;
 }
@@ -222,7 +227,13 @@ export function floorSeedColumnById(
   if (sheetConfig === undefined || !isFloorTabName(sheetConfig.sheetName)) {
     return undefined;
   }
-  const sheetName = sheetConfig.sheetName;
+  return floorSeedColumnByName(sheetConfig.sheetName, columnId);
+}
+
+function floorSeedColumnByName(
+  sheetName: FloorTabName,
+  columnId: string,
+): FloorSeedColumn | undefined {
   return floorSeedColumns(sheetName).find((seedColumn) => {
     const columnName = getSheetColumnNames(sheetName).find(
       (name) =>
@@ -232,3 +243,19 @@ export function floorSeedColumnById(
     return getColumnTraitByName(sheetName, columnName, "columnId") === columnId;
   });
 }
+
+export interface FloorSeedLookup {
+  tabNames: readonly FloorTabName[];
+  columns(sheetName: FloorTabName): readonly FloorSeedColumn[];
+  columnById(
+    sheetName: FloorTabName,
+    columnId: string,
+  ): FloorSeedColumn | undefined;
+}
+
+// Handed to makeConfigs' constructors, which can't import this module without a cycle through the generated files.
+export const floorSeedLookup: FloorSeedLookup = {
+  tabNames: Obj.keys(configSheetFloorSeed),
+  columns: floorSeedColumns,
+  columnById: floorSeedColumnByName,
+};

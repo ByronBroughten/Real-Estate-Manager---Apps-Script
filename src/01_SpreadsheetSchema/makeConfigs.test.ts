@@ -1,8 +1,14 @@
 import { afterEach, describe, expect, it } from "vitest";
+import { columnConfigsByName } from "./columnConfigsTypes";
+import { floorSeedLookup } from "./configSheetFloorSeed";
+import { sheetConfigs } from "./generated/sheetConfigs";
 import {
+  makeColumnConfigs,
   makeIdPrefixFromTitle,
   makeSheetConfigs,
   makeSpreadsheetConfig,
+  type ColumnConfigsGeneric,
+  type ColumnConfigStored,
 } from "./makeConfigs";
 import {
   clearSpreadsheetConfigOverlay,
@@ -74,6 +80,106 @@ describe("makeSheetConfigs", () => {
         notes: { sheetGid: 1, idPrefix: "", hasIdColumn: false },
       }),
     ).toThrow(/notes.*no ID prefix/);
+  });
+
+  it("passes the generated floor tab entries against the floor seed", () => {
+    expect(() => makeSheetConfigs(sheetConfigs, floorSeedLookup)).not.toThrow();
+  });
+
+  it("throws naming a floor tab with no entry", () => {
+    const { valueConfig: _valueConfig, ...withoutValueConfig } = sheetConfigs;
+
+    expect(() => makeSheetConfigs(withoutValueConfig, floorSeedLookup)).toThrow(
+      'Floor tab "valueConfig" has no floor entry',
+    );
+  });
+});
+
+describe("makeColumnConfigs", () => {
+  function floorColumnConfigs(): ColumnConfigsGeneric {
+    return JSON.parse(JSON.stringify(columnConfigsByName));
+  }
+
+  function floorColumn(
+    configs: ColumnConfigsGeneric,
+    sheetName: string,
+    columnName: string,
+  ): ColumnConfigStored {
+    const column = configs[sheetName]?.[columnName];
+    if (column === undefined) {
+      throw new Error(`No generated column ${sheetName}.${columnName}.`);
+    }
+    return column;
+  }
+
+  it("passes the generated floor entries against the floor seed", () => {
+    expect(() =>
+      makeColumnConfigs(floorColumnConfigs(), floorSeedLookup),
+    ).not.toThrow();
+  });
+
+  it("throws naming the sheet, the column and both headers when a floor column's header differs from the seed's", () => {
+    const configs = floorColumnConfigs();
+    const header = floorColumn(configs, "columnConfig", "header");
+    header.header = "Heading";
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
+      `Floor column "header" (column ID "${header.columnId}") on "columnConfig" has header "Heading" where the floor seed has "Header".`,
+    );
+  });
+
+  it("throws when a floor column's valueName isn't the one the seed's column type implies", () => {
+    const configs = floorColumnConfigs();
+    const sheetGid = floorColumn(configs, "sheetConfig", "sheetGid");
+    sheetGid.valueName = "string";
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
+      `Floor column "sheetGid" (column ID "${sheetGid.columnId}") on "sheetConfig" has valueName "string" where the floor seed's column type DOUBLE implies "number".`,
+    );
+  });
+
+  it("throws when a floor column's emptyValueAllowed differs from the seed's", () => {
+    const configs = floorColumnConfigs();
+    const idHeader = floorColumn(configs, "spreadsheetConfig", "idHeader");
+    idHeader.emptyValueAllowed = true;
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
+      `Floor column "idHeader" (column ID "${idHeader.columnId}") on "spreadsheetConfig" has emptyValueAllowed true where the floor seed has false.`,
+    );
+  });
+
+  it("throws naming a seeded floor column with no entry", () => {
+    const configs = floorColumnConfigs();
+    delete configs.columnConfig?.emptyValueAllowed;
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).toThrow(
+      'Floor column "Empty value allowed" on "columnConfig" has no floor entry.',
+    );
+  });
+
+  it("passes a floor entry with a Custom default value and one without", () => {
+    const configs = floorColumnConfigs();
+    floorColumn(configs, "sheetConfig", "sheetTitle").customDefaultValue =
+      "Untitled";
+    floorColumn(configs, "columnConfig", "sheetTitle").customDefaultValue =
+      null;
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).not.toThrow();
+  });
+
+  it("passes a live column the seed doesn't declare", () => {
+    const configs = floorColumnConfigs();
+    const columnConfigTab = configs.columnConfig ?? {};
+    columnConfigTab.notes = {
+      columnId: "c:ccf:notes01",
+      header: "Notes",
+      valueName: "string",
+      isFormula: false,
+      emptyValueAllowed: true,
+      customDefaultValue: null,
+    };
+
+    expect(() => makeColumnConfigs(configs, floorSeedLookup)).not.toThrow();
   });
 });
 
