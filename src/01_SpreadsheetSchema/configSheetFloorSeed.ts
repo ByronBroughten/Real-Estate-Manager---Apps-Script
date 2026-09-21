@@ -230,7 +230,7 @@ export function floorSeedColumnById(
   return floorSeedColumnInSheet(sheetConfig.sheetName, columnId);
 }
 
-function floorSeedColumnInSheet(
+export function floorSeedColumnInSheet(
   sheetName: FloorTabName,
   columnId: string,
 ): FloorSeedColumn | undefined {
@@ -244,18 +244,6 @@ function floorSeedColumnInSheet(
   });
 }
 
-export interface FloorSeedLookup {
-  tabNames: readonly FloorTabName[];
-  columns(sheetName: FloorTabName): readonly FloorSeedColumn[];
-  columnById(
-    sheetName: FloorTabName,
-    columnId: string,
-  ): FloorSeedColumn | undefined;
+export function floorColumnLabel(sheetName: string, header: string): string {
+  return `Floor column "${header}" on "${sheetName}"`;
 }
-
-// Handed to makeConfigs' constructors, which can't import this module without a cycle through the generated files.
-export const floorSeedLookup: FloorSeedLookup = {
-  tabNames: Obj.keys(configSheetFloorSeed),
-  columns: floorSeedColumns,
-  columnById: floorSeedColumnInSheet,
-};

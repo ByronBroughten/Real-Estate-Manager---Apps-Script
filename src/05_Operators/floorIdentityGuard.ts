@@ -1,12 +1,12 @@
 import {
   configSheetFloorSeed,
+  floorColumnLabel,
   floorSeedColumns,
   type FloorTabName,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import {
-  floorColumnLabel,
-  type ColumnConfigsGeneric,
-  type SheetConfigsBase,
+import type {
+  ColumnConfigsGeneric,
+  SheetConfigsBase,
 } from "../01_SpreadsheetSchema/makeConfigs";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";

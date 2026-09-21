@@ -1,8 +1,3 @@
-import type {
-  FloorColumnType,
-  FloorSeedColumn,
-  FloorSeedLookup,
-} from "./configSheetFloorSeed";
 import type { SheetNameSimple } from "./sheetConfigsTypes";
 import type { Value, ValueName } from "./valueSchemas";
 
@@ -155,7 +150,6 @@ export interface SheetConfigStored<H extends boolean = boolean> {
 export type SheetConfigsBase = Record<string, SheetConfigStored>;
 export function makeSheetConfigs<T extends SheetConfigsBase>(
   sheetConfigs: T,
-  floorSeed?: FloorSeedLookup,
 ): T {
   validateIdPrefixesAreUnique(
     Object.entries(sheetConfigs).map(([label, config]) => ({
@@ -163,21 +157,7 @@ export function makeSheetConfigs<T extends SheetConfigsBase>(
       idPrefix: config.idPrefix,
     })),
   );
-  if (floorSeed) validateFloorTabEntries(sheetConfigs, floorSeed);
   return sheetConfigs;
-}
-
-function validateFloorTabEntries(
-  sheetConfigs: SheetConfigsBase,
-  floorSeed: FloorSeedLookup,
-): void {
-  const missing = floorSeed.tabNames.find(
-    (sheetName) => !Object.hasOwn(sheetConfigs, sheetName),
-  );
-  if (missing === undefined) return;
-  throw new Error(
-    `Floor tab "${missing}" has no floor entry; Let api access may be unticked on its Sheet Config row.`,
-  );
 }
 
 export type ValueConfigsBase = Record<string, readonly string[]>;
@@ -207,83 +187,8 @@ export type TableColumnConfigs = Record<string, ColumnConfigStored>;
 export type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
 export type ColumnConfigsGeneric = Record<string, TableColumnConfigs>;
 
-// The seeded form checks a regen's configs, which needn't match the last generated sheet list yet.
 export function makeColumnConfigs<T extends ColumnConfigsBase>(
   columnConfigs: T,
-): T;
-export function makeColumnConfigs<T extends ColumnConfigsGeneric>(
-  columnConfigs: T,
-  floorSeed: FloorSeedLookup,
-): T;
-export function makeColumnConfigs<T extends ColumnConfigsGeneric>(
-  columnConfigs: T,
-  floorSeed?: FloorSeedLookup,
 ): T {
-  if (floorSeed) validateFloorColumnEntries(columnConfigs, floorSeed);
-  return makeStructuredConfig({} as ColumnConfigsGeneric, columnConfigs);
-}
-
-export function floorColumnLabel(sheetName: string, header: string): string {
-  return `Floor column "${header}" on "${sheetName}"`;
-}
-
-const floorColumnTypeValueNames: Record<FloorColumnType, ValueName> = {
-  TEXT: "string",
-  DOUBLE: "number",
-  BOOLEAN: "checkbox",
-};
-
-function validateFloorColumnEntries(
-  columnConfigs: ColumnConfigsGeneric,
-  floorSeed: FloorSeedLookup,
-): void {
-  const mismatches = floorSeed.tabNames.flatMap((sheetName) => {
-    const matched = new Set<FloorSeedColumn>();
-    const entryMismatches = Object.entries(
-      columnConfigs[sheetName] ?? {},
-    ).flatMap(([, column]) => {
-      const seedColumn = floorSeed.columnById(sheetName, column.columnId);
-      if (seedColumn === undefined) return [];
-      matched.add(seedColumn);
-      const label = `${floorColumnLabel(sheetName, seedColumn.header)} (column ID "${column.columnId}")`;
-      return floorColumnMismatches(label, column, seedColumn);
-    });
-    const missing = floorSeed
-      .columns(sheetName)
-      .filter((seedColumn) => !matched.has(seedColumn))
-      .map(
-        ({ header }) =>
-          `${floorColumnLabel(sheetName, header)} has no floor entry.`,
-      );
-    return [...entryMismatches, ...missing];
-  });
-  if (mismatches.length === 0) return;
-  throw new Error(
-    `The generated configs differ from the floor seed. ${mismatches.join(" ")}`,
-  );
-}
-
-function floorColumnMismatches(
-  label: string,
-  column: ColumnConfigStored,
-  seedColumn: FloorSeedColumn,
-): string[] {
-  const mismatches: string[] = [];
-  if (column.header !== seedColumn.header) {
-    mismatches.push(
-      `${label} has header "${column.header}" where the floor seed has "${seedColumn.header}".`,
-    );
-  }
-  const seedValueName = floorColumnTypeValueNames[seedColumn.columnType];
-  if (column.valueName !== seedValueName) {
-    mismatches.push(
-      `${label} has valueName "${column.valueName}" where the floor seed's column type ${seedColumn.columnType} implies "${seedValueName}".`,
-    );
-  }
-  if (column.emptyValueAllowed !== seedColumn.emptyValueAllowed) {
-    mismatches.push(
-      `${label} has emptyValueAllowed ${column.emptyValueAllowed} where the floor seed has ${seedColumn.emptyValueAllowed}.`,
-    );
-  }
-  return mismatches;
+  return makeStructuredConfig({} as ColumnConfigsBase, columnConfigs);
 }

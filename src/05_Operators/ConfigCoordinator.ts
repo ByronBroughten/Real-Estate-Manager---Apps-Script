@@ -1,9 +1,5 @@
 import { columnConfigsByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
-import { floorSeedLookup } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import {
-  makeColumnConfigs,
-  makeSheetConfigs,
-} from "../01_SpreadsheetSchema/makeConfigs";
+import { assertFloorMatchesSeed } from "../01_SpreadsheetSchema/floorSeedCheck";
 import { sheetConfigsByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   clearSpreadsheetConfigOverlay,
@@ -132,15 +128,10 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
       },
     });
   }
-  // Resolves column IDs through the last generated configs, so it's sound only after the identity guard.
   private _assertFloorMatchesSeed(): void {
-    makeSheetConfigs(
+    assertFloorMatchesSeed(
       this.sheetConfigOperator.newSheetConfigs(),
-      floorSeedLookup,
-    );
-    makeColumnConfigs(
       this.columnConfigOperator.newColumnConfigs(),
-      floorSeedLookup,
     );
   }
   private _syncConfigSheetRows(): string | undefined {
