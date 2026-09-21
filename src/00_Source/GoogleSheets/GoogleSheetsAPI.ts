@@ -15,6 +15,29 @@ import { googleProtectedRange } from "./GoogleSheetsAPI/protectedRanges";
 
 export type OpaqueRawRequest = GoogleAppsScript.Sheets.Schema.Request;
 
+// Naming a verb here obliges UpdateRequestSummary to give it a line format.
+export type ModeledRequestVerb =
+  | "appendCells"
+  | "insertDimension"
+  | "deleteDimension"
+  | "findReplace"
+  | "sortRange"
+  | "addConditionalFormatRule"
+  | "deleteConditionalFormatRule"
+  | "addProtectedRange"
+  | "deleteProtectedRange"
+  | "addSheet"
+  | "addTable"
+  | "updateSheetProperties"
+  | "updateTable"
+  | "updateCells"
+  | "repeatCell"
+  | "pasteData";
+
+export type ModeledRequest = {
+  [RV in ModeledRequestVerb]: Required<Pick<OpaqueRawRequest, RV>>;
+}[ModeledRequestVerb];
+
 type GoogleSpreadsheet = GoogleAppsScript.Sheets.Schema.Spreadsheet;
 type BatchUpdateRequest =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
@@ -223,6 +246,13 @@ function gridFields(options: GridFetchOptions): string {
 function localOperationToGoogleRequests(
   operation: LocalWriteOperation,
 ): OpaqueRawRequest[] {
+  if (operation.kind === "raw") return [operation.request as OpaqueRawRequest];
+  return modeledOperationToGoogleRequests(operation);
+}
+
+function modeledOperationToGoogleRequests(
+  operation: Exclude<LocalWriteOperation, { kind: "raw" }>,
+): ModeledRequest[] {
   switch (operation.kind) {
     case "appendRows":
       return [
@@ -389,8 +419,6 @@ function localOperationToGoogleRequests(
           },
         },
       ];
-    case "raw":
-      return [operation.request as OpaqueRawRequest];
     default: {
       const exhaustive: never = operation;
       throw new Error(
