@@ -1,4 +1,8 @@
 import type { OpaqueRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
+import type {
+  AddSheetOperation,
+  AddTableOperation,
+} from "../00_Source/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetWriteQueue,
@@ -72,6 +76,15 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   }
   batchUpdateGSheets() {
     this.flusher.flush();
+  }
+  // Queued on the spreadsheet: a tab that does not exist yet has no sheet state to hold it.
+  gatherAddSheetRequest(props: Omit<AddSheetOperation, "kind">): this {
+    this.updateRequests.addSheet.push({ kind: "addSheet", ...props });
+    return this;
+  }
+  gatherAddTableRequest(props: Omit<AddTableOperation, "kind">): this {
+    this.updateRequests.addTable.push({ kind: "addTable", ...props });
+    return this;
   }
   // Matches by content rather than by coordinate, so no local mirror is possible.
   findReplace({ scope, ...terms }: FindReplaceProps): this {

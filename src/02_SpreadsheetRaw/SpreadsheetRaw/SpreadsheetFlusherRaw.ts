@@ -131,6 +131,9 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
   private _sendUpdateRequests() {
     const requests = this.updateRequests;
     const operations = [
+      // A Table can only be added to a tab this batch has created, so both go first.
+      ...requests.addSheet,
+      ...requests.addTable,
       ...requests.updateSheetTitle,
       ...requests.updateTableName,
       // First among column writes, so a header write in the same batch renames the column rather than being reverted.

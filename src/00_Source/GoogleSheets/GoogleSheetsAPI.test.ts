@@ -474,6 +474,113 @@ describe("GoogleSheetsAPI write mapping", () => {
       ),
     ).toEqual(["updateCells", "updateTable"]);
   });
+
+  it("maps an add-sheet operation onto one addSheet request carrying its sheetId, title and grid size", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(spreadsheetId, [
+      {
+        kind: "addSheet",
+        sheetId: 555,
+        title: "Spreadsheet Config",
+        rowCount: 20,
+        columnCount: 6,
+      },
+    ]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addSheet: {
+          properties: {
+            sheetId: 555,
+            title: "Spreadsheet Config",
+            gridProperties: { rowCount: 20, columnCount: 6 },
+          },
+        },
+      },
+    ]);
+  });
+
+  it("maps an add-Table operation onto one addTable request carrying its name, range and columns, and no tableId", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(spreadsheetId, [
+      {
+        kind: "addTable",
+        name: "spreadsheetConfig",
+        range: {
+          sheetId: 555,
+          startRowIndex: 2,
+          endRowIndex: 5,
+          startColumnIndex: 1,
+          endColumnIndex: 3,
+        },
+        columnProperties: [
+          { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
+          { columnIndex: 2, columnName: "Amount", columnType: "CURRENCY" },
+        ],
+      },
+    ]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addTable: {
+          table: {
+            name: "spreadsheetConfig",
+            range: {
+              sheetId: 555,
+              startRowIndex: 2,
+              endRowIndex: 5,
+              startColumnIndex: 1,
+              endColumnIndex: 3,
+            },
+            columnProperties: [
+              { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
+              { columnIndex: 2, columnName: "Amount", columnType: "CURRENCY" },
+            ],
+          },
+        },
+      },
+    ]);
+    expect(
+      batchUpdateCalls[0]?.requests?.[0]?.addTable?.table,
+    ).not.toHaveProperty("tableId");
+  });
+
+  it("maps an add-sheet and an add-Table handed together onto two requests in that order, and nothing else", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush(spreadsheetId, [
+      {
+        kind: "addSheet",
+        sheetId: 555,
+        title: "Spreadsheet Config",
+        rowCount: 20,
+        columnCount: 6,
+      },
+      {
+        kind: "addTable",
+        name: "spreadsheetConfig",
+        range: {
+          sheetId: 555,
+          startRowIndex: 2,
+          endRowIndex: 5,
+          startColumnIndex: 1,
+          endColumnIndex: 3,
+        },
+        columnProperties: [
+          { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
+        ],
+      },
+    ]);
+
+    expect(batchUpdateCalls).toHaveLength(1);
+    expect(
+      (batchUpdateCalls[0]?.requests ?? []).map((request) =>
+        Object.keys(request),
+      ),
+    ).toEqual([["addSheet"], ["addTable"]]);
+  });
 });
 
 describe("GoogleSheetsAPI payload mapping", () => {

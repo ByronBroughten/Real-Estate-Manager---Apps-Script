@@ -960,6 +960,89 @@ describe("SpreadsheetRaw.gatherRawRequest", () => {
   });
 });
 
+describe("SpreadsheetRaw add sheet and add Table", () => {
+  const addSheetProps = {
+    sheetId: 555,
+    title: "Spreadsheet Config",
+    rowCount: 20,
+    columnCount: 6,
+  };
+  const addTableProps = {
+    name: "spreadsheetConfig",
+    range: {
+      sheetId: 555,
+      startRowIndex: 2,
+      endRowIndex: 5,
+      startColumnIndex: 1,
+      endColumnIndex: 3,
+    },
+    columnProperties: [
+      { columnIndex: 1, columnName: "Name", columnType: "TEXT" as const },
+    ],
+  };
+
+  it("sends the add-sheet request first, the add-Table request second, and a sheet-title update after both", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).updateTitle("Renamed");
+    raw.gatherAddTableRequest(addTableProps);
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toHaveLength(1);
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        addSheet: {
+          properties: {
+            sheetId: 555,
+            title: "Spreadsheet Config",
+            gridProperties: { rowCount: 20, columnCount: 6 },
+          },
+        },
+      },
+      {
+        addTable: {
+          table: {
+            name: "spreadsheetConfig",
+            range: addTableProps.range,
+            columnProperties: addTableProps.columnProperties,
+          },
+        },
+      },
+      {
+        updateSheetProperties: {
+          properties: { sheetId: 111, title: "Renamed" },
+          fields: "title",
+        },
+      },
+    ]);
+  });
+
+  it("puts one operation on the spreadsheet's write queue per queue method, and a flush empties both lists", () => {
+    stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.gatherAddTableRequest(addTableProps);
+
+    expect(raw.updateRequests.addSheet).toEqual([
+      { kind: "addSheet", ...addSheetProps },
+    ]);
+    expect(raw.updateRequests.addTable).toEqual([
+      { kind: "addTable", ...addTableProps },
+    ]);
+
+    raw.batchUpdateGSheets();
+
+    expect(raw.updateRequests.addSheet).toEqual([]);
+    expect(raw.updateRequests.addTable).toEqual([]);
+  });
+});
+
 describe("RowRaw.delete", () => {
   function stubSheetWithDataRows(dataRowCount: number) {
     return stubSheetsService({
