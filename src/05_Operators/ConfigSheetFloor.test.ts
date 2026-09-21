@@ -1613,10 +1613,21 @@ describe("ConfigSheetFloor", () => {
 
     const table = addTableRequests(batchUpdateCalls)[0];
     const startColIndex = table?.range?.startColumnIndex ?? 0;
+    const headers = (table?.columnProperties ?? []).map(
+      (column) => column.columnName ?? null,
+    );
+    // The floor restores a created tab's column IDs on a later pass.
+    const columnIdByHeader = new Map<string | null, string>(
+      Object.values(columnConfigs.spreadsheetConfig).map((column) => [
+        column.header,
+        column.columnId,
+      ]),
+    );
     const rowsByIndex: Record<number, FakeCell[]> = {
-      [table?.range?.startRowIndex ?? 0]: (table?.columnProperties ?? []).map(
-        (column) => column.columnName ?? null,
+      [spreadsheetConfig.columnIdRowIdxBase0]: headers.map(
+        (header) => columnIdByHeader.get(header) ?? null,
       ),
+      [table?.range?.startRowIndex ?? 0]: headers,
     };
     spreadsheetConfigCellUpdates(batchUpdateCalls).forEach(
       ({ rowIndex, colIndex, value }) => {
@@ -1630,6 +1641,7 @@ describe("ConfigSheetFloor", () => {
           sheetId: spreadsheetConfigGid,
           title: configSheetFloorSeed.spreadsheetConfig.title,
           rows: buildGridRows(rowsByIndex),
+          table: { endRowIndex: table?.range?.endRowIndex ?? 0 },
         },
       ],
     });

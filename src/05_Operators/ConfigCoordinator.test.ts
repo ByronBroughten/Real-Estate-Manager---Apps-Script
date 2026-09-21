@@ -462,11 +462,11 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
   });
 
-  it("refuses a live ID delimiter change, since the floor tabs' column IDs keep the old one", () => {
+  it("refuses a live ID delimiter change, naming it with the expected one", () => {
     seedFixture({ idDelimiter: "|", testColumnId: "" });
 
     expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
-      'Floor tab "sheetConfig" ID prefix was "scf" and is now "scnf".',
+      'Spreadsheet Config column "ID delimiter" is "|"; expected ":".',
     );
   });
 
@@ -486,11 +486,13 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
 
   it("clears the live layout when later work throws", () => {
     stubSheetsService({
-      sheets: [spreadsheetConfigSheet("|")],
+      sheets: [spreadsheetConfigSheet(":", { idHeader: "Key" })],
     });
 
-    expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow();
-    expect(ssConfigGet("idDelimiter")).toBe(spreadsheetConfig.idDelimiter);
+    expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
+      /need a full row\/column fetch but have no Table object/,
+    );
+    expect(ssConfigGet("idHeader")).toBe(spreadsheetConfig.idHeader);
   });
 
   it("carries the untyped-column summary back, since no run status cell will show it", () => {

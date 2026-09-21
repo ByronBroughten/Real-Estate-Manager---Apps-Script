@@ -1,12 +1,13 @@
-import type { CellValue } from "../00_Source/CellValues/cellValues";
+import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { makeImportLine } from "../01_SpreadsheetSchema/makeConfigs";
 import {
+  spreadsheetConfigColumnLabel,
   spreadsheetConfigIndexHeaders,
   spreadsheetConfigTextHeaders,
 } from "../01_SpreadsheetSchema/spreadsheetConfigFields";
 import type { LiveSpreadsheetConfig } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import { uniformRowLayout } from "../01_SpreadsheetSchema/uniformRowLayout";
 import { Obj } from "../utils/Obj";
+import { Str } from "../utils/Str";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
@@ -14,12 +15,14 @@ import {
   type ConfigSyncState,
   type OperatorProps,
 } from "./SpreadsheetBaseOperator";
-import { SpreadsheetConfigDataRow } from "./SpreadsheetConfigDataRow";
 
-const guaranteedHeaders: string[] = [
+const fieldColumnNames = [
   ...Obj.values(spreadsheetConfigTextHeaders),
   ...Obj.values(spreadsheetConfigIndexHeaders),
-];
+].map((header) => Str.sentenceToCamelCase(header));
+
+const { idHeader: editableHeader, ...fixedTextHeaders } =
+  spreadsheetConfigTextHeaders;
 
 export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheetConfig"> {
   constructor(props: OperatorProps) {
@@ -37,8 +40,24 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     return this.configSyncState.spreadsheetConfigSync;
   }
   fetchLiveConfig(): LiveSpreadsheetConfig {
-    this.ss.raw.fetchSheetUsedGrid(this.schema.sheetGid);
-    const liveConfig = this._translateFetchedGrid();
+    this.sheet.prepFetchColumnsSpecific(
+      [this.schema.topDataRowIdx],
+      ...fieldColumnNames,
+    );
+    this.ss.fetchAllPrepped({ skipFetchingProperties: true });
+    const firstDataRow = this.sheet.topRow;
+    const textValues = Obj.mapValues(spreadsheetConfigTextHeaders, (header) =>
+      firstDataRow.value(Str.sentenceToCamelCase(header)),
+    );
+    const indexValuesBase1 = Obj.mapValues(
+      spreadsheetConfigIndexHeaders,
+      (header) => firstDataRow.value(Str.sentenceToCamelCase(header)),
+    );
+    validateFixedLayoutValuesUnchanged(textValues, indexValuesBase1);
+    const liveConfig: LiveSpreadsheetConfig = {
+      ...textValues,
+      ...Obj.mapValues(indexValuesBase1, (value) => value - 1),
+    };
     this.spreadsheetConfigSync.liveConfig = liveConfig;
     return liveConfig;
   }
@@ -66,85 +85,44 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
       );
     }
   }
-  private _translateFetchedGrid(): LiveSpreadsheetConfig {
-    const tableHeaderRowIndex =
-      this._uniqueTableHeaderRowIndex(guaranteedHeaders);
-    const colIndexByHeader = this._colIndexByHeader(
-      tableHeaderRowIndex,
-      guaranteedHeaders,
-    );
-    const dataRow = new SpreadsheetConfigDataRow(
-      this._valueByHeader(tableHeaderRowIndex + 1, colIndexByHeader),
-    );
-    const liveConfig: LiveSpreadsheetConfig = {
-      ...Obj.mapValues(spreadsheetConfigTextHeaders, (header) =>
-        dataRow.stringCell(header),
-      ),
-      ...Obj.mapValues(spreadsheetConfigIndexHeaders, (header) =>
-        dataRow.indexCell(header),
-      ),
-    };
-    uniformRowLayout.validate(liveConfig);
-    return liveConfig;
-  }
-  private _uniqueTableHeaderRowIndex(guaranteedHeaders: string[]): number {
-    const matchingRowIndexes = this.sheet.raw.activeRowIndexes.filter(
-      (rowIndex) =>
-        guaranteedHeaders.every((header) =>
-          this._rowValues(rowIndex).includes(header),
-        ),
-    );
-    if (matchingRowIndexes.length !== 1) {
-      throw new Error(
-        `Spreadsheet Config Table header row must be the unique row that contains every guaranteed header; found ${matchingRowIndexes.length}.`,
-      );
-    }
-    return matchingRowIndexes[0]!;
-  }
-  private _rowValues(rowIndex: number): CellValue[] {
-    const rowState = this.sheet.raw.rowStates.get(rowIndex);
-    return rowState
-      ? [...rowState.values()].map((cellState) => cellState.value)
-      : [];
-  }
-  private _colIndexByHeader(
-    tableHeaderRowIndex: number,
-    guaranteedHeaders: string[],
-  ): Map<string, number> {
-    const colIndexByHeader = new Map<string, number>();
-    const rowState = this.sheet.raw.rowStates.get(tableHeaderRowIndex);
-    if (!rowState) {
-      throw new Error("Spreadsheet Config Table header row is not active.");
-    }
-    for (const [colIndex, cellState] of rowState.entries()) {
-      if (
-        typeof cellState.value === "string" &&
-        guaranteedHeaders.includes(cellState.value)
-      ) {
-        colIndexByHeader.set(cellState.value, colIndex);
-      }
-    }
-    return colIndexByHeader;
-  }
-  private _valueByHeader(
-    dataRowIndex: number,
-    colIndexByHeader: Map<string, number>,
-  ): Map<string, CellValue | ""> {
-    return new Map(
-      [...colIndexByHeader].map(([header, colIndex]) => [
-        header,
-        this._cellValueOrEmpty(dataRowIndex, colIndex),
-      ]),
+}
+
+// Compared in base 1, so a refusal shows each cell as it reads on the sheet.
+function validateFixedLayoutValuesUnchanged(
+  textValues: Record<keyof typeof spreadsheetConfigTextHeaders, string>,
+  indexValuesBase1: Record<keyof typeof spreadsheetConfigIndexHeaders, number>,
+): void {
+  const changed = [
+    ...changedLayoutValueLines(
+      fixedTextHeaders,
+      textValues,
+      (key) => spreadsheetConfig[key],
+    ),
+    ...changedLayoutValueLines(
+      spreadsheetConfigIndexHeaders,
+      indexValuesBase1,
+      (key) => spreadsheetConfig[key] + 1,
+    ),
+  ];
+  if (changed.length > 0) {
+    throw new Error(
+      `Spreadsheet Config layout values other than "${editableHeader}" are fixed; put back:\n${changed.join("\n")}`,
     );
   }
-  private _cellValueOrEmpty(
-    rowIndex: number,
-    colIndex: number,
-  ): CellValue | "" {
-    const rowState = this.sheet.raw.rowStates.get(rowIndex);
-    if (!rowState || !rowState.has(colIndex)) {
-      return "";
-    }
-    return rowState.get(colIndex)?.value ?? "";
-  }
+}
+
+function changedLayoutValueLines<K extends string>(
+  headers: Record<K, string>,
+  liveValues: NoInfer<Record<K, string | number>>,
+  expectedValue: (key: K) => string | number,
+): string[] {
+  return Obj.keys(headers).flatMap((key) => {
+    const live = liveValues[key];
+    const expected = expectedValue(key);
+    return live === expected
+      ? []
+      : [
+          `${spreadsheetConfigColumnLabel(headers[key])} is ${JSON.stringify(live)}; expected ${JSON.stringify(expected)}.`,
+        ];
+  });
 }
