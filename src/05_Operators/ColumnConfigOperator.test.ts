@@ -650,6 +650,114 @@ describe("ColumnConfigOperator.syncToSpreadsheet -> _updateProgrammaticValues", 
   });
 });
 
+describe("ColumnConfigOperator.syncToSpreadsheet -> _appendColumnRows", () => {
+  const propertyColumnConfigRow = [
+    propertyGid,
+    "c:prp:aaa",
+    "Property",
+    "Rent Amount",
+  ];
+  const newSheetColumnConfigRow = [
+    newSheetGid,
+    "c:prp:aaa",
+    "Brand New Sheet",
+    "Rent Amount",
+  ];
+
+  function seedDuplicatedColumnIdOnTwoSheets(columnConfigRows: unknown[][]) {
+    stubSheetsService({
+      sheets: [
+        {
+          sheetId: sheetConfigGid,
+          title: "Sheet Config",
+          rows: buildGridRows({
+            0: sheetConfigColumnIdRow,
+            3: sheetConfigHeaderRow,
+            4: [propertyGid, "Property", true, ""],
+            5: [newSheetGid, "Brand New Sheet", true, ""],
+          }),
+          table: { endRowIndex: 6, columnTypes: sheetConfigColumnTypes },
+        },
+        {
+          sheetId: columnConfigGid,
+          title: "Column Config",
+          rows: buildGridRows({
+            0: columnConfigColumnIdRow,
+            3: columnConfigHeaderRow,
+            ...Object.fromEntries(
+              columnConfigRows.map((row, index) => [4 + index, row]),
+            ),
+          }),
+          table: {
+            endRowIndex: 4 + columnConfigRows.length,
+            columnTypes: columnConfigColumnTypes,
+          },
+        },
+        {
+          sheetId: propertyGid,
+          title: "Property",
+          rows: buildGridRows({
+            0: ["c:prp:aaa"],
+            3: ["Rent Amount"],
+            4: [42],
+          }),
+          table: { endRowIndex: 5 },
+        },
+        {
+          sheetId: newSheetGid,
+          title: "Brand New Sheet",
+          rows: buildGridRows({
+            0: ["c:prp:aaa"],
+            3: ["Rent Amount"],
+            4: [42],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+  }
+
+  function identitiesOnTheTwoSheets(operator: ColumnConfigOperator): string[] {
+    const col = operator.sheet.columns("sheetGid", "columnId");
+    return operator.sheet.rowIndexesActiveWithData
+      .map((rowIndex) => [
+        col.sheetGid.value(rowIndex),
+        col.columnId.value(rowIndex),
+      ])
+      .filter(
+        ([sheetGid]) => sheetGid === propertyGid || sheetGid === newSheetGid,
+      )
+      .map(([sheetGid, columnId]) => `${sheetGid}:${columnId}`);
+  }
+
+  it("appends a row for a column whose ID already has a row under another sheet", () => {
+    seedDuplicatedColumnIdOnTwoSheets([propertyColumnConfigRow]);
+
+    const operator = ColumnConfigOperator.init();
+    syncColumnConfigOperator(operator);
+
+    expect(identitiesOnTheTwoSheets(operator)).toEqual([
+      `${propertyGid}:c:prp:aaa`,
+      `${newSheetGid}:c:prp:aaa`,
+    ]);
+  });
+
+  it("appends no row for a column whose identity already has one", () => {
+    seedDuplicatedColumnIdOnTwoSheets([
+      propertyColumnConfigRow,
+      newSheetColumnConfigRow,
+    ]);
+
+    const operator = ColumnConfigOperator.init();
+    syncColumnConfigOperator(operator);
+
+    expect(identitiesOnTheTwoSheets(operator)).toEqual([
+      `${propertyGid}:c:prp:aaa`,
+      `${newSheetGid}:c:prp:aaa`,
+    ]);
+  });
+});
+
 interface ColumnsUnderTest {
   headers: string[];
   topDataRow?: FakeCell[];
