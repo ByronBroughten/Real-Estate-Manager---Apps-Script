@@ -1,11 +1,11 @@
 import type {
   ModeledRequestVerb,
-  OpaqueRawRequest,
+  GoogleRequest,
 } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { sheetConfigsByGid } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";
 
-type GoogleUpdateRequest = OpaqueRawRequest;
+type GoogleUpdateRequest = GoogleRequest;
 type GoogleGridRange = GoogleAppsScript.Sheets.Schema.GridRange;
 type UserEnteredValue = NonNullable<
   NonNullable<

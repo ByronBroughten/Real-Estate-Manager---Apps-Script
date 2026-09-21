@@ -1,9 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -78,7 +75,6 @@ const rowReferencingUnresolvableSheet = [
 ];
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 

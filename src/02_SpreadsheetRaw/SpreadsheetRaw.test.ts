@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import type { CellValue } from "../00_Source/CellValues/cellValues";
+import { googleRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import type { AddTableOperation } from "../00_Source/RawSource/RawSource";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -95,10 +95,6 @@ function thrownMessage(fn: () => void): string {
   }
   throw new Error("Expected the call to throw, but it did not.");
 }
-
-beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-});
 
 describe("SpreadsheetRaw.fetchAllSheetProperties", () => {
   it("integrates sheet properties from Sheets.Spreadsheets.get into raw state", () => {
@@ -936,7 +932,9 @@ describe("SpreadsheetRaw.gatherRawRequest", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.gatherRawRequest({ updateTable: { table: { tableId: "t" } } });
+    raw.gatherRawRequest(
+      googleRawRequest({ updateTable: { table: { tableId: "t" } } }),
+    );
     raw.sheet(111).row(5).cell(2).updateValue("Processing...");
     raw.sheet(111).row(10).delete();
     raw.batchUpdateGSheets();
@@ -953,7 +951,9 @@ describe("SpreadsheetRaw.gatherRawRequest", () => {
     const { batchUpdateCalls } = stubSheetsService();
 
     const raw = SpreadsheetRaw.init();
-    raw.gatherRawRequest({ updateTable: { table: { tableId: "t" } } });
+    raw.gatherRawRequest(
+      googleRawRequest({ updateTable: { table: { tableId: "t" } } }),
+    );
     raw.discardQueuedChanges();
     raw.batchUpdateGSheets();
 
@@ -1919,7 +1919,9 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
       colIdxToSortBy: 0,
       sortOrder: "ASCENDING",
     });
-    raw.gatherRawRequest({ updateTable: { table: { tableId: "t" } } });
+    raw.gatherRawRequest(
+      googleRawRequest({ updateTable: { table: { tableId: "t" } } }),
+    );
     raw.discardQueuedChanges();
     raw.batchUpdateGSheets();
 
@@ -1948,29 +1950,6 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
         },
       },
     ]);
-  });
-});
-
-describe("SpreadsheetRaw.spreadsheetId", () => {
-  it("reads the script property once and reuses it across instances sharing the state", () => {
-    const properties = stubPropertiesService({
-      realEstateSpreadsheetId: "test-spreadsheet-id",
-    });
-    const getProperty = vi.spyOn(properties, "getProperty");
-
-    const raw = SpreadsheetRaw.init();
-    expect(raw.spreadsheetId).toBe("test-spreadsheet-id");
-    expect(raw.spreadsheetId).toBe("test-spreadsheet-id");
-    expect(raw.sheet(111).spreadsheetId).toBe("test-spreadsheet-id");
-
-    expect(getProperty).toHaveBeenCalledTimes(1);
-  });
-  it("throws every time when the property is missing", () => {
-    stubPropertiesService({});
-
-    const raw = SpreadsheetRaw.init();
-    expect(() => raw.spreadsheetId).toThrowError(/Spreadsheet ID not found/);
-    expect(() => raw.spreadsheetId).toThrowError(/Spreadsheet ID not found/);
   });
 });
 
@@ -3001,17 +2980,19 @@ describe("ColumnMetaRaw.updateColumnType", () => {
   it("fake: a columnProperties update replaces the whole list, so a column left out loses its type", () => {
     stubTypedTable();
     const raw = fetchedRaw();
-    raw.gatherRawRequest({
-      updateTable: {
-        table: {
-          tableId: "fake-table-111",
-          columnProperties: [
-            { columnIndex: 2, columnName: "Amount", columnType: "DOUBLE" },
-          ],
+    raw.gatherRawRequest(
+      googleRawRequest({
+        updateTable: {
+          table: {
+            tableId: "fake-table-111",
+            columnProperties: [
+              { columnIndex: 2, columnName: "Amount", columnType: "DOUBLE" },
+            ],
+          },
+          fields: "columnProperties",
         },
-        fields: "columnProperties",
-      },
-    });
+      }),
+    );
     raw.batchUpdateGSheets();
     raw.fetchAllSheetProperties();
 
@@ -3026,15 +3007,17 @@ describe("ColumnMetaRaw.updateColumnType", () => {
   it("fake: rejects a columnProperties update carrying a column with no columnName", () => {
     stubTypedTable();
     const raw = fetchedRaw();
-    raw.gatherRawRequest({
-      updateTable: {
-        table: {
-          tableId: "fake-table-111",
-          columnProperties: [{ columnIndex: 2, columnType: "DOUBLE" }],
+    raw.gatherRawRequest(
+      googleRawRequest({
+        updateTable: {
+          table: {
+            tableId: "fake-table-111",
+            columnProperties: [{ columnIndex: 2, columnType: "DOUBLE" }],
+          },
+          fields: "columnProperties",
         },
-        fields: "columnProperties",
-      },
-    });
+      }),
+    );
 
     expect(() => raw.batchUpdateGSheets()).toThrow(/columnName/);
   });

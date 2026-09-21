@@ -4,12 +4,6 @@ import tseslint from "typescript-eslint";
 
 const platformMessage =
   "Google Sheets code lives only in src/00_Source/GoogleSheets/. Everything else takes a platform-neutral type or a return value that the entry point handles.";
-// Leaks still being moved behind the platform module (#104).
-const platformLeaks = [
-  "src/02_SpreadsheetRaw/ClassBases/SpreadsheetBaseRaw.ts",
-  "src/02_SpreadsheetRaw/SpreadsheetRaw.ts",
-  "src/06_API/Api.ts",
-];
 const rawImportPattern = {
   regex:
     "^(\\.\\./)+01_SpreadsheetSchema/(SheetSchema|ColumnSchema|columnConfigsTypes|valueConfigsTypes|generated/(columnConfigs|valueConfigs))(\\.js)?$",
@@ -59,7 +53,6 @@ export default defineConfig(
       "src/testSupport/**",
       "src/TypeDeclarations/**",
       "**/*.test.ts",
-      ...platformLeaks,
     ],
     rules: {
       "no-restricted-imports": ["error", { patterns: [platformImportPattern] }],
@@ -82,7 +75,7 @@ export default defineConfig(
   // After the platform block: a later block's no-restricted-imports replaces an earlier one's.
   {
     files: ["src/02_SpreadsheetRaw/**/*.ts"],
-    ignores: platformLeaks,
+    ignores: ["**/*.test.ts"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -91,7 +84,7 @@ export default defineConfig(
     },
   },
   {
-    files: platformLeaks.filter((file) => file.startsWith("src/02_")),
+    files: ["src/02_SpreadsheetRaw/**/*.test.ts"],
     rules: {
       "no-restricted-imports": ["error", { patterns: [rawImportPattern] }],
     },

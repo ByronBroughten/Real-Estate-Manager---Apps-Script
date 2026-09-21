@@ -2,10 +2,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import type { SheetEdit } from "../00_Source/PlatformEvents/sheetEdit";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -48,15 +46,13 @@ function stubOccupancySheet() {
   });
 }
 
-function actionRowEdit(colIndex: number, value: string) {
+function actionRowEdit(colIndex: number, value: string): SheetEdit {
   return {
+    sheetGid: occupancyGid,
+    rowIndexBase0: spreadsheetConfig.actionRowIndexBase0,
+    colIndexBase0: colIndex,
     value,
-    range: {
-      getRow: () => spreadsheetConfig.actionRowIndexBase0 + 1,
-      getColumn: () => colIndex + 1,
-      getSheet: () => ({ getSheetId: () => occupancyGid }),
-    },
-  } as unknown as GoogleAppsScript.Events.SheetsOnEdit;
+  };
 }
 
 function trackingEndpoints(calls: string[]): Endpoints {
@@ -90,7 +86,6 @@ function actionRowWrites(
 }
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 
@@ -110,12 +105,12 @@ describe("Api.isSuspectedApiCall", () => {
   });
 });
 
-describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
+describe("Api.handleSheetEdit, endpoint dispatch", () => {
   it("runs the entry registered under the edited column's full name", () => {
     const calls: string[] = [];
     stubOccupancySheet();
 
-    Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(buttonColIndex, "TRUE"),
     );
 
@@ -126,7 +121,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     const calls: string[] = [];
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(idColIndex, "TRUE"),
     );
 
@@ -138,7 +133,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     const calls: string[] = [];
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(blankIdColIndex, "TRUE"),
     );
 
@@ -150,7 +145,7 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     const calls: string[] = [];
     stubOccupancySheet();
 
-    Api.init(trackingEndpoints(calls)).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(buttonColIndex, "FALSE"),
     );
 
@@ -162,18 +157,18 @@ describe("Api.handleSheetOnEditEvent, endpoint dispatch", () => {
     stubOccupancySheet();
     const api = Api.init(trackingEndpoints(calls));
 
-    api.handleSheetOnEditEvent(actionRowEdit(twoWayColIndex, "TRUE"));
-    api.handleSheetOnEditEvent(actionRowEdit(twoWayColIndex, "FALSE"));
+    api.handleSheetEdit(actionRowEdit(twoWayColIndex, "TRUE"));
+    api.handleSheetEdit(actionRowEdit(twoWayColIndex, "FALSE"));
 
     expect(calls).toEqual(["twoWay:true", "twoWay:false"]);
   });
 });
 
-describe("Api.handleSheetOnEditEvent, the entry checkbox", () => {
+describe("Api.handleSheetEdit, the entry checkbox", () => {
   it("clears a button's checkbox so it is ready for the next click", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    Api.init(trackingEndpoints([])).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints([])).handleSheetEdit(
       actionRowEdit(buttonColIndex, "TRUE"),
     );
 
@@ -185,7 +180,7 @@ describe("Api.handleSheetOnEditEvent, the entry checkbox", () => {
   it("leaves a two-way entry's checkbox where the operator put it", () => {
     const { batchUpdateCalls } = stubOccupancySheet();
 
-    Api.init(trackingEndpoints([])).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints([])).handleSheetEdit(
       actionRowEdit(twoWayColIndex, "TRUE"),
     );
 
@@ -195,7 +190,7 @@ describe("Api.handleSheetOnEditEvent, the entry checkbox", () => {
   it("costs one read and one write for an entry that reports nothing", () => {
     const { batchUpdateCalls, getByDataFilterCalls } = stubOccupancySheet();
 
-    Api.init(trackingEndpoints([])).handleSheetOnEditEvent(
+    Api.init(trackingEndpoints([])).handleSheetEdit(
       actionRowEdit(buttonColIndex, "TRUE"),
     );
 

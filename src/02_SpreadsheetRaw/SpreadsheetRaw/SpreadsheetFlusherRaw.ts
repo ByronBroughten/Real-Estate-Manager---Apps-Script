@@ -154,7 +154,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       // Outside the ordering rules the queue was built around, so last.
       ...requests.raw,
     ];
-    this.spreadsheetStateRaw.rawSource.flush(this.spreadsheetId, operations);
+    this.spreadsheetStateRaw.rawSource.flush(operations);
     this.spreadsheetStateRaw.writeQueue.updateRequests = emptyUpdateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the

@@ -2,10 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -210,7 +207,6 @@ function touchedRowIndexes(calls: BatchUpdateCall[]): number[] {
 }
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 

@@ -1,4 +1,5 @@
 import type { SheetChange } from "../PlatformEvents/sheetChange";
+import type { SheetEdit } from "../PlatformEvents/sheetEdit";
 
 export class AppsScript {
   static projectProperties(key: string): string | null {
@@ -10,6 +11,15 @@ export class AppsScript {
     if (changeType === "REMOVE_GRID") return "sheetRemoved";
     if (changeType === "OTHER") return "other";
     return null;
+  }
+  // Google's event rows and columns are 1-based.
+  static sheetEdit(e: GoogleAppsScript.Events.SheetsOnEdit): SheetEdit {
+    return {
+      sheetGid: e.range.getSheet().getSheetId(),
+      rowIndexBase0: e.range.getRow() - 1,
+      colIndexBase0: e.range.getColumn() - 1,
+      value: e.value,
+    };
   }
   static toast(message: string): void {
     SpreadsheetApp.getActive().toast(message);

@@ -9,10 +9,7 @@ import {
   overlaySpreadsheetConfig,
   ssConfigGet,
 } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -54,7 +51,6 @@ const sscColumns = [
 ] as const;
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 

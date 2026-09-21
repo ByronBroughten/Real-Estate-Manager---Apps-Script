@@ -51,9 +51,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     this._addDataToState({ sheets });
   }
   private _fetchAndIntegrateAllSheetProperties() {
-    const data = this.spreadsheetStateRaw.rawSource.fetchSheetProperties(
-      this.spreadsheetId,
-    );
+    const data = this.spreadsheetStateRaw.rawSource.fetchSheetProperties();
     this._addDataToState(data);
     this.spreadsheetStateRaw.allSheetPropertiesAreFetched = true;
   }
@@ -116,19 +114,15 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     includeProgrammaticFacts: boolean,
     gridRanges: GridFetchRange[] = this.fetcherGridRanges,
   ): SpreadsheetSnapshot {
-    return this.spreadsheetStateRaw.rawSource.fetchGrid(
-      this.spreadsheetId,
-      gridRanges,
-      {
-        includeProgrammaticFacts,
-      },
-    );
+    return this.spreadsheetStateRaw.rawSource.fetchGrid(gridRanges, {
+      includeProgrammaticFacts,
+    });
   }
   private _fetchGatheredConditionalFormatRules(): void {
     const gatheringGids = this._gatheringGids("gatherConditionalFormats");
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
-      .fetchConditionalFormatRules(this.spreadsheetId)
+      .fetchConditionalFormatRules()
       .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
       .forEach(({ sheetGid, rules }) =>
         this.ss.sheet(sheetGid).integrateConditionalFormatRules(rules),
@@ -138,7 +132,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     const gatheringGids = this._gatheringGids("gatherEditProtections");
     if (gatheringGids.length === 0) return;
     this.spreadsheetStateRaw.rawSource
-      .fetchEditProtections(this.spreadsheetId)
+      .fetchEditProtections()
       .filter(({ sheetGid }) => gatheringGids.includes(sheetGid))
       .forEach(({ sheetGid, protections }) =>
         this.ss.sheet(sheetGid).integrateEditProtections(protections),

@@ -3,10 +3,7 @@ import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { EndpointRun } from "../06_API/EndpointRun";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -345,7 +342,6 @@ function runStateColour(calls: BatchUpdateCall[]) {
 const warningColour = { red: 0.99, green: 0.85, blue: 0.7 };
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 

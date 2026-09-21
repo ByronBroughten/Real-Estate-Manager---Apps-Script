@@ -260,23 +260,24 @@ export interface TableColumnPropertiesUpdate {
   columnType?: string;
 }
 
+declare const opaqueRawRequest: unique symbol;
+// Only the platform module can build or read one.
+export type OpaqueRawRequest = { readonly [opaqueRawRequest]: true };
+
 export interface OpaqueRawWriteOperation {
   kind: "raw";
-  request: unknown;
+  request: OpaqueRawRequest;
 }
 
 export interface RawSource {
-  fetchSheetProperties(spreadsheetId: string): SpreadsheetSnapshot;
+  fetchSheetProperties(): SpreadsheetSnapshot;
   fetchGrid(
-    spreadsheetId: string,
     gridRanges: GridFetchRange[],
     options: GridFetchOptions,
   ): SpreadsheetSnapshot;
-  fetchConditionalFormatRules(
-    spreadsheetId: string,
-  ): SheetConditionalFormatSnapshot[];
-  fetchEditProtections(spreadsheetId: string): SheetEditProtectionSnapshot[];
-  flush(spreadsheetId: string, operations: LocalWriteOperation[]): void;
+  fetchConditionalFormatRules(): SheetConditionalFormatSnapshot[];
+  fetchEditProtections(): SheetEditProtectionSnapshot[];
+  flush(operations: LocalWriteOperation[]): void;
 }
 
 let installed: RawSource | null = null;

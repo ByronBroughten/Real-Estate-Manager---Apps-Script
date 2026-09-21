@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import type { Value, VnToCvn } from "../01_SpreadsheetSchema/valueSchemas";
-import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   blankSheetConfigRow,
   filledSheetConfigRow,
@@ -99,7 +98,6 @@ function fetchedOccupancySheet(): SheetIdentified {
 
 describe("Identified value accessors", () => {
   beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
     stubOccupancyWithBlankRow();
   });
 
@@ -235,10 +233,6 @@ function unfetchedSheetConfig(): SheetIdentified {
 }
 
 describe("RowIdentified.isBlank / isReusable", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("calls a row whose every non-formula cell is empty blank", () => {
     stubSheetConfigSheet({ 4: blankSheetConfigRow });
 
@@ -269,10 +263,6 @@ describe("RowIdentified.isBlank / isReusable", () => {
 });
 
 describe("SheetIdentified.hasNoData", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("is true for a sheet whose one row is blank", () => {
     stubSheetConfigSheet({ 4: blankSheetConfigRow });
 
@@ -287,10 +277,6 @@ describe("SheetIdentified.hasNoData", () => {
 });
 
 describe("RowIdentified.clearValues", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("empties every non-formula cell and touches no formula cell", () => {
     const { batchUpdateCalls } = stubSheetConfigSheet({
       4: filledSheetConfigRow,
@@ -341,10 +327,6 @@ describe("RowIdentified.clearValues", () => {
 });
 
 describe("SheetIdentified.appendRowDefault", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("throws when the sheet's one data row was never fetched, naming the prefetch owed", () => {
     stubSheetConfigWithUnreadTopRow();
 
@@ -394,7 +376,6 @@ const testFormulaColumnId = columnConfigs.test.formulaTest.columnId;
 
 describe("Identified formula writes", () => {
   beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
     stubSheetsService({
       sheets: [
         {
@@ -438,10 +419,6 @@ describe("Identified formula writes", () => {
 });
 
 describe("SpreadsheetIdentified.fetchAllPrepped / FetchTargetIdentified", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   function recordedGridRanges(calls: object[]): unknown[] {
     const resource = calls[0] as {
       dataFilters: { gridRange: unknown }[];

@@ -36,6 +36,26 @@ describe("AppsScript.sheetChange", () => {
   );
 });
 
+describe("AppsScript.sheetEdit", () => {
+  it("decodes an edit event into a 0-based SheetEdit", () => {
+    const event = {
+      value: "TRUE",
+      range: {
+        getRow: () => 5,
+        getColumn: () => 3,
+        getSheet: () => ({ getSheetId: () => 111 }),
+      },
+    } as unknown as GoogleAppsScript.Events.SheetsOnEdit;
+
+    expect(AppsScript.sheetEdit(event)).toEqual({
+      sheetGid: 111,
+      rowIndexBase0: 4,
+      colIndexBase0: 2,
+      value: "TRUE",
+    });
+  });
+});
+
 describe("AppsScript.trigger", () => {
   it("addOnEdit schedules an onEdit trigger for the given function", () => {
     const { triggers } = stubScriptAndSpreadsheetApp();

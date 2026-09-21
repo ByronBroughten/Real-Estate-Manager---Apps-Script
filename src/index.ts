@@ -18,9 +18,10 @@ function installGoogleSheets(): void {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Apps Script calls it as a global trigger
 function triggerOnEdit(e: GoogleAppsScript.Events.SheetsOnEdit) {
-  if (Api.isSuspectedApiCall(e)) {
-    Api.init(businessEndpoints).handleSheetOnEditEvent(e);
-  }
+  const edit = AppsScript.sheetEdit(e);
+  if (!Api.isSuspectedApiCall(edit)) return;
+  installGoogleSheets();
+  Api.init(businessEndpoints).handleSheetEdit(edit);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- Apps Script calls it as a global trigger

@@ -1,8 +1,7 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import { stubPropertiesService } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -81,10 +80,6 @@ function fetchedOccupancy() {
 }
 
 describe("SheetNamed conditional format rules", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("reads a sheet with no rules as an empty list", () => {
     stubOccupancyWithRules([]);
     const { sheet } = fetchedOccupancy();
@@ -413,10 +408,6 @@ const idWholeColumnGoogleRange = {
 };
 
 describe("SheetNamed edit warnings and edit locks", () => {
-  beforeEach(() => {
-    stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
-  });
-
   it("queues nothing when adding a warning identical to one already present", () => {
     const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
       googleProtection(idColumnRange, {

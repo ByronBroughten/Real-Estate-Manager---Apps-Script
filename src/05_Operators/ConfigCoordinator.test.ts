@@ -7,10 +7,7 @@ import {
   clearSpreadsheetConfigOverlay,
   ssConfigGet,
 } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -79,7 +76,6 @@ function columnTypesByHeader(
 const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true];
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 

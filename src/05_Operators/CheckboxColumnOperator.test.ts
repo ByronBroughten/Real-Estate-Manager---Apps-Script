@@ -4,10 +4,7 @@ import type { ColumnValueName } from "../01_SpreadsheetSchema/columnConfigsTypes
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import type { ColumnNamedProps } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
-import {
-  stubLogger,
-  stubPropertiesService,
-} from "../testSupport/fakeAppsScriptGlobals";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -80,7 +77,6 @@ function selectFills(
 }
 
 beforeEach(() => {
-  stubPropertiesService({ realEstateSpreadsheetId: "test-spreadsheet-id" });
   stubLogger();
 });
 

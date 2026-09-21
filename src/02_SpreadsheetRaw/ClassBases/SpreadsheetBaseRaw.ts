@@ -1,4 +1,3 @@
-import { AppsScript } from "../../00_Source/GoogleSheets/AppsScript";
 import { installedRawSource } from "../../00_Source/RawSource/RawSource";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import {
@@ -24,18 +23,6 @@ export class SpreadsheetBaseRaw {
   get schema(): SpreadsheetBaseSchema {
     return new SpreadsheetBaseSchema();
   }
-  get spreadsheetId(): string {
-    const cached = this.spreadsheetStateRaw.spreadsheetId;
-    if (cached !== null) return cached;
-    const ssId = AppsScript.projectProperties("realEstateSpreadsheetId");
-    if (!ssId) {
-      throw new Error(
-        "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
-      );
-    }
-    this.spreadsheetStateRaw.spreadsheetId = ssId;
-    return ssId;
-  }
   get fetcherGridRanges(): GridRangeProps[] {
     return this.spreadsheetStateRaw.fetchQueue.gridRanges;
   }
@@ -51,7 +38,6 @@ export class SpreadsheetBaseRaw {
     return {
       spreadsheetStateRaw: {
         allSheetPropertiesAreFetched: false,
-        spreadsheetId: null,
         rawSource: installedRawSource(),
         fetchQueue: emptySpreadsheetFetchQueue(),
         writeQueue: emptySpreadsheetWriteQueue(),
