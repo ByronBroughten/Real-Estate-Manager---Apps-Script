@@ -145,18 +145,18 @@ function stubStaging(dataRows: readonly StagingRow[]): FakeSheetProperties {
   });
 }
 
-function stubProperty(dataRows?: readonly FakeRow<typeof columnConfigs.property>[]) {
+function stubProperty(
+  dataRows?: readonly FakeRow<typeof columnConfigs.property>[],
+) {
   return stubSheet({
     sheetName: "property",
     title: "Property",
     config: columnConfigs.property,
     columnNames: ["name", "id"],
-    dataRows:
-      dataRows ??
-      [
-        { name: caseName, id: caseProperty },
-        { name: charlesName, id: charlesProperty },
-      ],
+    dataRows: dataRows ?? [
+      { name: caseName, id: caseProperty },
+      { name: charlesName, id: charlesProperty },
+    ],
   });
 }
 
@@ -195,7 +195,12 @@ function stubPropertyExpense() {
     columnNames: expenseColumnNames,
     dataRows: [
       { id: "r:pex:old", propertyId: caseProperty, date: 44000, amount: 10 },
-      { id: "r:pex:older", propertyId: charlesProperty, date: 44001, amount: 20 },
+      {
+        id: "r:pex:older",
+        propertyId: charlesProperty,
+        date: 44001,
+        amount: 20,
+      },
     ],
   });
 }
@@ -330,7 +335,9 @@ function runStatusWritten(calls: BatchUpdateCall[]): string | undefined {
 
 function runStateColour(calls: BatchUpdateCall[]) {
   return allRequests(calls)
-    .map((request) => request.repeatCell?.cell?.userEnteredFormat?.backgroundColor)
+    .map(
+      (request) => request.repeatCell?.cell?.userEnteredFormat?.backgroundColor,
+    )
     .filter((colour) => colour !== undefined)
     .at(-1);
 }
@@ -583,7 +590,9 @@ describe("addPropertyExpense, what the sheet is left holding", () => {
     expect(
       stagingRowsWritten(batchUpdateCalls).get(topDataRowIndex + 1),
     ).toEqual(
-      Object.fromEntries(stagingColumnNames.map((columnName) => [columnName, ""])),
+      Object.fromEntries(
+        stagingColumnNames.map((columnName) => [columnName, ""]),
+      ),
     );
   });
 

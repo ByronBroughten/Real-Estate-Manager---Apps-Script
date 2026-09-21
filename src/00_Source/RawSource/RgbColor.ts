@@ -23,9 +23,7 @@ export function rgbChannelsEqual(
 
 export function quantizeRgbChannels(color: RgbChannels): RgbChannels {
   return {
-    ...(color.red !== undefined
-      ? { red: quantizeRgbChannel(color.red) }
-      : {}),
+    ...(color.red !== undefined ? { red: quantizeRgbChannel(color.red) } : {}),
     ...(color.green !== undefined
       ? { green: quantizeRgbChannel(color.green) }
       : {}),

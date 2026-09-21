@@ -440,15 +440,7 @@ describe("buildLedger, the page it writes", () => {
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
       [dayOne, "Property management", "Rent (base)", 50, "", null, ""],
-      [
-        dayOne,
-        "Property management",
-        "Security deposit",
-        1100,
-        "",
-        null,
-        "",
-      ],
+      [dayOne, "Property management", "Security deposit", 1100, "", null, ""],
       [dayOne, "Household", "Payment", "", 1150, null, ""],
       [
         dayTwo,
@@ -503,15 +495,7 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
-      [
-        dayOne,
-        "Property management",
-        "Security deposit",
-        1100,
-        "",
-        null,
-        "",
-      ],
+      [dayOne, "Property management", "Security deposit", 1100, "", null, ""],
       [dayOne, "Household", "Payment", "", 875, null, ""],
     ]);
   });
@@ -522,9 +506,7 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(
-      ledgerRowsWritten(batchUpdateCalls).map(
-        (row) => row[amountOwedColIndex],
-      ),
+      ledgerRowsWritten(batchUpdateCalls).map((row) => row[amountOwedColIndex]),
     ).toEqual([null, null, null, null, null, null, null, null]);
   });
 
@@ -576,15 +558,7 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
-      [
-        dayTwo,
-        "Property management",
-        "Prior balance",
-        0,
-        "",
-        null,
-        "",
-      ],
+      [dayTwo, "Property management", "Prior balance", 0, "", null, ""],
       [
         dayTwo,
         "Property management",
@@ -691,15 +665,7 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(ledgerRowsWritten(batchUpdateCalls)).toEqual([
-      [
-        dayTwo,
-        "Property management",
-        "Prior balance",
-        0,
-        "",
-        null,
-        "",
-      ],
+      [dayTwo, "Property management", "Prior balance", 0, "", null, ""],
     ]);
   });
 });

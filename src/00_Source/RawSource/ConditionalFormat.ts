@@ -38,11 +38,9 @@ export interface ConditionalFormatDeclaration {
 }
 
 export type ConditionalFormatRule =
-  | ModelableConditionalFormatRule
-  | UnmodelableConditionalFormatRule;
+  ModelableConditionalFormatRule | UnmodelableConditionalFormatRule;
 
-export interface ModelableConditionalFormatRule
-  extends ConditionalFormatDeclaration {
+export interface ModelableConditionalFormatRule extends ConditionalFormatDeclaration {
   kind: "boolean";
   ranges: GridRangeProps[];
 }
@@ -56,9 +54,7 @@ export interface UnmodelableConditionalFormatRule {
 export function isModelledConditionType(
   type: string,
 ): type is ModelledConditionType {
-  return modelledConditionTypes.some(
-    (modelledType) => modelledType === type,
-  );
+  return modelledConditionTypes.some((modelledType) => modelledType === type);
 }
 
 export function conditionalFormatRulesEqual(
@@ -86,10 +82,7 @@ export function quantizeConditionalFormat(
   };
 }
 
-function rangesEqual(
-  left: GridRangeProps[],
-  right: GridRangeProps[],
-): boolean {
+function rangesEqual(left: GridRangeProps[], right: GridRangeProps[]): boolean {
   if (left.length !== right.length) return false;
   return left.every((range, index) => rangeEqual(range, right[index]));
 }

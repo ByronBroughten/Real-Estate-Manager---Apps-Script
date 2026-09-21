@@ -2,15 +2,8 @@
   "scriptId": "1mwARqhx3udaTd8xvxnEhmT901shVXjlKPSeA4Yg0kYDE3HntHwM-44vn",
   "rootDir": "",
   "projectId": "real-estate-manager-sheets",
-  "scriptExtensions": [
-    ".js",
-    ".gs"
-  ],
-  "htmlExtensions": [
-    ".html"
-  ],
-  "jsonExtensions": [
-    ".json"
-  ],
+  "scriptExtensions": [".js", ".gs"],
+  "htmlExtensions": [".html"],
+  "jsonExtensions": [".json"],
   "filePushOrder": []
 }

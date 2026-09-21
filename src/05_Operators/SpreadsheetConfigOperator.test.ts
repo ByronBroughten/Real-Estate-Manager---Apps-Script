@@ -27,15 +27,7 @@ const spreadsheetConfigHeaders = [
   ssc.tableHeaderRowIndexBase1.header,
 ];
 
-const matchingCommittedFileValues = [
-  ":",
-  "ID",
-  1,
-  1,
-  2,
-  3,
-  4,
-] as const;
+const matchingCommittedFileValues = [":", "ID", 1, 1, 2, 3, 4] as const;
 
 function stubSpreadsheetConfigSheet(
   rowsByIndex: Record<number, readonly (string | number | boolean | null)[]>,
