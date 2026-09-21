@@ -31,6 +31,11 @@ interface FloorSeedSheet {
       runStatus: FloorSeedColumn;
     }
   >;
+  exampleColumn?: {
+    header: string;
+    columnType: FloorColumnType;
+    seededValues: readonly string[];
+  };
 }
 
 export const configSheetFloorSeed = {
@@ -185,6 +190,11 @@ export const configSheetFloorSeed = {
     tableName: "valueConfig",
     letApiAccess: true,
     columns: [],
+    exampleColumn: {
+      header: "Example value",
+      columnType: "TEXT",
+      seededValues: ["Example one", "Example two"],
+    },
   },
 } as const satisfies Record<string, FloorSeedSheet>;
 

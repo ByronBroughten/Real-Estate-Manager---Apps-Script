@@ -3,10 +3,12 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
-import { configSheetFloorSeed } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import {
+  configSheetFloorSeed,
+  type FloorTabName,
+} from "../../01_SpreadsheetSchema/configSheetFloorSeed";
 import { Obj } from "../../utils/Obj";
 
-export type FloorTabName = keyof typeof configSheetFloorSeed;
 export type FloorSheetName = Exclude<FloorTabName, "valueConfig">;
 
 export interface FloorColumnRestore {
@@ -32,8 +34,7 @@ export function columnNameByHeader<SN extends FloorSheetName>(
 
 export function floorSheetNames(): FloorSheetName[] {
   return Obj.keys(configSheetFloorSeed).filter(
-    (sheetName): sheetName is FloorSheetName =>
-      configSheetFloorSeed[sheetName].columns.length > 0,
+    (sheetName): sheetName is FloorSheetName => sheetName !== "valueConfig",
   );
 }
 
