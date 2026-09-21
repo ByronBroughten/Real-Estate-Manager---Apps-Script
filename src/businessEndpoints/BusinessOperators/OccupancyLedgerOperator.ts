@@ -160,7 +160,7 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
   private _paymentLines(occupancyId: string): LedgerLine[] {
     const allocations = this.ss
       .sheet("occPayAllocation")
-      .rowsFiltered({ occupancyId, filledOut: "Yes" });
+      .rowsFiltered({ occupancyId, filledOut: true });
     return paymentsFromAllocations(allocations).map((payment) => ({
       kind: "payment",
       date: payment.date,

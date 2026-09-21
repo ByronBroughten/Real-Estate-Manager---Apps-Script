@@ -658,34 +658,15 @@ describe("SheetNamed.appendRowWithAllVals", () => {
   it("asks a sheet with an ID column for every writable column but the ID", () => {
     assertType<
       IsExactly<
-        keyof CompleteAppendBag<"occupancyTerms">,
-        | "occupancyId"
-        | "noticeDate"
-        | "startDate"
-        | "endDate"
-        | "rentChargeMonthly"
-        | "caretakerRentReductionMonthly"
-        | "petFeeMonthly"
-        | "gasHeating"
-        | "electricHeating"
-        | "gasCooking"
-        | "electricCooking"
-        | "otherElectric"
-        | "gasWaterHeating"
-        | "electricWaterHeating"
-        | "waterSewer"
-        | "trashCollection"
-        | "districtEnergyHeating"
-        | "districtEnergyWaterHeating"
-        | "notes"
+        keyof CompleteAppendBag<"test">,
+        | "num"
+        | "dropdown"
+        | "conditionalFormatting"
+        | "columnCurrency"
+        | "active"
       >
     >(true);
-    assertType<
-      IsExactly<
-        CompleteAppendBag<"occupancyTerms">["petFeeMonthly"],
-        number | ""
-      >
-    >(true);
+    assertType<IsExactly<CompleteAppendBag<"test">["num"], number | "">>(true);
   });
 
   it("asks a sheet with no ID column for every writable column", () => {

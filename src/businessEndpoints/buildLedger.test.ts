@@ -204,7 +204,7 @@ const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:rentAndDeposit",
     occupancyId: tenant,
-    filledOut: "Yes",
+    filledOut: true,
     formOfPayment: "Payment",
     payerCategory: "Household",
     payerName: tenantName,
@@ -215,7 +215,7 @@ const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:rentAndDeposit",
     occupancyId: tenant,
-    filledOut: "Yes",
+    filledOut: true,
     formOfPayment: "Payment",
     payerCategory: "Household",
     payerName: tenantName,
@@ -226,7 +226,7 @@ const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:caretaking",
     occupancyId: tenant,
-    filledOut: "Yes",
+    filledOut: true,
     formOfPayment: "Caretaking",
     payerCategory: "Household",
     payerName: tenantName,
@@ -237,9 +237,9 @@ const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:agency",
     occupancyId: tenant,
-    filledOut: "Yes",
+    filledOut: true,
     formOfPayment: "Payment",
-    payerCategory: "Non-resident",
+    payerCategory: "Non-occupant",
     payerName: "Ramsey County",
     paymentDate: dayTwo,
     amount: 200,
@@ -248,7 +248,7 @@ const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:halfEntered",
     occupancyId: tenant,
-    filledOut: "No",
+    filledOut: false,
     formOfPayment: "Payment",
     payerCategory: "Household",
     payerName: tenantName,
@@ -259,7 +259,7 @@ const allocationRows: AllocationRow[] = [
   {
     paymentId: "r:opy:neighbour",
     occupancyId: neighbour,
-    filledOut: "Yes",
+    filledOut: true,
     formOfPayment: "Payment",
     payerCategory: "Household",
     payerName: "Someone Else`99 Elsewhere, Unit 2",
@@ -481,7 +481,7 @@ describe("buildLedger, the page it writes", () => {
         {
           paymentId: "r:opy:deposit",
           occupancyId: tenant,
-          filledOut: "Yes",
+          filledOut: true,
           formOfPayment: "Payment",
           payerCategory: "Household",
           payerName: tenantName,
@@ -651,7 +651,7 @@ describe("buildLedger, the page it writes", () => {
         {
           paymentId: "r:opy:deposit",
           occupancyId: tenant,
-          filledOut: "Yes",
+          filledOut: true,
           formOfPayment: "Payment",
           payerCategory: "Household",
           payerName: tenantName,
@@ -696,7 +696,7 @@ describe("buildLedger, what it reports", () => {
         {
           paymentId: "r:opy:rent",
           occupancyId: tenant,
-          filledOut: "Yes",
+          filledOut: true,
           formOfPayment: "Payment",
           payerCategory: "Household",
           payerName: tenantName,

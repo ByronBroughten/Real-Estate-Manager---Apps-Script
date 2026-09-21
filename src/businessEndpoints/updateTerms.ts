@@ -61,6 +61,8 @@ export const updateTerms: Endpoint<"occupancy"> = {
         lastActiveTerm.updateValue("endDate", Dat.dayBefore(nextStartDate));
       }
       occupancyTerms.appendRowWithAllVals({
+        paymentAllocationDefault: "Earliest unaccounted charge",
+        lateFeePolicy: "No late fees",
         noticeDate: occRow.value("nextTermsNoticeSentDate"),
         startDate: nextStartDate,
         endDate: occRow.value("nextTermsEndDate"),

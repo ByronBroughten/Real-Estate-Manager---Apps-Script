@@ -6,9 +6,13 @@ export const valueConfigs = makeValueConfigs({
     "Late fee",
     "Damage, waste, or service"
   ],
+  "paymentStatus": [
+    "Verified",
+    "Guaranteed"
+  ],
   "payerCategory": [
     "Household",
-    "Non-resident",
+    "Non-occupant",
     "Security deposit"
   ],
   "expenseCategory": [
@@ -49,18 +53,9 @@ export const valueConfigs = makeValueConfigs({
   "chargeReduceDescription": [
     "Forgiveness"
   ],
-  "paymentAllocateWhat": [
-    "Full payment",
-    "Full charge",
-    "Lesser amount"
-  ],
   "yesOrNo": [
     "Yes",
     "No"
-  ],
-  "paymentType": [
-    "Payment",
-    "Caretaking"
   ],
   "chargeDescription": [
     "Base rent",
@@ -70,5 +65,16 @@ export const valueConfigs = makeValueConfigs({
     "Security deposit",
     "Late fee",
     "Damage, waste, or service"
+  ],
+  "formOfPayment": [
+    "Payment",
+    "Caretaking",
+    "Cash App",
+    "Venmo",
+    "Check"
+  ],
+  "paymentAllocationDefault": [
+    "Earliest unaccounted charge",
+    "Next or latest unaccounted charge"
   ]
 });
