@@ -1,4 +1,4 @@
-// Hook stdin/stdout plumbing shared by the guardrail hooks. See docs/how-it-runs.md, "Claude Code guardrails".
+// Hook stdin/stdout plumbing shared by the guardrail hooks. See docs/claude-code-guardrails.md.
 import { mkdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";

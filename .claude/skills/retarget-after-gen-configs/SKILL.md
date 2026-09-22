@@ -5,7 +5,7 @@ description: Retarget hand-written sheet and column names onto the last generate
 
 Point the same live column or sheet (same column ID or sheet GID) at the new generated key. The live spreadsheet is the source of truth; the four generated config files from the last successful regen are the cache; hand-written names follow identity in that cache.
 
-Open [`docs/generated-data.md`](../../../docs/generated-data.md) now (grep the block, sampled vs declared, the floor, the one regen path). Leave regen-run permission, the floor report, and the untyped-column count with whoever ran `gen:configs`.
+Open [`docs/generated-data.md`](../../../docs/generated-data.md) now (reading by block, the one regen path), plus [`column-configs.md`](../../../docs/generated-data/column-configs.md) for sampled vs declared and [`config-sheet-floor.md`](../../../docs/generated-data/config-sheet-floor.md) for the floor. Leave regen-run permission, the floor report, and the untyped-column count with whoever ran `gen:configs`.
 
 ## Guardrails
 
@@ -39,7 +39,7 @@ One tag per error: **identity** / **incidental trait** / **skipped pin** / **ask
 | Trait-only diff whose assertion subject *is* the trait | **skipped pin** even if retargeting would make `tsc` green |
 | Cannot classify from cache + `tsc` line | **unclassified** — leave unpatched |
 
-**Pin detector** (sampled-trait change on an existing column ID). Open the exemplar-columns paragraph in [`docs/testing.md`](../../../docs/testing.md) only for this step.
+**Pin detector** (sampled-trait change on an existing column ID). Open [`docs/testing.md`](../../../docs/testing.md#exemplar-columns-in-type-level-tests)'s exemplar-columns section only for this step.
 
 1. Documented exemplar → **skipped pin**.
 2. Assertion subject is the trait (`ColumnIsFormula`, value name, empty-value-allowed, checkbox vs sampled boolean, writability-because-formula) → **skipped pin**.

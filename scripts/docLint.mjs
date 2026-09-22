@@ -1,8 +1,9 @@
 // Checks the agent-facing docs' links and size limits; a doc map in, violations out. See docs/agents/prose-files.md.
 import { posix } from "node:path";
 
-const RULES_FILES = ["STYLE.md", "VOCABULARY.md"];
+const RULES_FILES = ["DESIGN.md", "STYLE.md", "VOCABULARY.md"];
 const MAX_RULE_LINE = 300;
+const MAX_LEAD_LINES = 5;
 const MAX_SRC_AGENTS_LINES = 15;
 const MAX_FOLDER_AGENTS_LINES = 10;
 const MAX_ROOT_AGENTS_BYTES = 5 * 1024;
@@ -29,6 +30,7 @@ export function checkDocs({ docs, paths = [] }) {
     if (isLinkChecked(path))
       checkLinks(path, text, { docs, known, slugsOf, report });
     if (RULES_FILES.includes(path)) checkRuleLines(text, report);
+    if (path.startsWith("docs/")) checkLead(text, report);
     if (posix.basename(path) !== "AGENTS.md") continue;
     if (path === "AGENTS.md") checkRootSize(text, report);
     else {
@@ -138,6 +140,21 @@ function checkRuleLines(text, report) {
       `rule line is ${length} characters; keep it to ${MAX_RULE_LINE} and move the rest to a reasoning file`,
     );
   }
+}
+
+// A read-by-heading doc's lead: the non-blank lines after its title and before its first `##` heading.
+function checkLead(text, report) {
+  const lines = proseLines(text);
+  const firstSection = lines.findIndex(({ content }) => /^##\s/.test(content));
+  if (firstSection === -1) return;
+  const lead = lines
+    .slice(0, firstSection)
+    .filter(({ content }) => content.trim() !== "" && !/^#\s/.test(content));
+  if (lead.length <= MAX_LEAD_LINES) return;
+  report(
+    lead[0].line,
+    `lead is ${lead.length} lines before the first ## heading; keep it to ${MAX_LEAD_LINES} and move the rest under a heading`,
+  );
 }
 
 function checkRootSize(text, report) {

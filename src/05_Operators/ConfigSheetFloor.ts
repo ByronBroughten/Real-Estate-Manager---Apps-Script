@@ -38,7 +38,7 @@ import {
  * ensureConfigSheetFloor chore is the other caller.
  * changeToast has floorChangeToast decide the toast message for an On change
  * event that renamed or deleted Value Config, the one floor tab with no edit warning.
- * docs/generated-data.md
+ * docs/generated-data/config-sheet-floor.md
  */
 export class ConfigSheetFloor extends SpreadsheetBaseNamed {
   static init(): ConfigSheetFloor {

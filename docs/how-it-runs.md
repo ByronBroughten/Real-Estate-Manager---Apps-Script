@@ -2,15 +2,25 @@
 
 Map fragment routed from `AGENTS.md`. Read the heading the task needs.
 
-**The framework runs in two hosts, and only one of them is production.**
+**The framework runs in two hosts, and only one of them is production**: Apps Script, pushed with `clasp`, and the Node host behind `npm run chore` and `npm run gen:configs`, which reaches Sheets and nothing else. What needs a yes first is under "Before touching the live spreadsheet or deployment". Claude Code's hooks are [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
 
-**Apps Script is the production host.** `src/` is TypeScript compiled by `rollup` (via `@rollup/plugin-typescript`) into a single `dist/bundle.js`, which `clasp` pushes to a Google Apps Script project. The code then executes server-side inside Apps Script. Spreadsheet I/O goes through `GoogleSheetsAPI`, which is the only module that calls the Sheets Advanced Service (`Spreadsheets.get`, `getByDataFilter`, `batchUpdate`), not the `SpreadsheetApp` UI-bound API. Entry points are the top-level functions in `src/index.ts` — `triggerOnEdit` and `triggerOnChange`, which Apps Script calls by name from installed triggers — and each installs that adapter as the `RawSource` in Raw state before any framework work. `triggerOnEdit` decodes its event into a platform-neutral `SheetEdit` with `AppsScript.sheetEdit` and installs only once the edit looks like an action-row checkbox, so an ordinary edit costs no property read. `GoogleSheetsAPI.forAppsScript()` binds the adapter to the spreadsheet named by the `realEstateSpreadsheetId` script property, and throws naming that property when it is missing. Node/DOM APIs are not available there — only in the local build tooling (`rollup`, `tsc`, `scripts/*.mjs`).
+## Apps Script is the production host
 
-**The Node host is the second one** (`src/nodeHost/`, launched by `scripts/nodeHost.mjs`). Spreadsheet I/O is five `RawSource` methods — fetch sheet properties, fetch grid ranges, fetch conditional format rules, fetch edit protections, apply the queued write list — none of which names a spreadsheet: the adapter is bound to one when it is constructed. `GoogleSheetsAPI` maps those onto the three Advanced Service verbs and, in Node, an HTTP transport. `NodeHost.ensureGlobals()` installs a `Logger` onto the global scope and injects `GoogleSheetsAPI`, bound to the configured spreadsheet ID, as the `RawSource`, before any framework module loads. There is no `PropertiesService` stub. It does **not** install a `Sheets` global, so a chore that reaches for `Sheets` or `SpreadsheetApp` still fails by name. Two commands use it: `npm run chore <name>` and `npm run gen:configs`.
+`src/` is TypeScript compiled by `rollup` (via `@rollup/plugin-typescript`) into a single `dist/bundle.js`, which `clasp` pushes to a Google Apps Script project. The code then executes server-side inside Apps Script. Spreadsheet I/O goes through `GoogleSheetsAPI`, which is the only module that calls the Sheets Advanced Service (`Spreadsheets.get`, `getByDataFilter`, `batchUpdate`), not the `SpreadsheetApp` UI-bound API. Entry points are the top-level functions in `src/index.ts` — `triggerOnEdit` and `triggerOnChange`, which Apps Script calls by name from installed triggers — and each installs that adapter as the `RawSource` in Raw state before any framework work. `triggerOnEdit` decodes its event into a platform-neutral `SheetEdit` with `AppsScript.sheetEdit` and installs only once the edit looks like an action-row checkbox, so an ordinary edit costs no property read. `GoogleSheetsAPI.forAppsScript()` binds the adapter to the spreadsheet named by the `realEstateSpreadsheetId` script property, and throws naming that property when it is missing. Node/DOM APIs are not available there — only in the local build tooling (`rollup`, `tsc`, `scripts/*.mjs`).
+
+## The Node host
+
+The Node host is the second one (`src/nodeHost/`, launched by `scripts/nodeHost.mjs`). Spreadsheet I/O is five `RawSource` methods — fetch sheet properties, fetch grid ranges, fetch conditional format rules, fetch edit protections, apply the queued write list — none of which names a spreadsheet: the adapter is bound to one when it is constructed. `GoogleSheetsAPI` maps those onto the three Advanced Service verbs and, in Node, an HTTP transport. `NodeHost.ensureGlobals()` installs a `Logger` onto the global scope and injects `GoogleSheetsAPI`, bound to the configured spreadsheet ID, as the `RawSource`, before any framework module loads. There is no `PropertiesService` stub. It does **not** install a `Sheets` global, so a chore that reaches for `Sheets` or `SpreadsheetApp` still fails by name. Two commands use it: `npm run chore <name>` and `npm run gen:configs`.
+
+## The Node host reaches Sheets and nothing else
 
 **The Node host reaches Sheets and nothing else.** Triggers, Gmail and Docs run in Apps Script and stay there — a deliberate boundary, not a gap waiting to be filled. `ScriptApp` and `SpreadsheetApp` are deliberately left uninstalled, so a chore that reaches for one fails by name rather than half-working. And the adapter's fidelity to the real Advanced Sheets Service is an assumption rather than a fact: it is exercised against a recorded payload, not against Google. Moving `gen:configs` off `clasp run` also removed the last routine exercise of the deployed bundle, leaving the live trigger as the only thing that runs it — an accepted cost, taken because one regeneration path beats two, but worth remembering if a deployment-only failure ever appears.
 
+## Node-host transport: one HTTPS call per request
+
 **Each Node-host request is one HTTPS call to the Sheets REST API**, authenticated with the `desktop-clasp-run` credential clasp already stores. The framework's Sheets calls are synchronous and use their return values immediately, so the transport has to block: `scripts/nodeHost.mjs` `spawnSync`s `scripts/fetchSync.mjs`, a one-request-per-process script that reads the request from stdin and writes the response to stdout. TypeScript is run by `tsx`, because the repo's relative imports are extensionless under `bundler` module resolution and Node's own type stripping cannot resolve them.
+
+## Which spreadsheet the Node host points at
 
 **Which spreadsheet the Node host points at comes from `nodeHost.config.json`**, an untracked file at the repo root holding `{ "spreadsheetId": "..." }`. Pointing it elsewhere therefore costs nothing to support, but it is **not** a rehearsal mechanism: sheet configs key every sheet by its GID, and whether a Drive copy preserves GIDs is unverified. The dry run below is the safety net, not a scratch spreadsheet.
 
@@ -31,9 +41,9 @@ Map fragment routed from `AGENTS.md`. Read the heading the task needs.
 - the agent reports what changed, the floor report, the declared-cell report, and the untyped-column count it returned;
 - it is never a blind fix for a type error whose cause has not been identified. An identified identity or incidental retarget goes through [retarget-after-gen-configs](../.claude/skills/retarget-after-gen-configs/SKILL.md); an unidentified one still means no patch.
 
-**A guard ships in the same commit as the write it guards, or earlier.** A standing-permission `gen:configs` run can land between any two commits, so a write merged ahead of its refusal or fail-closed check writes unguarded.
+**A guard ships in the same commit as the write it guards, or earlier** ([`src/AGENTS.md`](../src/AGENTS.md)). A standing-permission `gen:configs` run can land between any two commits, so a write merged ahead of its refusal or fail-closed check writes unguarded.
 
-### The chore and its dry run
+## The chore and its dry run
 
 A **chore** is a unit of work run from the terminal against the live spreadsheet, as against an endpoint, which an operator runs from the sheet by ticking a checkbox. One typed exported const per file, named after its file, under `src/chores/` — see [Chores](./architecture/chores.md) for the three homes.
 
@@ -50,13 +60,13 @@ The preview is a rendered summary, one line per request, naming the sheet, the r
 
 **The agent verifies the preview before handing it over**, comparing the rendered requests against what the chore was meant to do and calling out anything wrong or larger than intended. That is a workflow obligation, not a code feature.
 
-### When the Node host fails to authenticate
+## When the Node host fails to authenticate
 
 `npm run gen:configs` and `npm run chore` both refresh the named credential `desktop-clasp-run` out of `~/.clasprc.json`. If one fails with an auth error, the token needs re-minting — run `scripts/setup-clasp-run-auth.sh`, which walks through it. The consent screen for GCP project `real-estate-manager-sheets` is deliberately published to production; left in "Testing" it would issue refresh tokens that expire every 7 days. Publishing alone doesn't fix an existing token, since one minted under "Testing" keeps its expiry — the re-authorization is the part that matters.
 
 Google no longer lets you view or download a client secret after creating it, but you don't need to: clasp stores `client_id` and `client_secret` in `~/.clasprc.json`, and `--creds` reads only those two plus a localhost `redirect_uris` entry, so the file is always rebuildable. The script does that for you. Keep `~/.clasprc.json` at `chmod 600` — the refresh token in it no longer self-expires.
 
-### Seeing the raw Sheets JSON
+## Seeing the raw Sheets JSON
 
 `GoogleSheetsAPI` maps the payload before anything can log it, and the `gsheets` MCP returns cell values only. To see what Google actually sent, use the committed probe:
 
@@ -68,7 +78,7 @@ npm run probe -- --path sheets.title=Occupancy.protectedRanges   # re-read the l
 
 `scripts/sheetsProbe.mjs` sends one request through the Node host's `SheetsTransport`, authenticated like a chore. That request is a `GET` with a `fields` mask or a `:getByDataFilter`, and the script cannot build any other kind. It writes the full response, pretty-printed, to the gitignored `.probe/last.json`. Stdout gets only a summary: top-level keys, array counts, and each sheet's id and title. With `--path`, stdout gets that one subtree, printed whole when it is short and summarized when it is not. **Never print a full body into the chat.** When the summary isn't enough, `Read` a line range of `.probe/last.json`. The throwaway `scripts/*.tmp.mjs` route this replaced is retired.
 
-### The `gsheets` MCP tools
+## The `gsheets` MCP tools
 
 This project also has a `gsheets` MCP server available, which can read and write the user's real Google Sheet directly — separately from `clasp`/Apps Script.
 
@@ -76,16 +86,3 @@ This project also has a `gsheets` MCP server available, which can read and write
 - **They return cell values only, so they cannot see a table's declared column types.** `tables[].columnProperties` — a column's `columnType`, its table-column name, its validation rule — is invisible to `get_sheet_data`, and `include_grid_data` reaches cell formats but not tables. Reading those means calling the Sheets REST API with the `clasp` credential, and `npm run probe` (above) is how to do it. It is read-only and on the allow-list, like a chore dry run. **Ask before running any other script that opens that credential.** The chore runner and `gen:configs` are exempt, because they open it as a routine step and the permissions above cover them.
 - **Any tool that writes — `create_spreadsheet`, `create_sheet`, `update_cells`, `batch_update_cells` — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.
 - **`share_spreadsheet` needs its own, separate confirmation** — it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.
-
-### Claude Code guardrails
-
-`.claude/settings.json` registers five Node hooks in `.claude/hooks/`, all fail-open (bad input allows the call), plus one project agent. `bashReadGuard.mjs` and `styleGate.mjs` gate a call; the others add a reminder.
-
-- **`bashReadGuard.mjs`** (PreToolUse, Bash) denies a Bash read of `columnConfigs.ts`, unless it is a grep or a `sed -n` range of at most 150 lines. It also denies a whole-file dump (`cat`, unbounded `head`/`tail`, `sed` without `-n`, `sed -n '1,$p'`) of a repo file over 150 lines. The deny message names the alternative. Piped input, small files, and anything under `.probe/`, `node_modules/` or outside the repo are not guarded. The classifier (`lib/bashReads.mjs`) is shared with `readCountNudge.mjs`.
-- **`generatedEditWarning.mjs`** (PreToolUse, Edit/Write) warns, without blocking, before an edit inside `src/01_SpreadsheetSchema/generated/`: regenerate instead, floor entries included: fix the live tab or the seed ([`docs/generated-data.md`](./generated-data.md)).
-- **`styleGate.mjs`** (PostToolUse, Read; PreToolUse, Edit/Write) records a Read of `STYLE.md`, and denies an edit to a `src/**/*.ts` file until that read is recorded for the session. Generated files are left to `generatedEditWarning.mjs`. The decision is `lib/styleGate.mjs`, tested beside it.
-- **`readCountNudge.mjs`** (PostToolUse on Read/Grep/Glob/Bash; reset on UserPromptSubmit) counts reads per turn: Read, Grep, Glob, and Bash calls the classifier calls reads. Edits, `tsc` and test runs are not counted. At 15 reads, and every 10 after, it reminds Claude to write findings down with `file:line`. Each subagent has its own count, and `repo-explorer` is exempt.
-- **`contextSizeNudge.mjs`** (UserPromptSubmit) estimates context from the transcript's last main-thread usage figures, falling back to bytes ÷ 4. It warns once past ~400k and once past ~1M; the second warning asks for a handoff ([`docs/agents/planning.md`](./agents/planning.md#handoffs)) and a fresh session.
-- **`.claude/agents/repo-explorer.md`** is a read-only (Read/Grep/Glob) Sonnet agent for sweeps of about 5+ files. It returns `file:line` plus verbatim quotes.
-
-Per-session state (the read log, which size warnings have fired, and whether STYLE.md was read) lives in `$TMPDIR/claude-guardrails/`, keyed by session id.

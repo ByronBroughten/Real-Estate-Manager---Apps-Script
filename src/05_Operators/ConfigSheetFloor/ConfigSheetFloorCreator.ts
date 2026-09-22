@@ -35,7 +35,7 @@ type CreatedTableColumn = Pick<FloorSeedColumn, "header" | "columnType">;
  * closed on a missing column the sync can't refill. ConfigSheetFloor runs this
  * right after its fetch and flushes only when it reports something. Each tab's
  * recreatable table and insert live in FloorTabColumnCreator.
- * docs/generated-data.md
+ * docs/generated-data/config-sheet-floor.md
  */
 export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
   get ss(): SpreadsheetNamed {

@@ -1,6 +1,6 @@
 # Agent-behavior design
 
-Why the agent tooling around this repo is shaped the way it is: the hooks, gates, delegation rules and helper commands that decide how agents work here. [DESIGN.md](../DESIGN.md) holds the arguments for the codebase itself; this file holds the arguments for how agents work on it. The mechanics live in [`docs/how-it-runs.md`](./how-it-runs.md) ("Claude Code guardrails") and the rules in [AGENTS.md](../AGENTS.md) and [`docs/agents/`](./agents/).
+Why the agent tooling around this repo is shaped the way it is: the hooks, gates, delegation rules and helper commands that decide how agents work here. [DESIGN.md](../DESIGN.md) holds the arguments for the codebase itself; this file holds the arguments for how agents work on it. The mechanics live in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md) and the rules in [AGENTS.md](../AGENTS.md) and [`docs/agents/`](./agents/).
 
 The citation rule is the same as DESIGN.md's. Every principle cites the decisions that produced it, by issue where one exists and by commit otherwise. A candidate with only one citation is parked at the bottom until a second decision makes the same argument.
 
