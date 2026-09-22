@@ -6,7 +6,7 @@ How the engineering skills should consume this repo's domain documentation when 
 
 - **`CONTEXT.md`** at the repo root, or
 - **`CONTEXT-MAP.md`** at the repo root if it exists: it points at one `CONTEXT.md` per context. Read each one relevant to the topic.
-- **`DESIGN.md`** at the repo root: the arguments behind the design, and this repo's substitute for an ADR tree.
+- **`docs/design.md`**: the arguments behind the design, and this repo's substitute for an ADR tree.
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates `CONTEXT.md` lazily when terms actually get resolved.
 
@@ -17,9 +17,9 @@ This is a single-context repo, and it keeps no ADR tree:
 ```
 /
 ├── CONTEXT.md
-├── DESIGN.md         # one line per principle; reasoning in docs/design/
-├── VOCABULARY.md      # architecture words; elaboration in docs/vocabulary/
-├── src/AGENTS.md      # the tiers
+├── docs/design.md       # one line per principle; reasoning in docs/design/
+├── docs/vocabulary.md   # architecture words; elaboration in docs/vocabulary/
+├── src/AGENTS.md        # the tiers
 ├── docs/architecture.md
 ├── docs/architecture/
 ├── docs/how-it-runs.md
@@ -34,16 +34,16 @@ This is a single-context repo, and it keeps no ADR tree:
 
 ## Use the glossary's vocabulary
 
-The architecture words (Raw, Identified, Named, Meta / primary, Operator) are [`VOCABULARY.md`](../../VOCABULARY.md)'s, not the glossary's.
+The architecture words (Raw, Identified, Named, Meta / primary, Operator) are [`docs/vocabulary.md`](../vocabulary.md)'s, not the glossary's.
 
 When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
 
 If the concept you need isn't in the glossary yet, that's a signal: either you're inventing language the project doesn't use (reconsider) or there's a real gap (note it for `/domain-modeling`).
 
-## No ADR tree — flag conflicts against DESIGN.md
+## No ADR tree — flag conflicts against docs/design.md
 
-**Don't create `docs/adr/`.** DESIGN.md rules it out: specs are published as GitHub issues, and a second filing system would only drift from them. An architectural argument belongs in DESIGN.md's principle list, one line there plus its reasoning in `docs/design/`, cited by issue where one exists and by commit otherwise.
+**Don't create `docs/adr/`.** docs/design.md rules it out: specs are published as GitHub issues, and a second filing system would only drift from them. An architectural argument belongs in docs/design.md's principle list, one line there plus its reasoning in `docs/design/`, cited by issue where one exists and by commit otherwise.
 
 If your output contradicts a principle already recorded there, surface it explicitly rather than silently overriding:
 
-> _Contradicts DESIGN.md's "Record a deliberate absence as deliberate", but worth reopening because…_
+> _Contradicts docs/design.md's "Record a deliberate absence as deliberate", but worth reopening because…_

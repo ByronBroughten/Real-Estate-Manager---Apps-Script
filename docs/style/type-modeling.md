@@ -1,6 +1,6 @@
 # Type modeling: reasoning and examples
 
-Disclosed from [`STYLE.md`](../../STYLE.md), "Type modeling". The rules are there, one line each; this file holds the why.
+Disclosed from [`docs/style.md`](../style.md), "Type modeling". The rules are there, one line each; this file holds the why.
 
 ## `interface` or `type`
 
@@ -21,7 +21,7 @@ Two letters, not one, even where one would be unambiguous: a lone `F` or `I` rea
 
 ## Specificity over branded fallbacks
 
-A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`. DESIGN.md, "Make disagreement structurally impossible rather than validating against it."
+A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`. docs/design.md, "Make disagreement structurally impossible rather than validating against it."
 
 ## The three accepted `as` idioms
 

@@ -1,7 +1,7 @@
 ---
-description: TypeScript code shape. Apply STYLE.md when writing or refactoring TS.
+description: TypeScript code shape. Apply docs/style.md when writing or refactoring TS.
 globs: "**/*.ts"
 alwaysApply: false
 ---
 
-Write TypeScript to [`STYLE.md`](../../STYLE.md), one line per rule; its table points to the reasoning under `docs/style/`.
+Write TypeScript to [`docs/style.md`](../../docs/style.md), one line per rule; its table points to the reasoning under `docs/style/`.

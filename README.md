@@ -27,7 +27,7 @@ Each numbered folder under `src/` is a dependency tier, and dependencies only po
 | `05_Operators` | Classes that add methods for one data structure, including regenerating the configs |
 | `06_API` | Routing a sheet edit to the endpoint registered for its column |
 
-`src/businessEndpoints/` sits above all of them as the real-estate logic. `src/chores/` holds one-off maintenance jobs, and `src/nodeHost/` lets the framework run in Node as well as Apps Script. The precise words for all of this (Raw, Identified, Named, Meta and primary) are defined in [`VOCABULARY.md`](./VOCABULARY.md).
+`src/businessEndpoints/` sits above all of them as the real-estate logic. `src/chores/` holds one-off maintenance jobs, and `src/nodeHost/` lets the framework run in Node as well as Apps Script. The precise words for all of this (Raw, Identified, Named, Meta and primary) are defined in [`docs/vocabulary.md`](./docs/vocabulary.md).
 
 ## Generated data — do not hand-edit
 

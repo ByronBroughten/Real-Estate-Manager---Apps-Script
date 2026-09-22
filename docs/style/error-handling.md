@@ -1,6 +1,6 @@
 # Error handling: reasoning and examples
 
-Disclosed from [`STYLE.md`](../../STYLE.md), "Error handling & validation". The rules are there, one line each; this file holds the why.
+Disclosed from [`docs/style.md`](../style.md), "Error handling & validation". The rules are there, one line each; this file holds the why.
 
 ## `Val.assert` over `!`
 

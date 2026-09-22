@@ -1,6 +1,6 @@
 # Record a deliberate absence as deliberate
 
-Design reasoning. The one-line principle lives in [`DESIGN.md`](../../DESIGN.md); this file holds the argument and its instances.
+Design reasoning. The one-line principle lives in [`docs/design.md`](../design.md); this file holds the argument and its instances.
 
 ## The argument
 
@@ -22,4 +22,4 @@ The riskiest gap in an AI-assisted codebase is the one that looks like an oversi
 
 ## Corollaries
 
-The same applies to commented-out code, which is why STYLE.md's delete-dead-scaffolding rule carves out an exception for it. Absence of an explanation is not evidence of absence of a reason — ask.
+The same applies to commented-out code, which is why docs/style.md's delete-dead-scaffolding rule carves out an exception for it. Absence of an explanation is not evidence of absence of a reason — ask.

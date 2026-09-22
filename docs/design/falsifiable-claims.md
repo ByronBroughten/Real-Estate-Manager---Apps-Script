@@ -1,6 +1,6 @@
 # Make the claim falsifiable before believing it
 
-Design reasoning. The one-line principle lives in [`DESIGN.md`](../../DESIGN.md); this file holds the argument and its instances.
+Design reasoning. The one-line principle lives in [`docs/design.md`](../design.md); this file holds the argument and its instances.
 
 ## The argument
 
@@ -12,7 +12,7 @@ Intuition about cost and intuition about types are both unreliable here, and bot
 
 ## Instances: types
 
-An assignment proves nothing about a mapped or conditional type — it passes against `any` and against `never` alike. Identity-based `IsExactly`/`assertType` is the only probe that means anything, and a probe that needed an `any` to compile has proved nothing at all: intersecting to satisfy an indexer resolves to `any` and makes every downstream assertion vacuously true (STYLE.md, "Type modeling").
+An assignment proves nothing about a mapped or conditional type — it passes against `any` and against `never` alike. Identity-based `IsExactly`/`assertType` is the only probe that means anything, and a probe that needed an `any` to compile has proved nothing at all: intersecting to satisfy an indexer resolves to `any` and makes every downstream assertion vacuously true (docs/style.md, "Type modeling").
 
 ## Instances: live behaviour
 

@@ -31,7 +31,7 @@ import { SheetMetaNamed } from "./SheetMetaNamed";
  * Name-addressed primary sheet: data rows, append, named columns.
  * Structure as its own shape is this.meta (SheetMetaNamed).
  * Crossing views costs one word: meta / primary; no cross-level shortcut.
- * Member placement for Meta vs primary: VOCABULARY.md, "Meta / primary".
+ * Member placement for Meta vs primary: docs/vocabulary.md, "Meta / primary".
  * docs/architecture/class-chains.md
  */
 export class SheetNamed<

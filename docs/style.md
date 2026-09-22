@@ -1,19 +1,21 @@
 # Coding style
 
-Distilled from the user's own refactors of AI-generated code, plus a survey of `src/` for consistent, repeated patterns. This file covers code _shape_; where things live is [`src/AGENTS.md`](./src/AGENTS.md) and [`VOCABULARY.md`](./VOCABULARY.md).
+Distilled from the user's own refactors of AI-generated code, plus a survey of `src/` for consistent, repeated patterns. This file covers code _shape_; where things live is [`src/AGENTS.md`](../src/AGENTS.md) and [`docs/vocabulary.md`](./vocabulary.md).
 
 One line per rule. The reasoning and worked examples are one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 
+## Reasoning files
+
 | When | File |
 | --- | --- |
-| Writing a coordinator or an Operator, placing a member or a class | [`docs/style/class-shape.md`](./docs/style/class-shape.md) |
-| Naming a value, method, flag, getter or param bag | [`docs/style/naming.md`](./docs/style/naming.md) |
-| A cast, a type-level assertion, a registry literal | [`docs/style/type-modeling.md`](./docs/style/type-modeling.md) |
-| A guard, a blank-tolerant read, a `catch`, a skip-and-log | [`docs/style/error-handling.md`](./docs/style/error-handling.md) |
-| Writing or changing a test | [`docs/style/tests.md`](./docs/style/tests.md) |
-| A comment, or a file-level navigation block | [`docs/style/comments.md`](./docs/style/comments.md) |
-| `reduce`, a chaining mutator, a combined option | [`docs/style/idioms.md`](./docs/style/idioms.md) |
-| Imports, barrels, file names | [`docs/style/file-organization.md`](./docs/style/file-organization.md) |
+| Writing a coordinator or an Operator, placing a member or a class | [`docs/style/class-shape.md`](./style/class-shape.md) |
+| Naming a value, method, flag, getter or param bag | [`docs/style/naming.md`](./style/naming.md) |
+| A cast, a type-level assertion, a registry literal | [`docs/style/type-modeling.md`](./style/type-modeling.md) |
+| A guard, a blank-tolerant read, a `catch`, a skip-and-log | [`docs/style/error-handling.md`](./style/error-handling.md) |
+| Writing or changing a test | [`docs/style/tests.md`](./style/tests.md) |
+| A comment, or a file-level navigation block | [`docs/style/comments.md`](./style/comments.md) |
+| `reduce`, a chaining mutator, a combined option | [`docs/style/idioms.md`](./style/idioms.md) |
+| Imports, barrels, file names | [`docs/style/file-organization.md`](./style/file-organization.md) |
 
 ## Class shape
 

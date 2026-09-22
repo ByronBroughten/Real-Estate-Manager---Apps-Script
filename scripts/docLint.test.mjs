@@ -77,6 +77,16 @@ describe("checkDocs", () => {
       ]);
     });
 
+    it("fails a link to the old root STYLE.md once it lives at docs/style.md", () => {
+      const docs = {
+        "docs/a.md": "[style](../STYLE.md)\n",
+        "docs/style.md": "# Style\n",
+      };
+      expect(messages(docs)).toEqual([
+        "docs/a.md: broken link ../STYLE.md: no file STYLE.md",
+      ]);
+    });
+
     it("leaves unlisted docs such as skills unchecked", () => {
       expect(
         check({ ".claude/skills/x/SKILL.md": "[gone](./gone.md)\n" }),
@@ -86,7 +96,7 @@ describe("checkDocs", () => {
 
   describe("rule lines", () => {
     it("passes a rules-file rule line of any length", () => {
-      expect(check({ "STYLE.md": `- **${"x".repeat(600)}**\n` })).toEqual([]);
+      expect(check({ "docs/style.md": `- **${"x".repeat(600)}**\n` })).toEqual([]);
     });
   });
 
