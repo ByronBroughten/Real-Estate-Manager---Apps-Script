@@ -4,7 +4,7 @@ The layering words, used precisely and never loosely; the operator-facing words 
 
 One line per term. The elaboration is one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 
-## Elaboration files
+## Reasoning files
 
 | When | File |
 | --- | --- |
