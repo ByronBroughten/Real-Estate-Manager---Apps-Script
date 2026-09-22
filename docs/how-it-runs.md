@@ -31,6 +31,8 @@ Map fragment disclosed from `README.md`. Read the heading the task needs.
 - the agent reports what changed, the floor report, the declared-cell report, and the untyped-column count it returned;
 - it is never a blind fix for a type error whose cause has not been identified. An identified identity or incidental retarget goes through [retarget-after-gen-configs](../.claude/skills/retarget-after-gen-configs/SKILL.md); an unidentified one still means no patch.
 
+**A guard ships in the same commit as the write it guards, or earlier.** A standing-permission `gen:configs` run can land between any two commits, so a write merged ahead of its refusal or fail-closed check writes unguarded.
+
 ### The chore and its dry run
 
 A **chore** is a unit of work run from the terminal against the live spreadsheet, as against an endpoint, which an operator runs from the sheet by ticking a checkbox. One typed exported const per file, named after its file, under `src/chores/` — see [Chores](./architecture/chores.md) for the three homes.
