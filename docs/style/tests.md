@@ -6,9 +6,15 @@ Disclosed from [`STYLE.md`](../../STYLE.md). How tests run, and the fakes: [`doc
 
 All of STYLE.md applies to test code as-is.
 
+## Draft test rules
+
 - **Understand a class from its implementation.** Open the sibling `Foo.test.ts` when changing tests.
 - **Use a named setup function instead of a comment explaining a seeded row.** Instead of `// Pre-existing row for the "test" sheet, with API access so its column IDs get gathered` beside a literal, write `seedActiveSheetWithApiAccess()`, so the call site states the scenario.
 - **One behavior per `it()`, named as a sentence describing the behavior, not the mechanism**: `"flushes Sheet Config and Column Config changes in a single batchUpdate call"`.
 - **Name `describe` blocks after the real method or class under test**, not an invented suite label: `describe("syncAndFlushConfigSheets", ...)`, `describe("ColumnConfigOperator.columnEntries / toFileSource", ...)`.
 - **Use real, already-committed schema data over invented literals** wherever the code under test resolves identifiers through the actual schema (column IDs via `columnConfigs.sheetConfig.x.columnId`, real sheet gids). This stops a test from passing against a shape that doesn't exist in production.
 - **Assert precisely**: the exact resulting value or shape, not presence or truthiness.
+
+## Exemplar columns for type-level tests
+
+STYLE.md's settled rule asks a type-level test for an exemplar column whose value name can't churn under `gen:configs`. A config sheet's column qualifies, and so does a column of the live `test` sheet.

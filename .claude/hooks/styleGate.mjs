@@ -1,5 +1,6 @@
-// PostToolUse on Read records a read of STYLE.md; PreToolUse on Edit and Write denies a src/ TypeScript edit until one is recorded.
-import { existsSync, writeFileSync } from "node:fs";
+// PostToolUse on Read records a full read of STYLE.md; PreToolUse on Edit and Write denies a src/ TypeScript edit until one is recorded.
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 import { editDecision, isStyleRead } from "./lib/styleGate.mjs";
 import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.mjs";
 
@@ -11,7 +12,10 @@ await runFailOpen(() => {
   const where = { projectDir, cwd: input.cwd ?? projectDir, filePath };
   const markerPath = sessionStatePath(input.session_id, "style-read");
   if (input.hook_event_name === "PostToolUse") {
-    if (input.tool_name === "Read" && isStyleRead(where)) writeFileSync(markerPath, "");
+    if (input.tool_name !== "Read") return;
+    const { offset, limit } = input.tool_input;
+    if (isStyleRead({ ...where, offset, limit, totalLines: lineCount(join(projectDir, "STYLE.md")) }))
+      writeFileSync(markerPath, "");
     return;
   }
   if (!["Edit", "Write"].includes(input.tool_name)) return;
@@ -25,3 +29,7 @@ await runFailOpen(() => {
     },
   });
 });
+
+function lineCount(path) {
+  return readFileSync(path, "utf8").replace(/\n$/, "").split("\n").length;
+}

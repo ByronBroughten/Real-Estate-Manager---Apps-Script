@@ -40,6 +40,10 @@ One heading per naming rule, in STYLE.md's order: grep `^## ` for the rule you'r
 
 **A plural method name promises more of the same return, not a different container.** `rowByValue` finds one row by a value, so `rowsByValue` could only mean every row matching a value. When the plural would change the shape rather than the count, it needs its own name.
 
+## Trim a method name to what its return type doesn't say
+
+**Trim a method name to what the return type doesn't already say.** `generateConfigFilesSources` became `generateConfigFiles`: the return type already says they are sources.
+
 ## A name reads to a newcomer
 
 **A name has to read to someone who has never opened this codebase.** A flag named after the mechanism that sets it becomes jargon at every call site that isn't that mechanism. Prefer the word a newcomer would guess: a row held even though it looks empty is `isReserved`, not `claimed` (#10).

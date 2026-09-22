@@ -12,6 +12,10 @@ The unmarked accessors carry the column's own **Empty value allowed** declaratio
 
 Don't read through a blank-tolerant form and defer the check to a manual guard closer to where the value is used. Reading and validating in one step means a value can never be used unvalidated in between, and it validates every field in an object literal the same way. `ColumnConfigOperator.newColumnConfigs()` reads `columnId`/`sheetGid`/`header`/`emptyValueAllowed` all via `col.x.value(rowIndex)` for exactly that reason. The drift comparisons a few methods up read `valueOrEmpty`, because a blank config cell is what they exist to catch. Sampled `isFormula` / `valueName` come from the described live column, not from Column Config cells.
 
+## One function for a shared phrase
+
+A phrase that names the same thing in several messages or labels comes from one function, so the wording can't drift between them. `spreadsheetConfigColumnLabel` is the example.
+
 ## `try`/`catch`
 
 `EndpointRun.run` is the only `catch` in the codebase. It exists because an endpoint's failure has to reach the sheet as a run status rather than kill the trigger. Don't generalize from it. If the question comes up elsewhere, note it as open.

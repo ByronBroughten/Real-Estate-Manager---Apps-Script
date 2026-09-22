@@ -2,8 +2,9 @@
 import { posix } from "node:path";
 
 const RULES_FILES = ["DESIGN.md", "STYLE.md", "VOCABULARY.md"];
-const MAX_RULE_LINE = 300;
 const MAX_LEAD_LINES = 5;
+const MAX_LEAD_BYTES = 800;
+const MAX_UNHEADED_DOC_BYTES = 4 * 1024;
 const MAX_SRC_AGENTS_LINES = 15;
 const MAX_FOLDER_AGENTS_LINES = 10;
 const MAX_ROOT_AGENTS_BYTES = 5 * 1024;
@@ -29,7 +30,6 @@ export function checkDocs({ docs, paths = [] }) {
     const report = (line, message) => violations.push({ path, line, message });
     if (isLinkChecked(path))
       checkLinks(path, text, { docs, known, slugsOf, report });
-    if (RULES_FILES.includes(path)) checkRuleLines(text, report);
     if (path.startsWith("docs/")) checkLead(text, report);
     if (posix.basename(path) !== "AGENTS.md") continue;
     if (path === "AGENTS.md") checkRootSize(text, report);
@@ -130,35 +130,43 @@ function headingSlugs(text) {
   return slugs;
 }
 
-function checkRuleLines(text, report) {
-  for (const { line, content } of proseLines(text)) {
-    if (!/^\s*- \*\*/.test(content)) continue;
-    const length = [...content].length;
-    if (length <= MAX_RULE_LINE) continue;
-    report(
-      line,
-      `rule line is ${length} characters; keep it to ${MAX_RULE_LINE} and move the rest to a reasoning file`,
-    );
-  }
-}
-
 // A read-by-heading doc's lead: the non-blank lines after its title and before its first `##` heading.
 function checkLead(text, report) {
   const lines = proseLines(text);
   const firstSection = lines.findIndex(({ content }) => /^##\s/.test(content));
-  if (firstSection === -1) return;
+  if (firstSection === -1) {
+    const bytes = byteLength(text);
+    if (bytes > MAX_UNHEADED_DOC_BYTES)
+      report(
+        1,
+        `doc is ${bytes} bytes with no ## heading; over ${MAX_UNHEADED_DOC_BYTES} bytes, give it a short lead and ## headings so it can be read by section`,
+      );
+    return;
+  }
   const lead = lines
     .slice(0, firstSection)
     .filter(({ content }) => content.trim() !== "" && !/^#\s/.test(content));
-  if (lead.length <= MAX_LEAD_LINES) return;
-  report(
-    lead[0].line,
-    `lead is ${lead.length} lines before the first ## heading; keep it to ${MAX_LEAD_LINES} and move the rest under a heading`,
-  );
+  if (lead.length > MAX_LEAD_LINES) {
+    report(
+      lead[0].line,
+      `lead is ${lead.length} lines before the first ## heading; keep it to ${MAX_LEAD_LINES} and move the rest under a heading`,
+    );
+    return;
+  }
+  const bytes = byteLength(lead.map(({ content }) => content).join("\n"));
+  if (bytes > MAX_LEAD_BYTES)
+    report(
+      lead[0].line,
+      `lead is ${bytes} bytes before the first ## heading; keep it to ${MAX_LEAD_BYTES} and move the rest under a heading`,
+    );
+}
+
+function byteLength(text) {
+  return new TextEncoder().encode(text).length;
 }
 
 function checkRootSize(text, report) {
-  const bytes = new TextEncoder().encode(text).length;
+  const bytes = byteLength(text);
   if (bytes <= MAX_ROOT_AGENTS_BYTES) return;
   report(
     1,

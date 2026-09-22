@@ -2,6 +2,10 @@
 
 Disclosed from [`STYLE.md`](../../STYLE.md), "Type modeling". The rules are there, one line each; this file holds the why.
 
+## `interface` or `type`
+
+Props and state bags that chain through `extends` are `interface`s. Unions, `keyof`, mapped types and utility types are `type`s.
+
 ## Identity checks, never assignment
 
 `const x: Expected = valueOfNewType` proves nothing about a mapped or conditional type: it passes against `any` and against `never`. Use the identity-based `IsExactly`/`assertType` pair from `src/testSupport/typeAssertions.ts`, and `assertNotType` to claim that two types are _not_ identical. `assertNotType` is the only way to state that a branded type like `DateSerial` is not just `number` (#15). Two corollaries, both learned the hard way:
@@ -11,6 +15,8 @@ Disclosed from [`STYLE.md`](../../STYLE.md), "Type modeling". The rules are ther
 
 ## Two-letter generic params
 
+The abbreviations are `SN` (SheetName), `VN` (ValueName), `CN` (ColumnName), `UN` (UniformRowName), `IF` (IsFormula) and `TN`, each usually constrained with `extends <DomainType>`. Bare `T`/`K`/`V`/`O` belong to domain-free utilities such as `utils/Obj.ts`.
+
 Two letters, not one, even where one would be unambiguous: a lone `F` or `I` reads as a bare letter rather than an abbreviation.
 
 ## Specificity over branded fallbacks
@@ -18,6 +24,8 @@ Two letters, not one, even where one would be unambiguous: a lone `F` or `I` rea
 A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`. DESIGN.md, "Make disagreement structurally impossible rather than validating against it."
 
 ## The three accepted `as` idioms
+
+External values, such as Sheets cell data, go through `Val.validate.*`/`Val.is.*`; a cast is only for data that is already runtime-safe. The accepted idioms:
 
 - Seed a fully-typed empty accumulator up front, then fill it: `{} as SheetColumnNamesStandard<SN>`. Don't cast at the point of use.
 - Use `as any` / `as unknown as X` as an escape hatch only inside low-level structural utilities (`utils/Obj.ts`, `utils/Arr.ts` and similar) that do generic structural-typing gymnastics. This is no licence to use it elsewhere.
@@ -31,8 +39,14 @@ Test files are separately mid-migration off `as` via the `migrate-to-shoehorn` s
 
 ## Lookup tables are keyed by the producer's union
 
-`UpdateRequestSummary` once dispatched on a `switch` over the keys of Google's `Request`, whose every member is optional, ending in a `default` that printed raw JSON. The builders returned that same wide type, so nothing tied the kinds they produced to the cases the switch handled: a new kind compiled and silently rendered as JSON. The fix names the kinds on the producer side (`ModeledRequestVerb` in `GoogleSheetsAPI.ts`), types the builders to return only `ModeledRequest`, and annotates the formatter table with a mapped type over that union, so a missing or mistyped formatter fails `tsc`. The `default` survives only for requests the framework doesn't build. It is the same move as the plain registry annotation above: let the type, not the reader, carry the list of keys.
+`UpdateRequestSummary` once dispatched on a `switch` over the keys of Google's `Request`, whose every member is optional, ending in a `default` that printed raw JSON. The builders returned that same wide type, so nothing tied the kinds they produced to the cases the switch handled: a new kind compiled and silently rendered as JSON. The fix names the kinds on the producer side (`ModeledRequestVerb` in `GoogleSheetsAPI.ts`), types the builders to return only `ModeledRequest`, and annotates the formatter table with a mapped type over that union, so a missing or mistyped formatter fails `tsc`. The `default` survives only for requests the framework doesn't build. It is the same move as the plain registry annotation above: let the type, not the reader, carry the list of keys. The general hazard: a `default` over an optional-keyed type like Google's `Request` compiles with any case missing.
+
+## Use the named type that already exists
+
+A field, return type or param bag that matches a named type uses it: `TableIdentityRaw`, not `{ tableId: string; name: string }`.
 
 ## Where utility types live
+
+Custom generic utility types live in `utils/Obj.ts`, PascalCase, one transform per name: `StrictOmit`, `DistributiveOmit`, `StrictPick`, `PickStartsWith`.
 
 `NotEmpty<V>` is the one deliberate exception to `utils/Obj.ts`: it sits in `00_Source/CellValues/cellValues.ts` beside the wire value types, because the blank it removes is the cell blank those types define, not a general structural transform (#12).

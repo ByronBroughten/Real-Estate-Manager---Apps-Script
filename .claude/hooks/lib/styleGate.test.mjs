@@ -47,13 +47,42 @@ describe("editDecision", () => {
 });
 
 describe("isStyleRead", () => {
-  it("is true for a Read of the root STYLE.md", () => {
-    expect(isStyleRead({ projectDir, cwd: projectDir, filePath: "/repo/STYLE.md" })).toBe(true);
-    expect(isStyleRead({ projectDir, cwd: "/repo/src", filePath: "../STYLE.md" })).toBe(true);
+  const read = (filePath, bounds = {}, cwd = projectDir) =>
+    isStyleRead({ projectDir, cwd, filePath, totalLines: 40, ...bounds });
+
+  it("is true for an unbounded Read of the root STYLE.md", () => {
+    expect(read("/repo/STYLE.md")).toBe(true);
+    expect(read("../STYLE.md", {}, "/repo/src")).toBe(true);
+  });
+
+  it("is false for a Read whose limit stops short of the end", () => {
+    expect(read("/repo/STYLE.md", { limit: 5 })).toBe(false);
+    expect(read("/repo/STYLE.md", { offset: 1, limit: 39 })).toBe(false);
+  });
+
+  it("is false for a Read that starts past the top", () => {
+    expect(read("/repo/STYLE.md", { offset: 2 })).toBe(false);
+    expect(read("/repo/STYLE.md", { offset: 10, limit: 100 })).toBe(false);
+  });
+
+  it("is true for a bounded Read that covers the whole file", () => {
+    expect(read("/repo/STYLE.md", { limit: 40 })).toBe(true);
+    expect(read("/repo/STYLE.md", { offset: 1, limit: 2000 })).toBe(true);
+  });
+
+  it("is false for a bounded Read when the file's length is unknown", () => {
+    expect(read("/repo/STYLE.md", { limit: 2000, totalLines: undefined })).toBe(false);
   });
 
   it("is false for any other file", () => {
-    expect(isStyleRead({ projectDir, cwd: projectDir, filePath: "/repo/docs/style/naming.md" })).toBe(false);
-    expect(isStyleRead({ projectDir, cwd: projectDir, filePath: "/other/STYLE.md" })).toBe(false);
+    expect(read("/repo/docs/style/naming.md")).toBe(false);
+    expect(read("/other/STYLE.md")).toBe(false);
+  });
+});
+
+describe("the refusal reason", () => {
+  it("says a partial Read doesn't count", () => {
+    expect(STYLE_GATE_REASON).toMatch(/full Read/);
+    expect(STYLE_GATE_REASON).toMatch(/partial/);
   });
 });

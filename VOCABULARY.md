@@ -24,21 +24,21 @@ One line per term. The elaboration is one file away. Open a reasoning file only 
 ## Class names
 
 - **Every tier class name ends in its tier word**: state types, bases and Common classes alike. A tier root is `<Scope>Base<Tier>`, with no exceptions.
-- **State members are named by scope** (`sheetState`, `rowState`), plus the tier word where one instance holds more than one tier's state at that scope (`spreadsheetStateRaw`).
-- **Base means a class root (`<Scope>Base<Tier>`) or an index origin (`Base0`/`Base1`), and nothing else.** What the framework supplies whatever the spreadsheet adds is **Framework** (`frameworkValueNames`).
+- **State members are named by scope**, plus the tier word where one instance holds more than one tier's state at that scope.
+- **Base means a class root (`<Scope>Base<Tier>`) or an index origin (`Base0`/`Base1`), and nothing else.** What the framework supplies whatever the spreadsheet adds is **Framework**.
 - **An Operator extends a Named base and adds methods suited to one data structure**, reaching its subject through a getter. Business Operators live in `src/businessEndpoints/BusinessOperators/`.
 - **A Collaborator is a class a coordinator builds from its own props and reaches through a lazy getter**, named `<Subject><Role><Tier>`, in a subfolder named after its coordinator. Callers use the coordinator.
 
 ## Config
 
 - **Config is the data describing the spreadsheet's own structure, generated from the live sheet**, in `01_SpreadsheetSchema/generated/`.
-- **`xConfigs` is the whole map, `XConfig` is one entry's record, and a trait is one property of one record** (`getSheetTraitByGid`). "Trait" never means a collection.
+- **`xConfigs` is the whole map, `XConfig` is one entry's record, and a trait is one property of one record.** "Trait" never means a collection.
 - **`spreadsheetConfig` is a single record**, with no `spreadsheetConfigs` collection.
 - **The config-sheet floor is guaranteed, not data to fix**: the four config sheets' own entries always come out the same on regeneration.
 
 ## Meta / primary
 
-- **Meta / primary is an axis orthogonal to the tiers, not a fourth tier.** Primary deals in contents and takes the unmarked name; Meta is the structure's own shape and takes a `Meta` stem (`SheetMetaRaw`).
+- **Meta / primary is an axis orthogonal to the tiers, not a fourth tier.** Primary deals in contents and takes the unmarked name; Meta is the structure's own shape and takes a `Meta` stem.
 - **Crossing views takes exactly one word**: `meta` from primary, `primary` from Meta. A sheet's `column(name)` and a column's `sheet` stay in the view you're in.
 - **A member belongs on the Meta class only if it acts on a uniform row, samples the top data row for a column-wide fact, or reads the table's own column properties.** Everything else is primary.
 - **Active means present in the working view, with row indexes at their pre-flush positions**, not "exists on the sheet".
@@ -46,7 +46,7 @@ One line per term. The elaboration is one file away. Open a reasoning file only 
 
 ## Values
 
-- **Nearly every cell is tri-state: `Value<VN>` includes `""`.** Code that branches on a value says what empty means. `checkbox` is exactly `boolean` (#12); don't restore the blank to it.
-- **`valueNotEmpty` throws on a blank, `valueOrEmpty` keeps `""`, and `value` is whichever the column's Empty value allowed box declares** (#13). The plurals follow suit; only Named offers `value`/`valueArr`.
-- **An in-app date is a `DateSerial`, never a JS `Date`.** Build one with `Dat.fromYmd` or `Dat.today`, and move it with `Dat.addDays`/`addMonths`, not `+ 1` (#15).
+- **Nearly every cell is tri-state: `Value<VN>` includes `""`.** Code that branches on a value says what empty means. `checkbox` is exactly `boolean`; don't restore the blank to it.
+- **`valueNotEmpty` throws on a blank, `valueOrEmpty` keeps `""`, and `value` is whichever the column's Empty value allowed box declares.** The plurals follow suit; only Named offers `value`/`valueArr`.
+- **An in-app date is a `DateSerial`, never a JS `Date`.** Build one with `Dat.fromYmd` or `Dat.today`, and move it with `Dat.addDays`/`addMonths`, not `+ 1`.
 - **`emptyValueAllowed` shapes the accessor, not the value type**, and is enforced at access, never at fetch or write.
