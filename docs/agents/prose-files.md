@@ -8,7 +8,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 - **Reasoning file**: a file under a rules file's `docs/<name>/` folder holding the why, examples and history. It is never auto-loaded.
 - **Router**: the Read-by-task table in the root AGENTS.md. It is the only one.
 - **Nested AGENTS.md**: a folder's own rules, loaded when an agent works there, paired with a one-line `CLAUDE.md` holding `@AGENTS.md`.
-- **Enforcement ladder**: lint > path-triggered (nested AGENTS.md, a hook) > router pointer > prose. A rule goes on the highest rung it can reach; a hook only reinforces.
+- **Enforcement ladder**: lint > path-triggered (nested AGENTS.md, a hook) > router pointer > prose.
 - **Derived view**: a file that restates facts whose home is elsewhere, for another audience. README.md is one.
 
 ## Map
@@ -17,10 +17,11 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | --- | --- |
 | `AGENTS.md` | Only what changes an agent's behavior on every task: commands, gates, git rules, the README line, the router. Loaded every turn, under 5 KB. |
 | `CLAUDE.md` | `@AGENTS.md` plus pointers to Claude Code-only mechanics (subagents, hooks). |
-| `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. 15 lines or fewer. |
-| `src/businessEndpoints/`, `src/chores/`, `src/00_Source/GoogleSheets/`, `scripts/` `AGENTS.md` | That folder's rules, 10 lines or fewer, each with a `CLAUDE.md` beside it. |
+| `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. 15 lines or fewer (lint). |
+| `src/businessEndpoints/`, `src/chores/`, `src/00_Source/GoogleSheets/`, `scripts/` `AGENTS.md` | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. |
 | `STYLE.md` | Code shape, one line per rule. Reasoning and worked examples go under `docs/style/`. |
-| `VOCABULARY.md` | The architecture words, one line per term. Elaboration goes under `docs/vocabulary/`. |
+| `VOCABULARY.md` | The architecture words, one line per term. |
+| `docs/vocabulary/*.md` | Each term's elaboration, split by subject, indexed by VOCABULARY.md's "When \| File" table. |
 | `CONTEXT.md` | Operator-facing words: the glossary. |
 | `DESIGN.md` | Why the codebase is shaped as it is, including deliberate absences. Covers the codebase only. |
 | `docs/agent-behavior-design.md` | Why the agent tooling (hooks, gates, delegation, this doc scheme) is shaped as it is. It never goes in DESIGN.md. |

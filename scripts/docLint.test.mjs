@@ -124,6 +124,17 @@ describe("checkDocs", () => {
       ).toEqual([]);
     });
 
+    it("fails a folder's nested AGENTS.md over 10 lines", () => {
+      expect(
+        messages({
+          "scripts/AGENTS.md": nested(11),
+          "scripts/CLAUDE.md": "@AGENTS.md\n",
+        }),
+      ).toEqual([
+        "scripts/AGENTS.md: nested AGENTS.md is 11 lines; the limit is 10",
+      ]);
+    });
+
     it("fails a root AGENTS.md over 5 KB", () => {
       expect(messages({ "AGENTS.md": "x".repeat(5121) })).toEqual([
         "AGENTS.md: root AGENTS.md is 5121 bytes; the limit is 5120",

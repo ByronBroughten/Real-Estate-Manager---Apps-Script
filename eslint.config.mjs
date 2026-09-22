@@ -14,7 +14,9 @@ const platformImportPattern = {
   regex: "GoogleSheets/|GoogleSheets/(GoogleSheetsAPI|AppsScript)(\\.js)?$",
   message: platformMessage,
 };
-const tierFolders = [
+// utils/ sits below every numbered tier.
+const layerFolders = [
+  "utils",
   "00_Source",
   "01_SpreadsheetSchema",
   "02_SpreadsheetRaw",
@@ -25,17 +27,17 @@ const tierFolders = [
 ];
 // The un-numbered folders built on the tiers; utils/ and testSupport/ are not among them.
 const aboveTierFolders = ["businessEndpoints", "chores", "nodeHost"];
-const tierImportPattern = (tier) => ({
-  regex: `(^|/)(${[...tierFolders.slice(tier + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
-  message: `Dependencies only point downward: ${tierFolders[tier]} imports nothing from a higher tier or from businessEndpoints, chores or nodeHost (src/AGENTS.md).`,
+const layerImportPattern = (layer) => ({
+  regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
+  message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (src/AGENTS.md).`,
 });
 // After the platform block: a later block's no-restricted-imports replaces an earlier one's, so each merges the patterns that still apply.
-const tierImportBlocks = tierFolders.flatMap((folder, tier) => {
+const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
   const extra = folder === "02_SpreadsheetRaw" ? [rawImportPattern] : [];
   const restrict = (patterns) => ({
     "no-restricted-imports": [
       "error",
-      { patterns: [...patterns, tierImportPattern(tier), ...extra] },
+      { patterns: [...patterns, layerImportPattern(layer), ...extra] },
     ],
   });
   const isPlatformFolder = folder === "00_Source";
@@ -115,5 +117,5 @@ export default defineConfig(
       ],
     },
   },
-  ...tierImportBlocks,
+  ...layerImportBlocks,
 );

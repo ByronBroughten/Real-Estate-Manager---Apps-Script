@@ -1,10 +1,11 @@
 // Checks the agent-facing docs' links and size limits; a doc map in, violations out. See docs/agents/prose-files.md.
 import { posix } from "node:path";
 
-export const RULES_FILES = ["STYLE.md", "VOCABULARY.md"];
-export const MAX_RULE_LINE = 300;
-export const MAX_NESTED_AGENTS_LINES = 15;
-export const MAX_ROOT_AGENTS_BYTES = 5 * 1024;
+const RULES_FILES = ["STYLE.md", "VOCABULARY.md"];
+const MAX_RULE_LINE = 300;
+const MAX_SRC_AGENTS_LINES = 15;
+const MAX_FOLDER_AGENTS_LINES = 10;
+const MAX_ROOT_AGENTS_BYTES = 5 * 1024;
 const LINKED_ROOT_FILES = new Set([
   "AGENTS.md",
   "CLAUDE.md",
@@ -30,7 +31,10 @@ export function checkDocs({ docs, paths = [] }) {
     if (RULES_FILES.includes(path)) checkRuleLines(text, report);
     if (posix.basename(path) !== "AGENTS.md") continue;
     if (path === "AGENTS.md") checkRootSize(text, report);
-    else checkNested(path, text, docs, report);
+    else {
+      checkNestedSize(path, text, report);
+      checkClaudePairing(path, docs, report);
+    }
   }
   return violations;
 }
@@ -145,14 +149,15 @@ function checkRootSize(text, report) {
   );
 }
 
-function checkNested(path, text, docs, report) {
+function checkNestedSize(path, text, report) {
   const lines = text.replace(/\n$/, "").split("\n").length;
-  if (lines > MAX_NESTED_AGENTS_LINES) {
-    report(
-      1,
-      `nested AGENTS.md is ${lines} lines; the limit is ${MAX_NESTED_AGENTS_LINES}`,
-    );
-  }
+  const limit =
+    path === "src/AGENTS.md" ? MAX_SRC_AGENTS_LINES : MAX_FOLDER_AGENTS_LINES;
+  if (lines > limit)
+    report(1, `nested AGENTS.md is ${lines} lines; the limit is ${limit}`);
+}
+
+function checkClaudePairing(path, docs, report) {
   const claude = posix.join(posix.dirname(path), "CLAUDE.md");
   const importsIt = (docs[claude] ?? "")
     .split("\n")
