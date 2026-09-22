@@ -1,0 +1,6 @@
+{
+  "extends": "../../tsconfig.base.json",
+  // Resolved against this file, so the framework source this program pulls in sees the app's generated/.
+  "compilerOptions": { "paths": { "#generated/*": ["./generated/*"] } },
+  "include": ["**/*.ts"]
+}
