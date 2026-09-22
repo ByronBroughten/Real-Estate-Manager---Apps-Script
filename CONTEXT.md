@@ -71,7 +71,7 @@ Everything on the four config sheets that the app guarantees and restores on eac
 _Avoid_: minimum floor, minimum headers, floor sheet
 
 **Floor seed**:
-The app's own declaration of what the config-sheet floor looks like: its structure, plus Table menu space's data value, and never a tab's or column's identity. A tab it creates also gets its **seeded values**.
+The app's own declaration of what the config-sheet floor looks like: its structure, plus Table menu space's data value. A floor tab or column keeps the identity it was created with. A tab it creates also gets its **seeded values**.
 _Avoid_: template, default config
 
 **Self-describing row**:
@@ -147,7 +147,7 @@ A column the operator made a checkbox: the type menu says Checkbox, or Insert > 
 _Avoid_: boolean column, tickbox column, flag column
 
 **Empty value allowed**:
-A box you tick against a column in Column Config to say that a blank in it is a real answer rather than something missing. Unticked, the app stops and names the cell whenever it reads a blank there; ticked, it hands the blank on to whatever asked for it.
+A box you tick against a column in Column Config to say that a blank in it is a real answer rather than something missing. Unticked, the app stops and names the cell whenever it reads a blank there; ticked, it hands the blank on to whatever asked for it, and that work has to say what a missing value means.
 _Avoid_: nullable, optional column, blank allowed
 
 **Untyped**:

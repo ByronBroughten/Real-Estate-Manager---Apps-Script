@@ -2,6 +2,8 @@
 
 Style fragment. The one-line rules live in [`STYLE.md`](../../STYLE.md); this file holds the reasoning and the worked examples.
 
+One heading per class-shape rule, most of them with the refactor that produced it: grep `^## ` for the rule you're applying and read that section.
+
 
 ## Coordinator classes
 

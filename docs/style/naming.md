@@ -2,6 +2,8 @@
 
 Style fragment. The one-line rules live in [`STYLE.md`](../../STYLE.md); this file holds the reasoning and the worked examples.
 
+One heading per naming rule, in STYLE.md's order: grep `^## ` for the rule you're applying and read that section.
+
 ## Prefer TS/JS vocabulary over a made-up adjective
 
 **Prefer a term from TS/JS's own vocabulary over a made-up adjective, once one fits.** `PureValueName`/`PureValue`/`PureValueNamesToTypes` (`utils/Val.ts`) named the `string | number | boolean | date` family after a vague "pure" adjective; renamed to `PrimitiveValueName`/`PrimitiveValue`/`PrimitiveValueNamesToTypes` once it was clear that's exactly what the set is — no invented term needed when the language already has one.

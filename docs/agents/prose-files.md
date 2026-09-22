@@ -8,7 +8,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 - **Reasoning file**: a file under a rules file's `docs/<name>/` folder holding the why, examples and history. It is never auto-loaded.
 - **Router**: the Read-by-task table in the root AGENTS.md. It is the only one.
 - **Nested AGENTS.md**: a folder's own rules, loaded when an agent works there, paired with a one-line `CLAUDE.md` holding `@AGENTS.md`.
-- **Mechanics doc**: a reference file under `docs/` read by heading. It opens with a lead of 5 lines or fewer (lint), its headings are specific enough to grep, and a rule found in it moves up to a rules file or nested AGENTS.md, leaving a pointer. One that covers subjects sharing nothing is split and indexed.
+- **Mechanics doc**: a reference file under `docs/` read by heading. It opens with a lead of 5 lines or fewer (lint checks every `docs/` file that has a `##` heading), its headings are specific enough to grep, and a rule found in it moves up to a rules file or nested AGENTS.md, leaving a pointer. One that covers subjects sharing nothing is split and indexed.
 - **Enforcement ladder**: lint > path-triggered (nested AGENTS.md, a hook) > router pointer > prose.
 - **Derived view**: a file that restates facts whose home is elsewhere, for another audience. README.md is one.
 

@@ -2,7 +2,7 @@
 
 Disclosed from [`STYLE.md`](../../STYLE.md). How tests run, and the fakes: [`docs/testing.md`](../testing.md).
 
-**This is a draft, not settled like STYLE.md.** Every STYLE.md rule was mined from a file the user refactored personally; test files haven't had that pass yet, so `*.test.ts` doesn't represent the house style. These rules are proposed extensions in the same spirit. Revisit them once a real test file has been through the user's own refactor, the way `ConfigCoordinator.ts` was for production code.
+**This is a draft, not settled like STYLE.md; STYLE.md's Tests section holds the settled test rules.** Every STYLE.md rule was mined from a file the user refactored personally; test files haven't had that pass yet, so `*.test.ts` doesn't represent the house style. These rules are proposed extensions in the same spirit. Revisit them once a real test file has been through the user's own refactor, the way `ConfigCoordinator.ts` was for production code.
 
 All of STYLE.md applies to test code as-is.
 

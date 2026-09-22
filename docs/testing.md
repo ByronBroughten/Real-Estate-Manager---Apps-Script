@@ -44,7 +44,7 @@ SpreadsheetRaw / EndpointRun tests inject a RawSource (`stubSheetsService`). `Go
 
 ## The Apps Script surface and its fakes
 
-Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, `triggerOnEdit` / `AppsScript.sheetEdit`, and `triggerOnChange` / `AppsScript.sheetChange`. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change.
+Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, `triggerOnEdit` / `AppsScript.sheetEdit`, and `triggerOnChange` / `AppsScript.sheetChange`. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
 
 ## Exemplar columns in type-level tests
 
@@ -52,11 +52,11 @@ A test that needs a real column of some value name should name one whose value n
 
 ## Testing an endpoint through `EndpointRun`
 
-**An endpoint is tested through `EndpointRun`, never by calling its action**: the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints.
+An endpoint is tested through `EndpointRun`, never by calling its action (the rule: [`STYLE.md`](../STYLE.md#tests)): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints.
 
 ## The fake answers what the adapter asked; Google doesn't
 
-Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row 1), echoes each colour as a `*ColorStyle`, and `getByDataFilter` drops sheet-level fields such as `conditionalFormats`. A new read isn't done until a chore dry run has read it from the live sheet.
+Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row 1), echoes each colour as a `*ColorStyle`, and `getByDataFilter` drops sheet-level fields such as `conditionalFormats`. A new read isn't done until a chore dry run has read it from the live sheet (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
 
 ## Live-sheet verification
 

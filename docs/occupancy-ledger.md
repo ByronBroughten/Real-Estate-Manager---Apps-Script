@@ -6,7 +6,7 @@ A build rebuilds the page from scratch for one occupancy, writes the letterhead'
 
 ## Rebuilt from scratch, one occupancy at a time
 
-It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it, and its lines carry no IDs, because nothing points at them.
+It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. Its lines carry no IDs, because nothing points at them.
 
 ## The ledger start date cuts the page
 

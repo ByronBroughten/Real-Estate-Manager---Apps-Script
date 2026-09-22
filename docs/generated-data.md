@@ -25,6 +25,8 @@ All four are (or are meant to be) mechanically generated from the real spreadshe
 
 ## Regenerate all four together, never a subset
 
+The rules on regenerating and on tab spelling: [`src/01_SpreadsheetSchema/AGENTS.md`](../src/01_SpreadsheetSchema/AGENTS.md).
+
 **`spreadsheetConfig`, `sheetConfigs`, `columnConfigs`, and `valueConfigs` must always be regenerated together, in the same run — never a subset of them.** Sheet names live as keys in `sheetConfigs.ts`, and `columnConfigs.ts` is keyed by those same names; `valueConfigs.ts` in turn depends on `columnConfigs` already being current to know which columns' headers to read. Regenerating a subset after a sheet/column was renamed/added/removed leaves the others referencing stale names, which breaks `npm run tsc` in places that look unrelated (the generated files themselves, plus any hand-written code — like `SheetNameGroups.ts` — that references a sheet name by string literal).
 
 ## What a regeneration runs, on the Node host

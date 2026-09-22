@@ -29,7 +29,7 @@ One line per principle. Each principle's argument and instances are one file awa
 - **Give the common case the unmarked name.** The reflexive name is the one wanted most of the time, decided by counting call sites; the rare case costs exactly one word.
 - **Record a deliberate absence as deliberate.** An unexplained gap reads as a to-do and gets filled in; a documented one carries its reason and survives.
 - **A live config-sheet column must identify a row or serve a human on that sheet.** Sampled generated traits do not earn a cell.
-- **Structure is declared in code; identity is recorded from the sheet.** What a thing looks like is declared in code; which instance it is (GID, column ID, prefix) is read from the sheet.
+- **Structure is declared in code; identity is recorded from the sheet.** Headers, floor columns and ID shape are declared; GID, column ID and prefix are read.
 
 ## Not yet promoted
 
