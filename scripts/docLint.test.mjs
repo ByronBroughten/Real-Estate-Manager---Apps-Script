@@ -85,30 +85,8 @@ describe("checkDocs", () => {
   });
 
   describe("rule lines", () => {
-    const longRule = `- **${"x".repeat(300)}**\n`;
-
-    it("fails a rules-file rule line over 300 characters", () => {
-      expect(messages({ "STYLE.md": longRule })).toEqual([
-        "STYLE.md: rule line is 306 characters; keep it to 300 and move the rest to a reasoning file",
-      ]);
-    });
-
-    it("passes a rule line of 300 characters", () => {
-      expect(check({ "VOCABULARY.md": `- **${"x".repeat(291)}**\n` })).toEqual(
-        [],
-      );
-    });
-
-    it("checks DESIGN.md's principle lines", () => {
-      expect(messages({ "DESIGN.md": longRule })).toEqual([
-        "DESIGN.md: rule line is 306 characters; keep it to 300 and move the rest to a reasoning file",
-      ]);
-    });
-
-    it("exempts README and other docs from the rule-line check", () => {
-      expect(check({ "README.md": longRule, "docs/a.md": longRule })).toEqual(
-        [],
-      );
+    it("passes a rules-file rule line of any length", () => {
+      expect(check({ "STYLE.md": `- **${"x".repeat(600)}**\n` })).toEqual([]);
     });
   });
 
@@ -149,8 +127,9 @@ describe("checkDocs", () => {
   });
 
   describe("leads", () => {
-    const withLead = (lines) =>
-      `# Doc\n\n${Array.from({ length: lines }, (_, i) => `line ${i}`).join("\n\n")}\n\n## Section\n\nBody.\n`;
+    const withLead = (lines, width = 6) =>
+      `# Doc\n\n${Array.from({ length: lines }, (_, i) => `line ${i}`.padEnd(width, "x")).join("\n\n")}\n\n## Section\n\nBody.\n`;
+    const unheaded = (bytes) => `# Doc\n\n${"x".repeat(bytes - 8)}\n`;
 
     it("fails a docs/ file whose lead before the first ## heading is over 5 lines", () => {
       expect(messages({ "docs/a.md": withLead(6) })).toEqual([
@@ -158,12 +137,24 @@ describe("checkDocs", () => {
       ]);
     });
 
-    it("passes a lead of 5 lines, not counting blank lines", () => {
-      expect(check({ "docs/a.md": withLead(5) })).toEqual([]);
+    it("fails a lead over 800 bytes even at 5 lines or fewer", () => {
+      expect(messages({ "docs/a.md": withLead(2, 401) })).toEqual([
+        "docs/a.md: lead is 803 bytes before the first ## heading; keep it to 800 and move the rest under a heading",
+      ]);
     });
 
-    it("leaves a docs/ file with no ## heading unchecked", () => {
-      expect(check({ "docs/a.md": "# Doc\n\n1\n2\n3\n4\n5\n6\n" })).toEqual([]);
+    it("passes a lead of 5 lines and 800 bytes, not counting blank lines", () => {
+      expect(check({ "docs/a.md": withLead(5, 159) })).toEqual([]);
+    });
+
+    it("fails a docs/ file over 4 KB with no ## heading", () => {
+      expect(messages({ "docs/a.md": unheaded(4097) })).toEqual([
+        "docs/a.md: doc is 4097 bytes with no ## heading; over 4096 bytes, give it a short lead and ## headings so it can be read by section",
+      ]);
+    });
+
+    it("passes a docs/ file of 4 KB or less with no ## heading", () => {
+      expect(check({ "docs/a.md": unheaded(4096) })).toEqual([]);
     });
 
     it("leaves files outside docs/ unchecked", () => {

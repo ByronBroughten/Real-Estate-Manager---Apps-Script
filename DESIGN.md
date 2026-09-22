@@ -33,12 +33,12 @@ One line per principle. Each principle's argument and instances are one file awa
 
 ## Not yet promoted
 
-- **A human-facing signal need not be machine-readable.** _Cited by:_ #4, `ac7a795`, #45.
-- **A mechanism that needs an identity list waits for somewhere to keep it.** _Cited by:_ #49, #51.
-- **A tier is named for what it adds, and the layout sits below its first reader.** _Cited by:_ #71, #72.
-- **Prefer the cheaper thing lazily over the complete thing eagerly**, when the complete version's cost scales with a union you don't control. _Cited by:_ the lazy mapped-filter measurement.
-- **A fetched view plus a working view.** Splitting the two would let the fetched table stay put until flush. _Cited by:_ #55, #58.
-- **Google Sheets stays behind one folder before a second platform exists.** _Cited by:_ #85, #104.
+- **A human-facing signal need not be machine-readable.**
+- **A mechanism that needs an identity list waits for somewhere to keep it.**
+- **A tier is named for what it adds, and the layout sits below its first reader.**
+- **Prefer the cheaper thing lazily over the complete thing eagerly**, when the complete version's cost scales with a union you don't control.
+- **A fetched view plus a working view**, so the fetched table stays put until flush.
+- **Google Sheets stays behind one folder before a second platform exists.**
 
 ## Adding a principle
 
