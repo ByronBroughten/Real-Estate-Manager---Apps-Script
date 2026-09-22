@@ -1,9 +1,10 @@
-// Decides the STYLE.md gate: a src/ TypeScript edit waits for a full Read of STYLE.md this session. Pure; styleGate.mjs does the I/O.
+// Decides the style gate: a src/ TypeScript edit waits for a full Read of docs/style.md this session. Pure; styleGate.mjs does the I/O.
 import { relative, resolve, sep } from "node:path";
 
 export const STYLE_GATE_REASON =
-  "Read STYLE.md before your first src/ edit this session, then retry. " +
+  "Read docs/style.md before your first src/ edit this session, then retry. " +
   "Use a full Read with no offset or limit (a partial Read or a Bash read isn't recorded), and skip docs/style/ unless a rule's line doesn't decide your case.";
+export const STYLE_PATH = ["docs", "style.md"].join(sep);
 const GENERATED_DIR = ["src", "01_SpreadsheetSchema", "generated"].join(sep);
 
 export function editDecision({ projectDir, cwd, filePath, hasReadStyle }) {
@@ -14,7 +15,7 @@ export function editDecision({ projectDir, cwd, filePath, hasReadStyle }) {
 }
 
 export function isStyleRead({ projectDir, cwd, filePath, offset, limit, totalLines }) {
-  if (projectRelative({ projectDir, cwd, filePath }) !== "STYLE.md") return false;
+  if (projectRelative({ projectDir, cwd, filePath }) !== STYLE_PATH) return false;
   if (offset == null && limit == null) return true;
   if ((offset ?? 1) > 1) return false;
   return limit == null || (Number.isInteger(totalLines) && limit >= totalLines);

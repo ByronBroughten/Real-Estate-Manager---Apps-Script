@@ -1,6 +1,6 @@
 # Give the common case the unmarked name
 
-Design reasoning. The one-line principle lives in [`DESIGN.md`](../../DESIGN.md); this file holds the argument and its instances.
+Design reasoning. The one-line principle lives in [`docs/design.md`](../design.md); this file holds the argument and its instances.
 
 ## The argument
 

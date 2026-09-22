@@ -1,7 +1,6 @@
 // Checks the agent-facing docs' links and size limits; a doc map in, violations out. See docs/agents/prose-files.md.
 import { posix } from "node:path";
 
-const RULES_FILES = ["DESIGN.md", "STYLE.md", "VOCABULARY.md"];
 const MAX_LEAD_LINES = 5;
 const MAX_LEAD_BYTES = 800;
 const MAX_UNHEADED_DOC_BYTES = 4 * 1024;
@@ -12,9 +11,7 @@ const LINKED_ROOT_FILES = new Set([
   "AGENTS.md",
   "CLAUDE.md",
   "CONTEXT.md",
-  "DESIGN.md",
   "README.md",
-  ...RULES_FILES,
 ]);
 
 // `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.

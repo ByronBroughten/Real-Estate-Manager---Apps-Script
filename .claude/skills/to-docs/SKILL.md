@@ -1,6 +1,6 @@
 ---
 name: to-docs
-description: "Turn the session's friction into proposed updates to STYLE.md / VOCABULARY.md / AGENTS.md: what the docs failed to tell you, not what you decided."
+description: "Turn the session's friction into proposed updates to docs/style.md / docs/vocabulary.md / AGENTS.md: what the docs failed to tell you, not what you decided."
 disable-model-invocation: true
 ---
 
@@ -33,8 +33,8 @@ Done when every wrong turn, rediscovered fact, and user-stated rule in the sessi
 
 ## 3. Route and rank
 
-- **VOCABULARY.md** and **`src/AGENTS.md`** — the architecture words and the tiers. README.md is a derived view for people, never the home of a fact. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md` and the files it indexes; testing in `docs/testing.md`; Claude Code hooks in `docs/claude-code-guardrails.md`. A design principle is one line in DESIGN.md plus its reasoning in `docs/design/`.
-- **STYLE.md** — code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** almost always lands here, as one line. Its reasoning and worked examples live under `docs/style/`; a rule that needs an example adds the line to STYLE.md and the example to the fragment.
+- **docs/vocabulary.md** and **`src/AGENTS.md`** — the architecture words and the tiers. README.md is a derived view for people, never the home of a fact. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md` and the files it indexes; testing in `docs/testing.md`; Claude Code hooks in `docs/claude-code-guardrails.md`. A design principle is one line in docs/design.md plus its reasoning in `docs/design/`.
+- **docs/style.md** — code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** almost always lands here, as one line. Its reasoning and worked examples live under `docs/style/`; a rule that needs an example adds the line to docs/style.md and the example to the fragment.
 - **AGENTS.md** — loaded every turn, so it earns a line only if that line changes turn-one behavior. Everything else goes in the other two, or under `docs/agents/`, with a pointer at most. Full routing: `docs/agents/prose-files.md`.
 
 Rank by time the change would have saved this session, and say so. A ranked list lets the user take the top three and stop.

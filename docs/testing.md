@@ -2,7 +2,7 @@
 
 Map fragment routed from `AGENTS.md`.
 
-Vitest, as plain Node against fakes, so `npm test` is always safe. The test-writing rules are [`STYLE.md`](../STYLE.md#tests)'s; this file is the fakes, the seams and the exemplar columns. Most tests need only `stubSheetsService()`.
+Vitest, as plain Node against fakes, so `npm test` is always safe. The test-writing rules are [`docs/style.md`](./style.md#tests)'s; this file is the fakes, the seams and the exemplar columns. Most tests need only `stubSheetsService()`.
 
 ## Running the tests
 
@@ -52,7 +52,7 @@ A test that needs a real column of some value name should name one whose value n
 
 ## Testing an endpoint through `EndpointRun`
 
-An endpoint is tested through `EndpointRun`, never by calling its action (the rule: [`STYLE.md`](../STYLE.md#tests)): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints.
+An endpoint is tested through `EndpointRun`, never by calling its action (the rule: [`docs/style.md`](./style.md#tests)): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints.
 
 ## The fake answers what the adapter asked; Google doesn't
 

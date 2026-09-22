@@ -1,16 +1,18 @@
 # Architecture vocabulary
 
-The layering words, used precisely and never loosely; the operator-facing words (endpoint, selector, run state) are [CONTEXT.md](./CONTEXT.md)'s.
+The layering words, used precisely and never loosely; the operator-facing words (endpoint, selector, run state) are [CONTEXT.md](../CONTEXT.md)'s.
 
 One line per term. The elaboration is one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 
+## Elaboration files
+
 | When | File |
 | --- | --- |
-| Source, Platform, Raw, Identified, Named | [`docs/vocabulary/tiers.md`](./docs/vocabulary/tiers.md) |
-| Tier word, State, Base, Operator, Collaborator | [`docs/vocabulary/class-names.md`](./docs/vocabulary/class-names.md) |
-| `xConfigs` / `XConfig` / trait, `spreadsheetConfig`, the config-sheet floor | [`docs/vocabulary/config.md`](./docs/vocabulary/config.md) |
-| Meta vs primary, crossing views, which class a member belongs to, Active, Active facts | [`docs/vocabulary/meta-primary.md`](./docs/vocabulary/meta-primary.md) |
-| Schema, blank cells, `value` / `valueOrEmpty` / `valueNotEmpty`, checkbox, `DateSerial`, `emptyValueAllowed` | [`docs/vocabulary/values.md`](./docs/vocabulary/values.md) |
+| Source, Platform, Raw, Identified, Named | [`docs/vocabulary/tiers.md`](./vocabulary/tiers.md) |
+| Tier word, State, Base, Operator, Collaborator | [`docs/vocabulary/class-names.md`](./vocabulary/class-names.md) |
+| `xConfigs` / `XConfig` / trait, `spreadsheetConfig`, the config-sheet floor | [`docs/vocabulary/config.md`](./vocabulary/config.md) |
+| Meta vs primary, crossing views, which class a member belongs to, Active, Active facts | [`docs/vocabulary/meta-primary.md`](./vocabulary/meta-primary.md) |
+| Schema, blank cells, `value` / `valueOrEmpty` / `valueNotEmpty`, checkbox, `DateSerial`, `emptyValueAllowed` | [`docs/vocabulary/values.md`](./vocabulary/values.md) |
 
 ## Tiers
 

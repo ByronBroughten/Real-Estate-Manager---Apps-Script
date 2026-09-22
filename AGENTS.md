@@ -22,10 +22,10 @@ Open only the section or disclosed doc the task needs.
 
 | When | Open |
 | --- | --- |
-| Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`src/AGENTS.md`](./src/AGENTS.md) + [`VOCABULARY.md`](./VOCABULARY.md) |
-| Writing or refactoring TypeScript, tests included | [`STYLE.md`](./STYLE.md) |
+| Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`src/AGENTS.md`](./src/AGENTS.md) + [`docs/vocabulary.md`](./docs/vocabulary.md) |
+| Writing or refactoring TypeScript, tests included | [`docs/style.md`](./docs/style.md) |
 | Operator-facing words: endpoint, selector, run state, blank row | [`CONTEXT.md`](./CONTEXT.md) |
-| Arguing that a gap is deliberate, or proposing a design principle | [`DESIGN.md`](./DESIGN.md) |
+| Arguing that a gap is deliberate, or proposing a design principle | [`docs/design.md`](./docs/design.md) |
 | Architecture mechanics: dispatch, schema classes, class chains, queued writes, round trips, type-check cost | [`docs/architecture.md`](./docs/architecture.md) index, then one file |
 | Adding a deletion path | [`docs/architecture/blank-row.md`](./docs/architecture/blank-row.md) |
 | A one-off job against the live sheet | [`docs/architecture/chores.md`](./docs/architecture/chores.md) |

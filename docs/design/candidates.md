@@ -1,6 +1,6 @@
 # Candidate principles
 
-Design reasoning for DESIGN.md's "Not yet promoted" list. Candidates with one citation. Leave them here until a second decision makes the same argument; delete them if the first one gets reversed.
+Design reasoning for docs/design.md's "Not yet promoted" list. Candidates with one citation. Leave them here until a second decision makes the same argument; delete them if the first one gets reversed.
 
 ## A human-facing signal need not be machine-readable
 

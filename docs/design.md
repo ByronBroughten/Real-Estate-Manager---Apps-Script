@@ -1,22 +1,24 @@
 # Design philosophy
 
-Why this codebase is shaped the way it is, in the reasoning that generalizes past the decision that produced it; the agent tooling's arguments are [`docs/agent-behavior-design.md`](./docs/agent-behavior-design.md)'s, and which file answers what is [`docs/agents/prose-files.md`](./docs/agents/prose-files.md).
+Why this codebase is shaped the way it is, in the reasoning that generalizes past the decision that produced it; the agent tooling's arguments are [`docs/agent-behavior-design.md`](./agent-behavior-design.md)'s, and which file answers what is [`docs/agents/prose-files.md`](./agents/prose-files.md).
 
 One line per principle. Each principle's argument and instances are one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 
+## Reasoning files
+
 | When | File |
 | --- | --- |
-| Two pieces of state could contradict each other | [`docs/design/unrepresentable-disagreement.md`](./docs/design/unrepresentable-disagreement.md) |
-| Choosing the level a fact is stored or exposed at | [`docs/design/concept-granularity.md`](./docs/design/concept-granularity.md) |
-| A state model with a real condition it can't express | [`docs/design/room-for-real-states.md`](./docs/design/room-for-real-states.md) |
-| An absence in an API response | [`docs/design/payload-is-not-grid.md`](./docs/design/payload-is-not-grid.md) |
-| Adding a call to Sheets or another costly operation | [`docs/design/one-chokepoint.md`](./docs/design/one-chokepoint.md) |
-| A claim about cost, types or live Sheets behaviour | [`docs/design/falsifiable-claims.md`](./docs/design/falsifiable-claims.md) |
-| Which case gets the unmarked name | [`docs/design/unmarked-common-case.md`](./docs/design/unmarked-common-case.md) |
-| A gap that looks like an oversight | [`docs/design/deliberate-absence.md`](./docs/design/deliberate-absence.md) |
-| Adding a column to a config sheet | [`docs/design/config-sheet-columns.md`](./docs/design/config-sheet-columns.md) |
-| Declaring a shape in code or reading it from the sheet | [`docs/design/structure-vs-identity.md`](./docs/design/structure-vs-identity.md) |
-| A parked candidate under "Not yet promoted" | [`docs/design/candidates.md`](./docs/design/candidates.md) |
+| Two pieces of state could contradict each other | [`docs/design/unrepresentable-disagreement.md`](./design/unrepresentable-disagreement.md) |
+| Choosing the level a fact is stored or exposed at | [`docs/design/concept-granularity.md`](./design/concept-granularity.md) |
+| A state model with a real condition it can't express | [`docs/design/room-for-real-states.md`](./design/room-for-real-states.md) |
+| An absence in an API response | [`docs/design/payload-is-not-grid.md`](./design/payload-is-not-grid.md) |
+| Adding a call to Sheets or another costly operation | [`docs/design/one-chokepoint.md`](./design/one-chokepoint.md) |
+| A claim about cost, types or live Sheets behaviour | [`docs/design/falsifiable-claims.md`](./design/falsifiable-claims.md) |
+| Which case gets the unmarked name | [`docs/design/unmarked-common-case.md`](./design/unmarked-common-case.md) |
+| A gap that looks like an oversight | [`docs/design/deliberate-absence.md`](./design/deliberate-absence.md) |
+| Adding a column to a config sheet | [`docs/design/config-sheet-columns.md`](./design/config-sheet-columns.md) |
+| Declaring a shape in code or reading it from the sheet | [`docs/design/structure-vs-identity.md`](./design/structure-vs-identity.md) |
+| A parked candidate under "Not yet promoted" | [`docs/design/candidates.md`](./design/candidates.md) |
 
 ## Principles
 

@@ -1,6 +1,6 @@
 # A live config-sheet column must identify a row or serve a human on that sheet
 
-Design reasoning. The one-line principle lives in [`DESIGN.md`](../../DESIGN.md); this file holds the argument and its instances.
+Design reasoning. The one-line principle lives in [`docs/design.md`](../design.md); this file holds the argument and its instances.
 
 ## The argument
 
