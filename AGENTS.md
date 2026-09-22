@@ -14,16 +14,15 @@ Open only the section or disclosed doc the task needs.
 
 ## Every task
 
-- **Regenerate, never hand-edit,** the data in `src/01_SpreadsheetSchema/generated/`. Fix a sheet-shape bug on the sheet, then regenerate. The config-sheet floor entries are no exception: fix the live tab or the seed ([`docs/generated-data.md`](./docs/generated-data.md)).
-- **Read the block, not the file.** Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that one object. `sheetConfigs.ts` is the sheet list. A long test file works the same way: open only the `describe` block you are changing.
-- **`src/` is host-neutral TypeScript**, `nodeHost/` included, with no Node or DOM APIs, and platform-neutral outside `src/00_Source/GoogleSheets/` and the entry points; lint holds both. The Node-specific half lives in `scripts/*.mjs`.
+- **README.md is for humans.** Nothing in it is needed for a task here; open it only to keep it accurate ([`docs/agents/prose-files.md`](./docs/agents/prose-files.md)).
+- **Working in a folder with its own `AGENTS.md`**, read it first: `src/` and several folders below it, and `scripts/`, each have one.
 - **Commit or push only when asked. Implement a spec on its `issue-<n>-<slug>` branch**, even when a skill says to commit to the current branch. Branch rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
 ## Read by task
 
 | When | Open |
 | --- | --- |
-| Placing a file, import, or member | README tier table + [Naming vocabulary](./README.md#naming-vocabulary) |
+| Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`src/AGENTS.md`](./src/AGENTS.md) + [`VOCABULARY.md`](./VOCABULARY.md) |
 | Writing or refactoring TypeScript, tests included | [`STYLE.md`](./STYLE.md) |
 | Operator-facing words: endpoint, selector, run state, blank row | [`CONTEXT.md`](./CONTEXT.md) |
 | Arguing that a gap is deliberate, or proposing a design principle | [`DESIGN.md`](./DESIGN.md) |

@@ -13,7 +13,7 @@ export interface NodeHostProps {
   log: (message: string) => void;
 }
 
-// The framework's second host — Sheets only, in Node. See README, "How it runs".
+// The framework's second host — Sheets only, in Node. See docs/how-it-runs.md.
 export class NodeHost {
   readonly spreadsheetId: string;
   readonly isDryRun: boolean;

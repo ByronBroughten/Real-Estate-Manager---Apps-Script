@@ -1,4 +1,4 @@
-// Starts the framework's second host. See README, "How it runs".
+// Starts the framework's second host. See docs/how-it-runs.md.
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";

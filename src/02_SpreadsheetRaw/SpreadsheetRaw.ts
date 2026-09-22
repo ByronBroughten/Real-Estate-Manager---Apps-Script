@@ -112,7 +112,7 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
     });
     return this;
   }
-  // The one bypass of the type layer; using it obliges filing an issue (README).
+  // The one bypass of the type layer; using it obliges filing an issue (docs/architecture/raw-request-opening.md).
   gatherRawRequest(request: OpaqueRawRequest): this {
     this.updateRequests.raw.push({ kind: "raw", request });
     return this;

@@ -1,4 +1,4 @@
-// Runs one chore against the live spreadsheet. See README, "The chore and its dry run".
+// Runs one chore against the live spreadsheet. See docs/how-it-runs.md, "The chore and its dry run".
 import { existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { startNodeHost } from "./nodeHost.mjs";

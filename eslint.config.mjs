@@ -14,6 +14,51 @@ const platformImportPattern = {
   regex: "GoogleSheets/|GoogleSheets/(GoogleSheetsAPI|AppsScript)(\\.js)?$",
   message: platformMessage,
 };
+// utils/ sits below every numbered tier.
+const layerFolders = [
+  "utils",
+  "00_Source",
+  "01_SpreadsheetSchema",
+  "02_SpreadsheetRaw",
+  "03_SpreadsheetIdentified",
+  "04_SpreadsheetNamed",
+  "05_Operators",
+  "06_API",
+];
+// The un-numbered folders built on the tiers; utils/ and testSupport/ are not among them.
+const aboveTierFolders = ["businessEndpoints", "chores", "nodeHost"];
+const layerImportPattern = (layer) => ({
+  regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
+  message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (src/AGENTS.md).`,
+});
+// After the platform block: a later block's no-restricted-imports replaces an earlier one's, so each merges the patterns that still apply.
+const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
+  const extra = folder === "02_SpreadsheetRaw" ? [rawImportPattern] : [];
+  const restrict = (patterns) => ({
+    "no-restricted-imports": [
+      "error",
+      { patterns: [...patterns, layerImportPattern(layer), ...extra] },
+    ],
+  });
+  const isPlatformFolder = folder === "00_Source";
+  return [
+    {
+      files: [`src/${folder}/**/*.ts`],
+      ignores: [
+        "**/*.test.ts",
+        ...(isPlatformFolder ? ["src/00_Source/GoogleSheets/**"] : []),
+      ],
+      rules: restrict([platformImportPattern]),
+    },
+    {
+      files: [
+        `src/${folder}/**/*.test.ts`,
+        ...(isPlatformFolder ? ["src/00_Source/GoogleSheets/**/*.ts"] : []),
+      ],
+      rules: restrict([]),
+    },
+  ];
+});
 
 export default defineConfig(
   eslint.configs.recommended,
@@ -72,21 +117,5 @@ export default defineConfig(
       ],
     },
   },
-  // After the platform block: a later block's no-restricted-imports replaces an earlier one's.
-  {
-    files: ["src/02_SpreadsheetRaw/**/*.ts"],
-    ignores: ["**/*.test.ts"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        { patterns: [platformImportPattern, rawImportPattern] },
-      ],
-    },
-  },
-  {
-    files: ["src/02_SpreadsheetRaw/**/*.test.ts"],
-    rules: {
-      "no-restricted-imports": ["error", { patterns: [rawImportPattern] }],
-    },
-  },
+  ...layerImportBlocks,
 );

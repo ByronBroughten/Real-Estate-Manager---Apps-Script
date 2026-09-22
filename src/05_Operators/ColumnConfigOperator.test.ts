@@ -151,7 +151,7 @@ function stubGroupedColumnConfigSheets(): void {
 }
 
 // Mirrors ConfigCoordinator.syncAndFlushConfigSheets's own sequence (see
-// CLAUDE.md/README on why Sheet Config and Column Config sync together),
+// docs/generated-data.md on why Sheet Config and Column Config sync together),
 // stopping short of the final batchUpdateGSheets flush these tests don't
 // need.
 function syncColumnConfigOperator(operator: ColumnConfigOperator): void {

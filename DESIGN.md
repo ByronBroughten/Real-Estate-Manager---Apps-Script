@@ -36,7 +36,7 @@ Store and expose a fact at the level it's *about*, not the level it happens to a
 
 A state model that can't express a real condition doesn't omit it — it *misreports* it as one of the states it does have. Before settling a model, ask which real-world conditions have nowhere to go.
 
-*Instances:* a run killed mid-flight — an Apps Script timeout, a quota kill — runs no `finally`. Under the old boolean, it displayed the *previous* run's `TRUE`: a state with no representation became a confident lie. The colour model leaves that run yellow, which says "started, never reported back" (#4, `ac7a795`). Every cell's value type includes `""`, because an untouched cell is empty rather than defaulted — a `boolean` column reads `boolean | ""`, and code that branches on it has to say what empty means instead of assuming the base type (README.md, "Naming vocabulary").
+*Instances:* a run killed mid-flight — an Apps Script timeout, a quota kill — runs no `finally`. Under the old boolean, it displayed the *previous* run's `TRUE`: a state with no representation became a confident lie. The colour model leaves that run yellow, which says "started, never reported back" (#4, `ac7a795`). Every cell's value type includes `""`, because an untouched cell is empty rather than defaulted — a `boolean` column reads `boolean | ""`, and code that branches on it has to say what empty means instead of assuming the base type (VOCABULARY.md, "Values").
 
 ### The payload is not the grid
 
