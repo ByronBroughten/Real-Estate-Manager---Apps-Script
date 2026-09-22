@@ -69,7 +69,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 - **Default to no comments.** When a block would need a comment saying _what_ it does, pull it into a small private method whose name says it.
 - **A comment is one line, trailing or immediately above its line, and explains a "why not the obvious thing"**, never restating the line. A why that doesn't fit on one short line goes in the commit message or PR description.
-- **The one multi-line exception is a file-level navigation block**, 5–10 lines above the exported class stating the file's job and where neighbouring work lives. The set is small on purpose; `docs/style/comments.md` lists it.
+- **The one multi-line exception is a file-level navigation block**, 5–10 lines above the exported class stating the file's job and where neighbouring work lives. `docs/style/comments.md` lists the set.
 
 ## Error handling & validation
 

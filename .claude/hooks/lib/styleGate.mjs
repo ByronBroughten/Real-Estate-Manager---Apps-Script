@@ -13,7 +13,6 @@ export function editDecision({ projectDir, cwd, filePath, hasReadStyle }) {
   return { denyReason: isGated && !hasReadStyle ? STYLE_GATE_REASON : null };
 }
 
-// A Read counts only when it covers every line: no bounds, or bounds that start at the top and reach `totalLines`.
 export function isStyleRead({ projectDir, cwd, filePath, offset, limit, totalLines }) {
   if (projectRelative({ projectDir, cwd, filePath }) !== "STYLE.md") return false;
   if (offset == null && limit == null) return true;

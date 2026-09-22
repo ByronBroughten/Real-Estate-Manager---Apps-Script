@@ -37,7 +37,7 @@ One line per principle. Each principle's argument and instances are one file awa
 - **A mechanism that needs an identity list waits for somewhere to keep it.**
 - **A tier is named for what it adds, and the layout sits below its first reader.**
 - **Prefer the cheaper thing lazily over the complete thing eagerly**, when the complete version's cost scales with a union you don't control.
-- **A fetched view plus a working view.**
+- **A fetched view plus a working view**, so the fetched table stays put until flush.
 - **Google Sheets stays behind one folder before a second platform exists.**
 
 ## Adding a principle
