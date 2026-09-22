@@ -1,8 +1,8 @@
 # Coding style
 
-Distilled from the user's own refactors of AI-generated code, plus a survey of `src/` for consistent, repeated patterns. This file covers code _shape_; where things live is README.md's tier table and naming vocabulary.
+Distilled from the user's own refactors of AI-generated code, plus a survey of `src/` for consistent, repeated patterns. This file covers code _shape_; where things live is [`src/AGENTS.md`](./src/AGENTS.md) and [`VOCABULARY.md`](./VOCABULARY.md).
 
-One line per rule. The reasoning and worked examples are one file away:
+One line per rule. The reasoning and worked examples are one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 
 | When | File |
 | --- | --- |
@@ -14,7 +14,7 @@ One line per rule. The reasoning and worked examples are one file away:
 
 ## Class shape
 
-- **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** `init` is how an outside caller builds one; `new` is how a class builds its own collaborators from props already on `this`; collaborators are lazy getters. Endpoints are exempt — a plain entry with module-private helpers, until a body turns unwieldy: 303 lines and eighteen free functions threading a collaborator through crossed that line and moved onto a business operator (#22).
+- **Coordinating other stateful objects means a coordinator class extending the tier's Base class.** Callers build one with `init`; it builds its collaborators with `new` from props on `this`, as lazy getters. Endpoints are exempt, as plain entries, until a body turns unwieldy (#22).
 - **An Operator extends its subject's `*BaseNamed` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
 - **What an Operator holds as props is its identity; a per-run value is an argument to the method that needs it** — `OccupancyLedgerOperator` holds the spreadsheet, and `build` takes the occupancy row index.
 - **Split a coordinator into collaborators when its private helpers fall into groups that share nothing with each other**, not when it passes a method count. The coordinator keeps its public methods as one-line delegations, and the collaborators go in a subfolder named after it (`SpreadsheetRaw/`).
@@ -62,8 +62,8 @@ One line per rule. The reasoning and worked examples are one file away:
 ## Comments
 
 - **Default to no comments.** When a block would need a comment saying _what_ it does, pull it into a small private method whose name says it — `SheetConfigOperator._updateAll` → `_deleteStaleSheetConfigs`/`_appendMissingSheetConfigs`/`_updateProgrammaticValues`.
-- **A comment is one line, trailing or immediately above its line, and explains a "why not the obvious thing"**, never restating what the line already says — `action: "boolean", // Should perhaps be "boolean" | "string"`. If the why doesn't fit on one short line, cut it; it belongs in a commit message or PR description.
-- **The one multi-line exception is a file-level navigation block**: 5–10 lines immediately above the exported class, stating this file's job and where neighbouring work lives, so an agent opens the right sibling instead of the whole tier. `SpreadsheetRaw`, `SheetRaw`, `EndpointRun`, `SheetNamed`, `ConfigCoordinator` and `ConfigSheetFloorEditWarnings` are the current set.
+- **A comment is one line, trailing or immediately above its line, and explains a "why not the obvious thing"**, never restating the line — `action: "boolean", // Should perhaps be "boolean" | "string"`. A why that doesn't fit on one short line goes in the commit message or PR description.
+- **The one multi-line exception is a file-level navigation block**: 5–10 lines above the exported class, stating the file's job and where neighbouring work lives. `SpreadsheetRaw`, `SheetRaw`, `EndpointRun`, `SheetNamed`, `ConfigCoordinator` and `ConfigSheetFloorEditWarnings` have one.
 
 ## Error handling & validation
 
@@ -78,7 +78,7 @@ One line per rule. The reasoning and worked examples are one file away:
 ## Type modeling
 
 - **`interface` for object shapes that get constructed or extended; `type` for everything computed from other types.** Props/state bags that chain via `extends` are `interface`s; unions, `keyof`, mapped and utility types are `type`s.
-- **Generic params get two-letter domain abbreviations with a constraint** — `SN` (SheetName), `VN` (ValueName), `CN` (ColumnName), `UN` (UniformRowName), `IF` (IsFormula), `TN`, usually `extends <DomainType>`. Bare `T`/`K`/`V`/`O` are only for domain-free structural utilities (`utils/Obj.ts`, `utils/Arr.ts`).
+- **Generic params get two-letter domain abbreviations with a constraint** — `SN` (SheetName), `VN` (ValueName), `CN` (ColumnName), `UN` (UniformRowName), `IF` (IsFormula), `TN`, usually `extends <DomainType>`. Bare `T`/`K`/`V`/`O` are only for domain-free utilities (`utils/Obj.ts`).
 - **Verify a type-level claim with `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts`, never an assignment.** A probe that needed an `any` to compile has proved nothing. Measure a mapped type over the config unions before adopting it.
 - **Narrow a type until the empty case can't arise, rather than a branded-string fallback.**
 - **`as` casts narrow data that's already runtime-safe; they never substitute for validation.** External values (Sheets cell data) go through `Val.validate.*`/`Val.is.*`. The three accepted cast idioms are in the reasoning file.

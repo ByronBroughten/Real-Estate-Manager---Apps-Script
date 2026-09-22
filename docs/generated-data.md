@@ -1,6 +1,6 @@
 # Generated data — do not hand-edit
 
-Map fragment disclosed from `README.md`.
+Map fragment routed from `AGENTS.md`.
 
 **Never read `columnConfigs.ts` whole.** `sheetConfigs.ts` is the sheet list — one labeled sheet record per line. Grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that object only: the key opens a multi-line block, and each column config is one labeled line inside it (`columnId`, `header`, `valueName`, `isFormula`, `emptyValueAllowed`, `customDefaultValue`). Same for a single column: grep its `columnId` or name. `valueConfigs.ts` stays a pretty-printed map of member arrays.
 

@@ -1,6 +1,6 @@
 # Testing
 
-Map fragment disclosed from `README.md`.
+Map fragment routed from `AGENTS.md`.
 
 Tests run on [Vitest](https://vitest.dev): `npm test` (single run), `npm run test:watch`, or `npm run test:coverage`. None of it touches the live spreadsheet or Apps Script — it's plain Node against fakes — so it's always safe to run freely, same as `npm run tsc`.
 

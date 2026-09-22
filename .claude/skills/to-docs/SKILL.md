@@ -1,6 +1,6 @@
 ---
 name: to-docs
-description: "Turn the session's friction into proposed updates to README.md / STYLE.md / AGENTS.md: what the docs failed to tell you, not what you decided."
+description: "Turn the session's friction into proposed updates to STYLE.md / VOCABULARY.md / AGENTS.md: what the docs failed to tell you, not what you decided."
 disable-model-invocation: true
 ---
 
@@ -33,7 +33,7 @@ Done when every wrong turn, rediscovered fact, and user-stated rule in the sessi
 
 ## 3. Route and rank
 
-- **README.md** — the map: tiers, naming vocabulary. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md`; testing in `docs/testing.md`.
+- **VOCABULARY.md** and **`src/AGENTS.md`** — the architecture words and the tiers. README.md is a derived view for people, never the home of a fact. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md`; testing in `docs/testing.md`.
 - **STYLE.md** — code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** almost always lands here, as one line. Its reasoning and worked examples live under `docs/style/`; a rule that needs an example adds the line to STYLE.md and the example to the fragment.
 - **AGENTS.md** — loaded every turn, so it earns a line only if that line changes turn-one behavior. Everything else goes in the other two, or under `docs/agents/`, with a pointer at most. Full routing: `docs/agents/prose-files.md`.
 

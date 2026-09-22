@@ -18,7 +18,8 @@ This is a single-context repo, and it keeps no ADR tree:
 /
 ├── CONTEXT.md
 ├── DESIGN.md
-├── README.md          # map: tiers, naming vocabulary
+├── VOCABULARY.md      # architecture words; elaboration in docs/vocabulary/
+├── src/AGENTS.md      # the tiers
 ├── docs/architecture.md
 ├── docs/architecture/
 ├── docs/how-it-runs.md
@@ -28,6 +29,8 @@ This is a single-context repo, and it keeps no ADR tree:
 ```
 
 ## Use the glossary's vocabulary
+
+The architecture words (Raw, Identified, Named, Meta / primary, Operator) are [`VOCABULARY.md`](../../VOCABULARY.md)'s, not the glossary's.
 
 When your output names a domain concept (in an issue title, a refactor proposal, a hypothesis, a test name), use the term as defined in `CONTEXT.md`. Don't drift to synonyms the glossary explicitly avoids.
 
