@@ -99,6 +99,12 @@ describe("checkDocs", () => {
       );
     });
 
+    it("checks DESIGN.md's principle lines", () => {
+      expect(messages({ "DESIGN.md": longRule })).toEqual([
+        "DESIGN.md: rule line is 306 characters; keep it to 300 and move the rest to a reasoning file",
+      ]);
+    });
+
     it("exempts README and other docs from the rule-line check", () => {
       expect(check({ "README.md": longRule, "docs/a.md": longRule })).toEqual(
         [],
@@ -139,6 +145,29 @@ describe("checkDocs", () => {
       expect(messages({ "AGENTS.md": "x".repeat(5121) })).toEqual([
         "AGENTS.md: root AGENTS.md is 5121 bytes; the limit is 5120",
       ]);
+    });
+  });
+
+  describe("leads", () => {
+    const withLead = (lines) =>
+      `# Doc\n\n${Array.from({ length: lines }, (_, i) => `line ${i}`).join("\n\n")}\n\n## Section\n\nBody.\n`;
+
+    it("fails a docs/ file whose lead before the first ## heading is over 5 lines", () => {
+      expect(messages({ "docs/a.md": withLead(6) })).toEqual([
+        "docs/a.md: lead is 6 lines before the first ## heading; keep it to 5 and move the rest under a heading",
+      ]);
+    });
+
+    it("passes a lead of 5 lines, not counting blank lines", () => {
+      expect(check({ "docs/a.md": withLead(5) })).toEqual([]);
+    });
+
+    it("leaves a docs/ file with no ## heading unchecked", () => {
+      expect(check({ "docs/a.md": "# Doc\n\n1\n2\n3\n4\n5\n6\n" })).toEqual([]);
+    });
+
+    it("leaves files outside docs/ unchecked", () => {
+      expect(check({ "README.md": withLead(6) })).toEqual([]);
     });
   });
 

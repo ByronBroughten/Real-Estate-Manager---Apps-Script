@@ -28,7 +28,7 @@ interface FloorTabDeclaration {
  * Each tab's declaration and the rules table live in FloorTabEditWarning; the
  * live column lookup is floorColumnLocation; seed lookups are floorSeedLookups;
  * ConfigSheetFloorCreator creates missing floor tabs and columns before this runs.
- * docs/generated-data.md
+ * docs/generated-data/config-sheet-floor.md
  */
 export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
   get ss(): SpreadsheetNamed {

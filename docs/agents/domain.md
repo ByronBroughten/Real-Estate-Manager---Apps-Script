@@ -17,13 +17,17 @@ This is a single-context repo, and it keeps no ADR tree:
 ```
 /
 ├── CONTEXT.md
-├── DESIGN.md
+├── DESIGN.md         # one line per principle; reasoning in docs/design/
 ├── VOCABULARY.md      # architecture words; elaboration in docs/vocabulary/
 ├── src/AGENTS.md      # the tiers
 ├── docs/architecture.md
 ├── docs/architecture/
 ├── docs/how-it-runs.md
+├── docs/claude-code-guardrails.md
+├── docs/occupancy-ledger.md
 ├── docs/generated-data.md
+├── docs/generated-data/
+├── docs/design/
 ├── docs/testing.md
 └── src/
 ```
@@ -38,7 +42,7 @@ If the concept you need isn't in the glossary yet, that's a signal: either you'r
 
 ## No ADR tree — flag conflicts against DESIGN.md
 
-**Don't create `docs/adr/`.** DESIGN.md rules it out: specs are published as GitHub issues, and a second filing system would only drift from them. An architectural argument belongs in DESIGN.md's principle list, cited by issue where one exists and by commit otherwise.
+**Don't create `docs/adr/`.** DESIGN.md rules it out: specs are published as GitHub issues, and a second filing system would only drift from them. An architectural argument belongs in DESIGN.md's principle list, one line there plus its reasoning in `docs/design/`, cited by issue where one exists and by commit otherwise.
 
 If your output contradicts a principle already recorded there, surface it explicitly rather than silently overriding:
 

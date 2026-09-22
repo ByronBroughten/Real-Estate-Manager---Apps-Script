@@ -11,4 +11,5 @@
 - **Before adding a file, ask "would this make sense in a different Sheets-backed app?"** Yes: tiers 00–06, generically named. No: `businessEndpoints/`, or `chores/` for a one-off job.
 - **`src/` is host-neutral, `nodeHost/` included: no Node or DOM APIs.** It is platform-neutral outside `00_Source/GoogleSheets/` and the entry points. Lint holds both.
 - **Regenerate, never hand-edit, the data in `01_SpreadsheetSchema/generated/`.** Read by block: grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that one object; open a long test file's one `describe`.
+- **A guard ships in the same commit as the write it guards, or earlier**: a standing-permission `gen:configs` run can land between any two commits.
 - **Read [STYLE.md](../STYLE.md) before editing TypeScript here.** Words: [VOCABULARY.md](../VOCABULARY.md). Mechanics: the [`docs/architecture.md`](../docs/architecture.md) index.

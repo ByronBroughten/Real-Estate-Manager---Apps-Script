@@ -7,7 +7,7 @@ A Google Sheets spreadsheet that a person operates directly, with an Apps Script
 ### Sheet layout
 
 **Table**:
-The Google Table (Insert > Table) laid over a sheet's data. Every sheet with **Let api access** must have exactly one, starting on the Table header row in the first column, with at least one data row (a **blank row** counts). Deleting a row above it or inserting a column to its left moves it, so the app checks where it starts on every run and refuses to go on if it has drifted, naming where the Table is and where it belongs. If a fetch finds more than one Table on a sheet with **Let api access**, it refuses the same way and names those sheets, so you can delete the extras; it never picks one for you. It never moves or rebuilds a Table, because a Table that moved or multiplied usually means you restructured the sheet on purpose.
+The Google Table (Insert > Table) laid over a sheet's data. Every sheet with **Let api access** must have exactly one, starting on the Table header row in the first column, with at least one data row (a **blank row** counts). What a run does about a moved or extra Table: [`docs/architecture/table-placement.md`](./docs/architecture/table-placement.md).
 _Avoid_: range, data range, grid
 
 **Table reference**:
@@ -35,11 +35,11 @@ The first row of the Table's data, always the row immediately below the Table he
 _Avoid_: data start, top data row, row 5
 
 **Layout value**:
-One of Spreadsheet Config's cells saying where the bookkeeping rows and the Table sit and how IDs are written. All but ID header are fixed for now: a config sync refuses a changed one and names it, with the value it expects.
+One of Spreadsheet Config's cells saying where the bookkeeping rows and the Table sit and how IDs are written. All but ID header are fixed for now.
 _Avoid_: layout setting, layout constant, spreadsheet config value
 
 **Blank row**:
-A data row with nothing in any of the columns you fill in yourself. It is what the app leaves when it deletes everything on a sheet: emptying the sheet completely would take the formulas, number formats, validation and colours with it, since a new row copies those from the rows already there. The formula cells still show whatever their formulas make of an empty row, so the row reads as a live row rather than a gap. The next row the app adds to that sheet goes into the blank row rather than beneath it, so it never sits stranded above your data.
+A data row with nothing in any of the columns you fill in yourself, which the app leaves when it deletes everything on a sheet. The next row the app adds goes into it. Why, and how: [`docs/architecture/blank-row.md`](./docs/architecture/blank-row.md).
 _Avoid_: empty row, placeholder row, spare row
 
 **ID prefix**:
@@ -67,11 +67,11 @@ A cell only the editors it names can change; a lock that names none stops nobody
 _Avoid_: protection, lock
 
 **Config-sheet floor**:
-Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, Spreadsheet Config's Table menu space data cell, and the framework endpoints' columns. Edits to it are overwritten and reported. A column type is restored only on a Table with no dropdown or other validated column; otherwise the run stops and names those columns, because restoring a type resets every dropdown's style and colours on that Table.
+Everything on the four config sheets that the app guarantees and restores on each config sync: tab titles, Table names, headers, column IDs, column-group headings, column types, Spreadsheet Config's Table menu space data cell, and the framework endpoints' columns. Edits to it are overwritten and reported ([`docs/generated-data/config-sheet-floor.md`](./docs/generated-data/config-sheet-floor.md)).
 _Avoid_: minimum floor, minimum headers, floor sheet
 
 **Floor seed**:
-The app's own declaration of what the config-sheet floor looks like. It holds structure, plus Table menu space's data value; a floor tab or column keeps the identity it was created with. A tab it creates also gets its seeded values; Spreadsheet Config's layout values come from the generated layout record, not from the seed.
+The app's own declaration of what the config-sheet floor looks like: its structure, plus Table menu space's data value. A floor tab or column keeps the identity it was created with. A tab it creates also gets its **seeded values**.
 _Avoid_: template, default config
 
 **Self-describing row**:
@@ -101,7 +101,7 @@ An endpoint whose entry checkbox is the input rather than a button — it runs o
 _Avoid_: toggle, switch
 
 **Selector**:
-A column of checkboxes an endpoint may declare, naming the rows one run is about. Ticking rows picks them out; the run then acts on those rows and reports into those rows, and leaves every other row alone. A successful run **consumes** its selection — the ticks clear themselves, the way the run button does, so an empty selector column means nothing is selected and the next run costs what it looks like it costs. A run that fails leaves the ticks alone: they are the operator's input, and the same selection can be retried once the problem is fixed. An endpoint whose selector marks a standing set of rows rather than a one-off pick declares that it **retains its selection**, and its ticks survive a successful run untouched. An endpoint whose work is about one row and could not be about two — a ledger is one page about one tenancy — declares that it **requires one row**, and a run with more than one ticked fails before it starts, saying how many you ticked, leaving every tick where it is so you can untick the extras and go again.
+A column of checkboxes an endpoint may declare, naming the rows one run is about; the run acts on and reports into those rows only. A successful run **consumes** its selection unless the endpoint **retains its selection**, and an endpoint may declare that it **requires one row**. What the operator sees: [`docs/architecture/endpoint-dispatch.md`](./docs/architecture/endpoint-dispatch.md#what-the-operator-sees-of-a-selector).
 _Avoid_: toggle, filter
 
 **Feedback column**:
@@ -121,11 +121,11 @@ Work has begun and has not reported back. A run killed mid-flight stays here, wh
 _Avoid_: in progress, pending, processing
 
 **Warning**:
-The run committed its work, and something about it wants your attention — most often that some of the rows it was about went through and some did not. Its orange sits between the success green and the failure red, so the three read as a scale, and it always carries a sentence of its own, since an orange cell with nothing to say would be a puzzle.
+The run committed its work, and something about it wants your attention — most often that some of the rows it was about went through and some did not. It is orange and always carries a sentence of its own.
 _Avoid_: partial, incomplete, soft failure
 
 **Run report**:
-What an endpoint hands back when its work is done: nothing, a sentence, a run state with a sentence, or a set of rows that differ from the rest, each with the state and sentence it gets. Rows the report does not name take the run's own state, which is success unless the report says otherwise. A run that **fails by throwing** is a different thing: the work is abandoned, nothing is written, and every row goes red. A failure the report *names* means that one row did not go through while the rest of the run stood — the same red, because what you do about the row in front of you is the same either way.
+What an endpoint hands back when its work is done: nothing, a sentence, a run state with a sentence, or a set of rows that differ from the rest, each with the state and sentence it gets. A run that **fails by throwing** is not a run report: its work is abandoned and every row goes red.
 _Avoid_: result, outcome, return value
 
 **Start time**:
@@ -139,19 +139,19 @@ What a column holds, as the operator declares it in the column's own type menu i
 _Avoid_: data type, format, value type
 
 **Number format**:
-What Format > Number says on a column's first data row — currency, date, number, plain text, and the rest. When the type menu is silent, a format the app knows counts as a declaration only if that row's value is **compatible** with it: blank, or a value the app would already guess as the name that format maps to. A value that is not compatible stays a guess, and the column stays untyped. The type menu is left alone.
+What Format > Number says on a column's first data row — currency, date, number, plain text, and the rest. When the type menu is silent, a format the app knows counts as a declaration only if that row's value is **compatible** with it ([`docs/generated-data/column-configs.md`](./docs/generated-data/column-configs.md#how-valuename-is-resolved)).
 _Avoid_: column type, value type, cell type, permissible
 
 **Checkbox column**:
-A column the operator made a checkbox: the type menu says Checkbox, or Insert > Checkbox put BOOLEAN data validation on the Table column or the first data row. Every one of its rows draws a box, so a row nobody has touched counts as unchecked rather than as blank, and only such a column can be an endpoint's selector. A column that merely holds TRUE and FALSE without that declaration is untyped, not a checkbox column.
+A column the operator made a checkbox: the type menu says Checkbox, or Insert > Checkbox put BOOLEAN data validation on the Table column or the first data row. A row nobody has touched counts as unchecked rather than as blank, and only such a column can be an endpoint's selector.
 _Avoid_: boolean column, tickbox column, flag column
 
 **Empty value allowed**:
-A box you tick against a column in Column Config to say that a blank in it is a real answer rather than something missing. Leave it unticked and the app stops and names the cell whenever it reads a blank there, which is what you want on a column you consider mandatory. Tick it and the app hands the blank on to whatever asked for it, and that work has to say what a missing value means. A column nobody has ticked behaves the way every column behaved before, and a newly discovered column arrives unticked, so nothing starts accepting blanks on your behalf. Your tick survives a config sync; nothing the app works out for itself will overwrite it.
+A box you tick against a column in Column Config to say that a blank in it is a real answer rather than something missing. Unticked, the app stops and names the cell whenever it reads a blank there; ticked, it hands the blank on to whatever asked for it, and that work has to say what a missing value means.
 _Avoid_: nullable, optional column, blank allowed
 
 **Untyped**:
-Said of a column whose type menu, checkbox validation, and first-data-row number format all tell the app nothing about what it holds — left on Automatic with no format the app maps and no Insert > Checkbox, or a dropdown that no Value Config rule backs. The app then guesses from the column's top value, and says how many such columns are left every time the config sheets sync.
+Said of a column whose type menu, checkbox validation, and first-data-row number format all tell the app nothing about what it holds — left on Automatic with no format the app maps and no Insert > Checkbox, or a dropdown that no Value Config rule backs. The app guesses its type from the column's top value.
 _Avoid_: unset, automatic, missing type
 
 ### Units
@@ -163,7 +163,7 @@ _Avoid_: standard name, unit type
 ### The occupancy ledger
 
 **Occupancy ledger**:
-The one-page statement you hand a tenant, showing every charge they were billed, every payment that settled one, and what they still owe. It is rebuilt from scratch every time it is built, for one occupancy at a time, so nothing a previous build left behind can survive into the next one. When that occupancy names a ledger start date, the page begins that day rather than at the beginning of the tenancy. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it, and its lines carry no IDs.
+The one-page statement you hand a tenant about one occupancy, showing every charge they were billed, every payment that settled one, and what they still owe. It is a printed document rather than a record: nothing else in the spreadsheet points at a line of it. How it is built: [`docs/occupancy-ledger.md`](./docs/occupancy-ledger.md).
 _Avoid_: statement, invoice, tenant report
 
 **Ledger start date**:
@@ -171,23 +171,23 @@ The occupancy cell that, when filled, cuts the ledger so the page begins that da
 _Avoid_: from date, window start, statement date
 
 **Ledger line**:
-One row of the page: a charge billed, a charge forgiven, a payment received, a draw from the deposit, or a prior balance. It carries the day it happened, who it came from, what it was for and the amount, and the lines run in the order things happened, with a charge shown before anything that settled it the same day. A line carries no identifier, because nothing points at it.
+One row of the page: a charge billed, a charge forgiven, a payment received, a draw from the deposit, or a prior balance. It carries the day it happened, its **issuer**, what it was for and the amount, and no identifier.
 _Avoid_: entry, row, transaction
 
 **Prior balance**:
-The collapsed history from before the ledger start date, shown as the first ledger line so Amount owed is already right that morning. Dated the start date, issued by Property management, described as "Prior balance", written as one charge — positive or negative; it is not a bill.
+The collapsed history from before the ledger start date, shown as the first ledger line so Amount owed is already right that morning. It is written as one charge, positive or negative, and is not a bill.
 _Avoid_: opening balance, brought forward, carry-forward, first row
 
 **Amount owed**:
-What the household still owes as you read down the page, a running Charge minus Payment that the sheet's own formula keeps. Building a ledger never writes this column.
+What the household still owes as you read down the page, a running Charge minus Payment that the sheet's own formula keeps.
 _Avoid_: balance due, outstanding, running total
 
 **Letterhead**:
-The block above the ledger's Table header row naming the tenant, the address and the day the page was built. Its cells are formulas, and they read the occupancy and the date that building the ledger writes into the Variable sheet. Building a ledger is what makes the letterhead say the right household.
+The block above the ledger's Table header row naming the tenant, the address and the day the page was built.
 _Avoid_: header, title block
 
 **Issuer**:
-Whose money or decision a ledger line came from. A charge or a forgiveness says "Property management"; a payment the household made says "Household" plainly rather than repeating the tenant's name down the page; a payment made on the household's behalf names the payer; and money taken from the deposit says "Security deposit", because a draw is real money settling a bill rather than the landlord paying it.
+Whose money or decision a ledger line came from: Property management, the Household, a named payer on the household's behalf, or the Security deposit.
 _Avoid_: source, from, party
 
 **Forgiveness**:
@@ -195,9 +195,9 @@ A charge cancelled because it should never have stood. It appears on the ledger 
 _Avoid_: credit, write-off, waiver
 
 **Security deposit draw**:
-Money taken from the deposit already held to settle a charge. It appears on the ledger as a payment against the charge it settled, named after that charge.
+Money taken from the deposit already held to settle a charge. It appears on the ledger as a payment against the charge it settled.
 _Avoid_: deposit deduction, withholding
 
 **Allocation**:
-One part of a payment, naming the charge that part settled. A payment split across three charges is three allocations. The ledger shows the payment rather than its allocations, so one line matches one bank transaction.
+One part of a payment, naming the charge that part settled. A payment split across three charges is three allocations; the ledger shows the payment, not its allocations.
 _Avoid_: split, line item, apportionment

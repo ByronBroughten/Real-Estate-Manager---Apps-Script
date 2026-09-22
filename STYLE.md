@@ -18,11 +18,14 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **An Operator extends its subject's `*BaseNamed` and reaches the subject through a getter** (`ss`, `sheet`, `column`), never by extending the concrete class or taking one as a constructor argument.
 - **What an Operator holds as props is its identity; a per-run value is an argument to the method that needs it** — `OccupancyLedgerOperator` holds the spreadsheet, and `build` takes the occupancy row index.
 - **Split a coordinator into collaborators when its private helpers fall into groups that share nothing with each other**, not when it passes a method count. The coordinator keeps its public methods as one-line delegations, and the collaborators go in a subfolder named after it (`SpreadsheetRaw/`).
+  - **Collaborators get no tests of their own**, since the coordinator's cover them, and reach its shared surface through a getter (`ss`, `sheet`). A base class stays in `ClassBases/`.
 - **A composition of collaborator calls that answers one domain question belongs on the collaborator**, under its own name. A parameter that its only caller already holds as its own state means the query belongs on the instance.
 - **Extract the shared piece when you can name the second caller**, not when it arrives.
 - **A member that samples the top data row for a column-wide fact belongs on the Meta column.** `topCell`/`topRow` stay primary.
 - **Member order:** `static init()`, then collaborator getters, then public behavior methods, then `_`-prefixed private helpers — a single-caller helper sits right after its caller.
   - **A private helper that never reads `this` is an unexported module function below the class, not a `_` method**, ordered by first use. A helper that reads `this` only to reach a collaborator stays a method.
+  - **A helper whose arguments are one collaborator and its state belongs on that collaborator.** A public method that doesn't read `this` stays put; a helper that only renames a function in scope is deleted.
+  - **Helpers sharing a subject and passing nothing between them become an object bundle; helpers passing one value around become a helper class** in its own file.
 - **Delete dead scaffolding in a file you touch** — a stub nothing calls, a placeholder, a variable instantiated and discarded. **Ask before deleting commented-out code.** Zero callers is a list of candidates, not a verdict.
 - **A "why" comment carries over verbatim across a restructure.**
 - **One class per file, custom `Error` subclasses included.** Lint enforces it.
@@ -31,7 +34,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 - **Prefer a term from TS/JS's own vocabulary over a made-up adjective** — `Primitive`, not `Pure`.
 - **Name a value after the domain type it holds, not a generic container word** — `columnConfigs`, not `entries`.
-- **A boolean is a third-person statement about its subject, never a bare adjective.** `is`/`has` are the common case, not the rule.
+- **A boolean is a third-person statement about its subject, never a bare adjective.** `is`/`has` are the common case, not the rule. It defaults to `false`, so it appears only where it changes something.
   - **A flag in a config literal is the exception: it is an imperative directive to whatever reads the literal** — `retainSelection`, `requireOneRow`, `runOnUncheck`. One mood per literal.
 - **Prefix a getter `active` when it reads live sheet state that has a same-named schema/config counterpart** — `ColumnMetaRaw.activeIsFormula` vs `ColumnSchema.isFormula`. A helper that moves down onto the object it's about renames `_actualX` → `activeX`.
 - **`column` abbreviates to `col` by default, and is spelled out beside an already-short suffix** — `colIndex`, but `columnId`. One form per scope.
@@ -73,6 +76,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **Default to a plain `throw new Error("specific message")`.** Mint a custom `Error` subclass only when callers need to catch the failure _category_ by type.
 - **Guard-clause throws, never nested conditionals.** The one accepted exception is an exhaustiveness check, which ends in a trailing `else { throw new Error(...) }`.
 - **`try`/`catch` has no established convention yet** — don't generalize from `EndpointRun.run`, its one use.
+- **`value`/`valueOrEmpty` throw on a row never fetched**, so a decision that branches on a cell queues its fetch in the same cycle, or says at the call site what an unfetched row means.
 - **Trace whether a "shouldn't happen" condition is actually reachable before defaulting to skip-and-log**; if upstream already guarantees it can't happen, throw.
 
 ## Type modeling
@@ -96,6 +100,12 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks.
 - **An option that combines other options is built from them, not from copies of their bodies** — `prepFetchRowSpecifier`'s `"all"` case calls itself for `"headers"`, `"actions"`, `"columnIds"` and `"data"`.
 - **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects.
+
+## Tests
+
+- **A test sits beside what it tests (`Foo.test.ts`) and imports only from its own tier and below.**
+- **Test an endpoint through `EndpointRun`, never by calling its action**, and assert the batch-update requests the run emits. No test reaches for a private helper.
+- **A type-level test names an exemplar column whose value name can't churn under `gen:configs`**: a config sheet's column, or the live `test` sheet's.
 
 ## Imports & file organization
 
