@@ -10,10 +10,20 @@ import {
 import { frameworkEndpoints } from "./frameworkEndpoints";
 import { EndpointRun } from "./EndpointRun";
 import type { Endpoints } from "./Endpoints";
+import { AppsScript } from "../00_Source/GoogleSheets/AppsScript";
+import { hasInstalledRawSource } from "../00_Source/RawSource/RawSource";
+import { installRawSource } from "../00_Source/RawSource/RawSource";
+import { GoogleSheetsAPI } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 
 interface ApiProps extends SpreadsheetNamedProps {
   endpoints: Endpoints;
 }
+
+function installGoogleSheets(): void {
+  if (!hasInstalledRawSource())
+    installRawSource(GoogleSheetsAPI.forAppsScript());
+}
+
 export class Api extends SpreadsheetBaseNamed {
   readonly endpoints: Endpoints;
   constructor({ endpoints, ...rest }: ApiProps) {
@@ -28,6 +38,15 @@ export class Api extends SpreadsheetBaseNamed {
       endpoints,
       ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
     });
+  }
+  static handleSheetEdit(
+    businessEndpoints: Endpoints,
+    e: GoogleAppsScript.Events.SheetsOnEdit,
+  ): void {
+    const edit = AppsScript.sheetEdit(e);
+    if (!Api.isSuspectedApiCall(edit)) return;
+    installGoogleSheets();
+    Api.init(businessEndpoints).handleSheetEdit(edit);
   }
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
