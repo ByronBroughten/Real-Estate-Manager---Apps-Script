@@ -126,8 +126,10 @@ export function readSpreadsheetId() {
 
 export async function startNodeHost({ isDryRun }) {
   const { NodeHost } = await import("../src/nodeHost/NodeHost.ts");
+  const { appConfigs } = await import("../src/appConfigs.ts");
   const transport = SheetsTransport.init();
   return NodeHost.init({
+    configs: appConfigs,
     spreadsheetId: readSpreadsheetId(),
     transport: (request) => transport.send(request),
     isDryRun,

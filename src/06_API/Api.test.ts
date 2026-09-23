@@ -1,7 +1,8 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
+import { valueConfigs } from "../01_SpreadsheetSchema/generated/valueConfigs";
 import type { SheetEdit } from "../00_Source/PlatformEvents/sheetEdit";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -87,6 +88,65 @@ function actionRowWrites(
 
 beforeEach(() => {
   stubLogger();
+});
+
+describe("Api.handleSheetEdit, the entry call", () => {
+  const configs = {
+    spreadsheetConfig,
+    sheetConfigs,
+    columnConfigs,
+    valueConfigs,
+  };
+  it("supplies the app's configs before anything reads them", async () => {
+    vi.resetModules();
+    const fresh = await import("./Api");
+    const installSource = vi.fn();
+    expect(() =>
+      fresh.Api.handleSheetEdit(
+        { configs, endpoints: {} },
+        {
+          ...actionRowEdit(twoWayColIndex, "TRUE"),
+          rowIndexBase0: endRowIndex,
+        },
+        installSource,
+      ),
+    ).not.toThrow();
+    expect(installSource).not.toHaveBeenCalled();
+  });
+  it("installs the source and dispatches a suspected API call", () => {
+    stubOccupancySheet();
+    const calls: string[] = [];
+    const installSource = vi.fn();
+    Api.handleSheetEdit(
+      { configs, endpoints: trackingEndpoints(calls) },
+      actionRowEdit(buttonColIndex, "TRUE"),
+      installSource,
+    );
+    expect(installSource).toHaveBeenCalledOnce();
+    expect(calls).toEqual(["button"]);
+  });
+});
+
+describe("Api.handleSheetChange", () => {
+  it("does nothing for a change the platform module doesn't name", () => {
+    const installSource = vi.fn();
+    expect(
+      Api.handleSheetChange(
+        {
+          configs: {
+            spreadsheetConfig,
+            sheetConfigs,
+            columnConfigs,
+            valueConfigs,
+          },
+          endpoints: {},
+        },
+        null,
+        installSource,
+      ),
+    ).toBeNull();
+    expect(installSource).not.toHaveBeenCalled();
+  });
 });
 
 describe("Api.isSuspectedApiCall", () => {

@@ -5,7 +5,7 @@ import type {
 import { lazy } from "../utils/lazy";
 import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
-import { columnConfigs } from "./generated/columnConfigs";
+import { installedConfigs, type Configs } from "./configRegister";
 import type { ColumnConfigsGeneric, ColumnConfigStored } from "./makeConfigs";
 import {
   configSheetNames,
@@ -14,11 +14,15 @@ import {
 } from "./sheetConfigsTypes";
 import { type Value, type ValueName, type ValueSchema } from "./valueSchemas";
 
-export type ColumnConfigs = typeof columnConfigs;
+export type ColumnConfigs = Configs["columnConfigs"];
 
 // The generated literal read by an arbitrary name, where an entry may be absent.
 export function columnConfigsByName(): ColumnConfigsGeneric {
-  return columnConfigs;
+  return columnConfigs();
+}
+
+function columnConfigs(): ColumnConfigs {
+  return installedConfigs().columnConfigs;
 }
 
 export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
@@ -112,7 +116,7 @@ export type SheetDataValuesAll<SN extends SheetNameSimple> = SheetDataValues<
 export function getSheetColumnNames<SN extends SheetNameSimple>(
   sheetName: SN,
 ): ColumnName<SN>[] {
-  return Obj.keys(columnConfigs[sheetName]) as unknown as ColumnName<SN>[];
+  return Obj.keys(columnConfigs()[sheetName]) as unknown as ColumnName<SN>[];
 }
 
 // columnConfig isn't actually very unique. The only unique
@@ -124,7 +128,9 @@ export function getColumnTraitByName<
   if (key === "columnName") {
     return columnName as ColumnConfigAt<TN, CN>[K];
   }
-  return (columnConfigs[sheetName][columnName] as ColumnConfigAt<TN, CN>)[key];
+  return (columnConfigs()[sheetName][columnName] as ColumnConfigAt<TN, CN>)[
+    key
+  ];
 }
 
 export type TableColumnConfigsById = KeyedMap<
@@ -139,7 +145,7 @@ function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
       sheetGid,
-      Obj.toKeyedMap(columnConfigs[sheetName], "columnId", "columnName"),
+      Obj.toKeyedMap(columnConfigs()[sheetName], "columnId", "columnName"),
     );
     return attrs;
   }, new Map() as ColumnConfigsByGidAndColId);

@@ -1,11 +1,11 @@
 import { lazy } from "../utils/lazy";
 import { Obj } from "../utils/Obj";
-import { valueConfigs } from "./generated/valueConfigs";
+import { installedConfigs, type Configs } from "./configRegister";
 
-export type ValueConfigs = typeof valueConfigs;
+export type ValueConfigs = Configs["valueConfigs"];
 export type ValueConfigName = keyof ValueConfigs;
 export const valueConfigNames = lazy((): readonly ValueConfigName[] =>
-  Obj.keys(valueConfigs),
+  Obj.keys(installedConfigs().valueConfigs),
 );
 
 export type ValueConfigValues = {
@@ -17,5 +17,5 @@ export type ValueConfigValue<N extends ValueConfigName = ValueConfigName> =
 export function getValueConfigValueArr<K extends ValueConfigName>(
   key: K,
 ): ValueConfigs[K] {
-  return valueConfigs[key];
+  return installedConfigs().valueConfigs[key];
 }

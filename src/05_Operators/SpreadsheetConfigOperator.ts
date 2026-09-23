@@ -1,4 +1,4 @@
-import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { makeImportLine } from "../01_SpreadsheetSchema/makeConfigs";
 import {
   spreadsheetConfigColumnLabel,
@@ -92,6 +92,7 @@ function validateFixedLayoutValuesUnchanged(
   textValues: Record<keyof typeof spreadsheetConfigTextHeaders, string>,
   indexValuesBase1: Record<keyof typeof spreadsheetConfigIndexHeaders, number>,
 ): void {
+  const { spreadsheetConfig } = installedConfigs();
   const changed = [
     ...changedLayoutValueLines(
       fixedTextHeaders,
