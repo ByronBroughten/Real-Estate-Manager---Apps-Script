@@ -187,12 +187,12 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       const sheetName = this.schema.titleToName(title);
       const sheetGid = col.sheetGid.value(rowIndex);
       const idPrefix = this.idPrefix(sheetGid);
+      const { tableHeaderRow } = this.ss.raw.sheetMeta(sheetGid);
       sheetConfigs[sheetName] = {
         sheetGid,
         idPrefix,
-        hasIdColumn: this.ss.raw
-          .sheetMeta(sheetGid)
-          .tableHeaderRow.hasValue(this.schema.idHeader),
+        hasIdColumn: tableHeaderRow.hasValue(this.schema.idHeader),
+        hasNameColumn: tableHeaderRow.hasValue(this.schema.nameHeader),
       };
       idPrefixLabels.push({ label: title, idPrefix });
     });

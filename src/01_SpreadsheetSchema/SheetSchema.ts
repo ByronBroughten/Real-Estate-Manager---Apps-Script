@@ -95,6 +95,15 @@ export class SheetSchema<
       columnName: this.colNameByColumnId(columnId),
     });
   }
+  columnIdByHeader(header: string): string {
+    const columnId = [...this.columnIds].find(
+      (id) => getColumnTraitById(this.sheetGid, id, "header") === header,
+    );
+    if (columnId === undefined) {
+      throw new Error(`"${this.sheetName}" has no column headed "${header}".`);
+    }
+    return columnId;
+  }
   columnSpecifierToStandard(
     columnSpecifier: ColumnName<SN> | ColumnName<SN>[] | "allColumns",
   ): ColumnName<SN>[] {

@@ -11,6 +11,14 @@ export type SheetNameWithIdColumn = keyof SubType<
   { hasIdColumn: true }
 >;
 
+export type SheetNameWithNameColumn = keyof SubType<
+  SheetConfigs,
+  { hasNameColumn: true }
+>;
+
+export type SheetNameWithIdAndNameColumn = SheetNameWithIdColumn &
+  SheetNameWithNameColumn;
+
 const sheetNameGroups = lazy(
   () =>
     ({

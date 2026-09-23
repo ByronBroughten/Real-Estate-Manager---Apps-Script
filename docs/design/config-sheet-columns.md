@@ -8,4 +8,4 @@ A config-sheet cell that isn't needed to find the row, and that a person doesn't
 
 ## Instances
 
-`isFormula`, `valueName`, and `hasIdColumn` are sampled at emit from the described column or header row, and leftover Is formula / Value title / Has ID column cells are ignored (#33). An ID prefix typed into Sheet Config is a second copy of what every column ID on that sheet already records, so the column and its uniqueness helper were removed and the prefix is sampled from the column ID row instead (#87).
+`isFormula`, `valueName`, `hasIdColumn` and `hasNameColumn` are sampled at emit from the described column or header row, and leftover Is formula / Value title / Has ID column cells are ignored (#33). An ID prefix typed into Sheet Config is a second copy of what every column ID on that sheet already records, so the column and its uniqueness helper were removed and the prefix is sampled from the column ID row instead (#87).

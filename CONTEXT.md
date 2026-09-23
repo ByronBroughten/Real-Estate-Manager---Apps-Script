@@ -155,7 +155,7 @@ Said of a column whose type menu, checkbox validation, and first-data-row number
 _Avoid_: unset, automatic, missing type
 
 **Name column**:
-A column of names people type to refer to a row, such as a unit's or a property's name, on a sheet Sheet Config marks as having one. Its header is Spreadsheet Config's Name header. An endpoint finds a row by what's in it; a name that matches no row, or several, is the endpoint's to report, and the app enforces nothing else about it.
+A column of names people type to refer to a row, such as a unit's or a property's name, on any sheet whose Table header row holds Spreadsheet Config's Name header. An endpoint finds a row by what's in it; a name that matches no row, or several, is the endpoint's to report, and the app enforces nothing else about it.
 _Avoid_: key column, label column, title column
 
 **Serial date**:

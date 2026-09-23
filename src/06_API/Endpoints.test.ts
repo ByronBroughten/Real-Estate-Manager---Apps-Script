@@ -25,6 +25,7 @@ describe("Endpoint's column parameters", () => {
         TimeLastRanOf<"spreadsheetConfig">,
         | "idDelimiter"
         | "idHeader"
+        | "nameHeader"
         | "tableMenuSpace"
         | "fillRowIdsTimeLastRan"
         | "fillRowIdsRunStatus"

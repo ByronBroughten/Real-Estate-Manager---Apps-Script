@@ -10,7 +10,7 @@ This is the most-repeated argument in the codebase, and it's what most often dis
 
 ## Instances
 
-- A sampled generated trait that also occupies a config-sheet cell is a third copy that can disagree with the live column — Column Config and Sheet Config keep only identity and operator-facing columns, and emit samples `isFormula` / `valueName` / `hasIdColumn` / `idPrefix` at regen (#33, #87).
+- A sampled generated trait that also occupies a config-sheet cell is a third copy that can disagree with the live column — Column Config and Sheet Config keep only identity and operator-facing columns, and emit samples `isFormula` / `valueName` / `hasIdColumn` / `hasNameColumn` / `idPrefix` at regen (#33, #87).
 - The "ID prefix is unique or empty" helper validated a Sheet Config cell that the new design removes, so uniqueness is the generated constructor's check of sampled prefixes rather than a formula watching a second copy (#87).
 - An endpoint entry is keyed by a **column full name that carries its own sheet**, so `SheetNameOf<FN>` narrows every column it may declare to that sheet's, each filtered to the value type it needs — a cross-sheet or wrongly-typed column is unrepresentable rather than checked for (#5).
 - Bundling `retainSelection` and `requireOneRow` inside the selector they modify is the same move one level down: an endpoint with no selector has nowhere to write either, so a silent no-op is unrepresentable rather than ignored (#11, #18).

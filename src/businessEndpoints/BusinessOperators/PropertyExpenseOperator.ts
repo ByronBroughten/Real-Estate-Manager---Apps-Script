@@ -3,10 +3,7 @@ import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases
 import type { RowNamed } from "../../04_SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import {
-  RowIdByNameOperator,
-  type RowIdByName,
-} from "../../05_Operators/RowIdByNameOperator";
+import type { RowIdByName } from "../../04_SpreadsheetNamed/Types/RowIdByName";
 import type {
   ActionReturn,
   RowReports,
@@ -99,10 +96,10 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
   private _gatherFetchInputs(): void {
     const { ss } = this;
     this.staging.prepFetchColumnsFull(...typedColumns);
-    this._rowIdsByName("unit").prepFetch();
+    ss.sheet("unit").prepFetchRowIdAndName();
     ss.sheet("unit").prepFetchColumnsFull("propertyId");
-    this._rowIdsByName("property").prepFetch();
-    this._rowIdsByName("splitReceipt").prepFetch();
+    ss.sheet("property").prepFetchRowIdAndName();
+    ss.sheet("splitReceipt").prepFetchRowIdAndName();
     // The append needs this sheet's column ids and table bounds, which only a prepped read brings.
     this.sheet.prepFetchColumnsFull("id");
     ss.fetchAllPrepped();
@@ -150,7 +147,7 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
     if (propertyName === "") {
       return emptyPlace(["name a unit or a property"]);
     }
-    const property = this._rowIdsByName("property").rowIdByName(propertyName);
+    const property = this.ss.sheet("property").rowIdByName(propertyName);
     if (property.found !== "one") {
       return emptyPlace(
         this._nameComplaints(property, "property", propertyName),
@@ -167,7 +164,7 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
       "property",
       propertyName,
     );
-    const unit = this._rowIdsByName("unit").rowIdByName(unitName);
+    const unit = this.ss.sheet("unit").rowIdByName(unitName);
     if (unit.found !== "one") {
       return emptyPlace([
         ...this._nameComplaints(unit, "unit", unitName),
@@ -194,12 +191,12 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
   }
   private _propertyMatch(propertyName: string): RowIdByName | undefined {
     if (propertyName === "") return undefined;
-    return this._rowIdsByName("property").rowIdByName(propertyName);
+    return this.ss.sheet("property").rowIdByName(propertyName);
   }
   private _splitReceipt(stagingRow: StagingRow): SplitReceiptRef {
     const name = stagingRow.value("splitReceiptName");
     if (name === "") return { splitReceiptId: "", complaints: [] };
-    const receipt = this._rowIdsByName("splitReceipt").rowIdByName(name);
+    const receipt = this.ss.sheet("splitReceipt").rowIdByName(name);
     if (receipt.found !== "one") {
       return {
         splitReceiptId: "",
@@ -228,15 +225,6 @@ export class PropertyExpenseOperator extends SheetBaseNamed<"propertyExpense"> {
       return `${match.rowCount} rows of ${title} are named "${name}"`;
     }
     return `no row of ${title} is named "${name}"`;
-  }
-  private _rowIdsByName(
-    sheetName: NamedSheetName,
-  ): RowIdByNameOperator<NamedSheetName, "name"> {
-    return new RowIdByNameOperator({
-      ...this.spreadsheetNamedProps,
-      sheetName,
-      columnName: "name",
-    });
   }
 }
 

@@ -18,6 +18,7 @@ const ssc = columnConfigs.spreadsheetConfig;
 const spreadsheetConfigColumns = [
   ssc.idDelimiter,
   ssc.idHeader,
+  ssc.nameHeader,
   ssc.startTableColumnIndexBase1,
   ssc.columnIdRowIndexBase1,
   ssc.columnGroupHeadingRowIndexBase1,
@@ -31,11 +32,11 @@ const columnIdRowIndex = spreadsheetConfig.columnIdRowIdxBase0;
 const tableHeaderRowIndex = spreadsheetConfig.tableHeaderRowIndexBase0;
 const firstDataRowIndex = tableHeaderRowIndex + 1;
 
-const compiledValues = [":", "ID", 1, 1, 2, 3, 4] as const;
+const compiledValues = [":", "ID", "Name", 1, 1, 2, 3, 4] as const;
 
 function refusal(...lines: string[]): string {
   return [
-    'Spreadsheet Config layout values other than "ID header" are fixed; put back:',
+    'Spreadsheet Config layout values other than "ID header" and "Name header" are fixed; put back:',
     ...lines,
   ].join("\n");
 }
@@ -89,6 +90,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
         `export const spreadsheetConfig = makeSpreadsheetConfig({`,
         `  idDelimiter: ":",`,
         `  idHeader: "ID",`,
+        `  nameHeader: "Name",`,
         `  startTableColIndexBase0: 0,`,
         `  columnIdRowIdxBase0: 0,`,
         `  columnGroupHeadingRowIndexBase0: 1,`,
@@ -102,15 +104,23 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
 
   it("emits an edited ID header as written", () => {
     stubSpreadsheetConfigSheet({
-      [firstDataRowIndex]: [":", "Row ID", 1, 1, 2, 3, 4],
+      [firstDataRowIndex]: [":", "Row ID", "Name", 1, 1, 2, 3, 4],
     });
 
     expect(fetchedOperator().toFileSource()).toContain('idHeader: "Row ID"');
   });
 
+  it("emits an edited Name header as written", () => {
+    stubSpreadsheetConfigSheet({
+      [firstDataRowIndex]: [":", "ID", "Title", 1, 1, 2, 3, 4],
+    });
+
+    expect(fetchedOperator().toFileSource()).toContain('nameHeader: "Title"');
+  });
+
   it("refuses an edited ID delimiter, naming it with the live and expected values", () => {
     stubSpreadsheetConfigSheet({
-      [firstDataRowIndex]: ["|", "ID", 1, 1, 2, 3, 4],
+      [firstDataRowIndex]: ["|", "ID", "Name", 1, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -120,7 +130,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
 
   it("refuses every edited index in one error, in base 1", () => {
     stubSpreadsheetConfigSheet({
-      [firstDataRowIndex]: [":", "ID", 2, 1, 2, 3, 5],
+      [firstDataRowIndex]: [":", "ID", "Name", 2, 1, 2, 3, 5],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -170,7 +180,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
 
   it("throws when a guaranteed cell is blank", () => {
     stubSpreadsheetConfigSheet({
-      [firstDataRowIndex]: ["", "ID", 1, 1, 2, 3, 4],
+      [firstDataRowIndex]: ["", "ID", "Name", 1, 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(
@@ -180,7 +190,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
 
   it("refuses a non-numeric index, naming it", () => {
     stubSpreadsheetConfigSheet({
-      [firstDataRowIndex]: [":", "ID", "one", 1, 2, 3, 4],
+      [firstDataRowIndex]: [":", "ID", "Name", "one", 1, 2, 3, 4],
     });
 
     expect(() => SpreadsheetConfigOperator.init().fetchLiveConfig()).toThrow(

@@ -26,6 +26,9 @@ export class SpreadsheetBaseSchema {
   get idHeader(): LiveSpreadsheetConfig["idHeader"] {
     return ssConfigGet("idHeader");
   }
+  get nameHeader(): LiveSpreadsheetConfig["nameHeader"] {
+    return ssConfigGet("nameHeader");
+  }
   titleToName(sheetTitle: string): string {
     return Str.sentenceToCamelCase(sheetTitle);
   }

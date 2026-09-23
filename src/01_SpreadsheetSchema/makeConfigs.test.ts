@@ -21,8 +21,18 @@ describe("makeSheetConfigs", () => {
   it("throws when two sheets share a non-empty ID prefix", () => {
     expect(() =>
       makeSheetConfigs({
-        property: { sheetGid: 1, idPrefix: "prp", hasIdColumn: true },
-        unit: { sheetGid: 2, idPrefix: "prp", hasIdColumn: true },
+        property: {
+          sheetGid: 1,
+          idPrefix: "prp",
+          hasIdColumn: true,
+          hasNameColumn: false,
+        },
+        unit: {
+          sheetGid: 2,
+          idPrefix: "prp",
+          hasIdColumn: true,
+          hasNameColumn: false,
+        },
       }),
     ).toThrow(/property.*unit.*"prp"/);
   });
@@ -30,7 +40,12 @@ describe("makeSheetConfigs", () => {
   it("throws when a sheet has an empty ID prefix", () => {
     expect(() =>
       makeSheetConfigs({
-        notes: { sheetGid: 1, idPrefix: "", hasIdColumn: false },
+        notes: {
+          sheetGid: 1,
+          idPrefix: "",
+          hasIdColumn: false,
+          hasNameColumn: false,
+        },
       }),
     ).toThrow(/notes.*no ID prefix/);
   });

@@ -31,6 +31,7 @@ export function makeSpreadsheetConfig<T extends SpreadsheetConfigBase>(
 export interface SheetConfigStored<H extends boolean = boolean> {
   sheetGid: number;
   hasIdColumn: H;
+  hasNameColumn: boolean;
   idPrefix: string;
 }
 export type SheetConfigsBase = Record<string, SheetConfigStored>;

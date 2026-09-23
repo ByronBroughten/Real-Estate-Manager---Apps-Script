@@ -73,6 +73,12 @@ export const configSheetFloorSeed = {
         emptyValueAllowed: false,
       },
       {
+        header: spreadsheetConfigTextHeaders.nameHeader,
+        columnGroupHeading: "",
+        columnType: "TEXT",
+        emptyValueAllowed: false,
+      },
+      {
         header: spreadsheetConfigTextHeaders.idDelimiter,
         columnGroupHeading: "",
         columnType: "TEXT",
