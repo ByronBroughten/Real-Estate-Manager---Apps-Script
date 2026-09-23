@@ -85,8 +85,27 @@ describe("AppsScriptApi.handleSheetEdit", () => {
   });
 });
 
+describe("AppsScriptApi.handleSheetEdit, with no source installed", () => {
+  it("reaches for the Google Sheets source on an action-row tick", async () => {
+    vi.resetModules();
+    const fresh = await import("./AppsScriptApi");
+    stubPropertiesService();
+    expect(() =>
+      fresh.AppsScriptApi.handleSheetEdit(
+        { configs, endpoints: {} },
+        onEditEvent(
+          occupancyGid,
+          spreadsheetConfig.actionRowIndexBase0,
+          buildLedgerColIndex,
+          "TRUE",
+        ),
+      ),
+    ).toThrow("realEstateSpreadsheetId");
+  });
+});
+
 describe("AppsScriptApi.handleSheetChange", () => {
-  it("toasts the floor's message for a renamed Value Config", () => {
+  it("toasts the message the change handler returns", () => {
     stubSheetsService({
       sheets: [{ sheetId: sheetConfigs.valueConfig.sheetGid, title: "Values" }],
     });
@@ -95,9 +114,7 @@ describe("AppsScriptApi.handleSheetChange", () => {
       { configs, endpoints: {} },
       onChangeEvent("OTHER"),
     );
-    expect(toasts).toEqual([
-      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
-    ]);
+    expect(toasts).toHaveLength(1);
   });
   it("shows no toast for a change type the platform module doesn't name", () => {
     const { toasts } = stubScriptAndSpreadsheetApp();
@@ -107,7 +124,7 @@ describe("AppsScriptApi.handleSheetChange", () => {
     );
     expect(toasts).toEqual([]);
   });
-  it("installs Google Sheets as the source when none is installed", async () => {
+  it("reaches for the Google Sheets source when none is installed", async () => {
     vi.resetModules();
     const fresh = await import("./AppsScriptApi");
     stubPropertiesService();

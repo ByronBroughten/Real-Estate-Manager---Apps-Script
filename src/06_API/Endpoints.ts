@@ -58,7 +58,7 @@ export type EndpointDispatched<SN extends SheetNameSimple> = {
 };
 
 // Each key carries its own sheet, so a column from another sheet is unnameable.
-export type EndpointsDispatched = {
+export type EndpointsAll = {
   [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>>;
 };
 

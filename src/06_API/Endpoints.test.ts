@@ -6,7 +6,7 @@ import type {
 import type { FloorTabName } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import type { Endpoint, Endpoints, EndpointsDispatched } from "./Endpoints";
+import type { Endpoint, Endpoints, EndpointsAll } from "./Endpoints";
 
 type SelectorColumnOf<SN extends SheetNameSimple> = NonNullable<
   Endpoint<SN>["selector"]
@@ -67,9 +67,9 @@ describe("Endpoint at the widened sheet name the dispatch boundary uses", () => 
   });
 });
 
-describe("EndpointsDispatched", () => {
+describe("EndpointsAll", () => {
   it("is keyed by every column full name and nothing else", () => {
-    assertType<IsExactly<keyof EndpointsDispatched, ColumnFullName>>(true);
+    assertType<IsExactly<keyof EndpointsAll, ColumnFullName>>(true);
   });
 });
 

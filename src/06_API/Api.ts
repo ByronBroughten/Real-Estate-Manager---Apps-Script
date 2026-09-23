@@ -15,7 +15,7 @@ import {
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { frameworkEndpoints } from "./frameworkEndpoints";
 import { EndpointRun } from "./EndpointRun";
-import type { Endpoints, EndpointsDispatched } from "./Endpoints";
+import type { Endpoints, EndpointsAll } from "./Endpoints";
 
 interface ApiProps extends SpreadsheetNamedProps {
   endpoints: Endpoints;
@@ -27,7 +27,7 @@ export interface AppSetup {
 }
 
 export class Api extends SpreadsheetBaseNamed {
-  readonly endpoints: EndpointsDispatched;
+  readonly endpoints: EndpointsAll;
   constructor({ endpoints, ...rest }: ApiProps) {
     super(rest);
     this.endpoints = {
