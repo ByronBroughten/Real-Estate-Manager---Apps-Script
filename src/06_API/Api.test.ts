@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
-import { valueConfigs } from "../01_SpreadsheetSchema/generated/valueConfigs";
 import type { SheetEdit } from "../00_Source/PlatformEvents/sheetEdit";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -90,13 +90,9 @@ beforeEach(() => {
   stubLogger();
 });
 
+const configs = installedConfigs();
+
 describe("Api.handleSheetEdit, the entry call", () => {
-  const configs = {
-    spreadsheetConfig,
-    sheetConfigs,
-    columnConfigs,
-    valueConfigs,
-  };
   it("supplies the app's configs before anything reads them", async () => {
     vi.resetModules();
     const fresh = await import("./Api");
@@ -131,19 +127,7 @@ describe("Api.handleSheetChange", () => {
   it("does nothing for a change the platform module doesn't name", () => {
     const installSource = vi.fn();
     expect(
-      Api.handleSheetChange(
-        {
-          configs: {
-            spreadsheetConfig,
-            sheetConfigs,
-            columnConfigs,
-            valueConfigs,
-          },
-          endpoints: {},
-        },
-        null,
-        installSource,
-      ),
+      Api.handleSheetChange({ configs, endpoints: {} }, null, installSource),
     ).toBeNull();
     expect(installSource).not.toHaveBeenCalled();
   });

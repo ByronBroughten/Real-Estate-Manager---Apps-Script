@@ -1,12 +1,12 @@
 import type {
   ColumnConfigsBase,
   SheetConfigsBase,
+  SpreadsheetConfigBase,
   ValueConfigsBase,
 } from "./makeConfigs";
-import type { UniformRowLayoutIndexes } from "./uniformRowLayout";
 
 export interface ConfigSetBase {
-  spreadsheetConfig: UniformRowLayoutIndexes & Record<string, string | number>;
+  spreadsheetConfig: SpreadsheetConfigBase;
   sheetConfigs: SheetConfigsBase;
   columnConfigs: ColumnConfigsBase;
   valueConfigs: ValueConfigsBase;
@@ -30,7 +30,13 @@ export type Configs = ConfigsOf<Register>;
 
 let installed: Configs | null = null;
 
+// The lazy derivations cache the first set, so a second would be silently ignored.
 export function installConfigs(configs: Configs): void {
+  if (installed !== null && installed !== configs) {
+    throw new Error(
+      "A different set of configs is already installed. A program installs one set, once.",
+    );
+  }
   installed = configs;
 }
 

@@ -19,9 +19,11 @@ function makeStructuredConfig<S, const T extends S>(_structure: S, t: T): T {
   return t;
 }
 
-export function makeSpreadsheetConfig<
-  T extends UniformRowLayoutIndexes & Record<string, string | number>,
->(config: T): T {
+export type SpreadsheetConfigBase = UniformRowLayoutIndexes &
+  Record<string, string | number>;
+export function makeSpreadsheetConfig<T extends SpreadsheetConfigBase>(
+  config: T,
+): T {
   uniformRowLayout.validate(config);
   return config;
 }
