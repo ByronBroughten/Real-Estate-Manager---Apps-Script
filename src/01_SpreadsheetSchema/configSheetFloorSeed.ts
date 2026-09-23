@@ -193,7 +193,7 @@ export function isFloorTabName(name: string): name is FloorTabName {
 export function floorTabSeedByGid(
   sheetGid: number,
 ): (typeof configSheetFloorSeed)[FloorTabName] | undefined {
-  const sheetConfig = sheetConfigsByGid.get(sheetGid);
+  const sheetConfig = sheetConfigsByGid().get(sheetGid);
   if (sheetConfig === undefined || !isFloorTabName(sheetConfig.sheetName)) {
     return undefined;
   }
@@ -219,7 +219,7 @@ export function floorSeedColumnById(
   sheetGid: number,
   columnId: string,
 ): FloorSeedColumn | undefined {
-  const sheetConfig = sheetConfigsByGid.get(sheetGid);
+  const sheetConfig = sheetConfigsByGid().get(sheetGid);
   if (sheetConfig === undefined || !isFloorTabName(sheetConfig.sheetName)) {
     return undefined;
   }

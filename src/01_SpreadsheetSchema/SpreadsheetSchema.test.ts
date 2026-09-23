@@ -144,7 +144,7 @@ describe("SpreadsheetSchema", () => {
 
   describe("isInSheetGids", () => {
     it("agrees with the generated sheet gid list", () => {
-      const [firstGid] = configSheetGids;
+      const [firstGid] = configSheetGids();
       expect(firstGid).toBeDefined();
       expect(schema.isInSheetGids(firstGid as number)).toBe(true);
       expect(schema.isInSheetGids(Number.MAX_SAFE_INTEGER)).toBe(false);

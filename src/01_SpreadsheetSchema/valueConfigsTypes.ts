@@ -1,10 +1,12 @@
+import { lazy } from "../utils/lazy";
 import { Obj } from "../utils/Obj";
 import { valueConfigs } from "./generated/valueConfigs";
 
 export type ValueConfigs = typeof valueConfigs;
 export type ValueConfigName = keyof ValueConfigs;
-export const valueConfigNames: readonly ValueConfigName[] =
-  Obj.keys(valueConfigs);
+export const valueConfigNames = lazy((): readonly ValueConfigName[] =>
+  Obj.keys(valueConfigs),
+);
 
 export type ValueConfigValues = {
   [K in ValueConfigName]: ValueConfigs[K][number];

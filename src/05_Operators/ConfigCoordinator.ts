@@ -119,8 +119,8 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
   private _assertFloorIdentityUnchanged(): void {
     assertFloorIdentityUnchanged({
       previous: {
-        sheetConfigs: sheetConfigsByName,
-        columnConfigs: columnConfigsByName,
+        sheetConfigs: sheetConfigsByName(),
+        columnConfigs: columnConfigsByName(),
       },
       next: {
         sheetConfigs: this.sheetConfigOperator.newSheetConfigs(),

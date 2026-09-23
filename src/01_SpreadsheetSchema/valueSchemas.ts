@@ -12,6 +12,7 @@ import type {
   ValueSchemaBase,
   ValueSchemaKey,
 } from "../00_Source/CellValues/valueSchema";
+import { lazy } from "../utils/lazy";
 import type { Merge } from "../utils/Obj/merge";
 import type { ValueConfigName, ValueConfigValues } from "./valueConfigsTypes";
 import { makeSchemasFromValueConfig } from "./valueConfigSchemas";
@@ -35,10 +36,10 @@ export type VnToCvn<VN extends ValueNameSimple> = VN extends CellValueName
 
 export type ValueSchema<VN extends ValueName = ValueName> = ValueSchemas[VN];
 
-const valueSchemas: ValueSchemas = {
+const valueSchemas = lazy((): ValueSchemas => ({
   ...frameworkValueSchemas,
   ...makeSchemasFromValueConfig(),
-} as const;
+}));
 
 export type ValueTrait<
   VN extends ValueName,
@@ -49,7 +50,7 @@ export function getValTrait<
   VN extends ValueNameSimple,
   K extends ValueSchemaKey,
 >(valueName: VN, key: K): ValueSchema<VN>[K] {
-  return valueSchemas[valueName][key] as ValueSchema<VN>[K];
+  return valueSchemas()[valueName][key] as ValueSchema<VN>[K];
 }
 
 export type Value<VN extends ValueName = ValueName> = ValueTrait<VN, "type">;

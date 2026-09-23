@@ -2,6 +2,7 @@ import type {
   CodebaseNameDelimiter,
   NotEmpty,
 } from "../00_Source/CellValues/cellValues";
+import { lazy } from "../utils/lazy";
 import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
 import { Val } from "../utils/Val";
 import { columnConfigs } from "./generated/columnConfigs";
@@ -16,7 +17,9 @@ import { type Value, type ValueName, type ValueSchema } from "./valueSchemas";
 export type ColumnConfigs = typeof columnConfigs;
 
 // The generated literal read by an arbitrary name, where an entry may be absent.
-export const columnConfigsByName: ColumnConfigsGeneric = columnConfigs;
+export function columnConfigsByName(): ColumnConfigsGeneric {
+  return columnConfigs;
+}
 
 export type ColumnName<SN extends SheetNameSimple = SheetNameSimple> =
   SN extends SheetNameSimple ? keyof ColumnConfigs[SN] : never;
@@ -132,7 +135,7 @@ export type TableColumnConfigsById = KeyedMap<
 
 type ColumnConfigsByGidAndColId = Map<number, TableColumnConfigsById>;
 function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
-  return configSheetNames.reduce((attrs, sheetName) => {
+  return configSheetNames().reduce((attrs, sheetName) => {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
     attrs.set(
       sheetGid,
@@ -142,7 +145,7 @@ function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
   }, new Map() as ColumnConfigsByGidAndColId);
 }
 
-const columnConfigsByGidAndColId = makeColumnConfigsByGidAndColId();
+const columnConfigsByGidAndColId = lazy(makeColumnConfigsByGidAndColId);
 
 export function getColumnTraitById<K extends keyof ColumnConfig>(
   sheetGid: number,
@@ -150,14 +153,14 @@ export function getColumnTraitById<K extends keyof ColumnConfig>(
   key: K,
 ): ColumnConfig[K] {
   const colTraits = Val.assert(
-    columnConfigsByGidAndColId.get(sheetGid)?.get(columnId),
+    columnConfigsByGidAndColId().get(sheetGid)?.get(columnId),
     `column attributes for sheetGid=${sheetGid}, columnId=${columnId}`,
   );
   return colTraits[key];
 }
 export function getSheetColumnIds(sheetGid: number): MapIterator<string> {
   return Val.assert(
-    columnConfigsByGidAndColId.get(sheetGid),
+    columnConfigsByGidAndColId().get(sheetGid),
     `column attributes for sheetGid=${sheetGid}`,
   ).keys();
 }
