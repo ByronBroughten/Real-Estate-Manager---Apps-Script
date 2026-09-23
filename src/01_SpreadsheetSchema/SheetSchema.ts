@@ -16,9 +16,9 @@ import { ColumnSchema } from "./ColumnSchema";
 import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 
 function sheetNameFromGid(sheetGid: number): SheetName {
-  if (!configSheetGids.includes(sheetGid)) {
+  if (!configSheetGids().includes(sheetGid)) {
     throw new Error(
-      `Invalid sheetGid: ${sheetGid}. Must be one of: ${configSheetGids.join(", ")}`,
+      `Invalid sheetGid: ${sheetGid}. Must be one of: ${configSheetGids().join(", ")}`,
     );
   }
   return getSheetTraitByGid(sheetGid, "sheetName") as SheetName;

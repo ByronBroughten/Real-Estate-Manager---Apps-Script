@@ -160,7 +160,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   idPrefixChangeReport(): string | undefined {
     const changes: string[] = [];
     this.sheetGidsApiAccesses().forEach((sheetGid) => {
-      const previous = sheetConfigsByGid.get(sheetGid);
+      const previous = sheetConfigsByGid().get(sheetGid);
       if (previous === undefined) return;
       const sampled = this.ss.raw.sheetMeta(sheetGid).activeIdPrefix();
       if (sampled === undefined || sampled === previous.idPrefix) return;

@@ -6,7 +6,7 @@ import type { ColumnConfigsGeneric, ColumnConfigStored } from "./makeConfigs";
 
 describe("assertFloorMatchesSeed", () => {
   function floorColumnConfigs(): ColumnConfigsGeneric {
-    return JSON.parse(JSON.stringify(columnConfigsByName));
+    return JSON.parse(JSON.stringify(columnConfigsByName()));
   }
 
   function floorColumn(

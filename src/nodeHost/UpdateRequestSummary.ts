@@ -364,7 +364,7 @@ const label = {
   },
   sheet(sheetGid: number | undefined): string {
     if (sheetGid === undefined) return "(no sheet)";
-    return sheetConfigsByGid.get(sheetGid)?.sheetName ?? `gid ${sheetGid}`;
+    return sheetConfigsByGid().get(sheetGid)?.sheetName ?? `gid ${sheetGid}`;
   },
   dimensionSpan(
     dimension: string,

@@ -29,7 +29,7 @@ type ValueConfigSchemas = {
 };
 
 export function makeSchemasFromValueConfig(): ValueConfigSchemas {
-  return valueConfigNames.reduce((schemas, name) => {
+  return valueConfigNames().reduce((schemas, name) => {
     (schemas[name] as ValueSchemaBase<ValueConfigValue<typeof name>>) = vsc({
       type: makeDefaultValueConfigValue(name) as ValueConfigValue<typeof name>,
       makeDefault: () => makeDefaultValueConfigValue(name),
