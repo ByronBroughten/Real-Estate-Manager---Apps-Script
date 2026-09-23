@@ -1,7 +1,11 @@
 export function lazy<T>(make: () => T): () => T {
-  let made: { value: T } | undefined;
+  let ready = false;
+  let value: T;
   return () => {
-    made ??= { value: make() };
-    return made.value;
+    if (!ready) {
+      value = make();
+      ready = true;
+    }
+    return value;
   };
 }

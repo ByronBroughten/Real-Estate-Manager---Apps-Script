@@ -4,9 +4,14 @@ import {
   type SheetsHttpTransport,
 } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { installRawSource } from "../00_Source/RawSource/RawSource";
+import {
+  installConfigs,
+  type Configs,
+} from "../01_SpreadsheetSchema/configRegister";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
 export interface NodeHostProps {
+  configs: Configs;
   spreadsheetId: string;
   transport: SheetsHttpTransport;
   isDryRun: boolean;
@@ -15,12 +20,14 @@ export interface NodeHostProps {
 
 // The framework's second host — Sheets only, in Node. See docs/how-it-runs.md.
 export class NodeHost {
+  readonly configs: Configs;
   readonly spreadsheetId: string;
   readonly isDryRun: boolean;
   private transport: SheetsHttpTransport;
   private log: (message: string) => void;
   private sentRequests: GoogleRequest[];
   constructor(props: NodeHostProps) {
+    this.configs = props.configs;
     this.spreadsheetId = props.spreadsheetId;
     this.isDryRun = props.isDryRun;
     this.transport = props.transport;
@@ -45,6 +52,7 @@ export class NodeHost {
   ensureGlobals(): this {
     const globals = globalThis as Record<string, unknown>;
     globals.Logger = { log: this.log };
+    installConfigs(this.configs);
     installRawSource(this.googleSheetsAPI);
     return this;
   }

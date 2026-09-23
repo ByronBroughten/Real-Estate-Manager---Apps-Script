@@ -1,7 +1,7 @@
-import { spreadsheetConfig } from "./generated/spreadsheetConfig";
+import { installedConfigs, type Configs } from "./configRegister";
 import { uniformRowLayout } from "./uniformRowLayout";
 
-export type SpreadsheetConfig = typeof spreadsheetConfig;
+export type SpreadsheetConfig = Configs["spreadsheetConfig"];
 export type LiveSpreadsheetConfig = {
   -readonly [K in keyof SpreadsheetConfig]: SpreadsheetConfig[K] extends number
     ? number
@@ -24,5 +24,5 @@ export function clearSpreadsheetConfigOverlay(): void {
 export function ssConfigGet<K extends keyof SpreadsheetConfig>(
   key: K,
 ): LiveSpreadsheetConfig[K] {
-  return (liveSpreadsheetConfig ?? spreadsheetConfig)[key];
+  return (liveSpreadsheetConfig ?? installedConfigs().spreadsheetConfig)[key];
 }

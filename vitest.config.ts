@@ -8,6 +8,7 @@ export default defineConfig({
       "scripts/**/*.test.mjs",
       ".claude/hooks/**/*.test.mjs",
     ],
+    setupFiles: ["src/testSupport/installAppConfigs.ts"],
     restoreMocks: true,
     unstubGlobals: true,
     coverage: {

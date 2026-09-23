@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { NodeHost } from "./NodeHost";
@@ -29,6 +30,7 @@ const leasesPayload = {
 function seedHost(isDryRun: boolean) {
   const transport = vi.fn((_request: SheetsHttpRequest) => leasesPayload);
   const host = NodeHost.init({
+    configs: installedConfigs(),
     spreadsheetId,
     transport,
     isDryRun,

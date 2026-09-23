@@ -1,8 +1,14 @@
+import type { SheetChange } from "../00_Source/PlatformEvents/sheetChange";
 import type { SheetEdit } from "../00_Source/PlatformEvents/sheetEdit";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import type { ColumnSchema } from "../01_SpreadsheetSchema/ColumnSchema";
+import {
+  installConfigs,
+  type Configs,
+} from "../01_SpreadsheetSchema/configRegister";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetIdentified } from "../03_SpreadsheetIdentified/SpreadsheetIdentified";
+import { ConfigSheetFloor } from "../05_Operators/ConfigSheetFloor";
 import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
@@ -12,6 +18,11 @@ import { EndpointRun } from "./EndpointRun";
 import type { Endpoints } from "./Endpoints";
 
 interface ApiProps extends SpreadsheetNamedProps {
+  endpoints: Endpoints;
+}
+
+export interface AppSetup {
+  configs: Configs;
   endpoints: Endpoints;
 }
 
@@ -31,13 +42,24 @@ export class Api extends SpreadsheetBaseNamed {
     });
   }
   static handleSheetEdit(
-    businessEndpoints: Endpoints,
+    { configs, endpoints }: AppSetup,
     edit: SheetEdit,
     installSource: () => void,
   ): void {
+    installConfigs(configs);
     if (!Api.isSuspectedApiCall(edit)) return;
     installSource();
-    Api.init(businessEndpoints).handleSheetEdit(edit);
+    Api.init(endpoints).handleSheetEdit(edit);
+  }
+  static handleSheetChange(
+    { configs }: AppSetup,
+    change: SheetChange | null,
+    installSource: () => void,
+  ): string | null {
+    if (change === null) return null;
+    installConfigs(configs);
+    installSource();
+    return ConfigSheetFloor.init().changeToast(change);
   }
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();

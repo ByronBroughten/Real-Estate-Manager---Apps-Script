@@ -10,6 +10,11 @@ const rawImportPattern = {
   message:
     "Raw is positional: it addresses by GID and index and never resolves a column. Column and value lookups belong in the Identified tier or above.",
 };
+const appConfigsImportPattern = {
+  regex: "(^|/)generated/|(^|/)appConfigs(\\.js)?$",
+  message:
+    "Tiers take config types from Register and values from installedConfigs(); only src/appConfigs.ts imports the generated configs.",
+};
 const platformImportPattern = {
   regex: "GoogleSheets/|GoogleSheets/(GoogleSheetsAPI|AppsScript)(\\.js)?$",
   message: platformMessage,
@@ -48,7 +53,7 @@ const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
         "**/*.test.ts",
         ...(isPlatformFolder ? ["src/00_Source/GoogleSheets/**"] : []),
       ],
-      rules: restrict([platformImportPattern]),
+      rules: restrict([platformImportPattern, appConfigsImportPattern]),
     },
     {
       files: [

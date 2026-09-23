@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
@@ -87,6 +88,49 @@ function actionRowWrites(
 
 beforeEach(() => {
   stubLogger();
+});
+
+const configs = installedConfigs();
+
+describe("Api.handleSheetEdit, the entry call", () => {
+  it("supplies the app's configs before anything reads them", async () => {
+    vi.resetModules();
+    const fresh = await import("./Api");
+    const installSource = vi.fn();
+    expect(() =>
+      fresh.Api.handleSheetEdit(
+        { configs, endpoints: {} },
+        {
+          ...actionRowEdit(twoWayColIndex, "TRUE"),
+          rowIndexBase0: endRowIndex,
+        },
+        installSource,
+      ),
+    ).not.toThrow();
+    expect(installSource).not.toHaveBeenCalled();
+  });
+  it("installs the source and dispatches a suspected API call", () => {
+    stubOccupancySheet();
+    const calls: string[] = [];
+    const installSource = vi.fn();
+    Api.handleSheetEdit(
+      { configs, endpoints: trackingEndpoints(calls) },
+      actionRowEdit(buttonColIndex, "TRUE"),
+      installSource,
+    );
+    expect(installSource).toHaveBeenCalledOnce();
+    expect(calls).toEqual(["button"]);
+  });
+});
+
+describe("Api.handleSheetChange", () => {
+  it("does nothing for a change the platform module doesn't name", () => {
+    const installSource = vi.fn();
+    expect(
+      Api.handleSheetChange({ configs, endpoints: {} }, null, installSource),
+    ).toBeNull();
+    expect(installSource).not.toHaveBeenCalled();
+  });
 });
 
 describe("Api.isSuspectedApiCall", () => {

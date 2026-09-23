@@ -1,5 +1,4 @@
 import { idPrefixes } from "./idPrefixes";
-import type { SheetNameSimple } from "./sheetConfigsTypes";
 import {
   uniformRowLayout,
   type UniformRowLayoutIndexes,
@@ -20,9 +19,11 @@ function makeStructuredConfig<S, const T extends S>(_structure: S, t: T): T {
   return t;
 }
 
-export function makeSpreadsheetConfig<
-  T extends UniformRowLayoutIndexes & Record<string, string | number>,
->(config: T): T {
+export type SpreadsheetConfigBase = UniformRowLayoutIndexes &
+  Record<string, string | number>;
+export function makeSpreadsheetConfig<T extends SpreadsheetConfigBase>(
+  config: T,
+): T {
   uniformRowLayout.validate(config);
   return config;
 }
@@ -69,11 +70,24 @@ export interface ColumnConfigStored<
 }
 
 type TableColumnConfigs = Record<string, ColumnConfigStored>;
-type ColumnConfigsBase = Record<SheetNameSimple, TableColumnConfigs>;
 export type ColumnConfigsGeneric = Record<string, TableColumnConfigs>;
 
-export function makeColumnConfigs<T extends ColumnConfigsBase>(
-  columnConfigs: T,
-): T {
+interface ColumnConfigLiteralStored<
+  VN extends string,
+> extends ColumnConfigLiteral {
+  valueName: VN;
+  customDefaultValue: unknown;
+}
+// Names no Register-derived type, so the generated literal can fill Register without a cycle.
+export type ColumnConfigsBase<VN extends string = string> = Record<
+  string,
+  Record<string, ColumnConfigLiteralStored<VN>>
+>;
+
+// VN keeps each valueName a literal instead of widening it to string.
+export function makeColumnConfigs<
+  VN extends string,
+  T extends ColumnConfigsBase<VN>,
+>(columnConfigs: T): T {
   return makeStructuredConfig({} as ColumnConfigsBase, columnConfigs);
 }
