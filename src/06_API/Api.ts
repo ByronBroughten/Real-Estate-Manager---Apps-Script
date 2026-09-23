@@ -10,18 +10,9 @@ import {
 import { frameworkEndpoints } from "./frameworkEndpoints";
 import { EndpointRun } from "./EndpointRun";
 import type { Endpoints } from "./Endpoints";
-import { AppsScript } from "../00_Source/GoogleSheets/AppsScript";
-import { hasInstalledRawSource } from "../00_Source/RawSource/RawSource";
-import { installRawSource } from "../00_Source/RawSource/RawSource";
-import { GoogleSheetsAPI } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 
 interface ApiProps extends SpreadsheetNamedProps {
   endpoints: Endpoints;
-}
-
-function installGoogleSheets(): void {
-  if (!hasInstalledRawSource())
-    installRawSource(GoogleSheetsAPI.forAppsScript());
 }
 
 export class Api extends SpreadsheetBaseNamed {
@@ -41,11 +32,11 @@ export class Api extends SpreadsheetBaseNamed {
   }
   static handleSheetEdit(
     businessEndpoints: Endpoints,
-    e: GoogleAppsScript.Events.SheetsOnEdit,
+    edit: SheetEdit,
+    installSource: () => void,
   ): void {
-    const edit = AppsScript.sheetEdit(e);
     if (!Api.isSuspectedApiCall(edit)) return;
-    installGoogleSheets();
+    installSource();
     Api.init(businessEndpoints).handleSheetEdit(edit);
   }
   get schema(): SpreadsheetSchema {
