@@ -3,6 +3,7 @@
 export const spreadsheetConfigTextHeaders = {
   idDelimiter: "ID delimiter",
   idHeader: "ID header",
+  nameHeader: "Name header",
 } as const;
 
 // Each header's column holds its field in base 1.

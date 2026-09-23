@@ -8,6 +8,7 @@ import { uniformRowLayout } from "./uniformRowLayout";
 const validLayout = {
   idDelimiter: ":",
   idHeader: "ID",
+  nameHeader: "Name",
   startTableColIndexBase0: 0,
   columnIdRowIdxBase0: 0,
   columnGroupHeadingRowIndexBase0: 1,

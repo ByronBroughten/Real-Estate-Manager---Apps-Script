@@ -21,7 +21,12 @@ function source(props: {
 }): FloorIdentitySource {
   return {
     sheetConfigs: props.sheetConfigs ?? {
-      sheetConfig: { sheetGid: 1, idPrefix: "scf", hasIdColumn: false },
+      sheetConfig: {
+        sheetGid: 1,
+        idPrefix: "scf",
+        hasIdColumn: false,
+        hasNameColumn: false,
+      },
     },
     columnConfigs:
       props.sheetConfigColumnId === undefined

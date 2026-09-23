@@ -6,7 +6,7 @@
 
 | When | File |
 | --- | --- |
-| `sheetConfigs`, `hasIdColumn`, `idPrefix` | [`generated-data/sheet-configs.md`](./generated-data/sheet-configs.md) |
+| `sheetConfigs`, `hasIdColumn`, `hasNameColumn`, `idPrefix` | [`generated-data/sheet-configs.md`](./generated-data/sheet-configs.md) |
 | `columnConfigs`, `emptyValueAllowed`, `isFormula`, `valueName` resolution, the untyped-columns summary | [`generated-data/column-configs.md`](./generated-data/column-configs.md) |
 | `valueConfigs` and its `const` type parameter | [`generated-data/value-configs.md`](./generated-data/value-configs.md) |
 | `spreadsheetConfig`, layout values | [`generated-data/spreadsheet-config.md`](./generated-data/spreadsheet-config.md) |

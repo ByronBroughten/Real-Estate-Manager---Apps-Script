@@ -86,6 +86,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       sheetGid: propertyGid,
       idPrefix: "prp",
       hasIdColumn: false,
+      hasNameColumn: false,
     });
     // A newly-discovered sheet gets a Sheet Config row appended, but stays
     // excluded from the generated file until a human sets letApiAccess.
@@ -125,6 +126,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       sheetGid: newSheetGid,
       idPrefix: "bns",
       hasIdColumn: false,
+      hasNameColumn: false,
     });
   });
 
@@ -183,6 +185,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       sheetGid: sheetConfigGid,
       idPrefix: "scf",
       hasIdColumn: false,
+      hasNameColumn: false,
     });
   });
 
@@ -214,6 +217,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       sheetGid: propertyGid,
       idPrefix: "prp",
       hasIdColumn: false,
+      hasNameColumn: false,
     });
   });
 
@@ -299,6 +303,41 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(true);
   });
+
+  it.each([
+    { headers: ["ID", "Name"], hasNameColumn: true },
+    { headers: ["ID", "Title"], hasNameColumn: false },
+  ])(
+    "emits has-name $hasNameColumn for header row $headers",
+    ({ headers, hasNameColumn }) => {
+      stubSheetsService({
+        sheets: [
+          {
+            sheetId: sheetConfigGid,
+            title: "Sheet Config",
+            rows: buildGridRows({
+              0: sheetConfigColumnIdRow,
+              4: [propertyGid, "Property", true],
+            }),
+            table: { endRowIndex: 5 },
+          },
+          {
+            sheetId: propertyGid,
+            title: "Property",
+            rows: buildGridRows({ 3: headers }),
+            table: { endRowIndex: 5 },
+          },
+        ],
+      });
+
+      const operator = SheetConfigOperator.init();
+      syncSheetConfigOperator(operator);
+
+      expect(operator.newSheetConfigs().property?.hasNameColumn).toBe(
+        hasNameColumn,
+      );
+    },
+  );
 
   it("throws when two sheets share a sampled ID prefix, named by sheet title", () => {
     stubSheetsService({

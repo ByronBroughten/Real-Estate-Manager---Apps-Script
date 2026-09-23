@@ -18,7 +18,7 @@ import type {
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
-import type { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
+import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
@@ -26,6 +26,8 @@ import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
 import { SheetMetaNamed } from "./SheetMetaNamed";
+import type { SheetNameWithIdAndNameColumn } from "./SheetNameGroups";
+import type { RowIdByName } from "./Types/RowIdByName";
 
 /**
  * Name-addressed primary sheet: data rows, append, named columns.
@@ -228,6 +230,61 @@ export class SheetNamed<
     // Checking this subset generically costs ~70k instantiations; the Named suite pins it instead.
     return this.appendRowWithVals(
       values as unknown as Partial<SheetDataValues<SN>>,
+    );
+  }
+  prepFetchRowIdAndName(
+    this: SheetNamed<SN & SheetNameWithIdAndNameColumn>,
+  ): SheetNamed<SN & SheetNameWithIdAndNameColumn> {
+    this._idColumn().prepFetchFull();
+    this._nameColumn().prepFetchFull();
+    return this;
+  }
+  rowIdByName(
+    this: SheetNamed<SN & SheetNameWithIdAndNameColumn>,
+    name: string,
+  ): RowIdByName {
+    this._validateNameNotBlank(name);
+    const rowIndexes = this._rowIndexesNamed(name);
+    const rowIndex = rowIndexes[0];
+    if (rowIndex === undefined) return { found: "none" };
+    if (rowIndexes.length > 1) {
+      return { found: "many", rowCount: rowIndexes.length };
+    }
+    return { found: "one", rowId: this._rowId(rowIndex), rowIndex };
+  }
+  // A blank name would match every unnamed row, which is never what a caller meant.
+  private _validateNameNotBlank(name: string): void {
+    if (name !== "") return;
+    throw new Error(
+      `Cannot look up a blank name in the name column of "${this.sheetName}".`,
+    );
+  }
+  private _rowIndexesNamed(name: string): number[] {
+    const column = this._nameColumn();
+    return column.cellIndexesActive.filter(
+      (rowIndex) => column.valueOrEmpty(rowIndex) === name,
+    );
+  }
+  // A row id is bookkeeping nobody types, and the row is already in hand.
+  private _rowId(rowIndex: number): string {
+    const cell = this._idColumn().cell(rowIndex);
+    if (cell.raw.isEmpty) {
+      cell.updateToDefault();
+    }
+    return cell.valueNotEmpty();
+  }
+  // By header, since the layout values name these columns, not a column name.
+  private _idColumn(): ColumnIdentified<"id"> {
+    // The framework's own column, so its value type is named here.
+    return new ColumnIdentified<"id">({
+      ...this.identified.sheetIdentifiedProps,
+      columnId: this.schema.columnIdByHeader(this.schema.idHeader),
+    });
+  }
+  // By column id, so the name column's own value type isn't composed into the read.
+  private _nameColumn(): ColumnIdentified {
+    return this.identified.column(
+      this.schema.columnIdByHeader(this.schema.nameHeader),
     );
   }
 }

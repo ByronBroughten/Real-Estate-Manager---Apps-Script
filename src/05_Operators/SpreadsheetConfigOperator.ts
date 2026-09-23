@@ -21,8 +21,11 @@ const fieldColumnNames = [
   ...Obj.values(spreadsheetConfigIndexHeaders),
 ].map((header) => Str.sentenceToCamelCase(header));
 
-const { idHeader: editableHeader, ...fixedTextHeaders } =
-  spreadsheetConfigTextHeaders;
+const {
+  idHeader: editableIdHeader,
+  nameHeader: editableNameHeader,
+  ...fixedTextHeaders
+} = spreadsheetConfigTextHeaders;
 
 export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheetConfig"> {
   constructor(props: OperatorProps) {
@@ -107,7 +110,7 @@ function validateFixedLayoutValuesUnchanged(
   ];
   if (changed.length > 0) {
     throw new Error(
-      `Spreadsheet Config layout values other than "${editableHeader}" are fixed; put back:\n${changed.join("\n")}`,
+      `Spreadsheet Config layout values other than "${editableIdHeader}" and "${editableNameHeader}" are fixed; put back:\n${changed.join("\n")}`,
     );
   }
 }

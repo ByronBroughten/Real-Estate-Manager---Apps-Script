@@ -40,6 +40,7 @@ const sscColumns = [
   "syncConfigSheetRowsRunStatus",
   "idDelimiter",
   "idHeader",
+  "nameHeader",
   "startTableColumnIndexBase1",
   "columnIdRowIndexBase1",
   "columnGroupHeadingRowIndexBase1",
@@ -102,6 +103,7 @@ function spreadsheetConfigSheet(
     if (columnName === "tableMenuSpace") return "Not used";
     if (columnName === "idDelimiter") return idDelimiter;
     if (columnName === "idHeader") return options.idHeader ?? "ID";
+    if (columnName === "nameHeader") return "Name";
     if (columnName === "startTableColumnIndexBase1") {
       return options.startTableColumnIndexBase1 ?? 1;
     }
@@ -408,6 +410,7 @@ describe("ConfigCoordinator.syncAndFlushConfigSheets", () => {
       sheetGid: testSheetGid,
       idPrefix: "test",
       hasIdColumn: false,
+      hasNameColumn: false,
     });
   });
 
@@ -751,7 +754,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
 
     const parsed = ConfigCoordinator.init().generateConfigFiles();
     expect(parsed.sheetConfigs).toContain(
-      `"addOccPaymentIntention": { "sheetGid": ${draftGid}, "idPrefix": "aopi", "hasIdColumn": true }`,
+      `"addOccPaymentIntention": { "sheetGid": ${draftGid}, "idPrefix": "aopi", "hasIdColumn": true, "hasNameColumn": true }`,
     );
   });
 
@@ -967,7 +970,7 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
 
     const parsed = ConfigCoordinator.init().generateConfigFiles();
     expect(parsed.sheetConfigs).toContain(
-      `"property": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false }`,
+      `"property": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
     );
     expect(parsed.columnConfigs).toMatch(/c:prp:/);
   });
@@ -993,7 +996,7 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
 
     const parsed = ConfigCoordinator.init().generateConfigFiles();
     expect(parsed.sheetConfigs).toContain(
-      `"renamedTab": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false }`,
+      `"renamedTab": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
     );
   });
 
@@ -1142,10 +1145,10 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
 
     const parsed = ConfigCoordinator.init().generateConfigFiles();
     expect(parsed.sheetConfigs).toContain(
-      `"household": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false }`,
+      `"household": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
     );
     expect(parsed.sheetConfigs).toContain(
-      `"property": { "sheetGid": ${propertiesGid}, "idPrefix": "prpr", "hasIdColumn": false }`,
+      `"property": { "sheetGid": ${propertiesGid}, "idPrefix": "prpr", "hasIdColumn": false, "hasNameColumn": true }`,
     );
   });
 });

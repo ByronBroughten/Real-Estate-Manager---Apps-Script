@@ -47,6 +47,7 @@ const sscColumns = [
   "syncConfigSheetRowsRunStatus",
   "idDelimiter",
   "idHeader",
+  "nameHeader",
   "startTableColumnIndexBase1",
   "columnIdRowIndexBase1",
   "columnGroupHeadingRowIndexBase1",
@@ -415,6 +416,7 @@ function floorFixture(
     }
     if (columnName === "idDelimiter") return ":";
     if (columnName === "idHeader") return "ID";
+    if (columnName === "nameHeader") return "Name";
     if (columnName === "startTableColumnIndexBase1") return 1;
     if (columnName === "columnIdRowIndexBase1") return 1;
     if (columnName === "columnGroupHeadingRowIndexBase1") return 2;
@@ -606,7 +608,7 @@ const spreadsheetConfigLayoutRange = {
   sheetId: spreadsheetConfigGid,
   startRowIndex: topDataRowIndex,
   startColumnIndex: 5,
-  endColumnIndex: 12,
+  endColumnIndex: 13,
 };
 const spreadsheetConfigSelectorRanges = [
   {
@@ -804,7 +806,7 @@ describe("ConfigSheetFloor", () => {
       protectionsOf(floor, "spreadsheetConfig")[0]?.unprotectedRanges,
     ).toEqual([
       ...spreadsheetConfigSelectorRanges,
-      { ...spreadsheetConfigLayoutRange, endColumnIndex: 13 },
+      { ...spreadsheetConfigLayoutRange, endColumnIndex: 14 },
     ]);
   });
 
@@ -1574,6 +1576,7 @@ describe("ConfigSheetFloor", () => {
     const dataRowIndex = (table?.range?.startRowIndex ?? 0) + 1;
     const expected = [
       { header: ssc.idHeader.header, value: spreadsheetConfig.idHeader },
+      { header: ssc.nameHeader.header, value: spreadsheetConfig.nameHeader },
       { header: ssc.idDelimiter.header, value: spreadsheetConfig.idDelimiter },
       {
         header: ssc.startTableColumnIndexBase1.header,
@@ -1674,7 +1677,7 @@ describe("ConfigSheetFloor", () => {
     );
     expect(addSheetAt).toBeGreaterThanOrEqual(0);
     expect(addTableAt).toBeGreaterThan(addSheetAt);
-    expect(seedAts).toHaveLength(7);
+    expect(seedAts).toHaveLength(8);
     expect(Math.min(...seedAts)).toBeGreaterThan(addTableAt);
   });
 

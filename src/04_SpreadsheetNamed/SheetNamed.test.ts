@@ -832,3 +832,98 @@ describe("SheetNamed edit warnings and edit locks", () => {
     ).not.toThrow();
   });
 });
+
+const propertyGid = sheetConfigs.property.sheetGid;
+const propertyColumns = columnConfigs.property;
+
+function fetchedPropertyNames(
+  dataRows: readonly (readonly [string | null, string | null])[],
+) {
+  const service = stubSheetsService({
+    sheets: [
+      {
+        sheetId: propertyGid,
+        title: "Property",
+        rows: buildGridRows({
+          0: [propertyColumns.id.columnId, propertyColumns.name.columnId],
+          3: ["ID", "Name"],
+          ...Object.fromEntries(
+            dataRows.map((row, index) => [topDataRowIndex + index, [...row]]),
+          ),
+        }),
+        table: {
+          endRowIndex: topDataRowIndex + dataRows.length,
+          endColumnIndex: 2,
+        },
+      },
+    ],
+  });
+  const ss = SpreadsheetNamed.init();
+  const sheet = ss.sheet("property").prepFetchRowIdAndName();
+  ss.fetchAllPrepped();
+  return { ss, sheet, ...service };
+}
+
+describe("SheetNamed.rowIdByName", () => {
+  it("finds the one row with the name, with its id and row index", () => {
+    const { sheet } = fetchedPropertyNames([
+      ["r:prp:aaaaaaa", "730 Western"],
+      ["r:prp:bbbbbbb", "12 Elm"],
+    ]);
+
+    expect(sheet.rowIdByName("12 Elm")).toEqual({
+      found: "one",
+      rowId: "r:prp:bbbbbbb",
+      rowIndex: topDataRowIndex + 1,
+    });
+  });
+
+  it("reports none when no row has the name", () => {
+    const { sheet } = fetchedPropertyNames([["r:prp:aaaaaaa", "730 Western"]]);
+
+    expect(sheet.rowIdByName("12 Elm")).toEqual({ found: "none" });
+  });
+
+  it("reports many, with the count, when several rows share the name", () => {
+    const { sheet } = fetchedPropertyNames([
+      ["r:prp:aaaaaaa", "12 Elm"],
+      ["r:prp:bbbbbbb", "730 Western"],
+      ["r:prp:ccccccc", "12 Elm"],
+    ]);
+
+    expect(sheet.rowIdByName("12 Elm")).toEqual({ found: "many", rowCount: 2 });
+  });
+
+  it("fills a blank id on the row it found and queues the write", () => {
+    const { ss, sheet, batchUpdateCalls } = fetchedPropertyNames([
+      [null, "730 Western"],
+    ]);
+
+    const match = sheet.rowIdByName("730 Western");
+    ss.batchUpdateGSheets();
+
+    expect(match).toMatchObject({ found: "one", rowIndex: topDataRowIndex });
+    const rowId = match.found === "one" ? match.rowId : "";
+    expect(rowId).toMatch(/^r:prp:/);
+    expect(JSON.stringify(batchUpdateCalls)).toContain(rowId);
+  });
+
+  it("refuses a blank name, which would match every unnamed row", () => {
+    const { sheet } = fetchedPropertyNames([["r:prp:aaaaaaa", ""]]);
+
+    expect(() => sheet.rowIdByName("")).toThrow(
+      'Cannot look up a blank name in the name column of "property".',
+    );
+  });
+
+  it("is typed only to sheets with both an id and a name column", () => {
+    function neverCalled(ss: SpreadsheetNamed): void {
+      ss.sheet("property").rowIdByName("12 Elm");
+      // @ts-expect-error occPayAllocation has a name column but no id column.
+      ss.sheet("occPayAllocation").rowIdByName("12 Elm");
+      // @ts-expect-error spreadsheetConfig has neither.
+      ss.sheet("spreadsheetConfig").prepFetchRowIdAndName();
+    }
+    expect(neverCalled).toBeTypeOf("function");
+  });
+});
