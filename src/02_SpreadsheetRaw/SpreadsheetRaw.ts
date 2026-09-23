@@ -39,6 +39,9 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   private get flusher(): SpreadsheetFlusherRaw {
     return new SpreadsheetFlusherRaw(this.spreadsheetRawProps);
   }
+  get timeZone(): string {
+    return this.fetcher.ensureTimeZoneIsFetched();
+  }
   gidIsActive(sheetGid: number): boolean {
     return this.activeSheetGids.includes(sheetGid);
   }

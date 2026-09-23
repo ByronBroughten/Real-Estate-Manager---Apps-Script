@@ -39,6 +39,7 @@ export interface GridFetchOptions {
 }
 
 export interface SpreadsheetSnapshot {
+  timeZone: string | null;
   sheets: SheetSnapshot[];
 }
 
@@ -271,6 +272,7 @@ export interface OpaqueRawWriteOperation {
 
 export interface RawSource {
   fetchSheetProperties(): SpreadsheetSnapshot;
+  fetchTimeZone(): string | null;
   fetchGrid(
     gridRanges: GridFetchRange[],
     options: GridFetchOptions,

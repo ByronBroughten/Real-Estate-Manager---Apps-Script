@@ -17,6 +17,7 @@ type GoogleCellData = GoogleAppsScript.Sheets.Schema.CellData;
 export const googleGrid = {
   toSpreadsheetSnapshot(spreadsheet: GoogleSpreadsheet): SpreadsheetSnapshot {
     return {
+      timeZone: spreadsheet.properties?.timeZone ?? null,
       sheets: Val.assert(spreadsheet.sheets, "spreadsheet.sheets").map(
         toSheetSnapshot,
       ),

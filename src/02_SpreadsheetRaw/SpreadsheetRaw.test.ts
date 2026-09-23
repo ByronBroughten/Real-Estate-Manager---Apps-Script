@@ -4,6 +4,7 @@ import { googleRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import type { AddTableOperation } from "../00_Source/RawSource/RawSource";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
   stubSheetsService,
@@ -118,6 +119,44 @@ describe("SpreadsheetRaw.fetchAllSheetProperties", () => {
     expect(() => raw.fetchAllSheetProperties()).toThrowError(
       /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
     );
+  });
+});
+
+describe("SpreadsheetRaw.timeZone", () => {
+  it("fetches the zone alone, once, and logs it when nothing has been fetched", () => {
+    const logger = stubLogger();
+    const { getCalls } = stubSheetsService({ timeZone: "Europe/London" });
+
+    const raw = SpreadsheetRaw.init();
+
+    expect(raw.timeZone).toBe("Europe/London");
+    expect(raw.timeZone).toBe("Europe/London");
+    expect(getCalls).toEqual([{ fields: "properties(timeZone)" }]);
+    expect(logger.log).toHaveBeenCalledTimes(1);
+  });
+
+  it("reads the zone that rode a grid fetch, silently and with no get of its own", () => {
+    const logger = stubLogger();
+    const { getCalls } = stubSheetsService({
+      timeZone: "Australia/Sydney",
+      sheets: [placedTableSheet({ sheetId: 111, title: "Leases" })],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchSheetUsedGrid(111);
+
+    expect(raw.timeZone).toBe("Australia/Sydney");
+    expect(getCalls).toEqual([]);
+    expect(logger.log).not.toHaveBeenCalled();
+  });
+
+  it("throws when the spreadsheet's time zone is absent", () => {
+    stubLogger();
+    stubSheetsService({ timeZone: null });
+
+    const raw = SpreadsheetRaw.init();
+
+    expect(() => raw.timeZone).toThrowError(/properties\.timeZone/);
   });
 });
 

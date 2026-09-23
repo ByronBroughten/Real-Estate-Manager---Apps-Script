@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
@@ -328,6 +328,7 @@ interface LedgerSpreadsheetProps {
   charges?: ChargeRow[];
   allocations?: AllocationRow[];
   startDates?: Partial<Record<string, number>>;
+  timeZone?: string;
 }
 
 function stubLedgerSpreadsheet({
@@ -335,8 +336,10 @@ function stubLedgerSpreadsheet({
   charges = chargeRows,
   allocations = allocationRows,
   startDates = {},
+  timeZone,
 }: LedgerSpreadsheetProps = {}) {
   return stubSheetsService({
+    timeZone,
     sheets: [
       stubOccupancy(selectedOccupancyId, startDates),
       stubOccCharge(charges),
@@ -429,6 +432,10 @@ beforeEach(() => {
 });
 
 describe("buildLedger, the page it writes", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("writes every kind of line in date order, charge before payment on a shared day", () => {
     const { batchUpdateCalls } = stubLedgerSpreadsheet();
 
@@ -536,6 +543,20 @@ describe("buildLedger, the page it writes", () => {
         ]),
       ],
     ]);
+  });
+
+  it("dates the run in the spreadsheet's own zone", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2024-03-15T02:30:00Z"));
+    const { batchUpdateCalls } = stubLedgerSpreadsheet({
+      timeZone: "Asia/Tokyo",
+    });
+
+    runBuildLedger();
+
+    expect(
+      cellsWrittenTo(batchUpdateCalls, variableGid).get(topDataRowIndex)?.get(1),
+    ).toBe(Dat.fromYmd({ year: 2024, month: 3, day: 15 }));
   });
 
   it("reads every input sheet in one fetch cycle of its own", () => {

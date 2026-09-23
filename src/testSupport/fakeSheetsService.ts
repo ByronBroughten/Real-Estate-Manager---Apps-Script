@@ -9,6 +9,7 @@ type BatchUpdateResponse =
 type GoogleCellData = GoogleAppsScript.Sheets.Schema.CellData;
 
 export const fakeSpreadsheetId = "fake-spreadsheet";
+export const fakeTimeZone = "America/Chicago";
 
 /** A single cell's value, in the same terms `CellRaw` reads/writes them.
  * `null` (or a short row) represents an empty cell. */
@@ -148,6 +149,8 @@ export interface FakeSheetProperties {
 
 export interface FakeSheetsServiceOptions {
   sheets?: FakeSheetProperties[];
+  /** The spreadsheet's `properties.timeZone`; `null` leaves it out of every response. */
+  timeZone?: string | null;
 }
 
 export interface FakeSheetsService {
@@ -383,6 +386,8 @@ export function stubSheetsService(
   options: FakeSheetsServiceOptions = {},
 ): FakeSheetsService {
   const sheets = options.sheets ?? [];
+  const timeZone =
+    options.timeZone === undefined ? fakeTimeZone : options.timeZone;
   const batchUpdateCalls: BatchUpdateRequest[] = [];
   const getByDataFilterCalls: object[] = [];
   const getCalls: { fields?: string }[] = [];
@@ -407,7 +412,10 @@ export function stubSheetsService(
     const includeProtectedRanges =
       !isFilteredFetch &&
       (fields === undefined || fields.includes("protectedRanges"));
+    const includeTimeZone =
+      timeZone !== null && (fields === undefined || fields.includes("timeZone"));
     return {
+      ...(includeTimeZone ? { properties: { timeZone } } : {}),
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({
         properties: { sheetId: s.sheetId, title: s.title },
         data: fakeRowsToGoogleSheetData(s),

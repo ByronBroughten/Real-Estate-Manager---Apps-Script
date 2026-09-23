@@ -12,7 +12,6 @@ import {
   CheckboxColumnOperator,
   type CheckboxColumnName,
 } from "../05_Operators/CheckboxColumnOperator";
-import { Tim } from "../utils/Tim";
 import type {
   ActionReturn,
   EndpointDispatched,
@@ -144,7 +143,7 @@ export class EndpointRun<
   }
   // The flush is what puts the running state on the sheet before the work runs.
   private _onRunSetup(): void {
-    this._applyRunState("running", { startTime: Tim.nowTimestamp() });
+    this._applyRunState("running", { startTime: this.ss.now() });
     this.ss.batchUpdateGSheets();
   }
   // First inside the `try`, so the refusal reports like any other failure and keeps the ticks.

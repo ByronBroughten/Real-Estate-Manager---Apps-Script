@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
@@ -42,7 +42,10 @@ const lightRed = { red: 0.957, green: 0.8, blue: 0.8 };
 const timestamp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
 // Rows 4 and 6 are ticked; 5, 7 and 8 are the rows a selective run must not touch.
-function stubOccupancySheet(checkedRowIndexes: number[] = [4, 6]) {
+function stubOccupancySheet(
+  checkedRowIndexes: number[] = [4, 6],
+  timeZone?: string,
+) {
   const dataRow = (rowIndex: number) => [
     `r:occ:row${rowIndex}`,
     checkedRowIndexes.includes(rowIndex),
@@ -50,6 +53,7 @@ function stubOccupancySheet(checkedRowIndexes: number[] = [4, 6]) {
     "",
   ];
   return stubSheetsService({
+    timeZone,
     sheets: [
       {
         sheetId: occupancyGid,
@@ -461,6 +465,24 @@ describe("EndpointRun.run, the two flushes", () => {
       ),
     ).toEqual(["Running…"]);
     expect(batchUpdateCalls).toHaveLength(2);
+  });
+});
+
+describe("EndpointRun.run, the start time", () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("is the wall-clock time in the spreadsheet's own zone", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2024-03-15T02:30:00Z"));
+    const { batchUpdateCalls } = stubOccupancySheet([4, 6], "Asia/Tokyo");
+
+    runEndpoint(selectiveEndpoint(noOp));
+
+    expect(fillsFor(batchUpdateCalls, timeLastRanColIndex)[0]?.value).toBe(
+      "2024-03-15 11:30:00",
+    );
   });
 });
 
