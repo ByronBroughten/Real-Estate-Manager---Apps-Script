@@ -3,6 +3,7 @@ import type {
   ColumnNameFiltered,
   SheetNameOf,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { FloorTabName } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import type { CheckboxColumnName } from "../05_Operators/CheckboxColumnOperator";
@@ -57,4 +58,13 @@ export type EndpointDispatched<SN extends SheetNameSimple> = {
 };
 
 // Each key carries its own sheet, so a column from another sheet is unnameable.
-export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };
+export type EndpointsAll = {
+  [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>>;
+};
+
+// The framework owns the config sheets' entries, so the app's map can't name one.
+export type Endpoints = {
+  [
+    FN in ColumnFullName as SheetNameOf<FN> extends FloorTabName ? never : FN
+  ]?: Endpoint<SheetNameOf<FN>>;
+};

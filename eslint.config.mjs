@@ -31,7 +31,12 @@ const layerFolders = [
   "06_API",
 ];
 // The un-numbered folders built on the tiers; utils/ and testSupport/ are not among them.
-const aboveTierFolders = ["businessEndpoints", "chores", "nodeHost"];
+const aboveTierFolders = [
+  "appsScriptHost",
+  "businessEndpoints",
+  "chores",
+  "nodeHost",
+];
 const layerImportPattern = (layer) => ({
   regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
   message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (src/AGENTS.md).`,
@@ -98,6 +103,7 @@ export default defineConfig(
     ignores: [
       "src/00_Source/GoogleSheets/**",
       "src/index.ts",
+      "src/appsScriptHost/**",
       "src/nodeHost/**",
       "src/chores/**",
       "src/testSupport/**",

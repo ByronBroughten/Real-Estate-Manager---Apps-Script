@@ -3,9 +3,10 @@ import type {
   ColumnFullName,
   ColumnNameFiltered,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import type { FloorTabName } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import type { SheetNameSimple } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import type { Endpoint, Endpoints } from "./Endpoints";
+import type { Endpoint, Endpoints, EndpointsAll } from "./Endpoints";
 
 type SelectorColumnOf<SN extends SheetNameSimple> = NonNullable<
   Endpoint<SN>["selector"]
@@ -66,8 +67,36 @@ describe("Endpoint at the widened sheet name the dispatch boundary uses", () => 
   });
 });
 
-describe("Endpoints", () => {
+describe("EndpointsAll", () => {
   it("is keyed by every column full name and nothing else", () => {
-    assertType<IsExactly<keyof Endpoints, ColumnFullName>>(true);
+    assertType<IsExactly<keyof EndpointsAll, ColumnFullName>>(true);
+  });
+});
+
+describe("Endpoints, the app's map", () => {
+  it("rejects a column on a config sheet", () => {
+    assertType<
+      IsExactly<
+        Extract<keyof Endpoints, "spreadsheetConfig_fillRowIdsTimeLastRan">,
+        never
+      >
+    >(true);
+    assertType<
+      IsExactly<Extract<keyof Endpoints, `${FloorTabName}_${string}`>, never>
+    >(true);
+  });
+  it("keeps every column on an app sheet", () => {
+    assertType<
+      IsExactly<
+        keyof Endpoints,
+        Exclude<ColumnFullName, `${FloorTabName}_${string}`>
+      >
+    >(true);
+    assertType<
+      IsExactly<
+        Extract<keyof Endpoints, "occupancy_buildLedgerTimeLastRan">,
+        "occupancy_buildLedgerTimeLastRan"
+      >
+    >(true);
   });
 });
