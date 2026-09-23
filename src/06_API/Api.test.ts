@@ -131,6 +131,28 @@ describe("Api.handleSheetChange", () => {
     ).toBeNull();
     expect(installSource).not.toHaveBeenCalled();
   });
+  it("installs the source and returns the floor's toast for a renamed Value Config", () => {
+    stubSheetsService({
+      sheets: [{ sheetId: sheetConfigs.valueConfig.sheetGid, title: "Values" }],
+    });
+    const installSource = vi.fn();
+    expect(
+      Api.handleSheetChange({ configs, endpoints: {} }, "other", installSource),
+    ).toBe(
+      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
+    );
+    expect(installSource).toHaveBeenCalledOnce();
+  });
+  it("returns no toast when the floor tabs are intact", () => {
+    stubSheetsService({
+      sheets: [
+        { sheetId: sheetConfigs.valueConfig.sheetGid, title: "Value Config" },
+      ],
+    });
+    expect(
+      Api.handleSheetChange({ configs, endpoints: {} }, "other", vi.fn()),
+    ).toBeNull();
+  });
 });
 
 describe("Api.isSuspectedApiCall", () => {

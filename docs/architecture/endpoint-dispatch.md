@@ -23,8 +23,18 @@ export interface Endpoint<SN extends SheetNameSimple> {
   runOnUncheck?: boolean;
 }
 
-export type Endpoints = { [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>> };
+export type EndpointsDispatched = {
+  [FN in ColumnFullName]?: Endpoint<SheetNameOf<FN>>;
+};
+
+export type Endpoints = {
+  [FN in ColumnFullName as SheetNameOf<FN> extends FloorTabName
+    ? never
+    : FN]?: Endpoint<SheetNameOf<FN>>;
+};
 ```
+
+`Endpoints` is the app's map: a key on one of the four config sheets is a type error, because the framework owns those entries (`frameworkEndpoints`). `Api` spreads the framework's entries last into an `EndpointsDispatched`, so a collision still resolves to the framework at runtime.
 
 `action` is the only required field, so an endpoint takes exactly the machinery it wants: a bulk "select all" declares an action alone and stays at the round-trip floor; a run over a selection declares the feedback columns and the selector too. `retainSelection` and `requireOneRow` are nameable only inside a declared selector, so an endpoint without one cannot carry either as a silent no-op. Register endpoints with a plain `: Endpoints` annotation — **not** `makeStructuredConfig`, which lets an unknown key through (see [`docs/style.md`](../style.md), "Type modeling").
 
