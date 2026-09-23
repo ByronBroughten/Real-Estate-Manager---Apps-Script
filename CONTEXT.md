@@ -35,7 +35,7 @@ The first row of the Table's data, always the row immediately below the Table he
 _Avoid_: data start, top data row, row 5
 
 **Layout value**:
-One of Spreadsheet Config's cells saying where the bookkeeping rows and the Table sit and how IDs are written. All but ID header are fixed for now.
+One of Spreadsheet Config's cells saying where the bookkeeping rows and the Table sit and how IDs are written. All but ID header and Name header are fixed for now.
 _Avoid_: layout setting, layout constant, spreadsheet config value
 
 **Blank row**:
@@ -153,6 +153,14 @@ _Avoid_: nullable, optional column, blank allowed
 **Untyped**:
 Said of a column whose type menu, checkbox validation, and first-data-row number format all tell the app nothing about what it holds — left on Automatic with no format the app maps and no Insert > Checkbox, or a dropdown that no Value Config rule backs. The app guesses its type from the column's top value.
 _Avoid_: unset, automatic, missing type
+
+**Name column**:
+A column of names people type to refer to a row, such as a unit's or a property's name, on a sheet Sheet Config marks as having one. Its header is Spreadsheet Config's Name header. An endpoint finds a row by what's in it; a name that matches no row, or several, is the endpoint's to report, and the app enforces nothing else about it.
+_Avoid_: key column, label column, title column
+
+**Serial date**:
+A date as Sheets stores it: the count of days since 30 December 1899. Adding or comparing serial dates doesn't depend on a timezone; knowing which one is today does, and the spreadsheet's own timezone decides that.
+_Avoid_: date number, day serial, JS date
 
 ### Units
 
