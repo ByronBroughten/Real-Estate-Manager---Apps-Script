@@ -1,12 +1,3 @@
-import typescript from "@rollup/plugin-typescript";
+import { rollupPreset } from "./scripts/rollupPreset.mjs";
 
-export default {
-  input: "src/index.ts",
-  output: {
-    file: "dist/bundle.js",
-    format: "es",
-    sourcemap: true,
-  },
-  treeshake: false,
-  plugins: [typescript({ tsconfig: "./tsconfig.json" })],
-};
+export default rollupPreset({ input: "src/index.ts" });
