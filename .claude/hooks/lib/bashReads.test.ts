@@ -2,9 +2,9 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { BashReads, LARGE_FILE_LINES } from "./bashReads.ts";
+import { BashReads, largeFileLines } from "./bashReads.ts";
 
-const bigFile = "line\n".repeat(LARGE_FILE_LINES + 1);
+const bigFile = "line\n".repeat(largeFileLines + 1);
 
 function projectWith(files: Record<string, string>): string {
   const projectDir = mkdtempSync(join(tmpdir(), "bash-reads-"));

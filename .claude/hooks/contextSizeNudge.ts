@@ -2,9 +2,8 @@
 import { closeSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
 import { type HookInput, readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 
-const BYTES_PER_TOKEN = 4;
-const TAIL_BYTES = 4 * 1024 * 1024;
-const THRESHOLDS = [
+const transcriptBytes = { perToken: 4, tail: 4 * 1024 * 1024 } as const;
+const thresholds = [
   {
     tokens: 1_000_000,
     operator: "This session's context is past ~1M tokens. End it after a written handoff.",
@@ -36,10 +35,10 @@ class ContextSize {
     const tokens = this._estimateTokens();
     if (tokens === null) return;
     const fired = this._fired();
-    const threshold = THRESHOLDS.find((each) => tokens >= each.tokens);
+    const threshold = thresholds.find((each) => tokens >= each.tokens);
     if (!threshold || fired.includes(threshold.tokens)) return;
     // Crossing 1M first also retires the 400k warning; each fires at most once.
-    const retired = THRESHOLDS.filter((each) => each.tokens <= threshold.tokens).map((each) => each.tokens);
+    const retired = thresholds.filter((each) => each.tokens <= threshold.tokens).map((each) => each.tokens);
     writeFileSync(this.firedPath, JSON.stringify([...new Set([...fired, ...retired])]));
     const estimate = `${Math.round(tokens / 1000)}k`;
     writeHookOutput({
@@ -65,12 +64,12 @@ class ContextSize {
     const { size } = statSync(path);
     const usage = lastUsageIn(readTail(path, size));
     if (usage) return usage;
-    return Math.round(size / BYTES_PER_TOKEN);
+    return Math.round(size / transcriptBytes.perToken);
   }
 }
 
 function readTail(path: string, size: number): string {
-  const length = Math.min(size, TAIL_BYTES);
+  const length = Math.min(size, transcriptBytes.tail);
   const buffer = Buffer.alloc(length);
   const fd = openSync(path, "r");
   try {

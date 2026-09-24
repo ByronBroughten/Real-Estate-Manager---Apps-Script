@@ -1,8 +1,14 @@
 // PreToolUse on Bash and gsheets writes: a dev write asks while a pinning file is dirty; a gsheets write is allowed only on the clean dev ID.
 import { spawnSync } from "node:child_process";
-import { type Decision, type DirtyPinningFiles, PINNING_FILES, bashDecision, gsheetsWriteDecision } from "./lib/pinnedTargets.ts";
-import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
+import {
+  type Decision,
+  type DirtyPinningFiles,
+  bashDecision,
+  gsheetsWriteDecision,
+  pinningFiles,
+} from "./lib/pinnedTargets.ts";
+import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 
 await runFailOpen(() => {
   const input = readHookInput();
@@ -32,7 +38,7 @@ await runFailOpen(() => {
 });
 
 function dirtyPinningFiles(projectDir: string): DirtyPinningFiles {
-  const { status, stdout } = spawnSync("git", ["status", "--porcelain", "--", ...PINNING_FILES], {
+  const { status, stdout } = spawnSync("git", ["status", "--porcelain", "--", ...pinningFiles], {
     cwd: projectDir,
     encoding: "utf8",
   });

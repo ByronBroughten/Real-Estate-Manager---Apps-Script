@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { STYLE_GATE_REASON, editDecision, isStyleRead } from "./styleGate.ts";
+import { styleGateReason, editDecision, isStyleRead } from "./styleGate.ts";
 
 const projectDir = "/repo";
 const generatedDirs = ["packages/real-estate/src/generated", "packages/framework/dev/generated"];
@@ -9,17 +9,17 @@ const frameworkFile = "/repo/packages/framework/src/02_SpreadsheetRaw/SheetRaw.t
 
 describe("editDecision", () => {
   it("denies a TypeScript edit in either package's src/ before docs/style.md was read", () => {
-    expect(edit(frameworkFile, false)).toEqual({ denyReason: STYLE_GATE_REASON });
-    expect(edit("/repo/packages/real-estate/src/index.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit(frameworkFile, false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/packages/real-estate/src/index.ts", false)).toEqual({ denyReason: styleGateReason });
   });
 
   it("denies a TypeScript edit in the framework's dev/, which ESLint lints too", () => {
-    expect(edit("/repo/packages/framework/dev/devConfigs.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit("/repo/packages/framework/dev/devConfigs.ts", false)).toEqual({ denyReason: styleGateReason });
   });
 
   it("denies a relative path resolved from the working directory", () => {
     expect(edit("SheetRaw.ts", false, "/repo/packages/framework/src/02_SpreadsheetRaw")).toEqual({
-      denyReason: STYLE_GATE_REASON,
+      denyReason: styleGateReason,
     });
   });
 
@@ -28,10 +28,10 @@ describe("editDecision", () => {
   });
 
   it("denies an edit to tooling, which ESLint lints too", () => {
-    expect(edit("/repo/.claude/hooks/lib/bashReads.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
-    expect(edit("/repo/scripts/docLint.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
-    expect(edit("/repo/packages/framework/scripts/rollupPreset.js", false)).toEqual({ denyReason: STYLE_GATE_REASON });
-    expect(edit("/repo/eslint.config.mjs", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit("/repo/.claude/hooks/lib/bashReads.ts", false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/scripts/docLint.ts", false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/packages/framework/scripts/rollupPreset.js", false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/eslint.config.mjs", false)).toEqual({ denyReason: styleGateReason });
   });
 
   it("allows edits outside the ESLint set", () => {
@@ -53,12 +53,12 @@ describe("editDecision", () => {
   });
 
   it("does not say it only covers packages/", () => {
-    expect(STYLE_GATE_REASON).not.toMatch(/under packages/);
+    expect(styleGateReason).not.toMatch(/under packages/);
   });
 
   it("names what to read and to retry", () => {
-    expect(STYLE_GATE_REASON).toMatch(/docs\/style\.md/);
-    expect(STYLE_GATE_REASON).toMatch(/retry/);
+    expect(styleGateReason).toMatch(/docs\/style\.md/);
+    expect(styleGateReason).toMatch(/retry/);
   });
 });
 
@@ -106,7 +106,7 @@ describe("isStyleRead", () => {
 
 describe("the refusal reason", () => {
   it("says a partial Read doesn't count", () => {
-    expect(STYLE_GATE_REASON).toMatch(/full Read/);
-    expect(STYLE_GATE_REASON).toMatch(/partial/);
+    expect(styleGateReason).toMatch(/full Read/);
+    expect(styleGateReason).toMatch(/partial/);
   });
 });

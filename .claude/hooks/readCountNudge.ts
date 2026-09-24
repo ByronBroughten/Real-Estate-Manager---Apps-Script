@@ -3,10 +3,9 @@ import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import { BashReads } from "./lib/bashReads.ts";
 import { type HookInput, readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 
-const FIRST_NUDGE = 15;
-const NUDGE_EVERY = 10;
-const READ_TOOLS = new Set(["Read", "Grep", "Glob"]);
-const EXEMPT_AGENT_TYPES = new Set(["repo-explorer"]);
+const nudgeAt = { first: 15, every: 10 } as const;
+const readTools = new Set(["Read", "Grep", "Glob"]);
+const exemptAgentTypes = new Set(["repo-explorer"]);
 
 class ReadCount {
   readonly input: HookInput;
@@ -23,11 +22,11 @@ class ReadCount {
       writeFileSync(this.logPath, "");
       return;
     }
-    if (EXEMPT_AGENT_TYPES.has(this.input.agent_type ?? "") || !this._isRead()) return;
+    if (exemptAgentTypes.has(this.input.agent_type ?? "") || !this._isRead()) return;
     // One appended line per read keeps parallel tool calls from losing counts.
     appendFileSync(this.logPath, `${this._counterKey()}\n`);
     const count = this._count();
-    if (count < FIRST_NUDGE || (count - FIRST_NUDGE) % NUDGE_EVERY !== 0) return;
+    if (count < nudgeAt.first || (count - nudgeAt.first) % nudgeAt.every !== 0) return;
     writeHookOutput({
       hookSpecificOutput: {
         hookEventName: "PostToolUse",
@@ -40,7 +39,7 @@ class ReadCount {
   }
   _isRead(): boolean {
     const { tool_name: toolName, tool_input: toolInput } = this.input;
-    if (READ_TOOLS.has(toolName ?? "")) return true;
+    if (readTools.has(toolName ?? "")) return true;
     if (toolName !== "Bash" || typeof toolInput?.command !== "string") return false;
     try {
       return BashReads.initFromHook(this.input, toolInput.command).classify().isRead;

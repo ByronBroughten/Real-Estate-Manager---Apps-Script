@@ -5,20 +5,27 @@ import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import type { HookInput } from "./hookIo.ts";
 import { readSheetsConfigs } from "./sheetsConfigs.ts";
 
-export const LARGE_FILE_LINES = 150;
-const UNGUARDED_DIRS = ["node_modules", ".git", ".probe", "dist", "coverage"];
-const WRAPPERS = new Set(["sudo", "command", "env", "time", "nice", "nohup", "exec", "builtin"]);
-const WHOLE_FILE_COMMANDS = new Set(["cat", "nl", "bat", "less", "more", "tac"]);
-const HEAD_TAIL = new Set(["head", "tail"]);
-const SEARCH_COMMANDS = new Set(["grep", "egrep", "fgrep", "rg", "ag"]);
-const SEPARATORS = new Set([";", "&&", "||", "&", "$(", "(", ")", "`"]);
-const PIPES = new Set(["|", "|&"]);
+export const largeFileLines = 150;
+const unguardedDirs = ["node_modules", ".git", ".probe", "dist", "coverage"];
+const commandNames = {
+  wrappers: new Set(["sudo", "command", "env", "time", "nice", "nohup", "exec", "builtin"]),
+  wholeFile: new Set(["cat", "nl", "bat", "less", "more", "tac"]),
+  headTail: new Set(["head", "tail"]),
+  search: new Set(["grep", "egrep", "fgrep", "rg", "ag"]),
+} as const;
+const operators = {
+  separators: new Set([";", "&&", "||", "&", "$(", "(", ")", "`"]),
+  pipes: new Set(["|", "|&"]),
+} as const;
 
 export interface BashReadsProps {
   command: string;
   cwd: string;
   projectDir: string;
 }
+
+// projectDir defaults to cwd.
+type BashReadsInit = Omit<BashReadsProps, "projectDir"> & { projectDir?: string };
 
 export interface Classification {
   isRead: boolean;
@@ -51,7 +58,7 @@ export class BashReads {
     this.cwd = cwd;
     this.projectDir = projectDir;
   }
-  static init({ command, cwd, projectDir }: Omit<BashReadsProps, "projectDir"> & { projectDir?: string }): BashReads {
+  static init({ command, cwd, projectDir }: BashReadsInit): BashReads {
     return new BashReads({ command, cwd, projectDir: projectDir ?? cwd });
   }
   static initFromHook(input: HookInput, command: string): BashReads {
@@ -73,7 +80,7 @@ export class BashReads {
         if (args[0]) cwd = resolve(cwd, expandHome(args[0]));
         continue;
       }
-      const read = this._readOf(name, args, segment);
+      const read = readOf(name, args, segment);
       if (!read) continue;
       isRead = true;
       for (const file of [...read.files, ...segment.inputFiles]) {
@@ -83,33 +90,24 @@ export class BashReads {
     }
     return { isRead, denyReason: null };
   }
-  _readOf(name: string, args: string[], segment: Segment): FileRead | null {
-    if (WHOLE_FILE_COMMANDS.has(name)) return fileRead(nonFlags(args), segment, "whole");
-    if (HEAD_TAIL.has(name)) return headTailRead(name, args, segment);
-    if (name === "sed") return sedRead(args, segment);
-    if (name === "awk") return fileRead(nonFlags(args).slice(1), segment, "filter");
-    const isSearch = SEARCH_COMMANDS.has(name) || (name === "git" && args[0] === "grep");
-    if (!isSearch || (segment.isPiped && segment.inputFiles.length === 0)) return null;
-    return { kind: "search", files: [] };
-  }
   _denyReasonFor(name: string, read: FileRead, path: string): string | null {
     if (read.kind === "search") return null;
     const shown = relative(this.projectDir, path);
     if (this._columnConfigsPaths().includes(path)) {
-      if (read.kind === "range" && read.span !== undefined && read.span <= LARGE_FILE_LINES) return null;
+      if (read.kind === "range" && read.span !== undefined && read.span <= largeFileLines) return null;
       return (
         `Bash-read guard: \`${name}\` would read columnConfigs.ts beyond one block. ` +
         `Grep it for the sheet key (e.g. \`"occupancy":\`) with -A to read that object, ` +
-        `or \`sed -n 'a,bp'\` a range of at most ${LARGE_FILE_LINES} lines. (AGENTS.md, "Read the block, not the file".)`
+        `or \`sed -n 'a,bp'\` a range of at most ${largeFileLines} lines. (AGENTS.md, "Read the block, not the file".)`
       );
     }
     if (read.kind !== "whole" || !this._isGuarded(path)) return null;
     const lines = lineCountOf(path);
-    if (lines <= LARGE_FILE_LINES) return null;
+    if (lines <= largeFileLines) return null;
     return (
       `Bash-read guard: \`${name}\` would dump all ${lines} lines of ${shown}. ` +
       `Use Read with offset/limit on the block you need, or Grep for the symbol first; ` +
-      `\`sed -n 'a,bp'\` and \`head -n ${LARGE_FILE_LINES}\` also work.`
+      `\`sed -n 'a,bp'\` and \`head -n ${largeFileLines}\` also work.`
     );
   }
   _columnConfigsPaths(): string[] {
@@ -121,9 +119,19 @@ export class BashReads {
   _isGuarded(path: string): boolean {
     const inside = relative(this.projectDir, path);
     if (!inside || inside.startsWith("..") || isAbsolute(inside)) return false;
-    if (dirname(inside).split(sep).some((dir) => UNGUARDED_DIRS.includes(dir))) return false;
+    if (dirname(inside).split(sep).some((dir) => unguardedDirs.includes(dir))) return false;
     return existsSync(path) && statSync(path).isFile();
   }
+}
+
+function readOf(name: string, args: string[], segment: Segment): FileRead | null {
+  if (commandNames.wholeFile.has(name)) return fileRead(nonFlags(args), segment, "whole");
+  if (commandNames.headTail.has(name)) return headTailRead(name, args, segment);
+  if (name === "sed") return sedRead(args, segment);
+  if (name === "awk") return fileRead(nonFlags(args).slice(1), segment, "filter");
+  const isSearch = commandNames.search.has(name) || (name === "git" && args[0] === "grep");
+  if (!isSearch || (segment.isPiped && segment.inputFiles.length === 0)) return null;
+  return { kind: "search", files: [] };
 }
 
 // Each simple command's words, wrappers and env assignments dropped; throws on an unbalanced quote.
@@ -165,7 +173,7 @@ function headTailRead(name: string, args: string[], segment: Segment): FileRead 
     if (arg.startsWith("-c")) continue;
     count = Number.parseInt(String(value).replace(/^[+-]/, ""), 10);
   }
-  const isSmall = isBounded && Number.isFinite(count) && count <= LARGE_FILE_LINES;
+  const isSmall = isBounded && Number.isFinite(count) && count <= largeFileLines;
   return fileRead(files, segment, isSmall ? "range" : "whole", { span: count });
 }
 
@@ -217,7 +225,7 @@ function lineCountOf(path: string): number {
 
 function commandWords(words: string[]): string[] {
   let start = 0;
-  while (start < words.length && (/^\w+=/.test(words[start] ?? "") || WRAPPERS.has(words[start] ?? ""))) start++;
+  while (start < words.length && (/^\w+=/.test(words[start] ?? "") || commandNames.wrappers.has(words[start] ?? ""))) start++;
   return words.slice(start);
 }
 
@@ -264,7 +272,7 @@ function segmentsOf(tokens: Token[]): Segment[] {
     }
     redirect = null;
     segments.push(current);
-    current = newSegment(PIPES.has(token.value));
+    current = newSegment(operators.pipes.has(token.value));
   }
   segments.push(current);
   return segments;
@@ -277,10 +285,10 @@ function newSegment(isPiped: boolean): Segment {
 function tokenize(command: string): Token[] {
   const tokens: Token[] = [];
   let word: string | null = null;
-  const endWord = () => {
+  function endWord() {
     if (word !== null) tokens.push({ type: "word", value: word });
     word = null;
-  };
+  }
   for (let i = 0; i < command.length; i++) {
     const char = command.charAt(i);
     const next = command[i + 1];
@@ -313,7 +321,7 @@ function tokenize(command: string): Token[] {
       const pair = char + (next ?? "");
       const value = ["||", "&&", "|&", ";;"].includes(pair) ? pair : char;
       if (value.length === 2) i++;
-      tokens.push({ type: "op", value: SEPARATORS.has(value) || PIPES.has(value) ? value : ";" });
+      tokens.push({ type: "op", value: operators.separators.has(value) || operators.pipes.has(value) ? value : ";" });
     } else {
       word = (word ?? "") + char;
     }
