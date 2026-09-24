@@ -557,7 +557,9 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(
-      cellsWrittenTo(batchUpdateCalls, variableGid).get(topDataRowIndex)?.get(1),
+      cellsWrittenTo(batchUpdateCalls, variableGid)
+        .get(topDataRowIndex)
+        ?.get(1),
     ).toBe(SerialDate.fromYmd({ year: 2024, month: 3, day: 15 }));
   });
 

@@ -58,7 +58,10 @@ export const updateTerms: Endpoint<"occupancy"> = {
         );
       }
       if (!lastEndDate) {
-        lastActiveTerm.updateValue("endDate", SerialDate.dayBefore(nextStartDate));
+        lastActiveTerm.updateValue(
+          "endDate",
+          SerialDate.dayBefore(nextStartDate),
+        );
       }
       occupancyTerms.appendRowWithAllVals({
         paymentAllocationDefault: "Earliest unaccounted charge",
