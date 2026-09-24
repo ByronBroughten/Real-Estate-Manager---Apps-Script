@@ -166,6 +166,14 @@ describe("a build with the preset", () => {
     expect(code).not.toMatch(/^export /m);
   }, 60_000);
 
+  it("keeps an entry function that is already exported, with no export statement", async () => {
+    const code = await bundleOf(
+      twoPackages("export function triggerOnEdit() { return 1; }\n"),
+    );
+    expect(code).toContain("function triggerOnEdit()");
+    expect(code).not.toMatch(/^export /m);
+  }, 60_000);
+
   it("keeps everything with treeshake: false", async () => {
     const code = await bundleOf(twoPackages(appSource), { treeshake: false });
     expect(code).toContain("function neverCalled()");
