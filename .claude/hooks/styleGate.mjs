@@ -1,4 +1,4 @@
-// PostToolUse on Read records a full read of docs/style.md; PreToolUse on Edit and Write denies a src/ TypeScript edit until one is recorded.
+// PostToolUse on Read records a full read of docs/style.md; PreToolUse on Edit and Write denies a gated TypeScript edit until one is recorded.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { STYLE_PATH, editDecision, isStyleRead } from "./lib/styleGate.mjs";

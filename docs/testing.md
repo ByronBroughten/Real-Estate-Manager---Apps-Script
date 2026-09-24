@@ -44,15 +44,15 @@ SpreadsheetRaw / EndpointRun tests inject a RawSource (`stubSheetsService`). `Go
 
 ## The Apps Script surface and its fakes
 
-Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, and `appsScriptHost/AppsScriptApi.ts`, which decodes the trigger events with `AppsScript.sheetEdit` / `AppsScript.sheetChange` and is tested against faked events and globals. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
+Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, and `appsScriptHost/AppsScriptApi.ts`, which decodes the trigger events with `AppsScript.sheetEdit` / `AppsScript.sheetChange` and is tested against faked events and globals. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../packages/framework/src/00_Source/GoogleSheets/AGENTS.md)).
 
 ## Two test programs, two config sets
 
-The framework tests (tiers `00`–`06`, `appsScriptHost/`, `nodeHost/`, `testSupport/` and `utils/`) run on the dev spreadsheet's configs, and every other `src/` test, today `businessEndpoints/`, runs on the app's. Each set has its own Vitest project and `tsc` program, so each program carries one `Register` augmentation: `dev/devConfigs.ts` for the framework and `src/appConfigs.ts` for the app, each installed for its tests by `dev/installDevConfigs.ts` and `src/installAppConfigs.ts`. The app's `tsconfig.json` excludes the framework tests, and `testSupport/` compiles in both. An app test takes its fakes and `EndpointRun` only from `@byronbroughten/sheets-framework/testing`. A framework test reads a GID or column ID through `getSheetTraitByName`/`getColumnTraitByName`, and a config sheet's columns through `installedConfigs()`, never by importing a `generated/` file. It never names a real-estate sheet or column, and a made-up sheet in a fixture takes a neutral name such as `Widget`.
+The framework tests (tiers `00`–`06`, `appsScriptHost/`, `nodeHost/`, `testSupport/` and `utils/`) run on the dev spreadsheet's configs, and the app's tests, today `businessEndpoints/`, run on the app's. Each package is its own Vitest project and `tsc` program, so each program carries one `Register` augmentation: the framework's `dev/devConfigs.ts` and the app's `src/appConfigs.ts`, each installed for its tests by `dev/installDevConfigs.ts` and `src/installAppConfigs.ts`. The app's program reaches framework source only through imports, so framework tests never enter it, and `testSupport/` compiles in both. An app test takes its fakes and `EndpointRun` only from `@byronbroughten/sheets-framework/testing`. A framework test reads a GID or column ID through `getSheetTraitByName`/`getColumnTraitByName`, and a config sheet's columns through `installedConfigs()`, never by importing a `generated/` file. It never names a real-estate sheet or column, and a made-up sheet in a fixture takes a neutral name such as `Widget`.
 
 ## The dev fixtures and their exemplar columns
 
-A framework test names a sheet or column of the dev spreadsheet's fixtures, never a real-estate one. `buildDevFixtures` is their checked-in recipe, and `dev/generated/` is what `dev:gen:configs` read back from them:
+A framework test names a sheet or column of the dev spreadsheet's fixtures, never a real-estate one. `buildDevFixtures` is their checked-in recipe, and the framework's `dev/generated/` is what `dev:gen:configs` read back from them:
 
 | Sheet | Shape | Exemplars |
 | --- | --- | --- |
@@ -73,7 +73,7 @@ An endpoint is tested through `EndpointRun`, never by calling its action (the ru
 
 ## The fake answers what the adapter asked; Google doesn't
 
-Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row 1), echoes each colour as a `*ColorStyle`, and `getByDataFilter` drops sheet-level fields such as `conditionalFormats`. A new read isn't done until a chore dry run has read it from the live sheet (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
+Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row 1), echoes each colour as a `*ColorStyle`, and `getByDataFilter` drops sheet-level fields such as `conditionalFormats`. A new read isn't done until a chore dry run has read it from the live sheet (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../packages/framework/src/00_Source/GoogleSheets/AGENTS.md)).
 
 ## Live-sheet verification
 

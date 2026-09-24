@@ -2,7 +2,7 @@
 
 Map fragment. Sibling headings live in this folder. What a run sees between fetch and flush: [the working view](./working-view.md).
 
-A write mutates local state and queues a request; one `batchUpdate` per flush sends them in a fixed order by kind. A flushed row delete or mid-Table column insert makes indexes stale, and a new write method asserts they aren't. The rules for adding a write: [`src/02_SpreadsheetRaw/AGENTS.md`](../../src/02_SpreadsheetRaw/AGENTS.md).
+A write mutates local state and queues a request; one `batchUpdate` per flush sends them in a fixed order by kind. A flushed row delete or mid-Table column insert makes indexes stale, and a new write method asserts they aren't. The rules for adding a write: [`src/02_SpreadsheetRaw/AGENTS.md`](../../packages/framework/src/02_SpreadsheetRaw/AGENTS.md).
 
 ## Writes queue locally until a flush
 
@@ -10,7 +10,7 @@ A write mutates local state and queues a request; one `batchUpdate` per flush se
 
 ## A new write is queued and gathered on the sheet
 
-A new write is queued and gathered on the sheet, and the flusher only sends the batch (the rules for a new write: [`src/02_SpreadsheetRaw/AGENTS.md`](../../src/02_SpreadsheetRaw/AGENTS.md)). The sheet, row or cell builds the request, either when the write is queued (`SheetRaw.updateTitle`) or from the write queue at flush time (`SheetRaw.gatherFillRequest`). Row deletes, still built in `SpreadsheetFlusherRaw`, are the one exception. A new request kind therefore settles four things: its queue op, the state that holds it, the gather method that builds it (none for a spreadsheet-level op like `addSheet`, since a tab that doesn't exist yet has no sheet state to gather from), and its slot in the send order below.
+A new write is queued and gathered on the sheet, and the flusher only sends the batch (the rules for a new write: [`src/02_SpreadsheetRaw/AGENTS.md`](../../packages/framework/src/02_SpreadsheetRaw/AGENTS.md)). The sheet, row or cell builds the request, either when the write is queued (`SheetRaw.updateTitle`) or from the write queue at flush time (`SheetRaw.gatherFillRequest`). Row deletes, still built in `SpreadsheetFlusherRaw`, are the one exception. A new request kind therefore settles four things: its queue op, the state that holds it, the gather method that builds it (none for a spreadsheet-level op like `addSheet`, since a tab that doesn't exist yet has no sheet state to gather from), and its slot in the send order below.
 
 ## Flush order
 

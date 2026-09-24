@@ -64,7 +64,7 @@ Done when every wrong turn, rediscovered fact, user-stated rule and style ruling
 
 ## 3. Route and rank
 
-- **docs/vocabulary.md** and **`src/AGENTS.md`**: the architecture words and the tiers. README.md is a derived view for people, never the home of a fact. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md` and the files it indexes; testing in `docs/testing.md`; Claude Code hooks in `docs/claude-code-guardrails.md`. A design principle is one line in docs/design.md plus its reasoning in `docs/design/`.
+- **docs/vocabulary.md** and **`packages/framework/src/AGENTS.md`**: the architecture words and the tiers. README.md is a derived view for people, never the home of a fact. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md` and the files it indexes; testing in `docs/testing.md`; Claude Code hooks in `docs/claude-code-guardrails.md`. A design principle is one line in docs/design.md plus its reasoning in `docs/design/`.
 - **docs/style.md**: code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** or **style ruling** almost always lands here, as one line. Its reasoning and worked examples live under `docs/style/`; a rule that needs an example adds the line to docs/style.md and the example to the fragment. For a ruling, the before and after from the session's diff is the example.
 - **AGENTS.md**: loaded every turn, so it earns a line only if that line changes turn-one behavior. Everything else goes in the other two, or under `docs/agents/`, with a pointer at most. Full routing: `docs/agents/prose-files.md`.
 

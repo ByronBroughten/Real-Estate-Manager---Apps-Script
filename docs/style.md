@@ -1,6 +1,6 @@
 # Coding style
 
-Distilled from the user's own refactors of AI-generated code, plus a survey of `src/` for consistent, repeated patterns. This file covers code _shape_; where things live is [`src/AGENTS.md`](../src/AGENTS.md) and [`docs/vocabulary.md`](./vocabulary.md).
+Distilled from the user's own refactors of AI-generated code, plus a survey of `src/` for consistent, repeated patterns. This file covers code _shape_; where things live is [`packages/framework/src/AGENTS.md`](../packages/framework/src/AGENTS.md) and [`docs/vocabulary.md`](./vocabulary.md).
 
 One line per rule. The reasoning and worked examples are one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 

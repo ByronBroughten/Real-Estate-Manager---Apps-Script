@@ -1,0 +1,5 @@
+{
+  // The app program: src/ plus the framework source it imports, typed to the app's configs.
+  "extends": "@byronbroughten/sheets-framework/tsconfig.base.json",
+  "include": ["src/**/*.ts"]
+}

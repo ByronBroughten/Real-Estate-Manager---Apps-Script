@@ -1,0 +1,5 @@
+{
+  "spreadsheetId": "1wzFBUFani9pOHAOla7nQObqDuTQU084HZotAPbQlcnQ",
+  "generatedDir": "src/generated",
+  "choreHomes": ["src/chores", "src/chores/oneOff"]
+}

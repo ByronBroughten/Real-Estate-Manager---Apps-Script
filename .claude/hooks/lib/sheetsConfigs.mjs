@@ -1,10 +1,10 @@
-// Every package's sheets.config.json, read for its generated folder and spreadsheet ID. The list becomes packages/* at the workspace move.
+// Every package's sheets.config.json, read for its generated folder and spreadsheet ID.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 export const SHEETS_CONFIGS = [
-  { path: "sheets.config.json", scriptPrefix: "app" },
-  { path: join("dev", "sheets.config.json"), scriptPrefix: "dev" },
+  { path: join("packages", "real-estate", "sheets.config.json"), scriptPrefix: "app" },
+  { path: join("packages", "framework", "sheets.config.json"), scriptPrefix: "dev" },
 ];
 
 // Project-relative generatedDir per package; a config that can't be read is skipped.

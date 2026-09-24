@@ -103,21 +103,35 @@ describe("checkDocs", () => {
   });
 
   describe("sizes", () => {
-    it("fails a nested AGENTS.md over 15 lines", () => {
+    it("fails a package's src/AGENTS.md over 15 lines", () => {
       expect(
         messages({
-          "src/AGENTS.md": nested(16),
-          "src/CLAUDE.md": "@AGENTS.md\n",
+          "packages/app/src/AGENTS.md": nested(16),
+          "packages/app/src/CLAUDE.md": "@AGENTS.md\n",
         }),
       ).toEqual([
-        "src/AGENTS.md: nested AGENTS.md is 16 lines; the limit is 15",
+        "packages/app/src/AGENTS.md: nested AGENTS.md is 16 lines; the limit is 15",
       ]);
     });
 
-    it("passes a nested AGENTS.md of 15 lines", () => {
+    it("passes a package's src/AGENTS.md of 15 lines", () => {
       expect(
-        check({ "src/AGENTS.md": nested(15), "src/CLAUDE.md": "@AGENTS.md\n" }),
+        check({
+          "packages/app/src/AGENTS.md": nested(15),
+          "packages/app/src/CLAUDE.md": "@AGENTS.md\n",
+        }),
       ).toEqual([]);
+    });
+
+    it("holds a root src/AGENTS.md to the folder limit", () => {
+      expect(
+        messages({
+          "src/AGENTS.md": nested(11),
+          "src/CLAUDE.md": "@AGENTS.md\n",
+        }),
+      ).toEqual([
+        "src/AGENTS.md: nested AGENTS.md is 11 lines; the limit is 10",
+      ]);
     });
 
     it("fails a folder's nested AGENTS.md over 10 lines", () => {

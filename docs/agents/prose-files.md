@@ -18,8 +18,9 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | --- | --- |
 | `AGENTS.md` | Only what changes an agent's behavior on every task: commands, gates, git rules, the README line, the router. Loaded every turn, under 5 KB. |
 | `CLAUDE.md` | `@AGENTS.md` plus pointers to Claude Code-only mechanics (subagents, hooks). |
-| `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. 15 lines or fewer (lint). |
-| `src/businessEndpoints/`, `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/`, `scripts/` `AGENTS.md` | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. |
+| `packages/*/CLAUDE.md` | Only the restart-at-root notice for a session started inside that package. |
+| `packages/framework/src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. 15 lines or fewer (lint). |
+| The framework's `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/` and `scripts/` `AGENTS.md`, and the app's `src/businessEndpoints/` one | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. |
 | `docs/style.md` | Code shape, one line per rule, rule only. Reasoning, examples and instances go under `docs/style/`. |
 | `docs/vocabulary.md` | The architecture words, one line per term. |
 | `docs/vocabulary/*.md` | Each term's elaboration, split by subject, indexed by docs/vocabulary.md's "When \| File" table. |
@@ -43,8 +44,8 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | README section | Mirrors |
 | --- | --- |
 | Opening paragraph | What the project manages: CONTEXT.md |
-| Two layers, one codebase | Framework vs business boundary: `src/AGENTS.md` |
-| Architecture: the numbered tiers | The tier list: `src/AGENTS.md`; the words: docs/vocabulary.md |
+| Two layers, one codebase | Framework vs business boundary: `packages/framework/src/AGENTS.md` |
+| Architecture: the numbered tiers | The tier list: `packages/framework/src/AGENTS.md`; the words: docs/vocabulary.md |
 | Generated data — do not hand-edit | [`docs/generated-data.md`](../generated-data.md) |
 | Testing | [`docs/testing.md`](../testing.md) |
 | Known rough edges | The properties-probe blind spot: [`docs/architecture/round-trips.md`](../architecture/round-trips.md) and `SpreadsheetRaw`'s placement reporter |

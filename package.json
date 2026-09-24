@@ -1,41 +1,29 @@
 {
-  "name": "real-estate-manager-apps-script",
-  "version": "1.0.0",
+  "name": "dev-science-monorepo",
+  "private": true,
   "type": "module",
-  "description": "",
-  "main": "index.js",
-  "bin": {
-    "sheets-framework": "scripts/sheets-framework.mjs"
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "tsc": "tsc && tsc -p tsconfig.framework.json",
-    "lint": "eslint src && npm run -s lint:docs",
+    "tsc": "npm run tsc --workspaces",
+    "lint": "eslint packages && npm run -s lint:docs",
     "lint:docs": "node scripts/lintDocs.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "build": "rollup --config && clasp push",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "app:chore": "node scripts/sheets-framework.mjs chore",
-    "app:gen:configs": "node scripts/sheets-framework.mjs gen-configs",
-    "app:probe": "node scripts/sheets-framework.mjs probe",
-    "app:build": "npm run build",
-    "dev:chore": "cd dev && node ../scripts/sheets-framework.mjs chore",
-    "dev:gen:configs": "cd dev && node ../scripts/sheets-framework.mjs gen-configs",
-    "dev:probe": "cd dev && node ../scripts/sheets-framework.mjs probe",
-    "dev:build": "echo 'dev:build: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1",
-    "dev:push": "echo 'dev:push: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1",
-    "dev:run": "echo 'dev:run: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "real-estate-manager-apps-script"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "tslib": "^2.8.1"
+    "app:chore": "npm run chore -w real-estate-app --",
+    "app:gen:configs": "npm run gen:configs -w real-estate-app --",
+    "app:probe": "npm run probe -w real-estate-app --",
+    "app:build": "npm run build -w real-estate-app --",
+    "dev:chore": "npm run chore -w @byronbroughten/sheets-framework --",
+    "dev:gen:configs": "npm run gen:configs -w @byronbroughten/sheets-framework --",
+    "dev:probe": "npm run probe -w @byronbroughten/sheets-framework --",
+    "dev:build": "npm run build -w @byronbroughten/sheets-framework --",
+    "dev:push": "npm run push -w @byronbroughten/sheets-framework --",
+    "dev:run": "npm run run -w @byronbroughten/sheets-framework --"
   },
   "devDependencies": {
     "@eslint/js": "^9.35.0",
@@ -45,7 +33,6 @@
     "eslint": "^9.35.0",
     "prettier": "3.9.6",
     "rollup": "^4.54.0",
-    "tsx": "^4.23.13",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.43.0",
     "vitest": "^4.1.11"
