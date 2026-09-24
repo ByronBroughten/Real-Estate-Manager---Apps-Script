@@ -10,6 +10,7 @@ import type {
   GridCellSnapshot,
   TableColumnType,
 } from "../00_Source/RawSource/RawSource";
+import { dimensionIds } from "../01_SpreadsheetSchema/dimensionIds";
 import { Val, type PrimitiveValueName } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
@@ -94,7 +95,7 @@ export class ColumnMetaRaw<
     idPrefix: string;
     header: string;
   }): this {
-    const columnId = this.sheet.makeColumnId(idPrefix);
+    const columnId = dimensionIds.col(idPrefix);
     this.uniformCell("columnId").updateValue(columnId);
     this.uniformCell("tableHeader").updateValue(header);
     return this;

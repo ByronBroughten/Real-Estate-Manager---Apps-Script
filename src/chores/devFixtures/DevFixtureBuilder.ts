@@ -1,13 +1,10 @@
 import { googleRawRequest } from "../../00_Source/GoogleSheets/GoogleSheetsAPI";
+import { dimensionIds } from "../../01_SpreadsheetSchema/dimensionIds";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import {
-  devColumnId,
-  devFixtureSheets,
-  type DevFixtureSheet,
-} from "./devFixtureSheets";
+import { devFixtureSheets, type DevFixtureSheet } from "./devFixtureSheets";
 
 // A tab that exists is left alone; rebuild one by deleting it and rerunning (docs/how-it-runs.md).
 export class DevFixtureBuilder extends SpreadsheetBaseNamed {
@@ -88,7 +85,7 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
         sheetId: sheetGid,
         rowIndex: ssConfigGet("columnIdRowIdxBase0"),
         colIndex,
-        value: devColumnId(fixture.idPrefix, column.key),
+        value: dimensionIds.col(fixture.idPrefix, column.key),
       });
       column.values.forEach((value, rowOffset) => {
         if (value === "") return;
@@ -153,7 +150,7 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
     const columnConfig = this.ss.sheet("columnConfig");
     fixture.columns.forEach(({ key, header, emptyValueAllowed }) => {
       if (emptyValueAllowed === undefined) return;
-      const columnId = devColumnId(fixture.idPrefix, key);
+      const columnId = dimensionIds.col(fixture.idPrefix, key);
       const [row] = columnConfig.rowsFiltered({
         sheetGid: fixture.sheetGid,
         columnId,
