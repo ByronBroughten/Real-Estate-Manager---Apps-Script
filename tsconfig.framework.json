@@ -18,6 +18,8 @@
     "src/testSupport/**/*.ts",
     "src/utils/**/*.ts",
     "src/TypeDeclarations/**/*.ts",
+    "src/framework.ts",
+    "src/frameworkTesting.ts",
     "dev/**/*.ts"
   ],
   "exclude": ["src/01_SpreadsheetSchema/generated/**"]

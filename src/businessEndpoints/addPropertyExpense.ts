@@ -1,4 +1,4 @@
-import type { Endpoint } from "../06_API/Endpoints";
+import type { Endpoint } from "@byronbroughten/sheets-framework";
 import { PropertyExpenseOperator } from "./BusinessOperators/PropertyExpenseOperator";
 
 export const addPropertyExpense: Endpoint<"addPropertyExpense"> = {

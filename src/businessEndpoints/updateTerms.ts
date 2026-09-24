@@ -1,4 +1,4 @@
-import type { Endpoint } from "../06_API/Endpoints";
+import type { Endpoint } from "@byronbroughten/sheets-framework";
 
 export const updateTerms: Endpoint<"occupancy"> = {
   timeLastRan: "updateTermsTimeLastRan",

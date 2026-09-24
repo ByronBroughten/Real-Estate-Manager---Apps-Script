@@ -7,7 +7,7 @@
 - `04_SpreadsheetNamed`: the name-based API most code should use.
 - `05_Operators`: classes on a Named base, suited to one data structure, config regeneration included.
 - `06_API`: generic endpoint dispatch (`Api`, `EndpointRun`), handed its endpoint map.
-- **Dependencies point only downward; lint holds the numbered tiers and `utils/` to it.** A file goes in the lowest tier that satisfies it. `utils/` is below every tier; `appsScriptHost/`, `businessEndpoints`, `chores/`, `nodeHost/` and `index.ts` sit above them all.
+- **Dependencies point only downward; lint holds the numbered tiers and `utils/` to it.** A file goes in the lowest tier that satisfies it. `utils/` is below every tier; `appsScriptHost/`, `businessEndpoints`, `appUtils/`, `chores/`, `nodeHost/`, `index.ts` and the two framework entries sit above them all. **App code imports the framework only from `@byronbroughten/sheets-framework` (`framework.ts`), and `/testing` (`frameworkTesting.ts`) only in `*.test.ts` and `installAppConfigs.ts`**; lint holds it, and `tsconfig.json`/`vitest.config.ts` map the name until the workspace move. The app keeps its own `Arr` and `Val` in `appUtils/`.
 - **Before adding a file, ask "would this make sense in a different Sheets-backed app?"** Yes: tiers 00–06, generically named. No: `businessEndpoints/`, or `chores/` for a one-off job.
 - **`src/` is host-neutral, `nodeHost/` included: no Node or DOM APIs.** It is platform-neutral outside `00_Source/GoogleSheets/`, `appsScriptHost/` and the entry points. Lint holds both.
 - **Regenerate, never hand-edit, the data in `01_SpreadsheetSchema/generated/`.** Read by block: grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that one object; open a long test file's one `describe`.
