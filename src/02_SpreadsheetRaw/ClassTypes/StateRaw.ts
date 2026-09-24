@@ -5,6 +5,7 @@ import type {
 import type { ConditionalFormatRule } from "../../00_Source/RawSource/ConditionalFormat";
 import type { EditProtection } from "../../00_Source/RawSource/EditProtection";
 import type {
+  AddCheckboxValidationOperation,
   AddConditionalFormatRuleOperation,
   AddProtectedRangeOperation,
   AddSheetOperation,
@@ -66,6 +67,7 @@ export interface UpdateRequests {
   updateTableName: UpdateTableNameOperation[];
   updateTableColumnType: UpdateTableColumnTypeOperation[];
   updateTableColumnProperties: UpdateTableColumnPropertiesOperation[];
+  addCheckboxValidation: AddCheckboxValidationOperation[];
   raw: OpaqueRawWriteOperation[];
 }
 
@@ -265,6 +267,7 @@ export function emptyUpdateRequests(): UpdateRequests {
     updateTableName: [],
     updateTableColumnType: [],
     updateTableColumnProperties: [],
+    addCheckboxValidation: [],
     raw: [],
   };
 }

@@ -103,6 +103,18 @@ const requestBody: {
       label.fields(repeatCell?.fields),
     );
   },
+  setDataValidation(
+    setDataValidation:
+      GoogleAppsScript.Sheets.Schema.SetDataValidationRequest | undefined,
+  ): string {
+    const range = setDataValidation?.range;
+    return columns(
+      label.range(range),
+      `${rangeCellCount(range)} cell(s)`,
+      setDataValidation?.rule?.condition?.type ?? "",
+      "",
+    );
+  },
   appendCells(
     appendCells: GoogleAppsScript.Sheets.Schema.AppendCellsRequest | undefined,
   ): string {

@@ -1,4 +1,3 @@
-import { googleRawRequest } from "../../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { dimensionIds } from "../../01_SpreadsheetSchema/dimensionIds";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
@@ -101,7 +100,6 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
       this._addEntryCheckbox(fixture, fixture.entryCheckboxColumnKey);
     }
   }
-  // Raw until data validation is modeled: #150.
   private _addEntryCheckbox(fixture: DevFixtureSheet, columnKey: string): void {
     const columnIndex = fixture.columns.findIndex(
       (column) => column.key === columnKey,
@@ -118,20 +116,13 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
         colIndex,
         value: false,
       })
-      .gatherRawRequest(
-        googleRawRequest({
-          setDataValidation: {
-            range: {
-              sheetId: fixture.sheetGid,
-              startRowIndex: rowIndex,
-              endRowIndex: rowIndex + 1,
-              startColumnIndex: colIndex,
-              endColumnIndex: colIndex + 1,
-            },
-            rule: { condition: { type: "BOOLEAN" } },
-          },
-        }),
-      );
+      .gatherAddedSheetCheckboxValidationRequest({
+        sheetId: fixture.sheetGid,
+        startRowIndex: rowIndex,
+        endRowIndex: rowIndex + 1,
+        startColumnIndex: colIndex,
+        endColumnIndex: colIndex + 1,
+      });
   }
   private _ensureLetApiAccess(fixture: DevFixtureSheet): void {
     const sheetConfig = this.ss.sheet("sheetConfig");

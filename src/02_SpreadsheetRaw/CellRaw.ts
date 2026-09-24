@@ -135,6 +135,11 @@ export class CellRaw<
     });
     return this;
   }
+  addCheckboxValidation(): this {
+    this.sheet.activeTable.validateColIndexNotStale(this.colIndex);
+    this.sheet.addCheckboxValidationAt(this.gridRange);
+    return this;
+  }
   addConditionalFormatRule(declaration: ConditionalFormatDeclaration): this {
     this.sheet.addConditionalFormatRuleAt(this.gridRange, declaration);
     return this;
