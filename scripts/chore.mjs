@@ -2,18 +2,22 @@
 import { existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { startNodeHost } from "./nodeHost.mjs";
+import { takeTarget } from "./targets.mjs";
 
 const CHORES_URL = new URL("../src/chores/", import.meta.url);
 const CHORE_HOMES = ["", "oneOff/"];
 
 class ChoreRunner {
-  constructor({ choreName, isSend, isJson }) {
+  constructor({ target, choreName, isSend, isJson }) {
+    this.target = target;
     this.choreName = choreName;
     this.isSend = isSend;
     this.isJson = isJson;
   }
-  static init(argv) {
+  static init(argvWithTarget) {
+    const { target, argv } = takeTarget(argvWithTarget);
     return new ChoreRunner({
+      target,
       choreName: argv.find((arg) => !arg.startsWith("--")),
       isSend: argv.includes("--send"),
       isJson: argv.includes("--json"),
@@ -21,7 +25,9 @@ class ChoreRunner {
   }
   async run() {
     if (!this.choreName) {
-      console.log("Usage: npm run chore <name> [-- --send] [-- --json]");
+      console.log(
+        "Usage: npm run <app|dev>:chore <name> [-- --send] [-- --json]",
+      );
       console.log("  no flag   preview what it would write, writing nothing");
       console.log("  --send    apply it to the live spreadsheet");
       console.log("  --json    preview as raw request JSON\n");
@@ -30,7 +36,10 @@ class ChoreRunner {
     }
     // Resolved before the host starts, so a typo costs no setup.
     const modulePath = this._choreModulePath();
-    const host = await startNodeHost({ isDryRun: !this.isSend });
+    const host = await startNodeHost({
+      isDryRun: !this.isSend,
+      target: this.target,
+    });
     const chore = await this._loadChore(modulePath);
     console.log(`chore: ${this.choreName} — ${chore.description}\n`);
     const { SpreadsheetNamed } =

@@ -8,13 +8,22 @@
       "Bash(npm test)",
       "Bash(npm test *)",
       "Bash(npm run tsc *)",
-      "Bash(npm run gen:configs)",
-      "Bash(npm run chore)",
-      "Bash(npm run chore addMissingColumnIds)",
-      "Bash(npm run chore fillMissingRowIds)",
-      "Bash(npm run probe)",
-      "Bash(npm run probe *)",
-      "Bash(npm run -s probe *)",
+      "Bash(npm run app:gen:configs)",
+      "Bash(npm run app:chore)",
+      "Bash(npm run app:chore addMissingColumnIds)",
+      "Bash(npm run app:chore fillMissingRowIds)",
+      "Bash(npm run app:probe)",
+      "Bash(npm run app:probe *)",
+      "Bash(npm run -s app:probe *)",
+      "Bash(npm run dev:gen:configs)",
+      "Bash(npm run dev:chore)",
+      "Bash(npm run dev:chore *)",
+      "Bash(npm run dev:probe)",
+      "Bash(npm run dev:probe *)",
+      "Bash(npm run -s dev:probe *)",
+      "Bash(npm run dev:build)",
+      "Bash(npm run dev:push)",
+      "Bash(npm run dev:run *)",
       "Bash(npx prettier --check *)",
       "Bash(npx eslint *)",
       "Bash(gh label list *)",
@@ -23,7 +32,12 @@
       "mcp__gsheets__list_sheets"
     ],
     "ask": [
-      "Bash(npm run chore * --send*)"
+      "Bash(npm run app:chore * --send*)",
+      "Bash(npm run app:build*)",
+      "Bash(clasp deploy*)",
+      "Bash(npx clasp deploy*)",
+      "mcp__gsheets__create_spreadsheet",
+      "mcp__gsheets__share_spreadsheet"
     ],
     "deny": [
       "Read(./src/01_SpreadsheetSchema/generated/columnConfigs.ts)"
@@ -37,6 +51,16 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bashReadGuard.mjs\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__gsheets__update_cells|mcp__gsheets__batch_update_cells|mcp__gsheets__create_sheet",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pinnedTargetGuard.mjs\"",
             "timeout": 10
           }
         ]

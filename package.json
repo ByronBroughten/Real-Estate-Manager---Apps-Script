@@ -16,7 +16,17 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "chore": "tsx scripts/chore.mjs",
-    "probe": "node scripts/sheetsProbe.mjs"
+    "probe": "node scripts/sheetsProbe.mjs",
+    "app:chore": "npm run chore -- --target app",
+    "app:gen:configs": "npm run gen:configs -- --target app",
+    "app:probe": "npm run -s probe -- --target app",
+    "app:build": "npm run build",
+    "dev:chore": "npm run chore -- --target dev",
+    "dev:gen:configs": "npm run gen:configs -- --target dev",
+    "dev:probe": "npm run -s probe -- --target dev",
+    "dev:build": "echo 'dev:build: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1",
+    "dev:push": "echo 'dev:push: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1",
+    "dev:run": "echo 'dev:run: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1"
   },
   "repository": {
     "type": "git",

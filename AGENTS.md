@@ -7,10 +7,11 @@ Open only the section or disclosed doc the task needs.
 ## Commands
 
 - `npm run tsc`, `npm test` and `npm run lint`: always safe. Run all three before calling a change done, and treat a new type error as yours unless a clean checkout has it too.
-- `npm run chore <name>`: a dry run, always safe. The Node host adapter suppresses its writes. `npm run chore <name> -- --send` applies it and needs a yes **naming that chore**.
-- `npm run probe`: read-only raw Sheets JSON. Stdout gets a summary and the full response goes to `.probe/last.json`; read a line range of it, never print a full body into the chat. Ask before any other script that opens the `clasp` credential.
-- `npm run gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/how-it-runs.md`](./docs/how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).
-- Ask first for `npm run build`, `clasp push` / `run` / `deploy`, and any gsheets MCP write (give the exact sheet, range and values). `share_spreadsheet` needs its own yes, naming who and at what permission. Reading the live sheet needs no yes.
+- **Every live-spreadsheet command names its target: `dev:*` (the `Sheets Framework Dev` spreadsheet) or `app:*` (the real-estate one).** `dev:*` has a standing yes. `app:*` keeps the asks below. A yes for one spreadsheet never covers the other, and a bare `npm run chore`/`probe`/`gen:configs` always asks. Full table: [`docs/how-it-runs.md`](./docs/how-it-runs.md#targets-dev-and-app).
+- `npm run app:chore <name>`: a dry run, always safe. The Node host adapter suppresses its writes. `npm run app:chore <name> -- --send` applies it and needs a yes **naming that chore**.
+- `npm run app:probe`: read-only raw Sheets JSON. Stdout gets a summary and the full response goes to `.probe/last.json`; read a line range of it, never print a full body into the chat. Ask before any other script that opens the `clasp` credential.
+- `npm run app:gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/how-it-runs.md`](./docs/how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).
+- Ask first for `npm run app:build`, `clasp push` / `run` / `deploy`, and any gsheets MCP write to the app spreadsheet (give the exact sheet, range and values). `create_spreadsheet` always asks; `share_spreadsheet` needs its own yes, naming who and at what permission. Reading either sheet needs no yes.
 
 ## Every task
 

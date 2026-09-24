@@ -1,18 +1,26 @@
 // Regenerates the four config files from the live config sheets, on the Node host.
 import { spawnSync } from "node:child_process";
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startNodeHost } from "./nodeHost.mjs";
+import { takeTarget } from "./targets.mjs";
+
+const DEFAULT_GENERATED_DIR = "src/01_SpreadsheetSchema/generated";
 
 class ConfigFilesGenerator {
-  path = {
-    spreadsheetConfig: configsPath("spreadsheetConfig"),
-    sheetConfigs: configsPath("sheetConfigs"),
-    columnConfigs: configsPath("columnConfigs"),
-    valueConfigs: configsPath("valueConfigs"),
-  };
-  static init() {
-    return new ConfigFilesGenerator();
+  constructor({ target }) {
+    this.target = target;
+    const generatedDir = target?.generatedDir ?? DEFAULT_GENERATED_DIR;
+    this.path = {
+      spreadsheetConfig: configsPath(generatedDir, "spreadsheetConfig"),
+      sheetConfigs: configsPath(generatedDir, "sheetConfigs"),
+      columnConfigs: configsPath(generatedDir, "columnConfigs"),
+      valueConfigs: configsPath(generatedDir, "valueConfigs"),
+    };
+  }
+  static init(argv) {
+    return new ConfigFilesGenerator(takeTarget(argv));
   }
   async run() {
     const {
@@ -27,6 +35,7 @@ class ConfigFilesGenerator {
     } = await this._generate();
 
     // Write nothing until all four are confirmed good; a subset would go stale.
+    mkdirSync(dirname(this.path.spreadsheetConfig), { recursive: true });
     writeFileSync(this.path.spreadsheetConfig, spreadsheetConfig);
     writeFileSync(this.path.sheetConfigs, sheetConfigs);
     writeFileSync(this.path.columnConfigs, columnConfigs);
@@ -57,7 +66,7 @@ class ConfigFilesGenerator {
   }
 
   async _generate() {
-    await startNodeHost({ isDryRun: false });
+    await startNodeHost({ isDryRun: false, target: this.target });
     const { ConfigCoordinator } =
       await import("../src/05_Operators/ConfigCoordinator.ts");
     return ConfigCoordinator.init().generateConfigFiles();
@@ -79,13 +88,10 @@ class ConfigFilesGenerator {
   }
 }
 
-function configsPath(base) {
+function configsPath(generatedDir, base) {
   return fileURLToPath(
-    new URL(
-      `../src/01_SpreadsheetSchema/generated/${base}.ts`,
-      import.meta.url,
-    ),
+    new URL(`../${generatedDir}/${base}.ts`, import.meta.url),
   );
 }
 
-await ConfigFilesGenerator.init().run();
+await ConfigFilesGenerator.init(process.argv.slice(2)).run();
