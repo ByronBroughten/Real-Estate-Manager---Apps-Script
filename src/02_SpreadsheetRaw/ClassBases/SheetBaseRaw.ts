@@ -4,11 +4,11 @@ import type {
 } from "../../00_Source/RawSource/RawSource";
 import { Obj } from "../../utils/Obj";
 import { Val } from "../../utils/Val";
-import {
-  emptySheetStateRaw,
-  type ColumnStateRaw,
-  type RowStateRaw,
-  type SheetStateRaw,
+import { emptyStateRaw } from "../ClassTypes/emptyStateRaw";
+import type {
+  ColumnStateRaw,
+  RowStateRaw,
+  SheetStateRaw,
 } from "../ClassTypes/StateRaw";
 import {
   SpreadsheetBaseRaw,
@@ -28,7 +28,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
   }
   private _ensureSheetState() {
     if (!this.spreadsheetStateRaw.sheets.has(this.sheetGid)) {
-      this.spreadsheetStateRaw.sheets.set(this.sheetGid, emptySheetStateRaw());
+      this.spreadsheetStateRaw.sheets.set(this.sheetGid, emptyStateRaw.sheetState());
     }
   }
   protected _initSheetState(sheet: SheetSnapshot): void {

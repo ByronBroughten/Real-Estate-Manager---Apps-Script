@@ -6,11 +6,10 @@ import type {
 } from "../00_Source/RawSource/RawSource";
 import { validateFormulaString } from "./CellRaw";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
-import {
-  emptySheetWriteQueue,
-  emptySpreadsheetWriteQueue,
-  type AddedSheetCell,
-  type FindReplaceProps,
+import { emptyStateRaw } from "./ClassTypes/emptyStateRaw";
+import type {
+  AddedSheetCell,
+  FindReplaceProps,
 } from "./ClassTypes/StateRaw";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SheetMetaRaw } from "./SheetMetaRaw";
@@ -124,9 +123,9 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   }
   // Abandons queued writes while local state still reflects them — terminal step only.
   discardQueuedChanges(): this {
-    this.spreadsheetStateRaw.writeQueue = emptySpreadsheetWriteQueue();
+    this.spreadsheetStateRaw.writeQueue = emptyStateRaw.spreadsheetWriteQueue();
     this.sheetsStateRaw.forEach((state) => {
-      state.writeQueue = emptySheetWriteQueue();
+      state.writeQueue = emptyStateRaw.sheetWriteQueue();
     });
     return this;
   }

@@ -4,11 +4,11 @@ import type {
 } from "../../00_Source/CellValues/cellValues";
 import { Obj } from "../../utils/Obj";
 import { CellRaw } from "../CellRaw";
-import {
-  emptyRowChanges,
-  type RowChangeProps,
-  type RowChangesToSave,
-  type RowChangeUpdateProps,
+import { emptyStateRaw } from "../ClassTypes/emptyStateRaw";
+import type {
+  RowChangeProps,
+  RowChangesToSave,
+  RowChangeUpdateProps,
 } from "../ClassTypes/StateRaw";
 import { SheetRaw } from "../SheetRaw";
 import { RowBaseRaw } from "./RowBaseRaw";
@@ -82,7 +82,7 @@ export abstract class RowCommonRaw extends RowBaseRaw {
   private _ensureChangesToSaveExists(): void {
     const rowChanges = this.sheetState.writeQueue.rows;
     if (!rowChanges.has(this.rowIndex)) {
-      rowChanges.set(this.rowIndex, emptyRowChanges());
+      rowChanges.set(this.rowIndex, emptyStateRaw.rowChanges());
     }
   }
   addRowChangeToSave(props: RowChangeProps): this {

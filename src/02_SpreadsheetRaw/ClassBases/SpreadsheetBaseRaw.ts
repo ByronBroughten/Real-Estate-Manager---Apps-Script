@@ -1,11 +1,7 @@
 import { installedRawSource } from "../../00_Source/RawSource/RawSource";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
-import {
-  emptySpreadsheetFetchQueue,
-  emptySpreadsheetWriteQueue,
-  type SheetsStateRaw,
-  type StateRaw,
-} from "../ClassTypes/StateRaw";
+import { emptyStateRaw } from "../ClassTypes/emptyStateRaw";
+import type { SheetsStateRaw, StateRaw } from "../ClassTypes/StateRaw";
 import { SpreadsheetBaseSchema } from "../../01_SpreadsheetSchema/SpreadsheetBaseSchema";
 
 export interface SpreadsheetRawProps {
@@ -40,8 +36,8 @@ export class SpreadsheetBaseRaw {
         allSheetPropertiesAreFetched: false,
         timeZone: null,
         rawSource: installedRawSource(),
-        fetchQueue: emptySpreadsheetFetchQueue(),
-        writeQueue: emptySpreadsheetWriteQueue(),
+        fetchQueue: emptyStateRaw.spreadsheetFetchQueue(),
+        writeQueue: emptyStateRaw.spreadsheetWriteQueue(),
         sheets: new Map(),
       },
     };

@@ -1,10 +1,9 @@
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
-import {
-  emptySheetChanges,
-  emptyUpdateRequests,
-  type RowChangesToSave,
-  type SheetChangesToSave,
-  type UpdateTableColumnTypeOperation,
+import { emptyStateRaw } from "../ClassTypes/emptyStateRaw";
+import type {
+  RowChangesToSave,
+  SheetChangesToSave,
+  UpdateTableColumnTypeOperation,
 } from "../ClassTypes/StateRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
 
@@ -50,7 +49,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       for (const [rowIndex, change] of state.writeQueue.rows) {
         this._gatherRowRequests(change, { sheetGid, rowIndex });
       }
-      state.writeQueue.sheet = emptySheetChanges();
+      state.writeQueue.sheet = emptyStateRaw.sheetChanges();
       state.writeQueue.rows = new Map();
     });
     // After the sheet queues, so the insert-column refusal sees this flush's inserts.
@@ -157,7 +156,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       ...requests.raw,
     ];
     this.spreadsheetStateRaw.rawSource.flush(operations);
-    this.spreadsheetStateRaw.writeQueue.updateRequests = emptyUpdateRequests();
+    this.spreadsheetStateRaw.writeQueue.updateRequests = emptyStateRaw.updateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
