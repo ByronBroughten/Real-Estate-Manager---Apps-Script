@@ -1,12 +1,12 @@
 // `sheets-framework gen-configs`: regenerates the package's four config files from its live config sheets, on the Node host.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, join, relative } from "node:path";
+import { dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ConfigRegeneration } from "../src/05_Operators/ConfigCoordinator.ts";
 import {
-  configFiles,
   type ConfigFile,
+  configFilePath,
   hasPackageConfigs,
   loadFrameworkConfigs,
   loadPackageConfigs,
@@ -20,9 +20,12 @@ class ConfigFilesGenerator {
   constructor({ sheetsConfig }: { sheetsConfig: SheetsConfig }) {
     this.sheetsConfig = sheetsConfig;
     const { generatedDir } = sheetsConfig;
-    this.path = Object.fromEntries(
-      configFiles.map((base) => [base, join(generatedDir, `${base}.ts`)]),
-    ) as Record<ConfigFile, string>;
+    this.path = {
+      spreadsheetConfig: configFilePath(generatedDir, "spreadsheetConfig"),
+      sheetConfigs: configFilePath(generatedDir, "sheetConfigs"),
+      columnConfigs: configFilePath(generatedDir, "columnConfigs"),
+      valueConfigs: configFilePath(generatedDir, "valueConfigs"),
+    };
   }
   static init(sheetsConfig: SheetsConfig): ConfigFilesGenerator {
     return new ConfigFilesGenerator({ sheetsConfig });

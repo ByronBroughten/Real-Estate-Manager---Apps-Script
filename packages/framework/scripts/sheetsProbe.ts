@@ -7,7 +7,6 @@ import type { SheetsConfig } from "./sheetsConfig.ts";
 
 const sheetsApiBase = "https://sheets.googleapis.com/v4/spreadsheets";
 const outputName = ".probe/last.json";
-const probeFlags = new Set(["--fields", "--filter", "--path"]);
 const printLimits = { lines: 60, listed: 50 } as const;
 
 interface SheetsProbeProps {
@@ -18,6 +17,12 @@ interface SheetsProbeProps {
 }
 
 type ProbeOption = "fields" | "filter" | "path";
+
+const probeFlags = new Map<string, ProbeOption>([
+  ["--fields", "fields"],
+  ["--filter", "filter"],
+  ["--path", "path"],
+]);
 
 class SheetsProbe {
   readonly sheetsConfig: SheetsConfig;
@@ -38,13 +43,14 @@ class SheetsProbe {
     const options: SheetsProbeProps = { sheetsConfig };
     for (let i = 0; i < argv.length; i += 2) {
       const flag = argv[i] ?? "";
+      const option = probeFlags.get(flag);
       const value = argv[i + 1];
-      if (!probeFlags.has(flag) || value === undefined) {
+      if (option === undefined || value === undefined) {
         throw new Error(
           `Unexpected argument "${flag}".\n\n${usage(outputShownOf(sheetsConfig))}`,
         );
       }
-      options[flag.slice(2) as ProbeOption] = value;
+      options[option] = value;
     }
     return new SheetsProbe(options);
   }

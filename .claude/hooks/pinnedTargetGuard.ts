@@ -49,6 +49,6 @@ function dirtyPinningFiles(projectDir: string): DirtyPinningFiles {
     .map((line) => line.slice(3));
 }
 
-function devSpreadsheetId(projectDir: string): unknown {
+function devSpreadsheetId(projectDir: string): string | undefined {
   return readSheetsConfigs(projectDir).find(({ scriptPrefix }) => scriptPrefix === "dev")?.spreadsheetId;
 }

@@ -61,8 +61,9 @@ export function checkDocs({
   }
   const violations: Violation[] = [];
   for (const [path, text] of Object.entries(docs)) {
-    const report: Report = (line, message) =>
+    function report(line: number, message: string): void {
       violations.push({ path, line, message });
+    }
     if (isLinkChecked(path))
       checkLinks(path, text, { docs, known, slugsOf, report });
     if (isDocsFolderFile(path)) checkLead(text, report);

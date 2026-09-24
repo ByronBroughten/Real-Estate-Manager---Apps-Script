@@ -8,7 +8,7 @@ export interface SheetsConfigFile {
 }
 
 export interface SheetsConfigEntry extends SheetsConfigFile {
-  spreadsheetId: unknown;
+  spreadsheetId: string | undefined;
   generatedDir: string;
 }
 
@@ -31,7 +31,7 @@ export function readSheetsConfigs(projectDir: string): SheetsConfigEntry[] {
       {
         path,
         scriptPrefix,
-        spreadsheetId: raw.spreadsheetId,
+        spreadsheetId: typeof raw.spreadsheetId === "string" ? raw.spreadsheetId : undefined,
         generatedDir: join(dirname(path), raw.generatedDir),
       },
     ];

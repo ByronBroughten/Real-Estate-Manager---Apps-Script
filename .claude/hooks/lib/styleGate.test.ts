@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { styleGateReason, editDecision, isStyleRead } from "./styleGate.ts";
+import { type EditDecision, styleGateReason, editDecision, isStyleRead } from "./styleGate.ts";
 
 const projectDir = "/repo";
 const generatedDirs = ["packages/real-estate/src/generated", "packages/framework/dev/generated"];
-const edit = (filePath: string, hasReadStyle: boolean, cwd = projectDir) =>
-  editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs });
+function edit(filePath: string, hasReadStyle: boolean, cwd = projectDir): EditDecision {
+  return editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs });
+}
 const frameworkFile = "/repo/packages/framework/src/02_SpreadsheetRaw/SheetRaw.ts";
 
 describe("editDecision", () => {
@@ -63,12 +64,13 @@ describe("editDecision", () => {
 });
 
 describe("isStyleRead", () => {
-  const read = (
+  function read(
     filePath: string,
     bounds: { offset?: number; limit?: number; totalLines?: number } = {},
     cwd = projectDir,
-  ) =>
-    isStyleRead({ projectDir, cwd, filePath, totalLines: 40, ...bounds });
+  ): boolean {
+    return isStyleRead({ projectDir, cwd, filePath, totalLines: 40, ...bounds });
+  }
 
   it("is true for an unbounded Read of docs/style.md", () => {
     expect(read("/repo/docs/style.md")).toBe(true);

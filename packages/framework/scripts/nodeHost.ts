@@ -7,6 +7,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import type { SheetsHttpRequest } from "../src/00_Source/GoogleSheets/GoogleSheetsAPI.ts";
 import type { Configs } from "../src/01_SpreadsheetSchema/configRegister.ts";
 import type { NodeHost } from "../src/nodeHost/NodeHost.ts";
+import { Val } from "../src/utils/Val.ts";
 import type { SheetsConfig } from "./sheetsConfig.ts";
 
 const claspAuth = {
@@ -98,7 +99,8 @@ export class SheetsTransport {
 // A failing token endpoint need not answer in JSON, so a parse error is one too.
 function accessTokenOf(body: string): string | null {
   try {
-    return JSON.parse(body).access_token ?? null;
+    const { access_token: accessToken } = JSON.parse(body);
+    return Val.is.string(accessToken) ? accessToken : null;
   } catch {
     return null;
   }
@@ -121,7 +123,11 @@ function claspCredential(): ClaspCredential {
         "Run sheets-framework setup-auth.",
     );
   }
-  return credential;
+  return {
+    client_id: Val.validate.string(credential.client_id),
+    client_secret: Val.validate.string(credential.client_secret),
+    refresh_token: Val.validate.string(credential.refresh_token),
+  };
 }
 
 function fetchSync(request: FetchRequest): FetchResponse {
@@ -140,7 +146,11 @@ function fetchSync(request: FetchRequest): FetchResponse {
       `The request subprocess exited with ${status}.${stderr.trim() ? ` ${stderr.trim()}` : ""}`,
     );
   }
-  return JSON.parse(stdout);
+  const response = JSON.parse(stdout);
+  return {
+    status: Val.validate.number(response.status),
+    body: Val.validate.string(response.body),
+  };
 }
 
 export async function startNodeHost({
@@ -167,19 +177,27 @@ export async function startNodeHost({
 export async function loadPackageConfigs({
   generatedDir,
 }: SheetsConfig): Promise<Configs> {
-  const entries = await Promise.all(
-    configFiles.map(async (base) => {
-      const url = pathToFileURL(join(generatedDir, `${base}.ts`));
-      return [base, (await import(url.href))[base]];
-    }),
-  );
-  return Object.fromEntries(entries) as Configs;
+  return {
+    spreadsheetConfig: await importConfig(generatedDir, "spreadsheetConfig"),
+    sheetConfigs: await importConfig(generatedDir, "sheetConfigs"),
+    columnConfigs: await importConfig(generatedDir, "columnConfigs"),
+    valueConfigs: await importConfig(generatedDir, "valueConfigs"),
+  };
+}
+
+async function importConfig(generatedDir: string, base: ConfigFile) {
+  const url = pathToFileURL(configFilePath(generatedDir, base));
+  return (await import(url.href))[base];
 }
 
 export function hasPackageConfigs({ generatedDir }: SheetsConfig): boolean {
   return configFiles.every((base) =>
-    existsSync(join(generatedDir, `${base}.ts`)),
+    existsSync(configFilePath(generatedDir, base)),
   );
+}
+
+export function configFilePath(generatedDir: string, base: ConfigFile): string {
+  return join(generatedDir, `${base}.ts`);
 }
 
 // The framework's own dev configs: enough to read any spreadsheet's config floor.

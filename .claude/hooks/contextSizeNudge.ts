@@ -81,9 +81,7 @@ function readTail(path: string, size: number): string {
 }
 
 function lastUsageIn(text: string): number | null {
-  const lines = text.split("\n");
-  for (let i = lines.length - 1; i >= 0; i--) {
-    const line = lines[i] ?? "";
+  for (const line of text.split("\n").reverse()) {
     if (!line.includes('"usage"')) continue;
     let entry;
     try {

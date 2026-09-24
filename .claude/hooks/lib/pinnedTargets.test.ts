@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { type GsheetsWrite, bashDecision, devWriteOf, gsheetsWriteDecision } from "./pinnedTargets.ts";
+import { type Decision, type GsheetsWrite, bashDecision, devWriteOf, gsheetsWriteDecision } from "./pinnedTargets.ts";
 
 describe("devWriteOf", () => {
   it("names a dev gen:configs, build, push or run", () => {
@@ -60,14 +60,15 @@ describe("bashDecision", () => {
 
 describe("gsheetsWriteDecision", () => {
   const devSpreadsheetId = "dev-id";
-  const decide = (overrides: Partial<GsheetsWrite>) =>
-    gsheetsWriteDecision({
+  function decide(overrides: Partial<GsheetsWrite>): Decision | null {
+    return gsheetsWriteDecision({
       toolName: "mcp__gsheets__update_cells",
       spreadsheetId: "dev-id",
       devSpreadsheetId,
       dirtyPinningFiles: [],
       ...overrides,
     });
+  }
 
   it("allows update_cells, batch_update_cells and create_sheet on the dev spreadsheet", () => {
     for (const toolName of [

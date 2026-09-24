@@ -17,6 +17,21 @@ export interface FileLocation {
   filePath: string;
 }
 
+interface EditTarget extends FileLocation {
+  hasReadStyle: boolean;
+  generatedDirs: string[];
+}
+
+export interface EditDecision {
+  denyReason: string | null;
+}
+
+interface StyleRead extends FileLocation {
+  offset?: number;
+  limit?: number;
+  totalLines: number | undefined;
+}
+
 // generatedDirs are project-relative, one per package's sheets.config.json.
 export function editDecision({
   projectDir,
@@ -24,7 +39,7 @@ export function editDecision({
   filePath,
   hasReadStyle,
   generatedDirs,
-}: FileLocation & { hasReadStyle: boolean; generatedDirs: string[] }): { denyReason: string | null } {
+}: EditTarget): EditDecision {
   const target = projectRelative({ projectDir, cwd, filePath });
   const isGenerated = generatedDirs.some((dir) => target.startsWith(dir + sep));
   const isGated = isLinted(target) && !isGenerated;
@@ -38,7 +53,7 @@ export function isStyleRead({
   offset,
   limit,
   totalLines,
-}: FileLocation & { offset?: number; limit?: number; totalLines: number | undefined }): boolean {
+}: StyleRead): boolean {
   if (projectRelative({ projectDir, cwd, filePath }) !== stylePath) return false;
   if (offset == null && limit == null) return true;
   if ((offset ?? 1) > 1) return false;

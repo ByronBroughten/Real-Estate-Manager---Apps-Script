@@ -36,8 +36,8 @@ export interface BashCommand {
 
 export interface GsheetsWrite {
   toolName: string | undefined;
-  spreadsheetId: unknown;
-  devSpreadsheetId: unknown;
+  spreadsheetId: string | undefined;
+  devSpreadsheetId: string | undefined;
   dirtyPinningFiles: DirtyPinningFiles;
 }
 
@@ -73,7 +73,7 @@ export function gsheetsWriteDecision({
   dirtyPinningFiles,
 }: GsheetsWrite): Decision | null {
   if (toolName === undefined || !guardedGsheetsWrites.has(toolName)) return null;
-  const isDev = typeof devSpreadsheetId === "string" && devSpreadsheetId !== "" && spreadsheetId === devSpreadsheetId;
+  const isDev = devSpreadsheetId !== undefined && devSpreadsheetId !== "" && spreadsheetId === devSpreadsheetId;
   if (!isDev) {
     return {
       permissionDecision: "ask",

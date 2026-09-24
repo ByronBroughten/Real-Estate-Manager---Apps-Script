@@ -1,16 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { type Docs, checkDocs } from "./docLint.ts";
+import { type Docs, type Violation, checkDocs } from "./docLint.ts";
 
-const nested = (lines: number) =>
-  Array.from({ length: lines }, (_, i) => `- rule ${i}`).join("\n") + "\n";
+function nested(lines: number): string {
+  return (
+    Array.from({ length: lines }, (_, i) => `- rule ${i}`).join("\n") + "\n"
+  );
+}
 const baseDocs = {
   "AGENTS.md": "# Root\n",
   "CLAUDE.md": "@AGENTS.md\n",
 };
-const check = (docs: Docs, paths: string[] = []) =>
-  checkDocs({ docs: { ...baseDocs, ...docs }, paths });
-const messages = (docs: Docs, paths?: string[]) =>
-  check(docs, paths).map((each) => `${each.path}: ${each.message}`);
+function check(docs: Docs, paths: string[] = []): Violation[] {
+  return checkDocs({ docs: { ...baseDocs, ...docs }, paths });
+}
+function messages(docs: Docs, paths?: string[]): string[] {
+  return check(docs, paths).map((each) => `${each.path}: ${each.message}`);
+}
 
 describe("checkDocs", () => {
   it("passes a clean tree", () => {
@@ -225,9 +230,12 @@ describe("checkDocs", () => {
   });
 
   describe("leads", () => {
-    const withLead = (lines: number, width = 6) =>
-      `# Doc\n\n${Array.from({ length: lines }, (_, i) => `line ${i}`.padEnd(width, "x")).join("\n\n")}\n\n## Section\n\nBody.\n`;
-    const unheaded = (bytes: number) => `# Doc\n\n${"x".repeat(bytes - 8)}\n`;
+    function withLead(lines: number, width = 6): string {
+      return `# Doc\n\n${Array.from({ length: lines }, (_, i) => `line ${i}`.padEnd(width, "x")).join("\n\n")}\n\n## Section\n\nBody.\n`;
+    }
+    function unheaded(bytes: number): string {
+      return `# Doc\n\n${"x".repeat(bytes - 8)}\n`;
+    }
 
     it("fails a docs/ file whose lead before the first ## heading is over 5 lines", () => {
       expect(messages({ "docs/a.md": withLead(6) })).toEqual([

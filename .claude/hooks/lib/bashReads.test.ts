@@ -15,7 +15,9 @@ function projectWith(files: Record<string, string>): string {
   return projectDir;
 }
 
-const denyReasonOf = (projectDir: string, command: string) => BashReads.init({ command, cwd: projectDir }).classify().denyReason;
+function denyReasonOf(projectDir: string, command: string): string | null {
+  return BashReads.init({ command, cwd: projectDir }).classify().denyReason;
+}
 
 describe("BashReads unguarded folders", () => {
   const projectDir = projectWith({
