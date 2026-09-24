@@ -19,7 +19,7 @@ Each package's `generatedDir` (the app's `src/generated/`, the framework's `dev/
 
 ## The generated half and the hand-written half
 
-A `generatedDir` holds the four generated data files and nothing else: `spreadsheetConfig.ts`, `sheetConfigs.ts`, `columnConfigs.ts` and `valueConfigs.ts`. Each is one literal passed through its validating constructor (`makeSpreadsheetConfig`, `makeSheetConfigs`, `makeColumnConfigs`, `makeValueConfigs`), imported from `../makeConfigs`. The hand-written half sits one level up at the Schema tier root: the generator helpers in `makeConfigs.ts`, the floor seed in `configSheetFloorSeed.ts`, and a sibling types file per constant (`spreadsheetConfigTypes`, `sheetConfigsTypes`, `columnConfigsTypes`, `valueConfigsTypes`) holding the derived types and accessor functions built on the data.
+A `generatedDir` holds the four generated data files and nothing else: `spreadsheetConfig.ts`, `sheetConfigs.ts`, `columnConfigs.ts` and `valueConfigs.ts`. Each is one literal passed through its validating constructor (`makeSpreadsheetConfig`, `makeSheetConfigs`, `makeColumnConfigs`, `makeValueConfigs`), imported from `../makeConfigs`. The hand-written half sits one level up at the Schema tier root: the generator helpers in `makeConfigs.ts`, the floor seed in `configSheetFloorSeed.ts`, and a sibling types file per constant (`spreadsheetConfigTypes`, `sheetConfigsTypes`, `columnConfigsTypes`, `valueConfigsTypes`) holding the derived types and accessor functions built on the data. A generated file imports `makeConfigs` from the framework by the relative path `gen:configs` computes, the one framework deep import the app's lint exempts.
 
 All four are (or are meant to be) mechanically generated from the real spreadsheet, not hand-authored.
 

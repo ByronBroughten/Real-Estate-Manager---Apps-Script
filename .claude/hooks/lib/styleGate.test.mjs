@@ -30,7 +30,6 @@ describe("editDecision", () => {
   it("allows edits outside the ESLint set", () => {
     expect(edit("/repo/scripts/docLint.mjs", false)).toEqual({ denyReason: null });
     expect(edit("/repo/vitest.config.ts", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/packages/real-estate/dev/x.ts", false)).toEqual({ denyReason: null });
     expect(edit("/elsewhere/packages/framework/src/x.ts", false)).toEqual({ denyReason: null });
   });
 

@@ -92,7 +92,7 @@ const appImportPatterns = (depth, allowTesting) => [
   },
 ];
 // generated/ imports the framework's makeConfigs by the relative path gen:configs writes.
-const appImportBlocks = [0, 1, 2, 3].flatMap((depth) => {
+const appImportBlocks = [0, 1, 2, 3, 4, 5].flatMap((depth) => {
   const files = [`${appSrc}/${"*/".repeat(depth)}*.ts`];
   const restrict = (allowTesting) => ({
     "no-restricted-imports": [

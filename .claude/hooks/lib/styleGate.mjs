@@ -21,10 +21,9 @@ export function isStyleRead({ projectDir, cwd, filePath, offset, limit, totalLin
   return limit == null || (Number.isInteger(totalLines) && limit >= totalLines);
 }
 
-// The same set eslint.config.mjs lints: each package's src/ and the framework's dev/.
+// `eslint packages` lints every .ts file under packages/.
 function isLinted(target) {
-  const [top, pkg, folder] = target.split(sep);
-  return top === "packages" && (folder === "src" || (pkg === "framework" && folder === "dev"));
+  return target.split(sep)[0] === "packages";
 }
 
 function projectRelative({ projectDir, cwd, filePath }) {

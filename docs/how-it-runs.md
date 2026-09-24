@@ -34,7 +34,7 @@ The Node host is the second one (the framework's `src/nodeHost/`, launched by it
 
 - `spreadsheetId`: the package's spreadsheet.
 - `generatedDir`: where `gen-configs` writes the four config files and where the chore runner loads them from.
-- `choreHomes`: the package's own chore folders. The framework's generic chores (`src/chores/`) are listed in every package, and a package chore with a generic chore's name stops the run (`scripts/choreIndex.mjs`).
+- `choreHomes`: the package's own chore folders. The framework's generic chores (its `src/chores/`) are listed in every package, and a package chore with a generic chore's name stops the run (`scripts/choreIndex.mjs`).
 
 Paths are relative to the config file, which sits at each package's root: the app's has `src/generated` with `src/chores` and `src/chores/oneOff`, the framework's (the dev spreadsheet) `dev/generated` with `dev/chores`. **The bin refuses to run when two `sheets.config.json` files in the repo share a spreadsheet ID**, so a copy-paste mistake can't merge the two targets. `gen-configs` checks its output with the package's own `npm run tsc`.
 
