@@ -6,20 +6,22 @@ const frameworkSrc = "packages/framework/src";
 const appSrc = "packages/real-estate/src";
 const platformMessage =
   "Google Sheets code lives only in the framework's src/00_Source/GoogleSheets/. Everything else takes a platform-neutral type or a return value that the entry point handles.";
-const rawImportPattern = {
-  regex:
-    "^(\\.\\./)+01_SpreadsheetSchema/(SheetSchema|ColumnSchema|columnConfigsTypes|valueConfigsTypes|generated/(columnConfigs|valueConfigs))(\\.js)?$",
-  message:
-    "Raw is positional: it addresses by GID and index and never resolves a column. Column and value lookups belong in the Identified tier or above.",
-};
-const appConfigsImportPattern = {
-  regex: "(^|/)generated/|(^|/)appConfigs(\\.js)?$",
-  message:
-    "Tiers take config types from Register and values from installedConfigs(); only the app's appConfigs.ts and the framework's dev/devConfigs.ts import generated configs.",
-};
-const platformImportPattern = {
-  regex: "GoogleSheets/|GoogleSheets/(GoogleSheetsAPI|AppsScript)(\\.js)?$",
-  message: platformMessage,
+const importPatterns = {
+  raw: {
+    regex:
+      "^(\\.\\./)+01_SpreadsheetSchema/(SheetSchema|ColumnSchema|columnConfigsTypes|valueConfigsTypes|generated/(columnConfigs|valueConfigs))(\\.js)?$",
+    message:
+      "Raw is positional: it addresses by GID and index and never resolves a column. Column and value lookups belong in the Identified tier or above.",
+  },
+  appConfigs: {
+    regex: "(^|/)generated/|(^|/)appConfigs(\\.js)?$",
+    message:
+      "Tiers take config types from Register and values from installedConfigs(); only the app's appConfigs.ts and the framework's dev/devConfigs.ts import generated configs.",
+  },
+  platform: {
+    regex: "GoogleSheets/|GoogleSheets/(GoogleSheetsAPI|AppsScript)(\\.js)?$",
+    message: platformMessage,
+  },
 };
 // utils/ sits below every numbered tier.
 const layerFolders = [
@@ -40,19 +42,23 @@ const aboveTierFolders = [
   "frameworkTesting",
   "nodeHost",
 ];
-const layerImportPattern = (layer) => ({
-  regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
-  message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (packages/framework/src/AGENTS.md).`,
-});
+function layerImportPattern(layer) {
+  return {
+    regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
+    message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (packages/framework/src/AGENTS.md).`,
+  };
+}
 // After the platform block: a later block's no-restricted-imports replaces an earlier one's, so each merges the patterns that still apply.
 const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
-  const extra = folder === "02_SpreadsheetRaw" ? [rawImportPattern] : [];
-  const restrict = (patterns) => ({
-    "no-restricted-imports": [
-      "error",
-      { patterns: [...patterns, layerImportPattern(layer), ...extra] },
-    ],
-  });
+  const extra = folder === "02_SpreadsheetRaw" ? [importPatterns.raw] : [];
+  function restrict(patterns) {
+    return {
+      "no-restricted-imports": [
+        "error",
+        { patterns: [...patterns, layerImportPattern(layer), ...extra] },
+      ],
+    };
+  }
   const isPlatformFolder = folder === "00_Source";
   return [
     {
@@ -63,7 +69,7 @@ const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
           ? [`${frameworkSrc}/00_Source/GoogleSheets/**`]
           : []),
       ],
-      rules: restrict([platformImportPattern, appConfigsImportPattern]),
+      rules: restrict([importPatterns.platform, importPatterns.appConfigs]),
     },
     {
       files: [
@@ -81,25 +87,29 @@ const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
 const frameworkPackage = "@byronbroughten/sheets-framework";
 const appTestSetupFiles = [`${appSrc}/installAppConfigs.ts`];
 const appEntryMessage = `App code imports the framework only from "${frameworkPackage}", and "${frameworkPackage}/testing" only from *.test.ts (#140).`;
-const appImportPatterns = (depth, allowTesting) => [
-  {
-    regex: `^(\\.\\./){${depth + 1}}`,
-    message: "A relative import stays inside the app's src/ (#140).",
-  },
-  {
-    regex: `^${frameworkPackage}/${allowTesting ? "(?!testing$)" : ""}`,
-    message: appEntryMessage,
-  },
-];
+function appImportPatterns(depth, isTestingAllowed) {
+  return [
+    {
+      regex: `^(\\.\\./){${depth + 1}}`,
+      message: "A relative import stays inside the app's src/ (#140).",
+    },
+    {
+      regex: `^${frameworkPackage}/${isTestingAllowed ? "(?!testing$)" : ""}`,
+      message: appEntryMessage,
+    },
+  ];
+}
 // generated/ imports the framework's makeConfigs by the relative path gen:configs writes.
 const appImportBlocks = [0, 1, 2, 3, 4, 5].flatMap((depth) => {
   const files = [`${appSrc}/${"*/".repeat(depth)}*.ts`];
-  const restrict = (allowTesting) => ({
-    "no-restricted-imports": [
-      "error",
-      { patterns: appImportPatterns(depth, allowTesting) },
-    ],
-  });
+  function restrict(isTestingAllowed) {
+    return {
+      "no-restricted-imports": [
+        "error",
+        { patterns: appImportPatterns(depth, isTestingAllowed) },
+      ],
+    };
+  }
   return [
     {
       files,
@@ -117,9 +127,15 @@ const appImportBlocks = [0, 1, 2, 3, 4, 5].flatMap((depth) => {
 });
 
 export default defineConfig(
-  { ignores: ["**/*.mjs", "**/dist/**", "**/coverage/**"] },
+  // Agent worktrees are whole checkouts that git excludes locally, which ESLint doesn't read.
+  { ignores: ["**/dist/**", "**/coverage/**", ".claude/worktrees/**"] },
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  // tsc checks these for undefined names, as typescript-eslint leaves it to tsc in .ts files.
+  {
+    files: ["packages/framework/scripts/**/*.js"],
+    rules: { "no-undef": "off" },
+  },
   {
     rules: {
       "max-classes-per-file": ["error", 1],
@@ -158,7 +174,10 @@ export default defineConfig(
       "**/*.test.ts",
     ],
     rules: {
-      "no-restricted-imports": ["error", { patterns: [platformImportPattern] }],
+      "no-restricted-imports": [
+        "error",
+        { patterns: [importPatterns.platform] },
+      ],
       "no-restricted-syntax": [
         "error",
         {

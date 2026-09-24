@@ -1,0 +1,22 @@
+{
+  // The tooling program: Claude Code hooks and root scripts, run by Node's type stripping (node file.ts), so erasable syntax only.
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "nodenext",
+    "lib": ["esnext"],
+    "types": ["node"],
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true
+  },
+  "include": [".claude/hooks/**/*.ts", "scripts/**/*.ts"]
+}

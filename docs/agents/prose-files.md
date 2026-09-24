@@ -84,7 +84,7 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | Opening paragraph | What the package is: its `package.json` description |
 | Install | `peerDependencies` and `exports` in its `package.json` |
 | The public entry | `src/framework.ts` and `src/frameworkTesting.ts` |
-| The bin | The bin's usage text (`scripts/sheets-framework.mjs`) and [`how-it-runs.md`](../../packages/framework/docs/how-it-runs.md#the-sheets-framework-bin) |
+| The bin | The bin's usage text (`scripts/cli.ts`) and [`how-it-runs.md`](../../packages/framework/docs/how-it-runs.md#the-sheets-framework-bin) |
 | Docs | The framework's `docs/` indexes and `CONTEXT.md` |
 
 ### The app's README.md
@@ -95,4 +95,4 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | What's here | The app's `src/AGENTS.md` and its `CONTEXT.md` and `docs/` |
 | Commands | The root `package.json`'s `app:*` scripts and [`targets-and-gates.md`](../targets-and-gates.md#targets-dev-and-app) |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links and the size limits above (`scripts/lintDocs.mjs`). It also holds the framework's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside `packages/framework`; its `AGENTS.md` and `CLAUDE.md` files may point at root.
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links and the size limits above (`scripts/lintDocs.ts`). It also holds the framework's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside `packages/framework`; its `AGENTS.md` and `CLAUDE.md` files may point at root.

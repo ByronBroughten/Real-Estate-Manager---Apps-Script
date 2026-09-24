@@ -1,10 +1,9 @@
 // UserPromptSubmit: warns once when the session's context passes about 400k tokens, and once more past 1M.
 import { closeSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
-import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.mjs";
+import { type HookInput, readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 
-const BYTES_PER_TOKEN = 4;
-const TAIL_BYTES = 4 * 1024 * 1024;
-const THRESHOLDS = [
+const transcriptBytes = { perToken: 4, tail: 4 * 1024 * 1024 } as const;
+const thresholds = [
   {
     tokens: 1_000_000,
     operator: "This session's context is past ~1M tokens. End it after a written handoff.",
@@ -23,21 +22,23 @@ const THRESHOLDS = [
 ];
 
 class ContextSize {
-  constructor({ input }) {
+  readonly input: HookInput;
+  readonly firedPath: string;
+  constructor({ input }: { input: HookInput }) {
     this.input = input;
     this.firedPath = sessionStatePath(input.session_id, "size.json");
   }
-  static init(input) {
+  static init(input: HookInput): ContextSize {
     return new ContextSize({ input });
   }
-  run() {
+  run(): void {
     const tokens = this._estimateTokens();
     if (tokens === null) return;
     const fired = this._fired();
-    const threshold = THRESHOLDS.find((each) => tokens >= each.tokens);
+    const threshold = thresholds.find((each) => tokens >= each.tokens);
     if (!threshold || fired.includes(threshold.tokens)) return;
     // Crossing 1M first also retires the 400k warning; each fires at most once.
-    const retired = THRESHOLDS.filter((each) => each.tokens <= threshold.tokens).map((each) => each.tokens);
+    const retired = thresholds.filter((each) => each.tokens <= threshold.tokens).map((each) => each.tokens);
     writeFileSync(this.firedPath, JSON.stringify([...new Set([...fired, ...retired])]));
     const estimate = `${Math.round(tokens / 1000)}k`;
     writeHookOutput({
@@ -48,7 +49,7 @@ class ContextSize {
       },
     });
   }
-  _fired() {
+  _fired(): number[] {
     try {
       const fired = JSON.parse(readFileSync(this.firedPath, "utf8"));
       return Array.isArray(fired) ? fired : [];
@@ -57,18 +58,18 @@ class ContextSize {
     }
   }
   // Prefer the last main-thread usage figures; fall back to transcript bytes.
-  _estimateTokens() {
+  _estimateTokens(): number | null {
     const path = this.input.transcript_path;
     if (typeof path !== "string") return null;
     const { size } = statSync(path);
     const usage = lastUsageIn(readTail(path, size));
     if (usage) return usage;
-    return Math.round(size / BYTES_PER_TOKEN);
+    return Math.round(size / transcriptBytes.perToken);
   }
 }
 
-function readTail(path, size) {
-  const length = Math.min(size, TAIL_BYTES);
+function readTail(path: string, size: number): string {
+  const length = Math.min(size, transcriptBytes.tail);
   const buffer = Buffer.alloc(length);
   const fd = openSync(path, "r");
   try {
@@ -79,13 +80,12 @@ function readTail(path, size) {
   return buffer.toString("utf8");
 }
 
-function lastUsageIn(text) {
-  const lines = text.split("\n");
-  for (let i = lines.length - 1; i >= 0; i--) {
-    if (!lines[i].includes('"usage"')) continue;
+function lastUsageIn(text: string): number | null {
+  for (const line of text.split("\n").reverse()) {
+    if (!line.includes('"usage"')) continue;
     let entry;
     try {
-      entry = JSON.parse(lines[i]);
+      entry = JSON.parse(line);
     } catch {
       continue;
     }

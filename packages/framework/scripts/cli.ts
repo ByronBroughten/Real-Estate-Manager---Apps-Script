@@ -1,13 +1,9 @@
-#!/usr/bin/env node
-// The sheets-framework bin: registers tsx, then runs one subcommand against the package whose sheets.config.json sits above cwd. See docs/how-it-runs.md.
+// The sheets-framework subcommands: runs one against the package whose sheets.config.json sits above cwd. See docs/how-it-runs.md.
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { register } from "tsx/esm/api";
-import { loadSheetsConfig } from "./sheetsConfig.mjs";
+import { loadSheetsConfig } from "./sheetsConfig.ts";
 
-register();
-
-const USAGE = `Usage: sheets-framework <command> [args]
+const usage = `Usage: sheets-framework <command> [args]
   gen-configs          regenerate the package's four config files from its config sheets
   chore [name] [--send] [--json]
                        dry-run a chore (or apply it with --send); no name lists them
@@ -21,17 +17,17 @@ const [command, ...argv] = process.argv.slice(2);
 
 switch (command) {
   case "gen-configs": {
-    const { runGenConfigs } = await import("./genConfigs.mjs");
+    const { runGenConfigs } = await import("./genConfigs.ts");
     await runGenConfigs(loadSheetsConfig());
     break;
   }
   case "chore": {
-    const { runChore } = await import("./chore.mjs");
+    const { runChore } = await import("./chore.ts");
     await runChore(loadSheetsConfig(), argv);
     break;
   }
   case "probe": {
-    const { runProbe } = await import("./sheetsProbe.mjs");
+    const { runProbe } = await import("./sheetsProbe.ts");
     runProbe(loadSheetsConfig(), argv);
     break;
   }
@@ -47,7 +43,7 @@ switch (command) {
   }
   default:
     console.error(
-      command ? `Unknown command "${command}".\n\n${USAGE}` : USAGE,
+      command ? `Unknown command "${command}".\n\n${usage}` : usage,
     );
     process.exit(1);
 }

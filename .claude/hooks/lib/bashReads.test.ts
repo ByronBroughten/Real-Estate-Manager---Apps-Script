@@ -2,11 +2,11 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { BashReads, LARGE_FILE_LINES } from "./bashReads.mjs";
+import { BashReads, largeFileLines } from "./bashReads.ts";
 
-const bigFile = "line\n".repeat(LARGE_FILE_LINES + 1);
+const bigFile = "line\n".repeat(largeFileLines + 1);
 
-function projectWith(files) {
+function projectWith(files: Record<string, string>): string {
   const projectDir = mkdtempSync(join(tmpdir(), "bash-reads-"));
   for (const [path, content] of Object.entries(files)) {
     mkdirSync(dirname(join(projectDir, path)), { recursive: true });
@@ -15,7 +15,9 @@ function projectWith(files) {
   return projectDir;
 }
 
-const denyReasonOf = (projectDir, command) => BashReads.init({ command, cwd: projectDir }).classify().denyReason;
+function denyReasonOf(projectDir: string, command: string): string | null {
+  return BashReads.init({ command, cwd: projectDir }).classify().denyReason;
+}
 
 describe("BashReads unguarded folders", () => {
   const projectDir = projectWith({

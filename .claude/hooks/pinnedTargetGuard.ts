@@ -1,14 +1,20 @@
 // PreToolUse on Bash and gsheets writes: a dev write asks while a pinning file is dirty; a gsheets write is allowed only on the clean dev ID.
 import { spawnSync } from "node:child_process";
-import { PINNING_FILES, bashDecision, gsheetsWriteDecision } from "./lib/pinnedTargets.mjs";
-import { readSheetsConfigs } from "./lib/sheetsConfigs.mjs";
-import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.mjs";
+import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
+import {
+  type Decision,
+  type DirtyPinningFiles,
+  bashDecision,
+  gsheetsWriteDecision,
+  pinningFiles,
+} from "./lib/pinnedTargets.ts";
+import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 
 await runFailOpen(() => {
   const input = readHookInput();
   if (!input) return;
   const projectDir = process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
-  let decision;
+  let decision: Decision | null;
   if (input.tool_name === "Bash") {
     const command = input.tool_input?.command;
     if (typeof command !== "string") return;
@@ -31,8 +37,8 @@ await runFailOpen(() => {
   });
 });
 
-function dirtyPinningFiles(projectDir) {
-  const { status, stdout } = spawnSync("git", ["status", "--porcelain", "--", ...PINNING_FILES], {
+function dirtyPinningFiles(projectDir: string): DirtyPinningFiles {
+  const { status, stdout } = spawnSync("git", ["status", "--porcelain", "--", ...pinningFiles], {
     cwd: projectDir,
     encoding: "utf8",
   });
@@ -43,6 +49,6 @@ function dirtyPinningFiles(projectDir) {
     .map((line) => line.slice(3));
 }
 
-function devSpreadsheetId(projectDir) {
+function devSpreadsheetId(projectDir: string): string | undefined {
   return readSheetsConfigs(projectDir).find(({ scriptPrefix }) => scriptPrefix === "dev")?.spreadsheetId;
 }

@@ -27,9 +27,9 @@ export default defineConfig({
         test: {
           name: "tooling",
           include: [
-            "scripts/**/*.test.mjs",
-            "packages/framework/scripts/**/*.test.mjs",
-            ".claude/hooks/**/*.test.mjs",
+            "scripts/**/*.test.ts",
+            "packages/framework/scripts/**/*.test.ts",
+            ".claude/hooks/**/*.test.ts",
           ],
         },
       },

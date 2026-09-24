@@ -1,25 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { STYLE_GATE_REASON, editDecision, isStyleRead } from "./styleGate.mjs";
+import { type EditDecision, styleGateReason, editDecision, isStyleRead } from "./styleGate.ts";
 
 const projectDir = "/repo";
 const generatedDirs = ["packages/real-estate/src/generated", "packages/framework/dev/generated"];
-const edit = (filePath, hasReadStyle, cwd = projectDir) =>
-  editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs });
+function edit(filePath: string, hasReadStyle: boolean, cwd = projectDir): EditDecision {
+  return editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs });
+}
 const frameworkFile = "/repo/packages/framework/src/02_SpreadsheetRaw/SheetRaw.ts";
 
 describe("editDecision", () => {
   it("denies a TypeScript edit in either package's src/ before docs/style.md was read", () => {
-    expect(edit(frameworkFile, false)).toEqual({ denyReason: STYLE_GATE_REASON });
-    expect(edit("/repo/packages/real-estate/src/index.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit(frameworkFile, false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/packages/real-estate/src/index.ts", false)).toEqual({ denyReason: styleGateReason });
   });
 
   it("denies a TypeScript edit in the framework's dev/, which ESLint lints too", () => {
-    expect(edit("/repo/packages/framework/dev/devConfigs.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit("/repo/packages/framework/dev/devConfigs.ts", false)).toEqual({ denyReason: styleGateReason });
   });
 
   it("denies a relative path resolved from the working directory", () => {
     expect(edit("SheetRaw.ts", false, "/repo/packages/framework/src/02_SpreadsheetRaw")).toEqual({
-      denyReason: STYLE_GATE_REASON,
+      denyReason: styleGateReason,
     });
   });
 
@@ -27,14 +28,24 @@ describe("editDecision", () => {
     expect(edit(frameworkFile, true)).toEqual({ denyReason: null });
   });
 
+  it("denies an edit to tooling, which ESLint lints too", () => {
+    expect(edit("/repo/.claude/hooks/lib/bashReads.ts", false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/scripts/docLint.ts", false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/packages/framework/scripts/rollupPreset.js", false)).toEqual({ denyReason: styleGateReason });
+    expect(edit("/repo/eslint.config.mjs", false)).toEqual({ denyReason: styleGateReason });
+  });
+
   it("allows edits outside the ESLint set", () => {
-    expect(edit("/repo/scripts/docLint.mjs", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/vitest.config.ts", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/framework/dist/bundle.js", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/coverage/prettify.js", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/node_modules/x/index.js", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/.claude/worktrees/agent-1/scripts/docLint.ts", false)).toEqual({ denyReason: null });
     expect(edit("/elsewhere/packages/framework/src/x.ts", false)).toEqual({ denyReason: null });
   });
 
-  it("allows non-TypeScript edits inside src/", () => {
+  it("allows non-code edits", () => {
     expect(edit("/repo/packages/framework/src/AGENTS.md", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/framework/sheets.config.json", false)).toEqual({ denyReason: null });
   });
 
   it("leaves every package's generated files to the generated-data warning", () => {
@@ -42,15 +53,24 @@ describe("editDecision", () => {
     expect(edit("/repo/packages/framework/dev/generated/sheetConfigs.ts", false)).toEqual({ denyReason: null });
   });
 
+  it("does not say it only covers packages/", () => {
+    expect(styleGateReason).not.toMatch(/under packages/);
+  });
+
   it("names what to read and to retry", () => {
-    expect(STYLE_GATE_REASON).toMatch(/docs\/style\.md/);
-    expect(STYLE_GATE_REASON).toMatch(/retry/);
+    expect(styleGateReason).toMatch(/docs\/style\.md/);
+    expect(styleGateReason).toMatch(/retry/);
   });
 });
 
 describe("isStyleRead", () => {
-  const read = (filePath, bounds = {}, cwd = projectDir) =>
-    isStyleRead({ projectDir, cwd, filePath, totalLines: 40, ...bounds });
+  function read(
+    filePath: string,
+    bounds: { offset?: number; limit?: number; totalLines?: number } = {},
+    cwd = projectDir,
+  ): boolean {
+    return isStyleRead({ projectDir, cwd, filePath, totalLines: 40, ...bounds });
+  }
 
   it("is true for an unbounded Read of docs/style.md", () => {
     expect(read("/repo/docs/style.md")).toBe(true);
@@ -88,7 +108,7 @@ describe("isStyleRead", () => {
 
 describe("the refusal reason", () => {
   it("says a partial Read doesn't count", () => {
-    expect(STYLE_GATE_REASON).toMatch(/full Read/);
-    expect(STYLE_GATE_REASON).toMatch(/partial/);
+    expect(styleGateReason).toMatch(/full Read/);
+    expect(styleGateReason).toMatch(/partial/);
   });
 });

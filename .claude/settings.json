@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bashReadGuard.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/bashReadGuard.ts\"",
             "timeout": 10
           }
         ]
@@ -61,7 +61,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pinnedTargetGuard.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/pinnedTargetGuard.ts\"",
             "timeout": 10
           }
         ]
@@ -71,12 +71,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/generatedEditWarning.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/generatedEditWarning.ts\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/styleGate.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/styleGate.ts\"",
             "timeout": 10
           }
         ]
@@ -99,7 +99,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/readCountNudge.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/readCountNudge.ts\"",
             "timeout": 10
           }
         ]
@@ -109,7 +109,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/styleGate.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/styleGate.ts\"",
             "timeout": 10
           }
         ]
@@ -120,12 +120,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/readCountNudge.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/readCountNudge.ts\"",
             "timeout": 10
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/contextSizeNudge.mjs\"",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/contextSizeNudge.ts\"",
             "timeout": 10
           }
         ]
