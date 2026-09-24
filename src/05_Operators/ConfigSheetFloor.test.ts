@@ -264,12 +264,18 @@ function addSheetRequests(
   });
 }
 
+// The adapter sends a Table's columns on the updateTable after its addTable, not on the addTable.
 function addTableRequests(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {
-  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+  const requests = firstFlushRequests(batchUpdateCalls);
+  return requests.flatMap((request) => {
     const table = request.addTable?.table;
-    return table === undefined ? [] : [table];
+    if (table === undefined) return [];
+    const columnProperties = requests.find(
+      (candidate) => candidate.updateTable?.table?.tableId === table.tableId,
+    )?.updateTable?.table?.columnProperties;
+    return [{ ...table, columnProperties }];
   });
 }
 

@@ -403,15 +403,25 @@ function modeledOperationToGoogleRequests(
           },
         },
       ];
+    // Google writes addTable's own column names three columns right of the Table (measured 2026-09-23).
     case "addTable":
       return [
         {
           addTable: {
             table: {
+              tableId: operation.name,
               name: operation.name,
               range: operation.range,
+            },
+          },
+        },
+        {
+          updateTable: {
+            table: {
+              tableId: operation.name,
               columnProperties: operation.columnProperties,
             },
+            fields: "columnProperties",
           },
         },
       ];

@@ -1,7 +1,7 @@
 // Regenerates the four config files from the live config sheets, on the Node host.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startNodeHost } from "./nodeHost.mjs";
 import { takeTarget } from "./targets.mjs";
@@ -69,7 +69,16 @@ class ConfigFilesGenerator {
     await startNodeHost({ isDryRun: false, target: this.target });
     const { ConfigCoordinator } =
       await import("../src/05_Operators/ConfigCoordinator.ts");
-    return ConfigCoordinator.init().generateConfigFiles();
+    return ConfigCoordinator.init().generateConfigFiles(
+      this._makeConfigsImport(),
+    );
+  }
+
+  _makeConfigsImport() {
+    const makeConfigsPath = fileURLToPath(
+      new URL("../src/01_SpreadsheetSchema/makeConfigs", import.meta.url),
+    );
+    return relative(dirname(this.path.spreadsheetConfig), makeConfigsPath);
   }
 
   _runTsc() {

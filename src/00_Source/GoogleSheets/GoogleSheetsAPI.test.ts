@@ -535,7 +535,7 @@ describe("GoogleSheetsAPI write mapping", () => {
     ]);
   });
 
-  it("maps an add-Table operation onto one addTable request carrying its name, range and columns, and no tableId", () => {
+  it("maps an add-Table operation onto an addTable keyed by its name, then an updateTable carrying its columns", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
     api.flush([addTableOperation]);
@@ -544,19 +544,25 @@ describe("GoogleSheetsAPI write mapping", () => {
       {
         addTable: {
           table: {
+            tableId: "spreadsheetConfig",
             name: "spreadsheetConfig",
             range: addTableOperation.range,
-            columnProperties: addTableOperation.columnProperties,
           },
         },
       },
+      {
+        updateTable: {
+          table: {
+            tableId: "spreadsheetConfig",
+            columnProperties: addTableOperation.columnProperties,
+          },
+          fields: "columnProperties",
+        },
+      },
     ]);
-    expect(
-      batchUpdateCalls[0]?.requests?.[0]?.addTable?.table,
-    ).not.toHaveProperty("tableId");
   });
 
-  it("maps an add-sheet and an add-Table handed together onto two requests in that order, and nothing else", () => {
+  it("maps an add-sheet and an add-Table handed together onto three requests in that order, and nothing else", () => {
     const { api, batchUpdateCalls } = recordingSheets();
 
     api.flush([addSheetOperation, addTableOperation]);
@@ -566,7 +572,7 @@ describe("GoogleSheetsAPI write mapping", () => {
       (batchUpdateCalls[0]?.requests ?? []).map((request) =>
         Object.keys(request),
       ),
-    ).toEqual([["addSheet"], ["addTable"]]);
+    ).toEqual([["addSheet"], ["addTable"], ["updateTable"]]);
   });
 });
 

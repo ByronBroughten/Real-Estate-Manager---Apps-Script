@@ -83,7 +83,7 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
   it("emits makeSpreadsheetConfig of the first data row with base-1 indexes minus one", () => {
     stubSpreadsheetConfigSheet({ [firstDataRowIndex]: [...compiledValues] });
 
-    expect(fetchedOperator().toFileSource()).toBe(
+    expect(fetchedOperator().toFileSource("../makeConfigs")).toBe(
       [
         `import { makeSpreadsheetConfig } from "../makeConfigs";`,
         ``,
@@ -107,7 +107,9 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
       [firstDataRowIndex]: [":", "Row ID", "Name", 1, 1, 2, 3, 4],
     });
 
-    expect(fetchedOperator().toFileSource()).toContain('idHeader: "Row ID"');
+    expect(fetchedOperator().toFileSource("../makeConfigs")).toContain(
+      'idHeader: "Row ID"',
+    );
   });
 
   it("emits an edited Name header as written", () => {
@@ -115,7 +117,9 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
       [firstDataRowIndex]: [":", "ID", "Title", 1, 1, 2, 3, 4],
     });
 
-    expect(fetchedOperator().toFileSource()).toContain('nameHeader: "Title"');
+    expect(fetchedOperator().toFileSource("../makeConfigs")).toContain(
+      'nameHeader: "Title"',
+    );
   });
 
   it("refuses an edited ID delimiter, naming it with the live and expected values", () => {
@@ -147,8 +151,12 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
       { columnId: "notes", header: "Notes" },
     );
 
-    expect(fetchedOperator().toFileSource()).toContain('idDelimiter: ":"');
-    expect(fetchedOperator().toFileSource()).not.toContain("Notes");
+    expect(fetchedOperator().toFileSource("../makeConfigs")).toContain(
+      'idDelimiter: ":"',
+    );
+    expect(fetchedOperator().toFileSource("../makeConfigs")).not.toContain(
+      "Notes",
+    );
   });
 
   it("throws when there are no data rows", () => {
@@ -175,7 +183,9 @@ describe("SpreadsheetConfigOperator.fetchLiveConfig / toFileSource", () => {
       [firstDataRowIndex + 1]: ["x", "", "", "", "", "", ""],
     });
 
-    expect(fetchedOperator().toFileSource()).toContain('idDelimiter: ":"');
+    expect(fetchedOperator().toFileSource("../makeConfigs")).toContain(
+      'idDelimiter: ":"',
+    );
   });
 
   it("throws when a guaranteed cell is blank", () => {

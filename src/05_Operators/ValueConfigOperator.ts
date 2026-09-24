@@ -54,9 +54,9 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
       {} as Record<string, string[]>,
     );
   }
-  toFileSource(): string {
+  toFileSource(makeConfigsImport: string): string {
     return [
-      `${makeImportLine("makeValueConfigs")}`,
+      `${makeImportLine("makeValueConfigs", makeConfigsImport)}`,
       ``,
       `export const valueConfigs = makeValueConfigs(${JSON.stringify(
         this.newValueConfigs(),

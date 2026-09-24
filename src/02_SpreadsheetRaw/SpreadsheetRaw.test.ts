@@ -1047,10 +1047,19 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
       {
         addTable: {
           table: {
+            tableId: "spreadsheetConfig",
             name: "spreadsheetConfig",
             range: addTableProps.range,
+          },
+        },
+      },
+      {
+        updateTable: {
+          table: {
+            tableId: "spreadsheetConfig",
             columnProperties: addTableProps.columnProperties,
           },
+          fields: "columnProperties",
         },
       },
       {
@@ -1142,10 +1151,19 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
       {
         addTable: {
           table: {
+            tableId: "spreadsheetConfig",
             name: "spreadsheetConfig",
             range: addTableProps.range,
+          },
+        },
+      },
+      {
+        updateTable: {
+          table: {
+            tableId: "spreadsheetConfig",
             columnProperties: addTableProps.columnProperties,
           },
+          fields: "columnProperties",
         },
       },
       {

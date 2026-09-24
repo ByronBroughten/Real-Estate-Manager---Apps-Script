@@ -206,9 +206,9 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
     });
     return map;
   }
-  toFileSource(): string {
+  toFileSource(makeConfigsImport: string): string {
     return [
-      `${makeImportLine("makeSheetConfigs")}`,
+      `${makeImportLine("makeSheetConfigs", makeConfigsImport)}`,
       ``,
       `export const sheetConfigs = makeSheetConfigs(${sheetConfigsFileSource(
         this.newSheetConfigs(),

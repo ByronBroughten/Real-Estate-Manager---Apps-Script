@@ -44,7 +44,9 @@ class ChoreRunner {
     console.log(`chore: ${this.choreName} — ${chore.description}\n`);
     const { SpreadsheetNamed } =
       await import("../src/04_SpreadsheetNamed/SpreadsheetNamed.ts");
-    const result = chore.action(SpreadsheetNamed.init());
+    const result = chore.action(SpreadsheetNamed.init(), {
+      spreadsheetId: host.spreadsheetId,
+    });
     if (result) console.log(`result: ${result}`);
     this._report(host);
   }

@@ -453,7 +453,8 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
   it("returns every file's source together, reflecting the synced state", () => {
     seedFixture();
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(typeof parsed.spreadsheetConfig).toBe("string");
     expect(typeof parsed.sheetConfigs).toBe("string");
     expect(typeof parsed.columnConfigs).toBe("string");
@@ -468,22 +469,23 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
   it("refuses a live ID delimiter change, naming it with the expected one", () => {
     seedFixture({ idDelimiter: "|", testColumnId: "" });
 
-    expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
-      'Spreadsheet Config column "ID delimiter" is "|"; expected ":".',
-    );
+    expect(() =>
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+    ).toThrow('Spreadsheet Config column "ID delimiter" is "|"; expected ":".');
   });
 
   it("emits the live Spreadsheet Config values", () => {
     seedFixture({ idHeader: "Key" });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.spreadsheetConfig).toContain('idHeader: "Key"');
   });
 
   it("clears the live layout after the call returns", () => {
     seedFixture({ idHeader: "Key" });
 
-    ConfigCoordinator.init().generateConfigFiles();
+    ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(ssConfigGet("idHeader")).toBe(spreadsheetConfig.idHeader);
   });
 
@@ -492,9 +494,9 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
       sheets: [spreadsheetConfigSheet(":", { idHeader: "Key" })],
     });
 
-    expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
-      /need a full row\/column fetch but have no Table object/,
-    );
+    expect(() =>
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+    ).toThrow(/need a full row\/column fetch but have no Table object/);
     expect(ssConfigGet("idHeader")).toBe(spreadsheetConfig.idHeader);
   });
 
@@ -502,7 +504,8 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
     seedFixture();
 
     expect(
-      ConfigCoordinator.init().generateConfigFiles().untypedColumnsSummary,
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs")
+        .untypedColumnsSummary,
     ).toContain("1 column(s) across 1 sheet(s)");
   });
 
@@ -511,7 +514,8 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
       spreadsheetConfigProtections: [driftedFloorWarningProtection()],
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.floorReport).toBe(
       `Replaced drifted: ${driftedFloorWarningDescription()}`,
     );
@@ -529,7 +533,8 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
     });
 
     expect(
-      ConfigCoordinator.init().generateConfigFiles().declaredCellReport,
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs")
+        .declaredCellReport,
     ).toContain("Sheet Config · Let api access · Spreadsheet Config → TRUE");
   });
 
@@ -600,7 +605,9 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
       ],
     });
 
-    expect(() => ConfigCoordinator.init().generateConfigFiles()).not.toThrow();
+    expect(() =>
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+    ).not.toThrow();
   });
 
   describe("floor identity", () => {
@@ -619,7 +626,9 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
         valueConfigTab({ sheetId: movedValueConfigGid, title: "Value config" }),
       );
 
-      expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
+      expect(() =>
+        ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+      ).toThrow(
         `Floor tab "valueConfig" GID was ${valueConfigFloorGid} and is now ${movedValueConfigGid}.`,
       );
     });
@@ -633,7 +642,9 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
         }),
       );
 
-      expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
+      expect(() =>
+        ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+      ).toThrow(
         'Floor tab "valueConfig" ID prefix was "vcf" and is now "zzz".',
       );
     });
@@ -641,7 +652,9 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
     it("fails a floor column's changed column ID with the identity guard's message, before the floor seed check", () => {
       seedFixture({ fillRowIdsRunStatusColumnId: "c:sscf:moved01" });
 
-      expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
+      expect(() =>
+        ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+      ).toThrow(
         `Floor column "Fill row IDs, run status" on "spreadsheetConfig" had column ID "${ssc.fillRowIdsRunStatus.columnId}" and is now "c:sscf:moved01".`,
       );
     });
@@ -650,7 +663,8 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
       seedFixture({ testColumnId: "c:zzz:xyz123" });
 
       expect(
-        ConfigCoordinator.init().generateConfigFiles().idPrefixReport,
+        ConfigCoordinator.init().generateConfigFiles("../makeConfigs")
+          .idPrefixReport,
       ).toBe(
         'Sheet "Test" sampled ID prefix "zzz" differs from last generated "test".',
       );
@@ -696,9 +710,9 @@ describe("ConfigCoordinator.generateConfigFiles Spreadsheet Config Table", () =>
   it("throws when Spreadsheet Config's Table has two data rows", () => {
     seedFixture({ spreadsheetConfigTableEndRowIndex: 6 });
 
-    expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
-      /Spreadsheet Config/,
-    );
+    expect(() =>
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+    ).toThrow(/Spreadsheet Config/);
   });
 });
 
@@ -752,7 +766,8 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
       sheetConfigTableEndRowIndex: 6,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
       `"addOccPaymentIntention": { "sheetGid": ${draftGid}, "idPrefix": "aopi", "hasIdColumn": true, "hasNameColumn": true }`,
     );
@@ -778,7 +793,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     seedFixture({ extraSheets: [headerOnlyDraftSheet()] });
 
     const orchestrator = ConfigCoordinator.init();
-    const parsed = orchestrator.generateConfigFiles();
+    const parsed = orchestrator.generateConfigFiles("../makeConfigs");
     expect(
       orchestrator.sheetConfigOperator.sheet
         .column("sheetGid")
@@ -796,7 +811,8 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
       sheetConfigTableEndRowIndex: 6,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain('"test"');
     expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
@@ -826,7 +842,8 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
   it("regens a healthy Let api access sheet while cataloguing an empty draft", () => {
     seedFixture({ extraSheets: [headerOnlyDraftSheet()] });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain('"test"');
     expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
     expect(parsed.columnConfigs).toContain("c:test:xyz123");
@@ -968,7 +985,8 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
       sheetConfigTableEndRowIndex: 6,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
       `"property": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
     );
@@ -994,7 +1012,8 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
       sheetConfigTableEndRowIndex: 6,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
       `"renamedTab": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
     );
@@ -1020,7 +1039,8 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
       sheetConfigTableEndRowIndex: 6,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     const minted = parsed.columnConfigs.match(/c:prp:[^"]+/g) ?? [];
     expect(minted).toHaveLength(2);
     expect(minted).toContain("c:prp:abc1234");
@@ -1080,15 +1100,16 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
       sheetConfigTableEndRowIndex: 7,
     });
 
-    expect(() => ConfigCoordinator.init().generateConfigFiles()).toThrow(
-      /Property.*Unit.*"prp"/,
-    );
+    expect(() =>
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
+    ).toThrow(/Property.*Unit.*"prp"/);
   });
 
   it("reports a sampled prefix that differs from the last generated sheet configs without failing", () => {
     seedFixture({ testColumnId: "c:zzz:xyz123" });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.idPrefixReport).toBe(
       'Sheet "Test" sampled ID prefix "zzz" differs from last generated "test".',
     );
@@ -1110,7 +1131,8 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
       sheetConfigTableEndRowIndex: 6,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).not.toContain("property");
     expect(parsed.columnConfigs).not.toMatch(/c:prp:/);
   });
@@ -1143,7 +1165,8 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
       sheetConfigTableEndRowIndex: 7,
     });
 
-    const parsed = ConfigCoordinator.init().generateConfigFiles();
+    const parsed =
+      ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
       `"household": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
     );
