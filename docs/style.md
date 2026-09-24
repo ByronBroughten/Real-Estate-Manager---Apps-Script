@@ -120,7 +120,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **No barrel/index files** but the framework's two public entries, `src/framework.ts` and `src/frameworkTesting.ts`; `src/index.ts` is the Apps Script entry point, not a barrel.
 - **File naming:**
   - PascalCase mirroring the exported class name.
-  - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions. A fat bundle's pieces split into a same-named subfolder and are re-assembled in the parent file.
+  - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions (`Str`, `Obj`, `Arr`, `Tim`, `Val`); `SerialDate` is the exception, named for its type because it's the one utility the framework exports to business code, which has its own copy of `Arr`. A fat bundle's pieces split into a same-named subfolder and are re-assembled in the parent file.
   - camelCase for plain data/config or entry-point files.
   - A long module's helpers split by subject into a same-named subfolder of camelCase files, each exporting camelCase bundles written with method shorthand.
 - **Tier subfolders**: `ClassBases/` for base and Common classes + their prop interfaces; `Types/`/`ClassTypes/` for supporting state/shape types consumed by that tier's classes.
