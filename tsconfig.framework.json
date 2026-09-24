@@ -1,5 +1,5 @@
 {
-  // The framework program: tiers 00–03, utils/ and their tests, typed to the dev configs (#138).
+  // The framework program: tiers 00–06, the hosts, testSupport/, utils/ and their tests, typed to the dev configs (#138, #139).
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "rootDir": ".",
@@ -10,6 +10,12 @@
     "src/01_SpreadsheetSchema/**/*.ts",
     "src/02_SpreadsheetRaw/**/*.ts",
     "src/03_SpreadsheetIdentified/**/*.ts",
+    "src/04_SpreadsheetNamed/**/*.ts",
+    "src/05_Operators/**/*.ts",
+    "src/06_API/**/*.ts",
+    "src/appsScriptHost/**/*.ts",
+    "src/nodeHost/**/*.ts",
+    "src/testSupport/**/*.ts",
     "src/utils/**/*.ts",
     "src/TypeDeclarations/**/*.ts",
     "dev/**/*.ts"

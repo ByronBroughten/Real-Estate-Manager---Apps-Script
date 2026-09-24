@@ -16,7 +16,7 @@ function liveTitles(
   overrides: Record<number, string | null> = {},
 ): Map<number, string> {
   const titles = new Map<number, string | null>([
-    [businessSheetGid, "Occupancy"],
+    [businessSheetGid, "Widget"],
     [spreadsheetConfigGid, configSheetFloorSeed.spreadsheetConfig.title],
     [sheetConfigGid, configSheetFloorSeed.sheetConfig.title],
     [columnConfigGid, configSheetFloorSeed.columnConfig.title],
@@ -55,7 +55,7 @@ describe("floorChangeToast", () => {
 
   it("says nothing when a business tab is renamed", () => {
     expect(
-      floorChangeToast("other", liveTitles({ [businessSheetGid]: "Leases" })),
+      floorChangeToast("other", liveTitles({ [businessSheetGid]: "Gadgets" })),
     ).toBeNull();
   });
 

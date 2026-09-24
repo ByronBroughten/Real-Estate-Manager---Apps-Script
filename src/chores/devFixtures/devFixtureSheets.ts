@@ -187,5 +187,27 @@ export function devFixtureSheets(): DevFixtureSheet[] {
         },
       ],
     }),
+    withIdColumn({
+      sheetGid: 1100006,
+      title: "Dates",
+      tableName: "dates",
+      idPrefix: "dat",
+      columns: [
+        {
+          key: "requiredDate",
+          header: "Required date",
+          columnType: "DATE",
+          emptyValueAllowed: false,
+          values: [46000, 46001],
+        },
+        {
+          key: "optionalDate",
+          header: "Optional date",
+          columnType: "DATE",
+          emptyValueAllowed: true,
+          values: ["", 46002],
+        },
+      ],
+    }),
   ];
 }

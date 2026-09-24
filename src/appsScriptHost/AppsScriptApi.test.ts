@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
-import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   stubLogger,
   stubPropertiesService,
@@ -14,8 +14,8 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { AppsScriptApi } from "./AppsScriptApi";
 
-const occupancyGid = sheetConfigs.occupancy.sheetGid;
-const buildLedgerColIndex = 1;
+const runItemGid = getSheetTraitByName("runItem", "sheetGid");
+const resultColIndex = 1;
 const configs = installedConfigs();
 
 // Google's event rows and columns are 1-based.
@@ -47,16 +47,18 @@ beforeEach(() => {
 
 describe("AppsScriptApi.handleSheetEdit", () => {
   it("decodes the event and dispatches an action-row tick through the run", () => {
-    const c = columnConfigs.occupancy;
     stubSheetsService({
       sheets: [
         {
-          sheetId: occupancyGid,
-          title: "Occupancy",
+          sheetId: runItemGid,
+          title: "Run item",
           rows: buildGridRows({
-            0: [c.id.columnId, c.buildLedgerTimeLastRan.columnId],
-            3: ["ID", "Build ledger, time last ran"],
-            4: ["c:occ:row4", ""],
+            0: [
+              getColumnTraitByName("runItem", "id", "columnId"),
+              getColumnTraitByName("runItem", "result", "columnId"),
+            ],
+            3: ["ID", "Result"],
+            4: ["r:rit:row4", ""],
           }),
           table: { endRowIndex: 5 },
         },
@@ -67,21 +69,21 @@ describe("AppsScriptApi.handleSheetEdit", () => {
       {
         configs,
         endpoints: {
-          occupancy_buildLedgerTimeLastRan: {
+          runItem_result: {
             action: () => {
-              calls.push("buildLedger");
+              calls.push("result");
             },
           },
         },
       },
       onEditEvent(
-        occupancyGid,
-        spreadsheetConfig.actionRowIndexBase0,
-        buildLedgerColIndex,
+        runItemGid,
+        ssConfigGet("actionRowIndexBase0"),
+        resultColIndex,
         "TRUE",
       ),
     );
-    expect(calls).toEqual(["buildLedger"]);
+    expect(calls).toEqual(["result"]);
   });
 });
 
@@ -94,9 +96,9 @@ describe("AppsScriptApi.handleSheetEdit, with no source installed", () => {
       fresh.AppsScriptApi.handleSheetEdit(
         { configs, endpoints: {} },
         onEditEvent(
-          occupancyGid,
-          spreadsheetConfig.actionRowIndexBase0,
-          buildLedgerColIndex,
+          runItemGid,
+          ssConfigGet("actionRowIndexBase0"),
+          resultColIndex,
           "TRUE",
         ),
       ),
@@ -107,7 +109,12 @@ describe("AppsScriptApi.handleSheetEdit, with no source installed", () => {
 describe("AppsScriptApi.handleSheetChange", () => {
   it("toasts the message the change handler returns", () => {
     stubSheetsService({
-      sheets: [{ sheetId: sheetConfigs.valueConfig.sheetGid, title: "Values" }],
+      sheets: [
+        {
+          sheetId: getSheetTraitByName("valueConfig", "sheetGid"),
+          title: "Values",
+        },
+      ],
     });
     const { toasts } = stubScriptAndSpreadsheetApp();
     AppsScriptApi.handleSheetChange(

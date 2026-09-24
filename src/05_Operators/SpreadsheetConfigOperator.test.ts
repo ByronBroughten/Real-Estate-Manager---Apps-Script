@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -9,6 +8,8 @@ import {
   type FakeCell,
 } from "../testSupport/fakeSheetsService";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
+
+const { columnConfigs, spreadsheetConfig } = installedConfigs();
 
 const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",

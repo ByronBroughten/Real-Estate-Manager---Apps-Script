@@ -28,7 +28,10 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
   }
   private _ensureSheetState() {
     if (!this.spreadsheetStateRaw.sheets.has(this.sheetGid)) {
-      this.spreadsheetStateRaw.sheets.set(this.sheetGid, emptyStateRaw.sheetState());
+      this.spreadsheetStateRaw.sheets.set(
+        this.sheetGid,
+        emptyStateRaw.sheetState(),
+      );
     }
   }
   protected _initSheetState(sheet: SheetSnapshot): void {

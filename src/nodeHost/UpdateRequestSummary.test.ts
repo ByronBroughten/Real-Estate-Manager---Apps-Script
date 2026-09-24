@@ -3,7 +3,7 @@ import type { GoogleRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 
-const occupancyGid = getSheetTraitByName("occupancy", "sheetGid");
+const itemGid = getSheetTraitByName("item", "sheetGid");
 const unknownGid = 999999;
 
 function onlyLine(request: GoogleRequest): string {
@@ -17,7 +17,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         updateCells: {
           range: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             startRowIndex: 4,
             endRowIndex: 6,
             startColumnIndex: 2,
@@ -30,9 +30,7 @@ describe("UpdateRequestSummary.lines", () => {
           fields: "userEnteredValue",
         },
       }),
-    ).toBe(
-      'updateCells occupancy!C5:C6 2 cell(s) "yes", 42 [userEnteredValue]',
-    );
+    ).toBe('updateCells item!C5:C6 2 cell(s) "yes", 42 [userEnteredValue]');
   });
 
   it("falls back to the gid for a sheet the config does not describe", () => {
@@ -50,7 +48,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         repeatCell: {
           range: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             startRowIndex: 4,
             endRowIndex: 9,
             startColumnIndex: 5,
@@ -60,7 +58,7 @@ describe("UpdateRequestSummary.lines", () => {
           fields: "userEnteredValue",
         },
       }),
-    ).toBe("repeatCell occupancy!F5:F9 5 cell(s) false [userEnteredValue]");
+    ).toBe("repeatCell item!F5:F9 5 cell(s) false [userEnteredValue]");
   });
 
   it("names the range, cell count and condition type of a data-validation rule", () => {
@@ -68,7 +66,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         setDataValidation: {
           range: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             startRowIndex: 4,
             endRowIndex: 5,
             startColumnIndex: 5,
@@ -77,19 +75,19 @@ describe("UpdateRequestSummary.lines", () => {
           rule: { condition: { type: "BOOLEAN" } },
         },
       }),
-    ).toBe("setDataValidation occupancy!F5:F5 1 cell(s) BOOLEAN");
+    ).toBe("setDataValidation item!F5:F5 1 cell(s) BOOLEAN");
   });
 
   it("counts the rows an append adds", () => {
     expect(
       onlyLine({
         appendCells: {
-          sheetId: occupancyGid,
+          sheetId: itemGid,
           rows: [{ values: [{ userEnteredValue: { stringValue: "r:abc" } }] }],
           fields: "userEnteredValue",
         },
       }),
-    ).toBe('appendCells occupancy 1 row(s) "r:abc" [userEnteredValue]');
+    ).toBe('appendCells item 1 row(s) "r:abc" [userEnteredValue]');
   });
 
   it("states a row delete as the 1-based rows it removes", () => {
@@ -97,14 +95,14 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         deleteDimension: {
           range: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             dimension: "ROWS",
             startIndex: 6,
             endIndex: 9,
           },
         },
       }),
-    ).toBe("deleteDimension occupancy!7:9 delete 3 rows");
+    ).toBe("deleteDimension item!7:9 delete 3 rows");
   });
 
   it("states a column insert by its column letter", () => {
@@ -112,36 +110,36 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         insertDimension: {
           range: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             dimension: "COLUMNS",
             startIndex: 27,
             endIndex: 28,
           },
         },
       }),
-    ).toBe("insertDimension occupancy!AB:AB insert 1 columns");
+    ).toBe("insertDimension item!AB:AB insert 1 columns");
   });
 
   it("states a sort by its column and direction", () => {
     expect(
       onlyLine({
         sortRange: {
-          range: { sheetId: occupancyGid, startRowIndex: 4 },
+          range: { sheetId: itemGid, startRowIndex: 4 },
           sortSpecs: [{ dimensionIndex: 2, sortOrder: "ASCENDING" }],
         },
       }),
-    ).toBe("sortRange occupancy!A5: by column C ascending");
+    ).toBe("sortRange item!A5: by column C ascending");
   });
 
   it("states a range-scoped replace as its range, its two strings and its flags", () => {
     expect(
       onlyLine({
         findReplace: {
-          find: "Currency",
-          replacement: "Payment",
+          find: "Old",
+          replacement: "New",
           matchEntireCell: true,
           range: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             startRowIndex: 4,
             endRowIndex: 9,
             startColumnIndex: 2,
@@ -150,7 +148,7 @@ describe("UpdateRequestSummary.lines", () => {
         },
       }),
     ).toBe(
-      'findReplace occupancy!C5:C9 matching cells "Currency" → "Payment" matchEntireCell',
+      'findReplace item!C5:C9 matching cells "Old" → "New" matchEntireCell',
     );
   });
 
@@ -158,28 +156,26 @@ describe("UpdateRequestSummary.lines", () => {
     expect(
       onlyLine({
         findReplace: {
-          find: "Currency",
-          replacement: "Payment",
-          sheetId: occupancyGid,
+          find: "Old",
+          replacement: "New",
+          sheetId: itemGid,
         },
       }),
-    ).toBe(
-      'findReplace occupancy!all matching cells "Currency" → "Payment" (no flags)',
-    );
+    ).toBe('findReplace item!all matching cells "Old" → "New" (no flags)');
   });
 
   it("says every sheet when the replace is unscoped", () => {
     expect(
       onlyLine({
         findReplace: {
-          find: "Currency",
-          replacement: "Payment",
+          find: "Old",
+          replacement: "New",
           allSheets: true,
           includeFormulas: true,
         },
       }),
     ).toBe(
-      'findReplace every sheet matching cells "Currency" → "Payment" includeFormulas',
+      'findReplace every sheet matching cells "Old" → "New" includeFormulas',
     );
   });
 
@@ -188,17 +184,17 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         pasteData: {
           coordinate: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             rowIndex: 4,
             columnIndex: 6,
           },
-          data: '"=2+SINGLE(test[Number])"',
+          data: '"=2+SINGLE(item[Required count])"',
           delimiter: "\t",
           type: "PASTE_FORMULA",
         },
       }),
     ).toBe(
-      "pasteData occupancy!G5:G5 1 row(s) =2+SINGLE(test[Number]) PASTE_FORMULA",
+      "pasteData item!G5:G5 1 row(s) =2+SINGLE(item[Required count]) PASTE_FORMULA",
     );
   });
 
@@ -207,7 +203,7 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         pasteData: {
           coordinate: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             rowIndex: 4,
             columnIndex: 6,
           },
@@ -216,7 +212,7 @@ describe("UpdateRequestSummary.lines", () => {
           type: "PASTE_FORMULA",
         },
       }),
-    ).toBe("pasteData occupancy!G5:G7 3 row(s) =2+1 PASTE_FORMULA");
+    ).toBe("pasteData item!G5:G7 3 row(s) =2+1 PASTE_FORMULA");
   });
 
   it("names the sheet, range and condition of an added conditional format rule", () => {
@@ -227,7 +223,7 @@ describe("UpdateRequestSummary.lines", () => {
           rule: {
             ranges: [
               {
-                sheetId: occupancyGid,
+                sheetId: itemGid,
                 startRowIndex: 4,
                 endRowIndex: 11,
                 startColumnIndex: 0,
@@ -240,18 +236,18 @@ describe("UpdateRequestSummary.lines", () => {
           },
         },
       }),
-    ).toBe("addConditionalFormatRule occupancy!A5:A11 prepend CUSTOM_FORMULA");
+    ).toBe("addConditionalFormatRule item!A5:A11 prepend CUSTOM_FORMULA");
   });
 
   it("names the sheet and index of a deleted conditional format rule", () => {
     expect(
       onlyLine({
         deleteConditionalFormatRule: {
-          sheetId: occupancyGid,
+          sheetId: itemGid,
           index: 3,
         },
       }),
-    ).toBe("deleteConditionalFormatRule occupancy index 3");
+    ).toBe("deleteConditionalFormatRule item index 3");
   });
 
   it("names the range and kind of an added protected range", () => {
@@ -260,7 +256,7 @@ describe("UpdateRequestSummary.lines", () => {
         addProtectedRange: {
           protectedRange: {
             range: {
-              sheetId: occupancyGid,
+              sheetId: itemGid,
               startRowIndex: 4,
               endRowIndex: 11,
               startColumnIndex: 0,
@@ -271,7 +267,7 @@ describe("UpdateRequestSummary.lines", () => {
           },
         },
       }),
-    ).toBe("addProtectedRange occupancy!A5:A11 warning id warning");
+    ).toBe("addProtectedRange item!A5:A11 warning id warning");
   });
 
   it("names the id of a deleted protected range", () => {
@@ -315,13 +311,13 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         updateSheetProperties: {
           properties: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             title: "Spreadsheet Config",
           },
           fields: "title",
         },
       }),
-    ).toBe("updateSheetProperties occupancy title Spreadsheet Config [title]");
+    ).toBe("updateSheetProperties item title Spreadsheet Config [title]");
   });
 
   it("names the GID as a number, the title and the grid size of an added tab", () => {
@@ -329,14 +325,14 @@ describe("UpdateRequestSummary.lines", () => {
       onlyLine({
         addSheet: {
           properties: {
-            sheetId: occupancyGid,
+            sheetId: itemGid,
             title: "Spreadsheet Config",
             gridProperties: { rowCount: 20, columnCount: 6 },
           },
         },
       }),
     ).toBe(
-      `addSheet gid ${occupancyGid} add tab Spreadsheet Config (20 rows × 6 cols)`,
+      `addSheet gid ${itemGid} add tab Spreadsheet Config (20 rows × 6 cols)`,
     );
   });
 
@@ -347,7 +343,7 @@ describe("UpdateRequestSummary.lines", () => {
           table: {
             name: "spreadsheetConfig",
             range: {
-              sheetId: occupancyGid,
+              sheetId: itemGid,
               startRowIndex: 2,
               endRowIndex: 5,
               startColumnIndex: 1,
@@ -361,7 +357,7 @@ describe("UpdateRequestSummary.lines", () => {
         },
       }),
     ).toBe(
-      `addTable gid ${occupancyGid}!B3:C5 add 2 cols spreadsheetConfig (Name: TEXT, Amount: CURRENCY)`,
+      `addTable gid ${itemGid}!B3:C5 add 2 cols spreadsheetConfig (Name: TEXT, Amount: CURRENCY)`,
     );
   });
 

@@ -9,5 +9,6 @@ export const sheetConfigs = makeSheetConfigs({
   "valueTypes": { "sheetGid": 1100002, "idPrefix": "vty", "hasIdColumn": true, "hasNameColumn": false },
   "log": { "sheetGid": 1100003, "idPrefix": "log", "hasIdColumn": false, "hasNameColumn": false },
   "runItem": { "sheetGid": 1100004, "idPrefix": "rit", "hasIdColumn": true, "hasNameColumn": true },
-  "computed": { "sheetGid": 1100005, "idPrefix": "cmp", "hasIdColumn": false, "hasNameColumn": false }
+  "computed": { "sheetGid": 1100005, "idPrefix": "cmp", "hasIdColumn": false, "hasNameColumn": false },
+  "dates": { "sheetGid": 1100006, "idPrefix": "dat", "hasIdColumn": true, "hasNameColumn": false }
 });

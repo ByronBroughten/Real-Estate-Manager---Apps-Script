@@ -6,6 +6,11 @@ const frameworkTests = [
   "src/01_SpreadsheetSchema/**/*.test.ts",
   "src/02_SpreadsheetRaw/**/*.test.ts",
   "src/03_SpreadsheetIdentified/**/*.test.ts",
+  "src/04_SpreadsheetNamed/**/*.test.ts",
+  "src/05_Operators/**/*.test.ts",
+  "src/06_API/**/*.test.ts",
+  "src/appsScriptHost/**/*.test.ts",
+  "src/nodeHost/**/*.test.ts",
   "src/utils/**/*.test.ts",
 ];
 
@@ -29,7 +34,7 @@ export default defineConfig({
           name: "real-estate",
           include: ["src/**/*.test.ts"],
           exclude: frameworkTests,
-          setupFiles: ["src/testSupport/installAppConfigs.ts"],
+          setupFiles: ["src/installAppConfigs.ts"],
         },
       },
       {

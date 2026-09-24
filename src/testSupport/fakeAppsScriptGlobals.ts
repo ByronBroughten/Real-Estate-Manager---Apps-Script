@@ -30,10 +30,7 @@ export function stubPropertiesService(
 }
 
 export type FakeTriggerKind =
-  | "onEdit"
-  | "onChange"
-  | "monthDay"
-  | "everyMinutes";
+  "onEdit" | "onChange" | "monthDay" | "everyMinutes";
 
 export interface FakeTrigger {
   handlerFunction: string;

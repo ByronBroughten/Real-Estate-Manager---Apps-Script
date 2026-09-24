@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   buildGridRows,
@@ -10,15 +10,15 @@ import { Val } from "../utils/Val";
 import { SpreadsheetNamed } from "./SpreadsheetNamed";
 
 const topDataRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
-const occupancyGid = sheetConfigs.occupancy.sheetGid;
-const idColumnId = columnConfigs.occupancy.id.columnId;
-const selectColumnId = columnConfigs.occupancy.updateTermsSelect.columnId;
+const runItemGid = getSheetTraitByName("runItem", "sheetGid");
+const idColumnId = getColumnTraitByName("runItem", "id", "columnId");
+const selectColumnId = getColumnTraitByName("runItem", "selected", "columnId");
 const pink = { red: 244 / 255, green: 204 / 255, blue: 204 / 255 };
 const grey = { red: 0.6, green: 0.6, blue: 0.6 };
 const green = { red: 0.7, green: 0.9, blue: 0.7 };
 
 const sheetRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startRowIndex: topDataRowIndex,
   endRowIndex: 6,
   startColumnIndex: 0,
@@ -50,18 +50,18 @@ function googleBooleanRule(
   };
 }
 
-function stubOccupancyWithRules(
+function stubRunItemWithRules(
   conditionalFormats: GoogleAppsScript.Sheets.Schema.ConditionalFormatRule[],
 ) {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: runItemGid,
+        title: "Run item",
         rows: buildGridRows({
           0: [idColumnId, selectColumnId],
-          3: ["ID", "Update terms, select"],
-          4: ["r:occ:row4", true],
+          3: ["ID", "Selected"],
+          4: ["r:rit:row4", true],
           5: [null, null],
         }),
         table: { endRowIndex: 6, endColumnIndex: 2 },
@@ -71,9 +71,9 @@ function stubOccupancyWithRules(
   });
 }
 
-function fetchedOccupancy() {
+function fetchedRunItem() {
   const ss = SpreadsheetNamed.init();
-  const sheet = ss.sheet("occupancy");
+  const sheet = ss.sheet("runItem");
   sheet.prepFetchConditionalFormatRules();
   ss.fetchAllPrepped();
   return { ss, sheet };
@@ -81,17 +81,17 @@ function fetchedOccupancy() {
 
 describe("SheetNamed conditional format rules", () => {
   it("reads a sheet with no rules as an empty list", () => {
-    stubOccupancyWithRules([]);
-    const { sheet } = fetchedOccupancy();
+    stubRunItemWithRules([]);
+    const { sheet } = fetchedRunItem();
 
     expect(sheet.conditionalFormatRules()).toEqual([]);
   });
 
   it("prepends a column rule so it takes precedence over rules already on the sheet", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([
+    const { batchUpdateCalls } = stubRunItemWithRules([
       googleBooleanRule(sheetRange, "NUMBER_EQ", "TRUE", grey),
     ]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { ss, sheet } = fetchedRunItem();
 
     sheet.column("id").addConditionalFormatRule({
       condition: { type: "NUMBER_EQ", value: true },
@@ -130,20 +130,20 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("removes every rule whose range exactly matches a column and leaves a sheet-wide rule alone", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([
+    const { batchUpdateCalls } = stubRunItemWithRules([
       googleBooleanRule(sheetRange, "NUMBER_EQ", "TRUE", grey),
       googleBooleanRule(idColumnRange, "NUMBER_EQ", "TRUE", pink),
       googleBooleanRule(selectColumnRange, "NUMBER_EQ", "TRUE", green),
       googleBooleanRule(idColumnRange, "NUMBER_NOT_EQ", "TRUE", green),
     ]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { ss, sheet } = fetchedRunItem();
 
     sheet.column("id").removeConditionalFormatRules();
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
-      { deleteConditionalFormatRule: { sheetId: occupancyGid, index: 3 } },
-      { deleteConditionalFormatRule: { sheetId: occupancyGid, index: 1 } },
+      { deleteConditionalFormatRule: { sheetId: runItemGid, index: 3 } },
+      { deleteConditionalFormatRule: { sheetId: runItemGid, index: 1 } },
     ]);
 
     sheet.prepFetchConditionalFormatRules();
@@ -160,11 +160,11 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("removes a single rule by exact content so a re-stamp can replace it", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([
+    const { batchUpdateCalls } = stubRunItemWithRules([
       googleBooleanRule(idColumnRange, "NUMBER_EQ", "TRUE", pink),
       googleBooleanRule(idColumnRange, "NUMBER_NOT_EQ", "TRUE", green),
     ]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { ss, sheet } = fetchedRunItem();
     const toRemove = Val.assert(
       sheet.conditionalFormatRules()[0],
       "ID column rule to remove",
@@ -174,15 +174,15 @@ describe("SheetNamed conditional format rules", () => {
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
-      { deleteConditionalFormatRule: { sheetId: occupancyGid, index: 0 } },
+      { deleteConditionalFormatRule: { sheetId: runItemGid, index: 0 } },
     ]);
   });
 
   it("queues nothing when adding a rule identical to one already present", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([
+    const { batchUpdateCalls } = stubRunItemWithRules([
       googleBooleanRule(idColumnRange, "NUMBER_EQ", "TRUE", pink),
     ]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { ss, sheet } = fetchedRunItem();
 
     sheet.column("id").addConditionalFormatRule({
       condition: { type: "NUMBER_EQ", value: true },
@@ -194,21 +194,21 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("sends several deletes highest-index-first so the intended rules are the ones removed", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([
+    const { batchUpdateCalls } = stubRunItemWithRules([
       googleBooleanRule(idColumnRange, "NUMBER_EQ", "1", pink),
       googleBooleanRule(sheetRange, "NUMBER_EQ", "TRUE", grey),
       googleBooleanRule(idColumnRange, "NUMBER_EQ", "2", green),
       googleBooleanRule(idColumnRange, "NUMBER_EQ", "3", grey),
     ]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { ss, sheet } = fetchedRunItem();
 
     sheet.column("id").removeConditionalFormatRules();
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
-      { deleteConditionalFormatRule: { sheetId: occupancyGid, index: 3 } },
-      { deleteConditionalFormatRule: { sheetId: occupancyGid, index: 2 } },
-      { deleteConditionalFormatRule: { sheetId: occupancyGid, index: 0 } },
+      { deleteConditionalFormatRule: { sheetId: runItemGid, index: 3 } },
+      { deleteConditionalFormatRule: { sheetId: runItemGid, index: 2 } },
+      { deleteConditionalFormatRule: { sheetId: runItemGid, index: 0 } },
     ]);
 
     sheet.prepFetchConditionalFormatRules();
@@ -220,8 +220,8 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("refuses a second rule-mutating flush against the same sheet until the rules are re-fetched", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { batchUpdateCalls } = stubRunItemWithRules([]);
+    const { ss, sheet } = fetchedRunItem();
 
     sheet.column("id").addConditionalFormatRule({
       condition: { type: "NUMBER_EQ", value: true },
@@ -247,11 +247,11 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("builds an anchored A1 reference from a column name at the data-start row", () => {
-    stubOccupancyWithRules([]);
-    const { sheet } = fetchedOccupancy();
+    stubRunItemWithRules([]);
+    const { sheet } = fetchedRunItem();
 
     expect(sheet.column("id").anchoredA1()).toBe("$A5");
-    expect(sheet.column("id").anchoredA1("updateTermsSelect")).toBe("$B5");
+    expect(sheet.column("id").anchoredA1("selected")).toBe("$B5");
     expect(
       sheet
         .column("id")
@@ -261,8 +261,8 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("adds a sheet-wide rule over the live data range and a cell rule over one cell", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { batchUpdateCalls } = stubRunItemWithRules([]);
+    const { ss, sheet } = fetchedRunItem();
 
     sheet.addConditionalFormatRule({
       condition: { type: "NUMBER_EQ", value: true },
@@ -294,10 +294,10 @@ describe("SheetNamed conditional format rules", () => {
   });
 
   it("sends a content delete and a declaration add in one batch so a malformed add cannot leave the column bare", () => {
-    const { batchUpdateCalls } = stubOccupancyWithRules([
+    const { batchUpdateCalls } = stubRunItemWithRules([
       googleBooleanRule(idColumnRange, "CUSTOM_FORMULA", "=$B5=FALSE", pink),
     ]);
-    const { ss, sheet } = fetchedOccupancy();
+    const { ss, sheet } = fetchedRunItem();
     const existing = Val.assert(
       sheet.conditionalFormatRules()[0],
       "existing ID column rule",
@@ -308,7 +308,7 @@ describe("SheetNamed conditional format rules", () => {
     idPrefix.addConditionalFormatRule({
       condition: {
         type: "CUSTOM_FORMULA",
-        formula: `=${idPrefix.anchoredA1("updateTermsSelect")}=FALSE`,
+        formula: `=${idPrefix.anchoredA1("selected")}=FALSE`,
       },
       format: { backgroundColor: pink },
     });
@@ -332,18 +332,18 @@ function googleProtection(
   };
 }
 
-function stubOccupancyWithProtections(
+function stubRunItemWithProtections(
   protectedRanges: GoogleAppsScript.Sheets.Schema.ProtectedRange[],
 ) {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: runItemGid,
+        title: "Run item",
         rows: buildGridRows({
           0: [idColumnId, selectColumnId],
-          3: ["ID", "Update terms, select"],
-          4: ["r:occ:row4", true],
+          3: ["ID", "Selected"],
+          4: ["r:rit:row4", true],
           5: [null, null],
         }),
         table: { endRowIndex: 6, endColumnIndex: 2 },
@@ -353,39 +353,39 @@ function stubOccupancyWithProtections(
   });
 }
 
-function fetchedOccupancyProtections(
+function fetchedRunItemProtections(
   protectedRanges: GoogleAppsScript.Sheets.Schema.ProtectedRange[] = [],
 ) {
-  const service = stubOccupancyWithProtections(protectedRanges);
+  const service = stubRunItemWithProtections(protectedRanges);
   const ss = SpreadsheetNamed.init();
-  const sheet = ss.sheet("occupancy");
+  const sheet = ss.sheet("runItem");
   sheet.prepFetchEditProtections();
   ss.fetchAllPrepped();
   return { ss, sheet, ...service };
 }
 
-const wholeSheetRange = { sheetId: occupancyGid };
+const wholeSheetRange = { sheetId: runItemGid };
 const columnIdRowRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startRowIndex: 0,
   endRowIndex: 1,
 };
 const idHeaderCellRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startRowIndex: 3,
   endRowIndex: 4,
   startColumnIndex: 0,
   endColumnIndex: 1,
 };
 const idColumnIdCellRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startRowIndex: 0,
   endRowIndex: 1,
   startColumnIndex: 0,
   endColumnIndex: 1,
 };
 const idGroupHeadingCellRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startRowIndex: 1,
   endRowIndex: 2,
   startColumnIndex: 0,
@@ -396,20 +396,20 @@ const topIdCellRange = {
   endRowIndex: topDataRowIndex + 1,
 };
 const idWholeColumnRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startRowIndex: 0,
   startColumnIndex: 0,
   endColumnIndex: 1,
 };
 const idWholeColumnGoogleRange = {
-  sheetId: occupancyGid,
+  sheetId: runItemGid,
   startColumnIndex: 0,
   endColumnIndex: 1,
 };
 
 describe("SheetNamed edit warnings and edit locks", () => {
   it("queues nothing when adding a warning identical to one already present", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections([
       googleProtection(idColumnRange, {
         protectedRangeId: 4,
         description: "id warning",
@@ -426,7 +426,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   it("queues nothing when a present lock has every declared editor plus ones Google added", () => {
     const googleAdded = ["service@example.com", "owner@example.com"];
     const fetchedLock = (users: string[]) =>
-      fetchedOccupancyProtections([
+      fetchedRunItemProtections([
         googleProtection(idColumnRange, {
           protectedRangeId: 6,
           description: "id lock",
@@ -451,7 +451,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds a lock when a present lock lacks a declared editor", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections([
       googleProtection(idColumnRange, {
         protectedRangeId: 6,
         description: "id lock",
@@ -481,14 +481,14 @@ describe("SheetNamed edit warnings and edit locks", () => {
       warningOnly: true,
     });
 
-    const byRange = fetchedOccupancyProtections([handSet, other]);
+    const byRange = fetchedRunItemProtections([handSet, other]);
     byRange.sheet.column("id").removeEditProtections();
     byRange.ss.batchUpdateGSheets();
     expect(byRange.batchUpdateCalls[0]?.requests).toEqual([
       { deleteProtectedRange: { protectedRangeId: 11 } },
     ]);
 
-    const byContent = fetchedOccupancyProtections([handSet, other]);
+    const byContent = fetchedRunItemProtections([handSet, other]);
     const named = Val.assert(
       byContent.sheet.editProtections()[0],
       "hand-set protection",
@@ -499,14 +499,14 @@ describe("SheetNamed edit warnings and edit locks", () => {
       { deleteProtectedRange: { protectedRangeId: 11 } },
     ]);
 
-    const byDescription = fetchedOccupancyProtections([handSet, other]);
+    const byDescription = fetchedRunItemProtections([handSet, other]);
     byDescription.sheet.removeEditProtectionByDescription("hand-set");
     byDescription.ss.batchUpdateGSheets();
     expect(byDescription.batchUpdateCalls[0]?.requests).toEqual([
       { deleteProtectedRange: { protectedRangeId: 11 } },
     ]);
 
-    const byId = fetchedOccupancyProtections([handSet, other]);
+    const byId = fetchedRunItemProtections([handSet, other]);
     byId.sheet.removeEditProtectionById(11);
     byId.ss.batchUpdateGSheets();
     expect(byId.batchUpdateCalls[0]?.requests).toEqual([
@@ -515,9 +515,9 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds a whole-sheet warning with unprotected ranges", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
     const unprotected = {
-      sheetId: occupancyGid,
+      sheetId: runItemGid,
       startRowIndex: 2,
       endRowIndex: 3,
       startColumnIndex: 1,
@@ -545,7 +545,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("refuses a coordinate-bearing protection write while row indexes are stale", () => {
-    const { ss, sheet } = fetchedOccupancyProtections();
+    const { ss, sheet } = fetchedRunItemProtections();
 
     sheet.row(topDataRowIndex + 1).delete();
     ss.batchUpdateGSheets();
@@ -562,7 +562,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("refuses a read or mutation after a protection flush until protections are re-fetched", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
 
     sheet.column("id").addEditWarning({ description: "id warning" });
     ss.batchUpdateGSheets();
@@ -586,7 +586,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds a lock with named editors", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
 
     sheet.column("id").addEditLock({
       description: "id lock",
@@ -612,7 +612,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds warnings over a bookkeeping row, header cells, a column-group heading cell and a single cell", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
 
     sheet.meta.uniformRow("columnId").addEditWarning({
       description: "column id row",
@@ -644,7 +644,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds an open-ended column warning from a start row with no end row", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
 
     sheet.column("id").addEditWarningFromRow(topDataRowIndex, {
       description: "open-ended id",
@@ -656,7 +656,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
         addProtectedRange: {
           protectedRange: {
             range: {
-              sheetId: occupancyGid,
+              sheetId: runItemGid,
               startRowIndex: topDataRowIndex,
               startColumnIndex: 0,
               endColumnIndex: 1,
@@ -670,7 +670,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds a whole-column warning as a start-row-0 column range with no end row", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
 
     sheet.column("id").addEditWarningWholeColumn({
       description: "id column",
@@ -691,7 +691,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("adds a whole-column lock as a start-row-0 column range with no end row", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections();
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections();
 
     sheet.column("id").addEditLockWholeColumn({
       description: "id column lock",
@@ -713,7 +713,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("queues nothing when adding a whole-column warning identical to one already present", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections([
       googleProtection(idWholeColumnGoogleRange, {
         protectedRangeId: 20,
         description: "id column",
@@ -739,14 +739,14 @@ describe("SheetNamed edit warnings and edit locks", () => {
       warningOnly: true,
     });
 
-    const byRange = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
+    const byRange = fetchedRunItemProtections([wholeColumn, wholeSheet]);
     byRange.sheet.column("id").removeEditProtectionsWholeColumn();
     byRange.ss.batchUpdateGSheets();
     expect(byRange.batchUpdateCalls[0]?.requests).toEqual([
       { deleteProtectedRange: { protectedRangeId: 21 } },
     ]);
 
-    const byContent = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
+    const byContent = fetchedRunItemProtections([wholeColumn, wholeSheet]);
     const named = Val.assert(
       byContent.sheet.editProtections()[0],
       "whole-column protection",
@@ -757,17 +757,14 @@ describe("SheetNamed edit warnings and edit locks", () => {
       { deleteProtectedRange: { protectedRangeId: 21 } },
     ]);
 
-    const byDescription = fetchedOccupancyProtections([
-      wholeColumn,
-      wholeSheet,
-    ]);
+    const byDescription = fetchedRunItemProtections([wholeColumn, wholeSheet]);
     byDescription.sheet.removeEditProtectionByDescription("id column");
     byDescription.ss.batchUpdateGSheets();
     expect(byDescription.batchUpdateCalls[0]?.requests).toEqual([
       { deleteProtectedRange: { protectedRangeId: 21 } },
     ]);
 
-    const byId = fetchedOccupancyProtections([wholeColumn, wholeSheet]);
+    const byId = fetchedRunItemProtections([wholeColumn, wholeSheet]);
     byId.sheet.removeEditProtectionById(21);
     byId.ss.batchUpdateGSheets();
     expect(byId.batchUpdateCalls[0]?.requests).toEqual([
@@ -776,7 +773,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("removes a whole-sheet protection by exact range without matching a whole-column protection", () => {
-    const { batchUpdateCalls, ss, sheet } = fetchedOccupancyProtections([
+    const { batchUpdateCalls, ss, sheet } = fetchedRunItemProtections([
       googleProtection(idWholeColumnGoogleRange, {
         protectedRangeId: 21,
         description: "id column",
@@ -798,7 +795,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("refuses a whole-column protection write while column indexes are stale", () => {
-    const { ss, sheet } = fetchedOccupancyProtections();
+    const { ss, sheet } = fetchedRunItemProtections();
 
     sheet.identified.raw.addSheetChangeToSave({
       action: "insertColumn",
@@ -815,7 +812,7 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 
   it("allows a whole-column protection write while row indexes are stale", () => {
-    const { ss, sheet } = fetchedOccupancyProtections();
+    const { ss, sheet } = fetchedRunItemProtections();
 
     sheet.row(topDataRowIndex + 1).delete();
     ss.batchUpdateGSheets();
@@ -833,19 +830,21 @@ describe("SheetNamed edit warnings and edit locks", () => {
   });
 });
 
-const propertyGid = sheetConfigs.property.sheetGid;
-const propertyColumns = columnConfigs.property;
+const itemGid = getSheetTraitByName("item", "sheetGid");
 
-function fetchedPropertyNames(
+function fetchedItemNames(
   dataRows: readonly (readonly [string | null, string | null])[],
 ) {
   const service = stubSheetsService({
     sheets: [
       {
-        sheetId: propertyGid,
-        title: "Property",
+        sheetId: itemGid,
+        title: "Item",
         rows: buildGridRows({
-          0: [propertyColumns.id.columnId, propertyColumns.name.columnId],
+          0: [
+            getColumnTraitByName("item", "id", "columnId"),
+            getColumnTraitByName("item", "name", "columnId"),
+          ],
           3: ["ID", "Name"],
           ...Object.fromEntries(
             dataRows.map((row, index) => [topDataRowIndex + index, [...row]]),
@@ -859,68 +858,73 @@ function fetchedPropertyNames(
     ],
   });
   const ss = SpreadsheetNamed.init();
-  const sheet = ss.sheet("property").prepFetchRowIdAndName();
+  const sheet = ss.sheet("item").prepFetchRowIdAndName();
   ss.fetchAllPrepped();
   return { ss, sheet, ...service };
 }
 
 describe("SheetNamed.rowIdByName", () => {
   it("finds the one row with the name, with its id and row index", () => {
-    const { sheet } = fetchedPropertyNames([
-      ["r:prp:aaaaaaa", "730 Western"],
-      ["r:prp:bbbbbbb", "12 Elm"],
+    const { sheet } = fetchedItemNames([
+      ["r:itm:aaaaaaa", "Widget A"],
+      ["r:itm:bbbbbbb", "Widget B"],
     ]);
 
-    expect(sheet.rowIdByName("12 Elm")).toEqual({
+    expect(sheet.rowIdByName("Widget B")).toEqual({
       found: "one",
-      rowId: "r:prp:bbbbbbb",
+      rowId: "r:itm:bbbbbbb",
       rowIndex: topDataRowIndex + 1,
     });
   });
 
   it("reports none when no row has the name", () => {
-    const { sheet } = fetchedPropertyNames([["r:prp:aaaaaaa", "730 Western"]]);
+    const { sheet } = fetchedItemNames([["r:itm:aaaaaaa", "Widget A"]]);
 
-    expect(sheet.rowIdByName("12 Elm")).toEqual({ found: "none" });
+    expect(sheet.rowIdByName("Widget B")).toEqual({ found: "none" });
   });
 
   it("reports many, with the count, when several rows share the name", () => {
-    const { sheet } = fetchedPropertyNames([
-      ["r:prp:aaaaaaa", "12 Elm"],
-      ["r:prp:bbbbbbb", "730 Western"],
-      ["r:prp:ccccccc", "12 Elm"],
+    const { sheet } = fetchedItemNames([
+      ["r:itm:aaaaaaa", "Widget B"],
+      ["r:itm:bbbbbbb", "Widget A"],
+      ["r:itm:ccccccc", "Widget B"],
     ]);
 
-    expect(sheet.rowIdByName("12 Elm")).toEqual({ found: "many", rowCount: 2 });
+    expect(sheet.rowIdByName("Widget B")).toEqual({
+      found: "many",
+      rowCount: 2,
+    });
   });
 
   it("fills a blank id on the row it found and queues the write", () => {
-    const { ss, sheet, batchUpdateCalls } = fetchedPropertyNames([
-      [null, "730 Western"],
+    const { ss, sheet, batchUpdateCalls } = fetchedItemNames([
+      [null, "Widget A"],
     ]);
 
-    const match = sheet.rowIdByName("730 Western");
+    const match = sheet.rowIdByName("Widget A");
     ss.batchUpdateGSheets();
 
     expect(match).toMatchObject({ found: "one", rowIndex: topDataRowIndex });
     const rowId = match.found === "one" ? match.rowId : "";
-    expect(rowId).toMatch(/^r:prp:/);
+    expect(rowId).toMatch(/^r:itm:/);
     expect(JSON.stringify(batchUpdateCalls)).toContain(rowId);
   });
 
   it("refuses a blank name, which would match every unnamed row", () => {
-    const { sheet } = fetchedPropertyNames([["r:prp:aaaaaaa", ""]]);
+    const { sheet } = fetchedItemNames([["r:itm:aaaaaaa", ""]]);
 
     expect(() => sheet.rowIdByName("")).toThrow(
-      'Cannot look up a blank name in the name column of "property".',
+      'Cannot look up a blank name in the name column of "item".',
     );
   });
 
   it("is typed only to sheets with both an id and a name column", () => {
     function neverCalled(ss: SpreadsheetNamed): void {
-      ss.sheet("property").rowIdByName("12 Elm");
-      // @ts-expect-error occPayAllocation has a name column but no id column.
-      ss.sheet("occPayAllocation").rowIdByName("12 Elm");
+      ss.sheet("item").rowIdByName("Widget B");
+      // @ts-expect-error valueTypes has an id column but no name column.
+      ss.sheet("valueTypes").rowIdByName("Widget B");
+      // @ts-expect-error log has neither.
+      ss.sheet("log").rowIdByName("Widget B");
       // @ts-expect-error spreadsheetConfig has neither.
       ss.sheet("spreadsheetConfig").prepFetchRowIdAndName();
     }

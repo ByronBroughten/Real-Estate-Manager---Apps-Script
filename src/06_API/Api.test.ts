@@ -1,8 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
-import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import type { SheetEdit } from "../00_Source/PlatformEvents/sheetEdit";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -12,34 +12,33 @@ import {
 import { Api } from "./Api";
 import type { Endpoints } from "./Endpoints";
 
-const occupancyGid = sheetConfigs.occupancy.sheetGid;
-const c = columnConfigs.occupancy;
+const runItemGid = getSheetTraitByName("runItem", "sheetGid");
 // The last column is deliberately left without a column id.
 const columnIds = [
-  c.id.columnId,
-  c.updateTermsSelect.columnId,
-  c.buildLedgerTimeLastRan.columnId,
+  getColumnTraitByName("runItem", "id", "columnId"),
+  getColumnTraitByName("runItem", "selected", "columnId"),
+  getColumnTraitByName("runItem", "result", "columnId"),
   "",
 ];
 const idColIndex = 0;
 const twoWayColIndex = 1;
 const buttonColIndex = 2;
 const blankIdColIndex = 3;
-const actionRowIndex = spreadsheetConfig.actionRowIndexBase0;
+const actionRowIndex = ssConfigGet("actionRowIndexBase0");
 const endRowIndex = 7;
 
-function stubOccupancySheet() {
+function stubRunItemSheet() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: runItemGid,
+        title: "Run item",
         rows: buildGridRows({
           0: columnIds,
-          3: ["ID", "Update terms, select", "Build ledger, time last ran", ""],
-          4: ["c:occ:row4", false, "", ""],
-          5: ["c:occ:row5", false, "", ""],
-          6: ["c:occ:row6", false, "", ""],
+          3: ["ID", "Selected", "Result", ""],
+          4: ["r:rit:row4", false, "", ""],
+          5: ["r:rit:row5", false, "", ""],
+          6: ["r:rit:row6", false, "", ""],
         }),
         table: { endRowIndex },
       },
@@ -49,8 +48,8 @@ function stubOccupancySheet() {
 
 function actionRowEdit(colIndex: number, value: string): SheetEdit {
   return {
-    sheetGid: occupancyGid,
-    rowIndexBase0: spreadsheetConfig.actionRowIndexBase0,
+    sheetGid: runItemGid,
+    rowIndexBase0: ssConfigGet("actionRowIndexBase0"),
     colIndexBase0: colIndex,
     value,
   };
@@ -58,13 +57,13 @@ function actionRowEdit(colIndex: number, value: string): SheetEdit {
 
 function trackingEndpoints(calls: string[]): Endpoints {
   return {
-    occupancy_updateTermsSelect: {
+    runItem_selected: {
       action: (_ss, { isChecked }) => {
         calls.push(`twoWay:${isChecked}`);
       },
       runOnUncheck: true,
     },
-    occupancy_buildLedgerTimeLastRan: {
+    runItem_result: {
       action: () => {
         calls.push("button");
       },
@@ -93,7 +92,7 @@ beforeEach(() => {
 const configs = installedConfigs();
 
 describe("Api.handleSheetEdit, the entry call", () => {
-  it("supplies the app's configs before anything reads them", async () => {
+  it("supplies the installed configs before anything reads them", async () => {
     vi.resetModules();
     const fresh = await import("./Api");
     const installSource = vi.fn();
@@ -110,7 +109,7 @@ describe("Api.handleSheetEdit, the entry call", () => {
     expect(installSource).not.toHaveBeenCalled();
   });
   it("installs the source and dispatches a suspected API call", () => {
-    stubOccupancySheet();
+    stubRunItemSheet();
     const calls: string[] = [];
     const installSource = vi.fn();
     Api.handleSheetEdit(
@@ -133,7 +132,12 @@ describe("Api.handleSheetChange", () => {
   });
   it("installs the source and returns the floor's toast for a renamed Value Config", () => {
     stubSheetsService({
-      sheets: [{ sheetId: sheetConfigs.valueConfig.sheetGid, title: "Values" }],
+      sheets: [
+        {
+          sheetId: getSheetTraitByName("valueConfig", "sheetGid"),
+          title: "Values",
+        },
+      ],
     });
     const installSource = vi.fn();
     expect(
@@ -146,7 +150,10 @@ describe("Api.handleSheetChange", () => {
   it("returns no toast when the floor tabs are intact", () => {
     stubSheetsService({
       sheets: [
-        { sheetId: sheetConfigs.valueConfig.sheetGid, title: "Value Config" },
+        {
+          sheetId: getSheetTraitByName("valueConfig", "sheetGid"),
+          title: "Value Config",
+        },
       ],
     });
     expect(
@@ -174,7 +181,7 @@ describe("Api.isSuspectedApiCall", () => {
 describe("Api.handleSheetEdit, endpoint dispatch", () => {
   it("runs the entry registered under the edited column's full name", () => {
     const calls: string[] = [];
-    stubOccupancySheet();
+    stubRunItemSheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(buttonColIndex, "TRUE"),
@@ -185,7 +192,7 @@ describe("Api.handleSheetEdit, endpoint dispatch", () => {
 
   it("does nothing for a column with no registered entry", () => {
     const calls: string[] = [];
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(idColIndex, "TRUE"),
@@ -197,7 +204,7 @@ describe("Api.handleSheetEdit, endpoint dispatch", () => {
 
   it("does nothing for a table column that has no column id yet", () => {
     const calls: string[] = [];
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(blankIdColIndex, "TRUE"),
@@ -209,7 +216,7 @@ describe("Api.handleSheetEdit, endpoint dispatch", () => {
 
   it("ignores an untick for an entry that does not run on uncheck", () => {
     const calls: string[] = [];
-    stubOccupancySheet();
+    stubRunItemSheet();
 
     Api.init(trackingEndpoints(calls)).handleSheetEdit(
       actionRowEdit(buttonColIndex, "FALSE"),
@@ -220,7 +227,7 @@ describe("Api.handleSheetEdit, endpoint dispatch", () => {
 
   it("runs an entry that declares runOnUncheck on both tick and untick", () => {
     const calls: string[] = [];
-    stubOccupancySheet();
+    stubRunItemSheet();
     const api = Api.init(trackingEndpoints(calls));
 
     api.handleSheetEdit(actionRowEdit(twoWayColIndex, "TRUE"));
@@ -232,7 +239,7 @@ describe("Api.handleSheetEdit, endpoint dispatch", () => {
 
 describe("Api.handleSheetEdit, the entry checkbox", () => {
   it("clears a button's checkbox so it is ready for the next click", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     Api.init(trackingEndpoints([])).handleSheetEdit(
       actionRowEdit(buttonColIndex, "TRUE"),
@@ -244,7 +251,7 @@ describe("Api.handleSheetEdit, the entry checkbox", () => {
   });
 
   it("leaves a two-way entry's checkbox where the operator put it", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     Api.init(trackingEndpoints([])).handleSheetEdit(
       actionRowEdit(twoWayColIndex, "TRUE"),
@@ -254,7 +261,7 @@ describe("Api.handleSheetEdit, the entry checkbox", () => {
   });
 
   it("costs one read and one write for an entry that reports nothing", () => {
-    const { batchUpdateCalls, getByDataFilterCalls } = stubOccupancySheet();
+    const { batchUpdateCalls, getByDataFilterCalls } = stubRunItemSheet();
 
     Api.init(trackingEndpoints([])).handleSheetEdit(
       actionRowEdit(buttonColIndex, "TRUE"),

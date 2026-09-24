@@ -60,5 +60,10 @@ export const columnConfigs = makeColumnConfigs({
   "computed": {
     "amount": { "columnId": "c:cmp:amount", "header": "Amount", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "rowNumber": { "columnId": "c:cmp:rowNumber", "header": "Row number", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
+  },
+  "dates": {
+    "requiredDate": { "columnId": "c:dat:requiredDate", "header": "Required date", "valueName": "date", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "optionalDate": { "columnId": "c:dat:optionalDate", "header": "Optional date", "valueName": "date", "isFormula": false, "emptyValueAllowed": true, "customDefaultValue": null },
+    "id": { "columnId": "c:dat:id", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   }
 });

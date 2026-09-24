@@ -48,7 +48,7 @@ Schema/config resolution and ID encode/decode need no mocking. The GAS-touching 
 
 ## Two test programs, two config sets
 
-The framework tests (tiers `00`–`03` and `utils/`) run on the dev spreadsheet's configs, and every other `src/` test runs on the app's. Each set has its own Vitest project and `tsc` program, so each program carries one `Register` augmentation: `dev/devConfigs.ts` for the framework and `src/appConfigs.ts` for the app. The app's `tsconfig.json` excludes the framework tests. A framework test reads a GID or column ID through `getSheetTraitByName`/`getColumnTraitByName`, never by importing a `generated/` file.
+The framework tests (tiers `00`–`06`, `appsScriptHost/`, `nodeHost/`, `testSupport/` and `utils/`) run on the dev spreadsheet's configs, and every other `src/` test, today `businessEndpoints/`, runs on the app's. Each set has its own Vitest project and `tsc` program, so each program carries one `Register` augmentation: `dev/devConfigs.ts` for the framework and `src/appConfigs.ts` for the app, each installed for its tests by `dev/installDevConfigs.ts` and `src/installAppConfigs.ts`. The app's `tsconfig.json` excludes the framework tests, and `testSupport/` compiles in both. A framework test reads a GID or column ID through `getSheetTraitByName`/`getColumnTraitByName`, and a config sheet's columns through `installedConfigs()`, never by importing a `generated/` file. It never names a real-estate sheet or column, and a made-up sheet in a fixture takes a neutral name such as `Widget`.
 
 ## The dev fixtures and their exemplar columns
 
@@ -59,8 +59,9 @@ A framework test names a sheet or column of the dev spreadsheet's fixtures, neve
 | `item` | ID and Name columns | The main subject of the Raw and Identified tests. `optionalNote` has Empty value allowed ticked, and `requiredCount` has it unticked. |
 | `valueTypes` | ID column, one column per framework value name | `sampledBoolean` only *samples* as boolean, with no column type declared. `checkbox` is a declared checkbox. `dateValue` is a declared date. |
 | `log` | No ID column | |
-| `runItem` | Endpoint sheet: selector and run state | For the endpoint tests (#139). |
+| `runItem` | Endpoint sheet: `selected` checkbox, `result` entry column, `startTime` and `runStatus` | The subject of the `EndpointRun`, `Api`, `Endpoints` and `AppsScriptApi` tests, and of the tier 04 tests that need a checkbox column or a conditional-format or protection fixture. |
 | `computed` | No ID column | `rowNumber` is the one formula column. |
+| `dates` | ID column, two date columns | `requiredDate` has Empty value allowed unticked and `optionalDate` has it ticked, the only ticked column that is not text, so a ticked read's `SerialDate \| ""` type has a subject. |
 
 Add a fixture sheet only when a test needs a config shape these don't cover. A layout edge case, such as a blank row or a misplaced Table, stays row data in a fake-service fixture. The dev value configs are empty, so no framework test names a dropdown value name.
 
@@ -68,7 +69,7 @@ An exemplar's value name has to stay put. `sampledBoolean` must not be formatted
 
 ## Testing an endpoint through `EndpointRun`
 
-An endpoint is tested through `EndpointRun`, never by calling its action (the rule: [`docs/style.md`](./style.md#tests)): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints.
+An endpoint is tested through `EndpointRun`, never by calling its action (the rule: [`docs/style.md`](./style.md#tests)): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints on the `runItem` fixture.
 
 ## The fake answers what the adapter asked; Google doesn't
 

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
@@ -7,15 +7,14 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { SheetConfigOperator } from "./SheetConfigOperator";
 
-// Real committed columnId strings for the Sheet Config sheet's own columns
-// (src/01_SpreadsheetSchema/generated/columnConfigs.ts) — using these rather than
-// made-up ids means the fixture stays honest to what the production code
-// actually resolves column names through.
+const { columnConfigs } = installedConfigs();
+
+// The installed columnConfigs' ids, so the fixture matches what production resolves through.
 const sc = columnConfigs.sheetConfig;
 const sheetConfigGid = 210603630;
-const propertyGid = 999001;
+const widgetGid = 999001;
 const newSheetGid = 999002;
-const unitGid = 999003;
+const gadgetGid = 999003;
 
 const sheetConfigColumnIdRow = [
   sc.sheetGid.columnId,
@@ -23,7 +22,7 @@ const sheetConfigColumnIdRow = [
   sc.letApiAccess.columnId,
 ];
 
-const existingPropertyConfigRow = [propertyGid, "Property", true];
+const existingWidgetConfigRow = [widgetGid, "Widget", true];
 
 beforeEach(() => {
   stubLogger();
@@ -56,15 +55,15 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: existingPropertyConfigRow,
+            4: existingWidgetConfigRow,
           }),
           table: { endRowIndex: 5 },
         },
         // Referenced by the existing row above; no "ID" header, so
         // hasIdColumn is emitted false from the header-row sample.
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
         },
@@ -82,9 +81,9 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     syncSheetConfigOperator(operator);
     const sheetConfigs = operator.newSheetConfigs();
 
-    expect(sheetConfigs.property).toEqual({
-      sheetGid: propertyGid,
-      idPrefix: "prp",
+    expect(sheetConfigs.widget).toEqual({
+      sheetGid: widgetGid,
+      idPrefix: "wdg",
       hasIdColumn: false,
       hasNameColumn: false,
     });
@@ -139,13 +138,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", null, "prp"],
+            4: [widgetGid, "Widget", null, "wdg"],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
         },
@@ -155,7 +154,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(operator.newSheetConfigs().property).toBeUndefined();
+    expect(operator.newSheetConfigs().widget).toBeUndefined();
     expect(operator.sheetGidsApiAccesses()).toEqual([sheetConfigGid]);
   });
 
@@ -168,7 +167,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: existingPropertyConfigRow,
+            4: existingWidgetConfigRow,
             5: [newSheetGid, "Gone", true],
           }),
           table: { endRowIndex: 6 },
@@ -180,7 +179,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
 
     expect(() => syncSheetConfigOperator(operator)).not.toThrow();
     expect(operator.sheet.row(5).isBlank).toBe(true);
-    expect(operator.newSheetConfigs().property).toBeUndefined();
+    expect(operator.newSheetConfigs().widget).toBeUndefined();
     expect(operator.newSheetConfigs().sheetConfig).toEqual({
       sheetGid: sheetConfigGid,
       idPrefix: "scf",
@@ -197,13 +196,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", true],
+            4: [widgetGid, "Widget", true],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           rows: buildGridRows({ 3: [] }),
           table: { endRowIndex: 5 },
         },
@@ -213,9 +212,9 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(operator.newSheetConfigs().property).toEqual({
-      sheetGid: propertyGid,
-      idPrefix: "prp",
+    expect(operator.newSheetConfigs().widget).toEqual({
+      sheetGid: widgetGid,
+      idPrefix: "wdg",
       hasIdColumn: false,
       hasNameColumn: false,
     });
@@ -229,13 +228,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Stale Title", true],
+            4: [widgetGid, "Stale Title", true],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           rows: buildGridRows({ 3: ["Name"] }),
           table: { endRowIndex: 5 },
         },
@@ -245,8 +244,8 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(operator.sheet.column("sheetTitle").value(4)).toBe("Property");
-    expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(false);
+    expect(operator.sheet.column("sheetTitle").value(4)).toBe("Widget");
+    expect(operator.newSheetConfigs().widget?.hasIdColumn).toBe(false);
   });
 
   it("corrects a draft tab's title from the live tab name without reading its Table", () => {
@@ -257,13 +256,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Stale Title", false],
+            4: [widgetGid, "Stale Title", false],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           rows: buildGridRows({ 3: ["Name"] }),
           table: { endRowIndex: 4 },
         },
@@ -273,8 +272,8 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(operator.sheet.column("sheetTitle").value(4)).toBe("Property");
-    expect(operator.newSheetConfigs().property).toBeUndefined();
+    expect(operator.sheet.column("sheetTitle").value(4)).toBe("Widget");
+    expect(operator.newSheetConfigs().widget).toBeUndefined();
   });
 
   it("emits has-ID true when the described sheet's header row has the ID header", () => {
@@ -285,13 +284,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", true],
+            4: [widgetGid, "Widget", true],
           }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           rows: buildGridRows({ 3: ["ID", "Name"] }),
           table: { endRowIndex: 5 },
         },
@@ -301,7 +300,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(operator.newSheetConfigs().property?.hasIdColumn).toBe(true);
+    expect(operator.newSheetConfigs().widget?.hasIdColumn).toBe(true);
   });
 
   it.each([
@@ -317,13 +316,13 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
             title: "Sheet Config",
             rows: buildGridRows({
               0: sheetConfigColumnIdRow,
-              4: [propertyGid, "Property", true],
+              4: [widgetGid, "Widget", true],
             }),
             table: { endRowIndex: 5 },
           },
           {
-            sheetId: propertyGid,
-            title: "Property",
+            sheetId: widgetGid,
+            title: "Widget",
             rows: buildGridRows({ 3: headers }),
             table: { endRowIndex: 5 },
           },
@@ -333,7 +332,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
       const operator = SheetConfigOperator.init();
       syncSheetConfigOperator(operator);
 
-      expect(operator.newSheetConfigs().property?.hasNameColumn).toBe(
+      expect(operator.newSheetConfigs().widget?.hasNameColumn).toBe(
         hasNameColumn,
       );
     },
@@ -347,21 +346,21 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
           title: "Sheet Config",
           rows: buildGridRows({
             0: sheetConfigColumnIdRow,
-            4: [propertyGid, "Property", true],
-            5: [unitGid, "Unit", true],
+            4: [widgetGid, "Widget", true],
+            5: [gadgetGid, "Gadget", true],
           }),
           table: { endRowIndex: 6 },
         },
         {
-          sheetId: propertyGid,
-          title: "Property",
-          rows: buildGridRows({ 0: ["c:prp:aaa"], 3: [] }),
+          sheetId: widgetGid,
+          title: "Widget",
+          rows: buildGridRows({ 0: ["c:wdg:aaa"], 3: [] }),
           table: { endRowIndex: 5 },
         },
         {
-          sheetId: unitGid,
-          title: "Unit",
-          rows: buildGridRows({ 0: ["c:prp:bbb"], 3: [] }),
+          sheetId: gadgetGid,
+          title: "Gadget",
+          rows: buildGridRows({ 0: ["c:wdg:bbb"], 3: [] }),
           table: { endRowIndex: 5 },
         },
       ],
@@ -371,7 +370,7 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     syncSheetConfigOperator(operator);
 
     expect(() => operator.toFileSource("../makeConfigs")).toThrow(
-      /Property.*Unit.*"prp"/,
+      /Widget.*Gadget.*"wdg"/,
     );
   });
 });

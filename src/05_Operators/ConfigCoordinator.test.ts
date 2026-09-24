@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   clearSpreadsheetConfigOverlay,
@@ -15,11 +14,12 @@ import {
 } from "../testSupport/fakeSheetsService";
 import { ConfigCoordinator } from "./ConfigCoordinator";
 
-const testSheetGid = 2089200354;
+const { columnConfigs, spreadsheetConfig } = installedConfigs();
+const testSheetGid = getSheetTraitByName("item", "sheetGid");
 const sheetConfigGid = 210603630;
 const columnConfigGid = 2034522667;
 const draftGid = 777000111;
-const draftTitle = "Add Occ Payment Intention";
+const draftTitle = "Add Widget Order";
 const headerOnlyTableEndRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
 const tableHeaderRowIndex = ssConfigGet("tableHeaderRowIndexBase0");
 const startTableColIndex = ssConfigGet("startTableColIndexBase0");
@@ -74,7 +74,7 @@ function columnTypesByHeader(
   return types;
 }
 
-const testSheetConfigRowWithApiAccess = [testSheetGid, "Test", true];
+const testSheetConfigRowWithApiAccess = [testSheetGid, "Item", true];
 
 beforeEach(() => {
   stubLogger();
@@ -194,7 +194,7 @@ function seedFixture(
   } = {},
 ) {
   const idDelimiter = options.idDelimiter ?? ":";
-  const testColumnId = options.testColumnId ?? "c:test:xyz123";
+  const testColumnId = options.testColumnId ?? "c:itm:xyz123";
   return stubSheetsService({
     sheets: [
       spreadsheetConfigSheet(idDelimiter, {
@@ -244,7 +244,6 @@ function seedFixture(
             cc.columnId.columnId,
             cc.sheetTitle.columnId,
             cc.header.columnId,
-            cc.customDefaultValue.columnId,
             cc.emptyValueAllowed.columnId,
           ],
           3: [
@@ -252,7 +251,6 @@ function seedFixture(
             cc.columnId.header,
             cc.sheetTitle.header,
             cc.header.header,
-            cc.customDefaultValue.header,
             cc.emptyValueAllowed.header,
           ],
         }),
@@ -261,20 +259,19 @@ function seedFixture(
           startRowIndex: tableHeaderRowIndex,
           startColumnIndex: startTableColIndex,
           endRowIndex: 5,
-          endColumnIndex: startTableColIndex + 6,
+          endColumnIndex: startTableColIndex + 5,
           columnTypes: {
             0: "DOUBLE",
             1: "TEXT",
             2: "TEXT",
             3: "TEXT",
-            4: "TEXT",
-            5: "BOOLEAN",
+            4: "BOOLEAN",
           },
         },
       },
       {
         sheetId: testSheetGid,
-        title: "Test",
+        title: "Item",
         // Row 4 (the top data row) must be present, even blank, and a table
         // range declared, now that
         // ColumnConfigOperator emit samples both (for
@@ -404,11 +401,10 @@ describe("ConfigCoordinator.syncAndFlushConfigSheets", () => {
       driftedFloorWarningDescription(),
     );
     expect(batchUpdateCalls[1]?.requests?.length).toBeGreaterThan(0);
-    // The column ID gathered from the "test" sheet made it into a newly
-    // appended Column Config row, which is part of what got flushed.
-    expect(orchestrator.sheetConfigOperator.newSheetConfigs().test).toEqual({
+    // The gathered column ID rode the appended Column Config row into the flush.
+    expect(orchestrator.sheetConfigOperator.newSheetConfigs().item).toEqual({
       sheetGid: testSheetGid,
-      idPrefix: "test",
+      idPrefix: "itm",
       hasIdColumn: false,
       hasNameColumn: false,
     });
@@ -458,12 +454,10 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
     expect(typeof parsed.spreadsheetConfig).toBe("string");
     expect(typeof parsed.sheetConfigs).toBe("string");
     expect(typeof parsed.columnConfigs).toBe("string");
-    expect(parsed.sheetConfigs).toContain('"test"');
+    expect(parsed.sheetConfigs).toContain('"item"');
     expect(typeof parsed.valueConfigs).toBe("string");
-    // The "test" sheet's column ID was gathered and appended to Column
-    // Config as part of the sync, then given its real header by
-    // _updateProgrammaticValues; emit samples valueName from the live column.
-    expect(parsed.columnConfigs).toContain("c:test:xyz123");
+    // Gathered into Column Config by the sync, then headed by _updateProgrammaticValues.
+    expect(parsed.columnConfigs).toContain("c:itm:xyz123");
   });
 
   it("refuses a live ID delimiter change, naming it with the expected one", () => {
@@ -544,7 +538,6 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
       cc.columnId.columnId,
       cc.sheetTitle.columnId,
       cc.header.columnId,
-      cc.customDefaultValue.columnId,
       cc.emptyValueAllowed.columnId,
     ];
     stubSheetsService({
@@ -583,7 +576,6 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
               cc.columnId.header,
               cc.sheetTitle.header,
               cc.header.header,
-              cc.customDefaultValue.header,
               cc.emptyValueAllowed.header,
             ],
             4: [
@@ -666,7 +658,7 @@ describe("ConfigCoordinator.generateConfigFiles", () => {
         ConfigCoordinator.init().generateConfigFiles("../makeConfigs")
           .idPrefixReport,
       ).toBe(
-        'Sheet "Test" sampled ID prefix "zzz" differs from last generated "test".',
+        'Sheet "Item" sampled ID prefix "zzz" differs from last generated "itm".',
       );
     });
   });
@@ -729,7 +721,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     const orchestrator = ConfigCoordinator.init();
     expect(() => orchestrator.syncConfigSheetRows()).not.toThrow();
     expect(
-      orchestrator.sheetConfigOperator.newSheetConfigs().addOccPaymentIntention,
+      orchestrator.sheetConfigOperator.newSheetConfigs().addWidgetOrder,
     ).toBeUndefined();
     expect(
       orchestrator.sheetConfigOperator.sheet
@@ -748,7 +740,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     });
 
     expect(() => ConfigCoordinator.init().syncConfigSheetRows()).toThrow(
-      /Add Occ Payment Intention.*at least one data row/,
+      /Add Widget Order.*at least one data row/,
     );
   });
 
@@ -761,7 +753,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
         }),
       ],
       extraSheetConfigDataRows: {
-        5: [draftGid, draftTitle, true, "aopi"],
+        5: [draftGid, draftTitle, true, "awo"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -769,7 +761,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
-      `"addOccPaymentIntention": { "sheetGid": ${draftGid}, "idPrefix": "aopi", "hasIdColumn": true, "hasNameColumn": true }`,
+      `"addWidgetOrder": { "sheetGid": ${draftGid}, "idPrefix": "awo", "hasIdColumn": true, "hasNameColumn": true }`,
     );
   });
 
@@ -785,7 +777,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     const orchestrator = ConfigCoordinator.init();
     expect(() => orchestrator.syncConfigSheetRows()).not.toThrow();
     expect(
-      orchestrator.sheetConfigOperator.newSheetConfigs().addOccPaymentIntention,
+      orchestrator.sheetConfigOperator.newSheetConfigs().addWidgetOrder,
     ).toBeUndefined();
   });
 
@@ -799,24 +791,24 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
         .column("sheetGid")
         .hasValue(draftGid),
     ).toBe(true);
-    expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
+    expect(parsed.sheetConfigs).not.toContain("addWidgetOrder");
   });
 
   it("omits a draft that has data rows until Let api access is ticked", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet({ table: "with-data-row" })],
       extraSheetConfigDataRows: {
-        5: [draftGid, draftTitle, false, "aopi"],
+        5: [draftGid, draftTitle, false, "awo"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
 
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
-    expect(parsed.sheetConfigs).toContain('"test"');
-    expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
-    expect(parsed.columnConfigs).toContain("c:test:xyz123");
-    expect(parsed.columnConfigs).not.toMatch(/c:aopi:/);
+    expect(parsed.sheetConfigs).toContain('"item"');
+    expect(parsed.sheetConfigs).not.toContain("addWidgetOrder");
+    expect(parsed.columnConfigs).toContain("c:itm:xyz123");
+    expect(parsed.columnConfigs).not.toMatch(/c:awo:/);
   });
 
   it("syncs several header-only drafts in one run", () => {
@@ -844,9 +836,9 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
 
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
-    expect(parsed.sheetConfigs).toContain('"test"');
-    expect(parsed.sheetConfigs).not.toContain("addOccPaymentIntention");
-    expect(parsed.columnConfigs).toContain("c:test:xyz123");
+    expect(parsed.sheetConfigs).toContain('"item"');
+    expect(parsed.sheetConfigs).not.toContain("addWidgetOrder");
+    expect(parsed.columnConfigs).toContain("c:itm:xyz123");
   });
 
   it("still syncs the config-describing sheets when they have Let api access", () => {
@@ -903,7 +895,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet({ table: "with-data-row" })],
       extraSheetConfigDataRows: {
-        5: [draftGid, draftTitle, false, "aopi"],
+        5: [draftGid, draftTitle, false, "awo"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -919,7 +911,7 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
     seedFixture({
       extraSheets: [headerOnlyDraftSheet({ table: "missing" })],
       extraSheetConfigDataRows: {
-        5: [draftGid, draftTitle, true, "aopi"],
+        5: [draftGid, draftTitle, true, "awo"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
@@ -939,8 +931,8 @@ describe("ConfigCoordinator.syncConfigSheetRows Let api access", () => {
 });
 
 describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
-  const propertyGid = 888001;
-  const propertiesGid = 888002;
+  const widgetGid = 888001;
+  const otherGid = 888002;
 
   function letApiAccessSheet(options: {
     sheetId: number;
@@ -972,13 +964,11 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
 
   it("assigns a generated prefix to a new Let api access sheet and mints column IDs with it", () => {
     seedFixture({
-      extraSheets: [
-        letApiAccessSheet({ sheetId: propertyGid, title: "Property" }),
-      ],
+      extraSheets: [letApiAccessSheet({ sheetId: widgetGid, title: "Widget" })],
       extraSheetConfigDataRows: {
         5: sheetConfigRow({
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           leftoverIdPrefix: "zzzz",
         }),
       },
@@ -988,23 +978,23 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
-      `"property": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
+      `"widget": { "sheetGid": ${widgetGid}, "idPrefix": "wdg", "hasIdColumn": false, "hasNameColumn": true }`,
     );
-    expect(parsed.columnConfigs).toMatch(/c:prp:/);
+    expect(parsed.columnConfigs).toMatch(/c:wdg:/);
   });
 
   it("samples an existing sheet's prefix from its column IDs, whatever the tab title is now", () => {
     seedFixture({
       extraSheets: [
         letApiAccessSheet({
-          sheetId: propertyGid,
+          sheetId: widgetGid,
           title: "Renamed Tab",
-          columnIds: ["c:prp:abc1234"],
+          columnIds: ["c:wdg:abc1234"],
         }),
       ],
       extraSheetConfigDataRows: {
         5: sheetConfigRow({
-          sheetId: propertyGid,
+          sheetId: widgetGid,
           title: "Renamed Tab",
           leftoverIdPrefix: "zzzz",
         }),
@@ -1015,7 +1005,7 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
-      `"renamedTab": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
+      `"renamedTab": { "sheetGid": ${widgetGid}, "idPrefix": "wdg", "hasIdColumn": false, "hasNameColumn": true }`,
     );
   });
 
@@ -1023,16 +1013,16 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     seedFixture({
       extraSheets: [
         letApiAccessSheet({
-          sheetId: propertyGid,
-          title: "Property",
-          columnIds: ["c:prp:abc1234", ""],
+          sheetId: widgetGid,
+          title: "Widget",
+          columnIds: ["c:wdg:abc1234", ""],
           headers: ["Name", "Notes"],
         }),
       ],
       extraSheetConfigDataRows: {
         5: sheetConfigRow({
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           leftoverIdPrefix: "zzzz",
         }),
       },
@@ -1041,33 +1031,33 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
 
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
-    const minted = parsed.columnConfigs.match(/c:prp:[^"]+/g) ?? [];
+    const minted = parsed.columnConfigs.match(/c:wdg:[^"]+/g) ?? [];
     expect(minted).toHaveLength(2);
-    expect(minted).toContain("c:prp:abc1234");
+    expect(minted).toContain("c:wdg:abc1234");
   });
 
   it("stops when one sheet's column IDs carry mixed prefixes, naming the sheet and stray IDs", () => {
     seedFixture({
       extraSheets: [
         letApiAccessSheet({
-          sheetId: propertyGid,
-          title: "Property",
-          columnIds: ["c:prp:abc1234", "c:unt:xyz1234"],
+          sheetId: widgetGid,
+          title: "Widget",
+          columnIds: ["c:wdg:abc1234", "c:gzm:xyz1234"],
           headers: ["Name", "Notes"],
         }),
       ],
       extraSheetConfigDataRows: {
         5: sheetConfigRow({
-          sheetId: propertyGid,
-          title: "Property",
-          leftoverIdPrefix: "prp",
+          sheetId: widgetGid,
+          title: "Widget",
+          leftoverIdPrefix: "wdg",
         }),
       },
       sheetConfigTableEndRowIndex: 6,
     });
 
     expect(() => ConfigCoordinator.init().syncConfigSheetRows()).toThrow(
-      /Property.*c:unt:xyz1234/,
+      /Widget.*c:gzm:xyz1234/,
     );
   });
 
@@ -1075,26 +1065,26 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     seedFixture({
       extraSheets: [
         letApiAccessSheet({
-          sheetId: propertyGid,
-          title: "Property",
-          columnIds: ["c:prp:aaa1111"],
+          sheetId: widgetGid,
+          title: "Widget",
+          columnIds: ["c:wdg:aaa1111"],
         }),
         letApiAccessSheet({
-          sheetId: propertiesGid,
-          title: "Unit",
-          columnIds: ["c:prp:bbb2222"],
+          sheetId: otherGid,
+          title: "Gizmo",
+          columnIds: ["c:wdg:bbb2222"],
         }),
       ],
       extraSheetConfigDataRows: {
         5: sheetConfigRow({
-          sheetId: propertyGid,
-          title: "Property",
-          leftoverIdPrefix: "prp",
+          sheetId: widgetGid,
+          title: "Widget",
+          leftoverIdPrefix: "wdg",
         }),
         6: sheetConfigRow({
-          sheetId: propertiesGid,
-          title: "Unit",
-          leftoverIdPrefix: "unt",
+          sheetId: otherGid,
+          title: "Gizmo",
+          leftoverIdPrefix: "gzm",
         }),
       },
       sheetConfigTableEndRowIndex: 7,
@@ -1102,7 +1092,7 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
 
     expect(() =>
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs"),
-    ).toThrow(/Property.*Unit.*"prp"/);
+    ).toThrow(/Widget.*Gizmo.*"wdg"/);
   });
 
   it("reports a sampled prefix that differs from the last generated sheet configs without failing", () => {
@@ -1111,7 +1101,7 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.idPrefixReport).toBe(
-      'Sheet "Test" sampled ID prefix "zzz" differs from last generated "test".',
+      'Sheet "Item" sampled ID prefix "zzz" differs from last generated "itm".',
     );
     expect(parsed.sheetConfigs).toContain('"idPrefix": "zzz"');
   });
@@ -1120,45 +1110,45 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     seedFixture({
       extraSheets: [
         letApiAccessSheet({
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: widgetGid,
+          title: "Widget",
           columnIds: [""],
         }),
       ],
       extraSheetConfigDataRows: {
-        5: [propertyGid, "Property", false, "prp"],
+        5: [widgetGid, "Widget", false, "wdg"],
       },
       sheetConfigTableEndRowIndex: 6,
     });
 
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
-    expect(parsed.sheetConfigs).not.toContain("property");
-    expect(parsed.columnConfigs).not.toMatch(/c:prp:/);
+    expect(parsed.sheetConfigs).not.toContain("widget");
+    expect(parsed.columnConfigs).not.toMatch(/c:wdg:/);
   });
 
   it("avoids prefixes sampled from other Let api access sheets in the same run", () => {
     seedFixture({
       extraSheets: [
         letApiAccessSheet({
-          sheetId: propertyGid,
-          title: "Household",
-          columnIds: ["c:prp:abc1234"],
+          sheetId: widgetGid,
+          title: "Gadget",
+          columnIds: ["c:wdg:abc1234"],
         }),
         letApiAccessSheet({
-          sheetId: propertiesGid,
-          title: "Property",
+          sheetId: otherGid,
+          title: "Widget",
         }),
       ],
       extraSheetConfigDataRows: {
         5: sheetConfigRow({
-          sheetId: propertyGid,
-          title: "Household",
-          leftoverIdPrefix: "hsh",
+          sheetId: widgetGid,
+          title: "Gadget",
+          leftoverIdPrefix: "gdg",
         }),
         6: sheetConfigRow({
-          sheetId: propertiesGid,
-          title: "Property",
+          sheetId: otherGid,
+          title: "Widget",
           leftoverIdPrefix: "zzzz",
         }),
       },
@@ -1168,10 +1158,10 @@ describe("ConfigCoordinator.generateConfigFiles ID prefix", () => {
     const parsed =
       ConfigCoordinator.init().generateConfigFiles("../makeConfigs");
     expect(parsed.sheetConfigs).toContain(
-      `"household": { "sheetGid": ${propertyGid}, "idPrefix": "prp", "hasIdColumn": false, "hasNameColumn": true }`,
+      `"gadget": { "sheetGid": ${widgetGid}, "idPrefix": "wdg", "hasIdColumn": false, "hasNameColumn": true }`,
     );
     expect(parsed.sheetConfigs).toContain(
-      `"property": { "sheetGid": ${propertiesGid}, "idPrefix": "prpr", "hasIdColumn": false, "hasNameColumn": true }`,
+      `"widget": { "sheetGid": ${otherGid}, "idPrefix": "wdgt", "hasIdColumn": false, "hasNameColumn": true }`,
     );
   });
 });
