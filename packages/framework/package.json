@@ -18,7 +18,9 @@
     "tsconfig.base.json",
     "scripts",
     "docs",
-    "CONTEXT.md"
+    "CONTEXT.md",
+    "!**/AGENTS.md",
+    "!**/CLAUDE.md"
   ],
   "scripts": {
     "tsc": "tsc -p .",

@@ -1,6 +1,6 @@
 # Testing
 
-Map fragment routed from `AGENTS.md`.
+Read the heading the task needs.
 
 Vitest, as plain Node against fakes, so `npm test` is always safe. The test-writing rules are the house style's Tests section; this file is the fakes, the seams and the exemplar columns. Most tests need only `stubSheetsService()`.
 
@@ -52,7 +52,7 @@ The framework tests (tiers `00`–`06`, `appsScriptHost/`, `nodeHost/`, `testSup
 
 ## The dev fixtures and their exemplar columns
 
-A framework test names a sheet or column of the dev spreadsheet's fixtures, never a real-estate one. `buildDevFixtures` is their checked-in recipe, and the framework's `dev/generated/` is what `dev:gen:configs` read back from them:
+A framework test names a sheet or column of the dev spreadsheet's fixtures, never a real-estate one. `buildDevFixtures` is their checked-in recipe, and the framework's `dev/generated/` is what `gen-configs` read back from them:
 
 | Sheet | Shape | Exemplars |
 | --- | --- | --- |
@@ -77,7 +77,7 @@ Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row
 
 ## Live-sheet verification
 
-There's no standing integration-test tier against a real spreadsheet. When Claude is asked to extend this test infrastructure, it may use the `gsheets` MCP ad hoc (per the read/write rules in [`docs/how-it-runs.md`](./how-it-runs.md)) to sanity-check that a fake's behavior actually matches the real API — that stays a manual verification step, never part of `npm test`/CI.
+There's no standing integration-test tier against a real spreadsheet. When Claude is asked to extend this test infrastructure, it may use the `gsheets` MCP ad hoc (within the repo's gsheets write rules; what the MCP can see is [`docs/how-it-runs.md`](./how-it-runs.md#the-gsheets-mcp-tools)'s) to sanity-check that a fake's behavior actually matches the real API — that stays a manual verification step, never part of `npm test`/CI.
 
 ## Navigation assertions
 

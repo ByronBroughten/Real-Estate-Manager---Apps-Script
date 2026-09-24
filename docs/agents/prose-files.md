@@ -27,6 +27,8 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | `docs/claude-code-guardrails.md` | The Claude Code hooks and project agent. |
 | `docs/occupancy-ledger.md` | How the occupancy ledger is built, beyond CONTEXT.md's words for it. |
 | `docs/agents/*.md` | Agent workflow: git, planning, delegation, issues. |
+| `packages/real-estate/CLAUDE.md` | Only the restart-at-root notice for a session started inside the app package. |
+| `packages/real-estate/src/businessEndpoints/AGENTS.md` | That folder's rules, 10 lines or fewer (lint), with a `CLAUDE.md` beside it. |
 | `README.md` | A derived view for people on GitHub. Nothing routes agents to it. Update it when a fact it mirrors changes (table below). |
 
 ### Framework (`packages/framework/`)
@@ -35,9 +37,9 @@ Its `docs/`, `CONTEXT.md` and `README.md` ship with the package, so they link on
 
 | File | Holds |
 | --- | --- |
-| `CLAUDE.md` | Only the restart-at-root notice for a session started inside the package (the app's `packages/real-estate/CLAUDE.md` too). |
+| `CLAUDE.md` | Only the restart-at-root notice for a session started inside the package. |
 | `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. 15 lines or fewer (lint). |
-| `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/` and `scripts/` `AGENTS.md`, and the app's `src/businessEndpoints/` one | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. |
+| `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/` and `scripts/` `AGENTS.md` | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. |
 | `CONTEXT.md` | Operator-facing words every app on the framework shares: sheet layout, endpoints, columns. Each term is a definition of what it is, its relationships and its avoid-aliases; what the app does with it goes in the mechanics doc that owns that behavior. |
 | `docs/vocabulary.md` | The architecture words, one line per term. |
 | `docs/vocabulary/*.md` | Each term's elaboration, split by subject, indexed by `docs/vocabulary.md`'s "When \| File" table. |

@@ -23,7 +23,8 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 
 - **Bare `npx sheets-framework …`, `node packages/framework/scripts/sheets-framework.mjs …`, a package-level `npm run chore …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
 - **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.mjs` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
-- **`dev:build` runs `rollup --config && clasp push` in the framework package, `dev:push` is `clasp push` alone and `dev:run` is `clasp run`**, all against the dev project named in the framework's `.clasp.json`. The dev project itself: [The dev project](../packages/framework/docs/how-it-runs.md#the-dev-project).
+- **`dev:build`, `dev:push` and `dev:run` run the framework package's `build`, `push` and `run` scripts** against the dev project named in its `.clasp.json` ([the dev project](../packages/framework/docs/how-it-runs.md#the-dev-project)).
+- **Both targets' Node-host credential comes from GCP project `real-estate-manager-sheets`**, whose consent screen is published to production so its refresh tokens don't expire ([why](../packages/framework/docs/how-it-runs.md#when-the-node-host-fails-to-authenticate)).
 - **The dev spreadsheet is not a rehearsal copy of the app one.** Sheet configs key every sheet by its GID, and the dev sheet carries its own fixture sheets, not a copy of the business ones.
 
 ## Before touching the live spreadsheet or deployment
@@ -36,7 +37,7 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 
 `npm run tsc` (type-checking only) is always safe to run freely, and so is `npm run app:chore <name>` without `--send`, which cannot write ([the dry run](../packages/framework/docs/how-it-runs.md#the-chore-and-its-dry-run)).
 
-`npm run app:gen:configs` **writes** to the live config sheets and to business sheets' header rows ([what it writes](../packages/framework/docs/how-it-runs.md#what-gen-configs-writes)). It has **standing permission** under four conditions, all of which must hold. `dev:gen:configs` needs only the last two, since the dev spreadsheet holds no business data:
+`npm run app:gen:configs` **writes** to the live spreadsheet ([what it writes](../packages/framework/docs/how-it-runs.md#what-gen-configs-writes)). It has **standing permission** under four conditions, all of which must hold. `dev:gen:configs` needs only the last two, since the dev spreadsheet holds no business data:
 
 - no uncommitted changes in the framework's `src/01_SpreadsheetSchema/` or the app's `src/generated/`;
 - no uncommitted changes in the framework's `src/05_Operators/`, because the command now executes local, possibly unreviewed operator code against the live config sheets;
