@@ -13,7 +13,6 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "useDefineForClassFields": false,
 
     "noImplicitAny": true,
     "strictNullChecks": true,

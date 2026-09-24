@@ -11,13 +11,13 @@ const lintedFiles = {
   ignoredRoot: join(".claude", "worktrees") + sep,
 } as const;
 
-// generatedDirs are project-relative, one per package's sheets.config.json.
 export interface FileLocation {
   projectDir: string;
   cwd: string | undefined;
   filePath: string;
 }
 
+// generatedDirs are project-relative, one per package's sheets.config.json.
 export function editDecision({
   projectDir,
   cwd,
