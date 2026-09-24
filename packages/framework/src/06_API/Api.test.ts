@@ -130,7 +130,7 @@ describe("Api.handleSheetChange", () => {
     ).toBeNull();
     expect(installSource).not.toHaveBeenCalled();
   });
-  it("installs the source and returns the floor's toast for a renamed Value Config", () => {
+  it("installs the source and returns the floor notice for a renamed Value Config", () => {
     stubSheetsService({
       sheets: [
         {
@@ -142,12 +142,15 @@ describe("Api.handleSheetChange", () => {
     const installSource = vi.fn();
     expect(
       Api.handleSheetChange({ configs, endpoints: {} }, "other", installSource),
-    ).toBe(
-      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
-    );
+    ).toEqual({
+      title: "Value Config is managed",
+      message:
+        'This tab keeps the name "Value Config". Your rename will switch back the next time configs sync.',
+      untilClosed: false,
+    });
     expect(installSource).toHaveBeenCalledOnce();
   });
-  it("returns no toast when the floor tabs are intact", () => {
+  it("returns no floor notice when the floor tabs are intact", () => {
     stubSheetsService({
       sheets: [
         {

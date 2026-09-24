@@ -1070,15 +1070,18 @@ describe("ConfigSheetFloor", () => {
     });
   });
 
-  it("returns the toast for a renamed Value Config off freshly fetched sheet properties and sends no batch update", () => {
+  it("returns the floor notice for a renamed Value Config off freshly fetched sheet properties and sends no batch update", () => {
     const { batchUpdateCalls, getCalls } = floorFixture({
       valueConfig: { title: "Values" },
     });
-    const message = ConfigSheetFloor.init().changeToast("other");
+    const notice = ConfigSheetFloor.init().changeNotice("other");
 
-    expect(message).toBe(
-      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
-    );
+    expect(notice).toEqual({
+      title: "Value Config is managed",
+      message:
+        'This tab keeps the name "Value Config". Your rename will switch back the next time configs sync.',
+      untilClosed: false,
+    });
     expect(getCalls).toHaveLength(1);
     expect(batchUpdateCalls).toHaveLength(0);
   });

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { configSheetFloorSeed } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
-import { floorChangeToast } from "./floorChangeToast";
+import { floorChangeNotice } from "./floorChangeNotice";
 
 const businessSheetGid = 9001;
 const spreadsheetConfigGid = getSheetTraitByName(
@@ -32,30 +32,36 @@ function liveTitles(
   );
 }
 
-describe("floorChangeToast", () => {
-  it("says a renamed Value Config's title is managed and will revert on the next config sync", () => {
-    const message = floorChangeToast(
+describe("floorChangeNotice", () => {
+  it("says a renamed Value Config is managed and will switch back on the next config sync, and closes by itself", () => {
+    const notice = floorChangeNotice(
       "other",
       liveTitles({ [valueConfigGid]: "Values" }),
     );
-    expect(message).toBe(
-      "Value Config's tab title is managed and will revert to Value Config on the next config sync.",
-    );
+    expect(notice).toEqual({
+      title: "Value Config is managed",
+      message:
+        'This tab keeps the name "Value Config". Your rename will switch back the next time configs sync.',
+      untilClosed: false,
+    });
   });
 
-  it("tells whoever deleted Value Config to undo now, because the next config sync recreates it empty", () => {
-    const message = floorChangeToast(
+  it("tells whoever deleted Value Config to press Undo now, because the next sync recreates it empty, and stays until closed", () => {
+    const notice = floorChangeNotice(
       "sheetRemoved",
       liveTitles({ [valueConfigGid]: null }),
     );
-    expect(message).toBe(
-      "Value Config was deleted. Undo now to restore it: the next config sync recreates it empty.",
-    );
+    expect(notice).toEqual({
+      title: "Value Config was deleted",
+      message:
+        "Press Undo (Ctrl+Z, or ⌘Z on a Mac) now to get it back with its data. If you don't, the next sync recreates it empty.",
+      untilClosed: true,
+    });
   });
 
   it("says nothing when a business tab is renamed", () => {
     expect(
-      floorChangeToast("other", liveTitles({ [businessSheetGid]: "Gadgets" })),
+      floorChangeNotice("other", liveTitles({ [businessSheetGid]: "Gadgets" })),
     ).toBeNull();
   });
 
@@ -65,13 +71,13 @@ describe("floorChangeToast", () => {
     ["Column Config", columnConfigGid],
   ])("says nothing when warned %s is renamed", (title, sheetGid) => {
     expect(
-      floorChangeToast("other", liveTitles({ [sheetGid]: `Old ${title}` })),
+      floorChangeNotice("other", liveTitles({ [sheetGid]: `Old ${title}` })),
     ).toBeNull();
   });
 
   it("says nothing when a business tab is deleted", () => {
     expect(
-      floorChangeToast(
+      floorChangeNotice(
         "sheetRemoved",
         liveTitles({ [businessSheetGid]: null }),
       ),
@@ -79,7 +85,7 @@ describe("floorChangeToast", () => {
   });
 
   it("says nothing for a change that renames or deletes nothing", () => {
-    expect(floorChangeToast("other", liveTitles())).toBeNull();
-    expect(floorChangeToast("sheetRemoved", liveTitles())).toBeNull();
+    expect(floorChangeNotice("other", liveTitles())).toBeNull();
+    expect(floorChangeNotice("sheetRemoved", liveTitles())).toBeNull();
   });
 });

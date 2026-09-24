@@ -9,6 +9,7 @@ import {
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetIdentified } from "../03_SpreadsheetIdentified/SpreadsheetIdentified";
 import { ConfigSheetFloor } from "../05_Operators/ConfigSheetFloor";
+import type { FloorNotice } from "../05_Operators/ConfigSheetFloor/floorChangeNotice";
 import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
@@ -55,11 +56,11 @@ export class Api extends SpreadsheetBaseNamed {
     { configs }: AppSetup,
     change: SheetChange | null,
     installSource: () => void,
-  ): string | null {
+  ): FloorNotice | null {
     if (change === null) return null;
     installConfigs(configs);
     installSource();
-    return ConfigSheetFloor.init().changeToast(change);
+    return ConfigSheetFloor.init().changeNotice(change);
   }
   get schema(): SpreadsheetSchema {
     return new SpreadsheetSchema();
