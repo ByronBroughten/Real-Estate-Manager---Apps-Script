@@ -41,6 +41,7 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 - **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.mjs` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
 - **`dev:build`, `dev:push` and `dev:run` exit with an error until the dev Apps Script project lands** (slice L of #129).
 - **The dev spreadsheet is not a rehearsal copy of the app one.** Sheet configs key every sheet by its GID, and the dev sheet carries its own fixture sheets, not a copy of the business ones.
+- **The dev fixture is rebuilt in three steps**: `dev:gen:configs` (creates the config floor), `dev:chore buildDevFixtures -- --send` (adds any missing fixture tab and the config ticks, and refuses any other spreadsheet ID), then `dev:gen:configs` again, which writes the checked-in `dev/generated/`. To rebuild a drifted fixture tab, delete the tab and run the three again.
 
 ## Before touching the live spreadsheet or deployment
 

@@ -264,12 +264,18 @@ function addSheetRequests(
   });
 }
 
+// Each added Table with the columns its paired updateTable gives it.
 function addTableRequests(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {
-  return firstFlushRequests(batchUpdateCalls).flatMap((request) => {
+  const requests = firstFlushRequests(batchUpdateCalls);
+  return requests.flatMap((request) => {
     const table = request.addTable?.table;
-    return table === undefined ? [] : [table];
+    if (table === undefined) return [];
+    const columnProperties = requests.find(
+      (candidate) => candidate.updateTable?.table?.tableId === table.tableId,
+    )?.updateTable?.table?.columnProperties;
+    return [{ ...table, columnProperties }];
   });
 }
 

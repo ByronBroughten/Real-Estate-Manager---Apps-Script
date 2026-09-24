@@ -143,7 +143,7 @@ export interface AddSheetOperation {
   columnCount: number;
 }
 
-// Carries no tableId: Google assigns one, and the floor matches the Table by name.
+// Carries no tableId: the adapter keys the Table by its name, which the floor matches it by.
 export interface AddTableOperation {
   kind: "addTable";
   name: string;
