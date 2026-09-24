@@ -545,17 +545,6 @@ export const columnConfigs = makeColumnConfigs({
     "covers": { "columnId": "c:swr:gx4X8fs", "header": "Covers", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "updateDate": { "columnId": "c:swr:2GsBCol", "header": "Update date", "valueName": "date", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
   },
-  "test": {
-    "dateFormula": { "columnId": "c:test:HL-G329", "header": "Date Formula", "valueName": "date", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "conditionalFormatting": { "columnId": "c:test:KLMZlb4", "header": "Conditional Formatting", "valueName": "boolean", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "formulaTest": { "columnId": "c:test:R8Vj_m9", "header": "Formula test", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "columnCurrency": { "columnId": "c:test:__ygD9v", "header": "Column currency", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "active": { "columnId": "c:test:l7FWcC_", "header": "Active", "valueName": "checkbox", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "name": { "columnId": "c:test:Xr9XZGV", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "id": { "columnId": "c:test:-uGn8dY", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "num": { "columnId": "c:test:VzKaUqz", "header": "Num", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
-    "dropdown": { "columnId": "c:test:cQEliR8", "header": "Dropdown", "valueName": "yesOrNo", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
-  },
   "unit": {
     "name": { "columnId": "c:unt:jC9vwrI", "header": "Name", "valueName": "string", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "id": { "columnId": "c:unt:iun2_3m", "header": "ID", "valueName": "id", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
@@ -736,7 +725,7 @@ export const columnConfigs = makeColumnConfigs({
     "cleaningMaintenance": { "columnId": "c:pyr:4LX9hcx", "header": "Cleaning & maintenance", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "insurance": { "columnId": "c:pyr:qHsXi2n", "header": "Insurance", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "mortgageInterestPaidToBanks": { "columnId": "c:pyr:wpzmYRm", "header": "Mortgage interest paid to banks", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
-    "repair": { "columnId": "c:pyr:gji77Zq", "header": "Repair", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
+    "repairs": { "columnId": "c:pyr:gji77Zq", "header": "Repairs", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "supplies": { "columnId": "c:pyr:6BGc6jG", "header": "Supplies", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "taxes": { "columnId": "c:pyr:Fx59XF1", "header": "Taxes", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
     "utilities": { "columnId": "c:pyr:XeaIGJh", "header": "Utilities", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null },
