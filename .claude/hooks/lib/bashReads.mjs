@@ -89,6 +89,13 @@ export class BashReads {
   }
 }
 
+// Each simple command's words, wrappers and env assignments dropped; throws on an unbalanced quote.
+export function commandWordsOf(command) {
+  return segmentsOf(tokenize(stripHeredocBodies(command)))
+    .map((segment) => commandWords(segment.words))
+    .filter((words) => words.length > 0);
+}
+
 // A command with no file operand reads a pipe or a heredoc, which is not a file read.
 function fileRead(files, segment, kind, extra = {}) {
   if (files.length === 0 && segment.inputFiles.length === 0) return null;

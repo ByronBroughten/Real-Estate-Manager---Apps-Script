@@ -15,7 +15,7 @@ await runFailOpen(() => {
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       additionalContext:
-        `Generated-data warning: ${target} is generated. Fix the sheet and run \`npm run gen:configs\` instead of ` +
+        `Generated-data warning: ${target} is generated. Fix the sheet and run \`npm run app:gen:configs\` instead of ` +
         "hand-editing it. That includes config-sheet floor entries: fix the live tab or the seed (docs/generated-data.md).",
     },
   });

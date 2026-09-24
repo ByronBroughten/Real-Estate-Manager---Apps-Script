@@ -107,7 +107,12 @@ export class SheetsTransport {
   }
 }
 
-export function readSpreadsheetId() {
+// Without a target, the untracked config decides.
+export function spreadsheetIdOf(target) {
+  return target?.spreadsheetId ?? readSpreadsheetId();
+}
+
+function readSpreadsheetId() {
   let source;
   try {
     source = readFileSync(path.config, "utf8");
@@ -124,13 +129,13 @@ export function readSpreadsheetId() {
   return spreadsheetId;
 }
 
-export async function startNodeHost({ isDryRun }) {
+export async function startNodeHost({ isDryRun, target }) {
   const { NodeHost } = await import("../src/nodeHost/NodeHost.ts");
   const { appConfigs } = await import("../src/appConfigs.ts");
   const transport = SheetsTransport.init();
   return NodeHost.init({
     configs: appConfigs,
-    spreadsheetId: readSpreadsheetId(),
+    spreadsheetId: spreadsheetIdOf(target),
     transport: (request) => transport.send(request),
     isDryRun,
     log: (message) => console.log(`  log: ${message}`),
