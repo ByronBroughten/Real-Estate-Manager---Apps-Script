@@ -13,6 +13,8 @@ const LINKED_ROOT_FILES = new Set([
   "CONTEXT.md",
   "README.md",
 ]);
+const publishedRootFiles = new Set(["CONTEXT.md", "README.md"]);
+const frameworkRoot = "packages/framework";
 
 // `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.
 export function checkDocs({ docs, paths = [] }) {
@@ -27,7 +29,7 @@ export function checkDocs({ docs, paths = [] }) {
     const report = (line, message) => violations.push({ path, line, message });
     if (isLinkChecked(path))
       checkLinks(path, text, { docs, known, slugsOf, report });
-    if (path.startsWith("docs/")) checkLead(text, report);
+    if (isDocsFolderFile(path)) checkLead(text, report);
     if (posix.basename(path) !== "AGENTS.md") continue;
     if (path === "AGENTS.md") checkRootSize(text, report);
     else {
@@ -38,15 +40,40 @@ export function checkDocs({ docs, paths = [] }) {
   return violations;
 }
 
+// The repo root, or the `packages/<name>` folder, that holds the doc.
+function docRoot(path) {
+  const parts = path.split("/");
+  return parts[0] === "packages" && parts.length > 2
+    ? parts.slice(0, 2).join("/")
+    : "";
+}
+
+// `path` relative to its doc root.
+function inRoot(path) {
+  const root = docRoot(path);
+  return root === "" ? path : path.slice(root.length + 1);
+}
+
+function isDocsFolderFile(path) {
+  return inRoot(path).startsWith("docs/");
+}
+
 function isLinkChecked(path) {
   const name = posix.basename(path);
-  if (!path.includes("/")) return LINKED_ROOT_FILES.has(path);
-  return (
-    path.startsWith("docs/") || name === "AGENTS.md" || name === "CLAUDE.md"
-  );
+  const local = inRoot(path);
+  if (!local.includes("/")) return LINKED_ROOT_FILES.has(local);
+  return isDocsFolderFile(path) || name === "AGENTS.md" || name === "CLAUDE.md";
+}
+
+// The framework ships `docs/`, `CONTEXT.md` and `README.md`, so they must stand alone.
+function isPublishedFrameworkDoc(path) {
+  if (docRoot(path) !== frameworkRoot) return false;
+  const local = inRoot(path);
+  return local.startsWith("docs/") || publishedRootFiles.has(local);
 }
 
 function checkLinks(path, text, { docs, known, slugsOf, report }) {
+  const published = isPublishedFrameworkDoc(path);
   for (const { line, target } of linksIn(text)) {
     const hashAt = target.indexOf("#");
     const file = hashAt === -1 ? target : target.slice(0, hashAt);
@@ -54,6 +81,11 @@ function checkLinks(path, text, { docs, known, slugsOf, report }) {
       hashAt === -1 ? null : decodeURIComponent(target.slice(hashAt + 1));
     const resolved =
       file === "" ? path : resolveLink(path, decodeURIComponent(file));
+    if (published && !resolved.startsWith(`${frameworkRoot}/`))
+      report(
+        line,
+        `link ${target} leaves the framework; its published docs link only inside ${frameworkRoot}`,
+      );
     if (!known.has(resolved)) {
       report(line, `broken link ${target}: no file ${resolved}`);
       continue;

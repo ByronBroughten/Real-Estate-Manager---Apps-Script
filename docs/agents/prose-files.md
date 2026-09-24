@@ -8,7 +8,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 - **Reasoning file**: a file under a rules file's `docs/<name>/` folder holding the why, examples, instances and history. It is never auto-loaded. A rules-file section with anything beyond its rules gets one.
 - **Router**: the Read-by-task table in the root AGENTS.md. It is the only one.
 - **Nested AGENTS.md**: a folder's own rules, loaded when an agent works there, paired with a one-line `CLAUDE.md` holding `@AGENTS.md`.
-- **Mechanics doc**: a reference file under `docs/` read by heading. It opens with a lead of 5 lines and 800 bytes or fewer, and any `docs/` file over 4 KB must have `##` headings (lint checks both; a shorter doc with no heading is read whole). Its headings are specific enough to grep, and a rule found in it moves up to a rules file or nested AGENTS.md, leaving a pointer. One that covers subjects sharing nothing is split and indexed.
+- **Mechanics doc**: a reference file under `docs/` or `packages/*/docs/` read by heading. It opens with a lead of 5 lines and 800 bytes or fewer, and any such file over 4 KB must have `##` headings (lint checks both; a shorter doc with no heading is read whole). Its headings are specific enough to grep, and a rule found in it moves up to a rules file or nested AGENTS.md, leaving a pointer. One that covers subjects sharing nothing is split and indexed.
 - **Enforcement ladder**: lint > path-triggered (nested AGENTS.md, a hook) > router pointer > prose.
 - **Derived view**: a file that restates facts whose home is elsewhere, for another audience. README.md is one.
 
@@ -50,4 +50,4 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | Testing | [`docs/testing.md`](../testing.md) |
 | Known rough edges | The properties-probe blind spot: [`docs/architecture/round-trips.md`](../architecture/round-trips.md) and `SpreadsheetRaw`'s placement reporter |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links and the size limits above (`scripts/lintDocs.mjs`).
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links and the size limits above (`scripts/lintDocs.mjs`). It also holds the framework's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside `packages/framework`; its `AGENTS.md` and `CLAUDE.md` files may point at root.
