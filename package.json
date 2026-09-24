@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "tsc": "tsc",
+    "tsc": "tsc && tsc -p tsconfig.framework.json",
     "lint": "eslint src && npm run -s lint:docs",
     "lint:docs": "node scripts/lintDocs.mjs",
     "format": "prettier --write .",

@@ -1,7 +1,7 @@
 // Runs one chore against the live spreadsheet. See docs/how-it-runs.md, "The chore and its dry run".
 import { existsSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { startNodeHost } from "./nodeHost.mjs";
+import { loadOwnConfigs, startNodeHost } from "./nodeHost.mjs";
 import { takeTarget } from "./targets.mjs";
 
 const CHORES_URL = new URL("../src/chores/", import.meta.url);
@@ -39,6 +39,7 @@ class ChoreRunner {
     const host = await startNodeHost({
       isDryRun: !this.isSend,
       target: this.target,
+      configs: await loadOwnConfigs(this.target),
     });
     const chore = await this._loadChore(modulePath);
     console.log(`chore: ${this.choreName} — ${chore.description}\n`);

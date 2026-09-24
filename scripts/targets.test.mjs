@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { takeTarget } from "./targets.mjs";
+import { generatedDirOf, takeTarget } from "./targets.mjs";
 
 const table = {
   app: { spreadsheetId: "app-id", generatedDir: "src/generated" },
@@ -54,5 +54,15 @@ describe("takeTarget", () => {
     expect(() => takeTarget(["--target", "dev"], partial)).toThrow(
       /generatedDir/,
     );
+  });
+});
+
+describe("generatedDirOf", () => {
+  it("finds the folder generated from a listed spreadsheet", () => {
+    expect(generatedDirOf("dev-id", table)).toBe("dev/generated");
+  });
+
+  it("returns null for a spreadsheet the table does not list", () => {
+    expect(generatedDirOf("other-id", table)).toBeNull();
   });
 });

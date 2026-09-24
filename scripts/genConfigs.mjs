@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { startNodeHost } from "./nodeHost.mjs";
+import { loadAppConfigs, startNodeHost } from "./nodeHost.mjs";
 import { takeTarget } from "./targets.mjs";
 
 const DEFAULT_GENERATED_DIR = "src/01_SpreadsheetSchema/generated";
@@ -66,7 +66,12 @@ class ConfigFilesGenerator {
   }
 
   async _generate() {
-    await startNodeHost({ isDryRun: false, target: this.target });
+    // Only the config floor is read here, and the app's configs carry the same floor as every target's.
+    await startNodeHost({
+      isDryRun: false,
+      target: this.target,
+      configs: await loadAppConfigs(),
+    });
     const { ConfigCoordinator } =
       await import("../src/05_Operators/ConfigCoordinator.ts");
     return ConfigCoordinator.init().generateConfigFiles(

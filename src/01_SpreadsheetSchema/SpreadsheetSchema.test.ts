@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { columnConfigs } from "./generated/columnConfigs";
-import type {
-  ColumnFullName,
-  ColumnName,
-  ColumnNameFiltered,
-  ColumnNameOf,
-  ColumnValue,
-  ColumnValueName,
-  MakeColumnFullName,
-  SheetNameOf,
-  ValueNameOf,
-  ValueOf,
+import {
+  getColumnTraitByName,
+  type ColumnFullName,
+  type ColumnName,
+  type ColumnNameFiltered,
+  type ColumnNameOf,
+  type ColumnValue,
+  type ColumnValueName,
+  type MakeColumnFullName,
+  type SheetNameOf,
+  type ValueNameOf,
+  type ValueOf,
 } from "./columnConfigsTypes";
 import {
   configSheetGids,
@@ -150,7 +150,7 @@ describe("type-level precision", () => {
     const sheetGid = getSheetTraitByName("sheetConfig", "sheetGid");
     const column = ColumnSchema.fromColumnId(
       sheetGid,
-      columnConfigs.sheetConfig.sheetGid.columnId,
+      getColumnTraitByName("sheetConfig", "sheetGid", "columnId"),
     );
     assertType<IsExactly<typeof column.valueName, ValueName>>(true);
     assertType<IsExactly<typeof column.columnName, ColumnName<SheetName>>>(
@@ -207,7 +207,7 @@ function columnFullNameIsFormula(fullName: ColumnFullName): boolean {
 
 describe("ColumnFullName, absolute column addressing", () => {
   it("narrows to a proper subset of columns when filtered by value name", () => {
-    const sampled: ColumnFullName<"boolean"> = "test_conditionalFormatting";
+    const sampled: ColumnFullName<"boolean"> = "valueTypes_sampledBoolean";
     // @ts-expect-error a number column is not a boolean column
     const numeric: ColumnFullName<"boolean"> = "sheetConfig_sheetGid";
     // @ts-expect-error a string column is not a boolean column
@@ -220,11 +220,11 @@ describe("ColumnFullName, absolute column addressing", () => {
 
   // The two names are siblings, not one inside the other.
   it("keeps a declared checkbox column out of the boolean set, and the reverse", () => {
-    const declared: ColumnFullName<"checkbox"> = "occupancy_updateTermsSelect";
+    const declared: ColumnFullName<"checkbox"> = "valueTypes_checkbox";
     // @ts-expect-error a declared checkbox column is no longer a boolean column
-    const asBoolean: ColumnFullName<"boolean"> = "occupancy_updateTermsSelect";
+    const asBoolean: ColumnFullName<"boolean"> = "valueTypes_checkbox";
     // @ts-expect-error a column that only samples as boolean is not a checkbox column
-    const sampled: ColumnFullName<"checkbox"> = "test_conditionalFormatting";
+    const sampled: ColumnFullName<"checkbox"> = "valueTypes_sampledBoolean";
     expect(valueNameOfFullName(declared)).toBe("checkbox");
     expect(valueNameOfFullName(asBoolean)).toBe("checkbox");
     expect(valueNameOfFullName(sampled)).toBe("boolean");
@@ -241,14 +241,14 @@ describe("ColumnFullName, absolute column addressing", () => {
 
   it("narrows further on the formula axis", () => {
     const writable: ColumnFullName<"boolean", false> =
-      "test_conditionalFormatting";
+      "valueTypes_sampledBoolean";
     expect(columnFullNameIsFormula(writable)).toBe(false);
   });
 
   it("resolves a full name's sheet, column, value name and value type exactly", () => {
-    type FN = "occupancy_updateTermsSelect";
-    assertType<IsExactly<SheetNameOf<FN>, "occupancy">>(true);
-    assertType<IsExactly<ColumnNameOf<FN>, "updateTermsSelect">>(true);
+    type FN = "valueTypes_checkbox";
+    assertType<IsExactly<SheetNameOf<FN>, "valueTypes">>(true);
+    assertType<IsExactly<ColumnNameOf<FN>, "checkbox">>(true);
     assertType<IsExactly<ValueNameOf<FN>, "checkbox">>(true);
     assertType<IsExactly<ValueOf<FN>, boolean>>(true);
   });
@@ -256,8 +256,8 @@ describe("ColumnFullName, absolute column addressing", () => {
   it("agrees with relative addressing on sampled columns", () => {
     assertType<
       IsExactly<
-        ValueNameOf<"occupancy_updateTermsSelect">,
-        ColumnValueName<"occupancy", "updateTermsSelect">
+        ValueNameOf<"valueTypes_checkbox">,
+        ColumnValueName<"valueTypes", "checkbox">
       >
     >(true);
     assertType<
@@ -267,10 +267,7 @@ describe("ColumnFullName, absolute column addressing", () => {
       >
     >(true);
     assertType<
-      IsExactly<
-        ColumnNameOf<"valueConfig_transactionDescription">,
-        "transactionDescription"
-      >
+      IsExactly<ColumnNameOf<"valueConfig_exampleValue">, "exampleValue">
     >(true);
   });
 
@@ -281,8 +278,6 @@ describe("ColumnFullName, absolute column addressing", () => {
         "letApiAccess"
       >
     >(true);
-    assertType<
-      IsExactly<ColumnNameFiltered<"occupancy">, ColumnName<"occupancy">>
-    >(true);
+    assertType<IsExactly<ColumnNameFiltered<"item">, ColumnName<"item">>>(true);
   });
 });

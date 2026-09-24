@@ -1,0 +1,18 @@
+{
+  // The framework program: tiers 00–03, utils/ and their tests, typed to the dev configs (#138).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true
+  },
+  "include": [
+    "src/00_Source/**/*.ts",
+    "src/01_SpreadsheetSchema/**/*.ts",
+    "src/02_SpreadsheetRaw/**/*.ts",
+    "src/03_SpreadsheetIdentified/**/*.ts",
+    "src/utils/**/*.ts",
+    "src/TypeDeclarations/**/*.ts",
+    "dev/**/*.ts"
+  ],
+  "exclude": ["src/01_SpreadsheetSchema/generated/**"]
+}

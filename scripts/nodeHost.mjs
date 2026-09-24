@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { fileURLToPath } from "node:url";
+import { generatedDirOf } from "./targets.mjs";
 
 const CLASP_RUN_USER = "desktop-clasp-run";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -129,15 +130,38 @@ function readSpreadsheetId() {
   return spreadsheetId;
 }
 
-export async function startNodeHost({ isDryRun, target }) {
+export async function startNodeHost({ isDryRun, target, configs }) {
   const { NodeHost } = await import("../src/nodeHost/NodeHost.ts");
-  const { appConfigs } = await import("../src/appConfigs.ts");
   const transport = SheetsTransport.init();
   return NodeHost.init({
-    configs: appConfigs,
+    configs,
     spreadsheetId: spreadsheetIdOf(target),
     transport: (request) => transport.send(request),
     isDryRun,
     log: (message) => console.log(`  log: ${message}`),
   }).ensureGlobals();
+}
+
+export async function loadAppConfigs() {
+  return (await import("../src/appConfigs.ts")).appConfigs;
+}
+
+// A spreadsheet the target table doesn't list is the app's, as the untracked config has always meant.
+export async function loadOwnConfigs(target) {
+  const generatedDir = generatedDirOf(spreadsheetIdOf(target));
+  if (generatedDir === null) return loadAppConfigs();
+  return {
+    spreadsheetConfig: await loadGeneratedConfig(
+      generatedDir,
+      "spreadsheetConfig",
+    ),
+    sheetConfigs: await loadGeneratedConfig(generatedDir, "sheetConfigs"),
+    columnConfigs: await loadGeneratedConfig(generatedDir, "columnConfigs"),
+    valueConfigs: await loadGeneratedConfig(generatedDir, "valueConfigs"),
+  };
+}
+
+async function loadGeneratedConfig(generatedDir, base) {
+  const url = new URL(`../${generatedDir}/${base}.ts`, import.meta.url);
+  return (await import(url))[base];
 }

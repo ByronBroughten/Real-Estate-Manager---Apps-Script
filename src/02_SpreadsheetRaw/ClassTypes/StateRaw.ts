@@ -214,6 +214,11 @@ export interface FindReplaceProps extends FindReplaceTerms {
   scope: FindReplaceScope;
 }
 
+export type AddedSheetCell = Required<
+  Pick<UpdateCellOperation, "sheetId" | "rowIndex" | "colIndex">
+> &
+  ({ value: CellValue } | { formula: string });
+
 export type SheetChangePropsObj = {
   sort: SheetChangeSortProps;
   insertColumn: {

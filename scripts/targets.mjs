@@ -38,6 +38,15 @@ export function takeTarget(argv, table = readTargetTable()) {
   };
 }
 
+// The folder generated from this spreadsheet, or null for one the table doesn't list.
+export function generatedDirOf(spreadsheetId, table = readTargetTable()) {
+  assertDistinctIds(table);
+  const row = Object.values(table).find(
+    (candidate) => candidate?.spreadsheetId === spreadsheetId,
+  );
+  return row?.generatedDir ?? null;
+}
+
 // A copy-paste mistake here would merge the two targets, so it stops any targeted run.
 function assertDistinctIds(table) {
   const byId = new Map();
