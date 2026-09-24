@@ -82,6 +82,10 @@ _Avoid_: config-about-config row
 A cell or column the floor seed fills once, when it creates the tab or Table, and never restores — such as Spreadsheet Config's **layout values** or Value Config's example column.
 _Avoid_: initial value (too close to Custom default value)
 
+**Floor notice**:
+A message that pops up when someone changes the config-sheet floor in a way the next config sync will reverse, saying what will happen and what they can do about it.
+_Avoid_: toast, warning (that is a run state), alert
+
 ### Endpoints
 
 **Endpoint**:

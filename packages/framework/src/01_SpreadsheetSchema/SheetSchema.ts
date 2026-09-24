@@ -7,19 +7,20 @@ import {
 } from "./columnConfigsTypes";
 import { dimensionIds } from "./dimensionIds";
 import {
-  configSheetGids,
   getSheetTraitByGid,
   getSheetTraitByName,
   type SheetConfig,
+  sheetConfigsByGid,
   type SheetName,
 } from "./sheetConfigsTypes";
 import { ColumnSchema } from "./ColumnSchema";
 import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 
 function sheetNameFromGid(sheetGid: number): SheetName {
-  if (!configSheetGids().includes(sheetGid)) {
+  const byGid = sheetConfigsByGid();
+  if (!byGid.has(sheetGid)) {
     throw new Error(
-      `Invalid sheetGid: ${sheetGid}. Must be one of: ${configSheetGids().join(", ")}`,
+      `Invalid sheetGid: ${sheetGid}. Must be one of: ${[...byGid.keys()].join(", ")}`,
     );
   }
   return getSheetTraitByGid(sheetGid, "sheetName") as SheetName;

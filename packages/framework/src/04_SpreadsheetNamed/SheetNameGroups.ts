@@ -1,9 +1,7 @@
 import {
-  configSheetNames,
-  getSheetTraitByName,
+  sheetConfigsByName,
   type SheetConfigs,
 } from "../01_SpreadsheetSchema/sheetConfigsTypes";
-import { lazy } from "../utils/lazy";
 import { type SubType } from "../utils/Obj";
 
 export type SheetNameWithIdColumn = keyof SubType<
@@ -19,16 +17,7 @@ export type SheetNameWithNameColumn = keyof SubType<
 export type SheetNameWithIdAndNameColumn = SheetNameWithIdColumn &
   SheetNameWithNameColumn;
 
-const sheetNameGroups = lazy(
-  () =>
-    ({
-      hasIdColumn: configSheetNames().filter((sheetName) =>
-        getSheetTraitByName(sheetName, "hasIdColumn"),
-      ) as SheetNameWithIdColumn[],
-    }) as const,
-);
-
-type SheetNameGroups = ReturnType<typeof sheetNameGroups>;
+type SheetNameGroups = { hasIdColumn: SheetNameWithIdColumn[] };
 export type TnGroupName = keyof SheetNameGroups;
 
 export type SheetNameByGroup<GN extends TnGroupName> =
@@ -38,5 +27,5 @@ export function isInTnGroup<GN extends TnGroupName>(
   groupName: GN,
   sn: string,
 ): sn is SheetNameByGroup<GN> {
-  return (sheetNameGroups()[groupName] as string[]).includes(sn);
+  return sheetConfigsByName()[sn]?.[groupName] === true;
 }

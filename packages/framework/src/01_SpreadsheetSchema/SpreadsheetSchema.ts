@@ -1,6 +1,6 @@
 import {
-  configSheetGids,
   configSheetNames,
+  sheetConfigsByGid,
   type SheetName,
 } from "./sheetConfigsTypes";
 import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
@@ -8,7 +8,7 @@ import { SheetSchema } from "./SheetSchema";
 
 export class SpreadsheetSchema extends SpreadsheetBaseSchema {
   isInSheetGids(sheetGid: number): boolean {
-    return configSheetGids().includes(sheetGid);
+    return sheetConfigsByGid().has(sheetGid);
   }
   get sheetNames() {
     return configSheetNames();

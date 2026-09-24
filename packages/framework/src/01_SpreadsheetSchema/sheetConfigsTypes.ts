@@ -6,9 +6,9 @@ import type { SheetConfigsBase, SheetConfigStored } from "./makeConfigs";
 // Post-sheetConfigs
 export type SheetConfigs = Configs["sheetConfigs"];
 export type SheetNameSimple = keyof SheetConfigs & string;
-export const configSheetNames = lazy(
-  (): SheetNameSimple[] => Obj.keys(sheetConfigs()) as SheetNameSimple[],
-);
+export function configSheetNames(): SheetNameSimple[] {
+  return Obj.keys(sheetConfigs()) as SheetNameSimple[];
+}
 export type SheetName<TN extends SheetNameSimple = SheetNameSimple> = TN;
 export interface SheetConfig<
   H extends boolean = boolean,
@@ -31,8 +31,6 @@ export function getSheetTraitByName<
 export const sheetConfigsByGid = lazy(() =>
   Obj.toKeyedMap(sheetConfigs(), "sheetGid", "sheetName"),
 );
-
-export const configSheetGids = lazy(() => [...sheetConfigsByGid().keys()]);
 
 export function getSheetTraitByGid<K extends keyof SheetConfig>(
   sheetGid: number,
