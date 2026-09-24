@@ -41,10 +41,10 @@ describe("bashDecision", () => {
   });
 
   it("asks for a dev write while a pinning file has uncommitted changes, naming it", () => {
-    const decision = bashDecision({ command, dirtyPinningFiles: ["dev/sheets.config.json"] });
+    const decision = bashDecision({ command, dirtyPinningFiles: ["packages/framework/sheets.config.json"] });
     expect(decision?.permissionDecision).toBe("ask");
     expect(decision?.reason).toMatch(/dev:gen:configs/);
-    expect(decision?.reason).toMatch(/dev\/sheets\.config\.json/);
+    expect(decision?.reason).toMatch(/packages\/framework\/sheets\.config\.json/);
   });
 
   it("asks when the pinning files' state is unknown", () => {
@@ -52,7 +52,7 @@ describe("bashDecision", () => {
   });
 
   it("leaves anything but a dev write alone, however dirty", () => {
-    const dirty = ["dev/sheets.config.json"];
+    const dirty = ["packages/framework/sheets.config.json"];
     expect(bashDecision({ command: "npm run dev:probe", dirtyPinningFiles: dirty })).toBeNull();
     expect(bashDecision({ command: "npm run app:build", dirtyPinningFiles: dirty })).toBeNull();
   });

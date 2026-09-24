@@ -1,0 +1,50 @@
+{
+  "name": "@byronbroughten/sheets-framework",
+  "version": "0.1.0",
+  "description": "A TypeScript framework for typed apps on Google Sheets + Apps Script.",
+  "type": "module",
+  "license": "ISC",
+  "exports": {
+    ".": "./src/framework.ts",
+    "./testing": "./src/frameworkTesting.ts",
+    "./tsconfig.base.json": "./tsconfig.base.json",
+    "./rollup": "./scripts/rollupPreset.mjs"
+  },
+  "bin": {
+    "sheets-framework": "scripts/sheets-framework.mjs"
+  },
+  "files": [
+    "src",
+    "tsconfig.base.json",
+    "scripts"
+  ],
+  "scripts": {
+    "tsc": "tsc -p .",
+    "chore": "node scripts/sheets-framework.mjs chore",
+    "gen:configs": "node scripts/sheets-framework.mjs gen-configs",
+    "probe": "node scripts/sheets-framework.mjs probe",
+    "build": "echo 'dev:build: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1",
+    "push": "echo 'dev:push: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1",
+    "run": "echo 'dev:run: there is no dev Apps Script project yet; it arrives with slice L of #129.' >&2 && exit 1"
+  },
+  "dependencies": {
+    "tslib": "^2.8.1",
+    "tsx": "^4.23.13"
+  },
+  "peerDependencies": {
+    "@rollup/plugin-typescript": "^12.1.4",
+    "rollup": "^4.54.0",
+    "vitest": "^4.1.11"
+  },
+  "peerDependenciesMeta": {
+    "@rollup/plugin-typescript": {
+      "optional": true
+    },
+    "rollup": {
+      "optional": true
+    },
+    "vitest": {
+      "optional": true
+    }
+  }
+}

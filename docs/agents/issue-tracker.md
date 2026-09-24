@@ -13,6 +13,10 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 Infer the repo from `git remote -v`; `gh` does this automatically when run inside a clone.
 
+## Package labels
+
+**Spec and build issues carry `framework`, `real-estate`, or both when the change spans the packages.** Working one, read each labelled package's `AGENTS.md` files first: `packages/framework/` for `framework`, `packages/real-estate/` for `real-estate`. Triage labels are separate: [`triage-labels.md`](./triage-labels.md).
+
 ## Pull requests as a triage surface
 
 **PRs as a request surface: no.** _(Set to `yes` if this repo treats external PRs as feature requests; `/triage` reads this flag.)_

@@ -1,6 +1,6 @@
 # Generated data — do not hand-edit
 
-`src/01_SpreadsheetSchema/generated/` holds four files generated from the live spreadsheet. Regenerate all four together with `npm run app:gen:configs`, never hand-edit them, and read `columnConfigs.ts` by block. The rules are [`src/01_SpreadsheetSchema/AGENTS.md`](../src/01_SpreadsheetSchema/AGENTS.md)'s; the gate on the command is in [`docs/how-it-runs.md`](./how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).
+Each package's `generatedDir` (the app's `src/generated/`, the framework's `dev/generated/`) holds four files generated from the live spreadsheet. Regenerate all four together with `npm run app:gen:configs`, never hand-edit them, and read `columnConfigs.ts` by block. The rules are [`src/01_SpreadsheetSchema/AGENTS.md`](../packages/framework/src/01_SpreadsheetSchema/AGENTS.md)'s; the gate on the command is in [`docs/how-it-runs.md`](./how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).
 
 ## One file per generated constant, the sync and the floor
 
@@ -19,13 +19,13 @@
 
 ## The generated half and the hand-written half
 
-`src/01_SpreadsheetSchema/generated/` holds the four generated data files and nothing else: `spreadsheetConfig.ts`, `sheetConfigs.ts`, `columnConfigs.ts` and `valueConfigs.ts`. Each is one literal passed through its validating constructor (`makeSpreadsheetConfig`, `makeSheetConfigs`, `makeColumnConfigs`, `makeValueConfigs`), imported from `../makeConfigs`. The hand-written half sits one level up at the Schema tier root: the generator helpers in `makeConfigs.ts`, the floor seed in `configSheetFloorSeed.ts`, and a sibling types file per constant (`spreadsheetConfigTypes`, `sheetConfigsTypes`, `columnConfigsTypes`, `valueConfigsTypes`) holding the derived types and accessor functions built on the data.
+A `generatedDir` holds the four generated data files and nothing else: `spreadsheetConfig.ts`, `sheetConfigs.ts`, `columnConfigs.ts` and `valueConfigs.ts`. Each is one literal passed through its validating constructor (`makeSpreadsheetConfig`, `makeSheetConfigs`, `makeColumnConfigs`, `makeValueConfigs`), imported from `../makeConfigs`. The hand-written half sits one level up at the Schema tier root: the generator helpers in `makeConfigs.ts`, the floor seed in `configSheetFloorSeed.ts`, and a sibling types file per constant (`spreadsheetConfigTypes`, `sheetConfigsTypes`, `columnConfigsTypes`, `valueConfigsTypes`) holding the derived types and accessor functions built on the data.
 
 All four are (or are meant to be) mechanically generated from the real spreadsheet, not hand-authored.
 
 ## Regenerate all four together, never a subset
 
-The rules on regenerating and on tab spelling: [`src/01_SpreadsheetSchema/AGENTS.md`](../src/01_SpreadsheetSchema/AGENTS.md).
+The rules on regenerating and on tab spelling: [`src/01_SpreadsheetSchema/AGENTS.md`](../packages/framework/src/01_SpreadsheetSchema/AGENTS.md).
 
 **`spreadsheetConfig`, `sheetConfigs`, `columnConfigs`, and `valueConfigs` must always be regenerated together, in the same run — never a subset of them.** Sheet names live as keys in `sheetConfigs.ts`, and `columnConfigs.ts` is keyed by those same names; `valueConfigs.ts` in turn depends on `columnConfigs` already being current to know which columns' headers to read. Regenerating a subset after a sheet/column was renamed/added/removed leaves the others referencing stale names, which breaks `npm run tsc` in places that look unrelated (the generated files themselves, plus any hand-written code — like `SheetNameGroups.ts` — that references a sheet name by string literal).
 

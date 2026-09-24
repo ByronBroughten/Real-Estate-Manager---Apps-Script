@@ -2,8 +2,10 @@ import eslint from "@eslint/js";
 import { defineConfig } from "eslint/config";
 import tseslint from "typescript-eslint";
 
+const frameworkSrc = "packages/framework/src";
+const appSrc = "packages/real-estate/src";
 const platformMessage =
-  "Google Sheets code lives only in src/00_Source/GoogleSheets/. Everything else takes a platform-neutral type or a return value that the entry point handles.";
+  "Google Sheets code lives only in the framework's src/00_Source/GoogleSheets/. Everything else takes a platform-neutral type or a return value that the entry point handles.";
 const rawImportPattern = {
   regex:
     "^(\\.\\./)+01_SpreadsheetSchema/(SheetSchema|ColumnSchema|columnConfigsTypes|valueConfigsTypes|generated/(columnConfigs|valueConfigs))(\\.js)?$",
@@ -13,7 +15,7 @@ const rawImportPattern = {
 const appConfigsImportPattern = {
   regex: "(^|/)generated/|(^|/)appConfigs(\\.js)?$",
   message:
-    "Tiers take config types from Register and values from installedConfigs(); only src/appConfigs.ts imports the generated configs.",
+    "Tiers take config types from Register and values from installedConfigs(); only the app's appConfigs.ts and the framework's dev/devConfigs.ts import generated configs.",
 };
 const platformImportPattern = {
   regex: "GoogleSheets/|GoogleSheets/(GoogleSheetsAPI|AppsScript)(\\.js)?$",
@@ -30,11 +32,9 @@ const layerFolders = [
   "05_Operators",
   "06_API",
 ];
-// The un-numbered folders built on the tiers; utils/ and testSupport/ are not among them.
+// The framework's un-numbered folders built on the tiers; utils/ and testSupport/ are not among them.
 const aboveTierFolders = [
   "appsScriptHost",
-  "appUtils",
-  "businessEndpoints",
   "chores",
   "framework",
   "frameworkTesting",
@@ -42,7 +42,7 @@ const aboveTierFolders = [
 ];
 const layerImportPattern = (layer) => ({
   regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
-  message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (src/AGENTS.md).`,
+  message: `Dependencies only point downward: ${layerFolders[layer]} imports nothing from a higher tier or from ${aboveTierFolders.join(", ")} (packages/framework/src/AGENTS.md).`,
 });
 // After the platform block: a later block's no-restricted-imports replaces an earlier one's, so each merges the patterns that still apply.
 const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
@@ -56,86 +56,68 @@ const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
   const isPlatformFolder = folder === "00_Source";
   return [
     {
-      files: [`src/${folder}/**/*.ts`],
+      files: [`${frameworkSrc}/${folder}/**/*.ts`],
       ignores: [
         "**/*.test.ts",
-        ...(isPlatformFolder ? ["src/00_Source/GoogleSheets/**"] : []),
+        ...(isPlatformFolder
+          ? [`${frameworkSrc}/00_Source/GoogleSheets/**`]
+          : []),
       ],
       rules: restrict([platformImportPattern, appConfigsImportPattern]),
     },
     {
       files: [
-        `src/${folder}/**/*.test.ts`,
-        ...(isPlatformFolder ? ["src/00_Source/GoogleSheets/**/*.ts"] : []),
+        `${frameworkSrc}/${folder}/**/*.test.ts`,
+        ...(isPlatformFolder
+          ? [`${frameworkSrc}/00_Source/GoogleSheets/**/*.ts`]
+          : []),
       ],
       rules: restrict([]),
     },
   ];
 });
 
-// App code reaches the framework only through its package name; in place, relative paths are whitelisted to the app's own files.
+// App code reaches the framework only through its package name, and a relative import never leaves the app's src/.
 const frameworkPackage = "@byronbroughten/sheets-framework";
-const appRootNames = [
-  "index",
-  "appConfigs",
-  "installAppConfigs",
-  "businessEndpoints",
-  "appUtils",
-  "01_SpreadsheetSchema/generated",
-];
-const appFolders = ["businessEndpoints", "appUtils"];
-const appTestSetupFiles = ["src/installAppConfigs.ts"];
+const appTestSetupFiles = [`${appSrc}/installAppConfigs.ts`];
 const appEntryMessage = `App code imports the framework only from "${frameworkPackage}", and "${frameworkPackage}/testing" only from *.test.ts (#140).`;
-const appImportPatterns = (depth, allowTesting) => {
-  const toSrcRoot = depth === 0 ? "\\./" : `(\\.\\./){${depth}}`;
+const appImportPatterns = (depth, allowTesting) => [
+  {
+    regex: `^(\\.\\./){${depth + 1}}`,
+    message: "A relative import stays inside the app's src/ (#140).",
+  },
+  {
+    regex: `^${frameworkPackage}/${allowTesting ? "(?!testing$)" : ""}`,
+    message: appEntryMessage,
+  },
+];
+// generated/ imports the framework's makeConfigs by the relative path gen:configs writes.
+const appImportBlocks = [0, 1, 2, 3].flatMap((depth) => {
+  const files = [`${appSrc}/${"*/".repeat(depth)}*.ts`];
+  const restrict = (allowTesting) => ({
+    "no-restricted-imports": [
+      "error",
+      { patterns: appImportPatterns(depth, allowTesting) },
+    ],
+  });
   return [
     {
-      regex: `^(\\.\\./){${depth + 1}}`,
-      message: "A relative import stays inside the app (#140).",
+      files,
+      ignores: ["**/*.test.ts", `${appSrc}/generated/**`, ...appTestSetupFiles],
+      rules: restrict(false),
     },
     {
-      regex: `^${toSrcRoot}(?!\\.\\./|(${appRootNames.join("|")})(/|(\\.js)?$))`,
-      message: appEntryMessage,
-    },
-    {
-      regex: `^${frameworkPackage}/${allowTesting ? "(?!testing$)" : ""}`,
-      message: appEntryMessage,
+      files: files.flatMap((glob) => [
+        [glob, "**/*.test.ts"],
+        ...(depth === 0 ? appTestSetupFiles : []),
+      ]),
+      rules: restrict(true),
     },
   ];
-};
-const appFileGlobsByDepth = [
-  ["src/index.ts", "src/appConfigs.ts", "src/businessEndpoints.ts"],
-  ...[1, 2, 3].map((depth) =>
-    appFolders.map((folder) => `src/${folder}/${"*/".repeat(depth - 1)}*.ts`),
-  ),
-];
-const appImportBlocks = appFileGlobsByDepth.flatMap((globs, depth) => [
-  {
-    files: globs,
-    ignores: ["**/*.test.ts"],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        { patterns: appImportPatterns(depth, false) },
-      ],
-    },
-  },
-  {
-    files: [
-      ...(depth === 0
-        ? appTestSetupFiles
-        : globs.map((glob) => [glob, "**/*.test.ts"])),
-    ],
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        { patterns: appImportPatterns(depth, true) },
-      ],
-    },
-  },
-]);
+});
 
 export default defineConfig(
+  { ignores: ["**/*.mjs", "**/dist/**", "**/coverage/**"] },
   eslint.configs.recommended,
   tseslint.configs.recommended,
   {
@@ -164,15 +146,15 @@ export default defineConfig(
     },
   },
   {
-    files: ["src/**/*.ts"],
+    files: ["packages/*/src/**/*.ts"],
     ignores: [
-      "src/00_Source/GoogleSheets/**",
-      "src/index.ts",
-      "src/appsScriptHost/**",
-      "src/nodeHost/**",
-      "src/chores/**",
-      "src/testSupport/**",
-      "src/TypeDeclarations/**",
+      `${frameworkSrc}/00_Source/GoogleSheets/**`,
+      `${frameworkSrc}/appsScriptHost/**`,
+      `${frameworkSrc}/nodeHost/**`,
+      `${frameworkSrc}/chores/**`,
+      `${frameworkSrc}/testSupport/**`,
+      `${frameworkSrc}/TypeDeclarations/**`,
+      "packages/*/src/index.ts",
       "**/*.test.ts",
     ],
     rules: {

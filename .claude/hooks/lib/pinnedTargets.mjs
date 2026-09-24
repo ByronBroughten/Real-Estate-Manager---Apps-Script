@@ -48,7 +48,7 @@ export function gsheetsWriteDecision({ toolName, spreadsheetId, devSpreadsheetId
     return {
       permissionDecision: "ask",
       reason:
-        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the dev spreadsheet in dev/sheets.config.json. " +
+        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the dev spreadsheet in packages/framework/sheets.config.json. " +
         "It needs a yes that names the exact sheet, range and values.",
     };
   }

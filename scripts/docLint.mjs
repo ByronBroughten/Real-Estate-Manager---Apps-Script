@@ -173,10 +173,21 @@ function checkRootSize(text, report) {
 
 function checkNestedSize(path, text, report) {
   const lines = text.replace(/\n$/, "").split("\n").length;
-  const limit =
-    path === "src/AGENTS.md" ? MAX_SRC_AGENTS_LINES : MAX_FOLDER_AGENTS_LINES;
+  const limit = isPackageSrcAgents(path)
+    ? MAX_SRC_AGENTS_LINES
+    : MAX_FOLDER_AGENTS_LINES;
   if (lines > limit)
     report(1, `nested AGENTS.md is ${lines} lines; the limit is ${limit}`);
+}
+
+function isPackageSrcAgents(path) {
+  const parts = path.split("/");
+  return (
+    parts.length === 4 &&
+    parts[0] === "packages" &&
+    parts[2] === "src" &&
+    parts[3] === "AGENTS.md"
+  );
 }
 
 function checkClaudePairing(path, docs, report) {

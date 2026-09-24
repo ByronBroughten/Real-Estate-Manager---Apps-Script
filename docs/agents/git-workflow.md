@@ -15,5 +15,6 @@
   ````
 
   Add a line above the block if the checks were not all green or a box in the issue is undone, so the developer sees it before handing the prompt on.
+- **A change that spans both packages lands on one `issue-<n>-<slug>` branch.** A breaking change to the framework's public entry lands in the same commit as the app's fix, so every commit stays green. Commit messages get no package prefix.
 - **A `backup/*` branch is single-session scaffolding.** Take one before a history rewrite, retire it once the rewrite is verified, and say so. If a stale one exists, report it with its ahead/behind counts before starting other git work.
 - Commit messages and `gh` writes from a dispatched agent go back to the main session: [`delegation.md`](./delegation.md). The wrap-up prompt is the exception: it is the developer's own hand-off to a separate session, not a dispatch.

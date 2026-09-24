@@ -1,0 +1,28 @@
+{
+  // The compiler options framework source is written for; the framework's own program and every app program extend it.
+  "compilerOptions": {
+    "target": "ES2022",
+    // Apps Script's V8 runtime doesn't support native public class fields;
+    // this keeps TS emitting `this.x = ...` in the constructor instead.
+    "useDefineForClassFields": false,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["esnext"],
+    "types": ["google-apps-script"],
+    "strict": false,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true,
+    "sourceMap": true,
+    "allowUmdGlobalAccess": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "noUncheckedSideEffectImports": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true
+  }
+}

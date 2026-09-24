@@ -40,8 +40,8 @@
       "mcp__gsheets__share_spreadsheet"
     ],
     "deny": [
-      "Read(./src/01_SpreadsheetSchema/generated/columnConfigs.ts)",
-      "Read(./dev/generated/columnConfigs.ts)"
+      "Read(./packages/*/src/generated/columnConfigs.ts)",
+      "Read(./packages/*/dev/generated/columnConfigs.ts)"
     ]
   },
   "hooks": {

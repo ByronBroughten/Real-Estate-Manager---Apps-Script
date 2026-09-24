@@ -1,38 +1,6 @@
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
-// Mirrors tsconfig.framework.json: these tests run on the dev configs, the rest of src/ on the app's.
-const frameworkTests = [
-  "src/00_Source/**/*.test.ts",
-  "src/01_SpreadsheetSchema/**/*.test.ts",
-  "src/02_SpreadsheetRaw/**/*.test.ts",
-  "src/03_SpreadsheetIdentified/**/*.test.ts",
-  "src/04_SpreadsheetNamed/**/*.test.ts",
-  "src/05_Operators/**/*.test.ts",
-  "src/06_API/**/*.test.ts",
-  "src/appsScriptHost/**/*.test.ts",
-  "src/nodeHost/**/*.test.ts",
-  "src/utils/**/*.test.ts",
-];
-
 export default defineConfig({
-  // Mirrors tsconfig.json's paths for the framework's package name.
-  resolve: {
-    alias: [
-      {
-        find: /^@byronbroughten\/sheets-framework$/,
-        replacement: fileURLToPath(
-          new URL("src/framework.ts", import.meta.url),
-        ),
-      },
-      {
-        find: /^@byronbroughten\/sheets-framework\/testing$/,
-        replacement: fileURLToPath(
-          new URL("src/frameworkTesting.ts", import.meta.url),
-        ),
-      },
-    ],
-  },
   test: {
     environment: "node",
     restoreMocks: true,
@@ -42,37 +10,38 @@ export default defineConfig({
         extends: true,
         test: {
           name: "framework",
-          include: frameworkTests,
-          setupFiles: ["dev/installDevConfigs.ts"],
+          include: ["packages/framework/{src,dev}/**/*.test.ts"],
+          setupFiles: ["packages/framework/dev/installDevConfigs.ts"],
         },
       },
       {
         extends: true,
         test: {
           name: "real-estate",
-          include: ["src/**/*.test.ts"],
-          exclude: frameworkTests,
-          setupFiles: ["src/installAppConfigs.ts"],
+          include: ["packages/real-estate/src/**/*.test.ts"],
+          setupFiles: ["packages/real-estate/src/installAppConfigs.ts"],
         },
       },
       {
         extends: true,
         test: {
           name: "tooling",
-          include: ["scripts/**/*.test.mjs", ".claude/hooks/**/*.test.mjs"],
+          include: [
+            "scripts/**/*.test.mjs",
+            "packages/framework/scripts/**/*.test.mjs",
+            ".claude/hooks/**/*.test.mjs",
+          ],
         },
       },
     ],
     coverage: {
       provider: "v8",
       reporter: ["text", "html"],
-      include: ["src/**/*.ts"],
+      include: ["packages/*/src/**/*.ts"],
       exclude: [
-        "src/**/*.test.ts",
-        "src/testSupport/**",
-        "src/02_SpreadsheetRaw/toIntegrate.ts",
-        "src/testingGoogleApiFunctions.ts",
-        "src/TypeDeclarations/**",
+        "packages/*/src/**/*.test.ts",
+        "packages/framework/src/testSupport/**",
+        "packages/framework/src/TypeDeclarations/**",
       ],
     },
   },

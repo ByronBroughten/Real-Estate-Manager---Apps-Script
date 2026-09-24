@@ -45,18 +45,18 @@ describe("BashReads unguarded folders", () => {
 
 describe("BashReads columnConfigs", () => {
   const projectDir = projectWith({
-    "sheets.config.json": JSON.stringify({ spreadsheetId: "app-id", generatedDir: "src/generated", choreHomes: [] }),
-    "dev/sheets.config.json": JSON.stringify({ spreadsheetId: "dev-id", generatedDir: "generated", choreHomes: [] }),
-    "src/generated/columnConfigs.ts": "small\n",
-    "dev/generated/columnConfigs.ts": "small\n",
+    "packages/real-estate/sheets.config.json": JSON.stringify({ spreadsheetId: "app-id", generatedDir: "src/generated", choreHomes: [] }),
+    "packages/framework/sheets.config.json": JSON.stringify({ spreadsheetId: "dev-id", generatedDir: "dev/generated", choreHomes: [] }),
+    "packages/real-estate/src/generated/columnConfigs.ts": "small\n",
+    "packages/framework/dev/generated/columnConfigs.ts": "small\n",
   });
 
   it("denies a whole read of every package's columnConfigs.ts, found through its generatedDir", () => {
-    expect(denyReasonOf(projectDir, "cat src/generated/columnConfigs.ts")).toMatch(/columnConfigs\.ts beyond one block/);
-    expect(denyReasonOf(projectDir, "cat dev/generated/columnConfigs.ts")).toMatch(/columnConfigs\.ts beyond one block/);
+    expect(denyReasonOf(projectDir, "cat packages/real-estate/src/generated/columnConfigs.ts")).toMatch(/columnConfigs\.ts beyond one block/);
+    expect(denyReasonOf(projectDir, "cat packages/framework/dev/generated/columnConfigs.ts")).toMatch(/columnConfigs\.ts beyond one block/);
   });
 
   it("allows one block of it", () => {
-    expect(denyReasonOf(projectDir, "sed -n '1,40p' dev/generated/columnConfigs.ts")).toBeNull();
+    expect(denyReasonOf(projectDir, "sed -n '1,40p' packages/framework/dev/generated/columnConfigs.ts")).toBeNull();
   });
 });
