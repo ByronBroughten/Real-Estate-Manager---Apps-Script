@@ -1,16 +1,16 @@
 # Agent instructions for this repo
 
-An npm-workspaces monorepo: `packages/framework` (`@byronbroughten/sheets-framework`), a TypeScript framework for typed apps on Google Sheets + Apps Script (pushed with `clasp`), and `packages/real-estate` (`real-estate-app`), the real-estate endpoints built on it, with a live spreadsheet serving as both database and UI.
+An npm-workspaces monorepo: `packages/framework` (`@byronbroughten/sheets-framework`), a TypeScript framework for typed apps on Google Sheets + Apps Script, and `packages/real-estate` (`real-estate-app`), the real-estate endpoints built on it; a live spreadsheet is both database and UI.
 
 Open only the section or disclosed doc the task needs.
 
 ## Commands
 
 - `npm run tsc`, `npm test` and `npm run lint`: always safe. Run all three before calling a change done, and treat a new type error as yours unless a clean checkout has it too.
-- **Every live-spreadsheet command names its target: `dev:*` (the `Sheets Framework Dev` spreadsheet) or `app:*` (the real-estate one).** `dev:*` has a standing yes. `app:*` keeps the asks below. A yes for one spreadsheet never covers the other, and a bare `npx sheets-framework …` always asks. Full table: [`docs/how-it-runs.md`](./docs/how-it-runs.md#targets-dev-and-app).
+- **Every live-spreadsheet command names its target: `dev:*` (the `Sheets Framework Dev` spreadsheet) or `app:*` (the real-estate one).** `dev:*` has a standing yes. `app:*` keeps the asks below. A yes for one spreadsheet never covers the other, and a bare `npx sheets-framework …` always asks. Full table: [`docs/targets-and-gates.md`](./docs/targets-and-gates.md#targets-dev-and-app).
 - `npm run app:chore <name>`: a dry run, always safe. The Node host adapter suppresses its writes. `npm run app:chore <name> -- --send` applies it and needs a yes **naming that chore**.
 - `npm run app:probe`: read-only raw Sheets JSON. Stdout gets a summary and the full response goes to that package's `.probe/last.json`; read a line range of it, never print a full body into the chat. Ask before any other script that opens the `clasp` credential.
-- `npm run app:gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/how-it-runs.md`](./docs/how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).
+- `npm run app:gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/targets-and-gates.md`](./docs/targets-and-gates.md#before-touching-the-live-spreadsheet-or-deployment).
 - Ask first for `npm run app:build`, `clasp push` / `run` / `deploy`, and any gsheets MCP write to the app spreadsheet (give the exact sheet, range and values). `create_spreadsheet` always asks; `share_spreadsheet` needs its own yes, naming who and at what permission. Reading either sheet needs no yes.
 
 ## Every task
@@ -24,16 +24,16 @@ Open only the section or disclosed doc the task needs.
 
 | When | Open |
 | --- | --- |
-| Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`packages/framework/src/AGENTS.md`](./packages/framework/src/AGENTS.md) + [`docs/vocabulary.md`](./docs/vocabulary.md) |
+| Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`packages/framework/src/AGENTS.md`](./packages/framework/src/AGENTS.md) + [vocabulary](./packages/framework/docs/vocabulary.md) |
 | Writing or refactoring TypeScript, tests included | [`docs/style.md`](./docs/style.md) |
-| Operator-facing words: endpoint, selector, run state, blank row | [`CONTEXT.md`](./CONTEXT.md) |
-| Arguing that a gap is deliberate, or proposing a design principle | [`docs/design.md`](./docs/design.md) |
-| Architecture mechanics: dispatch, schema classes, class chains, queued writes, round trips, type-check cost | [`docs/architecture.md`](./docs/architecture.md) index, then one file |
-| Adding a deletion path | [`docs/architecture/blank-row.md`](./docs/architecture/blank-row.md) |
-| A one-off job against the live sheet | [`docs/architecture/chores.md`](./docs/architecture/chores.md) |
-| Hosts, chore dry run, Sheets probe, gsheets MCP | [`docs/how-it-runs.md`](./docs/how-it-runs.md) |
+| Operator-facing words: endpoint, selector, run state, blank row | [framework](./packages/framework/CONTEXT.md) and [app](./CONTEXT.md) `CONTEXT.md` |
+| Arguing that a gap is deliberate, or proposing a design principle | [design](./packages/framework/docs/design.md) |
+| Architecture mechanics: dispatch, schema classes, class chains, queued writes, round trips, type-check cost | [architecture](./packages/framework/docs/architecture.md) index, then one file |
+| Adding a deletion path | [blank-row](./packages/framework/docs/architecture/blank-row.md) |
+| A one-off job against the live sheet | [chores](./packages/framework/docs/architecture/chores.md) |
+| Hosts, bin, chore dry run, Sheets probe, gsheets MCP | [how-it-runs](./packages/framework/docs/how-it-runs.md); gates: [targets-and-gates](./docs/targets-and-gates.md) |
 | Claude Code hooks and the project agent | [`docs/claude-code-guardrails.md`](./docs/claude-code-guardrails.md) |
-| Tests and fakes | [`docs/testing.md`](./docs/testing.md) |
+| Tests and fakes | [testing](./packages/framework/docs/testing.md) |
 | Regen `tsc` fails, or hand-written sheet/column keys disagree with generated configs | [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md) |
 | Branches, landing a spec, closing an issue, `backup/*` branches | [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md) |
 | Design, grilling, specs, an offered ADR, a long session's handoff | [`docs/agents/planning.md`](./docs/agents/planning.md) |

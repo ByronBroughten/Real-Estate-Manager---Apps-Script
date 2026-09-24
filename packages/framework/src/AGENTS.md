@@ -12,4 +12,4 @@
 - **`src/` is host-neutral, `nodeHost/` included: no Node or DOM APIs.** It is platform-neutral outside `00_Source/GoogleSheets/`, `appsScriptHost/` and the entry points. Lint holds both.
 - **Regenerate, never hand-edit, a package's generated data** (`dev/generated/` here). Read by block: grep `columnConfigs.ts` for the sheet key (`"occupancy":`) and read that one object; open a long test file's one `describe`.
 - **A guard ships in the same commit as the write it guards, or earlier**: a standing-permission `gen:configs` run can land between any two commits.
-- **Read [docs/style.md](../../../docs/style.md) before editing TypeScript here.** Words: [docs/vocabulary.md](../../../docs/vocabulary.md). Mechanics: the [`docs/architecture.md`](../../../docs/architecture.md) index.
+- **Read [docs/style.md](../../../docs/style.md) before editing TypeScript here.** Words: [docs/vocabulary.md](../docs/vocabulary.md). Mechanics: the [`docs/architecture.md`](../docs/architecture.md) index.

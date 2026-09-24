@@ -16,7 +16,11 @@
   "files": [
     "src",
     "tsconfig.base.json",
-    "scripts"
+    "scripts",
+    "docs",
+    "CONTEXT.md",
+    "!**/AGENTS.md",
+    "!**/CLAUDE.md"
   ],
   "scripts": {
     "tsc": "tsc -p .",

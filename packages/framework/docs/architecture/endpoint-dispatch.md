@@ -4,7 +4,7 @@ Map fragment. Sibling headings live in this folder.
 
 **What an endpoint, a runner, a two-way endpoint, a selector, a run status, a run state and a run report *are* is defined in [`CONTEXT.md`](../../CONTEXT.md)** — read that first; this file is only how the dispatch is built.
 
-An endpoint is one entry keyed by the column whose action-row checkbox triggers it, and `EndpointRun` owns its run: selection, running state, action, outcome, feedback. The rules for writing one: [`src/businessEndpoints/AGENTS.md`](../../packages/real-estate/src/businessEndpoints/AGENTS.md) and [`src/06_API/AGENTS.md`](../../packages/framework/src/06_API/AGENTS.md).
+An endpoint is one entry keyed by the column whose action-row checkbox triggers it, and `EndpointRun` owns its run: selection, running state, action, outcome, feedback. The rules for writing one: [`src/06_API/AGENTS.md`](../../src/06_API/AGENTS.md), plus the app's own endpoint-folder rules.
 
 ## The endpoint entry
 
@@ -36,7 +36,7 @@ export type Endpoints = {
 
 `Endpoints` is the app's map: a key on one of the four config sheets is a type error, because the framework owns those entries (`frameworkEndpoints`). `Api` spreads the framework's entries last into an `EndpointsAll`, so a collision still resolves to the framework at runtime.
 
-`action` is the only required field, so an endpoint takes exactly the machinery it wants: a bulk "select all" declares an action alone and stays at the round-trip floor; a run over a selection declares the feedback columns and the selector too. `retainSelection` and `requireOneRow` are nameable only inside a declared selector, so an endpoint without one cannot carry either as a silent no-op. Register endpoints with a plain `: Endpoints` annotation — **not** `makeStructuredConfig`, which lets an unknown key through (see [`docs/style.md`](../style.md), "Type modeling").
+`action` is the only required field, so an endpoint takes exactly the machinery it wants: a bulk "select all" declares an action alone and stays at the round-trip floor; a run over a selection declares the feedback columns and the selector too. `retainSelection` and `requireOneRow` are nameable only inside a declared selector, so an endpoint without one cannot carry either as a silent no-op. Register endpoints with a plain `: Endpoints` annotation — **not** `makeStructuredConfig`, which lets an unknown key through (the house style's "Type modeling").
 
 ## Flags are directives to the framework
 
@@ -48,7 +48,7 @@ export type Endpoints = {
 
 ## Two shapes for an endpoint body
 
-**An endpoint body takes one of two shapes.** The default is module-private helpers around the entry, which `businessEndpoints/updateTerms.ts` is the reference for. Once a body turns unwieldy the logic moves onto a business operator under `businessEndpoints/BusinessOperators/`, and the entry keeps a one-line action delegating to it — `businessEndpoints/buildLedger.ts` is the reference for that shape, and its operator is `OccupancyLedgerOperator` (#22); `businessEndpoints/addPropertyExpense.ts` is the second, behind `PropertyExpenseOperator` (#24). The threshold that decides between them lives in [`docs/style/class-shape.md`](../style/class-shape.md), "Coordinator classes", which was mined from the framework tiers and otherwise doesn't govern endpoints.
+**An endpoint body takes one of two shapes.** The default is module-private helpers around the entry, which `businessEndpoints/updateTerms.ts` is the reference for. Once a body turns unwieldy the logic moves onto a business operator under `businessEndpoints/BusinessOperators/`, and the entry keeps a one-line action delegating to it — `businessEndpoints/buildLedger.ts` is the reference for that shape, and its operator is `OccupancyLedgerOperator` (#22); `businessEndpoints/addPropertyExpense.ts` is the second, behind `PropertyExpenseOperator` (#24). The threshold that decides between them lives in the house style's "Coordinator classes", which was mined from the framework tiers and otherwise doesn't govern endpoints.
 
 ## No operator scoped to the occupancy row
 
@@ -124,13 +124,13 @@ Feedback is written with the two column fills from [column fills](./queued-write
 
 ## `EndpointRun` is built from `Api`'s props
 
-`EndpointRun` is constructed from `Api`'s `SpreadsheetNamedProps` (the rule: [`src/06_API/AGENTS.md`](../../packages/framework/src/06_API/AGENTS.md)), never from a no-arg `init()` that mints fresh `spreadsheetStateRaw`. `Api` has already fetched the sheet's properties and columnId row by the time it dispatches; minting fresh state re-fetches all of it.
+`EndpointRun` is constructed from `Api`'s `SpreadsheetNamedProps` (the rule: [`src/06_API/AGENTS.md`](../../src/06_API/AGENTS.md)), never from a no-arg `init()` that mints fresh `spreadsheetStateRaw`. `Api` has already fetched the sheet's properties and columnId row by the time it dispatches; minting fresh state re-fetches all of it.
 
 ## The dispatch boundary widens the generic
 
 **The dispatch boundary is where the generic widens.** There is deliberately no type-level bridge from a column full name to a sheet-and-column pair, so `Api` — holding a full name resolved at runtime — instantiates `EndpointRun` at the widened sheet name, where a column parameter is the union across sheets rather than one sheet's. That is sound and does not collapse to `never`, because `ColumnNameFiltered` distributes over the sheet name; `Endpoints.test.ts` pins both ends.
 
-That widening is what forces the selector's shape to be spelled inline, and the run to take `EndpointDispatched` (the rule: [`src/06_API/AGENTS.md`](../../packages/framework/src/06_API/AGENTS.md)). Two generic references to the *same* named type are compared by that type's measured variance rather than property by property, and the column filter leaves the variance unmeasurable, so the comparison falls back to demanding identical sheet names. Nesting the selector inside a named `EndpointSelector<SN>` — interface or alias — therefore breaks `Api`'s assignment outright, and so does `Endpoint<SheetNameSimple>` as the run's prop type; an anonymous nested object plus a structural copy (`{ [K in keyof Endpoint<SN>]: Endpoint<SN>[K] }`) keeps both comparisons structural. Tidying either into a named type fails `npm run tsc` at `Api.ts`, not at the file you edited.
+That widening is what forces the selector's shape to be spelled inline, and the run to take `EndpointDispatched` (the rule: [`src/06_API/AGENTS.md`](../../src/06_API/AGENTS.md)). Two generic references to the *same* named type are compared by that type's measured variance rather than property by property, and the column filter leaves the variance unmeasurable, so the comparison falls back to demanding identical sheet names. Nesting the selector inside a named `EndpointSelector<SN>` — interface or alias — therefore breaks `Api`'s assignment outright, and so does `Endpoint<SheetNameSimple>` as the run's prop type; an anonymous nested object plus a structural copy (`{ [K in keyof Endpoint<SN>]: Endpoint<SN>[K] }`) keeps both comparisons structural. Tidying either into a named type fails `npm run tsc` at `Api.ts`, not at the file you edited.
 
 ## An endpoint that appends into its own sheet
 

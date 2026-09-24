@@ -1,6 +1,6 @@
 # `valueConfigs`: the dropdown member lists
 
-Part of [generated data](../generated-data.md). `makeValueConfigs` must keep its `const` type parameter (the rule: [`src/01_SpreadsheetSchema/AGENTS.md`](../../packages/framework/src/01_SpreadsheetSchema/AGENTS.md)).
+Part of [generated data](../generated-data.md). `makeValueConfigs` must keep its `const` type parameter (the rule: [`src/01_SpreadsheetSchema/AGENTS.md`](../../src/01_SpreadsheetSchema/AGENTS.md)).
 
 ## How `valueConfigs` is generated
 

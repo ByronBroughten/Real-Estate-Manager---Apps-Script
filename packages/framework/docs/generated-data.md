@@ -1,6 +1,6 @@
 # Generated data — do not hand-edit
 
-Each package's `generatedDir` (the app's `src/generated/`, the framework's `dev/generated/`) holds four files generated from the live spreadsheet. Regenerate all four together with `npm run app:gen:configs`, never hand-edit them, and read `columnConfigs.ts` by block. The rules are [`src/01_SpreadsheetSchema/AGENTS.md`](../packages/framework/src/01_SpreadsheetSchema/AGENTS.md)'s; the gate on the command is in [`docs/how-it-runs.md`](./how-it-runs.md#before-touching-the-live-spreadsheet-or-deployment).
+Each package's `generatedDir` (the app's `src/generated/`, the framework's `dev/generated/`) holds four files generated from the live spreadsheet. Regenerate all four together with `sheets-framework gen-configs`, never hand-edit them, and read `columnConfigs.ts` by block. The rules are [`src/01_SpreadsheetSchema/AGENTS.md`](../src/01_SpreadsheetSchema/AGENTS.md)'s; what the command writes is [`how-it-runs.md`](./how-it-runs.md#what-gen-configs-writes)'s.
 
 ## One file per generated constant, the sync and the floor
 
@@ -25,13 +25,13 @@ All four are (or are meant to be) mechanically generated from the real spreadshe
 
 ## Regenerate all four together, never a subset
 
-The rules on regenerating and on tab spelling: [`src/01_SpreadsheetSchema/AGENTS.md`](../packages/framework/src/01_SpreadsheetSchema/AGENTS.md).
+The rules on regenerating and on tab spelling: [`src/01_SpreadsheetSchema/AGENTS.md`](../src/01_SpreadsheetSchema/AGENTS.md).
 
 **`spreadsheetConfig`, `sheetConfigs`, `columnConfigs`, and `valueConfigs` must always be regenerated together, in the same run — never a subset of them.** Sheet names live as keys in `sheetConfigs.ts`, and `columnConfigs.ts` is keyed by those same names; `valueConfigs.ts` in turn depends on `columnConfigs` already being current to know which columns' headers to read. Regenerating a subset after a sheet/column was renamed/added/removed leaves the others referencing stale names, which breaks `npm run tsc` in places that look unrelated (the generated files themselves, plus any hand-written code — like `SheetNameGroups.ts` — that references a sheet name by string literal).
 
 ## What a regeneration runs, on the Node host
 
-Regenerate all four with `npm run app:gen:configs` (see [`docs/how-it-runs.md`](./how-it-runs.md), which also holds its standing-permission conditions), which runs `ConfigCoordinator` (`05_Operators`) **on the Node host**: it reads live Spreadsheet Config and overlays that record on `ssConfigGet` for the rest of the run, syncs the live Sheet Config sheet, then the live Column Config sheet (including adding any missing column IDs to business sheets), flushes all of that in one write, then reads the live Value Config sheet, and only then emits source for all four files. **Live Table sampling on that run — Table header row, column-ID row, first data row — is for this run's Let api access sheets**, after Sheet Config is loaded, not for every tab. Everyday Table-placement and extra-Table checks still use last-generate sheet GIDs, one regen behind the live box. The npm script writes all four files or none, and runs `npm run tsc` itself afterward so a stale hand-written reference surfaces immediately.
+Regenerate all four with `sheets-framework gen-configs` (see [`docs/how-it-runs.md`](./how-it-runs.md#what-gen-configs-writes)), which runs `ConfigCoordinator` (`05_Operators`) **on the Node host**: it reads live Spreadsheet Config and overlays that record on `ssConfigGet` for the rest of the run, syncs the live Sheet Config sheet, then the live Column Config sheet (including adding any missing column IDs to business sheets), flushes all of that in one write, then reads the live Value Config sheet, and only then emits source for all four files. **Live Table sampling on that run — Table header row, column-ID row, first data row — is for this run's Let api access sheets**, after Sheet Config is loaded, not for every tab. Everyday Table-placement and extra-Table checks still use last-generate sheet GIDs, one regen behind the live box. The command writes all four files or none, and runs `npm run tsc` itself afterward so a stale hand-written reference surfaces immediately.
 
 ## The `clasp run` path is gone
 
