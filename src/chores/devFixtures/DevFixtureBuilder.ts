@@ -3,7 +3,11 @@ import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsType
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import { devFixtureSheets, type DevFixtureSheet } from "./devFixtureSheets";
+import {
+  devFixtureSheets,
+  type DevFixtureColumn,
+  type DevFixtureSheet,
+} from "./devFixtureSheets";
 
 // A tab that exists is left alone; rebuild one by deleting it and rerunning (docs/how-it-runs.md).
 export class DevFixtureBuilder extends SpreadsheetBaseNamed {
@@ -86,18 +90,32 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
         colIndex,
         value: dimensionIds.col(fixture.idPrefix, column.key),
       });
-      column.values.forEach((value, rowOffset) => {
-        if (value === "") return;
-        this.ss.raw.gatherAddedSheetCellRequest({
-          sheetId: sheetGid,
-          rowIndex: headerRowIdx + 1 + rowOffset,
-          colIndex,
-          value,
-        });
-      });
+      this._seedColumnRows(sheetGid, colIndex, column, rowCount);
     });
     if (fixture.entryCheckboxColumnKey !== undefined) {
       this._addEntryCheckbox(fixture, fixture.entryCheckboxColumnKey);
+    }
+  }
+  private _seedColumnRows(
+    sheetId: number,
+    colIndex: number,
+    column: DevFixtureColumn,
+    rowCount: number,
+  ): void {
+    const topDataRowIdx = ssConfigGet("tableHeaderRowIndexBase0") + 1;
+    for (let rowOffset = 0; rowOffset < rowCount; rowOffset++) {
+      const position = {
+        sheetId,
+        rowIndex: topDataRowIdx + rowOffset,
+        colIndex,
+      };
+      const { formula } = column;
+      const value = column.values[rowOffset];
+      if (formula !== undefined) {
+        this.ss.raw.gatherAddedSheetCellRequest({ ...position, formula });
+      } else if (value !== undefined && value !== "") {
+        this.ss.raw.gatherAddedSheetCellRequest({ ...position, value });
+      }
     }
   }
   private _addEntryCheckbox(fixture: DevFixtureSheet, columnKey: string): void {

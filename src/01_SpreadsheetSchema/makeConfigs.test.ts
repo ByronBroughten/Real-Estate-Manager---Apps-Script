@@ -21,20 +21,20 @@ describe("makeSheetConfigs", () => {
   it("throws when two sheets share a non-empty ID prefix", () => {
     expect(() =>
       makeSheetConfigs({
-        property: {
+        item: {
           sheetGid: 1,
-          idPrefix: "prp",
+          idPrefix: "itm",
           hasIdColumn: true,
           hasNameColumn: false,
         },
-        unit: {
+        runItem: {
           sheetGid: 2,
-          idPrefix: "prp",
+          idPrefix: "itm",
           hasIdColumn: true,
           hasNameColumn: false,
         },
       }),
-    ).toThrow(/property.*unit.*"prp"/);
+    ).toThrow(/item.*runItem.*"itm"/);
   });
 
   it("throws when a sheet has an empty ID prefix", () => {

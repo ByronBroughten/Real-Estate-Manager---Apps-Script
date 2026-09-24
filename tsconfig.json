@@ -65,5 +65,14 @@
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": ["src/toIntegrate.ts", "src/testingGoogleApiFunctions.ts"]
+  // Framework tests belong to tsconfig.framework.json, whose Register holds the dev configs.
+  "exclude": [
+    "src/toIntegrate.ts",
+    "src/testingGoogleApiFunctions.ts",
+    "src/00_Source/**/*.test.ts",
+    "src/01_SpreadsheetSchema/**/*.test.ts",
+    "src/02_SpreadsheetRaw/**/*.test.ts",
+    "src/03_SpreadsheetIdentified/**/*.test.ts",
+    "src/utils/**/*.test.ts"
+  ]
 }

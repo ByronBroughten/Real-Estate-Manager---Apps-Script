@@ -56,5 +56,9 @@ export const columnConfigs = makeColumnConfigs({
     "result": { "columnId": "c:rit:result", "header": "Result", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "startTime": { "columnId": "c:rit:startTime", "header": "Start time", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
     "runStatus": { "columnId": "c:rit:runStatus", "header": "Run status", "valueName": "string", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null }
+  },
+  "computed": {
+    "amount": { "columnId": "c:cmp:amount", "header": "Amount", "valueName": "number", "isFormula": false, "emptyValueAllowed": false, "customDefaultValue": null },
+    "rowNumber": { "columnId": "c:cmp:rowNumber", "header": "Row number", "valueName": "number", "isFormula": true, "emptyValueAllowed": false, "customDefaultValue": null }
   }
 });

@@ -3,13 +3,13 @@ import { idPrefixes } from "./idPrefixes";
 
 describe("idPrefixes.fromTitle", () => {
   it("abbreviates a one-word title to the first letter plus consonants, up to 3", () => {
-    expect(idPrefixes.fromTitle("Property", new Set())).toBe("prp");
-    expect(idPrefixes.fromTitle("Unit", new Set())).toBe("unt");
-    expect(idPrefixes.fromTitle("Household", new Set())).toBe("hsh");
+    expect(idPrefixes.fromTitle("Product", new Set())).toBe("prd");
+    expect(idPrefixes.fromTitle("Item", new Set())).toBe("itm");
+    expect(idPrefixes.fromTitle("Schedule", new Set())).toBe("sch");
   });
 
   it("takes the first letter of each word and tops up from the last word's consonants to 3", () => {
-    expect(idPrefixes.fromTitle("Occupancy Terms", new Set())).toBe("otr");
+    expect(idPrefixes.fromTitle("Run Item", new Set())).toBe("rit");
   });
 
   it("keeps a title shorter than 3 consonants", () => {
@@ -17,19 +17,16 @@ describe("idPrefixes.fromTitle", () => {
   });
 
   it("steps up with the next consonant on a collision, then a number suffix", () => {
-    expect(idPrefixes.fromTitle("Property", new Set(["prp"]))).toBe("prpr");
+    expect(idPrefixes.fromTitle("Product", new Set(["prd"]))).toBe("prdc");
+    expect(
+      idPrefixes.fromTitle("Product", new Set(["prd", "prdc", "prdct"])),
+    ).toBe("prd2");
     expect(
       idPrefixes.fromTitle(
-        "Property",
-        new Set(["prp", "prpr", "prprt", "prprty"]),
+        "Product",
+        new Set(["prd", "prdc", "prdct", "prd2"]),
       ),
-    ).toBe("prp2");
-    expect(
-      idPrefixes.fromTitle(
-        "Property",
-        new Set(["prp", "prpr", "prprt", "prprty", "prp2"]),
-      ),
-    ).toBe("prp3");
+    ).toBe("prd3");
   });
 
   it("uses s plus a number suffix when the title has no letters", () => {
@@ -38,19 +35,16 @@ describe("idPrefixes.fromTitle", () => {
   });
 
   it("drops punctuation and digits before abbreviating", () => {
-    expect(idPrefixes.fromTitle("Unit-2B!", new Set())).toBe("unt");
+    expect(idPrefixes.fromTitle("Item-2B!", new Set())).toBe("itm");
   });
 
   it("returns only lowercase letters and digits", () => {
     const prefixes = [
-      idPrefixes.fromTitle("Property", new Set()),
-      idPrefixes.fromTitle("Occupancy Terms", new Set()),
+      idPrefixes.fromTitle("Product", new Set()),
+      idPrefixes.fromTitle("Run Item", new Set()),
       idPrefixes.fromTitle("2024", new Set(["s"])),
-      idPrefixes.fromTitle("Unit-2B!", new Set()),
-      idPrefixes.fromTitle(
-        "Property",
-        new Set(["prp", "prpr", "prprt", "prprty"]),
-      ),
+      idPrefixes.fromTitle("Item-2B!", new Set()),
+      idPrefixes.fromTitle("Product", new Set(["prd", "prdc", "prdct"])),
     ];
     prefixes.forEach((prefix) => {
       expect(prefix).toMatch(/^[a-z0-9]+$/);

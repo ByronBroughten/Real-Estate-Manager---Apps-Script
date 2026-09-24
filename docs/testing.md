@@ -36,7 +36,7 @@ A fixture's table starts where `spreadsheetConfig` says it must, so a fixture ne
 
 `fakeAppsScriptGlobals.ts` — `stubPropertiesService()` (in-memory script properties, for `AppsScript.projectProperties` and `GoogleSheetsAPI.forAppsScript()`) and `stubScriptAndSpreadsheetApp()` (a fluent trigger builder covering `AppsScript.trigger`'s usage, and an active spreadsheet whose `toast` records each message).
 
-`fakeSheetConfigSheet.ts` — a fake "Sheet Config" sheet, for behaviour that reads or writes a whole row rather than one named cell (clearing, the blank test, the wipe, append reuse). Anything working from a sheet's *configured* columns resolves each of them against the live columnId row, so such a test needs a fixture listing every column the config declares — which makes Sheet Config the right subject, as the smallest real sheet that still has a formula column to leave untouched.
+`fakeSheetConfigSheet.ts` — a fake "Sheet Config" sheet, for behaviour that reads or writes a whole row rather than one named cell (clearing, the blank test, the wipe, append reuse). Anything working from a sheet's *configured* columns resolves each of them against the live columnId row, so such a test needs a fixture listing every column the config declares — which makes Sheet Config the right subject, as the smallest sheet both config sets share. Its GID and column IDs come from the installed configs, so it serves either test program.
 
 ## Three seams
 
@@ -46,9 +46,25 @@ SpreadsheetRaw / EndpointRun tests inject a RawSource (`stubSheetsService`). `Go
 
 Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, and `appsScriptHost/AppsScriptApi.ts`, which decodes the trigger events with `AppsScript.sheetEdit` / `AppsScript.sheetChange` and is tested against faked events and globals. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
 
-## Exemplar columns in type-level tests
+## Two test programs, two config sets
 
-A test that needs a real column of some value name should name one whose value name can't churn under `gen:configs`. The config-describing sheets are the safe source for most of them, and the live `test` sheet holds a column per value name for the rest — `test_conditionalFormatting` is the canonical column that merely *samples* as boolean, declaring no column type in the table, which is the one thing no config sheet has. Its whole job is to be that exemplar, so don't format it as a checkbox in Sheets: doing so regenerates it as `checkbox` and breaks `SpreadsheetSchema.test.ts` and `CheckboxColumnOperator.test.ts` together, which is exactly what happened to the Occupancy column they used to name. **The same hazard reaches the `emptyValueAllowed` trait** (#13), with one difference: the trait is *declared* rather than sampled, so only a person deliberately unticking a box can move it. `occupancy_nextTermsEndDate` is the exemplar the Named suite names for the ticked branch — untick it and those assertions quietly re-prove the unticked case instead of failing. **An exemplar's *value name* has to be declared too**, for the mirror of the reason `test_conditionalFormatting`'s must not be: a sampled value name follows the column's number format, so a format change moves it and the `SerialDate` assertions break a long way from the edit that caused it. The Occupancy "Next terms" columns sat on Automatic until 10 September 2026, when they were declared to close exactly that.
+The framework tests (tiers `00`–`03` and `utils/`) run on the dev spreadsheet's configs, and every other `src/` test runs on the app's. Each set has its own Vitest project and `tsc` program, so each program carries one `Register` augmentation: `dev/devConfigs.ts` for the framework and `src/appConfigs.ts` for the app. The app's `tsconfig.json` excludes the framework tests. A framework test reads a GID or column ID through `getSheetTraitByName`/`getColumnTraitByName`, never by importing a `generated/` file.
+
+## The dev fixtures and their exemplar columns
+
+A framework test names a sheet or column of the dev spreadsheet's fixtures, never a real-estate one. `buildDevFixtures` is their checked-in recipe, and `dev/generated/` is what `dev:gen:configs` read back from them:
+
+| Sheet | Shape | Exemplars |
+| --- | --- | --- |
+| `item` | ID and Name columns | The main subject of the Raw and Identified tests. `optionalNote` has Empty value allowed ticked, and `requiredCount` has it unticked. |
+| `valueTypes` | ID column, one column per framework value name | `sampledBoolean` only *samples* as boolean, with no column type declared. `checkbox` is a declared checkbox. `dateValue` is a declared date. |
+| `log` | No ID column | |
+| `runItem` | Endpoint sheet: selector and run state | For the endpoint tests (#139). |
+| `computed` | No ID column | `rowNumber` is the one formula column. |
+
+Add a fixture sheet only when a test needs a config shape these don't cover. A layout edge case, such as a blank row or a misplaced Table, stays row data in a fake-service fixture. The dev value configs are empty, so no framework test names a dropdown value name.
+
+An exemplar's value name has to stay put. `sampledBoolean` must not be formatted as a checkbox in Sheets: that would regenerate it as `checkbox` and break `SpreadsheetSchema.test.ts`. The same holds for the Empty value allowed ticks: untick `optionalNote` and a test of the ticked case quietly proves the unticked one instead of failing. To change a fixture, edit the recipe, delete the tab and rebuild it ([`docs/how-it-runs.md`](./how-it-runs.md#targets-dev-and-app)).
 
 ## Testing an endpoint through `EndpointRun`
 

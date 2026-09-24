@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { columnConfigsByName } from "./columnConfigsTypes";
 import { assertFloorMatchesSeed } from "./floorSeedCheck";
-import { sheetConfigs } from "./generated/sheetConfigs";
 import type { ColumnConfigsGeneric, ColumnConfigStored } from "./makeConfigs";
+import { sheetConfigsByName } from "./sheetConfigsTypes";
 
 describe("assertFloorMatchesSeed", () => {
+  const sheetConfigs = sheetConfigsByName();
+
   function floorColumnConfigs(): ColumnConfigsGeneric {
     return JSON.parse(JSON.stringify(columnConfigsByName()));
   }

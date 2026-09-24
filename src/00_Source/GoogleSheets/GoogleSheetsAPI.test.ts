@@ -619,7 +619,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
     const { api } = recordingSheets({
       sheets: [
         {
-          properties: { sheetId: 111, title: "Leases" },
+          properties: { sheetId: 111, title: "Records" },
           tables: [
             {
               tableId: "tbl",
@@ -636,7 +636,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
                   dataValidationRule: {
                     condition: {
                       type: "ONE_OF_LIST",
-                      values: [{ userEnteredValue: "Rent" }],
+                      values: [{ userEnteredValue: "Open" }],
                     },
                   },
                 },
@@ -672,7 +672,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
       sheets: [
         {
           sheetGid: 111,
-          title: "Leases",
+          title: "Records",
           tables: [
             {
               tableId: "tbl",
@@ -685,7 +685,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
                 {
                   columnIndex: 1,
                   columnType: "CURRENCY",
-                  dataValidationValues: ["Rent"],
+                  dataValidationValues: ["Open"],
                   dataValidationConditionType: "ONE_OF_LIST",
                 },
               ],
@@ -725,7 +725,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
     const { api } = recordingSheets({
       sheets: [
         {
-          properties: { sheetId: 111, title: "Leases" },
+          properties: { sheetId: 111, title: "Records" },
           tables: [
             {
               tableId: "tbl",
@@ -755,7 +755,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
     const { api } = recordingSheets({
       sheets: [
         {
-          properties: { sheetId: 111, title: "Leases" },
+          properties: { sheetId: 111, title: "Records" },
           conditionalFormats: [
             {
               ranges: [
@@ -1382,7 +1382,7 @@ describe("GoogleSheetsAPI colour mapping", () => {
     const { api } = recordingSheets({
       sheets: [
         {
-          properties: { sheetId: 1, title: "Leases" },
+          properties: { sheetId: 1, title: "Records" },
           data: [
             {
               startColumn: 0,

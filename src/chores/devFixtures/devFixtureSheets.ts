@@ -9,6 +9,7 @@ export interface DevFixtureColumn {
   columnType: TableColumnType;
   emptyValueAllowed?: boolean;
   values: CellValue[];
+  formula?: string;
 }
 
 export interface DevFixtureSheet {
@@ -128,6 +129,27 @@ export function devFixtureSheets(): DevFixtureSheet[] {
           header: "Amount",
           columnType: "DOUBLE",
           values: [10, 20],
+        },
+      ],
+    },
+    {
+      sheetGid: 1100005,
+      title: "Computed",
+      tableName: "computed",
+      idPrefix: "cmp",
+      columns: [
+        {
+          key: "amount",
+          header: "Amount",
+          columnType: "DOUBLE",
+          values: [1, 2],
+        },
+        {
+          key: "rowNumber",
+          header: "Row number",
+          columnType: "DOUBLE",
+          values: [],
+          formula: "=ROW()",
         },
       ],
     },

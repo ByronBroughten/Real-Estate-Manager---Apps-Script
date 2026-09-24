@@ -1,5 +1,5 @@
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   buildGridRows,
   stubSheetsService,
@@ -9,23 +9,21 @@ import {
 /**
  * A fake "Sheet Config" sheet, for tests about behaviour that reads or writes
  * a whole row rather than one named cell — clearing, the blank test, the wipe,
- * append reuse. Sheet Config earns the job by being the smallest real sheet.
+ * append reuse. Sheet Config earns the job by being the smallest sheet every config set shares.
  *
- * The column ids are the real committed ones, and the default columnId row
+ * The column ids are the installed configs' ones, and the default columnId row
  * lists every column the config declares so clear / blank / wipe resolve each.
  */
-const sheetConfigColumns = columnConfigs.sheetConfig;
+export const sheetConfigGid = getSheetTraitByName("sheetConfig", "sheetGid");
 
-export const sheetConfigGid = sheetConfigs.sheetConfig.sheetGid;
-
-export const sheetConfigColumnIdRow = [
-  sheetConfigColumns.sheetGid.columnId,
-  sheetConfigColumns.sheetTitle.columnId,
-  sheetConfigColumns.letApiAccess.columnId,
-];
+export const sheetConfigColumnIdRow = (
+  ["sheetGid", "sheetTitle", "letApiAccess"] as const
+).map((columnName) =>
+  getColumnTraitByName("sheetConfig", columnName, "columnId"),
+);
 
 /** Every non-formula column filled in. */
-export const filledSheetConfigRow: FakeCell[] = [999001, "Property", true];
+export const filledSheetConfigRow: FakeCell[] = [999001, "Item", true];
 
 /** The blank row: nothing in any non-formula column. */
 export const blankSheetConfigRow: FakeCell[] = [null, null, null];

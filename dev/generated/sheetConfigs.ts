@@ -8,5 +8,6 @@ export const sheetConfigs = makeSheetConfigs({
   "item": { "sheetGid": 1100001, "idPrefix": "itm", "hasIdColumn": true, "hasNameColumn": true },
   "valueTypes": { "sheetGid": 1100002, "idPrefix": "vty", "hasIdColumn": true, "hasNameColumn": false },
   "log": { "sheetGid": 1100003, "idPrefix": "log", "hasIdColumn": false, "hasNameColumn": false },
-  "runItem": { "sheetGid": 1100004, "idPrefix": "rit", "hasIdColumn": true, "hasNameColumn": true }
+  "runItem": { "sheetGid": 1100004, "idPrefix": "rit", "hasIdColumn": true, "hasNameColumn": true },
+  "computed": { "sheetGid": 1100005, "idPrefix": "cmp", "hasIdColumn": false, "hasNameColumn": false }
 });

@@ -26,8 +26,8 @@ import { UniformRowRaw } from "./UniformRowRaw";
 
 const lightGreen = { red: 0.851, green: 0.918, blue: 0.827 };
 
-const propertyGid = getSheetTraitByName("property", "sheetGid");
-const unitGid = getSheetTraitByName("unit", "sheetGid");
+const itemGid = getSheetTraitByName("item", "sheetGid");
+const logGid = getSheetTraitByName("log", "sheetGid");
 const tableHeaderRowIndex = ssConfigGet("tableHeaderRowIndexBase0");
 const colIdRowIndex = ssConfigGet("columnIdRowIdxBase0");
 const startTableColIndex = ssConfigGet("startTableColIndexBase0");
@@ -100,24 +100,24 @@ function thrownMessage(fn: () => void): string {
 describe("SpreadsheetRaw.fetchAllSheetProperties", () => {
   it("integrates sheet properties from Sheets.Spreadsheets.get into raw state", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases" }],
+      sheets: [{ sheetId: 111, title: "Records" }],
     });
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
 
     expect(raw.activeSheetGids).toEqual([111]);
-    expect(raw.sheet(111).title).toBe("Leases");
+    expect(raw.sheet(111).title).toBe("Records");
   });
 
   it("throws when a known sheet has more than one Table on the unfiltered census", () => {
     stubSheetsService({
-      sheets: [extraTablesSheet({ sheetId: propertyGid, title: "Property" })],
+      sheets: [extraTablesSheet({ sheetId: itemGid, title: "Item" })],
     });
 
     const raw = SpreadsheetRaw.init();
     expect(() => raw.fetchAllSheetProperties()).toThrowError(
-      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
+      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Item" \(gid \d+\)/,
     );
   });
 });
@@ -139,7 +139,7 @@ describe("SpreadsheetRaw.timeZone", () => {
     const logger = stubLogger();
     const { getCalls } = stubSheetsService({
       timeZone: "Australia/Sydney",
-      sheets: [placedTableSheet({ sheetId: 111, title: "Leases" })],
+      sheets: [placedTableSheet({ sheetId: 111, title: "Records" })],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -185,7 +185,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({ 0: ["ID"] }),
           table: { endRowIndex: 5 },
         },
@@ -200,11 +200,11 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
   it("does not throw for a config-known sheet whose Table starts where the layout requires", () => {
     stubSheetsService({
-      sheets: [placedTableSheet({ sheetId: propertyGid, title: "Property" })],
+      sheets: [placedTableSheet({ sheetId: itemGid, title: "Item" })],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
 
     expect(() => raw.fetchAllGathered()).not.toThrow();
   });
@@ -213,18 +213,18 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     stubSheetsService({
       sheets: [
         misplacedTableSheet({
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: itemGid,
+          title: "Item",
           startRowIndex: tableHeaderRowIndex - 1,
         }),
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
 
     expect(() => raw.fetchAllGathered()).toThrowError(
-      /"Property".*starts at row 3, column A.*must start at row 4, column A/,
+      /"Item".*starts at row 3, column A.*must start at row 4, column A/,
     );
   });
 
@@ -232,18 +232,18 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     stubSheetsService({
       sheets: [
         misplacedTableSheet({
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: itemGid,
+          title: "Item",
           startColumnIndex: startTableColIndex + 1,
         }),
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
 
     expect(() => raw.fetchAllGathered()).toThrowError(
-      /"Property".*starts at row 4, column B.*must start at row 4, column A/,
+      /"Item".*starts at row 4, column B.*must start at row 4, column A/,
     );
   });
 
@@ -268,22 +268,22 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     stubSheetsService({
       sheets: [
         misplacedTableSheet({
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: itemGid,
+          title: "Item",
           startRowIndex: tableHeaderRowIndex - 1,
         }),
         misplacedTableSheet({
-          sheetId: unitGid,
-          title: "Unit",
+          sheetId: logGid,
+          title: "Log",
           startColumnIndex: startTableColIndex + 1,
         }),
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
 
-    expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
+    expect(() => raw.fetchAllGathered()).toThrowError(/"Item".*"Log"/);
   });
 
   it("reports a Table the filtered fetch could not see as misplaced rather than absent", () => {
@@ -291,8 +291,8 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
       sheets: [
         {
           ...misplacedTableSheet({
-            sheetId: propertyGid,
-            title: "Property",
+            sheetId: itemGid,
+            title: "Item",
             startRowIndex: tableHeaderRowIndex + 2,
           }),
           isTableHiddenFromFilteredFetch: true,
@@ -301,44 +301,44 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
-    raw.sheetMeta(propertyGid).gatherFetchColumnIdsInit(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
+    raw.sheetMeta(itemGid).gatherFetchColumnIdsInit(startTableColIndex);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(
-      /"Property".*starts at row 6, column A.*must start at row 4, column A/,
+      /"Item".*starts at row 6, column A.*must start at row 4, column A/,
     );
     expect(message).not.toMatch(/Insert > Table/);
   });
 
   it("throws naming a known sheet whose gathered payload has more than one Table, and does not keep the first as active", () => {
     stubSheetsService({
-      sheets: [extraTablesSheet({ sheetId: propertyGid, title: "Property" })],
+      sheets: [extraTablesSheet({ sheetId: itemGid, title: "Item" })],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
     expect(message).toMatch(
-      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Property" \(gid \d+\)/,
+      /1 sheet\(s\) have more than one Table — delete the extras so each sheet has exactly one: "Item" \(gid \d+\)/,
     );
-    expect(raw.sheet(propertyGid).hasFetchedProperties).toBe(false);
+    expect(raw.sheet(itemGid).hasFetchedProperties).toBe(false);
   });
 
   it("names every known sheet with extra Tables in one error", () => {
     stubSheetsService({
       sheets: [
-        extraTablesSheet({ sheetId: propertyGid, title: "Property" }),
-        extraTablesSheet({ sheetId: unitGid, title: "Unit" }),
+        extraTablesSheet({ sheetId: itemGid, title: "Item" }),
+        extraTablesSheet({ sheetId: logGid, title: "Log" }),
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
-    raw.sheet(unitGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(logGid).gatherFetchProperties(startTableColIndex);
 
-    expect(() => raw.fetchAllGathered()).toThrowError(/"Property".*"Unit"/);
+    expect(() => raw.fetchAllGathered()).toThrowError(/"Item".*"Log"/);
   });
 
   it("leaves a sheet the config does not know alone, even with two Tables", () => {
@@ -360,58 +360,58 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
   it("names extra Tables and a missing Table in one error", () => {
     stubSheetsService({
       sheets: [
-        extraTablesSheet({ sheetId: propertyGid, title: "Property" }),
-        { sheetId: unitGid, title: "Unit" },
+        extraTablesSheet({ sheetId: itemGid, title: "Item" }),
+        { sheetId: logGid, title: "Log" },
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
-    raw.sheet(unitGid).gatherFetchProperties(startTableColIndex);
-    raw.sheetMeta(unitGid).gatherFetchColumnIdsInit(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(logGid).gatherFetchProperties(startTableColIndex);
+    raw.sheetMeta(logGid).gatherFetchColumnIdsInit(startTableColIndex);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(/more than one Table.*"Property"/);
-    expect(message).toMatch(/Insert > Table.*"Unit"/);
+    expect(message).toMatch(/more than one Table.*"Item"/);
+    expect(message).toMatch(/Insert > Table.*"Log"/);
   });
 
   it("names extra Tables and a misplaced Table in one error", () => {
     stubSheetsService({
       sheets: [
-        extraTablesSheet({ sheetId: propertyGid, title: "Property" }),
+        extraTablesSheet({ sheetId: itemGid, title: "Item" }),
         misplacedTableSheet({
-          sheetId: unitGid,
-          title: "Unit",
+          sheetId: logGid,
+          title: "Log",
           startRowIndex: tableHeaderRowIndex - 1,
         }),
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
-    raw.sheet(unitGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(logGid).gatherFetchProperties(startTableColIndex);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(/more than one Table.*"Property"/);
-    expect(message).toMatch(/does not start where the layout requires.*"Unit"/);
+    expect(message).toMatch(/more than one Table.*"Item"/);
+    expect(message).toMatch(/does not start where the layout requires.*"Log"/);
   });
 
   it("reports extra Tables the filtered fetch could not see as extras rather than absent", () => {
     stubSheetsService({
       sheets: [
         {
-          ...extraTablesSheet({ sheetId: propertyGid, title: "Property" }),
+          ...extraTablesSheet({ sheetId: itemGid, title: "Item" }),
           isTableHiddenFromFilteredFetch: true,
         },
       ],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
-    raw.sheetMeta(propertyGid).gatherFetchColumnIdsInit(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
+    raw.sheetMeta(itemGid).gatherFetchColumnIdsInit(startTableColIndex);
 
     const message = thrownMessage(() => raw.fetchAllGathered());
-    expect(message).toMatch(/more than one Table.*"Property"/);
+    expect(message).toMatch(/more than one Table.*"Item"/);
     expect(message).not.toMatch(/Insert > Table/);
   });
 
@@ -420,7 +420,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({ 0: ["ID"] }),
           table: { endRowIndex: 5 },
         },
@@ -436,16 +436,16 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
   it("aims the properties probe at one header cell on the layout start column", () => {
     const { getByDataFilterCalls } = stubSheetsService({
-      sheets: [placedTableSheet({ sheetId: propertyGid, title: "Property" })],
+      sheets: [placedTableSheet({ sheetId: itemGid, title: "Item" })],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
     raw.fetchAllGathered();
 
     expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
       {
-        sheetId: propertyGid,
+        sheetId: itemGid,
         startRowIndex: tableHeaderRowIndex,
         endRowIndex: tableHeaderRowIndex + 1,
         startColumnIndex: startTableColIndex,
@@ -456,16 +456,16 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
   it("aims the column-id filter at the layout start column", () => {
     const { getByDataFilterCalls } = stubSheetsService({
-      sheets: [placedTableSheet({ sheetId: propertyGid, title: "Property" })],
+      sheets: [placedTableSheet({ sheetId: itemGid, title: "Item" })],
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheetMeta(propertyGid).gatherFetchColumnIdsInit(startTableColIndex);
+    raw.sheetMeta(itemGid).gatherFetchColumnIdsInit(startTableColIndex);
     raw.fetchAllGathered();
 
     expect(recordedGridRanges(getByDataFilterCalls)).toEqual([
       {
-        sheetId: propertyGid,
+        sheetId: itemGid,
         startRowIndex: colIdRowIndex,
         endRowIndex: colIdRowIndex + 1,
         startColumnIndex: startTableColIndex,
@@ -475,7 +475,7 @@ describe("SpreadsheetRaw.fetchAllGathered", () => {
 
   it("refuses a full-row fetch before the sheet has a Table in state", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases" }],
+      sheets: [{ sheetId: 111, title: "Records" }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -523,10 +523,10 @@ describe("ColumnMetaRaw active facts", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: itemGid,
+          title: "Item",
           rows: buildGridRows({
-            0: ["c:prp:aaa", "c:prp:bbb"],
+            0: ["c:itm:aaa", "c:itm:bbb"],
             [tableHeaderRowIndex]: ["Purchase Price", "Notes"],
             [topDataRowIndex]: topDataRow,
           }),
@@ -537,12 +537,12 @@ describe("ColumnMetaRaw active facts", () => {
     });
   }
 
-  function fetchedPropertyColumnMeta(colIndex: number): ColumnMetaRaw {
+  function fetchedItemColumnMeta(colIndex: number): ColumnMetaRaw {
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(propertyGid).topRow.gatherFetchFull();
+    raw.sheet(itemGid).topRow.gatherFetchFull();
     raw.fetchAllGathered(true);
-    return raw.sheetMeta(propertyGid).column(colIndex);
+    return raw.sheetMeta(itemGid).column(colIndex);
   }
 
   function expectBlankFacts(column: ColumnMetaRaw): void {
@@ -554,19 +554,19 @@ describe("ColumnMetaRaw active facts", () => {
   it("reports blank facts for a top data row returned without any cell data", () => {
     stubSheetWithTopDataRow([], "rowsWithNoGridData");
 
-    expectBlankFacts(fetchedPropertyColumnMeta(0));
+    expectBlankFacts(fetchedItemColumnMeta(0));
   });
 
   it("reports blank facts for a top data row returned as no grid block at all", () => {
     stubSheetWithTopDataRow([], "rowsWithNoGridBlock");
 
-    expectBlankFacts(fetchedPropertyColumnMeta(0));
+    expectBlankFacts(fetchedItemColumnMeta(0));
   });
 
   it("reports the same facts an empty cell inside a returned row produces", () => {
     stubSheetWithTopDataRow([null, "a note"]);
 
-    expectBlankFacts(fetchedPropertyColumnMeta(0));
+    expectBlankFacts(fetchedItemColumnMeta(0));
   });
 
   it("keeps the facts the payload supplied rather than seeding over them", () => {
@@ -574,7 +574,7 @@ describe("ColumnMetaRaw active facts", () => {
       { value: 42, isFormula: true, numberFormatType: "CURRENCY" },
     ]);
 
-    const column = fetchedPropertyColumnMeta(0);
+    const column = fetchedItemColumnMeta(0);
 
     expect(column.activeIsFormula).toBe(true);
     expect(column.activeNumberFormatType).toBe("CURRENCY");
@@ -585,21 +585,21 @@ describe("ColumnMetaRaw active facts", () => {
     stubSheetWithTopDataRow([], "rowsWithNoGridData");
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
     raw.fetchAllGathered();
-    raw.sheet(propertyGid).column(1).gatherFetchFull();
+    raw.sheet(itemGid).column(1).gatherFetchFull();
     raw.fetchAllGathered(true);
 
-    expectBlankFacts(raw.sheetMeta(propertyGid).column(1));
+    expectBlankFacts(raw.sheetMeta(itemGid).column(1));
   });
 
   it("reads a specifically fetched cell omitted from the payload as empty, not unfetched", () => {
     stubSheetWithTopDataRow([], "rowsWithNoGridData");
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
     raw.fetchAllGathered();
-    const cell = raw.sheet(propertyGid).row(topDataRowIndex).cell(0);
+    const cell = raw.sheet(itemGid).row(topDataRowIndex).cell(0);
     cell.gatherFetchRange();
     raw.fetchAllGathered();
 
@@ -610,8 +610,8 @@ describe("ColumnMetaRaw active facts", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: itemGid,
+          title: "Item",
           rows: buildGridRows({ [tableHeaderRowIndex]: ["Purchase Price"] }),
           table: { endRowIndex: tableEndRow },
         },
@@ -619,13 +619,13 @@ describe("ColumnMetaRaw active facts", () => {
     });
 
     const raw = SpreadsheetRaw.init();
-    raw.sheet(propertyGid).gatherFetchProperties(startTableColIndex);
+    raw.sheet(itemGid).gatherFetchProperties(startTableColIndex);
     raw.fetchAllGathered();
 
     const message = thrownMessage(
-      () => raw.sheetMeta(propertyGid).column(0).activeIsFormula,
+      () => raw.sheetMeta(itemGid).column(0).activeIsFormula,
     );
-    expect(message).toContain(`"Property" (gid ${propertyGid})`);
+    expect(message).toContain(`"Item" (gid ${itemGid})`);
     expect(message).toMatch(/top data row/);
   });
 
@@ -633,10 +633,10 @@ describe("ColumnMetaRaw active facts", () => {
     stubSheetsService({
       sheets: [
         {
-          sheetId: propertyGid,
-          title: "Property",
+          sheetId: itemGid,
+          title: "Item",
           rows: buildGridRows({
-            0: ["c:prp:aaa"],
+            0: ["c:itm:aaa"],
             [tableHeaderRowIndex]: ["Purchase Price"],
             [topDataRowIndex]: [100000, "outside the table"],
           }),
@@ -647,13 +647,13 @@ describe("ColumnMetaRaw active facts", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(propertyGid).topRow.gatherFetchFull();
+    raw.sheet(itemGid).topRow.gatherFetchFull();
     raw.fetchAllGathered(true);
 
-    expect(raw.sheetMeta(propertyGid).column(0).activeTopValue).toBe(100000);
-    expect(
-      () => raw.sheetMeta(propertyGid).column(1).activeTopValue,
-    ).toThrowError(/No active facts/);
+    expect(raw.sheetMeta(itemGid).column(0).activeTopValue).toBe(100000);
+    expect(() => raw.sheetMeta(itemGid).column(1).activeTopValue).toThrowError(
+      /No active facts/,
+    );
   });
 });
 
@@ -692,7 +692,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
   it("sends one appendCells whose rows array is the full append, so a Sheets table grows by every row rather than by one", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -717,8 +717,8 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
   it("keeps a second sheet's append as its own request rather than folding it into the first table's", () => {
     const { batchUpdateCalls } = stubSheetsService({
       sheets: [
-        { sheetId: 111, title: "Leases", table: { endRowIndex: 11 } },
-        { sheetId: 222, title: "Units", table: { endRowIndex: 6 } },
+        { sheetId: 111, title: "Records", table: { endRowIndex: 11 } },
+        { sheetId: 222, title: "Entries", table: { endRowIndex: 6 } },
       ],
     });
 
@@ -751,7 +751,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
   it("still gathers an append queued after a deletion on the same sheet, since row indexes only shift once the deletes are sent", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -778,7 +778,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             4: ["kept"],
             5: ["deleted"],
@@ -829,7 +829,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           table: {
             startColumnIndex: 1,
             endRowIndex: 11,
@@ -912,7 +912,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
   it("does not mark row indexes stale when a queued delete is discarded before flush", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -926,7 +926,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 
   it("sends same-sheet row deletions in descending startIndex order so an earlier deletion can't shift a later one out from under it", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -967,7 +967,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
 describe("SpreadsheetRaw.gatherRawRequest", () => {
   it("sends a raw request last, after every request the framework models", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -1024,7 +1024,7 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
 
   it("sends the add-sheet request first, the add-Table request second, and a sheet-title update after both", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -1135,6 +1135,28 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     expect(() => raw.gatherAddedSheetCellRequest(seededCell)).toThrow(
       "no addSheet for GID 555",
     );
+  });
+
+  it("seeds a formula on an added tab, and refuses one that doesn't start with =", () => {
+    const { batchUpdateCalls } = stubSheetsService();
+    const { value: _value, ...seededPosition } = seededCell;
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherAddSheetRequest(addSheetProps);
+    expect(() =>
+      raw.gatherAddedSheetCellRequest({ ...seededPosition, formula: "ROW()" }),
+    ).toThrow('Formula must start with "="');
+    raw.gatherAddedSheetCellRequest({ ...seededPosition, formula: "=ROW()" });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toContainEqual({
+      pasteData: {
+        coordinate: { sheetId: 555, rowIndex: 3, columnIndex: 1 },
+        data: '"=ROW()"',
+        delimiter: "\t",
+        type: "PASTE_FORMULA",
+      },
+    });
   });
 
   it("sends the add-sheet, then the add-Table, then the seeded value's updateCells in one batch", () => {
@@ -1254,7 +1276,7 @@ describe("RowRaw.delete", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           table: { endRowIndex: topDataRowIndex + dataRowCount },
         },
       ],
@@ -1320,8 +1342,8 @@ describe("RowRaw.delete", () => {
   it("does not change another sheet's data-row count when a row delete is queued", () => {
     stubSheetsService({
       sheets: [
-        { sheetId: 111, title: "Leases", table: { endRowIndex: 11 } },
-        { sheetId: 222, title: "Units", table: { endRowIndex: 6 } },
+        { sheetId: 111, title: "Records", table: { endRowIndex: 11 } },
+        { sheetId: 222, title: "Entries", table: { endRowIndex: 6 } },
       ],
     });
 
@@ -1339,7 +1361,7 @@ describe("RowRaw.delete", () => {
 describe("RowRaw.rowIsActive", () => {
   it("makes an appended row active and grows the table end before the flush", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -1357,7 +1379,7 @@ describe("RowRaw.rowIsActive", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({ 4: ["kept"], 5: ["deleted"] }),
           table: { endRowIndex: 11 },
         },
@@ -1383,7 +1405,7 @@ describe("RowRaw.rowIsActive", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({ 4: ["kept"], 5: ["deleted"] }),
           table: { endRowIndex: 11 },
         },
@@ -1411,7 +1433,7 @@ describe("queued writes outlive a same-run re-fetch", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             [tableHeaderRowIndex]: ["ID", "Status"],
@@ -1607,22 +1629,22 @@ describe("queued writes outlive a same-run re-fetch", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             [tableHeaderRowIndex]: ["ID", "Status"],
           }),
           table: {
-            name: "leases",
+            name: "records",
             endRowIndex: topDataRowIndex + 1,
             columnTypes: { 1: "TEXT" },
           },
         },
         {
           sheetId: 222,
-          title: "Units",
+          title: "Entries",
           rows: buildGridRows({ [tableHeaderRowIndex]: ["ID"] }),
-          table: { name: "units", endRowIndex: topDataRowIndex + 1 },
+          table: { name: "entries", endRowIndex: topDataRowIndex + 1 },
         },
       ],
     });
@@ -1644,12 +1666,12 @@ describe("queued writes outlive a same-run re-fetch", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).updateTableName("renamedLeases");
+    raw.sheet(111).updateTableName("renamedRecords");
     raw.fetchAllSheetProperties();
 
-    expect(raw.sheet(111).activeTable.name).toBe("renamedLeases");
+    expect(raw.sheet(111).activeTable.name).toBe("renamedRecords");
     expect(raw.sheet(111).tables).toEqual([
-      { tableId: "fake-table-111", name: "renamedLeases" },
+      { tableId: "fake-table-111", name: "renamedRecords" },
     ]);
   });
 
@@ -1681,11 +1703,11 @@ describe("queued writes outlive a same-run re-fetch", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).updateTableName("firstLeases");
-    raw.sheet(111).updateTableName("secondLeases");
+    raw.sheet(111).updateTableName("firstRecords");
+    raw.sheet(111).updateTableName("secondRecords");
     raw.fetchAllSheetProperties();
 
-    expect(raw.sheet(111).activeTable.name).toBe("secondLeases");
+    expect(raw.sheet(111).activeTable.name).toBe("secondRecords");
   });
 
   it("leaves another sheet's queued title alone on a re-fetch of one sheet", () => {
@@ -1707,7 +1729,7 @@ describe("queued writes outlive a same-run re-fetch", () => {
     raw.sheet(111).updateTitle("Renamed");
     raw.fetchAllSheetProperties();
 
-    expect(raw.sheet(222).title).toBe("Units");
+    expect(raw.sheet(222).title).toBe("Entries");
   });
 
   it("integrates the live title and Table name after the flush has cleared the queue", () => {
@@ -1716,20 +1738,20 @@ describe("queued writes outlive a same-run re-fetch", () => {
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
     raw.sheet(111).updateTitle("Renamed");
-    raw.sheet(111).updateTableName("renamedLeases");
+    raw.sheet(111).updateTableName("renamedRecords");
     raw.batchUpdateGSheets();
     raw.fetchAllSheetProperties();
 
     // The fake does not replay renames, so the live sheet still has the old ones.
-    expect(raw.sheet(111).title).toBe("Leases");
-    expect(raw.sheet(111).activeTable.name).toBe("leases");
+    expect(raw.sheet(111).title).toBe("Records");
+    expect(raw.sheet(111).activeTable.name).toBe("records");
   });
 });
 
 describe("CellRaw.updateValue", () => {
   it("sends a write to a row that was never fetched, since a write needs no fetched state", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -1760,7 +1782,7 @@ describe("CellRaw.updateValue", () => {
 
   it("leaves an unfetched row unreadable, so a forgotten fetch still fails loudly on read", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -1773,7 +1795,7 @@ describe("CellRaw.updateValue", () => {
 
   it("throws for a data row past the table's last row rather than writing off the grid", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -1789,7 +1811,7 @@ describe("CellRaw.updateValue", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             4: ["r:lse:1", "old"],
@@ -1816,7 +1838,7 @@ describe("SheetRaw column insert", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb", "c:lse:ccc"],
             4: ["r:lse:1", "left", "right"],
@@ -1931,7 +1953,7 @@ describe("SheetRaw column insert", () => {
         startColumnIndex: 1,
       }),
     ).toThrow(
-      'Refusing to queue a column insert at 1 on "Leases" (gid 111): it already has a column insert queued, so the next must land at the Table end, 4.',
+      'Refusing to queue a column insert at 1 on "Records" (gid 111): it already has a column insert queued, so the next must land at the Table end, 4.',
     );
     raw.batchUpdateGSheets();
 
@@ -1953,7 +1975,7 @@ describe("SheetRaw column insert", () => {
     expect(() =>
       raw.sheetMeta(111).insertColumnAtEnd({ idPrefix: "lse", header: "New" }),
     ).toThrow(
-      'Refusing to queue a column insert on "Leases" (gid 111): a mid-Table column insert is already queued.',
+      'Refusing to queue a column insert on "Records" (gid 111): a mid-Table column insert is already queued.',
     );
     raw.batchUpdateGSheets();
 
@@ -2000,7 +2022,7 @@ describe("SheetRaw column insert", () => {
 describe("SpreadsheetRaw.discardQueuedChanges", () => {
   it("sends nothing for changes queued before the discard", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2016,7 +2038,7 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
 
   it("empties the spreadsheet and per-sheet write queues, so a later flush sends nothing", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2037,7 +2059,7 @@ describe("SpreadsheetRaw.discardQueuedChanges", () => {
 
   it("still sends changes queued after the discard, so a failure handler can report status", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2066,7 +2088,7 @@ describe("ColumnRaw.updateAllCells", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             4: ["r:lse:1", "old"],
@@ -2192,7 +2214,7 @@ describe("ColumnRaw.updateActiveCells", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             4: ["r:lse:1", "old"],
@@ -2325,7 +2347,7 @@ describe("SheetRaw.removeRowsExcept", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             4: ["r:lse:1", "old"],
@@ -2382,7 +2404,7 @@ describe("ColumnRaw.updateAllFormulas", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             4: ["r:lse:1", "old"],
@@ -2536,7 +2558,7 @@ describe("ColumnRaw.updateAllFormulas", () => {
 describe("CellRaw.updateBackgroundColor", () => {
   it("sends one updateCells request masking only the background colour, with no value", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2567,7 +2589,7 @@ describe("CellRaw.updateBackgroundColor", () => {
 
   it("collapses a value and a colour on one cell into a single request masking both", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2604,7 +2626,7 @@ describe("CellRaw.updateBackgroundColor", () => {
 
   it("leaves a value queued for the cell intact when the colour is queued after it", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2620,7 +2642,7 @@ describe("CellRaw.updateBackgroundColor", () => {
 
   it("leaves the cell unreadable, since the read path never fetches colour", () => {
     stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2636,7 +2658,7 @@ describe("CellRaw.updateBackgroundColor", () => {
 describe("CellRaw.addCheckboxValidation", () => {
   it("sends one setDataValidation with a BOOLEAN condition over the cell", () => {
     const { batchUpdateCalls } = stubSheetsService({
-      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+      sheets: [{ sheetId: 111, title: "Records", table: { endRowIndex: 11 } }],
     });
 
     const raw = SpreadsheetRaw.init();
@@ -2729,7 +2751,7 @@ describe("SpreadsheetRaw.findReplace", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: ["c:lse:aaa", "c:lse:bbb"],
             4: ["r:lse:1", "Currency"],
@@ -2754,7 +2776,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     const raw = fetchedColumn();
     raw.sheet(111).column(1).findReplace({
       find: "Currency",
-      replacement: "Payment",
+      replacement: "Total",
       matchEntireCell: true,
     });
     raw.batchUpdateGSheets();
@@ -2763,7 +2785,7 @@ describe("SpreadsheetRaw.findReplace", () => {
       {
         findReplace: {
           find: "Currency",
-          replacement: "Payment",
+          replacement: "Total",
           matchEntireCell: true,
           range: {
             sheetId: 111,
@@ -2782,14 +2804,14 @@ describe("SpreadsheetRaw.findReplace", () => {
 
     const raw = SpreadsheetRaw.init();
     raw.fetchAllSheetProperties();
-    raw.sheet(111).findReplace({ find: "Currency", replacement: "Payment" });
+    raw.sheet(111).findReplace({ find: "Currency", replacement: "Total" });
     raw.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
         findReplace: {
           find: "Currency",
-          replacement: "Payment",
+          replacement: "Total",
           sheetId: 111,
         },
       },
@@ -2802,7 +2824,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     const raw = SpreadsheetRaw.init();
     raw.findReplace({
       find: "Currency",
-      replacement: "Payment",
+      replacement: "Total",
       scope: { allSheets: true },
       includeFormulas: true,
     });
@@ -2812,7 +2834,7 @@ describe("SpreadsheetRaw.findReplace", () => {
       {
         findReplace: {
           find: "Currency",
-          replacement: "Payment",
+          replacement: "Total",
           includeFormulas: true,
           allSheets: true,
         },
@@ -2826,7 +2848,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     const raw = fetchedColumn();
     raw.findReplace({
       find: "Currency",
-      replacement: "Payment",
+      replacement: "Total",
       scope: { allSheets: true },
     });
     raw.sheet(111).row(5).cell(1).updateValue("Currency");
@@ -2848,7 +2870,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     raw
       .sheet(111)
       .column(1)
-      .findReplace({ find: "Currency", replacement: "Payment" });
+      .findReplace({ find: "Currency", replacement: "Total" });
 
     expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
       "Currency",
@@ -2864,7 +2886,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     raw
       .sheet(111)
       .column(1)
-      .findReplace({ find: "Currency", replacement: "Payment" });
+      .findReplace({ find: "Currency", replacement: "Total" });
     raw.batchUpdateGSheets();
 
     expect(() => raw.sheet(111).row(4).cell(1).valueOrEmpty()).toThrowError(
@@ -2876,11 +2898,11 @@ describe("SpreadsheetRaw.findReplace", () => {
     stubFilledSheet();
 
     const raw = fetchedColumn();
-    raw.sheet(111).row(4).cell(1).updateValue("Payment");
+    raw.sheet(111).row(4).cell(1).updateValue("Total");
     raw.batchUpdateGSheets();
 
     expect(raw.sheet(111).column(1).valueArrOrEmpty).toEqual([
-      "Payment",
+      "Total",
       "Caretaking",
       "Currency",
     ]);
@@ -2893,7 +2915,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     raw
       .sheet(111)
       .column(1)
-      .findReplace({ find: "Currency", replacement: "Payment" });
+      .findReplace({ find: "Currency", replacement: "Total" });
     raw.batchUpdateGSheets();
     raw.sheet(111).column(1).gatherFetchFull();
     raw.fetchAllGathered();
@@ -2911,7 +2933,7 @@ describe("SpreadsheetRaw.findReplace", () => {
     const raw = SpreadsheetRaw.init();
     raw.findReplace({
       find: "Currency",
-      replacement: "Payment",
+      replacement: "Total",
       scope: { allSheets: true },
     });
     raw.discardQueuedChanges();
@@ -2927,7 +2949,7 @@ describe("SheetMetaRaw.activeColumnIds", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             0: columnIdRow,
             4: [],
@@ -2946,13 +2968,13 @@ describe("SheetMetaRaw.activeColumnIds", () => {
   it("throws when a Table column-ID cell is a number, boolean, or date", () => {
     expect(
       () => fetchedColumnIdSheet(["c:lse:aaa", 42]).activeColumnIds,
-    ).toThrow(/Leases.*column index 1/);
+    ).toThrow(/Records.*column index 1/);
     expect(
       () => fetchedColumnIdSheet(["c:lse:aaa", true]).activeColumnIds,
-    ).toThrow(/Leases.*column index 1/);
+    ).toThrow(/Records.*column index 1/);
     expect(
       () => fetchedColumnIdSheet(["c:lse:aaa", 44927]).activeColumnIds,
-    ).toThrow(/Leases.*column index 1/);
+    ).toThrow(/Records.*column index 1/);
   });
 
   it("treats a blank Table column-ID cell as missing rather than a type error", () => {
@@ -2970,14 +2992,14 @@ describe("SheetMetaRaw.activeColumnIds", () => {
   it("throws from lookup by ID when a sibling Table cell is not text", () => {
     const sheet = fetchedColumnIdSheet(["c:lse:aaa", false]);
     expect(() => sheet.columnByActiveId("c:lse:aaa")).toThrow(
-      /Leases.*column index 1/,
+      /Records.*column index 1/,
     );
   });
 
   it("throws from fill-missing when a Table column-ID cell is not text", () => {
     expect(() =>
       fetchedColumnIdSheet(["", 42]).addMissingColumnIds("lse"),
-    ).toThrow(/Leases.*column index 1/);
+    ).toThrow(/Records.*column index 1/);
   });
 });
 
@@ -2987,7 +3009,7 @@ describe("SheetRaw.activeTable", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           table: { endRowIndex },
         },
       ],
@@ -2999,7 +3021,7 @@ describe("SheetRaw.activeTable", () => {
 
   it("throws when the exclusive end row is the first data row", () => {
     expect(() => fetchedSheet(topDataRowIndex).activeTable).toThrow(
-      /Leases.*at least one data row/,
+      /Records.*at least one data row/,
     );
   });
 
@@ -3018,7 +3040,7 @@ describe("ColumnMetaRaw.updateColumnType", () => {
       sheets: [
         {
           sheetId: 111,
-          title: "Leases",
+          title: "Records",
           rows: buildGridRows({
             [tableHeaderRowIndex]: ["Name", "ID", "Amount"],
           }),
@@ -3171,7 +3193,7 @@ describe("ColumnMetaRaw.updateColumnType", () => {
       .updateColumnType("DOUBLE");
 
     expect(() => raw.batchUpdateGSheets()).toThrow(
-      /fake-table-111.*Leases.*ID/,
+      /fake-table-111.*Records.*ID/,
     );
     expect(batchUpdateCalls).toEqual([]);
   });

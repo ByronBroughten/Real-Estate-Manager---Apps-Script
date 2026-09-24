@@ -3,12 +3,13 @@ import type {
   AddTableOperation,
   BoundedGridRange,
   OpaqueRawRequest,
-  UpdateCellOperation,
 } from "../00_Source/RawSource/RawSource";
+import { validateFormulaString } from "./CellRaw";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import {
   emptySheetWriteQueue,
   emptySpreadsheetWriteQueue,
+  type AddedSheetCell,
   type FindReplaceProps,
 } from "./ClassTypes/StateRaw";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
@@ -92,12 +93,9 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
     return this;
   }
   // A seeded value on a tab this flush adds; an existing tab writes through CellRaw.
-  gatherAddedSheetCellRequest(
-    props: Required<
-      Pick<UpdateCellOperation, "sheetId" | "rowIndex" | "colIndex" | "value">
-    >,
-  ): this {
+  gatherAddedSheetCellRequest(props: AddedSheetCell): this {
     this._validateAddSheetQueued(props.sheetId, "cell write");
+    if ("formula" in props) validateFormulaString(props.formula);
     this.updateRequests.update.push({ kind: "updateCell", ...props });
     return this;
   }
