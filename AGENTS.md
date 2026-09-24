@@ -17,7 +17,7 @@ Open only the section or disclosed doc the task needs.
 
 - **README.md is for humans.** Nothing in it is needed for a task here; open it only to keep it accurate ([`docs/agents/prose-files.md`](./docs/agents/prose-files.md)).
 - **Which package: "would this make sense in a different Sheets-backed app?"** Yes: `packages/framework`. No: `packages/real-estate`.
-- **Working in a folder with its own `AGENTS.md`**, read it first; both packages' `src/` have one.
+- **Working in a folder with its own `AGENTS.md`**, read it first; each package's `src/` and several folders under it have one.
 - **Commit or push only when asked. Implement a spec on its `issue-<n>-<slug>` branch**, even when a skill says to commit to the current branch. Branch rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
 ## Read by task
@@ -26,8 +26,8 @@ Open only the section or disclosed doc the task needs.
 | --- | --- |
 | Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`packages/framework/src/AGENTS.md`](./packages/framework/src/AGENTS.md) + [vocabulary](./packages/framework/docs/vocabulary.md) |
 | Writing or refactoring TypeScript, tests included | [`docs/style.md`](./docs/style.md) |
-| Operator-facing words: endpoint, run state, blank row; units, the ledger | [`CONTEXT-MAP.md`](./CONTEXT-MAP.md), then that package's `CONTEXT.md` |
-| Real-estate endpoints, app chores, the occupancy ledger | [app `src/AGENTS.md`](./packages/real-estate/src/AGENTS.md) |
+| Operator-facing words: endpoint, selector, run state; units, the ledger | [`CONTEXT-MAP.md`](./CONTEXT-MAP.md), then that package's `CONTEXT.md` |
+| Real-estate endpoints or app chores | [app `src/AGENTS.md`](./packages/real-estate/src/AGENTS.md) |
 | Arguing that a gap is deliberate, or proposing a design principle | [design](./packages/framework/docs/design.md) |
 | Architecture mechanics: dispatch, schema classes, class chains, queued writes, round trips, type-check cost | [architecture](./packages/framework/docs/architecture.md) index, then one file |
 | Adding a deletion path | [blank-row](./packages/framework/docs/architecture/blank-row.md) |

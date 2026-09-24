@@ -37,7 +37,7 @@ Two contexts, one per package, and no ADR tree:
 
 ## Which context a term belongs to
 
-Ask "would this make sense in a different Sheets-backed app?" Yes: the framework's `CONTEXT.md`. No: the app's. **The app refines a framework term by linking to it, never by redefining it**, and a word the two use differently goes under the app's "Same word, two meanings". A new term that would redefine a framework one is a conflict to raise, not to resolve silently.
+Ask "would this make sense in a different Sheets-backed app?" Yes: the framework's `CONTEXT.md`. No: the app's. How the two glossaries relate is [`CONTEXT-MAP.md`](../../CONTEXT-MAP.md)'s; a new term that would redefine a framework one is a conflict to raise, not to resolve silently.
 
 ## Use the glossary's vocabulary
 
