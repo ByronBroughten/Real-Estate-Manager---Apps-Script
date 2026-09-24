@@ -9,18 +9,20 @@ import type { Configs } from "../src/01_SpreadsheetSchema/configRegister.ts";
 import type { NodeHost } from "../src/nodeHost/NodeHost.ts";
 import type { SheetsConfig } from "./sheetsConfig.ts";
 
-const CLASP_RUN_USER = "desktop-clasp-run";
-const TOKEN_URL = "https://oauth2.googleapis.com/token";
-const MAX_RESPONSE_BYTES = 256 * 1024 * 1024;
+const claspAuth = {
+  user: "desktop-clasp-run",
+  tokenUrl: "https://oauth2.googleapis.com/token",
+} as const;
+const maxResponseBytes = 256 * 1024 * 1024;
 
-export const CONFIG_FILES = [
+export const configFiles = [
   "spreadsheetConfig",
   "sheetConfigs",
   "columnConfigs",
   "valueConfigs",
 ] as const;
 
-export type ConfigFile = (typeof CONFIG_FILES)[number];
+export type ConfigFile = (typeof configFiles)[number];
 
 interface FetchRequest {
   url: string;
@@ -51,7 +53,7 @@ export class SheetsTransport {
     return new SheetsTransport();
   }
   send(request: SheetsHttpRequest): unknown {
-    const { status, body } = this._fetchSync({
+    const { status, body } = fetchSync({
       url: request.url,
       method: request.method,
       headers: {
@@ -69,73 +71,76 @@ export class SheetsTransport {
   }
   _ensureAccessToken(): string {
     if (this.accessToken) return this.accessToken;
-    const { client_id, client_secret, refresh_token } = this._claspCredential();
-    const { status, body } = this._fetchSync({
-      url: TOKEN_URL,
+    const credential = claspCredential();
+    const { status, body } = fetchSync({
+      url: claspAuth.tokenUrl,
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        client_id,
-        client_secret,
-        refresh_token,
+        client_id: credential.client_id,
+        client_secret: credential.client_secret,
+        refresh_token: credential.refresh_token,
         grant_type: "refresh_token",
       }).toString(),
     });
-    const accessToken = status === 200 ? this._accessTokenOf(body) : null;
+    const accessToken = status === 200 ? accessTokenOf(body) : null;
     if (!accessToken) {
       throw new Error(
-        `Could not refresh the "${CLASP_RUN_USER}" token (HTTP ${status}). ` +
+        `Could not refresh the "${claspAuth.user}" token (HTTP ${status}). ` +
           `Run sheets-framework setup-auth to re-mint it.\n${body}`,
       );
     }
     this.accessToken = accessToken;
     return accessToken;
   }
-  // A failing token endpoint need not answer in JSON, so a parse error is one too.
-  _accessTokenOf(body: string): string | null {
-    try {
-      return JSON.parse(body).access_token ?? null;
-    } catch {
-      return null;
-    }
+}
+
+// A failing token endpoint need not answer in JSON, so a parse error is one too.
+function accessTokenOf(body: string): string | null {
+  try {
+    return JSON.parse(body).access_token ?? null;
+  } catch {
+    return null;
   }
-  _claspCredential(): ClaspCredential {
-    let tokens;
-    try {
-      ({ tokens } = JSON.parse(readFileSync(path.claspRc, "utf8")));
-    } catch (error) {
-      throw new Error(
-        `Could not read ${path.claspRc}: ${error.message}. ` +
-          "Run sheets-framework setup-auth.",
-      );
-    }
-    const credential = tokens?.[CLASP_RUN_USER];
-    if (!credential?.refresh_token) {
-      throw new Error(
-        `No "${CLASP_RUN_USER}" credential in ${path.claspRc}. ` +
-          "Run sheets-framework setup-auth.",
-      );
-    }
-    return credential;
-  }
-  _fetchSync(request: FetchRequest): FetchResponse {
-    const { status, stdout, stderr, error } = spawnSync(
-      process.execPath,
-      [path.fetchSync],
-      {
-        input: JSON.stringify(request),
-        encoding: "utf8",
-        maxBuffer: MAX_RESPONSE_BYTES,
-      },
+}
+
+function claspCredential(): ClaspCredential {
+  let tokens;
+  try {
+    ({ tokens } = JSON.parse(readFileSync(path.claspRc, "utf8")));
+  } catch (error) {
+    throw new Error(
+      `Could not read ${path.claspRc}: ${error.message}. ` +
+        "Run sheets-framework setup-auth.",
     );
-    if (error) throw error;
-    if (status !== 0) {
-      throw new Error(
-        `The request subprocess exited with ${status}.${stderr.trim() ? ` ${stderr.trim()}` : ""}`,
-      );
-    }
-    return JSON.parse(stdout);
   }
+  const credential = tokens?.[claspAuth.user];
+  if (!credential?.refresh_token) {
+    throw new Error(
+      `No "${claspAuth.user}" credential in ${path.claspRc}. ` +
+        "Run sheets-framework setup-auth.",
+    );
+  }
+  return credential;
+}
+
+function fetchSync(request: FetchRequest): FetchResponse {
+  const { status, stdout, stderr, error } = spawnSync(
+    process.execPath,
+    [path.fetchSync],
+    {
+      input: JSON.stringify(request),
+      encoding: "utf8",
+      maxBuffer: maxResponseBytes,
+    },
+  );
+  if (error) throw error;
+  if (status !== 0) {
+    throw new Error(
+      `The request subprocess exited with ${status}.${stderr.trim() ? ` ${stderr.trim()}` : ""}`,
+    );
+  }
+  return JSON.parse(stdout);
 }
 
 export async function startNodeHost({
@@ -163,7 +168,7 @@ export async function loadPackageConfigs({
   generatedDir,
 }: SheetsConfig): Promise<Configs> {
   const entries = await Promise.all(
-    CONFIG_FILES.map(async (base) => {
+    configFiles.map(async (base) => {
       const url = pathToFileURL(join(generatedDir, `${base}.ts`));
       return [base, (await import(url.href))[base]];
     }),
@@ -172,7 +177,7 @@ export async function loadPackageConfigs({
 }
 
 export function hasPackageConfigs({ generatedDir }: SheetsConfig): boolean {
-  return CONFIG_FILES.every((base) =>
+  return configFiles.every((base) =>
     existsSync(join(generatedDir, `${base}.ts`)),
   );
 }

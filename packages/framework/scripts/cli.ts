@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { loadSheetsConfig } from "./sheetsConfig.ts";
 
-const USAGE = `Usage: sheets-framework <command> [args]
+const usage = `Usage: sheets-framework <command> [args]
   gen-configs          regenerate the package's four config files from its config sheets
   chore [name] [--send] [--json]
                        dry-run a chore (or apply it with --send); no name lists them
@@ -43,7 +43,7 @@ switch (command) {
   }
   default:
     console.error(
-      command ? `Unknown command "${command}".\n\n${USAGE}` : USAGE,
+      command ? `Unknown command "${command}".\n\n${usage}` : usage,
     );
     process.exit(1);
 }

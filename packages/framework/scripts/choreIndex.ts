@@ -43,7 +43,9 @@ export class ChoreIndex {
     return this.generic.get(name) ?? this.own.get(name) ?? null;
   }
   listing(packageDir: string): string {
-    const lines = (chores: ChorePaths) => [...chores.keys()].map((name) => `  ${name}`);
+    function lines(chores: ChorePaths): string[] {
+      return [...chores.keys()].map((name) => `  ${name}`);
+    }
     const ownLines = [...this.own].map(
       ([name, path]) => `  ${name}  (${relative(packageDir, path)})`,
     );

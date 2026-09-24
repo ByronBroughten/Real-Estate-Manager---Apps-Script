@@ -6,7 +6,7 @@ import { ChoreIndex } from "./choreIndex.ts";
 import { loadPackageConfigs, startNodeHost } from "./nodeHost.ts";
 import type { SheetsConfig } from "./sheetsConfig.ts";
 
-const GENERIC_HOME = fileURLToPath(new URL("../src/chores/", import.meta.url));
+const genericHome = fileURLToPath(new URL("../src/chores/", import.meta.url));
 
 interface ChoreRunnerProps {
   sheetsConfig: SheetsConfig;
@@ -22,7 +22,13 @@ class ChoreRunner {
   readonly choreName: string | undefined;
   readonly isSend: boolean;
   readonly isJson: boolean;
-  constructor({ sheetsConfig, index, choreName, isSend, isJson }: ChoreRunnerProps) {
+  constructor({
+    sheetsConfig,
+    index,
+    choreName,
+    isSend,
+    isJson,
+  }: ChoreRunnerProps) {
     this.sheetsConfig = sheetsConfig;
     this.index = index;
     this.choreName = choreName;
@@ -33,7 +39,7 @@ class ChoreRunner {
     return new ChoreRunner({
       sheetsConfig,
       index: ChoreIndex.init({
-        genericHome: GENERIC_HOME,
+        genericHome,
         packageHomes: sheetsConfig.choreHomes,
       }),
       choreName: argv.find((arg) => !arg.startsWith("--")),
@@ -59,7 +65,7 @@ class ChoreRunner {
       sheetsConfig: this.sheetsConfig,
       configs: await loadPackageConfigs(this.sheetsConfig),
     });
-    const chore = await this._loadChore(modulePath, this.choreName);
+    const chore = await loadChore(modulePath, this.choreName);
     console.log(`chore: ${this.choreName} — ${chore.description}\n`);
     const { SpreadsheetNamed } =
       await import("../src/04_SpreadsheetNamed/SpreadsheetNamed.ts");
@@ -68,6 +74,15 @@ class ChoreRunner {
     });
     if (result) console.log(`result: ${result}`);
     this._report(host);
+  }
+  _choreModulePath(choreName: string): string {
+    const path = this.index.pathOf(choreName);
+    if (!path) {
+      throw new Error(
+        `No chore named "${choreName}".\n\n${this.index.listing(this.sheetsConfig.dir)}`,
+      );
+    }
+    return pathToFileURL(path).href;
   }
   _report({ summary }: NodeHost): void {
     if (summary.isEmpty) {
@@ -84,26 +99,24 @@ class ChoreRunner {
         (this.isSend ? "" : " Re-run with `-- --send` to apply."),
     );
   }
-  async _loadChore(modulePath: string, choreName: string): Promise<Chore> {
-    const chore = (await import(modulePath))[choreName];
-    if (!chore) {
-      throw new Error(
-        `${modulePath} exports no "${choreName}". A chore file exports one const named after the file.`,
-      );
-    }
-    return chore;
-  }
-  _choreModulePath(choreName: string): string {
-    const path = this.index.pathOf(choreName);
-    if (!path) {
-      throw new Error(
-        `No chore named "${choreName}".\n\n${this.index.listing(this.sheetsConfig.dir)}`,
-      );
-    }
-    return pathToFileURL(path).href;
-  }
 }
 
-export async function runChore(sheetsConfig: SheetsConfig, argv: string[]): Promise<void> {
+async function loadChore(
+  modulePath: string,
+  choreName: string,
+): Promise<Chore> {
+  const chore = (await import(modulePath))[choreName];
+  if (!chore) {
+    throw new Error(
+      `${modulePath} exports no "${choreName}". A chore file exports one const named after the file.`,
+    );
+  }
+  return chore;
+}
+
+export async function runChore(
+  sheetsConfig: SheetsConfig,
+  argv: string[],
+): Promise<void> {
   await ChoreRunner.init(sheetsConfig, argv).run();
 }

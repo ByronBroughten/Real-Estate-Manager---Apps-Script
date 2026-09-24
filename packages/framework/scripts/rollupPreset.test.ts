@@ -140,7 +140,10 @@ function twoPackages(appSource: string): string {
   return root;
 }
 
-async function bundleOf(root: string, options: { treeshake?: boolean } = {}): Promise<string> {
+async function bundleOf(
+  root: string,
+  options: { treeshake?: boolean } = {},
+): Promise<string> {
   const config = rollupPreset({
     input: join(root, "app", "src", "index.ts"),
     tsconfig: join(root, "app", "tsconfig.json"),

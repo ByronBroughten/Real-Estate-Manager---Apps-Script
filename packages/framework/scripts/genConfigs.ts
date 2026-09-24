@@ -5,7 +5,7 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { ConfigRegeneration } from "../src/05_Operators/ConfigCoordinator.ts";
 import {
-  CONFIG_FILES,
+  configFiles,
   type ConfigFile,
   hasPackageConfigs,
   loadFrameworkConfigs,
@@ -21,7 +21,7 @@ class ConfigFilesGenerator {
     this.sheetsConfig = sheetsConfig;
     const { generatedDir } = sheetsConfig;
     this.path = Object.fromEntries(
-      CONFIG_FILES.map((base) => [base, join(generatedDir, `${base}.ts`)]),
+      configFiles.map((base) => [base, join(generatedDir, `${base}.ts`)]),
     ) as Record<ConfigFile, string>;
   }
   static init(sheetsConfig: SheetsConfig): ConfigFilesGenerator {
@@ -66,7 +66,7 @@ class ConfigFilesGenerator {
       "\nRunning this package's npm run tsc to check the regenerated files...",
     );
     if (!this._runTsc()) {
-      this._reportTscFailure();
+      reportTscFailure();
       process.exit(1);
     }
     console.log("gen:configs: tsc passed.");
@@ -102,16 +102,16 @@ class ConfigFilesGenerator {
     });
     return status === 0;
   }
+}
 
-  _reportTscFailure(): void {
-    console.error(
-      "\ngen:configs: regeneration succeeded and all four files were written, " +
-        "but this package's `npm run tsc` failed above. This usually means " +
-        "hand-written references in this package still name a sheet or column " +
-        "that no longer exists after this regeneration. Fix those references " +
-        "and re-run `npm run tsc` — do not hand-edit the generated files.",
-    );
-  }
+function reportTscFailure(): void {
+  console.error(
+    "\ngen:configs: regeneration succeeded and all four files were written, " +
+      "but this package's `npm run tsc` failed above. This usually means " +
+      "hand-written references in this package still name a sheet or column " +
+      "that no longer exists after this regeneration. Fix those references " +
+      "and re-run `npm run tsc` — do not hand-edit the generated files.",
+  );
 }
 
 export async function runGenConfigs(sheetsConfig: SheetsConfig): Promise<void> {

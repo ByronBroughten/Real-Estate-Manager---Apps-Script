@@ -5,11 +5,10 @@ import type { SheetsHttpRequest } from "../src/00_Source/GoogleSheets/GoogleShee
 import { SheetsTransport } from "./nodeHost.ts";
 import type { SheetsConfig } from "./sheetsConfig.ts";
 
-const SHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
-const OUTPUT_NAME = ".probe/last.json";
-const FLAGS = new Set(["--fields", "--filter", "--path"]);
-const MAX_PRINTED_LINES = 60;
-const MAX_LISTED = 50;
+const sheetsApiBase = "https://sheets.googleapis.com/v4/spreadsheets";
+const outputName = ".probe/last.json";
+const probeFlags = new Set(["--fields", "--filter", "--path"]);
+const printLimits = { lines: 60, listed: 50 } as const;
 
 interface SheetsProbeProps {
   sheetsConfig: SheetsConfig;
@@ -32,7 +31,7 @@ class SheetsProbe {
     this.fields = fields;
     this.filter = filter;
     this.path = path;
-    this.output = join(sheetsConfig.dir, OUTPUT_NAME);
+    this.output = join(sheetsConfig.dir, outputName);
     this.outputShown = outputShownOf(sheetsConfig);
   }
   static init(sheetsConfig: SheetsConfig, argv: string[]): SheetsProbe {
@@ -40,7 +39,7 @@ class SheetsProbe {
     for (let i = 0; i < argv.length; i += 2) {
       const flag = argv[i] ?? "";
       const value = argv[i + 1];
-      if (!FLAGS.has(flag) || value === undefined) {
+      if (!probeFlags.has(flag) || value === undefined) {
         throw new Error(
           `Unexpected argument "${flag}".\n\n${usage(outputShownOf(sheetsConfig))}`,
         );
@@ -75,7 +74,7 @@ class SheetsProbe {
   }
   // The only two requests this can build are reads; there is no way to name another verb.
   _request(): SheetsHttpRequest {
-    const base = `${SHEETS_API_BASE}/${this.sheetsConfig.spreadsheetId}`;
+    const base = `${sheetsApiBase}/${this.sheetsConfig.spreadsheetId}`;
     const query = this.fields
       ? `?fields=${encodeURIComponent(this.fields)}`
       : "";
@@ -103,7 +102,7 @@ class SheetsProbe {
 function outputShownOf(sheetsConfig: SheetsConfig): string {
   return relative(
     process.env.INIT_CWD ?? process.cwd(),
-    join(sheetsConfig.dir, OUTPUT_NAME),
+    join(sheetsConfig.dir, outputName),
   );
 }
 
@@ -120,7 +119,8 @@ Only a summary is printed; the full response is saved to ${outputShown}.`;
 
 // A backstop for future edits to _request: the transport itself has no dry-run gate.
 function assertIsRead({ method, url }: SheetsHttpRequest): void {
-  const isGet = method === "GET" && !/:\w+(\?|$)/.test(url.slice(url.lastIndexOf("/") + 1));
+  const isGet =
+    method === "GET" && !/:\w+(\?|$)/.test(url.slice(url.lastIndexOf("/") + 1));
   const isFilterRead = method === "POST" && /:getByDataFilter(\?|$)/.test(url);
   if (!isGet && !isFilterRead) {
     throw new Error(`The probe only reads; refusing ${method} ${url}.`);
@@ -159,8 +159,9 @@ function childAt(value: unknown, segment: string): unknown {
   const [, key = "", wanted] = match;
   return value.find(
     (each) =>
-      String(fieldOf(each, key) ?? fieldOf(fieldOf(each, "properties"), key)) ===
-      wanted,
+      String(
+        fieldOf(each, key) ?? fieldOf(fieldOf(each, "properties"), key),
+      ) === wanted,
   );
 }
 
@@ -168,7 +169,7 @@ function childAt(value: unknown, segment: string): unknown {
 function printed(value: unknown, outputShown: string): string {
   const json = JSON.stringify(value, null, 2) ?? "undefined";
   const lines = json.split("\n");
-  if (lines.length <= MAX_PRINTED_LINES) return json;
+  if (lines.length <= printLimits.lines) return json;
   return `${shapeLines(value).join("\n")}\n\n(${lines.length} lines as JSON — narrow with --path, or Read ${outputShown} with offset/limit.)`;
 }
 
@@ -183,13 +184,13 @@ function shapeLines(value: unknown): string[] {
 
 function arrayLines(array: unknown[]): string[] {
   const lines = [shapeOf(array)];
-  array.slice(0, MAX_LISTED).forEach((each, index) => {
+  array.slice(0, printLimits.listed).forEach((each, index) => {
     const label = labelOf(each);
     const counts = countsOf(each);
     if (label || counts) lines.push(`    ${index}: ${label}${counts}`);
   });
-  if (array.length > MAX_LISTED) {
-    lines.push(`    … ${array.length - MAX_LISTED} more`);
+  if (array.length > printLimits.listed) {
+    lines.push(`    … ${array.length - printLimits.listed} more`);
   }
   return lines;
 }
