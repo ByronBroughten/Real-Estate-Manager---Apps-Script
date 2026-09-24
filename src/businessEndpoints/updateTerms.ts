@@ -1,5 +1,4 @@
 import type { Endpoint } from "../06_API/Endpoints";
-import { SerialDate } from "../utils/SerialDate";
 
 export const updateTerms: Endpoint<"occupancy"> = {
   timeLastRan: "updateTermsTimeLastRan",
@@ -60,7 +59,7 @@ export const updateTerms: Endpoint<"occupancy"> = {
       if (!lastEndDate) {
         lastActiveTerm.updateValue(
           "endDate",
-          SerialDate.dayBefore(nextStartDate),
+          ss.serialDate.dayBefore(nextStartDate),
         );
       }
       occupancyTerms.appendRowWithAllVals({
