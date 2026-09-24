@@ -2,7 +2,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-export const SHEETS_CONFIG_FILE = "sheets.config.json";
+const SHEETS_CONFIG_FILE = "sheets.config.json";
 const SCAN_DEPTH = 3;
 const UNSCANNED_DIRS = new Set(["node_modules", "dist", "coverage"]);
 

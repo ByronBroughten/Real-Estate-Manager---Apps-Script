@@ -13,7 +13,7 @@ class ChoreRunner {
     this.isSend = isSend;
     this.isJson = isJson;
   }
-  static init(argv, sheetsConfig) {
+  static init(sheetsConfig, argv) {
     return new ChoreRunner({
       sheetsConfig,
       index: ChoreIndex.init({
@@ -88,6 +88,6 @@ class ChoreRunner {
   }
 }
 
-export async function runChore(argv, sheetsConfig) {
-  await ChoreRunner.init(argv, sheetsConfig).run();
+export async function runChore(sheetsConfig, argv) {
+  await ChoreRunner.init(sheetsConfig, argv).run();
 }

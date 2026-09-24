@@ -4,6 +4,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  CONFIG_FILES,
   hasPackageConfigs,
   loadFrameworkConfigs,
   loadPackageConfigs,
@@ -14,12 +15,9 @@ class ConfigFilesGenerator {
   constructor({ sheetsConfig }) {
     this.sheetsConfig = sheetsConfig;
     const { generatedDir } = sheetsConfig;
-    this.path = {
-      spreadsheetConfig: join(generatedDir, "spreadsheetConfig.ts"),
-      sheetConfigs: join(generatedDir, "sheetConfigs.ts"),
-      columnConfigs: join(generatedDir, "columnConfigs.ts"),
-      valueConfigs: join(generatedDir, "valueConfigs.ts"),
-    };
+    this.path = Object.fromEntries(
+      CONFIG_FILES.map((base) => [base, join(generatedDir, `${base}.ts`)]),
+    );
   }
   static init(sheetsConfig) {
     return new ConfigFilesGenerator({ sheetsConfig });

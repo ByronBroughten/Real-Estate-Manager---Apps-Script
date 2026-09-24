@@ -16,18 +16,14 @@ class SheetsProbe {
     this.filter = filter;
     this.path = path;
     this.output = join(sheetsConfig.dir, OUTPUT_NAME);
-    // Shown from where npm was invoked, so dev's file reads as dev/.probe/last.json from the root.
-    this.outputShown = relative(
-      process.env.INIT_CWD ?? process.cwd(),
-      this.output,
-    );
+    this.outputShown = outputShownOf(sheetsConfig);
   }
-  static init(argv, sheetsConfig) {
+  static init(sheetsConfig, argv) {
     const options = { sheetsConfig };
     for (let i = 0; i < argv.length; i += 2) {
       if (!FLAGS.has(argv[i]) || argv[i + 1] === undefined) {
         throw new Error(
-          `Unexpected argument "${argv[i]}".\n\n${usage(OUTPUT_NAME)}`,
+          `Unexpected argument "${argv[i]}".\n\n${usage(outputShownOf(sheetsConfig))}`,
         );
       }
       options[argv[i].slice(2)] = argv[i + 1];
@@ -84,7 +80,16 @@ class SheetsProbe {
   }
 }
 
-const usage = (outputShown) => `Usage:
+// Shown from where npm was invoked, so dev's file reads as dev/.probe/last.json from the root.
+function outputShownOf(sheetsConfig) {
+  return relative(
+    process.env.INIT_CWD ?? process.cwd(),
+    join(sheetsConfig.dir, OUTPUT_NAME),
+  );
+}
+
+function usage(outputShown) {
+  return `Usage:
   npm run <app|dev>:probe -- --fields '<mask>' [--path <path>]         GET the spreadsheet with a fields mask
   npm run <app|dev>:probe -- --filter '<getByDataFilter body JSON>' [--fields '<mask>'] [--path <path>]
   npm run <app|dev>:probe -- --path <path>                             re-read ${outputShown}, no request
@@ -92,6 +97,7 @@ const usage = (outputShown) => `Usage:
 A path is dot-separated: an index, a key, or key=value to pick an array
 element by that key or by properties.<key> — e.g. sheets.title=Occupancy.protectedRanges.
 Only a summary is printed; the full response is saved to ${outputShown}.`;
+}
 
 // A backstop for future edits to _request: the transport itself has no dry-run gate.
 function assertIsRead({ method, url }) {
@@ -204,6 +210,6 @@ function shapeOf(value) {
   return json.length > 60 ? `${json.slice(0, 57)}…` : json;
 }
 
-export function runProbe(argv, sheetsConfig) {
-  SheetsProbe.init(argv, sheetsConfig).run();
+export function runProbe(sheetsConfig, argv) {
+  SheetsProbe.init(sheetsConfig, argv).run();
 }

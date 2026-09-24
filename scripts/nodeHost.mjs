@@ -9,7 +9,7 @@ const CLASP_RUN_USER = "desktop-clasp-run";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const MAX_RESPONSE_BYTES = 256 * 1024 * 1024;
 
-const CONFIG_FILES = [
+export const CONFIG_FILES = [
   "spreadsheetConfig",
   "sheetConfigs",
   "columnConfigs",

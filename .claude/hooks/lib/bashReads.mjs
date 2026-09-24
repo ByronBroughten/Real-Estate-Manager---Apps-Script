@@ -18,7 +18,6 @@ export class BashReads {
     this.command = command;
     this.cwd = cwd;
     this.projectDir = projectDir;
-    this.columnConfigsPaths = null;
   }
   static init({ command, cwd, projectDir }) {
     return new BashReads({ command, cwd, projectDir: projectDir ?? cwd });
@@ -83,10 +82,9 @@ export class BashReads {
     );
   }
   _columnConfigsPaths() {
-    this.columnConfigsPaths ??= readSheetsConfigs(this.projectDir).map(({ generatedDir }) =>
+    return readSheetsConfigs(this.projectDir).map(({ generatedDir }) =>
       join(this.projectDir, generatedDir, "columnConfigs.ts"),
     );
-    return this.columnConfigsPaths;
   }
   // An unguarded folder at any depth, so each package's own .probe/, dist/ and coverage/ are free to read.
   _isGuarded(path) {

@@ -74,7 +74,7 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 
 ## The chore and its dry run
 
-A **chore** is a unit of work run from the terminal against the live spreadsheet, as against an endpoint, which an operator runs from the sheet by ticking a checkbox. One typed exported const per file, named after its file, in a generic or package chore home — see [Chores](./architecture/chores.md) for the three homes.
+A **chore** is a unit of work run from the terminal against the live spreadsheet, as against an endpoint, which an operator runs from the sheet by ticking a checkbox. One typed exported const per file, named after its file, in a generic or package chore home — see [Chores](./architecture/chores.md) for the homes.
 
 ```
 npm run app:chore                      # list the chores

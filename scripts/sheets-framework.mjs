@@ -27,12 +27,12 @@ switch (command) {
   }
   case "chore": {
     const { runChore } = await import("./chore.mjs");
-    await runChore(argv, loadSheetsConfig());
+    await runChore(loadSheetsConfig(), argv);
     break;
   }
   case "probe": {
     const { runProbe } = await import("./sheetsProbe.mjs");
-    runProbe(argv, loadSheetsConfig());
+    runProbe(loadSheetsConfig(), argv);
     break;
   }
   case "setup-auth": {
