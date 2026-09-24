@@ -1,9 +1,10 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
 import type { ColumnIsFormula } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   blankSheetConfigRow,
   filledSheetConfigRow,
@@ -18,7 +19,7 @@ import {
   assertType,
   type IsExactly,
 } from "../testSupport/typeAssertions";
-import type { DateSerial } from "../utils/Dat";
+import { Dat, type DateSerial } from "../utils/Dat";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetBaseNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { ColumnNamed } from "./ColumnNamed";
@@ -37,6 +38,43 @@ describe("SpreadsheetNamed props", () => {
 });
 
 // A mis-wired accessor still type-checks; the instance checks catch it.
+describe("SpreadsheetNamed dates", () => {
+  const march14 = Dat.fromYmd({ year: 2024, month: 3, day: 14 });
+  const march15 = Dat.fromYmd({ year: 2024, month: 3, day: 15 });
+
+  beforeEach(() => {
+    stubLogger();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2024-03-15T02:30:00Z"));
+  });
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("dates today in the fixture's default zone", () => {
+    stubSheetsService();
+
+    expect(SpreadsheetNamed.init().today()).toBe(march14);
+  });
+
+  it("dates today, now and serialDate.today in the spreadsheet's own zone", () => {
+    stubSheetsService({ timeZone: "Asia/Tokyo" });
+    const ss = SpreadsheetNamed.init();
+
+    expect(ss.today()).toBe(march15);
+    expect(ss.now()).toBe("2024-03-15 11:30:00");
+    expect(ss.serialDate.today()).toBe(march15);
+  });
+
+  it("keeps the static date operations on serialDate", () => {
+    stubSheetsService({ timeZone: "Asia/Tokyo" });
+
+    expect(SpreadsheetNamed.init().serialDate.addDays(march14, 1)).toBe(
+      march15,
+    );
+  });
+});
+
 describe("SpreadsheetNamed navigation", () => {
   it("gives each accessor the class its return type names", () => {
     stubSheetsService();

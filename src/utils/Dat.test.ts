@@ -93,6 +93,15 @@ describe("Dat.today", () => {
   });
 });
 
+describe("Dat.fromInstant", () => {
+  const instant = new Date("2024-03-15T02:30:00Z");
+
+  it("is the civil day of the instant in the given zone", () => {
+    expect(Dat.fromInstant(instant, "America/Chicago")).toBe(ymd(2024, 3, 14));
+    expect(Dat.fromInstant(instant, "Asia/Tokyo")).toBe(ymd(2024, 3, 15));
+  });
+});
+
 describe("Dat.addDays / Dat.dayBefore", () => {
   it("adds whole days as integer arithmetic", () => {
     const start = ymd(2024, 2, 28);

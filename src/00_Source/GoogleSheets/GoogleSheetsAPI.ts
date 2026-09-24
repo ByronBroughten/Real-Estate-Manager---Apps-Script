@@ -62,18 +62,25 @@ interface FieldsArg {
 
 const sheetsApiBase = "https://sheets.googleapis.com/v4/spreadsheets";
 
+const timeZoneMask = "properties(timeZone)";
+
+// The time zone rides every standing fetch, so reading it rarely costs its own get.
 const fieldMasks = {
+  timeZone: timeZoneMask,
   sheetProperties:
+    `${timeZoneMask},` +
     "sheets(properties(sheetId,title),tables(tableId,name,range))",
   conditionalFormats: "sheets(properties(sheetId),conditionalFormats)",
   protectedRanges: "sheets(properties(sheetId),protectedRanges)",
   gridWithProgrammaticFacts:
+    `${timeZoneMask},` +
     "sheets(" +
     "properties(sheetId,title)," +
     "tables(tableId,name,range,columnProperties(columnIndex,columnName,columnType,dataValidationRule(condition(type,values(userEnteredValue)))))," +
     "data(startColumn,startRow,columnMetadata,rowData(values(effectiveValue,userEnteredValue,effectiveFormat(numberFormat(type)),dataValidation(condition(type)))))" +
     ")",
   gridWithoutProgrammaticFacts:
+    `${timeZoneMask},` +
     "sheets(" +
     "properties(sheetId,title)," +
     "tables(tableId,name,range)," +
@@ -159,6 +166,12 @@ export class GoogleSheetsAPI implements RawSource {
         fields: fieldMasks.sheetProperties,
       }),
     );
+  }
+  fetchTimeZone(): string | null {
+    const spreadsheet = this.sheets.Spreadsheets.get(this.spreadsheetId, {
+      fields: fieldMasks.timeZone,
+    });
+    return spreadsheet.properties?.timeZone ?? null;
   }
   fetchGrid(
     gridRanges: GridFetchRange[],

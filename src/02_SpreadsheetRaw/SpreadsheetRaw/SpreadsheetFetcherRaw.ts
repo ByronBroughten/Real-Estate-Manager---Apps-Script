@@ -5,6 +5,7 @@ import type {
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
 import { SpreadsheetSchema } from "../../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";
+import { Val } from "../../utils/Val";
 import {
   type MisplacedTable,
   type SheetIdentity,
@@ -25,6 +26,12 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     if (!this.spreadsheetStateRaw.allSheetPropertiesAreFetched) {
       this._fetchAndIntegrateAllSheetProperties();
     }
+  }
+  ensureTimeZoneIsFetched(): string {
+    if (this.spreadsheetStateRaw.timeZone === null) {
+      this._fetchTimeZone();
+    }
+    return Val.assert(this.spreadsheetStateRaw.timeZone, "timeZone");
   }
   fetchAllSheetProperties() {
     this._fetchAndIntegrateAllSheetProperties();
@@ -48,7 +55,17 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     if (sheets.length === 0) {
       throw new Error(`Sheet gid ${sheetGid} was missing from the Sheets get.`);
     }
-    this._addDataToState({ sheets });
+    this._addDataToState({ ...data, sheets });
+  }
+  private _fetchTimeZone(): void {
+    const timeZone = this.spreadsheetStateRaw.rawSource.fetchTimeZone();
+    if (timeZone === null) {
+      throw new Error(
+        "The spreadsheet's properties.timeZone was absent from the Sheets get.",
+      );
+    }
+    Logger.log(`Fetched the spreadsheet's time zone on its own: ${timeZone}.`);
+    this.spreadsheetStateRaw.timeZone = timeZone;
   }
   private _fetchAndIntegrateAllSheetProperties() {
     const data = this.spreadsheetStateRaw.rawSource.fetchSheetProperties();
@@ -146,6 +163,9 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
       .map(([sheetGid]) => sheetGid);
   }
   private _addDataToState(snapshot: SpreadsheetSnapshot) {
+    if (snapshot.timeZone !== null) {
+      this.spreadsheetStateRaw.timeZone = snapshot.timeZone;
+    }
     snapshot.sheets.forEach((sheetSnapshot) => {
       const sheet = this.ss.sheet(sheetSnapshot.sheetGid);
       sheet.integrateSheetState(sheetSnapshot);

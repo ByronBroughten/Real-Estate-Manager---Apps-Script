@@ -128,7 +128,7 @@ export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
   private _updateLetterhead(occupancyId: string): void {
     this.ss.sheet("variable").topRow.updateValues({
       occupancyLedgerOccId: occupancyId,
-      occupancyLedgerDateRan: Dat.today(),
+      occupancyLedgerDateRan: this.ss.today(),
     });
   }
   private _chargeLines(occupancyId: string): LedgerLine[] {

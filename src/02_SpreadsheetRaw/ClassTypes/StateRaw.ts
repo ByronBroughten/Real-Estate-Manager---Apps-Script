@@ -33,6 +33,7 @@ import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface StateRaw {
   allSheetPropertiesAreFetched: boolean;
+  timeZone: string | null;
   rawSource: RawSource;
   fetchQueue: SpreadsheetFetchQueueRaw;
   writeQueue: SpreadsheetWriteQueueRaw;

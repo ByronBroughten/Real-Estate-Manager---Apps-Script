@@ -66,13 +66,16 @@ export const Dat = {
   isSerial,
   validate,
   today(): DateSerial {
+    return this.fromInstant(new Date(), this.sheetTimezone);
+  },
+  fromInstant(instant: Date, timeZone: string): DateSerial {
     const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: this.sheetTimezone,
+      timeZone,
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
     })
-      .formatToParts(new Date())
+      .formatToParts(instant)
       .reduce<Record<string, string>>((acc, part) => {
         acc[part.type] = part.value;
         return acc;

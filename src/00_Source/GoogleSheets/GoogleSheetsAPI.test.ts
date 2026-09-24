@@ -52,6 +52,7 @@ function recordingSheets(
 ) {
   const batchUpdateCalls: BatchUpdateRequest[] = [];
   const getByDataFilterCalls: object[] = [];
+  const getByDataFilterFields: (string | undefined)[] = [];
   const getCalls: { spreadsheetId: string; fields?: string }[] = [];
   const requestedIds: string[] = [];
   const sheets = {
@@ -64,10 +65,11 @@ function recordingSheets(
       getByDataFilter: (
         resource: object,
         spreadsheetId: string,
-        _optionalArgs?: { fields?: string },
+        optionalArgs?: { fields?: string },
       ) => {
         requestedIds.push(spreadsheetId);
         getByDataFilterCalls.push(resource);
+        getByDataFilterFields.push(optionalArgs?.fields);
         return payload;
       },
       batchUpdate: (resource: BatchUpdateRequest, spreadsheetId: string) => {
@@ -81,6 +83,7 @@ function recordingSheets(
     api: GoogleSheetsAPI.init(sheets, spreadsheetId),
     batchUpdateCalls,
     getByDataFilterCalls,
+    getByDataFilterFields,
     getCalls,
     requestedIds,
   };
@@ -621,6 +624,7 @@ describe("GoogleSheetsAPI payload mapping", () => {
     });
 
     expect(api.fetchSheetProperties()).toEqual({
+      timeZone: null,
       sheets: [
         {
           sheetGid: 111,
@@ -837,6 +841,56 @@ describe("GoogleSheetsAPI payload mapping", () => {
         },
       ],
     });
+  });
+});
+
+describe("GoogleSheetsAPI time zone read", () => {
+  const timeZoneMask = "properties(timeZone)";
+
+  it("carries the spreadsheet's time zone in all three standing field masks", () => {
+    const { api, getCalls, getByDataFilterFields } = recordingSheets();
+
+    api.fetchSheetProperties();
+    api.fetchGrid([{ sheetId: 1 }], { includeProgrammaticFacts: false });
+    api.fetchGrid([{ sheetId: 1 }], { includeProgrammaticFacts: true });
+
+    const masks = [getCalls[0]?.fields, ...getByDataFilterFields];
+    expect(masks).toHaveLength(3);
+    masks.forEach((mask) => {
+      expect(mask?.startsWith(`${timeZoneMask},sheets(`)).toBe(true);
+    });
+  });
+
+  it("maps the payload's time zone onto the snapshot", () => {
+    const { api } = recordingSheets({
+      properties: { timeZone: "Europe/Paris" },
+      sheets: [],
+    });
+
+    expect(api.fetchSheetProperties().timeZone).toBe("Europe/Paris");
+  });
+
+  it("maps a payload with no time zone to null", () => {
+    const { api } = recordingSheets({ sheets: [] });
+
+    expect(api.fetchSheetProperties().timeZone).toBeNull();
+  });
+
+  it("fetches the time zone alone with a plain get masking only that field", () => {
+    const { api, getCalls } = recordingSheets({
+      properties: { timeZone: "Asia/Tokyo" },
+    });
+
+    expect(api.fetchTimeZone()).toBe("Asia/Tokyo");
+    expect(getCalls).toEqual([
+      { spreadsheetId, fields: timeZoneMask },
+    ]);
+  });
+
+  it("answers null when the lone time zone fetch comes back without it", () => {
+    const { api } = recordingSheets({});
+
+    expect(api.fetchTimeZone()).toBeNull();
   });
 });
 
@@ -1334,7 +1388,7 @@ describe("GoogleSheetsAPI HTTP transport", () => {
   it("sends one GET for sheet properties, carrying the field mask", () => {
     const { api, transport } = seedApi();
     const fields =
-      "sheets(properties(sheetId,title),tables(tableId,name,range))";
+      "properties(timeZone),sheets(properties(sheetId,title),tables(tableId,name,range))";
 
     api.fetchSheetProperties();
 

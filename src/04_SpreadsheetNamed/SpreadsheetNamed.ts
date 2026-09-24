@@ -5,7 +5,9 @@ import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIdentified/SheetMetaIdentified";
 import { SpreadsheetIdentified } from "../03_SpreadsheetIdentified/SpreadsheetIdentified.js";
+import { Dat, type DateSerial } from "../utils/Dat.js";
 import { Obj } from "../utils/Obj.js";
+import { Tim } from "../utils/Tim.js";
 import { Val } from "../utils/Val.js";
 import { SpreadsheetBaseNamed } from "./ClassBases/SpreadsheetBaseNamed.js";
 import { SheetMetaNamed } from "./SheetMetaNamed.js";
@@ -33,6 +35,15 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
   }
   get identified(): SpreadsheetIdentified {
     return new SpreadsheetIdentified(this.spreadsheetIdentifiedProps);
+  }
+  today(): DateSerial {
+    return Dat.fromInstant(new Date(), this.raw.timeZone);
+  }
+  now(): string {
+    return Tim.nowTimestamp(this.raw.timeZone);
+  }
+  get serialDate(): typeof Dat {
+    return { ...Dat, today: () => this.today() };
   }
   sheet<TN extends SheetName>(sheetName: TN): SheetNamed<TN> {
     return new SheetNamed({
