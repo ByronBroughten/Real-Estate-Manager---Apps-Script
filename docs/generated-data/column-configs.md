@@ -38,7 +38,7 @@ The sync resolves it in six steps, first match winning: the ID column is always 
 
 ## Only a whole-day column is a `date`
 
-**Only a whole-day column is a `date`** (#15) — a value name whose type is `DateSerial`, which a time-of-day serial would not satisfy, so the datetime formats map to plain numbers until there is a datetime value name to give them.
+**Only a whole-day column is a `date`** (#15) — a value name whose type is `SerialDate`, which a time-of-day serial would not satisfy, so the datetime formats map to plain numbers until there is a datetime value name to give them.
 
 ## The untyped-columns summary
 

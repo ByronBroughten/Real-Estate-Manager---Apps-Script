@@ -324,6 +324,35 @@ describe("RowIdentified.clearValues", () => {
 
     expect(cell.valueOrEmpty()).toBe(false);
   });
+
+  it("defaults a date cell to blank rather than to today", () => {
+    const dateColumnId = columnConfigs.occupancy.nextTermsStartDate.columnId;
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [
+        {
+          sheetId: occupancyGid,
+          title: "Occupancy",
+          rows: buildGridRows({
+            0: [idColumnId, dateColumnId],
+            4: ["r:occ:row4", 45000],
+          }),
+          table: { endRowIndex: 5 },
+        },
+      ],
+    });
+    const ssi = new SpreadsheetIdentified(
+      SpreadsheetBaseIdentified.initSpreadsheetIdentifiedProps(),
+    );
+    const cell = ssi.sheet(occupancyGid).topRow.cell(dateColumnId);
+    cell.prepFetch();
+    ssi.fetchAllPrepped();
+
+    cell.updateToDefault();
+    ssi.raw.batchUpdateGSheets();
+
+    expect(writtenValuesByColIndex(batchUpdateCalls)).toEqual([[1, ""]]);
+    expect(cell.valueOrEmpty()).toBe("");
+  });
 });
 
 describe("SheetIdentified.appendRowDefault", () => {

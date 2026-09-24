@@ -3,7 +3,7 @@ import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases
 import type { RowNamed } from "../../04_SpreadsheetNamed/RowNamed";
 import type { SheetNamed } from "../../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import { Dat, type DateSerial } from "../../utils/Dat";
+import { SerialDate } from "../../utils/SerialDate";
 
 const issuers = {
   propertyManagement: "Property management",
@@ -21,7 +21,7 @@ const kindRanks = {
 
 interface LedgerLine {
   kind: keyof typeof kindRanks;
-  date: DateSerial;
+  date: SerialDate;
   issuer: string;
   description: string;
   charge: number | "";
@@ -30,7 +30,7 @@ interface LedgerLine {
 }
 
 interface PaymentFromAllocations {
-  date: DateSerial;
+  date: SerialDate;
   issuer: string;
   description: string;
   amount: number;
@@ -39,7 +39,7 @@ interface PaymentFromAllocations {
 interface RunStatusProps {
   allLines: LedgerLine[];
   pageLines: LedgerLine[];
-  startDate: DateSerial | "";
+  startDate: SerialDate | "";
 }
 
 export class OccupancyLedgerOperator extends SheetBaseNamed<"occupancyLedger"> {
@@ -196,7 +196,7 @@ function compareLines(a: LedgerLine, b: LedgerLine): number {
 
 function cutPageLines(
   lines: LedgerLine[],
-  startDate: DateSerial | "",
+  startDate: SerialDate | "",
 ): LedgerLine[] {
   if (startDate === "") {
     return lines;
@@ -210,7 +210,7 @@ function cutPageLines(
 }
 
 function priorBalanceLine(
-  startDate: DateSerial,
+  startDate: SerialDate,
   collapsed: LedgerLine[],
 ): LedgerLine {
   return {
@@ -243,7 +243,7 @@ function runStatusMessage(
   if (startDate === "") {
     return `Built ledger for ${occupancyName}: ${counts}.`;
   }
-  return `Built ledger for ${occupancyName}, from ${Dat.toDayMonthYear(startDate)}: ${counts}.`;
+  return `Built ledger for ${occupancyName}, from ${SerialDate.toDayMonthYear(startDate)}: ${counts}.`;
 }
 
 function countOfKind(

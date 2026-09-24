@@ -10,7 +10,7 @@ import {
   type FakeCell,
   type FakeSheetProperties,
 } from "../testSupport/fakeSheetsService";
-import { Dat } from "../utils/Dat";
+import { SerialDate } from "../utils/SerialDate";
 import { Val } from "../utils/Val";
 import { buildLedger } from "./buildLedger";
 
@@ -526,6 +526,8 @@ describe("buildLedger, the page it writes", () => {
   });
 
   it("stamps the occupancy and the day it ran into the Variable sheet", () => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(new Date("2024-06-01T12:00:00Z"));
     const { batchUpdateCalls } = stubLedgerSpreadsheet({
       startDates: { [tenant]: dayTwo },
     });
@@ -539,7 +541,7 @@ describe("buildLedger, the page it writes", () => {
         topDataRowIndex,
         new Map<number, WrittenValue>([
           [0, tenant],
-          [1, Dat.today()],
+          [1, SerialDate.fromYmd({ year: 2024, month: 6, day: 1 })],
         ]),
       ],
     ]);
@@ -555,8 +557,10 @@ describe("buildLedger, the page it writes", () => {
     runBuildLedger();
 
     expect(
-      cellsWrittenTo(batchUpdateCalls, variableGid).get(topDataRowIndex)?.get(1),
-    ).toBe(Dat.fromYmd({ year: 2024, month: 3, day: 15 }));
+      cellsWrittenTo(batchUpdateCalls, variableGid)
+        .get(topDataRowIndex)
+        ?.get(1),
+    ).toBe(SerialDate.fromYmd({ year: 2024, month: 3, day: 15 }));
   });
 
   it("reads every input sheet in one fetch cycle of its own", () => {

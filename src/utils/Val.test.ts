@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import type { DateSerial } from "./Dat";
+import type { SerialDate } from "./SerialDate";
 import { Val } from "./Val";
 
-// The calendar rules are Dat's; this only proves the facade delegates to it.
+// The calendar rules are SerialDate's; this only proves the facade delegates to it.
 describe("Val.validate.date", () => {
   it("takes a whole-day serial and rejects one carrying a time of day", () => {
     expect(Val.validate.date(45292)).toBe(45292);
@@ -11,8 +11,8 @@ describe("Val.validate.date", () => {
     expect(() => Val.validate.date(new Date())).toThrowError(/is not a date/);
   });
 
-  it("hands back a DateSerial rather than a plain number", () => {
-    assertType<IsExactly<ReturnType<typeof Val.validate.date>, DateSerial>>(
+  it("hands back a SerialDate rather than a plain number", () => {
+    assertType<IsExactly<ReturnType<typeof Val.validate.date>, SerialDate>>(
       true,
     );
   });

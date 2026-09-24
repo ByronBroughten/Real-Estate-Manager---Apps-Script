@@ -12,7 +12,7 @@ One line per term. The elaboration is one file away. Open a reasoning file only 
 | Tier word, State, Base, Operator, Collaborator | [`docs/vocabulary/class-names.md`](./vocabulary/class-names.md) |
 | `xConfigs` / `XConfig` / trait, `spreadsheetConfig`, the config-sheet floor | [`docs/vocabulary/config.md`](./vocabulary/config.md) |
 | Meta vs primary, crossing views, which class a member belongs to, Active, Active facts | [`docs/vocabulary/meta-primary.md`](./vocabulary/meta-primary.md) |
-| Schema, blank cells, `value` / `valueOrEmpty` / `valueNotEmpty`, checkbox, `DateSerial`, `emptyValueAllowed` | [`docs/vocabulary/values.md`](./vocabulary/values.md) |
+| Schema, blank cells, `value` / `valueOrEmpty` / `valueNotEmpty`, checkbox, `SerialDate`, `emptyValueAllowed` | [`docs/vocabulary/values.md`](./vocabulary/values.md) |
 
 ## Tiers
 
@@ -50,5 +50,5 @@ One line per term. The elaboration is one file away. Open a reasoning file only 
 
 - **Nearly every cell is tri-state: `Value<VN>` includes `""`.** Code that branches on a value says what empty means. `checkbox` is exactly `boolean`; don't restore the blank to it.
 - **`valueNotEmpty` throws on a blank, `valueOrEmpty` keeps `""`, and `value` is whichever the column's Empty value allowed box declares.** The plurals follow suit; only Named offers `value`/`valueArr`.
-- **An in-app date is a `DateSerial`, never a JS `Date`.** Build one with `Dat.fromYmd` or `SpreadsheetNamed.today()`, and move it with `Dat.addDays`/`addMonths`, not `+ 1`.
+- **An in-app date is a `SerialDate`, never a JS `Date`.** Build one with `SerialDate.fromYmd` or `SpreadsheetNamed.today()`, and move it with `SerialDate.addDays`/`addMonths`, not `+ 1`.
 - **`emptyValueAllowed` shapes the accessor, not the value type**, and is enforced at access, never at fetch or write.
