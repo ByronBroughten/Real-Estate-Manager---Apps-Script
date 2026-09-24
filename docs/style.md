@@ -62,7 +62,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
   - `init` — factory setup
   - `sync`/`flush` — coordinate multiple operators / send a batched write
   - `discard` — drop queued changes without sending them; the counterpart to `flush`
-  - **The list governs framework methods.** A business operator's public method takes its verb from `CONTEXT.md` instead.
+  - **The list governs framework methods.** A business operator's public method takes its verb from the app's `packages/real-estate/CONTEXT.md` instead.
 - **A getter is a cheap, no-arg, side-effect-free, one-expression pass-through.** Anything that takes an argument, has a side effect, or loops/branches to compute its answer is a called method. A value fixed for the object's whole lifetime is a plain field, not a getter.
 - **`_` prefix means "narrow-purpose, not general API"**: a true `private` helper, or a step a coordinating class must call that TS won't let you mark `private`.
 - **Destructure params into a named type at 3+ params, 2+ params of one type, or when a named type for the bag already exists**; otherwise stay positional. The one argument every implementation will use is hoisted out of the bag and passed first. The same grouping judgment applies to fields.

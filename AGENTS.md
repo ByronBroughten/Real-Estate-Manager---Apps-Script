@@ -8,7 +8,7 @@ Open only the section or disclosed doc the task needs.
 
 - `npm run tsc`, `npm test` and `npm run lint`: always safe. Run all three before calling a change done, and treat a new type error as yours unless a clean checkout has it too.
 - **Every live-spreadsheet command names its target: `dev:*` (the `Sheets Framework Dev` spreadsheet) or `app:*` (the real-estate one).** `dev:*` has a standing yes. `app:*` keeps the asks below. A yes for one spreadsheet never covers the other, and a bare `npx sheets-framework …` always asks. Full table: [`docs/targets-and-gates.md`](./docs/targets-and-gates.md#targets-dev-and-app).
-- `npm run app:chore <name>`: a dry run, always safe. The Node host adapter suppresses its writes. `npm run app:chore <name> -- --send` applies it and needs a yes **naming that chore**.
+- `npm run app:chore <name>`: a dry run, always safe. `npm run app:chore <name> -- --send` applies it and needs a yes **naming that chore**.
 - `npm run app:probe`: read-only raw Sheets JSON. Stdout gets a summary and the full response goes to that package's `.probe/last.json`; read a line range of it, never print a full body into the chat. Ask before any other script that opens the `clasp` credential.
 - `npm run app:gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/targets-and-gates.md`](./docs/targets-and-gates.md#before-touching-the-live-spreadsheet-or-deployment).
 - Ask first for `npm run app:build`, `clasp push` / `run` / `deploy`, and any gsheets MCP write to the app spreadsheet (give the exact sheet, range and values). `create_spreadsheet` always asks; `share_spreadsheet` needs its own yes, naming who and at what permission. Reading either sheet needs no yes.
@@ -17,7 +17,7 @@ Open only the section or disclosed doc the task needs.
 
 - **README.md is for humans.** Nothing in it is needed for a task here; open it only to keep it accurate ([`docs/agents/prose-files.md`](./docs/agents/prose-files.md)).
 - **Which package: "would this make sense in a different Sheets-backed app?"** Yes: `packages/framework`. No: `packages/real-estate`.
-- **Working in a folder with its own `AGENTS.md`**, read it first: the framework's `src/` and several folders below it, its `scripts/`, and the app's `src/` folders have one.
+- **Working in a folder with its own `AGENTS.md`**, read it first; both packages' `src/` have one.
 - **Commit or push only when asked. Implement a spec on its `issue-<n>-<slug>` branch**, even when a skill says to commit to the current branch. Branch rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 
 ## Read by task
@@ -26,7 +26,8 @@ Open only the section or disclosed doc the task needs.
 | --- | --- |
 | Placing a file, import, or member; naming an accessor; Meta vs primary; Raw, Identified or Named | [`packages/framework/src/AGENTS.md`](./packages/framework/src/AGENTS.md) + [vocabulary](./packages/framework/docs/vocabulary.md) |
 | Writing or refactoring TypeScript, tests included | [`docs/style.md`](./docs/style.md) |
-| Operator-facing words: endpoint, selector, run state, blank row | [framework](./packages/framework/CONTEXT.md) and [app](./CONTEXT.md) `CONTEXT.md` |
+| Operator-facing words: endpoint, run state, blank row; units, the ledger | [`CONTEXT-MAP.md`](./CONTEXT-MAP.md), then that package's `CONTEXT.md` |
+| Real-estate endpoints, app chores, the occupancy ledger | [app `src/AGENTS.md`](./packages/real-estate/src/AGENTS.md) |
 | Arguing that a gap is deliberate, or proposing a design principle | [design](./packages/framework/docs/design.md) |
 | Architecture mechanics: dispatch, schema classes, class chains, queued writes, round trips, type-check cost | [architecture](./packages/framework/docs/architecture.md) index, then one file |
 | Adding a deletion path | [blank-row](./packages/framework/docs/architecture/blank-row.md) |

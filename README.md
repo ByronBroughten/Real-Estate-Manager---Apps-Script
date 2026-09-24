@@ -2,16 +2,16 @@
 
 > Coding agents working in this repo: start at [`AGENTS.md`](./AGENTS.md). This README is for people.
 
-A Google Apps Script project (TypeScript, compiled and pushed via `clasp`) for managing real estate operations — properties, units, households, leases, subsidies, charges, and payments — on top of a Google Sheets spreadsheet that acts as the database and the UI.
+An npm-workspaces monorepo for managing real estate operations — properties, units, households, leases, subsidies, charges and payments — on a Google Sheets spreadsheet that acts as both the database and the UI, with TypeScript compiled and pushed to Apps Script.
 
-## Two layers, one codebase
+## The packages
 
-This repo is an npm-workspaces monorepo holding two packages, one stacked on top of the other:
+| Package | What it is |
+| --- | --- |
+| [`packages/framework`](./packages/framework/README.md) (`@byronbroughten/sheets-framework`) | A project-agnostic framework for typed apps on Google Sheets + Apps Script: the numbered tiers from raw cell I/O up to endpoint dispatch, the Node and Apps Script hosts, and the `sheets-framework` bin. It names nothing from real estate, and it is tested against its own dev spreadsheet, `Sheets Framework Dev`. |
+| [`packages/real-estate`](./packages/real-estate/README.md) (`real-estate-app`, private) | This project: the real-estate endpoints and chores, bundled with the framework's source and pushed to the business spreadsheet's Apps Script project. |
 
-- **`packages/framework` (`@byronbroughten/sheets-framework`) is a project-agnostic framework** for building typed, structured apps on top of Google Sheets + Apps Script. The Raw tier talks to a host-neutral `RawSource` in terms of raw row/column indexes and sheet properties (`GoogleSheetsAPI` is the Google implementer); the Identified and Named tiers resolve the typed schema on top of that by generated ID and by name. A dedicated Operators tier (`05_Operators`) sits above Named and owns generating/updating each package's generated configs from the live Spreadsheet Config/Sheet Config/Column Config/Value Config sheets — maintaining generated data is neither Raw's nor Named's job. `06_API` sits on top as a generic endpoint-dispatch layer (`Api`, `EndpointRun`) that routes sheet-edit events to registered endpoints by column name. Nothing in this package should reference real-estate concepts (properties, leases, tenants, etc.). If you're adding something reusable that any Sheets-backed app would want, it belongs here.
-- **`packages/real-estate` (`real-estate-app`, private) is this specific project**: its `src/businessEndpoints.ts` and `src/businessEndpoints/` are — together the only place real-estate domain logic (charges, leases, subsidies, payments, ledgers) should live: `businessEndpoints.ts` holds the `endpoints` record passed into `06_API`'s `Api` class, and `businessEndpoints/` holds one file per endpoint, with `businessEndpoints/BusinessOperators/` for any classes they need. Everything here is built on top of the framework layers below it.
-
-Keep that boundary in mind before adding a file: "would this make sense in a completely different Sheets-backed app?" If yes, it belongs in `packages/framework`, generically named. If no, it belongs in the app's `businessEndpoints/` — or, if it is a one-off maintenance job rather than something an operator triggers from the sheet, in its `src/chores/` (see [Chores](./packages/framework/docs/architecture/chores.md)). The framework's `src/nodeHost/` and `src/appsScriptHost/` are a third thing again: not layers of the app but host adapters, the one letting the framework run somewhere other than Apps Script and the other holding the Apps Script trigger glue behind the app's `src/index.ts` (see [How it runs](./packages/framework/docs/how-it-runs.md)).
+Before adding a file, ask "would this make sense in a completely different Sheets-backed app?" If yes, it belongs in `packages/framework`, generically named. If no, it belongs in `packages/real-estate`.
 
 ## Architecture: the numbered tiers
 
@@ -27,15 +27,19 @@ Each numbered folder under `packages/framework/src/` is a dependency tier, and d
 | `05_Operators` | Classes that add methods for one data structure, including regenerating the configs |
 | `06_API` | Routing a sheet edit to the endpoint registered for its column |
 
-The app's `src/businessEndpoints/` sits above all of them as the real-estate logic. The framework's `src/chores/` holds generic maintenance jobs, `src/nodeHost/` lets the framework run in Node as well as Apps Script, and `src/appsScriptHost/` turns Apps Script trigger events into `Api` calls. The precise words for all of this (Raw, Identified, Named, Meta and primary) are defined in [`docs/vocabulary.md`](./packages/framework/docs/vocabulary.md).
+The app imports the framework only through its public entry. The precise words for all of this (Raw, Identified, Named, Meta and primary) are defined in [`vocabulary.md`](./packages/framework/docs/vocabulary.md).
 
-## Generated data — do not hand-edit
+## Two spreadsheets
 
-Reading the generated files by block, regeneration, the config-sheet floor, and how `valueName` is declared vs sampled: [`docs/generated-data.md`](./packages/framework/docs/generated-data.md).
+Every command that touches a live spreadsheet names its target: `dev:*` for `Sheets Framework Dev`, `app:*` for the real-estate one, as `npm run dev:chore <name>` or `npm run app:gen:configs`. [`docs/targets-and-gates.md`](./docs/targets-and-gates.md) has the full table.
+
+## Words
+
+[`CONTEXT-MAP.md`](./CONTEXT-MAP.md) points at the two glossaries: the framework's operator-facing words, and the app's units and occupancy ledger.
 
 ## Testing
 
-Vitest, always safe: `npm test`. Co-located `Foo.test.ts`. Fakes, exemplars, and endpoint-run testing: [`docs/testing.md`](./packages/framework/docs/testing.md).
+Vitest, across both packages: `npm test`. Co-located `Foo.test.ts`. Fakes, exemplars, and endpoint-run testing: [`testing.md`](./packages/framework/docs/testing.md).
 
 ## Known rough edges
 
