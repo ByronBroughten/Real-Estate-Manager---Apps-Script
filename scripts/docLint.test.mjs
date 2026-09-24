@@ -87,10 +87,82 @@ describe("checkDocs", () => {
       ]);
     });
 
+    it("checks a package's docs, CONTEXT.md and README.md", () => {
+      expect(
+        messages({
+          "packages/app/docs/a.md": "[gone](./gone.md)\n",
+          "packages/app/CONTEXT.md": "[gone](./gone.md)\n",
+          "packages/app/README.md": "[gone](./gone.md)\n",
+        }),
+      ).toEqual([
+        "packages/app/docs/a.md: broken link ./gone.md: no file packages/app/docs/gone.md",
+        "packages/app/CONTEXT.md: broken link ./gone.md: no file packages/app/gone.md",
+        "packages/app/README.md: broken link ./gone.md: no file packages/app/gone.md",
+      ]);
+    });
+
     it("leaves unlisted docs such as skills unchecked", () => {
       expect(
         check({ ".claude/skills/x/SKILL.md": "[gone](./gone.md)\n" }),
       ).toEqual([]);
+    });
+  });
+
+  describe("link direction", () => {
+    const paths = [
+      "docs/style.md",
+      "packages/framework/src/x.ts",
+      "packages/real-estate/src/y.ts",
+    ];
+
+    it("fails a published framework doc linking outside the framework", () => {
+      expect(
+        messages(
+          {
+            "packages/framework/docs/a.md": "[style](../../../docs/style.md)\n",
+            "packages/framework/CONTEXT.md":
+              "[app](../real-estate/src/y.ts) [root](/docs/style.md)\n",
+            "packages/framework/README.md": "[root](../../AGENTS.md)\n",
+            "packages/framework/docs/sub/c.md":
+              "[style](../../../../docs/style.md)\n",
+          },
+          paths,
+        ),
+      ).toEqual([
+        "packages/framework/docs/a.md: link ../../../docs/style.md leaves the framework; its published docs link only inside packages/framework",
+        "packages/framework/CONTEXT.md: link ../real-estate/src/y.ts leaves the framework; its published docs link only inside packages/framework",
+        "packages/framework/CONTEXT.md: link /docs/style.md leaves the framework; its published docs link only inside packages/framework",
+        "packages/framework/README.md: link ../../AGENTS.md leaves the framework; its published docs link only inside packages/framework",
+        "packages/framework/docs/sub/c.md: link ../../../../docs/style.md leaves the framework; its published docs link only inside packages/framework",
+      ]);
+    });
+
+    it("passes a published framework doc linking inside the framework", () => {
+      const docs = {
+        "packages/framework/docs/a.md":
+          "[src](../src/x.ts) [b](./b.md#b) [readme](../README.md)\n",
+        "packages/framework/docs/b.md": "# B\n",
+        "packages/framework/README.md":
+          "[a](./docs/a.md) [abs](/packages/framework/src/x.ts)\n",
+      };
+      expect(check(docs, paths)).toEqual([]);
+    });
+
+    it("lets the framework's AGENTS.md and CLAUDE.md files point at root", () => {
+      const docs = {
+        "packages/framework/CLAUDE.md": "[root](../../docs/style.md)\n",
+        "packages/framework/src/AGENTS.md": "[root](../../../docs/style.md)\n",
+        "packages/framework/src/CLAUDE.md": "@AGENTS.md\n",
+      };
+      expect(check(docs, paths)).toEqual([]);
+    });
+
+    it("lets the app's docs link into the framework and root", () => {
+      const docs = {
+        "packages/real-estate/docs/a.md":
+          "[fw](../../framework/src/x.ts) [root](../../../docs/style.md)\n",
+      };
+      expect(check(docs, paths)).toEqual([]);
     });
   });
 
@@ -183,8 +255,20 @@ describe("checkDocs", () => {
       expect(check({ "docs/a.md": unheaded(4096) })).toEqual([]);
     });
 
+    it("checks a package's docs/ files", () => {
+      expect(messages({ "packages/app/docs/a.md": withLead(6) })).toEqual([
+        "packages/app/docs/a.md: lead is 6 lines before the first ## heading; keep it to 5 and move the rest under a heading",
+      ]);
+    });
+
     it("leaves files outside docs/ unchecked", () => {
-      expect(check({ "README.md": withLead(6) })).toEqual([]);
+      expect(
+        check({
+          "README.md": withLead(6),
+          "packages/app/README.md": withLead(6),
+          "packages/app/src/docs/a.md": withLead(6),
+        }),
+      ).toEqual([]);
     });
   });
 
