@@ -21,8 +21,8 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 | gsheets `create_spreadsheet`, `share_spreadsheet` | ask | ask |
 | gsheets reads | allow | allow |
 
-- **Bare `npx sheets-framework …`, `node packages/framework/scripts/sheets-framework.mjs …`, a package-level `npm run chore …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
-- **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.mjs` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
+- **Bare `npx sheets-framework …`, `node packages/framework/scripts/sheets-framework.js …`, a package-level `npm run chore …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
+- **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.ts` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
 - **`dev:build`, `dev:push` and `dev:run` run the framework package's `build`, `push` and `run` scripts** against the dev project named in its `.clasp.json` ([the dev project](../packages/framework/docs/how-it-runs.md#the-dev-project)).
 - **Both targets' Node-host credential comes from GCP project `real-estate-manager-sheets`**, whose consent screen is published to production so its refresh tokens don't expire ([why](../packages/framework/docs/how-it-runs.md#when-the-node-host-fails-to-authenticate)).
 - **The dev spreadsheet is not a rehearsal copy of the app one.** Sheet configs key every sheet by its GID, and the dev sheet carries its own fixture sheets, not a copy of the business ones.
@@ -54,6 +54,6 @@ The `gsheets` MCP server reads and writes the user's real Google Sheets directly
 
 - **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`.
 - **`app:probe`/`dev:probe` are read-only and on the allow-list, like a chore dry run.** Ask before running any other script that opens the `clasp` credential. The chore runner and `gen:configs` are exempt, because they open it as a routine step and the permissions above cover them.
-- **`update_cells`, `batch_update_cells` and `create_sheet` on the dev spreadsheet have a standing yes**, granted by `pinnedTargetGuard.mjs` while the pinning files are clean.
+- **`update_cells`, `batch_update_cells` and `create_sheet` on the dev spreadsheet have a standing yes**, granted by `pinnedTargetGuard.ts` while the pinning files are clean.
 - **Any other write — those three on any other spreadsheet, and `create_spreadsheet` everywhere — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.
 - **`share_spreadsheet` needs its own, separate confirmation** — it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.

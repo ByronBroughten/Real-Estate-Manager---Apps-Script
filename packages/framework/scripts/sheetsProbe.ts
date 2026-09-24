@@ -1,7 +1,9 @@
 // `sheets-framework probe`: one read-only Sheets request, summarized; the full JSON goes to the package's .probe/last.json. See docs/how-it-runs.md, "Seeing the raw Sheets JSON".
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
-import { SheetsTransport } from "./nodeHost.mjs";
+import type { SheetsHttpRequest } from "../src/00_Source/GoogleSheets/GoogleSheetsAPI.ts";
+import { SheetsTransport } from "./nodeHost.ts";
+import type { SheetsConfig } from "./sheetsConfig.ts";
 
 const SHEETS_API_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 const OUTPUT_NAME = ".probe/last.json";
@@ -9,8 +11,23 @@ const FLAGS = new Set(["--fields", "--filter", "--path"]);
 const MAX_PRINTED_LINES = 60;
 const MAX_LISTED = 50;
 
+interface SheetsProbeProps {
+  sheetsConfig: SheetsConfig;
+  fields?: string;
+  filter?: string;
+  path?: string;
+}
+
+type ProbeOption = "fields" | "filter" | "path";
+
 class SheetsProbe {
-  constructor({ sheetsConfig, fields, filter, path }) {
+  readonly sheetsConfig: SheetsConfig;
+  readonly fields: string | undefined;
+  readonly filter: string | undefined;
+  readonly path: string | undefined;
+  readonly output: string;
+  readonly outputShown: string;
+  constructor({ sheetsConfig, fields, filter, path }: SheetsProbeProps) {
     this.sheetsConfig = sheetsConfig;
     this.fields = fields;
     this.filter = filter;
@@ -18,19 +35,21 @@ class SheetsProbe {
     this.output = join(sheetsConfig.dir, OUTPUT_NAME);
     this.outputShown = outputShownOf(sheetsConfig);
   }
-  static init(sheetsConfig, argv) {
-    const options = { sheetsConfig };
+  static init(sheetsConfig: SheetsConfig, argv: string[]): SheetsProbe {
+    const options: SheetsProbeProps = { sheetsConfig };
     for (let i = 0; i < argv.length; i += 2) {
-      if (!FLAGS.has(argv[i]) || argv[i + 1] === undefined) {
+      const flag = argv[i] ?? "";
+      const value = argv[i + 1];
+      if (!FLAGS.has(flag) || value === undefined) {
         throw new Error(
-          `Unexpected argument "${argv[i]}".\n\n${usage(outputShownOf(sheetsConfig))}`,
+          `Unexpected argument "${flag}".\n\n${usage(outputShownOf(sheetsConfig))}`,
         );
       }
-      options[argv[i].slice(2)] = argv[i + 1];
+      options[flag.slice(2) as ProbeOption] = value;
     }
     return new SheetsProbe(options);
   }
-  run() {
+  run(): void {
     const isRequest = this.fields !== undefined || this.filter !== undefined;
     if (!isRequest && this.path === undefined) {
       console.log(usage(this.outputShown));
@@ -41,7 +60,7 @@ class SheetsProbe {
     console.log(`\n${this.path ? `at ${this.path}` : "response"}:`);
     console.log(printed(value, this.outputShown));
   }
-  _fetch() {
+  _fetch(): unknown {
     const request = this._request();
     console.log(`probe: ${request.method} ${request.url}`);
     assertIsRead(request);
@@ -55,7 +74,7 @@ class SheetsProbe {
     return response;
   }
   // The only two requests this can build are reads; there is no way to name another verb.
-  _request() {
+  _request(): SheetsHttpRequest {
     const base = `${SHEETS_API_BASE}/${this.sheetsConfig.spreadsheetId}`;
     const query = this.fields
       ? `?fields=${encodeURIComponent(this.fields)}`
@@ -69,7 +88,7 @@ class SheetsProbe {
       body: JSON.stringify(parsedFilter(this.filter)),
     };
   }
-  _lastResponse() {
+  _lastResponse(): unknown {
     try {
       return JSON.parse(readFileSync(this.output, "utf8"));
     } catch {
@@ -81,14 +100,14 @@ class SheetsProbe {
 }
 
 // Shown from where npm was invoked, so dev's file reads as dev/.probe/last.json from the root.
-function outputShownOf(sheetsConfig) {
+function outputShownOf(sheetsConfig: SheetsConfig): string {
   return relative(
     process.env.INIT_CWD ?? process.cwd(),
     join(sheetsConfig.dir, OUTPUT_NAME),
   );
 }
 
-function usage(outputShown) {
+function usage(outputShown: string): string {
   return `Usage:
   npm run <app|dev>:probe -- --fields '<mask>' [--path <path>]         GET the spreadsheet with a fields mask
   npm run <app|dev>:probe -- --filter '<getByDataFilter body JSON>' [--fields '<mask>'] [--path <path>]
@@ -100,15 +119,15 @@ Only a summary is printed; the full response is saved to ${outputShown}.`;
 }
 
 // A backstop for future edits to _request: the transport itself has no dry-run gate.
-function assertIsRead({ method, url }) {
-  const isGet = method === "GET" && !/:\w+(\?|$)/.test(url.split("/").pop());
+function assertIsRead({ method, url }: SheetsHttpRequest): void {
+  const isGet = method === "GET" && !/:\w+(\?|$)/.test(url.slice(url.lastIndexOf("/") + 1));
   const isFilterRead = method === "POST" && /:getByDataFilter(\?|$)/.test(url);
   if (!isGet && !isFilterRead) {
     throw new Error(`The probe only reads; refusing ${method} ${url}.`);
   }
 }
 
-function parsedFilter(filter) {
+function parsedFilter(filter: string): unknown {
   let body;
   try {
     body = JSON.parse(filter);
@@ -121,7 +140,7 @@ function parsedFilter(filter) {
   return body;
 }
 
-function valueAt(root, path) {
+function valueAt(root: unknown, path: string | undefined): unknown {
   if (!path) return root;
   let value = root;
   for (const segment of path.split(".")) {
@@ -133,25 +152,27 @@ function valueAt(root, path) {
   return value;
 }
 
-function childAt(value, segment) {
+function childAt(value: unknown, segment: string): unknown {
   if (value === null || typeof value !== "object") return undefined;
   const match = /^([^=]+)=(.*)$/.exec(segment);
-  if (!match || !Array.isArray(value)) return value[segment];
-  const [, key, wanted] = match;
+  if (!match || !Array.isArray(value)) return fieldOf(value, segment);
+  const [, key = "", wanted] = match;
   return value.find(
-    (each) => String(each?.[key] ?? each?.properties?.[key]) === wanted,
+    (each) =>
+      String(fieldOf(each, key) ?? fieldOf(fieldOf(each, "properties"), key)) ===
+      wanted,
   );
 }
 
 // Small subtrees print whole; anything longer prints as a shape summary.
-function printed(value, outputShown) {
+function printed(value: unknown, outputShown: string): string {
   const json = JSON.stringify(value, null, 2) ?? "undefined";
   const lines = json.split("\n");
   if (lines.length <= MAX_PRINTED_LINES) return json;
   return `${shapeLines(value).join("\n")}\n\n(${lines.length} lines as JSON — narrow with --path, or Read ${outputShown} with offset/limit.)`;
 }
 
-function shapeLines(value) {
+function shapeLines(value: unknown): string[] {
   if (Array.isArray(value)) return arrayLines(value);
   if (value === null || typeof value !== "object") return [shapeOf(value)];
   return Object.entries(value).flatMap(([key, child]) => [
@@ -160,7 +181,7 @@ function shapeLines(value) {
   ]);
 }
 
-function arrayLines(array) {
+function arrayLines(array: unknown[]): string[] {
   const lines = [shapeOf(array)];
   array.slice(0, MAX_LISTED).forEach((each, index) => {
     const label = labelOf(each);
@@ -173,16 +194,16 @@ function arrayLines(array) {
   return lines;
 }
 
-function labelOf(value) {
-  const source = value?.properties ?? value;
+function labelOf(value: unknown): string {
+  const source = fieldOf(value, "properties") ?? value;
   if (source === null || typeof source !== "object") return "";
   const parts = ["sheetId", "title", "tableId", "name"]
-    .filter((key) => source[key] !== undefined)
-    .map((key) => `${key}=${JSON.stringify(source[key])}`);
+    .filter((key) => fieldOf(source, key) !== undefined)
+    .map((key) => `${key}=${JSON.stringify(fieldOf(source, key))}`);
   return parts.join(" ");
 }
 
-function countsOf(value) {
+function countsOf(value: unknown): string {
   if (value === null || typeof value !== "object" || Array.isArray(value)) {
     return "";
   }
@@ -192,7 +213,7 @@ function countsOf(value) {
   return counts.length > 0 ? `  ${counts.join(" ")}` : "";
 }
 
-function shapeOf(value) {
+function shapeOf(value: unknown): string {
   if (Array.isArray(value)) {
     const keys = new Set(
       value.flatMap((each) =>
@@ -206,10 +227,15 @@ function shapeOf(value) {
   if (value !== null && typeof value === "object") {
     return `object {${Object.keys(value).join(", ")}}`;
   }
-  const json = JSON.stringify(value);
+  const json = JSON.stringify(value) ?? "undefined";
   return json.length > 60 ? `${json.slice(0, 57)}…` : json;
 }
 
-export function runProbe(sheetsConfig, argv) {
+// Optional chaining's semantics on a parsed JSON value of unknown shape.
+function fieldOf(value: unknown, key: string): unknown {
+  return (value as Record<string, unknown> | null | undefined)?.[key];
+}
+
+export function runProbe(sheetsConfig: SheetsConfig, argv: string[]): void {
   SheetsProbe.init(sheetsConfig, argv).run();
 }

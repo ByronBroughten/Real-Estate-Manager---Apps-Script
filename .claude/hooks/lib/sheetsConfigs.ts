@@ -2,13 +2,20 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
-export const SHEETS_CONFIGS = [
+export interface SheetsConfigEntry {
+  path: string;
+  scriptPrefix: "app" | "dev";
+  spreadsheetId: unknown;
+  generatedDir: string;
+}
+
+export const SHEETS_CONFIGS: { path: string; scriptPrefix: "app" | "dev" }[] = [
   { path: join("packages", "real-estate", "sheets.config.json"), scriptPrefix: "app" },
   { path: join("packages", "framework", "sheets.config.json"), scriptPrefix: "dev" },
 ];
 
 // Project-relative generatedDir per package; a config that can't be read is skipped.
-export function readSheetsConfigs(projectDir) {
+export function readSheetsConfigs(projectDir: string): SheetsConfigEntry[] {
   return SHEETS_CONFIGS.flatMap(({ path, scriptPrefix }) => {
     let raw;
     try {

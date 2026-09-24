@@ -3,8 +3,28 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+// The fields of Claude Code's hook payload these hooks read; every one may be absent.
+export interface HookInput {
+  session_id?: string;
+  transcript_path?: string;
+  cwd?: string;
+  hook_event_name?: string;
+  tool_name?: string;
+  tool_input?: ToolInput;
+  agent_id?: string;
+  agent_type?: string;
+}
+
+export interface ToolInput {
+  command?: string;
+  file_path?: string;
+  offset?: number;
+  limit?: number;
+  spreadsheet_id?: string;
+}
+
 // Every guardrail fails open: an unreadable input allows the call.
-export function readHookInput() {
+export function readHookInput(): HookInput | null {
   try {
     const input = JSON.parse(readFileSync(0, "utf8"));
     return input && typeof input === "object" ? input : null;
@@ -13,18 +33,18 @@ export function readHookInput() {
   }
 }
 
-export function writeHookOutput(output) {
+export function writeHookOutput(output: object): void {
   process.stdout.write(JSON.stringify(output));
 }
 
-export function sessionStatePath(sessionId, suffix) {
+export function sessionStatePath(sessionId: string | undefined, suffix: string): string {
   const dir = join(tmpdir(), "claude-guardrails");
   mkdirSync(dir, { recursive: true });
   const safeId = String(sessionId ?? "unknown").replace(/[^\w-]/g, "_");
   return join(dir, `${safeId}.${suffix}`);
 }
 
-export async function runFailOpen(main) {
+export async function runFailOpen(main: () => void | Promise<void>): Promise<void> {
   try {
     await main();
   } catch {

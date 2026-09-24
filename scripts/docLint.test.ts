@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { checkDocs } from "./docLint.mjs";
+import { type Docs, checkDocs } from "./docLint.ts";
 
-const nested = (lines) =>
+const nested = (lines: number) =>
   Array.from({ length: lines }, (_, i) => `- rule ${i}`).join("\n") + "\n";
 const baseDocs = {
   "AGENTS.md": "# Root\n",
   "CLAUDE.md": "@AGENTS.md\n",
 };
-const check = (docs, paths = []) =>
+const check = (docs: Docs, paths: string[] = []) =>
   checkDocs({ docs: { ...baseDocs, ...docs }, paths });
-const messages = (docs, paths) =>
+const messages = (docs: Docs, paths?: string[]) =>
   check(docs, paths).map((each) => `${each.path}: ${each.message}`);
 
 describe("checkDocs", () => {
@@ -36,7 +36,7 @@ describe("checkDocs", () => {
       const [violation] = check({
         "docs/a.md": "# A\n\ntext\n[gone](./gone.md)\n",
       });
-      expect(violation.line).toBe(4);
+      expect(violation?.line).toBe(4);
     });
 
     it("resolves an anchor against a GitHub-style heading slug", () => {
@@ -225,9 +225,9 @@ describe("checkDocs", () => {
   });
 
   describe("leads", () => {
-    const withLead = (lines, width = 6) =>
+    const withLead = (lines: number, width = 6) =>
       `# Doc\n\n${Array.from({ length: lines }, (_, i) => `line ${i}`.padEnd(width, "x")).join("\n\n")}\n\n## Section\n\nBody.\n`;
-    const unheaded = (bytes) => `# Doc\n\n${"x".repeat(bytes - 8)}\n`;
+    const unheaded = (bytes: number) => `# Doc\n\n${"x".repeat(bytes - 8)}\n`;
 
     it("fails a docs/ file whose lead before the first ## heading is over 5 lines", () => {
       expect(messages({ "docs/a.md": withLead(6) })).toEqual([

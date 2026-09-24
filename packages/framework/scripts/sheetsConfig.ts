@@ -6,7 +6,16 @@ const SHEETS_CONFIG_FILE = "sheets.config.json";
 const SCAN_DEPTH = 3;
 const UNSCANNED_DIRS = new Set(["node_modules", "dist", "coverage"]);
 
-export function loadSheetsConfig(cwd = process.cwd()) {
+// A package's sheets.config.json, its folders resolved to absolute paths.
+export interface SheetsConfig {
+  path: string;
+  dir: string;
+  spreadsheetId: string;
+  generatedDir: string;
+  choreHomes: string[];
+}
+
+export function loadSheetsConfig(cwd = process.cwd()): SheetsConfig {
   const path = nearestConfigPath(resolve(cwd));
   const config = readSheetsConfig(path);
   assertDistinctIds([
@@ -16,7 +25,7 @@ export function loadSheetsConfig(cwd = process.cwd()) {
   return config;
 }
 
-function nearestConfigPath(cwd) {
+function nearestConfigPath(cwd: string): string {
   for (let dir = cwd; ; dir = dirname(dir)) {
     const path = join(dir, SHEETS_CONFIG_FILE);
     if (existsSync(path)) return path;
@@ -28,7 +37,7 @@ function nearestConfigPath(cwd) {
   }
 }
 
-function readSheetsConfig(path) {
+function readSheetsConfig(path: string): SheetsConfig {
   const raw = JSON.parse(readFileSync(path, "utf8"));
   const dir = dirname(path);
   for (const field of ["spreadsheetId", "generatedDir"]) {
@@ -43,15 +52,15 @@ function readSheetsConfig(path) {
     dir,
     spreadsheetId: raw.spreadsheetId,
     generatedDir: join(dir, raw.generatedDir),
-    choreHomes: raw.choreHomes.map((home) => join(dir, home)),
+    choreHomes: raw.choreHomes.map((home: string) => join(dir, home)),
   };
 }
 
 // Every package config in the repo holding this one, so a copy-pasted ID is caught from either side.
-function siblingConfigPaths(configPath) {
+function siblingConfigPaths(configPath: string): string[] {
   const root = repoRootOf(dirname(configPath));
-  const found = [];
-  const visit = (dir, depth) => {
+  const found: string[] = [];
+  const visit = (dir: string, depth: number) => {
     const path = join(dir, SHEETS_CONFIG_FILE);
     if (existsSync(path)) found.push(path);
     if (depth === SCAN_DEPTH) return;
@@ -69,15 +78,15 @@ function siblingConfigPaths(configPath) {
   return found;
 }
 
-function repoRootOf(start) {
+function repoRootOf(start: string): string {
   for (let dir = start; ; dir = dirname(dir)) {
     if (existsSync(join(dir, ".git"))) return dir;
     if (dirname(dir) === dir) return start;
   }
 }
 
-function assertDistinctIds(paths) {
-  const byId = new Map();
+function assertDistinctIds(paths: string[]): void {
+  const byId = new Map<string, string>();
   for (const path of paths) {
     const { spreadsheetId } = JSON.parse(readFileSync(path, "utf8"));
     const other = byId.get(spreadsheetId);
@@ -90,6 +99,6 @@ function assertDistinctIds(paths) {
   }
 }
 
-function isFilledString(value) {
+function isFilledString(value: unknown): value is string {
   return typeof value === "string" && value !== "";
 }

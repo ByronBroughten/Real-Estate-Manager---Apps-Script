@@ -2,9 +2,9 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ChoreIndex } from "./choreIndex.mjs";
+import { ChoreIndex } from "./choreIndex.ts";
 
-function homesWith(files) {
+function homesWith(files: string[]): string {
   const root = mkdtempSync(join(tmpdir(), "chore-index-"));
   for (const file of files) {
     mkdirSync(join(root, file, ".."), { recursive: true });

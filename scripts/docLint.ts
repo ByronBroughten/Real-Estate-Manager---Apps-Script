@@ -16,17 +16,39 @@ const LINKED_ROOT_FILES = new Set([
 const publishedRootFiles = new Set(["CONTEXT.md", "README.md"]);
 const frameworkRoot = "packages/framework";
 
+export type Docs = Record<string, string>;
+
+export interface Violation {
+  path: string;
+  line: number;
+  message: string;
+}
+
+type Report = (line: number, message: string) => void;
+
+interface LinkContext {
+  docs: Docs;
+  known: Set<string>;
+  slugsOf: (path: string) => Set<string>;
+  report: Report;
+}
+
+interface ProseLine {
+  line: number;
+  content: string;
+}
+
 // `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.
-export function checkDocs({ docs, paths = [] }) {
+export function checkDocs({ docs, paths = [] }: { docs: Docs; paths?: string[] }): Violation[] {
   const known = new Set([...Object.keys(docs), ...paths]);
-  const slugs = new Map();
-  const slugsOf = (path) => {
-    if (!slugs.has(path)) slugs.set(path, headingSlugs(docs[path]));
-    return slugs.get(path);
+  const slugs = new Map<string, Set<string>>();
+  const slugsOf = (path: string) => {
+    if (!slugs.has(path)) slugs.set(path, headingSlugs(docs[path] ?? ""));
+    return slugs.get(path) ?? new Set<string>();
   };
-  const violations = [];
+  const violations: Violation[] = [];
   for (const [path, text] of Object.entries(docs)) {
-    const report = (line, message) => violations.push({ path, line, message });
+    const report: Report = (line, message) => violations.push({ path, line, message });
     if (isLinkChecked(path))
       checkLinks(path, text, { docs, known, slugsOf, report });
     if (isDocsFolderFile(path)) checkLead(text, report);
@@ -41,7 +63,7 @@ export function checkDocs({ docs, paths = [] }) {
 }
 
 // The repo root, or the `packages/<name>` folder, that holds the doc.
-function docRoot(path) {
+function docRoot(path: string): string {
   const parts = path.split("/");
   return parts[0] === "packages" && parts.length > 2
     ? parts.slice(0, 2).join("/")
@@ -49,16 +71,16 @@ function docRoot(path) {
 }
 
 // `path` relative to its doc root.
-function inRoot(path) {
+function inRoot(path: string): string {
   const root = docRoot(path);
   return root === "" ? path : path.slice(root.length + 1);
 }
 
-function isDocsFolderFile(path) {
+function isDocsFolderFile(path: string): boolean {
   return inRoot(path).startsWith("docs/");
 }
 
-function isLinkChecked(path) {
+function isLinkChecked(path: string): boolean {
   const name = posix.basename(path);
   const local = inRoot(path);
   if (!local.includes("/")) return LINKED_ROOT_FILES.has(local);
@@ -66,13 +88,13 @@ function isLinkChecked(path) {
 }
 
 // The framework ships `docs/`, `CONTEXT.md` and `README.md`, so they must stand alone.
-function isPublishedFrameworkDoc(path) {
+function isPublishedFrameworkDoc(path: string): boolean {
   if (docRoot(path) !== frameworkRoot) return false;
   const local = inRoot(path);
   return local.startsWith("docs/") || publishedRootFiles.has(local);
 }
 
-function checkLinks(path, text, { docs, known, slugsOf, report }) {
+function checkLinks(path: string, text: string, { docs, known, slugsOf, report }: LinkContext): void {
   const published = isPublishedFrameworkDoc(path);
   for (const { line, target } of linksIn(text)) {
     const hashAt = target.indexOf("#");
@@ -100,36 +122,36 @@ function checkLinks(path, text, { docs, known, slugsOf, report }) {
   }
 }
 
-function resolveLink(from, file) {
+function resolveLink(from: string, file: string): string {
   const joined = file.startsWith("/")
     ? file.slice(1)
     : posix.join(posix.dirname(from), file);
   return posix.normalize(joined).replace(/\/$/, "");
 }
 
-function linksIn(text) {
-  const links = [];
+function linksIn(text: string): { line: number; target: string }[] {
+  const links: { line: number; target: string }[] = [];
   for (const { line, content } of proseLines(text)) {
     const bare = content.replace(/`[^`]*`/g, "");
     for (const match of bare.matchAll(
       /\]\(\s*<?([^)\s>]+)>?(?:\s+"[^"]*")?\s*\)/g,
     )) {
-      links.push({ line, target: match[1] });
+      links.push({ line, target: match[1] ?? "" });
     }
     const reference = /^\s*\[[^\]]+\]:\s*(\S+)/.exec(bare);
-    if (reference) links.push({ line, target: reference[1] });
+    if (reference) links.push({ line, target: reference[1] ?? "" });
   }
   return links.filter(({ target }) => !/^[a-z][a-z0-9+.-]*:/i.test(target));
 }
 
 // Lines outside fenced code blocks, numbered from 1.
-function proseLines(text) {
-  const lines = [];
-  let fence = null;
+function proseLines(text: string): ProseLine[] {
+  const lines: ProseLine[] = [];
+  let fence: string | null = null;
   text.split("\n").forEach((content, index) => {
     const opener = /^\s*(```|~~~)/.exec(content);
     if (opener) {
-      if (fence === null) fence = opener[1];
+      if (fence === null) fence = opener[1] ?? null;
       else if (opener[1] === fence) fence = null;
       return;
     }
@@ -139,13 +161,13 @@ function proseLines(text) {
 }
 
 // GitHub's slugger: lowercase, drop everything but letters, marks, numbers, spaces, `-` and `_`, then spaces to `-`.
-function headingSlugs(text) {
-  const slugs = new Set();
-  const seen = new Map();
+function headingSlugs(text: string): Set<string> {
+  const slugs = new Set<string>();
+  const seen = new Map<string, number>();
   for (const { content } of proseLines(text)) {
     const heading = /^#{1,6}\s+(.*?)\s*#*\s*$/.exec(content);
     if (!heading) continue;
-    const rendered = heading[1]
+    const rendered = (heading[1] ?? "")
       .replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
       .replace(/[`*]/g, "");
     const base = rendered
@@ -160,7 +182,7 @@ function headingSlugs(text) {
 }
 
 // A read-by-heading doc's lead: the non-blank lines after its title and before its first `##` heading.
-function checkLead(text, report) {
+function checkLead(text: string, report: Report): void {
   const lines = proseLines(text);
   const firstSection = lines.findIndex(({ content }) => /^##\s/.test(content));
   if (firstSection === -1) {
@@ -175,9 +197,10 @@ function checkLead(text, report) {
   const lead = lines
     .slice(0, firstSection)
     .filter(({ content }) => content.trim() !== "" && !/^#\s/.test(content));
+  const leadLine = lead[0]?.line ?? 1;
   if (lead.length > MAX_LEAD_LINES) {
     report(
-      lead[0].line,
+      leadLine,
       `lead is ${lead.length} lines before the first ## heading; keep it to ${MAX_LEAD_LINES} and move the rest under a heading`,
     );
     return;
@@ -185,16 +208,16 @@ function checkLead(text, report) {
   const bytes = byteLength(lead.map(({ content }) => content).join("\n"));
   if (bytes > MAX_LEAD_BYTES)
     report(
-      lead[0].line,
+      leadLine,
       `lead is ${bytes} bytes before the first ## heading; keep it to ${MAX_LEAD_BYTES} and move the rest under a heading`,
     );
 }
 
-function byteLength(text) {
+function byteLength(text: string): number {
   return new TextEncoder().encode(text).length;
 }
 
-function checkRootSize(text, report) {
+function checkRootSize(text: string, report: Report): void {
   const bytes = byteLength(text);
   if (bytes <= MAX_ROOT_AGENTS_BYTES) return;
   report(
@@ -203,7 +226,7 @@ function checkRootSize(text, report) {
   );
 }
 
-function checkNestedSize(path, text, report) {
+function checkNestedSize(path: string, text: string, report: Report): void {
   const lines = text.replace(/\n$/, "").split("\n").length;
   const limit = isPackageSrcAgents(path)
     ? MAX_SRC_AGENTS_LINES
@@ -212,7 +235,7 @@ function checkNestedSize(path, text, report) {
     report(1, `nested AGENTS.md is ${lines} lines; the limit is ${limit}`);
 }
 
-function isPackageSrcAgents(path) {
+function isPackageSrcAgents(path: string): boolean {
   const parts = path.split("/");
   return (
     parts.length === 4 &&
@@ -222,7 +245,7 @@ function isPackageSrcAgents(path) {
   );
 }
 
-function checkClaudePairing(path, docs, report) {
+function checkClaudePairing(path: string, docs: Docs, report: Report): void {
   const claude = posix.join(posix.dirname(path), "CLAUDE.md");
   const importsIt = (docs[claude] ?? "")
     .split("\n")

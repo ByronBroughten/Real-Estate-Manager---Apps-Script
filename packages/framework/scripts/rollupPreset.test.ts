@@ -9,7 +9,7 @@ import {
   exportEntryFunctions,
   rollupPreset,
   stripExportStatements,
-} from "./rollupPreset.mjs";
+} from "./rollupPreset.js";
 
 describe("entryFunctionNames", () => {
   it("lists top-level function declarations in source order", () => {
@@ -105,7 +105,7 @@ describe("rollupPreset", () => {
 });
 
 // Two sibling folders under one root, like the two packages after the workspace move.
-function twoPackages(appSource) {
+function twoPackages(appSource: string): string {
   const root = mkdtempSync(join(tmpdir(), "rollup-preset-"));
   mkdirSync(join(root, "framework", "src"), { recursive: true });
   mkdirSync(join(root, "app", "src"), { recursive: true });
@@ -140,7 +140,7 @@ function twoPackages(appSource) {
   return root;
 }
 
-async function bundleOf(root, options = {}) {
+async function bundleOf(root: string, options: { treeshake?: boolean } = {}): Promise<string> {
   const config = rollupPreset({
     input: join(root, "app", "src", "index.ts"),
     tsconfig: join(root, "app", "tsconfig.json"),

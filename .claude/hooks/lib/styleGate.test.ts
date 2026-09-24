@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { STYLE_GATE_REASON, editDecision, isStyleRead } from "./styleGate.mjs";
+import { STYLE_GATE_REASON, editDecision, isStyleRead } from "./styleGate.ts";
 
 const projectDir = "/repo";
 const generatedDirs = ["packages/real-estate/src/generated", "packages/framework/dev/generated"];
-const edit = (filePath, hasReadStyle, cwd = projectDir) =>
+const edit = (filePath: string, hasReadStyle: boolean, cwd = projectDir) =>
   editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs });
 const frameworkFile = "/repo/packages/framework/src/02_SpreadsheetRaw/SheetRaw.ts";
 
@@ -27,19 +27,33 @@ describe("editDecision", () => {
     expect(edit(frameworkFile, true)).toEqual({ denyReason: null });
   });
 
+  it("denies an edit to tooling, which ESLint lints too", () => {
+    expect(edit("/repo/.claude/hooks/lib/bashReads.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit("/repo/scripts/docLint.ts", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit("/repo/packages/framework/scripts/rollupPreset.js", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+    expect(edit("/repo/eslint.config.mjs", false)).toEqual({ denyReason: STYLE_GATE_REASON });
+  });
+
   it("allows edits outside the ESLint set", () => {
-    expect(edit("/repo/scripts/docLint.mjs", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/vitest.config.ts", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/framework/dist/bundle.js", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/coverage/prettify.js", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/node_modules/x/index.js", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/.claude/worktrees/agent-1/scripts/docLint.ts", false)).toEqual({ denyReason: null });
     expect(edit("/elsewhere/packages/framework/src/x.ts", false)).toEqual({ denyReason: null });
   });
 
-  it("allows non-TypeScript edits inside src/", () => {
+  it("allows non-code edits", () => {
     expect(edit("/repo/packages/framework/src/AGENTS.md", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/framework/sheets.config.json", false)).toEqual({ denyReason: null });
   });
 
   it("leaves every package's generated files to the generated-data warning", () => {
     expect(edit("/repo/packages/real-estate/src/generated/sheetConfigs.ts", false)).toEqual({ denyReason: null });
     expect(edit("/repo/packages/framework/dev/generated/sheetConfigs.ts", false)).toEqual({ denyReason: null });
+  });
+
+  it("does not say it only covers packages/", () => {
+    expect(STYLE_GATE_REASON).not.toMatch(/under packages/);
   });
 
   it("names what to read and to retry", () => {
@@ -49,7 +63,11 @@ describe("editDecision", () => {
 });
 
 describe("isStyleRead", () => {
-  const read = (filePath, bounds = {}, cwd = projectDir) =>
+  const read = (
+    filePath: string,
+    bounds: { offset?: number; limit?: number; totalLines?: number } = {},
+    cwd = projectDir,
+  ) =>
     isStyleRead({ projectDir, cwd, filePath, totalLines: 40, ...bounds });
 
   it("is true for an unbounded Read of docs/style.md", () => {

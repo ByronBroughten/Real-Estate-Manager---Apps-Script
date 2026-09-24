@@ -113,6 +113,11 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **Test an endpoint through `EndpointRun`, never by calling its action**, and assert the batch-update requests the run emits. No test reaches for a private helper.
 - **A type-level test names an exemplar column whose value name can't churn under `gen:configs`.**
 
+## Tooling
+
+- **The hooks, root scripts, the framework's `scripts/` and the tool configs follow this file too**, all but the tier class-shape rules (coordinators, Operators, collaborators, Meta columns) and the Sheets verb list.
+- **The framework's `scripts/` may use `Val`; the hooks and root scripts never import from `packages/`** and write plain guards instead.
+
 ## Imports & file organization
 
 - **Imports sorted alphabetically by path, by hand.**

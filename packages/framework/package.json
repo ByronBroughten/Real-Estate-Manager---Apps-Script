@@ -8,10 +8,10 @@
     ".": "./src/framework.ts",
     "./testing": "./src/frameworkTesting.ts",
     "./tsconfig.base.json": "./tsconfig.base.json",
-    "./rollup": "./scripts/rollupPreset.mjs"
+    "./rollup": "./scripts/rollupPreset.js"
   },
   "bin": {
-    "sheets-framework": "scripts/sheets-framework.mjs"
+    "sheets-framework": "scripts/sheets-framework.js"
   },
   "files": [
     "src",
@@ -23,10 +23,10 @@
     "!**/CLAUDE.md"
   ],
   "scripts": {
-    "tsc": "tsc -p .",
-    "chore": "node scripts/sheets-framework.mjs chore",
-    "gen:configs": "node scripts/sheets-framework.mjs gen-configs",
-    "probe": "node scripts/sheets-framework.mjs probe",
+    "tsc": "tsc -p . && tsc -p scripts",
+    "chore": "node scripts/sheets-framework.js chore",
+    "gen:configs": "node scripts/sheets-framework.js gen-configs",
+    "probe": "node scripts/sheets-framework.js probe",
     "build": "rollup --config && clasp push",
     "push": "clasp push",
     "run": "clasp run"

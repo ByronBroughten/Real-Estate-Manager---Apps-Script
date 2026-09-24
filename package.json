@@ -6,9 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "tsc": "npm run tsc --workspaces",
-    "lint": "eslint packages && npm run -s lint:docs",
-    "lint:docs": "node scripts/lintDocs.mjs",
+    "tsc": "tsc -p . && npm run tsc --workspaces",
+    "lint": "eslint . && npm run -s lint:docs",
+    "lint:docs": "node scripts/lintDocs.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
@@ -29,6 +29,7 @@
     "@eslint/js": "^9.35.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/google-apps-script": "^2.0.11",
+    "@types/node": "^22.20.4",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.35.0",
     "prettier": "3.9.6",

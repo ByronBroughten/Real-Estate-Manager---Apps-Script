@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { bashDecision, devWriteOf, gsheetsWriteDecision } from "./pinnedTargets.mjs";
+import { type GsheetsWrite, bashDecision, devWriteOf, gsheetsWriteDecision } from "./pinnedTargets.ts";
 
 describe("devWriteOf", () => {
   it("names a dev gen:configs, build, push or run", () => {
@@ -60,7 +60,7 @@ describe("bashDecision", () => {
 
 describe("gsheetsWriteDecision", () => {
   const devSpreadsheetId = "dev-id";
-  const decide = (overrides) =>
+  const decide = (overrides: Partial<GsheetsWrite>) =>
     gsheetsWriteDecision({
       toolName: "mcp__gsheets__update_cells",
       spreadsheetId: "dev-id",
@@ -81,21 +81,21 @@ describe("gsheetsWriteDecision", () => {
 
   it("asks for any other spreadsheet, with the exact sheet, range and values", () => {
     const decision = decide({ spreadsheetId: "app-id" });
-    expect(decision.permissionDecision).toBe("ask");
-    expect(decision.reason).toMatch(/not the dev spreadsheet/);
-    expect(decision.reason).toMatch(/sheet, range and values/);
+    expect(decision?.permissionDecision).toBe("ask");
+    expect(decision?.reason).toMatch(/not the dev spreadsheet/);
+    expect(decision?.reason).toMatch(/sheet, range and values/);
   });
 
   it("asks on the dev spreadsheet while a pinning file has uncommitted changes", () => {
-    const decision = decide({ dirtyPinningFiles: [".claude/hooks/pinnedTargetGuard.mjs"] });
-    expect(decision.permissionDecision).toBe("ask");
-    expect(decision.reason).toMatch(/pinnedTargetGuard\.mjs/);
+    const decision = decide({ dirtyPinningFiles: [".claude/hooks/pinnedTargetGuard.ts"] });
+    expect(decision?.permissionDecision).toBe("ask");
+    expect(decision?.reason).toMatch(/pinnedTargetGuard\.ts/);
   });
 
   it("asks when the dev ID or the pinning files' state is unknown", () => {
-    expect(decide({ devSpreadsheetId: undefined }).permissionDecision).toBe("ask");
-    expect(decide({ spreadsheetId: undefined, devSpreadsheetId: undefined }).permissionDecision).toBe("ask");
-    expect(decide({ dirtyPinningFiles: null }).permissionDecision).toBe("ask");
+    expect(decide({ devSpreadsheetId: undefined })?.permissionDecision).toBe("ask");
+    expect(decide({ spreadsheetId: undefined, devSpreadsheetId: undefined })?.permissionDecision).toBe("ask");
+    expect(decide({ dirtyPinningFiles: null })?.permissionDecision).toBe("ask");
   });
 
   it("has no opinion on a tool it does not guard", () => {

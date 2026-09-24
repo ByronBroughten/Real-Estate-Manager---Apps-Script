@@ -117,9 +117,15 @@ const appImportBlocks = [0, 1, 2, 3, 4, 5].flatMap((depth) => {
 });
 
 export default defineConfig(
-  { ignores: ["**/*.mjs", "**/dist/**", "**/coverage/**"] },
+  // Agent worktrees are whole checkouts that git excludes locally, which ESLint doesn't read.
+  { ignores: ["**/dist/**", "**/coverage/**", ".claude/worktrees/**"] },
   eslint.configs.recommended,
   tseslint.configs.recommended,
+  // tsc checks these for undefined names, as typescript-eslint leaves it to tsc in .ts files.
+  {
+    files: ["packages/framework/scripts/**/*.js"],
+    rules: { "no-undef": "off" },
+  },
   {
     rules: {
       "max-classes-per-file": ["error", 1],

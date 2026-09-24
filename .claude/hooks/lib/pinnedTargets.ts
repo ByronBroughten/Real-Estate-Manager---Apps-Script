@@ -1,12 +1,12 @@
-// Decides the pinned-target guard: dev writes drop to ask while a pinning file is dirty, and gsheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.mjs does the I/O.
-import { commandWordsOf } from "./bashReads.mjs";
-import { SHEETS_CONFIGS } from "./sheetsConfigs.mjs";
+// Decides the pinned-target guard: dev writes drop to ask while a pinning file is dirty, and gsheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.ts does the I/O.
+import { commandWordsOf } from "./bashReads.ts";
+import { SHEETS_CONFIGS } from "./sheetsConfigs.ts";
 
 export const PINNING_FILES = [
   ...SHEETS_CONFIGS.map(({ path }) => path),
-  ".claude/hooks/pinnedTargetGuard.mjs",
-  ".claude/hooks/lib/pinnedTargets.mjs",
-  ".claude/hooks/lib/sheetsConfigs.mjs",
+  ".claude/hooks/pinnedTargetGuard.ts",
+  ".claude/hooks/lib/pinnedTargets.ts",
+  ".claude/hooks/lib/sheetsConfigs.ts",
 ];
 export const GUARDED_GSHEETS_WRITES = new Set([
   "mcp__gsheets__update_cells",
@@ -16,7 +16,22 @@ export const GUARDED_GSHEETS_WRITES = new Set([
 const DEV_WRITES = new Set(["dev:gen:configs", "dev:build", "dev:push", "dev:run"]);
 const RUN_VERBS = new Set(["run", "run-script"]);
 
-export function devWriteOf(command) {
+// null means git could not say which pinning files are dirty.
+export type DirtyPinningFiles = string[] | null;
+
+export interface Decision {
+  permissionDecision: "allow" | "ask";
+  reason: string;
+}
+
+export interface GsheetsWrite {
+  toolName: string | undefined;
+  spreadsheetId: unknown;
+  devSpreadsheetId: unknown;
+  dirtyPinningFiles: DirtyPinningFiles;
+}
+
+export function devWriteOf(command: string): string | null {
   let commands;
   try {
     commands = commandWordsOf(command);
@@ -32,7 +47,13 @@ export function devWriteOf(command) {
   return null;
 }
 
-export function bashDecision({ command, dirtyPinningFiles }) {
+export function bashDecision({
+  command,
+  dirtyPinningFiles,
+}: {
+  command: string;
+  dirtyPinningFiles: DirtyPinningFiles;
+}): Decision | null {
   const write = devWriteOf(command);
   if (!write || isClean(dirtyPinningFiles)) return null;
   return {
@@ -41,8 +62,13 @@ export function bashDecision({ command, dirtyPinningFiles }) {
   };
 }
 
-export function gsheetsWriteDecision({ toolName, spreadsheetId, devSpreadsheetId, dirtyPinningFiles }) {
-  if (!GUARDED_GSHEETS_WRITES.has(toolName)) return null;
+export function gsheetsWriteDecision({
+  toolName,
+  spreadsheetId,
+  devSpreadsheetId,
+  dirtyPinningFiles,
+}: GsheetsWrite): Decision | null {
+  if (toolName === undefined || !GUARDED_GSHEETS_WRITES.has(toolName)) return null;
   const isDev = typeof devSpreadsheetId === "string" && devSpreadsheetId !== "" && spreadsheetId === devSpreadsheetId;
   if (!isDev) {
     return {
@@ -61,19 +87,19 @@ export function gsheetsWriteDecision({ toolName, spreadsheetId, devSpreadsheetId
   return { permissionDecision: "allow", reason: "Pinned-target guard: a write to the dev spreadsheet, from a clean pin." };
 }
 
-function npmScriptOf(words) {
+function npmScriptOf(words: string[]): { name: string; args: string[] } | null {
   if (words[0] !== "npm" && words[0] !== "npm.cmd") return null;
   const rest = words.slice(1).filter((word) => !/^-/.test(word) || word === "--" || word === "--send");
-  if (!RUN_VERBS.has(rest[0]) || !rest[1]) return null;
+  if (!RUN_VERBS.has(rest[0] ?? "") || !rest[1]) return null;
   return { name: rest[1], args: rest.slice(2) };
 }
 
 // null means git could not say, which counts as dirty.
-function isClean(dirtyPinningFiles) {
+function isClean(dirtyPinningFiles: DirtyPinningFiles): boolean {
   return Array.isArray(dirtyPinningFiles) && dirtyPinningFiles.length === 0;
 }
 
-function dirtyShown(dirtyPinningFiles) {
+function dirtyShown(dirtyPinningFiles: DirtyPinningFiles): string {
   if (!Array.isArray(dirtyPinningFiles)) return "the pinning files' git state could not be read";
   return `${dirtyPinningFiles.join(", ")} ${dirtyPinningFiles.length === 1 ? "has" : "have"} uncommitted changes`;
 }

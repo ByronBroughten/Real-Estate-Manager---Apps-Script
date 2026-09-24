@@ -1,6 +1,6 @@
 // UserPromptSubmit: warns once when the session's context passes about 400k tokens, and once more past 1M.
 import { closeSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
-import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.mjs";
+import { type HookInput, readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 
 const BYTES_PER_TOKEN = 4;
 const TAIL_BYTES = 4 * 1024 * 1024;
@@ -23,14 +23,16 @@ const THRESHOLDS = [
 ];
 
 class ContextSize {
-  constructor({ input }) {
+  readonly input: HookInput;
+  readonly firedPath: string;
+  constructor({ input }: { input: HookInput }) {
     this.input = input;
     this.firedPath = sessionStatePath(input.session_id, "size.json");
   }
-  static init(input) {
+  static init(input: HookInput): ContextSize {
     return new ContextSize({ input });
   }
-  run() {
+  run(): void {
     const tokens = this._estimateTokens();
     if (tokens === null) return;
     const fired = this._fired();
@@ -48,7 +50,7 @@ class ContextSize {
       },
     });
   }
-  _fired() {
+  _fired(): number[] {
     try {
       const fired = JSON.parse(readFileSync(this.firedPath, "utf8"));
       return Array.isArray(fired) ? fired : [];
@@ -57,7 +59,7 @@ class ContextSize {
     }
   }
   // Prefer the last main-thread usage figures; fall back to transcript bytes.
-  _estimateTokens() {
+  _estimateTokens(): number | null {
     const path = this.input.transcript_path;
     if (typeof path !== "string") return null;
     const { size } = statSync(path);
@@ -67,7 +69,7 @@ class ContextSize {
   }
 }
 
-function readTail(path, size) {
+function readTail(path: string, size: number): string {
   const length = Math.min(size, TAIL_BYTES);
   const buffer = Buffer.alloc(length);
   const fd = openSync(path, "r");
@@ -79,13 +81,14 @@ function readTail(path, size) {
   return buffer.toString("utf8");
 }
 
-function lastUsageIn(text) {
+function lastUsageIn(text: string): number | null {
   const lines = text.split("\n");
   for (let i = lines.length - 1; i >= 0; i--) {
-    if (!lines[i].includes('"usage"')) continue;
+    const line = lines[i] ?? "";
+    if (!line.includes('"usage"')) continue;
     let entry;
     try {
-      entry = JSON.parse(lines[i]);
+      entry = JSON.parse(line);
     } catch {
       continue;
     }

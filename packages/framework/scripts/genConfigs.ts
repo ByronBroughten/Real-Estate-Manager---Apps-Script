@@ -3,26 +3,31 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import type { ConfigRegeneration } from "../src/05_Operators/ConfigCoordinator.ts";
 import {
   CONFIG_FILES,
+  type ConfigFile,
   hasPackageConfigs,
   loadFrameworkConfigs,
   loadPackageConfigs,
   startNodeHost,
-} from "./nodeHost.mjs";
+} from "./nodeHost.ts";
+import type { SheetsConfig } from "./sheetsConfig.ts";
 
 class ConfigFilesGenerator {
-  constructor({ sheetsConfig }) {
+  readonly sheetsConfig: SheetsConfig;
+  readonly path: Record<ConfigFile, string>;
+  constructor({ sheetsConfig }: { sheetsConfig: SheetsConfig }) {
     this.sheetsConfig = sheetsConfig;
     const { generatedDir } = sheetsConfig;
     this.path = Object.fromEntries(
       CONFIG_FILES.map((base) => [base, join(generatedDir, `${base}.ts`)]),
-    );
+    ) as Record<ConfigFile, string>;
   }
-  static init(sheetsConfig) {
+  static init(sheetsConfig: SheetsConfig): ConfigFilesGenerator {
     return new ConfigFilesGenerator({ sheetsConfig });
   }
-  async run() {
+  async run(): Promise<void> {
     const {
       spreadsheetConfig,
       sheetConfigs,
@@ -67,7 +72,7 @@ class ConfigFilesGenerator {
     console.log("gen:configs: tsc passed.");
   }
 
-  async _generate() {
+  async _generate(): Promise<ConfigRegeneration> {
     // Only the config floor is read here; a package with no generated files yet borrows the framework's.
     await startNodeHost({
       isDryRun: false,
@@ -83,14 +88,14 @@ class ConfigFilesGenerator {
     );
   }
 
-  _makeConfigsImport() {
+  _makeConfigsImport(): string {
     const makeConfigsPath = fileURLToPath(
       new URL("../src/01_SpreadsheetSchema/makeConfigs", import.meta.url),
     );
     return relative(dirname(this.path.spreadsheetConfig), makeConfigsPath);
   }
 
-  _runTsc() {
+  _runTsc(): boolean {
     const { status } = spawnSync("npm", ["run", "tsc"], {
       cwd: this.sheetsConfig.dir,
       stdio: "inherit",
@@ -98,7 +103,7 @@ class ConfigFilesGenerator {
     return status === 0;
   }
 
-  _reportTscFailure() {
+  _reportTscFailure(): void {
     console.error(
       "\ngen:configs: regeneration succeeded and all four files were written, " +
         "but this package's `npm run tsc` failed above. This usually means " +
@@ -109,6 +114,6 @@ class ConfigFilesGenerator {
   }
 }
 
-export async function runGenConfigs(sheetsConfig) {
+export async function runGenConfigs(sheetsConfig: SheetsConfig): Promise<void> {
   await ConfigFilesGenerator.init(sheetsConfig).run();
 }

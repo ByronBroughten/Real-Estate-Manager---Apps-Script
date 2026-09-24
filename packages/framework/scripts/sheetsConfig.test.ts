@@ -2,9 +2,9 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { loadSheetsConfig } from "./sheetsConfig.mjs";
+import { loadSheetsConfig } from "./sheetsConfig.ts";
 
-function repoWith(configs) {
+function repoWith(configs: Record<string, object>): string {
   const root = mkdtempSync(join(tmpdir(), "sheets-config-"));
   mkdirSync(join(root, ".git"));
   for (const [dir, config] of Object.entries(configs)) {

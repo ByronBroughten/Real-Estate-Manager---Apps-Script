@@ -1,12 +1,13 @@
 // PreToolUse on Edit and Write: warns, without blocking, before a hand edit inside any package's generated folder.
 import { relative, resolve, sep } from "node:path";
-import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.mjs";
-import { readSheetsConfigs } from "./lib/sheetsConfigs.mjs";
+import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
+import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 
 await runFailOpen(() => {
   const input = readHookInput();
-  const filePath = input?.tool_input?.file_path;
-  if (!["Edit", "Write"].includes(input?.tool_name) || typeof filePath !== "string") return;
+  if (!input) return;
+  const filePath = input.tool_input?.file_path;
+  if (!["Edit", "Write"].includes(input.tool_name ?? "") || typeof filePath !== "string") return;
   const projectDir = process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
   const target = relative(projectDir, resolve(input.cwd ?? projectDir, filePath));
   const owner = readSheetsConfigs(projectDir).find(({ generatedDir }) => target.startsWith(generatedDir + sep));

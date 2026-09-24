@@ -110,4 +110,4 @@ function prepFetchRowSpecifier(sheet: SheetIdentified, rowSpecifier: RowSpecifie
 
 ## Group paired fields the same way
 
-**The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. `scripts/genConfigs.mjs` groups its three output paths as `path: { sheetConfigs, columnConfigs, valueConfigs }` rather than three separate `sheetConfigsPath`/`columnConfigsPath`/`valueConfigsPath` members.
+**The same grouping judgment applies to fields, not just method params.** Two or more naturally-paired values (e.g. a pair of output file paths) get grouped into one object property rather than kept as separate top-level members. The framework's `scripts/genConfigs.ts` groups its three output paths as `path: { sheetConfigs, columnConfigs, valueConfigs }` rather than three separate `sheetConfigsPath`/`columnConfigsPath`/`valueConfigsPath` members.

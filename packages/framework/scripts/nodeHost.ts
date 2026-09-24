@@ -4,6 +4,10 @@ import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import type { SheetsHttpRequest } from "../src/00_Source/GoogleSheets/GoogleSheetsAPI.ts";
+import type { Configs } from "../src/01_SpreadsheetSchema/configRegister.ts";
+import type { NodeHost } from "../src/nodeHost/NodeHost.ts";
+import type { SheetsConfig } from "./sheetsConfig.ts";
 
 const CLASP_RUN_USER = "desktop-clasp-run";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -14,19 +18,39 @@ export const CONFIG_FILES = [
   "sheetConfigs",
   "columnConfigs",
   "valueConfigs",
-];
+] as const;
+
+export type ConfigFile = (typeof CONFIG_FILES)[number];
+
+interface FetchRequest {
+  url: string;
+  method: string;
+  headers: Record<string, string>;
+  body: string | null;
+}
+
+interface FetchResponse {
+  status: number;
+  body: string;
+}
+
+interface ClaspCredential {
+  client_id: string;
+  client_secret: string;
+  refresh_token: string;
+}
 
 const path = {
-  fetchSync: fileURLToPath(new URL("./fetchSync.mjs", import.meta.url)),
+  fetchSync: fileURLToPath(new URL("./fetchSync.js", import.meta.url)),
   claspRc: fileURLToPath(new URL(".clasprc.json", `file://${homedir()}/`)),
 };
 
 export class SheetsTransport {
-  accessToken = null;
-  static init() {
+  accessToken: string | null = null;
+  static init(): SheetsTransport {
     return new SheetsTransport();
   }
-  send(request) {
+  send(request: SheetsHttpRequest): unknown {
     const { status, body } = this._fetchSync({
       url: request.url,
       method: request.method,
@@ -43,7 +67,7 @@ export class SheetsTransport {
     }
     return JSON.parse(body);
   }
-  _ensureAccessToken() {
+  _ensureAccessToken(): string {
     if (this.accessToken) return this.accessToken;
     const { client_id, client_secret, refresh_token } = this._claspCredential();
     const { status, body } = this._fetchSync({
@@ -68,14 +92,14 @@ export class SheetsTransport {
     return accessToken;
   }
   // A failing token endpoint need not answer in JSON, so a parse error is one too.
-  _accessTokenOf(body) {
+  _accessTokenOf(body: string): string | null {
     try {
       return JSON.parse(body).access_token ?? null;
     } catch {
       return null;
     }
   }
-  _claspCredential() {
+  _claspCredential(): ClaspCredential {
     let tokens;
     try {
       ({ tokens } = JSON.parse(readFileSync(path.claspRc, "utf8")));
@@ -94,7 +118,7 @@ export class SheetsTransport {
     }
     return credential;
   }
-  _fetchSync(request) {
+  _fetchSync(request: FetchRequest): FetchResponse {
     const { status, stdout, stderr, error } = spawnSync(
       process.execPath,
       [path.fetchSync],
@@ -114,7 +138,15 @@ export class SheetsTransport {
   }
 }
 
-export async function startNodeHost({ isDryRun, sheetsConfig, configs }) {
+export async function startNodeHost({
+  isDryRun,
+  sheetsConfig,
+  configs,
+}: {
+  isDryRun: boolean;
+  sheetsConfig: SheetsConfig;
+  configs: Configs;
+}): Promise<NodeHost> {
   const { NodeHost } = await import("../src/nodeHost/NodeHost.ts");
   const transport = SheetsTransport.init();
   return NodeHost.init({
@@ -127,23 +159,25 @@ export async function startNodeHost({ isDryRun, sheetsConfig, configs }) {
 }
 
 // The four files in the package's generatedDir, as the package's entry passes them to the framework.
-export async function loadPackageConfigs({ generatedDir }) {
+export async function loadPackageConfigs({
+  generatedDir,
+}: SheetsConfig): Promise<Configs> {
   const entries = await Promise.all(
     CONFIG_FILES.map(async (base) => {
       const url = pathToFileURL(join(generatedDir, `${base}.ts`));
       return [base, (await import(url.href))[base]];
     }),
   );
-  return Object.fromEntries(entries);
+  return Object.fromEntries(entries) as Configs;
 }
 
-export function hasPackageConfigs({ generatedDir }) {
+export function hasPackageConfigs({ generatedDir }: SheetsConfig): boolean {
   return CONFIG_FILES.every((base) =>
     existsSync(join(generatedDir, `${base}.ts`)),
   );
 }
 
 // The framework's own dev configs: enough to read any spreadsheet's config floor.
-export async function loadFrameworkConfigs() {
+export async function loadFrameworkConfigs(): Promise<Configs> {
   return (await import("../dev/devConfigs.ts")).devConfigs;
 }

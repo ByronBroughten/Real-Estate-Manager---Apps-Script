@@ -2,14 +2,25 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 
+// Chore name to its module's absolute path.
+type ChorePaths = Map<string, string>;
+
 export class ChoreIndex {
-  constructor({ generic, own }) {
+  readonly generic: ChorePaths;
+  readonly own: ChorePaths;
+  constructor({ generic, own }: { generic: ChorePaths; own: ChorePaths }) {
     this.generic = generic;
     this.own = own;
   }
-  static init({ genericHome, packageHomes }) {
+  static init({
+    genericHome,
+    packageHomes,
+  }: {
+    genericHome: string;
+    packageHomes: string[];
+  }): ChoreIndex {
     const generic = choresIn(genericHome);
-    const own = new Map();
+    const own: ChorePaths = new Map();
     for (const home of packageHomes) {
       for (const [name, path] of choresIn(home)) {
         if (generic.has(name)) {
@@ -28,11 +39,11 @@ export class ChoreIndex {
     }
     return new ChoreIndex({ generic, own });
   }
-  pathOf(name) {
+  pathOf(name: string): string | null {
     return this.generic.get(name) ?? this.own.get(name) ?? null;
   }
-  listing(packageDir) {
-    const lines = (chores) => [...chores.keys()].map((name) => `  ${name}`);
+  listing(packageDir: string): string {
+    const lines = (chores: ChorePaths) => [...chores.keys()].map((name) => `  ${name}`);
     const ownLines = [...this.own].map(
       ([name, path]) => `  ${name}  (${relative(packageDir, path)})`,
     );
@@ -46,7 +57,7 @@ export class ChoreIndex {
 }
 
 // A home that is not there yet holds no chores, as an emptied oneOff/ does in a fresh clone.
-function choresIn(home) {
+function choresIn(home: string): ChorePaths {
   if (!existsSync(home)) return new Map();
   return new Map(
     readdirSync(home, { withFileTypes: true })
