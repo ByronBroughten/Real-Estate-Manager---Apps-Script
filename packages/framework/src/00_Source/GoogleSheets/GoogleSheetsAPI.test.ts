@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { stubPropertiesService } from "../../testSupport/fakeAppsScriptGlobals";
+import { stubScriptAndSpreadsheetApp } from "../../testSupport/fakeAppsScriptGlobals";
 import type {
   AddCheckboxValidationOperation,
   AddSheetOperation,
@@ -1529,12 +1529,12 @@ describe("GoogleSheetsAPI spreadsheet binding", () => {
     expect(requestedIds).toEqual([spreadsheetId, spreadsheetId, spreadsheetId]);
   });
 
-  it("names the missing script property when Apps Script has no spreadsheet id", () => {
-    stubPropertiesService();
+  it("asks for a bound script when Apps Script has no active spreadsheet", () => {
+    stubScriptAndSpreadsheetApp({ spreadsheetId: null });
     vi.stubGlobal("Sheets", { Spreadsheets: {} });
 
     expect(() => GoogleSheetsAPI.forAppsScript()).toThrowError(
-      "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
+      "bind the Apps Script project to its spreadsheet",
     );
     vi.unstubAllGlobals();
   });

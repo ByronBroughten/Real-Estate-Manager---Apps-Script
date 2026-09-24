@@ -1,32 +1,10 @@
 import { vi } from "vitest";
 
-export interface FakeScriptProperties {
-  getProperty(key: string): string | null;
-  setProperty(key: string, value: string): void;
-}
-
 /** Stubs the `Logger` global as a no-op spy, so production `Logger.log(...)` calls don't crash under Node. */
 export function stubLogger(): { log: ReturnType<typeof vi.fn> } {
   const logger = { log: vi.fn() };
   vi.stubGlobal("Logger", logger);
   return logger;
-}
-
-/** Stubs the `PropertiesService` global with an in-memory script-properties store. */
-export function stubPropertiesService(
-  initialProperties: Record<string, string> = {},
-): FakeScriptProperties {
-  const store = new Map(Object.entries(initialProperties));
-  const scriptProperties: FakeScriptProperties = {
-    getProperty: (key) => store.get(key) ?? null,
-    setProperty: (key, value) => {
-      store.set(key, value);
-    },
-  };
-  vi.stubGlobal("PropertiesService", {
-    getScriptProperties: () => scriptProperties,
-  });
-  return scriptProperties;
 }
 
 export type FakeTriggerKind =
@@ -49,8 +27,11 @@ export interface FakeToast {
  * builder to cover AppsScript.trigger's usage. Created triggers are tracked
  * in the returned array so tests can assert on what was scheduled/deleted,
  * and every toast (message, title and timeout) shown on the active spreadsheet in `toasts`.
+ * A null `spreadsheetId` stands in for a standalone script, which has no active spreadsheet.
  */
-export function stubScriptAndSpreadsheetApp(): {
+export function stubScriptAndSpreadsheetApp({
+  spreadsheetId = "fake-bound-spreadsheet",
+}: { spreadsheetId?: string | null } = {}): {
   triggers: FakeTrigger[];
   toasts: FakeToast[];
 } {
@@ -98,11 +79,15 @@ export function stubScriptAndSpreadsheetApp(): {
     },
   });
   vi.stubGlobal("SpreadsheetApp", {
-    getActive: () => ({
-      toast: (message: string, title: string, timeoutSeconds: number) => {
-        toasts.push({ message, title, timeoutSeconds });
-      },
-    }),
+    getActive: () => {
+      if (spreadsheetId === null) return null;
+      return {
+        getId: () => spreadsheetId,
+        toast: (message: string, title: string, timeoutSeconds: number) => {
+          toasts.push({ message, title, timeoutSeconds });
+        },
+      };
+    },
   });
 
   return { triggers, toasts };

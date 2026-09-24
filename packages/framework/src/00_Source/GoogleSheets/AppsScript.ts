@@ -1,3 +1,4 @@
+import { Val } from "../../utils/Val";
 import type { SheetChange } from "../PlatformEvents/sheetChange";
 import type { SheetEdit } from "../PlatformEvents/sheetEdit";
 
@@ -7,8 +8,12 @@ interface ToastOptions {
 }
 
 export class AppsScript {
-  static projectProperties(key: string): string | null {
-    return PropertiesService.getScriptProperties().getProperty(key);
+  // A standalone script has no active spreadsheet; the framework's is always bound to its own.
+  static boundSpreadsheetId(): string {
+    return Val.assert(
+      SpreadsheetApp.getActive(),
+      "Active spreadsheet (bind the Apps Script project to its spreadsheet)",
+    ).getId();
   }
   static sheetChange(
     changeType: GoogleAppsScript.Events.SheetsOnChange["changeType"],

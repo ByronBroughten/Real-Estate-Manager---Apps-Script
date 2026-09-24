@@ -142,14 +142,7 @@ export class GoogleSheetsAPI implements RawSource {
     return new GoogleSheetsAPI(sheets, spreadsheetId);
   }
   static forAppsScript(): GoogleSheetsAPI {
-    const spreadsheetId = AppsScript.projectProperties(
-      "realEstateSpreadsheetId",
-    );
-    if (!spreadsheetId) {
-      throw new Error(
-        "Spreadsheet ID not found in project properties. Please set the 'realEstateSpreadsheetId' property.",
-      );
-    }
+    const spreadsheetId = AppsScript.boundSpreadsheetId();
     return GoogleSheetsAPI.init(
       Val.assert(Sheets, "Sheets (enable the Advanced Sheets Service)"),
       spreadsheetId,

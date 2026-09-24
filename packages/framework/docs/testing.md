@@ -18,7 +18,7 @@ This is not a Node app at runtime (see [`docs/how-it-runs.md`](./how-it-runs.md)
 
 ## `fakeSheetsService.ts`: the fixture-backed Sheets service
 
-`stubSheetsService()` installs that adapter, bound to a fixed spreadsheet ID, so no test stubs a script property to supply one. Fixture `get` / `getByDataFilter` are backed by a real in-memory grid and typed against the actual `GoogleAppsScript.Sheets.Schema` types, so a fixture that drifts from the real response shape is a compile error.
+`stubSheetsService()` installs that adapter, bound to a fixed spreadsheet ID, so no test stubs a bound spreadsheet to supply one. Fixture `get` / `getByDataFilter` are backed by a real in-memory grid and typed against the actual `GoogleAppsScript.Sheets.Schema` types, so a fixture that drifts from the real response shape is a compile error.
 
 ## Which requests the fake replays
 
@@ -34,7 +34,7 @@ A fixture's table starts where `spreadsheetConfig` says it must, so a fixture ne
 
 ## `fakeAppsScriptGlobals.ts` and `fakeSheetConfigSheet.ts`
 
-`fakeAppsScriptGlobals.ts` — `stubPropertiesService()` (in-memory script properties, for `AppsScript.projectProperties` and `GoogleSheetsAPI.forAppsScript()`) and `stubScriptAndSpreadsheetApp()` (a fluent trigger builder covering `AppsScript.trigger`'s usage, and an active spreadsheet whose `toast` records each message with its title and timeout).
+`fakeAppsScriptGlobals.ts` — `stubScriptAndSpreadsheetApp()` (a fluent trigger builder covering `AppsScript.trigger`'s usage, and an active spreadsheet whose `getId` feeds `GoogleSheetsAPI.forAppsScript()` and whose `toast` records each message with its title and timeout; `{ spreadsheetId: null }` stands in for a standalone script).
 
 `fakeSheetConfigSheet.ts` — a fake "Sheet Config" sheet, for behaviour that reads or writes a whole row rather than one named cell (clearing, the blank test, the wipe, append reuse). Anything working from a sheet's *configured* columns resolves each of them against the live columnId row, so such a test needs a fixture listing every column the config declares — which makes Sheet Config the right subject, as the smallest sheet both config sets share. Its GID and column IDs come from the installed configs, so it serves either test program.
 

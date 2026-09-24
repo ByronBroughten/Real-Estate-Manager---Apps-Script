@@ -5,7 +5,6 @@ import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {
   stubLogger,
-  stubPropertiesService,
   stubScriptAndSpreadsheetApp,
 } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -91,7 +90,7 @@ describe("AppsScriptApi.handleSheetEdit, with no source installed", () => {
   it("reaches for the Google Sheets source on an action-row tick", async () => {
     vi.resetModules();
     const fresh = await import("./AppsScriptApi");
-    stubPropertiesService();
+    stubScriptAndSpreadsheetApp({ spreadsheetId: null });
     expect(() =>
       fresh.AppsScriptApi.handleSheetEdit(
         { configs, endpoints: {} },
@@ -102,7 +101,7 @@ describe("AppsScriptApi.handleSheetEdit, with no source installed", () => {
           "TRUE",
         ),
       ),
-    ).toThrow("realEstateSpreadsheetId");
+    ).toThrow("bind the Apps Script project to its spreadsheet");
   });
 });
 
@@ -157,12 +156,12 @@ describe("AppsScriptApi.handleSheetChange", () => {
   it("reaches for the Google Sheets source when none is installed", async () => {
     vi.resetModules();
     const fresh = await import("./AppsScriptApi");
-    stubPropertiesService();
+    stubScriptAndSpreadsheetApp({ spreadsheetId: null });
     expect(() =>
       fresh.AppsScriptApi.handleSheetChange(
         { configs, endpoints: {} },
         onChangeEvent("OTHER"),
       ),
-    ).toThrow("realEstateSpreadsheetId");
+    ).toThrow("bind the Apps Script project to its spreadsheet");
   });
 });

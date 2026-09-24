@@ -1,21 +1,18 @@
 import { describe, expect, it } from "vitest";
-import {
-  stubPropertiesService,
-  stubScriptAndSpreadsheetApp,
-} from "../../testSupport/fakeAppsScriptGlobals";
+import { stubScriptAndSpreadsheetApp } from "../../testSupport/fakeAppsScriptGlobals";
 import { AppsScript } from "./AppsScript";
 
-describe("AppsScript.projectProperties", () => {
-  it("reads a value from script properties", () => {
-    stubPropertiesService({ realEstateSpreadsheetId: "abc123" });
-    expect(AppsScript.projectProperties("realEstateSpreadsheetId")).toBe(
-      "abc123",
-    );
+describe("AppsScript.boundSpreadsheetId", () => {
+  it("reads the ID of the spreadsheet the script is bound to", () => {
+    stubScriptAndSpreadsheetApp({ spreadsheetId: "abc123" });
+    expect(AppsScript.boundSpreadsheetId()).toBe("abc123");
   });
 
-  it("returns null for a missing key", () => {
-    stubPropertiesService({});
-    expect(AppsScript.projectProperties("missingKey")).toBeNull();
+  it("throws asking for a bound script when there is no active spreadsheet", () => {
+    stubScriptAndSpreadsheetApp({ spreadsheetId: null });
+    expect(() => AppsScript.boundSpreadsheetId()).toThrowError(
+      "bind the Apps Script project to its spreadsheet",
+    );
   });
 });
 
