@@ -1,6 +1,6 @@
 # Test code style
 
-Disclosed from [`docs/style.md`](../style.md). How tests run, and the fakes: [`docs/testing.md`](../testing.md).
+Disclosed from [`docs/style.md`](../style.md). How tests run, and the fakes: [`docs/testing.md`](../../packages/framework/docs/testing.md).
 
 **This is a draft, not settled like docs/style.md; docs/style.md's Tests section holds the settled test rules.** Every docs/style.md rule was mined from a file the user refactored personally; test files haven't had that pass yet, so `*.test.ts` doesn't represent the house style. These rules are proposed extensions in the same spirit. Revisit them once a real test file has been through the user's own refactor, the way `ConfigCoordinator.ts` was for production code.
 

@@ -64,7 +64,7 @@ Inheriting the concrete class instead would put its whole surface on the operato
 
 What an Operator holds as props is what it *is*; a value that only one run cares about is an argument to the method that needs it. `OccupancyLedgerOperator` is constructed from the spreadsheet alone and its `build(occupancyRowIndex)` takes the occupancy per run, so any caller holding a spreadsheet can build a ledger and two builds in a row are independent.
 
-Holding the row index as an optional field assigned at the start of a build was considered and rejected (#22). It gives the operator two lifetimes with nothing in the type separating them: before a build the field is unset and every step reading it fails, and after one returns the field still names the previous occupancy, so anything reading the operator then gets a confident answer about the wrong tenancy. That is docs/design.md's "Make disagreement structurally impossible" applied to an operator's own state.
+Holding the row index as an optional field assigned at the start of a build was considered and rejected (#22). It gives the operator two lifetimes with nothing in the type separating them: before a build the field is unset and every step reading it fails, and after one returns the field still names the previous occupancy, so anything reading the operator then gets a confident answer about the wrong tenancy. That is packages/framework/docs/design.md's "Make disagreement structurally impossible" applied to an operator's own state.
 
 ## Push a domain query onto the object that owns it
 
@@ -82,11 +82,11 @@ A container method that takes an index/id as a parameter, but is only ever calle
 
 ## Extract the shared piece when the second caller is foreseen, not when it arrives
 
-Keeping a helper private until a second call site actually exists is the wrong default here. When the sibling caller is already visible — another sheet of the same shape, another endpoint of the same family — build the shared class now and put it where the framework keeps its operators. The name-to-ID resolver was written as a general operator on its first caller because Add Occ Charge and Add Occ Payment obviously want it (#24). The same judgment governs framework behaviour an endpoint asks for: build the general form rather than the one fitted to the endpoint that asked, which is why per-row reporting serves any endpoint instead of only the batch one that motivated it (#23). This is not licence to build for imagined callers, and docs/design.md's "Record a deliberate absence as deliberate" still governs a feature nobody has asked for. The test is whether you can name the second caller.
+Keeping a helper private until a second call site actually exists is the wrong default here. When the sibling caller is already visible — another sheet of the same shape, another endpoint of the same family — build the shared class now and put it where the framework keeps its operators. The name-to-ID resolver was written as a general operator on its first caller because Add Occ Charge and Add Occ Payment obviously want it (#24). The same judgment governs framework behaviour an endpoint asks for: build the general form rather than the one fitted to the endpoint that asked, which is why per-row reporting serves any endpoint instead of only the batch one that motivated it (#23). This is not licence to build for imagined callers, and packages/framework/docs/design.md's "Record a deliberate absence as deliberate" still governs a feature nobody has asked for. The test is whether you can name the second caller.
 
 ## Model state at the granularity the concept actually has
 
-The principle and its other instances live in docs/design.md; what follows is where it lands on member placement. A member that **samples the top data row to derive a column-wide fact** belongs on the Meta column — that is membership criterion 2 of the Meta/primary axis (docs/vocabulary.md, "Meta / primary"), and `isFormula`/`numberFormatType` are the case that produced it. They match `ColumnSchema.isFormula`, the schema-based trait, and are read off the column's top data-row cell only because that is how the API delivers them; so they live as `activeIsFormula`/`activeNumberFormatType` on `ColumnMetaRaw`, populated once per column by `SheetRaw._integrateSheetData`, not as per-row/per-cell state on `CellRaw`/`RowBaseRaw`.
+The principle and its other instances live in packages/framework/docs/design.md; what follows is where it lands on member placement. A member that **samples the top data row to derive a column-wide fact** belongs on the Meta column — that is membership criterion 2 of the Meta/primary axis (packages/framework/docs/vocabulary.md, "Meta / primary"), and `isFormula`/`numberFormatType` are the case that produced it. They match `ColumnSchema.isFormula`, the schema-based trait, and are read off the column's top data-row cell only because that is how the API delivers them; so they live as `activeIsFormula`/`activeNumberFormatType` on `ColumnMetaRaw`, populated once per column by `SheetRaw._integrateSheetData`, not as per-row/per-cell state on `CellRaw`/`RowBaseRaw`.
 
 The criterion bites on the derived fact, not on row or cell addressing: `topCell` and `topRow` stay primary, or a Meta class would end up handing out data rows.
 
@@ -120,7 +120,7 @@ Editing a file is the moment to remove, not preserve, a stub nothing calls, a pl
 
 A file named for a class holds only that class, so the file name tells a reader everything in it. There are no exceptions, custom `Error` subclasses included; `max-classes-per-file` enforces it. A helper type or free function that serves one class lives in that class's file.
 
-Splitting a class family can close an import cycle through an `extends` clause; [schema classes](../architecture/schema-classes.md) covers why that crashes and how `SpreadsheetBaseSchema` breaks it.
+Splitting a class family can close an import cycle through an `extends` clause; [schema classes](../../packages/framework/docs/architecture/schema-classes.md) covers why that crashes and how `SpreadsheetBaseSchema` breaks it.
 
 ## Keep "why" comments across a refactor
 

@@ -2,7 +2,7 @@
 
 Map fragment routed from `AGENTS.md`.
 
-Vitest, as plain Node against fakes, so `npm test` is always safe. The test-writing rules are [`docs/style.md`](./style.md#tests)'s; this file is the fakes, the seams and the exemplar columns. Most tests need only `stubSheetsService()`.
+Vitest, as plain Node against fakes, so `npm test` is always safe. The test-writing rules are the house style's Tests section; this file is the fakes, the seams and the exemplar columns. Most tests need only `stubSheetsService()`.
 
 ## Running the tests
 
@@ -44,7 +44,7 @@ SpreadsheetRaw / EndpointRun tests inject a RawSource (`stubSheetsService`). `Go
 
 ## The Apps Script surface and its fakes
 
-Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, and `appsScriptHost/AppsScriptApi.ts`, which decodes the trigger events with `AppsScript.sheetEdit` / `AppsScript.sheetChange` and is tested against faked events and globals. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../packages/framework/src/00_Source/GoogleSheets/AGENTS.md)).
+Schema/config resolution and ID encode/decode need no mocking. The GAS-touching surface is narrow: `00_Source/GoogleSheets/AppsScript.ts`, `GoogleSheetsAPI.forAppsScript()`, and `appsScriptHost/AppsScriptApi.ts`, which decodes the trigger events with `AppsScript.sheetEdit` / `AppsScript.sheetChange` and is tested against faked events and globals. Production Raw does not read `Sheets` from global scope. A change that first reaches a new Apps Script global adds its wrapper under `00_Source/GoogleSheets/` and extends `fakeAppsScriptGlobals.ts` in the same change (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
 
 ## Two test programs, two config sets
 
@@ -65,15 +65,15 @@ A framework test names a sheet or column of the dev spreadsheet's fixtures, neve
 
 Add a fixture sheet only when a test needs a config shape these don't cover. A layout edge case, such as a blank row or a misplaced Table, stays row data in a fake-service fixture. The dev value configs are empty, so no framework test names a dropdown value name.
 
-An exemplar's value name has to stay put. `sampledBoolean` must not be formatted as a checkbox in Sheets: that would regenerate it as `checkbox` and break `SpreadsheetSchema.test.ts`. The same holds for the Empty value allowed ticks: untick `optionalNote` and a test of the ticked case quietly proves the unticked one instead of failing. To change a fixture, edit the recipe, delete the tab and rebuild it ([`docs/how-it-runs.md`](./how-it-runs.md#targets-dev-and-app)).
+An exemplar's value name has to stay put. `sampledBoolean` must not be formatted as a checkbox in Sheets: that would regenerate it as `checkbox` and break `SpreadsheetSchema.test.ts`. The same holds for the Empty value allowed ticks: untick `optionalNote` and a test of the ticked case quietly proves the unticked one instead of failing. To change a fixture, edit the recipe, delete the tab and rebuild it ([The dev project](./how-it-runs.md#the-dev-project)).
 
 ## Testing an endpoint through `EndpointRun`
 
-An endpoint is tested through `EndpointRun`, never by calling its action (the rule: [`docs/style.md`](./style.md#tests)): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints on the `runItem` fixture.
+An endpoint is tested through `EndpointRun`, never by calling its action (the rule: the house style's Tests section): the seam is the run's entry point, driven by the fake Sheets service, and the assertion is the batch-update requests the run emits — which cells were written, with what values, in what order. Going through the run is what buys the selector pruning, the setup flush and the interplay between a wipe and the appends that follow it, all of which a rebuild-from-scratch endpoint depends on; the cost is a larger fixture, which is the right trade. `businessEndpoints/buildLedger.test.ts` stubs six sheets at once and decodes the recorded `updateCells` requests back into a table of ledger rows, last write per cell winning, since requests apply in order. No test reaches for a private helper, a comparator or an intermediate list of lines. The framework half of an endpoint's behaviour is tested separately in `06_API/EndpointRun.test.ts`, against synthetic endpoints on the `runItem` fixture.
 
 ## The fake answers what the adapter asked; Google doesn't
 
-Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row 1), echoes each colour as a `*ColorStyle`, and `getByDataFilter` drops sheet-level fields such as `conditionalFormats`. A new read isn't done until a chore dry run has read it from the live sheet (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../packages/framework/src/00_Source/GoogleSheets/AGENTS.md)).
+Live JSON omits empty lists and zero-valued fields (a gid-0 sheet, column A, row 1), echoes each colour as a `*ColorStyle`, and `getByDataFilter` drops sheet-level fields such as `conditionalFormats`. A new read isn't done until a chore dry run has read it from the live sheet (the rule: [`src/00_Source/GoogleSheets/AGENTS.md`](../src/00_Source/GoogleSheets/AGENTS.md)).
 
 ## Live-sheet verification
 

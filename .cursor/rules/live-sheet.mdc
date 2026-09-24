@@ -1,5 +1,5 @@
 ---
-description: gsheets MCP, chores, and Node-host live sheet. Read spreadsheetId from the package's sheets.config.json. Open docs/how-it-runs.md.
+description: gsheets MCP, chores, and Node-host live sheet. Read spreadsheetId from the package's sheets.config.json. Open docs/targets-and-gates.md and packages/framework/docs/how-it-runs.md.
 globs:
   - packages/*/src/chores/**
   - packages/framework/dev/chores/**
@@ -7,8 +7,8 @@ globs:
 alwaysApply: false
 ---
 
-Hosts, chore dry run, MCP, and live-sheet command rules: [`docs/how-it-runs.md`](../../docs/how-it-runs.md).
+Live-sheet command rules: [`docs/targets-and-gates.md`](../../docs/targets-and-gates.md). Hosts, chore dry run, MCP: [`how-it-runs.md`](../../packages/framework/docs/how-it-runs.md).
 
 gsheets MCP: `spreadsheetId` from the package's `sheets.config.json` (`packages/real-estate/` for the app, `packages/framework/` for dev).
 
-A send needs a yes naming that chore. Chore homes and the raw-request opening: [`docs/architecture/chores.md`](../../docs/architecture/chores.md).
+A send needs a yes naming that chore. Chore homes and the raw-request opening: [`architecture/chores.md`](../../packages/framework/docs/architecture/chores.md).

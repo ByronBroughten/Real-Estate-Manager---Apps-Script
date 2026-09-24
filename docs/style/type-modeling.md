@@ -11,7 +11,7 @@ Props and state bags that chain through `extends` are `interface`s. Unions, `key
 `const x: Expected = valueOfNewType` proves nothing about a mapped or conditional type: it passes against `any` and against `never`. Use the identity-based `IsExactly`/`assertType` pair from `src/testSupport/typeAssertions.ts`, and `assertNotType` to claim that two types are _not_ identical. `assertNotType` is the only way to state that a branded type like `SerialDate` is not just `number` (#15). Two corollaries, both learned the hard way:
 
 - **A probe that needed an `any` to compile has proved nothing.** Intersecting to satisfy an indexer (`(T & Record<K, any>)[K]`) resolves to `any`, so every assertion downstream of it passes vacuously. If a type won't index without that workaround, fix the type rather than casting past it: carry the data inside the entry so the key is provably present.
-- **Measure before adopting a mapped type over the config unions**, with `npx tsc --noEmit --extendedDiagnostics`. [`type-check-cost.md`](../architecture/type-check-cost.md) has the baseline and the one known cliff.
+- **Measure before adopting a mapped type over the config unions**, with `npx tsc --noEmit --extendedDiagnostics`. [`type-check-cost.md`](../../packages/framework/docs/architecture/type-check-cost.md) has the baseline and the one known cliff.
 
 ## Two-letter generic params
 
@@ -21,7 +21,7 @@ Two letters, not one, even where one would be unambiguous: a lone `F` or `I` rea
 
 ## Specificity over branded fallbacks
 
-A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`. docs/design.md, "Make disagreement structurally impossible rather than validating against it."
+A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`. packages/framework/docs/design.md, "Make disagreement structurally impossible rather than validating against it."
 
 ## The three accepted `as` idioms
 
@@ -29,7 +29,7 @@ External values, such as Sheets cell data, go through `Val.validate.*`/`Val.is.*
 
 - Seed a fully-typed empty accumulator up front, then fill it: `{} as SheetColumnNamesStandard<SN>`. Don't cast at the point of use.
 - Use `as any` / `as unknown as X` as an escape hatch only inside low-level structural utilities (`utils/Obj.ts`, `utils/Arr.ts` and similar) that do generic structural-typing gymnastics. This is no licence to use it elsewhere.
-- Use `as unknown as X` in ordinary code **only to buy back type-check time, and only when a test already proves the same thing more cheaply.** Both conditions are required. The cost condition: the cast must remove real, measured work. Run `npx tsc --noEmit --extendedDiagnostics` before and after; if the saving isn't in the tens of thousands of instantiations, don't cast. The proof condition: a test elsewhere must already check the exact shape the cast claims, written against one named sheet rather than a type parameter. That test is what keeps the cast from being a hole. `SheetNamed.appendRowWithAllVals` is the only place in the repo that qualifies (#14). [`type-check-cost.md`](../architecture/type-check-cost.md) has the numbers, and the profile that found no second candidate.
+- Use `as unknown as X` in ordinary code **only to buy back type-check time, and only when a test already proves the same thing more cheaply.** Both conditions are required. The cost condition: the cast must remove real, measured work. Run `npx tsc --noEmit --extendedDiagnostics` before and after; if the saving isn't in the tens of thousands of instantiations, don't cast. The proof condition: a test elsewhere must already check the exact shape the cast claims, written against one named sheet rather than a type parameter. That test is what keeps the cast from being a hole. `SheetNamed.appendRowWithAllVals` is the only place in the repo that qualifies (#14). [`type-check-cost.md`](../../packages/framework/docs/architecture/type-check-cost.md) has the numbers, and the profile that found no second candidate.
 
 Test files are separately mid-migration off `as` via the `migrate-to-shoehorn` skill. That is in-progress project state, not a rule that contradicts these.
 

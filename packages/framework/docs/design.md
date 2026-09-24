@@ -1,6 +1,6 @@
 # Design philosophy
 
-Why this codebase is shaped the way it is, in the reasoning that generalizes past the decision that produced it; the agent tooling's arguments are [`docs/agent-behavior-design.md`](./agent-behavior-design.md)'s, and which file answers what is [`docs/agents/prose-files.md`](./agents/prose-files.md).
+Why this codebase is shaped the way it is, in the reasoning that generalizes past the decision that produced it; the agent tooling's arguments live with the repo's agent docs, not here.
 
 One line per principle. Each principle's argument and instances are one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 

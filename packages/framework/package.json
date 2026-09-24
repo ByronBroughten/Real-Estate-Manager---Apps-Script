@@ -16,7 +16,9 @@
   "files": [
     "src",
     "tsconfig.base.json",
-    "scripts"
+    "scripts",
+    "docs",
+    "CONTEXT.md"
   ],
   "scripts": {
     "tsc": "tsc -p .",
