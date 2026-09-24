@@ -1,6 +1,6 @@
-declare const dateSerial: unique symbol;
+declare const serialDate: unique symbol;
 // A whole-day Sheets serial. Branded so a rent or a count can't be a date.
-export type DateSerial = number & { readonly [dateSerial]: true };
+export type SerialDate = number & { readonly [serialDate]: true };
 
 export interface MonthYear {
   month: number; // 1-12
@@ -12,12 +12,12 @@ export interface Ymd extends MonthYear {
 }
 
 export interface DateRange {
-  startDate: DateSerial;
-  endDate: DateSerial;
+  startDate: SerialDate;
+  endDate: SerialDate;
 }
 
 export interface DateInRange extends DateRange {
-  date: DateSerial;
+  date: SerialDate;
 }
 
 export interface MonthYearRange {
@@ -26,18 +26,18 @@ export interface MonthYearRange {
 }
 
 export interface FirstAndLastOfMonth {
-  firstOfMonth: DateSerial;
-  lastOfMonth: DateSerial;
+  firstOfMonth: SerialDate;
+  lastOfMonth: SerialDate;
 }
 
 export interface MonthRange extends MonthYear, DateRange {}
 
 // A guard and its throwing form, outside the bundle so `this` can't swallow the narrowing.
-function isSerial(value: unknown): value is DateSerial {
+function isSerial(value: unknown): value is SerialDate {
   return typeof value === "number" && Number.isInteger(value);
 }
 
-function validate(value: unknown): DateSerial {
+function validate(value: unknown): SerialDate {
   if (isSerial(value)) {
     return value;
   }
@@ -59,16 +59,12 @@ const monthAbbrevs = [
   "Dec",
 ] as const;
 
-export const Dat = {
-  sheetTimezone: "America/Chicago",
+export const SerialDate = {
   sheetsEpochUtcMs: Date.UTC(1899, 11, 30), // Dec 30, 1899, 00:00 UTC
   msPerDay: 86400000,
   isSerial,
   validate,
-  today(): DateSerial {
-    return this.fromInstant(new Date(), this.sheetTimezone);
-  },
-  fromInstant(instant: Date, timeZone: string): DateSerial {
+  fromInstant(instant: Date, timeZone: string): SerialDate {
     const parts = new Intl.DateTimeFormat("en-US", {
       timeZone,
       year: "numeric",
@@ -86,7 +82,7 @@ export const Dat = {
       day: Number(parts.day),
     });
   },
-  fromYmd({ year, month, day }: Ymd): DateSerial {
+  fromYmd({ year, month, day }: Ymd): SerialDate {
     const utcMs = utcMsFromYmd({ year, month, day });
     const serial = (utcMs - this.sheetsEpochUtcMs) / this.msPerDay;
     if (!isSerial(serial)) {
@@ -94,7 +90,7 @@ export const Dat = {
     }
     return serial;
   },
-  toYmd(date: DateSerial): Ymd {
+  toYmd(date: SerialDate): Ymd {
     const utc = new Date(
       this.sheetsEpochUtcMs + validate(date) * this.msPerDay,
     );
@@ -104,7 +100,7 @@ export const Dat = {
       day: utc.getUTCDate(),
     };
   },
-  toDayMonthYear(date: DateSerial): string {
+  toDayMonthYear(date: SerialDate): string {
     const { year, month, day } = this.toYmd(date);
     const monthAbbrev = monthAbbrevs[month - 1];
     if (monthAbbrev === undefined) {
@@ -112,13 +108,13 @@ export const Dat = {
     }
     return `${day} ${monthAbbrev} ${year}`;
   },
-  addDays(date: DateSerial, days: number): DateSerial {
+  addDays(date: SerialDate, days: number): SerialDate {
     return validate(validate(date) + days);
   },
-  dayBefore(date: DateSerial): DateSerial {
+  dayBefore(date: SerialDate): SerialDate {
     return this.addDays(date, -1);
   },
-  addMonths(date: DateSerial, months: number): DateSerial {
+  addMonths(date: SerialDate, months: number): SerialDate {
     const { year, month, day } = this.toYmd(date);
     const monthCount = year * 12 + (month - 1) + months;
     const target = {
@@ -130,20 +126,11 @@ export const Dat = {
       day: Math.min(day, this._daysInMonthYear(target)),
     });
   },
-  isSameOrAfter(
-    date: DateSerial,
-    referenceDate: DateSerial = this.today(),
-  ): boolean {
+  isSameOrAfter(date: SerialDate, referenceDate: SerialDate): boolean {
     return validate(date) >= validate(referenceDate);
   },
-  isSameOrBefore(
-    date: DateSerial,
-    referenceDate: DateSerial = this.today(),
-  ): boolean {
+  isSameOrBefore(date: SerialDate, referenceDate: SerialDate): boolean {
     return validate(date) <= validate(referenceDate);
-  },
-  isTodayOrPassed(date: DateSerial): boolean {
-    return this.isSameOrBefore(date);
   },
   isOnOrBetween({ date, startDate, endDate }: DateInRange): boolean {
     if (validate(startDate) > validate(endDate)) {
@@ -153,11 +140,11 @@ export const Dat = {
       this.isSameOrAfter(date, startDate) && this.isSameOrBefore(date, endDate)
     );
   },
-  monthYear(date: DateSerial): MonthYear {
+  monthYear(date: SerialDate): MonthYear {
     const { month, year } = this.toYmd(date);
     return { month, year };
   },
-  isInMonthAndYear(date: DateSerial, { month, year }: MonthYear): boolean {
+  isInMonthAndYear(date: SerialDate, { month, year }: MonthYear): boolean {
     const dateMonthYear = this.monthYear(date);
     return dateMonthYear.month === month && dateMonthYear.year === year;
   },
@@ -177,22 +164,22 @@ export const Dat = {
     }
     return monthYears;
   },
-  firstDayOfMonth(date: DateSerial): DateSerial {
+  firstDayOfMonth(date: SerialDate): SerialDate {
     return this.firstDayOfMonthYear(this.monthYear(date));
   },
-  lastDayOfMonth(date: DateSerial): DateSerial {
+  lastDayOfMonth(date: SerialDate): SerialDate {
     return this.lastDayOfMonthYear(this.monthYear(date));
   },
-  firstAndLastDayOfMonth(date: DateSerial): FirstAndLastOfMonth {
+  firstAndLastDayOfMonth(date: SerialDate): FirstAndLastOfMonth {
     return this.firstAndLastDayOfMonthYear(this.monthYear(date));
   },
-  firstDayOfNextMonth(date: DateSerial): DateSerial {
+  firstDayOfNextMonth(date: SerialDate): SerialDate {
     return this.firstDayOfMonthYear(nextMonthYear(this.monthYear(date)));
   },
-  firstDayOfMonthYear({ month, year }: MonthYear): DateSerial {
+  firstDayOfMonthYear({ month, year }: MonthYear): SerialDate {
     return this.fromYmd({ month, year, day: 1 });
   },
-  lastDayOfMonthYear(monthYear: MonthYear): DateSerial {
+  lastDayOfMonthYear(monthYear: MonthYear): SerialDate {
     return this.dayBefore(this.firstDayOfMonthYear(nextMonthYear(monthYear)));
   },
   firstAndLastDayOfMonthYear(monthYear: MonthYear): FirstAndLastOfMonth {

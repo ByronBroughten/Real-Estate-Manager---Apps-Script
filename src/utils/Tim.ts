@@ -1,4 +1,4 @@
-import { Dat } from "./Dat";
+import { SerialDate } from "./SerialDate";
 
 // ---------------------------------------------------------------------
 // DATE-TIME (has a time-of-day) — for later, once you have time columns
@@ -8,14 +8,10 @@ import { Dat } from "./Dat";
 // instant requires the actual UTC offset for that date, DST included.
 
 export const Tim = {
-  sheetTimezone: Dat.sheetTimezone,
-  sheetsEpochUtcMs: Dat.sheetsEpochUtcMs,
-  msPerDay: Dat.msPerDay,
+  sheetsEpochUtcMs: SerialDate.sheetsEpochUtcMs,
+  msPerDay: SerialDate.msPerDay,
   // Wall-clock date and time fields of `instant` as seen in `tz`.
-  wallClockParts(
-    instant: Date,
-    tz: string = this.sheetTimezone,
-  ): Record<string, string> {
+  wallClockParts(instant: Date, tz: string): Record<string, string> {
     return new Intl.DateTimeFormat("en-US", {
       timeZone: tz,
       hourCycle: "h23",
@@ -33,14 +29,14 @@ export const Tim = {
       }, {});
   },
   // Local wall-clock timestamp, e.g. "2026-08-31 17:14:10".
-  nowTimestamp(tz: string = this.sheetTimezone): string {
+  nowTimestamp(tz: string): string {
     const p = this.wallClockParts(new Date(), tz);
     return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}:${p.second}`;
   },
   // UTC offset (in minutes) of `tz` at the real-world moment `instant`
   // represents. Positive = east of UTC. DST-aware via Intl + the IANA
   // tz database.
-  getTzOffsetMinutes(instant: Date, tz: string = this.sheetTimezone): number {
+  getTzOffsetMinutes(instant: Date, tz: string): number {
     const parts = this.wallClockParts(instant, tz);
     const asIfUTC = Date.UTC(
       Number(parts.year),
@@ -53,19 +49,19 @@ export const Tim = {
     return (asIfUTC - instant.getTime()) / 60000;
   },
   // Sheets serial (with fractional time) -> JS Date, resolved against `tz`.
-  serialToDateTime(serial: number, tz: string = this.sheetTimezone): Date {
+  serialToDateTime(serial: number, tz: string): Date {
     const naiveMs = this.sheetsEpochUtcMs + Math.round(serial * this.msPerDay);
     const offsetMin = this.getTzOffsetMinutes(new Date(naiveMs), tz);
     return new Date(naiveMs - offsetMin * 60000);
   },
   // JS Date -> Sheets serial (with fractional time), resolved against `tz`.
-  dateTimeToSerial(date: Date, tz: string = this.sheetTimezone): number {
+  dateTimeToSerial(date: Date, tz: string): number {
     const offsetMin = this.getTzOffsetMinutes(date, tz);
     const localMs = date.getTime() + offsetMin * 60000;
     return (localMs - this.sheetsEpochUtcMs) / this.msPerDay;
   },
   // Add whole days on wall-clock fields in `tz` (DST-safe).
-  addDaysTz(date: Date, days: number, tz: string = this.sheetTimezone): Date {
+  addDaysTz(date: Date, days: number, tz: string): Date {
     const offsetMin = this.getTzOffsetMinutes(date, tz);
     const local = new Date(date.getTime() + offsetMin * 60000);
     local.setUTCDate(local.getUTCDate() + days);
@@ -73,11 +69,7 @@ export const Tim = {
     return new Date(local.getTime() - newOffsetMin * 60000);
   },
   // Add whole months on wall-clock fields in `tz` (DST-safe).
-  addMonthsTz(
-    date: Date,
-    months: number,
-    tz: string = this.sheetTimezone,
-  ): Date {
+  addMonthsTz(date: Date, months: number, tz: string): Date {
     const offsetMin = this.getTzOffsetMinutes(date, tz);
     const local = new Date(date.getTime() + offsetMin * 60000);
     local.setUTCMonth(local.getUTCMonth() + months);

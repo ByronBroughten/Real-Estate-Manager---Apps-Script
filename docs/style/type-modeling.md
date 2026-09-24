@@ -8,7 +8,7 @@ Props and state bags that chain through `extends` are `interface`s. Unions, `key
 
 ## Identity checks, never assignment
 
-`const x: Expected = valueOfNewType` proves nothing about a mapped or conditional type: it passes against `any` and against `never`. Use the identity-based `IsExactly`/`assertType` pair from `src/testSupport/typeAssertions.ts`, and `assertNotType` to claim that two types are _not_ identical. `assertNotType` is the only way to state that a branded type like `DateSerial` is not just `number` (#15). Two corollaries, both learned the hard way:
+`const x: Expected = valueOfNewType` proves nothing about a mapped or conditional type: it passes against `any` and against `never`. Use the identity-based `IsExactly`/`assertType` pair from `src/testSupport/typeAssertions.ts`, and `assertNotType` to claim that two types are _not_ identical. `assertNotType` is the only way to state that a branded type like `SerialDate` is not just `number` (#15). Two corollaries, both learned the hard way:
 
 - **A probe that needed an `any` to compile has proved nothing.** Intersecting to satisfy an indexer (`(T & Record<K, any>)[K]`) resolves to `any`, so every assertion downstream of it passes vacuously. If a type won't index without that workaround, fix the type rather than casting past it: carry the data inside the entry so the key is provably present.
 - **Measure before adopting a mapped type over the config unions**, with `npx tsc --noEmit --extendedDiagnostics`. [`type-check-cost.md`](../architecture/type-check-cost.md) has the baseline and the one known cliff.

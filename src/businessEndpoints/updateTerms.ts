@@ -1,5 +1,5 @@
 import type { Endpoint } from "../06_API/Endpoints";
-import { Dat } from "../utils/Dat";
+import { SerialDate } from "../utils/SerialDate";
 
 export const updateTerms: Endpoint<"occupancy"> = {
   timeLastRan: "updateTermsTimeLastRan",
@@ -58,7 +58,7 @@ export const updateTerms: Endpoint<"occupancy"> = {
         );
       }
       if (!lastEndDate) {
-        lastActiveTerm.updateValue("endDate", Dat.dayBefore(nextStartDate));
+        lastActiveTerm.updateValue("endDate", SerialDate.dayBefore(nextStartDate));
       }
       occupancyTerms.appendRowWithAllVals({
         paymentAllocationDefault: "Earliest unaccounted charge",

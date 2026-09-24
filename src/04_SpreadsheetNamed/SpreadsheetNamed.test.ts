@@ -19,7 +19,7 @@ import {
   assertType,
   type IsExactly,
 } from "../testSupport/typeAssertions";
-import { Dat, type DateSerial } from "../utils/Dat";
+import { SerialDate } from "../utils/SerialDate";
 import type { SpreadsheetNamedProps } from "./ClassBases/SpreadsheetBaseNamed";
 import { ColumnMetaNamed } from "./ColumnMetaNamed";
 import { ColumnNamed } from "./ColumnNamed";
@@ -39,8 +39,8 @@ describe("SpreadsheetNamed props", () => {
 
 // A mis-wired accessor still type-checks; the instance checks catch it.
 describe("SpreadsheetNamed dates", () => {
-  const march14 = Dat.fromYmd({ year: 2024, month: 3, day: 14 });
-  const march15 = Dat.fromYmd({ year: 2024, month: 3, day: 15 });
+  const march14 = SerialDate.fromYmd({ year: 2024, month: 3, day: 14 });
+  const march15 = SerialDate.fromYmd({ year: 2024, month: 3, day: 15 });
 
   beforeEach(() => {
     stubLogger();
@@ -290,23 +290,23 @@ describe("Named value accessors", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const row = fetchedOccupancySheet().row(filledRowIndex);
 
-    assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial>>(true);
-    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, DateSerial>>(
+    assertType<IsExactly<ReturnType<typeof cell.value>, SerialDate>>(true);
+    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, SerialDate>>(
       true,
     );
-    assertType<IsExactly<ReturnType<typeof column.value>, DateSerial>>(true);
-    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, DateSerial>>(
+    assertType<IsExactly<ReturnType<typeof column.value>, SerialDate>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, SerialDate>>(
       true,
     );
     assertType<
-      IsExactly<ReturnType<typeof column.valueOrEmpty>, DateSerial | "">
+      IsExactly<ReturnType<typeof column.valueOrEmpty>, SerialDate | "">
     >(true);
     assertType<
-      IsExactly<ReturnType<typeof row.value<"nextTermsStartDate">>, DateSerial>
+      IsExactly<ReturnType<typeof row.value<"nextTermsStartDate">>, SerialDate>
     >(true);
   });
 
-  // A plain number would pass an assignment check against DateSerial's supertype.
+  // A plain number would pass an assignment check against SerialDate's supertype.
   it("gives a date column a value type no rent or count can be handed to", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const column = fetchedOccupancySheet().column("nextTermsStartDate");
@@ -314,7 +314,7 @@ describe("Named value accessors", () => {
     const numberColumn = fetchedOccupancySheet().column("residentCount");
 
     assertNotType<IsExactly<ReturnType<typeof column.value>, number>>(false);
-    assertNotType<IsExactly<DateSerial, number>>(false);
+    assertNotType<IsExactly<SerialDate, number>>(false);
     assertType<IsExactly<ReturnType<typeof numberColumn.value>, number>>(true);
   });
 
@@ -345,21 +345,21 @@ describe("Named value accessors", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const row = fetchedOccupancySheet().row(blankRowIndex);
 
-    assertType<IsExactly<ReturnType<typeof cell.value>, DateSerial | "">>(true);
-    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, DateSerial>>(
+    assertType<IsExactly<ReturnType<typeof cell.value>, SerialDate | "">>(true);
+    assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, SerialDate>>(
       true,
     );
-    assertType<IsExactly<ReturnType<typeof column.value>, DateSerial | "">>(
+    assertType<IsExactly<ReturnType<typeof column.value>, SerialDate | "">>(
       true,
     );
-    assertType<IsExactly<typeof column.valueArr, (DateSerial | "")[]>>(true);
-    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, DateSerial>>(
+    assertType<IsExactly<typeof column.valueArr, (SerialDate | "")[]>>(true);
+    assertType<IsExactly<ReturnType<typeof column.valueNotEmpty>, SerialDate>>(
       true,
     );
     assertType<
       IsExactly<
         ReturnType<typeof row.value<"nextTermsEndDate">>,
-        DateSerial | ""
+        SerialDate | ""
       >
     >(true);
   });
