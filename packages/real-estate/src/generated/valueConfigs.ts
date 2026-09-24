@@ -16,7 +16,7 @@ export const valueConfigs = makeValueConfigs({
     "Security deposit"
   ],
   "expenseCategory": [
-    "Repair",
+    "Repairs",
     "Supplies",
     "Cleaning & maintenance",
     "Depreciation expense or depletion",
@@ -48,7 +48,8 @@ export const valueConfigs = makeValueConfigs({
     "Email",
     "Cash App",
     "Venmo",
-    "Unknown"
+    "Unknown",
+    "Tax return"
   ],
   "chargeReduceDescription": [
     "Forgiveness"

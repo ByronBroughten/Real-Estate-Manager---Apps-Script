@@ -5,7 +5,6 @@ export const sheetConfigs = makeSheetConfigs({
   "sheetConfig": { "sheetGid": 210603630, "idPrefix": "scf", "hasIdColumn": false, "hasNameColumn": false },
   "columnConfig": { "sheetGid": 2034522667, "idPrefix": "ccf", "hasIdColumn": false, "hasNameColumn": false },
   "spreadsheetConfig": { "sheetGid": 1967106628, "idPrefix": "sscf", "hasIdColumn": false, "hasNameColumn": false },
-  "test": { "sheetGid": 2089200354, "idPrefix": "test", "hasIdColumn": true, "hasNameColumn": true },
   "addOccCharge": { "sheetGid": 1202471195, "idPrefix": "aoco", "hasIdColumn": false, "hasNameColumn": false },
   "addOccPayment": { "sheetGid": 1485718763, "idPrefix": "aopo", "hasIdColumn": true, "hasNameColumn": false },
   "addPropertyExpense": { "sheetGid": 1964495656, "idPrefix": "ape", "hasIdColumn": false, "hasNameColumn": false },
