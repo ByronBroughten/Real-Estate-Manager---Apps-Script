@@ -1,16 +1,22 @@
 // Starts the framework's second host. See docs/how-it-runs.md.
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { fileURLToPath } from "node:url";
-import { generatedDirOf } from "./targets.mjs";
+import { join } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const CLASP_RUN_USER = "desktop-clasp-run";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 const MAX_RESPONSE_BYTES = 256 * 1024 * 1024;
 
+const CONFIG_FILES = [
+  "spreadsheetConfig",
+  "sheetConfigs",
+  "columnConfigs",
+  "valueConfigs",
+];
+
 const path = {
-  config: fileURLToPath(new URL("../nodeHost.config.json", import.meta.url)),
   fetchSync: fileURLToPath(new URL("./fetchSync.mjs", import.meta.url)),
   claspRc: fileURLToPath(new URL(".clasprc.json", `file://${homedir()}/`)),
 };
@@ -55,7 +61,7 @@ export class SheetsTransport {
     if (!accessToken) {
       throw new Error(
         `Could not refresh the "${CLASP_RUN_USER}" token (HTTP ${status}). ` +
-          `Run scripts/setup-clasp-run-auth.sh to re-mint it.\n${body}`,
+          `Run sheets-framework setup-auth to re-mint it.\n${body}`,
       );
     }
     this.accessToken = accessToken;
@@ -76,14 +82,14 @@ export class SheetsTransport {
     } catch (error) {
       throw new Error(
         `Could not read ${path.claspRc}: ${error.message}. ` +
-          "Run scripts/setup-clasp-run-auth.sh.",
+          "Run sheets-framework setup-auth.",
       );
     }
     const credential = tokens?.[CLASP_RUN_USER];
     if (!credential?.refresh_token) {
       throw new Error(
         `No "${CLASP_RUN_USER}" credential in ${path.claspRc}. ` +
-          "Run scripts/setup-clasp-run-auth.sh.",
+          "Run sheets-framework setup-auth.",
       );
     }
     return credential;
@@ -108,60 +114,36 @@ export class SheetsTransport {
   }
 }
 
-// Without a target, the untracked config decides.
-export function spreadsheetIdOf(target) {
-  return target?.spreadsheetId ?? readSpreadsheetId();
-}
-
-function readSpreadsheetId() {
-  let source;
-  try {
-    source = readFileSync(path.config, "utf8");
-  } catch {
-    throw new Error(
-      `No Node host config at ${path.config}. Create it (it is untracked) with:\n` +
-        `  { "spreadsheetId": "<the spreadsheet's id>" }`,
-    );
-  }
-  const { spreadsheetId } = JSON.parse(source);
-  if (typeof spreadsheetId !== "string" || spreadsheetId === "") {
-    throw new Error(`${path.config} has no "spreadsheetId" string.`);
-  }
-  return spreadsheetId;
-}
-
-export async function startNodeHost({ isDryRun, target, configs }) {
+export async function startNodeHost({ isDryRun, sheetsConfig, configs }) {
   const { NodeHost } = await import("../src/nodeHost/NodeHost.ts");
   const transport = SheetsTransport.init();
   return NodeHost.init({
     configs,
-    spreadsheetId: spreadsheetIdOf(target),
+    spreadsheetId: sheetsConfig.spreadsheetId,
     transport: (request) => transport.send(request),
     isDryRun,
     log: (message) => console.log(`  log: ${message}`),
   }).ensureGlobals();
 }
 
-export async function loadAppConfigs() {
-  return (await import("../src/appConfigs.ts")).appConfigs;
+// The four files in the package's generatedDir, as the package's entry passes them to the framework.
+export async function loadPackageConfigs({ generatedDir }) {
+  const entries = await Promise.all(
+    CONFIG_FILES.map(async (base) => {
+      const url = pathToFileURL(join(generatedDir, `${base}.ts`));
+      return [base, (await import(url.href))[base]];
+    }),
+  );
+  return Object.fromEntries(entries);
 }
 
-// A spreadsheet the target table doesn't list is the app's, as the untracked config has always meant.
-export async function loadOwnConfigs(target) {
-  const generatedDir = generatedDirOf(spreadsheetIdOf(target));
-  if (generatedDir === null) return loadAppConfigs();
-  return {
-    spreadsheetConfig: await loadGeneratedConfig(
-      generatedDir,
-      "spreadsheetConfig",
-    ),
-    sheetConfigs: await loadGeneratedConfig(generatedDir, "sheetConfigs"),
-    columnConfigs: await loadGeneratedConfig(generatedDir, "columnConfigs"),
-    valueConfigs: await loadGeneratedConfig(generatedDir, "valueConfigs"),
-  };
+export function hasPackageConfigs({ generatedDir }) {
+  return CONFIG_FILES.every((base) =>
+    existsSync(join(generatedDir, `${base}.ts`)),
+  );
 }
 
-async function loadGeneratedConfig(generatedDir, base) {
-  const url = new URL(`../${generatedDir}/${base}.ts`, import.meta.url);
-  return (await import(url))[base];
+// The framework's own dev configs: enough to read any spreadsheet's config floor.
+export async function loadFrameworkConfigs() {
+  return (await import("../dev/devConfigs.ts")).devConfigs;
 }

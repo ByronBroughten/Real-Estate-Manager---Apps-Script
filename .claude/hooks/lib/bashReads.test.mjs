@@ -1,0 +1,62 @@
+import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import { describe, expect, it } from "vitest";
+import { BashReads, LARGE_FILE_LINES } from "./bashReads.mjs";
+
+const bigFile = "line\n".repeat(LARGE_FILE_LINES + 1);
+
+function projectWith(files) {
+  const projectDir = mkdtempSync(join(tmpdir(), "bash-reads-"));
+  for (const [path, content] of Object.entries(files)) {
+    mkdirSync(dirname(join(projectDir, path)), { recursive: true });
+    writeFileSync(join(projectDir, path), content);
+  }
+  return projectDir;
+}
+
+const denyReasonOf = (projectDir, command) => BashReads.init({ command, cwd: projectDir }).classify().denyReason;
+
+describe("BashReads unguarded folders", () => {
+  const projectDir = projectWith({
+    "src/big.ts": bigFile,
+    ".probe/last.json": bigFile,
+    "dev/.probe/last.json": bigFile,
+    "packages/framework/dist/bundle.js": bigFile,
+    "packages/app/coverage/index.html": bigFile,
+  });
+
+  it("guards a large repo file", () => {
+    expect(denyReasonOf(projectDir, "cat src/big.ts")).toMatch(/would dump all/);
+  });
+
+  it("exempts .probe, dist and coverage at the root and at any depth", () => {
+    expect(denyReasonOf(projectDir, "cat .probe/last.json")).toBeNull();
+    expect(denyReasonOf(projectDir, "cat dev/.probe/last.json")).toBeNull();
+    expect(denyReasonOf(projectDir, "cat packages/framework/dist/bundle.js")).toBeNull();
+    expect(denyReasonOf(projectDir, "cat packages/app/coverage/index.html")).toBeNull();
+  });
+
+  it("does not exempt a file merely named like an unguarded folder", () => {
+    const withNamedFile = projectWith({ "src/dist": bigFile });
+    expect(denyReasonOf(withNamedFile, "cat src/dist")).toMatch(/would dump all/);
+  });
+});
+
+describe("BashReads columnConfigs", () => {
+  const projectDir = projectWith({
+    "sheets.config.json": JSON.stringify({ spreadsheetId: "app-id", generatedDir: "src/generated", choreHomes: [] }),
+    "dev/sheets.config.json": JSON.stringify({ spreadsheetId: "dev-id", generatedDir: "generated", choreHomes: [] }),
+    "src/generated/columnConfigs.ts": "small\n",
+    "dev/generated/columnConfigs.ts": "small\n",
+  });
+
+  it("denies a whole read of every package's columnConfigs.ts, found through its generatedDir", () => {
+    expect(denyReasonOf(projectDir, "cat src/generated/columnConfigs.ts")).toMatch(/columnConfigs\.ts beyond one block/);
+    expect(denyReasonOf(projectDir, "cat dev/generated/columnConfigs.ts")).toMatch(/columnConfigs\.ts beyond one block/);
+  });
+
+  it("allows one block of it", () => {
+    expect(denyReasonOf(projectDir, "sed -n '1,40p' dev/generated/columnConfigs.ts")).toBeNull();
+  });
+});

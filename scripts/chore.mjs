@@ -1,23 +1,25 @@
-// Runs one chore against the live spreadsheet. See docs/how-it-runs.md, "The chore and its dry run".
-import { existsSync, readdirSync } from "node:fs";
-import { fileURLToPath } from "node:url";
-import { loadOwnConfigs, startNodeHost } from "./nodeHost.mjs";
-import { takeTarget } from "./targets.mjs";
+// `sheets-framework chore`: runs one chore against the package's spreadsheet. See docs/how-it-runs.md, "The chore and its dry run".
+import { fileURLToPath, pathToFileURL } from "node:url";
+import { ChoreIndex } from "./choreIndex.mjs";
+import { loadPackageConfigs, startNodeHost } from "./nodeHost.mjs";
 
-const CHORES_URL = new URL("../src/chores/", import.meta.url);
-const CHORE_HOMES = ["", "oneOff/"];
+const GENERIC_HOME = fileURLToPath(new URL("../src/chores/", import.meta.url));
 
 class ChoreRunner {
-  constructor({ target, choreName, isSend, isJson }) {
-    this.target = target;
+  constructor({ sheetsConfig, index, choreName, isSend, isJson }) {
+    this.sheetsConfig = sheetsConfig;
+    this.index = index;
     this.choreName = choreName;
     this.isSend = isSend;
     this.isJson = isJson;
   }
-  static init(argvWithTarget) {
-    const { target, argv } = takeTarget(argvWithTarget);
+  static init(argv, sheetsConfig) {
     return new ChoreRunner({
-      target,
+      sheetsConfig,
+      index: ChoreIndex.init({
+        genericHome: GENERIC_HOME,
+        packageHomes: sheetsConfig.choreHomes,
+      }),
       choreName: argv.find((arg) => !arg.startsWith("--")),
       isSend: argv.includes("--send"),
       isJson: argv.includes("--json"),
@@ -31,15 +33,15 @@ class ChoreRunner {
       console.log("  no flag   preview what it would write, writing nothing");
       console.log("  --send    apply it to the live spreadsheet");
       console.log("  --json    preview as raw request JSON\n");
-      console.log(`Chores:\n${this._availableChores()}`);
+      console.log(this.index.listing(this.sheetsConfig.dir));
       return;
     }
     // Resolved before the host starts, so a typo costs no setup.
     const modulePath = this._choreModulePath();
     const host = await startNodeHost({
       isDryRun: !this.isSend,
-      target: this.target,
-      configs: await loadOwnConfigs(this.target),
+      sheetsConfig: this.sheetsConfig,
+      configs: await loadPackageConfigs(this.sheetsConfig),
     });
     const chore = await this._loadChore(modulePath);
     console.log(`chore: ${this.choreName} — ${chore.description}\n`);
@@ -76,33 +78,16 @@ class ChoreRunner {
     return chore;
   }
   _choreModulePath() {
-    const homes = CHORE_HOMES.filter((home) =>
-      existsSync(this._chorePath(home)),
-    );
-    if (homes.length === 0) {
+    const path = this.index.pathOf(this.choreName);
+    if (!path) {
       throw new Error(
-        `No chore named "${this.choreName}".\n\nChores:\n${this._availableChores()}`,
+        `No chore named "${this.choreName}".\n\n${this.index.listing(this.sheetsConfig.dir)}`,
       );
     }
-    if (homes.length > 1) {
-      throw new Error(
-        `"${this.choreName}" exists in more than one chore home: ${homes
-          .map((home) => `${home}${this.choreName}.ts`)
-          .join(", ")}. Rename or delete one.`,
-      );
-    }
-    return new URL(`${homes[0]}${this.choreName}.ts`, CHORES_URL).href;
-  }
-  _chorePath(home) {
-    return fileURLToPath(new URL(`${home}${this.choreName}.ts`, CHORES_URL));
-  }
-  _availableChores() {
-    return CHORE_HOMES.flatMap((area) =>
-      readdirSync(fileURLToPath(new URL(area, CHORES_URL)))
-        .filter((file) => file.endsWith(".ts") && file !== "Chore.ts")
-        .map((file) => `  ${area}${file.replace(/\.ts$/, "")}`),
-    ).join("\n");
+    return pathToFileURL(path).href;
   }
 }
 
-await ChoreRunner.init(process.argv.slice(2)).run();
+export async function runChore(argv, sheetsConfig) {
+  await ChoreRunner.init(argv, sheetsConfig).run();
+}

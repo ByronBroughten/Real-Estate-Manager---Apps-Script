@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { STYLE_PATH, editDecision, isStyleRead } from "./lib/styleGate.mjs";
+import { readSheetsConfigs } from "./lib/sheetsConfigs.mjs";
 import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.mjs";
 
 await runFailOpen(() => {
@@ -19,7 +20,11 @@ await runFailOpen(() => {
     return;
   }
   if (!["Edit", "Write"].includes(input.tool_name)) return;
-  const { denyReason } = editDecision({ ...where, hasReadStyle: existsSync(markerPath) });
+  const { denyReason } = editDecision({
+    ...where,
+    hasReadStyle: existsSync(markerPath),
+    generatedDirs: readSheetsConfigs(projectDir).map(({ generatedDir }) => generatedDir),
+  });
   if (!denyReason) return;
   writeHookOutput({
     hookSpecificOutput: {

@@ -1,26 +1,28 @@
-// Regenerates the four config files from the live config sheets, on the Node host.
+// `sheets-framework gen-configs`: regenerates the package's four config files from its live config sheets, on the Node host.
 import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { dirname, relative } from "node:path";
+import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadAppConfigs, startNodeHost } from "./nodeHost.mjs";
-import { takeTarget } from "./targets.mjs";
-
-const DEFAULT_GENERATED_DIR = "src/01_SpreadsheetSchema/generated";
+import {
+  hasPackageConfigs,
+  loadFrameworkConfigs,
+  loadPackageConfigs,
+  startNodeHost,
+} from "./nodeHost.mjs";
 
 class ConfigFilesGenerator {
-  constructor({ target }) {
-    this.target = target;
-    const generatedDir = target?.generatedDir ?? DEFAULT_GENERATED_DIR;
+  constructor({ sheetsConfig }) {
+    this.sheetsConfig = sheetsConfig;
+    const { generatedDir } = sheetsConfig;
     this.path = {
-      spreadsheetConfig: configsPath(generatedDir, "spreadsheetConfig"),
-      sheetConfigs: configsPath(generatedDir, "sheetConfigs"),
-      columnConfigs: configsPath(generatedDir, "columnConfigs"),
-      valueConfigs: configsPath(generatedDir, "valueConfigs"),
+      spreadsheetConfig: join(generatedDir, "spreadsheetConfig.ts"),
+      sheetConfigs: join(generatedDir, "sheetConfigs.ts"),
+      columnConfigs: join(generatedDir, "columnConfigs.ts"),
+      valueConfigs: join(generatedDir, "valueConfigs.ts"),
     };
   }
-  static init(argv) {
-    return new ConfigFilesGenerator(takeTarget(argv));
+  static init(sheetsConfig) {
+    return new ConfigFilesGenerator({ sheetsConfig });
   }
   async run() {
     const {
@@ -57,7 +59,9 @@ class ConfigFilesGenerator {
       `\ngen:configs: ${untypedColumnsSummary ?? "every column is declared; no value name was guessed."}`,
     );
 
-    console.log("\nRunning npm run tsc to check the regenerated files...");
+    console.log(
+      "\nRunning this package's npm run tsc to check the regenerated files...",
+    );
     if (!this._runTsc()) {
       this._reportTscFailure();
       process.exit(1);
@@ -66,11 +70,13 @@ class ConfigFilesGenerator {
   }
 
   async _generate() {
-    // Only the config floor is read here, and the app's configs carry the same floor as every target's.
+    // Only the config floor is read here; a package with no generated files yet borrows the framework's.
     await startNodeHost({
       isDryRun: false,
-      target: this.target,
-      configs: await loadAppConfigs(),
+      sheetsConfig: this.sheetsConfig,
+      configs: hasPackageConfigs(this.sheetsConfig)
+        ? await loadPackageConfigs(this.sheetsConfig)
+        : await loadFrameworkConfigs(),
     });
     const { ConfigCoordinator } =
       await import("../src/05_Operators/ConfigCoordinator.ts");
@@ -87,25 +93,24 @@ class ConfigFilesGenerator {
   }
 
   _runTsc() {
-    const { status } = spawnSync("npm", ["run", "tsc"], { stdio: "inherit" });
+    const { status } = spawnSync("npm", ["run", "tsc"], {
+      cwd: this.sheetsConfig.dir,
+      stdio: "inherit",
+    });
     return status === 0;
   }
 
   _reportTscFailure() {
     console.error(
       "\ngen:configs: regeneration succeeded and all four files were written, " +
-        "but `npm run tsc` failed above. This usually means a hand-written " +
-        "file (e.g. SheetNameGroups.ts) still references a sheet/column name " +
+        "but this package's `npm run tsc` failed above. This usually means " +
+        "hand-written references in this package still name a sheet or column " +
         "that no longer exists after this regeneration. Fix those references " +
         "and re-run `npm run tsc` — do not hand-edit the generated files.",
     );
   }
 }
 
-function configsPath(generatedDir, base) {
-  return fileURLToPath(
-    new URL(`../${generatedDir}/${base}.ts`, import.meta.url),
-  );
+export async function runGenConfigs(sheetsConfig) {
+  await ConfigFilesGenerator.init(sheetsConfig).run();
 }
-
-await ConfigFilesGenerator.init(process.argv.slice(2)).run();

@@ -5,12 +5,12 @@ export const STYLE_GATE_REASON =
   "Read docs/style.md before your first src/ edit this session, then retry. " +
   "Use a full Read with no offset or limit (a partial Read or a Bash read isn't recorded), and skip docs/style/ unless a rule's line doesn't decide your case.";
 export const STYLE_PATH = ["docs", "style.md"].join(sep);
-const GENERATED_DIR = ["src", "01_SpreadsheetSchema", "generated"].join(sep);
 
-export function editDecision({ projectDir, cwd, filePath, hasReadStyle }) {
+// generatedDirs are project-relative, one per package's sheets.config.json.
+export function editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs }) {
   const target = projectRelative({ projectDir, cwd, filePath });
-  const isGated =
-    target.startsWith("src" + sep) && target.endsWith(".ts") && !target.startsWith(GENERATED_DIR + sep);
+  const isGenerated = generatedDirs.some((dir) => target.startsWith(dir + sep));
+  const isGated = target.startsWith("src" + sep) && target.endsWith(".ts") && !isGenerated;
   return { denyReason: isGated && !hasReadStyle ? STYLE_GATE_REASON : null };
 }
 

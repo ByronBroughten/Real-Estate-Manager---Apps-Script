@@ -1,8 +1,7 @@
 // PreToolUse on Bash and gsheets writes: a dev write asks while a pinning file is dirty; a gsheets write is allowed only on the clean dev ID.
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { PINNING_FILES, bashDecision, gsheetsWriteDecision } from "./lib/pinnedTargets.mjs";
+import { readSheetsConfigs } from "./lib/sheetsConfigs.mjs";
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.mjs";
 
 await runFailOpen(() => {
@@ -45,9 +44,5 @@ function dirtyPinningFiles(projectDir) {
 }
 
 function devSpreadsheetId(projectDir) {
-  try {
-    return JSON.parse(readFileSync(join(projectDir, "spreadsheetTargets.json"), "utf8")).dev?.spreadsheetId;
-  } catch {
-    return undefined;
-  }
+  return readSheetsConfigs(projectDir).find(({ scriptPrefix }) => scriptPrefix === "dev")?.spreadsheetId;
 }

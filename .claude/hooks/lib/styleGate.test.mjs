@@ -3,7 +3,7 @@ import { STYLE_GATE_REASON, editDecision, isStyleRead } from "./styleGate.mjs";
 
 const projectDir = "/repo";
 const edit = (filePath, hasReadStyle, cwd = projectDir) =>
-  editDecision({ projectDir, cwd, filePath, hasReadStyle });
+  editDecision({ projectDir, cwd, filePath, hasReadStyle, generatedDirs: ["src/01_SpreadsheetSchema/generated"] });
 
 describe("editDecision", () => {
   it("denies a src/ TypeScript edit before docs/style.md was read", () => {

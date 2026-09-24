@@ -10,7 +10,7 @@ Map fragment routed from `AGENTS.md`. Read the heading the task needs.
 
 ## The Node host
 
-The Node host is the second one (`src/nodeHost/`, launched by `scripts/nodeHost.mjs`). Spreadsheet I/O is six `RawSource` methods — fetch sheet properties, fetch the time zone, fetch grid ranges, fetch conditional format rules, fetch edit protections, apply the queued write list — none of which names a spreadsheet: the adapter is bound to one when it is constructed. `GoogleSheetsAPI` maps those onto the three Advanced Service verbs and, in Node, an HTTP transport. `NodeHost.ensureGlobals()` installs a `Logger` onto the global scope, installs configs as the Apps Script entry call does, and injects `GoogleSheetsAPI`, bound to the configured spreadsheet ID, as the `RawSource`, before any framework module loads. There is no `PropertiesService` stub. It does **not** install a `Sheets` global, so a chore that reaches for `Sheets` or `SpreadsheetApp` still fails by name. Two commands use it: `npm run <app|dev>:chore <name>` and `npm run <app|dev>:gen:configs`. A chore gets the configs generated from the spreadsheet it opens (the `generatedDir` of its row in `spreadsheetTargets.json`, or the app's for a spreadsheet the table doesn't list), so `dev:chore` runs on `dev/generated/`. `gen:configs` always installs the app's configs, since it reads only the config floor, which both share.
+The Node host is the second one (`src/nodeHost/`, launched by `scripts/nodeHost.mjs`). Spreadsheet I/O is six `RawSource` methods — fetch sheet properties, fetch the time zone, fetch grid ranges, fetch conditional format rules, fetch edit protections, apply the queued write list — none of which names a spreadsheet: the adapter is bound to one when it is constructed. `GoogleSheetsAPI` maps those onto the three Advanced Service verbs and, in Node, an HTTP transport. `NodeHost.ensureGlobals()` installs a `Logger` onto the global scope, installs configs as the Apps Script entry call does, and injects `GoogleSheetsAPI`, bound to the configured spreadsheet ID, as the `RawSource`, before any framework module loads. There is no `PropertiesService` stub. It does **not** install a `Sheets` global, so a chore that reaches for `Sheets` or `SpreadsheetApp` still fails by name. Two commands use it: `npm run <app|dev>:chore <name>` and `npm run <app|dev>:gen:configs`. A chore gets the four files in its package's `generatedDir`, passed to the same `installConfigs` the entry call uses, so `dev:chore` runs on `dev/generated/`. `gen:configs` installs the package's own configs too, or the framework's dev ones when the package has none yet, since it reads only the config floor, which every package shares.
 
 ## The Node host reaches Sheets and nothing else
 
@@ -20,9 +20,19 @@ The Node host is the second one (`src/nodeHost/`, launched by `scripts/nodeHost.
 
 **Each Node-host request is one HTTPS call to the Sheets REST API**, authenticated with the `desktop-clasp-run` credential clasp already stores. The framework's Sheets calls are synchronous and use their return values immediately, so the transport has to block: `scripts/nodeHost.mjs` `spawnSync`s `scripts/fetchSync.mjs`, a one-request-per-process script that reads the request from stdin and writes the response to stdout. TypeScript is run by `tsx`, because the repo's relative imports are extensionless under `bundler` module resolution and Node's own type stripping cannot resolve them.
 
+## The sheets-framework bin
+
+**`scripts/sheets-framework.mjs` is the one tooling entry**: a `.mjs` shim that registers `tsx`, then runs `gen-configs`, `chore`, `probe` or `setup-auth`. The first three read the nearest `sheets.config.json` above cwd, the way clasp finds `.clasp.json`, and take the spreadsheet ID from it and nowhere else: no flag, no env override (`scripts/sheetsConfig.mjs`). The file is checked in and data-only:
+
+- `spreadsheetId`: the package's spreadsheet.
+- `generatedDir`: where `gen-configs` writes the four config files and where the chore runner loads them from.
+- `choreHomes`: the package's own chore folders. The framework's generic chores (`src/chores/`) are listed in every package, and a package chore with a generic chore's name stops the run (`scripts/choreIndex.mjs`).
+
+Paths are relative to the config file. The app's is the root `sheets.config.json`. The dev spreadsheet's is `dev/sheets.config.json`, with `dev/generated` and `dev/chores`, until the workspace move puts it at the framework package's root. **The bin refuses to run when two `sheets.config.json` files in the repo share a spreadsheet ID**, so a copy-paste mistake can't merge the two targets. `gen-configs` checks its output with the package's own `npm run tsc`.
+
 ## Targets: dev and app
 
-**Every live command names its target through a root alias: `dev:*` for the `Sheets Framework Dev` spreadsheet, `app:*` for the real-estate one.** Each alias passes `--target <name>` to the script, which takes the spreadsheet ID, and for `gen:configs` the output folder, from the checked-in `spreadsheetTargets.json` and nowhere else (`scripts/targets.mjs`). A run stops when two rows share a spreadsheet ID. The table is a stand-in: at the workspace move each row becomes a package's `sheets.config.json` and `--target` goes away. Without `--target` a script falls back to the untracked `nodeHost.config.json`, but a bare command matches no allow rule, so it always asks.
+**Every live command names its target through a root alias: `dev:*` for the `Sheets Framework Dev` spreadsheet, `app:*` for the real-estate one.** An `app:*` alias runs the bin from the root, and a `dev:*` alias runs it from `dev/`, so each finds its own `sheets.config.json`. A bare `npx sheets-framework …` matches no allow rule, so it always asks.
 
 The threat model is accidents, with tampering made visible. Both clasp credentials cover the whole Google account, so OAuth can't isolate the two spreadsheets; the permission rules and hooks do.
 
@@ -37,7 +47,7 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 | gsheets `create_spreadsheet`, `share_spreadsheet` | ask | ask |
 | gsheets reads | allow | allow |
 
-- **Bare `npm run chore …`, `npx sheets-framework …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
+- **Bare `npx sheets-framework …`, `node scripts/sheets-framework.mjs …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
 - **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.mjs` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
 - **`dev:build`, `dev:push` and `dev:run` exit with an error until the dev Apps Script project lands** (slice L of #129).
 - **The dev spreadsheet is not a rehearsal copy of the app one.** Sheet configs key every sheet by its GID, and the dev sheet carries its own fixture sheets, not a copy of the business ones.
@@ -64,7 +74,7 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 
 ## The chore and its dry run
 
-A **chore** is a unit of work run from the terminal against the live spreadsheet, as against an endpoint, which an operator runs from the sheet by ticking a checkbox. One typed exported const per file, named after its file, under `src/chores/` — see [Chores](./architecture/chores.md) for the three homes.
+A **chore** is a unit of work run from the terminal against the live spreadsheet, as against an endpoint, which an operator runs from the sheet by ticking a checkbox. One typed exported const per file, named after its file, in a generic or package chore home — see [Chores](./architecture/chores.md) for the three homes.
 
 ```
 npm run app:chore                      # list the chores
@@ -82,7 +92,7 @@ The agent verifies the preview before handing it over (the rule: [`src/chores/AG
 
 ## When the Node host fails to authenticate
 
-`gen:configs` and the chore runner both refresh the named credential `desktop-clasp-run` out of `~/.clasprc.json`. If one fails with an auth error, the token needs re-minting — run `scripts/setup-clasp-run-auth.sh`, which walks through it. The consent screen for GCP project `real-estate-manager-sheets` is deliberately published to production; left in "Testing" it would issue refresh tokens that expire every 7 days. Publishing alone doesn't fix an existing token, since one minted under "Testing" keeps its expiry — the re-authorization is the part that matters.
+`gen:configs` and the chore runner both refresh the named credential `desktop-clasp-run` out of `~/.clasprc.json`. If one fails with an auth error, the token needs re-minting — run `node scripts/sheets-framework.mjs setup-auth` (it runs `scripts/setup-clasp-run-auth.sh`), which walks through it. The consent screen for GCP project `real-estate-manager-sheets` is deliberately published to production; left in "Testing" it would issue refresh tokens that expire every 7 days. Publishing alone doesn't fix an existing token, since one minted under "Testing" keeps its expiry — the re-authorization is the part that matters.
 
 Google no longer lets you view or download a client secret after creating it, but you don't need to: clasp stores `client_id` and `client_secret` in `~/.clasprc.json`, and `--creds` reads only those two plus a localhost `redirect_uris` entry, so the file is always rebuildable. The script does that for you. Keep `~/.clasprc.json` at `chmod 600` — the refresh token in it no longer self-expires.
 
@@ -97,13 +107,13 @@ npm run app:probe -- --path sheets.title=Occupancy.protectedRanges   # re-read t
 npm run dev:probe -- --fields 'properties(title,timeZone)'           # the same, on the dev spreadsheet
 ```
 
-`scripts/sheetsProbe.mjs` sends one request through the Node host's `SheetsTransport`, authenticated like a chore. That request is a `GET` with a `fields` mask or a `:getByDataFilter`, and the script cannot build any other kind. It writes the full response, pretty-printed, to the gitignored `.probe/last.json`, shared by both targets. Stdout gets only a summary: top-level keys, array counts, and each sheet's id and title. With `--path`, stdout gets that one subtree, printed whole when it is short and summarized when it is not. Never print a full body into the chat (the rule: root [`AGENTS.md`](../AGENTS.md)). When the summary isn't enough, `Read` a line range of `.probe/last.json`. The throwaway `scripts/*.tmp.mjs` route this replaced is retired.
+The bin's `probe` (`scripts/sheetsProbe.mjs`) sends one request through the Node host's `SheetsTransport`, authenticated like a chore. That request is a `GET` with a `fields` mask or a `:getByDataFilter`, and the script cannot build any other kind. It writes the full response, pretty-printed, to the gitignored `.probe/last.json` in its package: `.probe/last.json` for the app, `dev/.probe/last.json` for dev. Stdout gets only a summary: top-level keys, array counts, and each sheet's id and title. With `--path`, stdout gets that one subtree, printed whole when it is short and summarized when it is not. Never print a full body into the chat (the rule: root [`AGENTS.md`](../AGENTS.md)). When the summary isn't enough, `Read` a line range of the file it names. The throwaway `scripts/*.tmp.mjs` route this replaced is retired.
 
 ## The `gsheets` MCP tools
 
 This project also has a `gsheets` MCP server available, which can read and write the user's real Google Sheet directly — separately from `clasp`/Apps Script.
 
-- **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`. Take `spreadsheet_id` from `spreadsheetTargets.json`.
+- **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`. Take `spreadsheet_id` from the package's `sheets.config.json`.
 - **They return cell values only, so they cannot see a table's declared column types.** `tables[].columnProperties` — a column's `columnType`, its table-column name, its validation rule — is invisible to `get_sheet_data`, and `include_grid_data` reaches cell formats but not tables. Reading those means calling the Sheets REST API with the `clasp` credential, and `app:probe`/`dev:probe` (above) is how to do it. It is read-only and on the allow-list, like a chore dry run. Ask before running any other script that opens that credential (the rule: root [`AGENTS.md`](../AGENTS.md)). The chore runner and `gen:configs` are exempt, because they open it as a routine step and the permissions above cover them.
 - **`update_cells`, `batch_update_cells` and `create_sheet` on the dev spreadsheet have a standing yes**, granted by `pinnedTargetGuard.mjs` while the pinning files are clean.
 - **Any other write — those three on any other spreadsheet, and `create_spreadsheet` everywhere — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.

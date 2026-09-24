@@ -1,7 +1,7 @@
-import type { CellValue } from "../../00_Source/CellValues/cellValues";
-import type { TableColumnType } from "../../00_Source/RawSource/RawSource";
-import { dimensionIds } from "../../01_SpreadsheetSchema/dimensionIds";
-import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
+import type { CellValue } from "../../../src/00_Source/CellValues/cellValues";
+import type { TableColumnType } from "../../../src/00_Source/RawSource/RawSource";
+import { dimensionIds } from "../../../src/01_SpreadsheetSchema/dimensionIds";
+import { ssConfigGet } from "../../../src/01_SpreadsheetSchema/spreadsheetConfigTypes";
 
 export interface DevFixtureColumn {
   key: string;
@@ -21,7 +21,7 @@ export interface DevFixtureSheet {
   columns: DevFixtureColumn[];
 }
 
-// Pinned here, not read from spreadsheetTargets.json, so a bad table row can't redirect the chore.
+// Pinned here, not read from sheets.config.json, so a bad config edit can't redirect the chore.
 export const devSpreadsheetId = "19gIs4w8-2Nsin5zTN1TojOR1HiiT9Y-jCctC7doAMqM";
 
 function withIdColumn(sheet: DevFixtureSheet): DevFixtureSheet {
