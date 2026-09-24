@@ -96,7 +96,9 @@ describe("checkDocs", () => {
 
   describe("rule lines", () => {
     it("passes a rules-file rule line of any length", () => {
-      expect(check({ "docs/style.md": `- **${"x".repeat(600)}**\n` })).toEqual([]);
+      expect(check({ "docs/style.md": `- **${"x".repeat(600)}**\n` })).toEqual(
+        [],
+      );
     });
   });
 

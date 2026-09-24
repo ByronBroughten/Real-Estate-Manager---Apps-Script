@@ -156,7 +156,8 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       ...requests.raw,
     ];
     this.spreadsheetStateRaw.rawSource.flush(operations);
-    this.spreadsheetStateRaw.writeQueue.updateRequests = emptyStateRaw.updateRequests();
+    this.spreadsheetStateRaw.writeQueue.updateRequests =
+      emptyStateRaw.updateRequests();
   }
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first

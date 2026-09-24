@@ -413,7 +413,8 @@ export function stubSheetsService(
       !isFilteredFetch &&
       (fields === undefined || fields.includes("protectedRanges"));
     const includeTimeZone =
-      timeZone !== null && (fields === undefined || fields.includes("timeZone"));
+      timeZone !== null &&
+      (fields === undefined || fields.includes("timeZone"));
     return {
       ...(includeTimeZone ? { properties: { timeZone } } : {}),
       sheets: sheets.map((s): GoogleAppsScript.Sheets.Schema.Sheet => ({

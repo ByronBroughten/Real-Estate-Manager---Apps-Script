@@ -38,14 +38,14 @@ describe("Endpoint's column parameters", () => {
   it("are filtered to the value type each one needs", () => {
     assertType<
       IsExactly<
-        SelectorColumnOf<"occupancy">,
-        ColumnNameFiltered<"occupancy", "checkbox", false>
+        SelectorColumnOf<"runItem">,
+        ColumnNameFiltered<"runItem", "checkbox", false>
       >
     >(true);
     assertType<
       IsExactly<
-        TimeLastRanOf<"occupancy">,
-        ColumnNameFiltered<"occupancy", "string", false>
+        TimeLastRanOf<"runItem">,
+        ColumnNameFiltered<"runItem", "string", false>
       >
     >(true);
   });
@@ -61,8 +61,8 @@ describe("Endpoint at the widened sheet name the dispatch boundary uses", () => 
     >(true);
     assertType<
       IsExactly<
-        Extract<SelectorColumnOf<SheetNameSimple>, "buildLedgerSelect">,
-        "buildLedgerSelect"
+        Extract<SelectorColumnOf<SheetNameSimple>, "selected">,
+        "selected"
       >
     >(true);
   });
@@ -74,7 +74,7 @@ describe("EndpointsAll", () => {
   });
 });
 
-describe("Endpoints, the app's map", () => {
+describe("Endpoints, the endpoint map", () => {
   it("rejects a column on a config sheet", () => {
     assertType<
       IsExactly<
@@ -94,10 +94,7 @@ describe("Endpoints, the app's map", () => {
       >
     >(true);
     assertType<
-      IsExactly<
-        Extract<keyof Endpoints, "occupancy_buildLedgerTimeLastRan">,
-        "occupancy_buildLedgerTimeLastRan"
-      >
+      IsExactly<Extract<keyof Endpoints, "runItem_result">, "runItem_result">
     >(true);
   });
 });

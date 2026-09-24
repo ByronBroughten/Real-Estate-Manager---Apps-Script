@@ -6,12 +6,12 @@ import { NodeHost } from "./NodeHost";
 import type { SheetsHttpRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 
 const spreadsheetId = "spreadsheet-under-test";
-const leasesGid = 111;
+const gadgetsGid = 111;
 
-const leasesPayload = {
+const gadgetsPayload = {
   sheets: [
     {
-      properties: { sheetId: leasesGid, title: "Leases" },
+      properties: { sheetId: gadgetsGid, title: "Gadgets" },
       tables: [
         {
           tableId: "fake-table",
@@ -28,7 +28,7 @@ const leasesPayload = {
 };
 
 function seedHost(isDryRun: boolean) {
-  const transport = vi.fn((_request: SheetsHttpRequest) => leasesPayload);
+  const transport = vi.fn((_request: SheetsHttpRequest) => gadgetsPayload);
   const host = NodeHost.init({
     configs: installedConfigs(),
     spreadsheetId,
@@ -42,7 +42,7 @@ function seedHost(isDryRun: boolean) {
 function writeOneCell(): SpreadsheetRaw {
   const raw = SpreadsheetRaw.init();
   raw.fetchAllSheetProperties();
-  raw.sheet(leasesGid).row(5).cell(2).updateValue("Processing...");
+  raw.sheet(gadgetsGid).row(5).cell(2).updateValue("Processing...");
   raw.batchUpdateGSheets();
   return raw;
 }
@@ -66,7 +66,7 @@ describe("NodeHost.ensureGlobals", () => {
       transport.mock.calls.filter(([request]) => request.method === "POST"),
     ).toEqual([]);
     expect(host.summary.count).toBe(1);
-    expect(host.summary.lines[0]).toContain(`gid ${leasesGid}!C6:C6`);
+    expect(host.summary.lines[0]).toContain(`gid ${gadgetsGid}!C6:C6`);
   });
 
   it("sends the write once the dry run is not armed", () => {

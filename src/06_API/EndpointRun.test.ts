@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
+import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { SpreadsheetBaseNamed } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -13,20 +13,11 @@ import type { ActionReturn, Endpoint } from "./Endpoints";
 type BatchUpdateCall =
   GoogleAppsScript.Sheets.Schema.BatchUpdateSpreadsheetRequest;
 
-const occupancyGid = sheetConfigs.occupancy.sheetGid;
-const c = columnConfigs.occupancy;
-const columnIds = [
-  c.id.columnId,
-  c.buildLedgerSelect.columnId,
-  c.buildLedgerTimeLastRan.columnId,
-  c.buildLedgerRunStatus.columnId,
-];
-const headers = [
-  "ID",
-  "Build ledger, select",
-  "Build ledger, time last ran",
-  "Build ledger, run status",
-];
+const runItemGid = getSheetTraitByName("runItem", "sheetGid");
+const columnIds = (["id", "selected", "startTime", "runStatus"] as const).map(
+  (columnName) => getColumnTraitByName("runItem", columnName, "columnId"),
+);
+const headers = ["ID", "Selected", "Start time", "Run status"];
 const selectorColIndex = 1;
 const timeLastRanColIndex = 2;
 const runStatusColIndex = 3;
@@ -42,12 +33,12 @@ const lightRed = { red: 0.957, green: 0.8, blue: 0.8 };
 const timestamp = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
 
 // Rows 4 and 6 are ticked; 5, 7 and 8 are the rows a selective run must not touch.
-function stubOccupancySheet(
+function stubRunItemSheet(
   checkedRowIndexes: number[] = [4, 6],
   timeZone?: string,
 ) {
   const dataRow = (rowIndex: number) => [
-    `r:occ:row${rowIndex}`,
+    `r:rit:row${rowIndex}`,
     checkedRowIndexes.includes(rowIndex),
     "",
     "",
@@ -56,8 +47,8 @@ function stubOccupancySheet(
     timeZone,
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: runItemGid,
+        title: "Run item",
         rows: buildGridRows({
           0: columnIds,
           3: headers,
@@ -74,13 +65,13 @@ function stubOccupancySheet(
 }
 
 // Row 6 is the blank row an emptied-then-refilled sheet would be left with.
-function stubOccupancySheetWithBlankRow() {
-  const dataRow = (rowIndex: number) => [`r:occ:row${rowIndex}`, false, "", ""];
+function stubRunItemSheetWithBlankRow() {
+  const dataRow = (rowIndex: number) => [`r:rit:row${rowIndex}`, false, "", ""];
   return stubSheetsService({
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: runItemGid,
+        title: "Run item",
         rows: buildGridRows({
           0: columnIds,
           3: headers,
@@ -96,11 +87,11 @@ function stubOccupancySheetWithBlankRow() {
   });
 }
 
-function runEndpoint(endpoint: Endpoint<"occupancy">, isChecked = true) {
+function runEndpoint(endpoint: Endpoint<"runItem">, isChecked = true) {
   const run = new EndpointRun({
     ...SpreadsheetBaseNamed.initSpreadsheetNamedProps(),
-    sheetName: "occupancy",
-    entryColumnName: "buildLedgerTimeLastRan",
+    sheetName: "runItem",
+    entryColumnName: "startTime",
     endpoint,
   });
   run.sheet.identified.meta.ensureColumnIdsAreFetched();
@@ -108,39 +99,39 @@ function runEndpoint(endpoint: Endpoint<"occupancy">, isChecked = true) {
 }
 
 function reportingEndpoint(
-  action: Endpoint<"occupancy">["action"],
-): Endpoint<"occupancy"> {
+  action: Endpoint<"runItem">["action"],
+): Endpoint<"runItem"> {
   return {
     action,
-    timeLastRan: "buildLedgerTimeLastRan",
-    runStatus: "buildLedgerRunStatus",
+    timeLastRan: "startTime",
+    runStatus: "runStatus",
   };
 }
 
 function selectiveEndpoint(
-  action: Endpoint<"occupancy">["action"],
-): Endpoint<"occupancy"> {
+  action: Endpoint<"runItem">["action"],
+): Endpoint<"runItem"> {
   return {
     ...reportingEndpoint(action),
-    selector: { column: "buildLedgerSelect" },
+    selector: { column: "selected" },
   };
 }
 
 function oneRowEndpoint(
-  action: Endpoint<"occupancy">["action"],
-): Endpoint<"occupancy"> {
+  action: Endpoint<"runItem">["action"],
+): Endpoint<"runItem"> {
   return {
     ...reportingEndpoint(action),
-    selector: { column: "buildLedgerSelect", requireOneRow: true },
+    selector: { column: "selected", requireOneRow: true },
   };
 }
 
 function retainingEndpoint(
-  action: Endpoint<"occupancy">["action"],
-): Endpoint<"occupancy"> {
+  action: Endpoint<"runItem">["action"],
+): Endpoint<"runItem"> {
   return {
     ...reportingEndpoint(action),
-    selector: { column: "buildLedgerSelect", retainSelection: true },
+    selector: { column: "selected", retainSelection: true },
   };
 }
 
@@ -216,7 +207,7 @@ beforeEach(() => {
 
 describe("EndpointRun.run, an endpoint with a selector", () => {
   it("stamps the run status into the selected rows only", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(noOp));
 
@@ -249,7 +240,7 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
   });
 
   it("leaves every unselected row completely untouched", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(noOp));
 
@@ -257,7 +248,7 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
   });
 
   it("hands the action exactly the rows it stamps", () => {
-    stubOccupancySheet();
+    stubRunItemSheet();
     let received: number[] = [];
 
     runEndpoint(
@@ -270,7 +261,7 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
   });
 
   it("shows the run state on every selected row's start-time cell", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(noOp));
     const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
@@ -296,7 +287,7 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
   });
 
   it("reads the selection without a round trip of its own", () => {
-    const { getByDataFilterCalls } = stubOccupancySheet();
+    const { getByDataFilterCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(noOp));
 
@@ -306,7 +297,7 @@ describe("EndpointRun.run, an endpoint with a selector", () => {
 
 describe("EndpointRun.run, the selection a successful run consumes", () => {
   it("unticks the selected rows and no other row", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(noOp));
 
@@ -317,7 +308,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
   });
 
   it("leaves the ticks alone when the action throws", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       selectiveEndpoint(() => {
@@ -332,7 +323,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
   });
 
   it("leaves the ticks alone when the endpoint retains its selection", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(retainingEndpoint(noOp));
 
@@ -343,7 +334,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
   });
 
   it("unticks them on an untick run too, leaving the entry checkbox alone", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint({ ...selectiveEndpoint(noOp), runOnUncheck: true }, false);
 
@@ -357,7 +348,7 @@ describe("EndpointRun.run, the selection a successful run consumes", () => {
 
 describe("EndpointRun.run, an endpoint with no selector", () => {
   it("stamps every table data row through a single fill per state", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(noOp));
     const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
@@ -369,7 +360,7 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
   });
 
   it("writes the start time once and only recolours it afterwards", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(noOp));
     const writes = fillsFor(batchUpdateCalls, timeLastRanColIndex);
@@ -384,7 +375,7 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
   });
 
   it("tells the action about every data row", () => {
-    stubOccupancySheet();
+    stubRunItemSheet();
     let received: number[] = [];
 
     runEndpoint(
@@ -397,7 +388,7 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
   });
 
   it("costs no read of its own, since nothing is prepped", () => {
-    const { getByDataFilterCalls } = stubOccupancySheet();
+    const { getByDataFilterCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(noOp));
 
@@ -405,7 +396,7 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
   });
 
   it("keeps a blank row out of the rows it hands the action", () => {
-    stubOccupancySheetWithBlankRow();
+    stubRunItemSheetWithBlankRow();
     let received: number[] = [];
 
     runEndpoint(
@@ -418,7 +409,7 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
   });
 
   it("still stamps its status across the blank row, so an emptied sheet reports somewhere", () => {
-    const { batchUpdateCalls } = stubOccupancySheetWithBlankRow();
+    const { batchUpdateCalls } = stubRunItemSheetWithBlankRow();
 
     runEndpoint(reportingEndpoint(noOp));
 
@@ -433,17 +424,17 @@ describe("EndpointRun.run, an endpoint with no selector", () => {
 
 describe("EndpointRun.run, the run status message", () => {
   it("writes the action's returned string", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
-    runEndpoint(reportingEndpoint(() => "Built 5 ledgers"));
+    runEndpoint(reportingEndpoint(() => "Built 5 items"));
 
     expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
-      "Built 5 ledgers",
+      "Built 5 items",
     );
   });
 
   it("writes Succeeded when the action returns nothing", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(noOp));
 
@@ -455,7 +446,7 @@ describe("EndpointRun.run, the run status message", () => {
 
 describe("EndpointRun.run, the two flushes", () => {
   it("puts the running state on the sheet before the work begins", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(noOp));
 
@@ -476,7 +467,7 @@ describe("EndpointRun.run, the start time", () => {
   it("is the wall-clock time in the spreadsheet's own zone", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(new Date("2024-03-15T02:30:00Z"));
-    const { batchUpdateCalls } = stubOccupancySheet([4, 6], "Asia/Tokyo");
+    const { batchUpdateCalls } = stubRunItemSheet([4, 6], "Asia/Tokyo");
 
     runEndpoint(selectiveEndpoint(noOp));
 
@@ -488,11 +479,11 @@ describe("EndpointRun.run, the start time", () => {
 
 describe("EndpointRun.run, an endpoint declaring no feedback columns", () => {
   it("emits no stamp at all", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint({
       action: noOp,
-      selector: { column: "buildLedgerSelect" },
+      selector: { column: "selected" },
     });
 
     expect(fillsFor(batchUpdateCalls, timeLastRanColIndex)).toEqual([]);
@@ -502,13 +493,13 @@ describe("EndpointRun.run, an endpoint declaring no feedback columns", () => {
 
 describe("EndpointRun.run, a run that fails", () => {
   // Reading a row past the table's last one is a real read on real state.
-  function failingAction(ss: Parameters<Endpoint<"occupancy">["action"]>[0]) {
-    ss.sheet("occupancy").row(4).cell("id").updateValue("r:occ:written");
-    ss.sheet("occupancy").row(endRowIndex).value("id");
+  function failingAction(ss: Parameters<Endpoint<"runItem">["action"]>[0]) {
+    ss.sheet("runItem").row(4).cell("id").updateValue("r:rit:written");
+    ss.sheet("runItem").row(endRowIndex).value("id");
   }
 
   it("writes the error text and red to the selected rows only", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(failingAction));
 
@@ -543,7 +534,7 @@ describe("EndpointRun.run, a run that fails", () => {
   });
 
   it("discards what the action queued before it threw", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(selectiveEndpoint(failingAction));
 
@@ -556,7 +547,7 @@ describe("EndpointRun.run, a run that fails", () => {
 
 describe("EndpointRun.run, an empty selection", () => {
   it("runs no action and stamps nothing", () => {
-    const { batchUpdateCalls } = stubOccupancySheet([]);
+    const { batchUpdateCalls } = stubRunItemSheet([]);
     const calls: string[] = [];
 
     runEndpoint(
@@ -573,17 +564,17 @@ describe("EndpointRun.run, an empty selection", () => {
 
 describe("EndpointRun.run, a selector that requires one row", () => {
   it("refuses a selection of two, naming the sheet and how many were ticked", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(oneRowEndpoint(noOp));
 
     expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)?.value).toBe(
-      'Error: This endpoint runs on one row of "Occupancy" at a time, but 2 are selected.',
+      'Error: This endpoint runs on one row of "Run item" at a time, but 2 are selected.',
     );
   });
 
   it("never reaches the action", () => {
-    stubOccupancySheet();
+    stubRunItemSheet();
     const calls: string[] = [];
 
     runEndpoint(
@@ -596,7 +587,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
   });
 
   it("leaves the ticks alone, so the extras can be unticked and the run retried", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(oneRowEndpoint(noOp));
 
@@ -604,7 +595,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
   });
 
   it("reports the refusal as a failed run on every ticked row", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(oneRowEndpoint(noOp));
 
@@ -625,7 +616,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
   });
 
   it("hands the action its one row when exactly one is ticked", () => {
-    stubOccupancySheet([6]);
+    stubRunItemSheet([6]);
     let received: number[] = [];
 
     runEndpoint(
@@ -638,7 +629,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
   });
 
   it("succeeds on that one row", () => {
-    const { batchUpdateCalls } = stubOccupancySheet([6]);
+    const { batchUpdateCalls } = stubRunItemSheet([6]);
 
     runEndpoint(oneRowEndpoint(noOp));
 
@@ -650,7 +641,7 @@ describe("EndpointRun.run, a selector that requires one row", () => {
 
 describe("EndpointRun.run, a run report naming a state", () => {
   it("writes the warning's own message, since warning has no useful default", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint(() => ({
@@ -665,7 +656,7 @@ describe("EndpointRun.run, a run report naming a state", () => {
   });
 
   it("colours both feedback columns, so a sheet with one of them still shows it", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint(() => ({
@@ -683,7 +674,7 @@ describe("EndpointRun.run, a run report naming a state", () => {
   });
 
   it("leaves the start time written once, recolouring it without a value", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint(() => ({
@@ -703,25 +694,25 @@ describe("EndpointRun.run, a run report naming rows", () => {
   function twoRowsFailed() {
     return {
       rows: new Map([
-        [5, { runState: "failure" as const, message: "No such unit" }],
+        [5, { runState: "failure" as const, message: "No such row" }],
         [7, { runState: "failure" as const, message: "Amount is blank" }],
       ]),
     };
   }
 
   it("writes each named row's own message and colour into its own cell", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
     expect(cellWritesFor(batchUpdateCalls, runStatusColIndex)).toEqual([
-      { rowIndex: 5, value: "No such unit", backgroundColor: lightRed },
+      { rowIndex: 5, value: "No such row", backgroundColor: lightRed },
       { rowIndex: 7, value: "Amount is blank", backgroundColor: lightRed },
     ]);
   });
 
   it("colours the named rows' start-time cells without rewriting the time", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
@@ -732,7 +723,7 @@ describe("EndpointRun.run, a run report naming rows", () => {
   });
 
   it("defaults the unnamed rows to success when no state is named", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
@@ -745,7 +736,7 @@ describe("EndpointRun.run, a run report naming rows", () => {
   });
 
   it("gives the unnamed rows the state named beside the map", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint(() => ({
@@ -764,7 +755,7 @@ describe("EndpointRun.run, a run report naming rows", () => {
   });
 
   it("lets a named row be warned rather than failed", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint(() => ({
@@ -780,38 +771,38 @@ describe("EndpointRun.run, a run report naming rows", () => {
   });
 
   it("keeps the rest of the run's writes, since a returned failure is not a throw", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint((ss) => {
-        ss.sheet("occupancy").row(4).cell("id").updateValue("r:occ:written");
+        ss.sheet("runItem").row(4).cell("id").updateValue("r:rit:written");
         return twoRowsFailed();
       }),
     );
 
     expect(cellWritesFor(batchUpdateCalls, 0)).toEqual([
-      { rowIndex: 4, value: "r:occ:written", backgroundColor: undefined },
+      { rowIndex: 4, value: "r:rit:written", backgroundColor: undefined },
     ]);
   });
 
   it("lets a selector endpoint flag some of its selected rows and not others", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       selectiveEndpoint(() => ({
         rows: new Map([
-          [6, { runState: "failure" as const, message: "No such unit" }],
+          [6, { runState: "failure" as const, message: "No such row" }],
         ]),
       })),
     );
 
     expect(cellWritesFor(batchUpdateCalls, runStatusColIndex)).toEqual([
-      { rowIndex: 6, value: "No such unit", backgroundColor: lightRed },
+      { rowIndex: 6, value: "No such row", backgroundColor: lightRed },
     ]);
   });
 
   it("fails the run when a key is not a data row of the sheet", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint(() => ({
@@ -824,13 +815,13 @@ describe("EndpointRun.run, a run report naming rows", () => {
     expect(fillsFor(batchUpdateCalls, runStatusColIndex).at(-1)).toEqual({
       startRowIndex: topDataRowIndex,
       endRowIndex,
-      value: `Error: Row ${endRowIndex} is not a data row of "Occupancy", so this run cannot report into it.`,
+      value: `Error: Row ${endRowIndex} is not a data row of "Run item", so this run cannot report into it.`,
       backgroundColor: lightRed,
     });
   });
 
   it("costs the run no round trip of its own", () => {
-    const { batchUpdateCalls, getByDataFilterCalls } = stubOccupancySheet();
+    const { batchUpdateCalls, getByDataFilterCalls } = stubRunItemSheet();
 
     runEndpoint(reportingEndpoint(twoRowsFailed));
 
@@ -839,11 +830,11 @@ describe("EndpointRun.run, a run report naming rows", () => {
   });
 
   it("leaves a deleted row's delete standing when the same run also names it", () => {
-    const { batchUpdateCalls } = stubOccupancySheet();
+    const { batchUpdateCalls } = stubRunItemSheet();
 
     runEndpoint(
       reportingEndpoint((ss) => {
-        ss.sheet("occupancy").row(5).delete();
+        ss.sheet("runItem").row(5).delete();
         return twoRowsFailed();
       }),
     );
@@ -874,11 +865,11 @@ describe("the run report's type", () => {
 
   it("takes a success with no message, and a message with no state", () => {
     const bare: ActionReturn = { runState: "success" };
-    const messaged: ActionReturn = { message: "Built 5 ledgers" };
+    const messaged: ActionReturn = { message: "Built 5 items" };
 
     expect([bare, messaged]).toEqual([
       { runState: "success" },
-      { message: "Built 5 ledgers" },
+      { message: "Built 5 items" },
     ]);
   });
 });

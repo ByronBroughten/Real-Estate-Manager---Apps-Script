@@ -1,8 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import type { ColumnIsFormula } from "../01_SpreadsheetSchema/columnConfigsTypes";
-import { sheetConfigs } from "../01_SpreadsheetSchema/generated/sheetConfigs";
-import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import {
+  getColumnTraitByName,
+  type ColumnIsFormula,
+} from "../01_SpreadsheetSchema/columnConfigsTypes";
+import {
+  getSheetTraitByName,
+  type SheetName,
+} from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
@@ -79,34 +83,30 @@ describe("SpreadsheetNamed navigation", () => {
   it("gives each accessor the class its return type names", () => {
     stubSheetsService();
     const ss = SpreadsheetNamed.init();
-    const sheet = ss.sheet("occupancy");
-    const sheetMeta = ss.sheetMeta("occupancy");
+    const sheet = ss.sheet("item");
+    const sheetMeta = ss.sheetMeta("item");
     const column = sheet.column("id");
     const columnMeta = sheetMeta.column("id");
 
-    assertType<IsExactly<typeof sheet, SheetNamed<"occupancy">>>(true);
-    assertType<IsExactly<typeof sheetMeta, SheetMetaNamed<"occupancy">>>(true);
-    assertType<IsExactly<typeof sheet.meta, SheetMetaNamed<"occupancy">>>(true);
-    assertType<IsExactly<typeof sheetMeta.primary, SheetNamed<"occupancy">>>(
+    assertType<IsExactly<typeof sheet, SheetNamed<"item">>>(true);
+    assertType<IsExactly<typeof sheetMeta, SheetMetaNamed<"item">>>(true);
+    assertType<IsExactly<typeof sheet.meta, SheetMetaNamed<"item">>>(true);
+    assertType<IsExactly<typeof sheetMeta.primary, SheetNamed<"item">>>(true);
+    assertType<IsExactly<typeof column, ColumnNamed<"item", "id">>>(true);
+    assertType<IsExactly<typeof columnMeta, ColumnMetaNamed<"item", "id">>>(
       true,
     );
-    assertType<IsExactly<typeof column, ColumnNamed<"occupancy", "id">>>(true);
-    assertType<
-      IsExactly<typeof columnMeta, ColumnMetaNamed<"occupancy", "id">>
-    >(true);
-    assertType<IsExactly<typeof column.sheet, SheetNamed<"occupancy">>>(true);
-    assertType<IsExactly<typeof columnMeta.sheet, SheetMetaNamed<"occupancy">>>(
+    assertType<IsExactly<typeof column.sheet, SheetNamed<"item">>>(true);
+    assertType<IsExactly<typeof columnMeta.sheet, SheetMetaNamed<"item">>>(
       true,
     );
-    assertType<
-      IsExactly<typeof column.meta, ColumnMetaNamed<"occupancy", "id">>
-    >(true);
-    assertType<
-      IsExactly<typeof columnMeta.primary, ColumnNamed<"occupancy", "id">>
-    >(true);
-    assertType<IsExactly<ReturnType<typeof sheet.row>, RowNamed<"occupancy">>>(
+    assertType<IsExactly<typeof column.meta, ColumnMetaNamed<"item", "id">>>(
       true,
     );
+    assertType<IsExactly<typeof columnMeta.primary, ColumnNamed<"item", "id">>>(
+      true,
+    );
+    assertType<IsExactly<ReturnType<typeof sheet.row>, RowNamed<"item">>>(true);
 
     expect(sheet.meta).toBeInstanceOf(SheetMetaNamed);
     expect(sheetMeta.primary).toBeInstanceOf(SheetNamed);
@@ -121,39 +121,50 @@ describe("SpreadsheetNamed navigation", () => {
 });
 
 const topDataRowIndex = ssConfigGet("tableHeaderRowIndexBase0") + 1;
-const occupancyGid = sheetConfigs.occupancy.sheetGid;
-const idColumnId = columnConfigs.occupancy.id.columnId;
-const selectColumnId = columnConfigs.occupancy.updateTermsSelect.columnId;
-const nextStartDateColumnId =
-  columnConfigs.occupancy.nextTermsStartDate.columnId;
-const nextEndDateColumnId = columnConfigs.occupancy.nextTermsEndDate.columnId;
-const nextStartDateSerial = 45000;
-const nextEndDateSerial = 45365;
+const datesGid = getSheetTraitByName("dates", "sheetGid");
+const valueTypesGid = getSheetTraitByName("valueTypes", "sheetGid");
+const idColumnId = getColumnTraitByName("dates", "id", "columnId");
+const requiredDateColumnId = getColumnTraitByName(
+  "dates",
+  "requiredDate",
+  "columnId",
+);
+const optionalDateColumnId = getColumnTraitByName(
+  "dates",
+  "optionalDate",
+  "columnId",
+);
+const requiredDateSerial = 45000;
+const optionalDateSerial = 45365;
 const filledRowIndex = 4;
 const blankRowIndex = 5;
 
-// Row 5 is the blank row; its checkbox is untouched, so it reads blank not false.
-function stubOccupancyWithBlankRow() {
+// Row 5 is the blank row; the checkbox is untouched, so it reads blank not false.
+function stubDatesAndValueTypesWithBlankRow() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: datesGid,
+        title: "Dates",
+        rows: buildGridRows({
+          0: [idColumnId, requiredDateColumnId, optionalDateColumnId],
+          3: ["ID", "Required date", "Optional date"],
+          4: ["r:dat:row4", requiredDateSerial, optionalDateSerial],
+          5: [null, null, null],
+        }),
+        table: { endRowIndex: 6 },
+      },
+      {
+        sheetId: valueTypesGid,
+        title: "Value Types",
         rows: buildGridRows({
           0: [
-            idColumnId,
-            selectColumnId,
-            nextStartDateColumnId,
-            nextEndDateColumnId,
+            getColumnTraitByName("valueTypes", "checkbox", "columnId"),
+            getColumnTraitByName("valueTypes", "numberValue", "columnId"),
           ],
-          3: [
-            "ID",
-            "Update terms, select",
-            "Next terms start date",
-            "Next terms end date",
-          ],
-          4: ["r:occ:row4", true, nextStartDateSerial, nextEndDateSerial],
-          5: [null, null, null, null],
+          3: ["Checkbox", "Number value"],
+          4: [true, 7],
+          5: [null, null],
         }),
         table: { endRowIndex: 6 },
       },
@@ -161,59 +172,61 @@ function stubOccupancyWithBlankRow() {
   });
 }
 
-function fetchedOccupancySheet(): SheetNamed<"occupancy"> {
+function fetchedDatesSheet(): SheetNamed<"dates"> {
   const ss = SpreadsheetNamed.init();
-  ss.sheet("occupancy").prepFetchColumnsFull(
-    "id",
-    "updateTermsSelect",
-    "nextTermsStartDate",
-    "nextTermsEndDate",
-  );
+  ss.sheet("dates").prepFetchColumnsFull("id", "requiredDate", "optionalDate");
   ss.fetchAllPrepped();
-  return ss.sheet("occupancy");
+  return ss.sheet("dates");
+}
+
+function fetchedValueTypesSheet(): SheetNamed<"valueTypes"> {
+  const ss = SpreadsheetNamed.init();
+  ss.sheet("valueTypes").prepFetchColumnsFull("checkbox", "numberValue");
+  ss.fetchAllPrepped();
+  return ss.sheet("valueTypes");
 }
 
 describe("Named value accessors", () => {
   beforeEach(() => {
-    stubOccupancyWithBlankRow();
+    stubDatesAndValueTypesWithBlankRow();
   });
 
   it("names the sheet, the column and the row when CellNamed.value hits a blank cell", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
+    const cell = fetchedDatesSheet().column("id").cell(blankRowIndex);
 
     expect(() => cell.value()).toThrowError(
-      new RegExp(`"id".*"occupancy".*${blankRowIndex}`),
+      new RegExp(`"id".*"dates".*${blankRowIndex}`),
     );
   });
 
   it("keeps the generated column id out of the Named message", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
+    const cell = fetchedDatesSheet().column("id").cell(blankRowIndex);
 
     expect(() => cell.value()).not.toThrowError(new RegExp(idColumnId));
   });
 
   it("returns the empty string from CellNamed.valueOrEmpty on that same cell", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
+    const cell = fetchedDatesSheet().column("id").cell(blankRowIndex);
 
     expect(cell.valueOrEmpty()).toBe("");
   });
 
   it("reads a filled cell identically through both forms", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(filledRowIndex);
+    const cell = fetchedDatesSheet().column("id").cell(filledRowIndex);
 
-    expect(cell.value()).toBe("r:occ:row4");
-    expect(cell.valueOrEmpty()).toBe("r:occ:row4");
+    expect(cell.value()).toBe("r:dat:row4");
+    expect(cell.valueOrEmpty()).toBe("r:dat:row4");
   });
 
   // The same read one tier up, which is what proves Identified and Named agree.
   it("reads an untouched checkbox as unchecked, with no blank in the type", () => {
-    const sheet = fetchedOccupancySheet();
-    const column = sheet.column("updateTermsSelect");
+    const sheet = fetchedValueTypesSheet();
+    const column = sheet.column("checkbox");
 
     expect(column.valueOrEmpty(blankRowIndex)).toBe(false);
     expect(column.value(blankRowIndex)).toBe(false);
     expect(column.value(filledRowIndex)).toBe(true);
-    expect(sheet.row(blankRowIndex).value("updateTermsSelect")).toBe(false);
+    expect(sheet.row(blankRowIndex).value("checkbox")).toBe(false);
     assertType<IsExactly<ReturnType<typeof column.value>, boolean>>(true);
     assertType<IsExactly<ReturnType<typeof column.valueOrEmpty>, boolean>>(
       true,
@@ -221,74 +234,74 @@ describe("Named value accessors", () => {
   });
 
   it("throws from ColumnNamed.value and returns empty from valueOrEmpty", () => {
-    const column = fetchedOccupancySheet().column("id");
+    const column = fetchedDatesSheet().column("id");
 
     expect(() => column.value(blankRowIndex)).toThrowError(/is empty/);
     expect(column.valueOrEmpty(blankRowIndex)).toBe("");
   });
 
   it("throws from RowNamed.value and returns empty from RowNamed.valueOrEmpty", () => {
-    const row = fetchedOccupancySheet().row(blankRowIndex);
+    const row = fetchedDatesSheet().row(blankRowIndex);
 
     expect(() => row.value("id")).toThrowError(/is empty/);
     expect(row.valueOrEmpty("id")).toBe("");
   });
 
   it("keeps blanks in the bag returned by RowNamed.valuesOrEmpty", () => {
-    const row = fetchedOccupancySheet().row(blankRowIndex);
+    const row = fetchedDatesSheet().row(blankRowIndex);
 
-    expect(row.valuesOrEmpty("id", "updateTermsSelect")).toEqual({
+    expect(row.valuesOrEmpty("id", "requiredDate")).toEqual({
       id: "",
-      updateTermsSelect: false,
+      requiredDate: "",
     });
   });
 
   it("throws from valueArr when a fetched cell is blank, but not from the marked forms", () => {
-    const column = fetchedOccupancySheet().column("id");
+    const column = fetchedDatesSheet().column("id");
 
     expect(() => column.valueArr).toThrowError(/is empty/);
-    expect(column.valueArrOrEmpty).toEqual(["r:occ:row4", ""]);
-    expect(column.valueArrFilterEmpty).toEqual(["r:occ:row4"]);
+    expect(column.valueArrOrEmpty).toEqual(["r:dat:row4", ""]);
+    expect(column.valueArrFilterEmpty).toEqual(["r:dat:row4"]);
   });
 
   it("throws from CellNamed.valueNotEmpty on a blank cell, naming it the same way", () => {
-    const cell = fetchedOccupancySheet().column("id").cell(blankRowIndex);
+    const cell = fetchedDatesSheet().column("id").cell(blankRowIndex);
 
     expect(() => cell.valueNotEmpty()).toThrowError(
-      new RegExp(`"id".*"occupancy".*${blankRowIndex}`),
+      new RegExp(`"id".*"dates".*${blankRowIndex}`),
     );
   });
 
   it("throws from both blank-excluding reads on a column whose box is unticked", () => {
-    const sheet = fetchedOccupancySheet();
-    const column = sheet.column("nextTermsStartDate");
+    const sheet = fetchedDatesSheet();
+    const column = sheet.column("requiredDate");
 
     expect(() => column.value(blankRowIndex)).toThrowError(
-      new RegExp(`"nextTermsStartDate".*"occupancy".*${blankRowIndex}`),
+      new RegExp(`"requiredDate".*"dates".*${blankRowIndex}`),
     );
     expect(() => column.valueNotEmpty(blankRowIndex)).toThrowError(/is empty/);
     expect(() => column.valueArr).toThrowError(/is empty/);
     expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
     expect(() =>
-      sheet.row(blankRowIndex).valueNotEmpty("nextTermsStartDate"),
+      sheet.row(blankRowIndex).valueNotEmpty("requiredDate"),
     ).toThrowError(/is empty/);
     expect(column.valueOrEmpty(blankRowIndex)).toBe("");
   });
 
   it("reads a filled cell identically through all three words", () => {
-    const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    const column = fetchedDatesSheet().column("requiredDate");
 
-    expect(column.value(filledRowIndex)).toBe(nextStartDateSerial);
-    expect(column.valueNotEmpty(filledRowIndex)).toBe(nextStartDateSerial);
-    expect(column.valueOrEmpty(filledRowIndex)).toBe(nextStartDateSerial);
+    expect(column.value(filledRowIndex)).toBe(requiredDateSerial);
+    expect(column.valueNotEmpty(filledRowIndex)).toBe(requiredDateSerial);
+    expect(column.valueOrEmpty(filledRowIndex)).toBe(requiredDateSerial);
   });
 
   it("keeps the blank out of the unmarked read's type on a column whose box is unticked", () => {
-    const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    const column = fetchedDatesSheet().column("requiredDate");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const cell = column.cell(filledRowIndex);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const row = fetchedOccupancySheet().row(filledRowIndex);
+    const row = fetchedDatesSheet().row(filledRowIndex);
 
     assertType<IsExactly<ReturnType<typeof cell.value>, SerialDate>>(true);
     assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, SerialDate>>(
@@ -302,16 +315,16 @@ describe("Named value accessors", () => {
       IsExactly<ReturnType<typeof column.valueOrEmpty>, SerialDate | "">
     >(true);
     assertType<
-      IsExactly<ReturnType<typeof row.value<"nextTermsStartDate">>, SerialDate>
+      IsExactly<ReturnType<typeof row.value<"requiredDate">>, SerialDate>
     >(true);
   });
 
   // A plain number would pass an assignment check against SerialDate's supertype.
-  it("gives a date column a value type no rent or count can be handed to", () => {
+  it("gives a date column a value type no plain number can be handed to", () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const column = fetchedOccupancySheet().column("nextTermsStartDate");
+    const column = fetchedDatesSheet().column("requiredDate");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const numberColumn = fetchedOccupancySheet().column("residentCount");
+    const numberColumn = fetchedValueTypesSheet().column("numberValue");
 
     assertNotType<IsExactly<ReturnType<typeof column.value>, number>>(false);
     assertNotType<IsExactly<SerialDate, number>>(false);
@@ -319,31 +332,31 @@ describe("Named value accessors", () => {
   });
 
   it("hands back the blank rather than throwing on a column whose box is ticked", () => {
-    const sheet = fetchedOccupancySheet();
-    const column = sheet.column("nextTermsEndDate");
+    const sheet = fetchedDatesSheet();
+    const column = sheet.column("optionalDate");
 
     expect(column.value(blankRowIndex)).toBe("");
-    expect(sheet.row(blankRowIndex).value("nextTermsEndDate")).toBe("");
-    expect(column.valueArr).toEqual([nextEndDateSerial, ""]);
+    expect(sheet.row(blankRowIndex).value("optionalDate")).toBe("");
+    expect(column.valueArr).toEqual([optionalDateSerial, ""]);
   });
 
   it("still throws from the blank-excluding reads on a column whose box is ticked", () => {
-    const sheet = fetchedOccupancySheet();
-    const column = sheet.column("nextTermsEndDate");
+    const sheet = fetchedDatesSheet();
+    const column = sheet.column("optionalDate");
 
     expect(() => column.valueNotEmpty(blankRowIndex)).toThrowError(/is empty/);
     expect(() => column.valueArrNotEmpty).toThrowError(/is empty/);
     expect(() =>
-      sheet.row(blankRowIndex).valueNotEmpty("nextTermsEndDate"),
+      sheet.row(blankRowIndex).valueNotEmpty("optionalDate"),
     ).toThrowError(/is empty/);
   });
 
   it("keeps the blank in the unmarked read's type on a column whose box is ticked", () => {
-    const column = fetchedOccupancySheet().column("nextTermsEndDate");
+    const column = fetchedDatesSheet().column("optionalDate");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
     const cell = column.cell(blankRowIndex);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars -- read for its type
-    const row = fetchedOccupancySheet().row(blankRowIndex);
+    const row = fetchedDatesSheet().row(blankRowIndex);
 
     assertType<IsExactly<ReturnType<typeof cell.value>, SerialDate | "">>(true);
     assertType<IsExactly<ReturnType<typeof cell.valueNotEmpty>, SerialDate>>(
@@ -357,15 +370,12 @@ describe("Named value accessors", () => {
       true,
     );
     assertType<
-      IsExactly<
-        ReturnType<typeof row.value<"nextTermsEndDate">>,
-        SerialDate | ""
-      >
+      IsExactly<ReturnType<typeof row.value<"optionalDate">>, SerialDate | "">
     >(true);
   });
 
   it("lets rowsFiltered select the rows whose column is blank", () => {
-    const sheet = fetchedOccupancySheet();
+    const sheet = fetchedDatesSheet();
 
     expect(sheet.rowsFiltered({ id: "" }).map((row) => row.rowIndex)).toEqual([
       blankRowIndex,
@@ -373,7 +383,7 @@ describe("Named value accessors", () => {
   });
 
   it("sorts rows by a column that some of them leave blank", () => {
-    const sheet = fetchedOccupancySheet();
+    const sheet = fetchedDatesSheet();
 
     const sorted = sheet.sortRowsbyColumnName(sheet.rows, "id");
 
@@ -414,60 +424,50 @@ function appendRequestCount(
 
 describe("SheetNamed.rowByValue", () => {
   it("returns the one row whose column holds the value", () => {
-    stubOccupancyWithBlankRow();
+    stubDatesAndValueTypesWithBlankRow();
 
-    const row = fetchedOccupancySheet().rowByValue("id", "r:occ:row4");
+    const row = fetchedDatesSheet().rowByValue("id", "r:dat:row4");
 
     expect(row.rowIndex).toBe(filledRowIndex);
   });
 
   it("throws naming the sheet, the column and the value when nothing matches", () => {
-    stubOccupancyWithBlankRow();
-    const sheet = fetchedOccupancySheet();
+    stubDatesAndValueTypesWithBlankRow();
+    const sheet = fetchedDatesSheet();
 
-    expect(() => sheet.rowByValue("id", "r:occ:absent")).toThrowError(
-      /occupancy.*id.*r:occ:absent.*0 did/,
+    expect(() => sheet.rowByValue("id", "r:dat:absent")).toThrowError(
+      /dates.*id.*r:dat:absent.*0 did/,
     );
   });
 
   it("throws rather than picking one when two rows match", () => {
-    stubOccupancyWithDuplicateIds();
-    const sheet = fetchedOccupancySheet();
+    stubDatesWithDuplicateIds();
+    const sheet = fetchedDatesSheet();
 
-    expect(() => sheet.rowByValue("id", "r:occ:dup")).toThrowError(/but 2 did/);
+    expect(() => sheet.rowByValue("id", "r:dat:dup")).toThrowError(/but 2 did/);
   });
 
   // The blank row reads "" through valueOrEmpty, so it is a match like any other.
   it("counts the sheet's blank row as a match for an empty value", () => {
-    stubOccupancyWithBlankRow();
+    stubDatesAndValueTypesWithBlankRow();
 
-    const row = fetchedOccupancySheet().rowByValue("id", "");
+    const row = fetchedDatesSheet().rowByValue("id", "");
 
     expect(row.rowIndex).toBe(blankRowIndex);
   });
 });
 
-function stubOccupancyWithDuplicateIds() {
+function stubDatesWithDuplicateIds() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: occupancyGid,
-        title: "Occupancy",
+        sheetId: datesGid,
+        title: "Dates",
         rows: buildGridRows({
-          0: [
-            idColumnId,
-            selectColumnId,
-            nextStartDateColumnId,
-            nextEndDateColumnId,
-          ],
-          3: [
-            "ID",
-            "Update terms, select",
-            "Next terms start date",
-            "Next terms end date",
-          ],
-          4: ["r:occ:dup", true, nextStartDateSerial, nextEndDateSerial],
-          5: ["r:occ:dup", true, nextStartDateSerial, nextEndDateSerial],
+          0: [idColumnId, requiredDateColumnId, optionalDateColumnId],
+          3: ["ID", "Required date", "Optional date"],
+          4: ["r:dat:dup", requiredDateSerial, optionalDateSerial],
+          5: ["r:dat:dup", requiredDateSerial, optionalDateSerial],
         }),
         table: { endRowIndex: 6 },
       },
@@ -512,13 +512,13 @@ describe("SheetNamed.appendRowWithVals", () => {
 
     const ss = fetchedSheetConfig();
     const row = ss.sheet("sheetConfig").appendRowWithVals({
-      sheetTitle: "Property",
+      sheetTitle: "Item",
     });
     ss.batchUpdateGSheets();
 
     expect(row.rowIndex).toBe(topDataRowIndex);
     expect(appendRequestCount(batchUpdateCalls)).toBe(0);
-    expect(row.value("sheetTitle")).toBe("Property");
+    expect(row.value("sheetTitle")).toBe("Item");
   });
 
   it("appends beneath a one-row sheet that still holds data", () => {
@@ -529,7 +529,7 @@ describe("SheetNamed.appendRowWithVals", () => {
     const ss = fetchedSheetConfig();
     const row = ss
       .sheet("sheetConfig")
-      .appendRowWithVals({ sheetTitle: "Unit" });
+      .appendRowWithVals({ sheetTitle: "Log" });
     ss.batchUpdateGSheets();
 
     expect(row.rowIndex).toBe(topDataRowIndex + 1);
@@ -590,20 +590,28 @@ describe("SheetNamed.appendRowWithVals", () => {
   });
 });
 
-const testSheetGid = sheetConfigs.test.sheetGid;
-const testColumnIdRow = Object.values(columnConfigs.test).map(
-  (column) => column.columnId,
-);
+const valueTypesColumnIdRow = Object.values({
+  id: getColumnTraitByName("valueTypes", "id", "columnId"),
+  stringValue: getColumnTraitByName("valueTypes", "stringValue", "columnId"),
+  numberValue: getColumnTraitByName("valueTypes", "numberValue", "columnId"),
+  dateValue: getColumnTraitByName("valueTypes", "dateValue", "columnId"),
+  sampledBoolean: getColumnTraitByName(
+    "valueTypes",
+    "sampledBoolean",
+    "columnId",
+  ),
+  checkbox: getColumnTraitByName("valueTypes", "checkbox", "columnId"),
+});
 
-function stubTestSheetWithBlankRow() {
+function stubValueTypesWithBlankRow() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: testSheetGid,
-        title: "Test",
+        sheetId: valueTypesGid,
+        title: "Value Types",
         rows: buildGridRows({
-          0: testColumnIdRow,
-          4: testColumnIdRow.map(() => null),
+          0: valueTypesColumnIdRow,
+          4: valueTypesColumnIdRow.map(() => null),
         }),
         table: { endRowIndex: 5 },
       },
@@ -611,15 +619,15 @@ function stubTestSheetWithBlankRow() {
   });
 }
 
-function fetchedTestSpreadsheet(): SpreadsheetNamed {
+function fetchedValueTypesSpreadsheet(): SpreadsheetNamed {
   const ss = SpreadsheetNamed.init();
-  ss.sheet("test").prepFetchColumnsFull(
+  ss.sheet("valueTypes").prepFetchColumnsFull(
     "id",
-    "num",
-    "dropdown",
-    "conditionalFormatting",
-    "columnCurrency",
-    "active",
+    "stringValue",
+    "numberValue",
+    "dateValue",
+    "sampledBoolean",
+    "checkbox",
   );
   ss.fetchAllPrepped();
   return ss;
@@ -629,46 +637,54 @@ type CompleteAppendBag<SN extends SheetName> = Parameters<
   SheetNamed<SN>["appendRowWithAllVals"]
 >[0];
 
-const completeTestRow: CompleteAppendBag<"test"> = {
-  num: 7,
-  dropdown: "Yes",
-  conditionalFormatting: true,
-  columnCurrency: 8,
-  active: true,
+const completeValueTypesRow: CompleteAppendBag<"valueTypes"> = {
+  stringValue: "Yes",
+  numberValue: 7,
+  dateValue: SerialDate.fromYmd({ year: 2024, month: 3, day: 14 }),
+  sampledBoolean: true,
+  checkbox: true,
 };
 
 describe("SheetNamed.appendRowWithAllVals", () => {
   it("mints the row ID itself, from a bag that cannot name one", () => {
-    stubTestSheetWithBlankRow();
+    stubValueTypesWithBlankRow();
 
-    const row = fetchedTestSpreadsheet()
-      .sheet("test")
-      .appendRowWithAllVals(completeTestRow);
+    const row = fetchedValueTypesSpreadsheet()
+      .sheet("valueTypes")
+      .appendRowWithAllVals(completeValueTypesRow);
 
-    expect(row.value("id")).toMatch(/^r:test:[0-9a-zA-Z_-]{7}$/);
+    expect(row.value("id")).toMatch(/^r:vty:[0-9a-zA-Z_-]{7}$/);
   });
 
   it("writes every value the bag carries", () => {
-    stubTestSheetWithBlankRow();
+    stubValueTypesWithBlankRow();
 
-    const row = fetchedTestSpreadsheet()
-      .sheet("test")
-      .appendRowWithAllVals(completeTestRow);
+    const row = fetchedValueTypesSpreadsheet()
+      .sheet("valueTypes")
+      .appendRowWithAllVals(completeValueTypesRow);
 
     expect([
-      row.value("num"),
-      row.value("dropdown"),
-      row.value("conditionalFormatting"),
-      row.value("columnCurrency"),
-      row.value("active"),
-    ]).toEqual([7, "Yes", true, 8, true]);
+      row.value("stringValue"),
+      row.value("numberValue"),
+      row.value("dateValue"),
+      row.value("sampledBoolean"),
+      row.value("checkbox"),
+    ]).toEqual([
+      "Yes",
+      7,
+      SerialDate.fromYmd({ year: 2024, month: 3, day: 14 }),
+      true,
+      true,
+    ]);
   });
 
   it("reuses the blank row the way the partial append does", () => {
-    const { batchUpdateCalls } = stubTestSheetWithBlankRow();
+    const { batchUpdateCalls } = stubValueTypesWithBlankRow();
 
-    const ss = fetchedTestSpreadsheet();
-    const row = ss.sheet("test").appendRowWithAllVals(completeTestRow);
+    const ss = fetchedValueTypesSpreadsheet();
+    const row = ss
+      .sheet("valueTypes")
+      .appendRowWithAllVals(completeValueTypesRow);
     ss.batchUpdateGSheets();
 
     expect(row.rowIndex).toBe(topDataRowIndex);
@@ -678,15 +694,17 @@ describe("SheetNamed.appendRowWithAllVals", () => {
   it("asks a sheet with an ID column for every writable column but the ID", () => {
     assertType<
       IsExactly<
-        keyof CompleteAppendBag<"test">,
-        | "num"
-        | "dropdown"
-        | "conditionalFormatting"
-        | "columnCurrency"
-        | "active"
+        keyof CompleteAppendBag<"valueTypes">,
+        | "stringValue"
+        | "numberValue"
+        | "dateValue"
+        | "sampledBoolean"
+        | "checkbox"
       >
     >(true);
-    assertType<IsExactly<CompleteAppendBag<"test">["num"], number | "">>(true);
+    assertType<
+      IsExactly<CompleteAppendBag<"valueTypes">["numberValue"], number | "">
+    >(true);
   });
 
   it("asks a sheet with no ID column for every writable column", () => {
@@ -703,106 +721,91 @@ describe("SheetNamed.appendRowWithAllVals", () => {
   });
 
   it("refuses a bag that names the ID", () => {
-    const withId: CompleteAppendBag<"test"> = {
-      ...completeTestRow,
+    const withId: CompleteAppendBag<"valueTypes"> = {
+      ...completeValueTypesRow,
       // @ts-expect-error the append mints the ID, so a caller cannot supply one
-      id: "r:test:abcdefg",
+      id: "r:vty:abcdefg",
     };
 
     expect(Object.keys(withId)).toEqual([
-      "num",
-      "dropdown",
-      "conditionalFormatting",
-      "columnCurrency",
-      "active",
+      "stringValue",
+      "numberValue",
+      "dateValue",
+      "sampledBoolean",
+      "checkbox",
       "id",
     ]);
   });
 });
 
-const addExpenseGid = sheetConfigs.addPropertyExpense.sheetGid;
-const expenseColumns = columnConfigs.addPropertyExpense;
-
-// Biller name alone is filled: amount is a required blank, notes an allowed one.
-function stubAddPropertyExpenseSheet() {
-  return stubSheetsService({
+// Both dates are blank: the required one is a gap, the optional one is allowed.
+function fetchedBlankDatesRow(): RowNamed<"dates"> {
+  stubSheetsService({
     sheets: [
       {
-        sheetId: addExpenseGid,
-        title: "Add Property Expense",
+        sheetId: datesGid,
+        title: "Dates",
         rows: buildGridRows({
-          0: [
-            expenseColumns.billerName.columnId,
-            expenseColumns.amount.columnId,
-            expenseColumns.notes.columnId,
-            expenseColumns.isUpfrontInvestment.columnId,
-          ],
-          3: ["Biller name", "Amount", "Notes", "Is upfront investment"],
-          4: ["Acme Roofing", null, null, null],
+          0: [idColumnId, requiredDateColumnId, optionalDateColumnId],
+          3: ["ID", "Required date", "Optional date"],
+          4: ["r:dat:row4", null, null],
         }),
         table: { endRowIndex: 5 },
       },
     ],
   });
-}
-
-function fetchedAddExpenseRow(): RowNamed<"addPropertyExpense"> {
   const ss = SpreadsheetNamed.init();
-  ss.sheet("addPropertyExpense").prepFetchColumnsFull(
-    "billerName",
-    "amount",
-    "notes",
-    "isUpfrontInvestment",
-  );
+  ss.sheet("dates").prepFetchColumnsFull("id", "requiredDate", "optionalDate");
   ss.fetchAllPrepped();
-  return ss.sheet("addPropertyExpense").row(topDataRowIndex);
+  return ss.sheet("dates").row(topDataRowIndex);
 }
 
 describe("RowNamed.blankRequiredColumnNames", () => {
-  beforeEach(() => {
-    stubAddPropertyExpenseSheet();
-  });
-
   it("names a blank column whose Empty value allowed box is unticked", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).toContain(
-      "amount",
+    expect(fetchedBlankDatesRow().blankRequiredColumnNames()).toContain(
+      "requiredDate",
     );
   });
 
   it("leaves out a blank column whose box is ticked", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).not.toContain(
-      "notes",
+    expect(fetchedBlankDatesRow().blankRequiredColumnNames()).not.toContain(
+      "optionalDate",
     );
   });
 
   it("leaves out an unticked checkbox, whose blank is an answer", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).not.toContain(
-      "isUpfrontInvestment",
-    );
+    stubDatesAndValueTypesWithBlankRow();
+    const row = fetchedValueTypesSheet().row(blankRowIndex);
+
+    expect(row.blankRequiredColumnNames()).not.toContain("checkbox");
+    expect(row.blankRequiredColumnNames()).toContain("numberValue");
   });
 
   it("names every blank required column and nothing else", () => {
-    expect(fetchedAddExpenseRow().blankRequiredColumnNames()).toEqual([
-      "amount",
+    expect(fetchedBlankDatesRow().blankRequiredColumnNames()).toEqual([
+      "requiredDate",
     ]);
   });
 });
 
-const testFormula = "=2+SINGLE(test[Number])";
-const formulaTestColIndex = Object.keys(columnConfigs.test).indexOf(
-  "formulaTest",
-);
+const computedGid = getSheetTraitByName("computed", "sheetGid");
+const computedColumnIdRow = [
+  getColumnTraitByName("computed", "amount", "columnId"),
+  getColumnTraitByName("computed", "rowNumber", "columnId"),
+];
+const testFormula = "=2+SINGLE(computed[Amount])";
+const rowNumberColIndex = 1;
 
-function stubTestSheetForFormulaWrite() {
+function stubComputedForFormulaWrite() {
   return stubSheetsService({
     sheets: [
       {
-        sheetId: testSheetGid,
-        title: "Test",
+        sheetId: computedGid,
+        title: "Computed",
         rows: buildGridRows({
-          0: testColumnIdRow,
-          4: [null, null, 11, null, null, null, "r:test:1", 10, null],
-          5: [null, null, 21, null, null, null, "r:test:2", 20, null],
+          0: computedColumnIdRow,
+          4: [10, 11],
+          5: [20, 21],
         }),
         table: { endRowIndex: 6 },
       },
@@ -811,21 +814,21 @@ function stubTestSheetForFormulaWrite() {
 }
 
 describe("Named formula writes", () => {
-  it("sends one pasteData PASTE_FORMULA for every Test Formula test data row", () => {
-    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+  it("sends one pasteData PASTE_FORMULA for every Computed data row", () => {
+    const { batchUpdateCalls } = stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
-    ss.sheet("test").column("formulaTest").updateAllFormulas(testFormula);
+    ss.sheet("computed").column("rowNumber").updateAllFormulas(testFormula);
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
         pasteData: {
           coordinate: {
-            sheetId: testSheetGid,
+            sheetId: computedGid,
             rowIndex: topDataRowIndex,
-            columnIndex: formulaTestColIndex,
+            columnIndex: rowNumberColIndex,
           },
           data: `"${testFormula}"\n"${testFormula}"`,
           delimiter: "\t",
@@ -835,13 +838,13 @@ describe("Named formula writes", () => {
     ]);
   });
 
-  it("sends one pasteData PASTE_FORMULA for a single Formula test cell", () => {
-    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+  it("sends one pasteData PASTE_FORMULA for a single Row number cell", () => {
+    const { batchUpdateCalls } = stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
-    ss.sheet("test")
-      .column("formulaTest")
+    ss.sheet("computed")
+      .column("rowNumber")
       .cell(topDataRowIndex)
       .updateFormula(testFormula);
     ss.batchUpdateGSheets();
@@ -850,9 +853,9 @@ describe("Named formula writes", () => {
       {
         pasteData: {
           coordinate: {
-            sheetId: testSheetGid,
+            sheetId: computedGid,
             rowIndex: topDataRowIndex,
-            columnIndex: formulaTestColIndex,
+            columnIndex: rowNumberColIndex,
           },
           data: `"${testFormula}"`,
           delimiter: "\t",
@@ -863,22 +866,22 @@ describe("Named formula writes", () => {
   });
 
   it("sends one pasteData per contiguous active run for updateActiveFormulas", () => {
-    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+    const { batchUpdateCalls } = stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
-    ss.sheet("test").prepFetchColumnsFull("formulaTest");
+    ss.sheet("computed").prepFetchColumnsFull("rowNumber");
     ss.fetchAllPrepped();
-    ss.sheet("test").raw.removeRowsExcept(topDataRowIndex);
-    ss.sheet("test").column("formulaTest").updateActiveFormulas(testFormula);
+    ss.sheet("computed").raw.removeRowsExcept(topDataRowIndex);
+    ss.sheet("computed").column("rowNumber").updateActiveFormulas(testFormula);
     ss.batchUpdateGSheets();
 
     expect(batchUpdateCalls[0]?.requests).toEqual([
       {
         pasteData: {
           coordinate: {
-            sheetId: testSheetGid,
+            sheetId: computedGid,
             rowIndex: topDataRowIndex,
-            columnIndex: formulaTestColIndex,
+            columnIndex: rowNumberColIndex,
           },
           data: `"${testFormula}"`,
           delimiter: "\t",
@@ -889,52 +892,54 @@ describe("Named formula writes", () => {
   });
 
   it("throws before queueing when the formula does not start with =", () => {
-    stubTestSheetForFormulaWrite();
+    stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
 
     expect(() =>
-      ss.sheet("test").column("formulaTest").updateAllFormulas("2+1"),
+      ss.sheet("computed").column("rowNumber").updateAllFormulas("2+1"),
     ).toThrowError('Formula must start with "=". Got "2+1".');
   });
 
   it("leaves local cell values unchanged after a formula write", () => {
-    stubTestSheetForFormulaWrite();
+    stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
-    ss.sheet("test").prepFetchColumnsFull("formulaTest", "num");
+    ss.sheet("computed").prepFetchColumnsFull("rowNumber", "amount");
     ss.fetchAllPrepped();
-    ss.sheet("test").column("formulaTest").updateAllFormulas(testFormula);
+    ss.sheet("computed").column("rowNumber").updateAllFormulas(testFormula);
 
-    expect(ss.sheet("test").column("formulaTest").valueArrOrEmpty).toEqual([
+    expect(ss.sheet("computed").column("rowNumber").valueArrOrEmpty).toEqual([
       11, 21,
     ]);
-    expect(ss.sheet("test").column("num").valueArrOrEmpty).toEqual([10, 20]);
+    expect(ss.sheet("computed").column("amount").valueArrOrEmpty).toEqual([
+      10, 20,
+    ]);
   });
 
-  it("still refuses a value write on Formula test", () => {
-    stubTestSheetForFormulaWrite();
+  it("still refuses a value write on Row number", () => {
+    stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
 
     expect(() =>
       ss
-        .sheet("test")
-        .column("formulaTest")
+        .sheet("computed")
+        .column("rowNumber")
         .cell(topDataRowIndex)
         .updateValue(99),
     ).toThrowError(/formula column/);
   });
 
   it("merges a colour onto the same cell as a formula write", () => {
-    const { batchUpdateCalls } = stubTestSheetForFormulaWrite();
+    const { batchUpdateCalls } = stubComputedForFormulaWrite();
     const backgroundColor = { red: 0.851, green: 0.918, blue: 0.827 };
 
     const ss = SpreadsheetNamed.init();
     ss.fetchAllSheetProperties();
-    const cell = ss.sheet("test").column("formulaTest").cell(topDataRowIndex);
+    const cell = ss.sheet("computed").column("rowNumber").cell(topDataRowIndex);
     cell.updateFormula(testFormula);
     cell.updateBackgroundColor(backgroundColor);
     ss.batchUpdateGSheets();
@@ -943,9 +948,9 @@ describe("Named formula writes", () => {
       {
         pasteData: {
           coordinate: {
-            sheetId: testSheetGid,
+            sheetId: computedGid,
             rowIndex: topDataRowIndex,
-            columnIndex: formulaTestColIndex,
+            columnIndex: rowNumberColIndex,
           },
           data: `"${testFormula}"`,
           delimiter: "\t",
@@ -955,11 +960,11 @@ describe("Named formula writes", () => {
       {
         updateCells: {
           range: {
-            sheetId: testSheetGid,
+            sheetId: computedGid,
             startRowIndex: topDataRowIndex,
             endRowIndex: topDataRowIndex + 1,
-            startColumnIndex: formulaTestColIndex,
-            endColumnIndex: formulaTestColIndex + 1,
+            startColumnIndex: rowNumberColIndex,
+            endColumnIndex: rowNumberColIndex + 1,
           },
           rows: [
             {
@@ -973,34 +978,34 @@ describe("Named formula writes", () => {
   });
 
   it("refuses a whole-column formula fill on a sheet pruned to a selection", () => {
-    stubTestSheetForFormulaWrite();
+    stubComputedForFormulaWrite();
 
     const ss = SpreadsheetNamed.init();
-    ss.sheet("test").prepFetchColumnsFull("formulaTest");
+    ss.sheet("computed").prepFetchColumnsFull("rowNumber");
     ss.fetchAllPrepped();
-    ss.sheet("test").raw.removeRowsExcept(topDataRowIndex);
+    ss.sheet("computed").raw.removeRowsExcept(topDataRowIndex);
 
     expect(() =>
-      ss.sheet("test").column("formulaTest").updateAllFormulas(testFormula),
+      ss.sheet("computed").column("rowNumber").updateAllFormulas(testFormula),
     ).toThrowError(/pruned to a selection/);
   });
 
-  it("accepts Formula test and rejects Num at the type level", () => {
-    assertType<IsExactly<ColumnIsFormula<"test", "formulaTest">, true>>(true);
-    assertType<IsExactly<ColumnIsFormula<"test", "num">, false>>(true);
+  it("accepts Row number and rejects Amount at the type level", () => {
+    assertType<IsExactly<ColumnIsFormula<"computed", "rowNumber">, true>>(true);
+    assertType<IsExactly<ColumnIsFormula<"computed", "amount">, false>>(true);
 
     function formulaWriteTypeGate(
-      formulaColumn: ColumnNamed<"test", "formulaTest">,
-      numColumn: ColumnNamed<"test", "num">,
+      formulaColumn: ColumnNamed<"computed", "rowNumber">,
+      numColumn: ColumnNamed<"computed", "amount">,
     ) {
       formulaColumn.updateAllFormulas(testFormula);
       formulaColumn.updateActiveFormulas(testFormula);
       formulaColumn.cell(topDataRowIndex).updateFormula(testFormula);
-      // @ts-expect-error Num is not a formula column
+      // @ts-expect-error Amount is not a formula column
       numColumn.updateAllFormulas(testFormula);
-      // @ts-expect-error Num is not a formula column
+      // @ts-expect-error Amount is not a formula column
       numColumn.updateActiveFormulas(testFormula);
-      // @ts-expect-error Num is not a formula column
+      // @ts-expect-error Amount is not a formula column
       numColumn.cell(topDataRowIndex).updateFormula(testFormula);
     }
 
@@ -1008,7 +1013,7 @@ describe("Named formula writes", () => {
   });
 
   it("rejects a misspelled column type at the type level", () => {
-    function columnTypeGate(column: ColumnNamed<"test", "num">) {
+    function columnTypeGate(column: ColumnNamed<"computed", "amount">) {
       column.meta.updateColumnType("DOUBLE");
       // @ts-expect-error DOUBEL is not a Table column type
       column.meta.updateColumnType("DOUBEL");

@@ -1,11 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import type { ModelableEditProtection } from "../00_Source/RawSource/EditProtection";
 import {
   configSheetFloorSeed,
   floorSeedColumns,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
-import { spreadsheetConfig } from "../01_SpreadsheetSchema/generated/spreadsheetConfig";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   clearSpreadsheetConfigOverlay,
@@ -24,6 +23,8 @@ import { floorSheetNames } from "./ConfigSheetFloor/floorSeedLookups";
 import { floorRecreatableColumns } from "./ConfigSheetFloor/FloorTabColumnCreator";
 import { selfDescribingRowColumns } from "./ConfigSheetFloor/FloorTabEditWarning";
 import { SpreadsheetConfigOperator } from "./SpreadsheetConfigOperator";
+
+const { columnConfigs, spreadsheetConfig } = installedConfigs();
 
 const spreadsheetConfigGid = getSheetTraitByName(
   "spreadsheetConfig",
@@ -309,10 +310,10 @@ const columnConfigColumns = [
   "sheetTitle",
   "header",
   "emptyValueAllowed",
-  "customDefaultValue",
 ] as const;
 
 const businessSheetGid = 9001;
+const addedColumnConfigColumn = { columnId: "c:ccf:notes", header: "Notes" };
 const defaultSheetConfigGids = [
   businessSheetGid,
   spreadsheetConfigGid,
@@ -383,6 +384,7 @@ function floorFixture(
       header: string;
       groupHeading?: string;
     };
+    extraColumnConfigColumn?: { columnId: string; header: string };
   } = {},
 ) {
   const startTableColIndex = options.startTableColIndex ?? 0;
@@ -408,6 +410,7 @@ function floorFixture(
   const scOrder = options.sheetConfigColumnOrder ?? sheetConfigColumns;
   const ccOrder = options.columnConfigColumnOrder ?? columnConfigColumns;
   const ccHeaders = ccOrder.map((columnName) => cc[columnName].header);
+  const extraCcColumn = options.extraColumnConfigColumn;
   const sheetConfigHeaders = scOrder.map(
     (columnName) =>
       options.sheetConfigHeaders?.[columnName] ?? sc[columnName].header,
@@ -513,13 +516,16 @@ function floorFixture(
         title: "Column Config",
         rows: buildGridRows({
           0: pad(
-            ccOrder.map(
-              (columnName) =>
-                options.columnConfigColumnIds?.[columnName] ??
-                cc[columnName].columnId,
+            withExtraColumn<FakeCell>(
+              ccOrder.map(
+                (columnName) =>
+                  options.columnConfigColumnIds?.[columnName] ??
+                  cc[columnName].columnId,
+              ),
+              extraCcColumn?.columnId,
             ),
           ),
-          3: pad(ccHeaders),
+          3: pad(withExtraColumn(ccHeaders, extraCcColumn?.header)),
           ...dataRowsFrom(
             topDataRowIndex,
             columnConfigRows.map(({ sheetGid, columnId }) => {
@@ -529,9 +535,13 @@ function floorFixture(
                 sheetTitle: "",
                 header: "",
                 emptyValueAllowed: false,
-                customDefaultValue: "",
               };
-              return pad(ccOrder.map((columnName) => cells[columnName]));
+              return pad(
+                withExtraColumn<FakeCell>(
+                  ccOrder.map((columnName) => cells[columnName]),
+                  extraCcColumn === undefined ? undefined : "",
+                ),
+              );
             }),
           ),
         }),
@@ -539,7 +549,10 @@ function floorFixture(
           name: configSheetFloorSeed.columnConfig.tableName,
           startColumnIndex: startTableColIndex,
           endRowIndex: topDataRowIndex + columnConfigRows.length,
-          endColumnIndex: startTableColIndex + ccOrder.length,
+          endColumnIndex:
+            startTableColIndex +
+            ccOrder.length +
+            (extraCcColumn === undefined ? 0 : 1),
           columnTypes: sheetAbsoluteTypes(
             matchingFloorColumnTypes(
               "columnConfig",
@@ -661,12 +674,6 @@ const columnConfigEditableRanges = [
   },
   {
     sheetId: columnConfigGid,
-    startRowIndex: topDataRowIndex,
-    startColumnIndex: 5,
-    endColumnIndex: 6,
-  },
-  {
-    sheetId: columnConfigGid,
     startRowIndex: topDataRowIndex + 2,
     endRowIndex: topDataRowIndex + 3,
     startColumnIndex: 4,
@@ -746,7 +753,7 @@ describe("ConfigSheetFloor", () => {
     );
   });
 
-  it("carves Column Config's Empty value allowed at each floor column's row and leaves a business column's row and Custom default value editable", () => {
+  it("carves Column Config's Empty value allowed at each floor column's row and leaves a business column's row editable", () => {
     floorFixture();
     const { floor } = applyFloor();
 
@@ -755,9 +762,43 @@ describe("ConfigSheetFloor", () => {
     );
   });
 
-  it("keeps Column Config's two editable columns merged while no floor column has a row", () => {
+  it("leaves Column Config's editable column open while no floor column has a row", () => {
     floorFixture({
       columnConfigRows: [{ sheetGid: businessSheetGid, columnId: "c:biz:one" }],
+    });
+    const { floor } = applyFloor();
+
+    expect(protectionsOf(floor, "columnConfig")[0]?.unprotectedRanges).toEqual([
+      {
+        sheetId: columnConfigGid,
+        startRowIndex: topDataRowIndex,
+        startColumnIndex: 4,
+        endColumnIndex: 5,
+      },
+    ]);
+  });
+
+  it("leaves a column added to Column Config editable beside the carved Empty value allowed", () => {
+    floorFixture({ extraColumnConfigColumn: addedColumnConfigColumn });
+    const { floor } = applyFloor();
+
+    const [firstCarve, ...laterCarves] = columnConfigEditableRanges;
+    expect(protectionsOf(floor, "columnConfig")[0]?.unprotectedRanges).toEqual([
+      firstCarve,
+      {
+        sheetId: columnConfigGid,
+        startRowIndex: topDataRowIndex,
+        startColumnIndex: 5,
+        endColumnIndex: 6,
+      },
+      ...laterCarves,
+    ]);
+  });
+
+  it("keeps Column Config's editable column merged with an added one while no floor column has a row", () => {
+    floorFixture({
+      columnConfigRows: [{ sheetGid: businessSheetGid, columnId: "c:biz:one" }],
+      extraColumnConfigColumn: addedColumnConfigColumn,
     });
     const { floor } = applyFloor();
 
@@ -933,8 +974,11 @@ describe("ConfigSheetFloor", () => {
     expect(columnTypeUpdates(batchUpdateCalls)).toEqual([]);
   });
 
-  it("does not set a type on Custom default value", () => {
-    const { batchUpdateCalls } = floorFixture({ columnTypesAreUnset: true });
+  it("does not set a type on a column added to Column Config", () => {
+    const { batchUpdateCalls } = floorFixture({
+      columnTypesAreUnset: true,
+      extraColumnConfigColumn: addedColumnConfigColumn,
+    });
     applyFloor();
 
     expect(columnTypeUpdates(batchUpdateCalls)).not.toContainEqual(
@@ -1303,16 +1347,15 @@ describe("ConfigSheetFloor", () => {
         "columnId",
         "sheetTitle",
         "emptyValueAllowed",
-        "customDefaultValue",
       ],
     });
     const { report } = applyFloor();
 
     expect(columnInserts(batchUpdateCalls)).toEqual([
-      { sheetId: columnConfigGid, startIndex: 5 },
+      { sheetId: columnConfigGid, startIndex: 4 },
     ]);
     const writes = cellUpdates(batchUpdateCalls).filter(
-      (update) => update.sheetId === columnConfigGid && update.colIndex === 5,
+      (update) => update.sheetId === columnConfigGid && update.colIndex === 4,
     );
     expect(
       writes
@@ -1330,25 +1373,20 @@ describe("ConfigSheetFloor", () => {
 
   it("recreates two missing columns on one tab as two Table-end inserts, in seed order", () => {
     const { batchUpdateCalls } = floorFixture({
-      columnConfigColumnOrder: [
-        "sheetGid",
-        "columnId",
-        "emptyValueAllowed",
-        "customDefaultValue",
-      ],
+      columnConfigColumnOrder: ["sheetGid", "columnId", "emptyValueAllowed"],
     });
     applyFloor();
 
     expect(columnInserts(batchUpdateCalls)).toEqual([
+      { sheetId: columnConfigGid, startIndex: 3 },
       { sheetId: columnConfigGid, startIndex: 4 },
-      { sheetId: columnConfigGid, startIndex: 5 },
     ]);
     const headerWrites = cellUpdates(batchUpdateCalls).filter(
       (update) => update.sheetId === columnConfigGid && update.rowIndex === 3,
     );
     expect(headerWrites).toEqual([
-      expect.objectContaining({ colIndex: 4, value: cc.sheetTitle.header }),
-      expect.objectContaining({ colIndex: 5, value: cc.header.header }),
+      expect.objectContaining({ colIndex: 3, value: cc.sheetTitle.header }),
+      expect.objectContaining({ colIndex: 4, value: cc.header.header }),
     ]);
   });
 
@@ -1360,13 +1398,12 @@ describe("ConfigSheetFloor", () => {
         "columnId",
         "sheetTitle",
         "emptyValueAllowed",
-        "customDefaultValue",
       ],
     });
     applyFloor();
 
     expect(columnInserts(batchUpdateCalls)).toEqual([
-      { sheetId: columnConfigGid, startIndex: 5 },
+      { sheetId: columnConfigGid, startIndex: 4 },
     ]);
     expect(columnTypeUpdates(batchUpdateCalls)).not.toContainEqual(
       expect.objectContaining({ tableId: `fake-table-${columnConfigGid}` }),
@@ -1401,7 +1438,6 @@ describe("ConfigSheetFloor", () => {
           "sheetTitle",
           "header",
           "emptyValueAllowed",
-          "customDefaultValue",
         ],
       },
     },
@@ -1413,7 +1449,6 @@ describe("ConfigSheetFloor", () => {
           "columnId",
           "sheetTitle",
           "header",
-          "customDefaultValue",
         ],
       },
     },
@@ -1473,7 +1508,6 @@ describe("ConfigSheetFloor", () => {
         "columnId",
         "sheetTitle",
         "emptyValueAllowed",
-        "customDefaultValue",
       ],
     });
     const { floor, report } = applyFloor();

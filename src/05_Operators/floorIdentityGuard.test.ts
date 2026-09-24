@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { columnConfigs } from "../01_SpreadsheetSchema/generated/columnConfigs";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import type {
   ColumnConfigStored,
   SheetConfigsBase,
@@ -8,6 +8,8 @@ import {
   assertFloorIdentityUnchanged,
   type FloorIdentitySource,
 } from "./floorIdentityGuard";
+
+const { columnConfigs } = installedConfigs();
 
 const sheetGidHeader = columnConfigs.sheetConfig.sheetGid.header;
 
