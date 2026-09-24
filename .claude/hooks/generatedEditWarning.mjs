@@ -1,8 +1,7 @@
-// PreToolUse on Edit and Write: warns, without blocking, before a hand edit inside the generated folder.
+// PreToolUse on Edit and Write: warns, without blocking, before a hand edit inside any package's generated folder.
 import { relative, resolve, sep } from "node:path";
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.mjs";
-
-const generatedDir = ["src", "01_SpreadsheetSchema", "generated"].join(sep);
+import { readSheetsConfigs } from "./lib/sheetsConfigs.mjs";
 
 await runFailOpen(() => {
   const input = readHookInput();
@@ -10,12 +9,13 @@ await runFailOpen(() => {
   if (!["Edit", "Write"].includes(input?.tool_name) || typeof filePath !== "string") return;
   const projectDir = process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
   const target = relative(projectDir, resolve(input.cwd ?? projectDir, filePath));
-  if (!target.startsWith(generatedDir + sep)) return;
+  const owner = readSheetsConfigs(projectDir).find(({ generatedDir }) => target.startsWith(generatedDir + sep));
+  if (!owner) return;
   writeHookOutput({
     hookSpecificOutput: {
       hookEventName: "PreToolUse",
       additionalContext:
-        `Generated-data warning: ${target} is generated. Fix the sheet and run \`npm run app:gen:configs\` instead of ` +
+        `Generated-data warning: ${target} is generated. Fix the sheet and run \`npm run ${owner.scriptPrefix}:gen:configs\` instead of ` +
         "hand-editing it. That includes config-sheet floor entries: fix the live tab or the seed (docs/generated-data.md).",
     },
   });

@@ -1,8 +1,8 @@
-import { dimensionIds } from "../../01_SpreadsheetSchema/dimensionIds";
-import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
-import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
-import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
-import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
+import { dimensionIds } from "../../../src/01_SpreadsheetSchema/dimensionIds";
+import { getSheetTraitByName } from "../../../src/01_SpreadsheetSchema/sheetConfigsTypes";
+import { ssConfigGet } from "../../../src/01_SpreadsheetSchema/spreadsheetConfigTypes";
+import { SpreadsheetBaseNamed } from "../../../src/04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
+import { SpreadsheetNamed } from "../../../src/04_SpreadsheetNamed/SpreadsheetNamed";
 import {
   devFixtureSheets,
   type DevFixtureColumn,

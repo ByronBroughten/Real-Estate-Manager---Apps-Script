@@ -1,10 +1,10 @@
 // Classifies a Bash command's file reads; shared by the Bash-read guard and the read-count nudge.
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
-import { isAbsolute, join, relative, resolve, sep } from "node:path";
+import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { readSheetsConfigs } from "./sheetsConfigs.mjs";
 
 export const LARGE_FILE_LINES = 150;
-const COLUMN_CONFIGS = join("src", "01_SpreadsheetSchema", "generated", "columnConfigs.ts");
 const UNGUARDED_DIRS = ["node_modules", ".git", ".probe", "dist", "coverage"];
 const WRAPPERS = new Set(["sudo", "command", "env", "time", "nice", "nohup", "exec", "builtin"]);
 const WHOLE_FILE_COMMANDS = new Set(["cat", "nl", "bat", "less", "more", "tac"]);
@@ -64,7 +64,7 @@ export class BashReads {
   _denyReasonFor(name, read, path) {
     if (read.kind === "search") return null;
     const shown = relative(this.projectDir, path);
-    if (path === join(this.projectDir, COLUMN_CONFIGS)) {
+    if (this._columnConfigsPaths().includes(path)) {
       if (read.kind === "range" && read.span <= LARGE_FILE_LINES) return null;
       return (
         `Bash-read guard: \`${name}\` would read columnConfigs.ts beyond one block. ` +
@@ -81,10 +81,16 @@ export class BashReads {
       `\`sed -n 'a,bp'\` and \`head -n ${LARGE_FILE_LINES}\` also work.`
     );
   }
+  _columnConfigsPaths() {
+    return readSheetsConfigs(this.projectDir).map(({ generatedDir }) =>
+      join(this.projectDir, generatedDir, "columnConfigs.ts"),
+    );
+  }
+  // An unguarded folder at any depth, so each package's own .probe/, dist/ and coverage/ are free to read.
   _isGuarded(path) {
     const inside = relative(this.projectDir, path);
     if (!inside || inside.startsWith("..") || isAbsolute(inside)) return false;
-    if (UNGUARDED_DIRS.includes(inside.split(sep)[0])) return false;
+    if (dirname(inside).split(sep).some((dir) => UNGUARDED_DIRS.includes(dir))) return false;
     return existsSync(path) && statSync(path).isFile();
   }
 }

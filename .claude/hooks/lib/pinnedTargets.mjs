@@ -1,10 +1,12 @@
 // Decides the pinned-target guard: dev writes drop to ask while a pinning file is dirty, and gsheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.mjs does the I/O.
 import { commandWordsOf } from "./bashReads.mjs";
+import { SHEETS_CONFIGS } from "./sheetsConfigs.mjs";
 
 export const PINNING_FILES = [
-  "spreadsheetTargets.json",
+  ...SHEETS_CONFIGS.map(({ path }) => path),
   ".claude/hooks/pinnedTargetGuard.mjs",
   ".claude/hooks/lib/pinnedTargets.mjs",
+  ".claude/hooks/lib/sheetsConfigs.mjs",
 ];
 export const GUARDED_GSHEETS_WRITES = new Set([
   "mcp__gsheets__update_cells",
@@ -46,7 +48,7 @@ export function gsheetsWriteDecision({ toolName, spreadsheetId, devSpreadsheetId
     return {
       permissionDecision: "ask",
       reason:
-        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the dev spreadsheet in spreadsheetTargets.json. " +
+        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the dev spreadsheet in dev/sheets.config.json. " +
         "It needs a yes that names the exact sheet, range and values.",
     };
   }

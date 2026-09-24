@@ -1,4 +1,4 @@
-import type { Chore } from "./Chore";
+import type { Chore } from "../../src/chores/Chore";
 import { DevFixtureBuilder } from "./devFixtures/DevFixtureBuilder";
 import { devSpreadsheetId } from "./devFixtures/devFixtureSheets";
 
