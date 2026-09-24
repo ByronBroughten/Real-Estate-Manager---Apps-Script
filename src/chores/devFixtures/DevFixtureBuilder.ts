@@ -116,7 +116,7 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
         colIndex,
         value: false,
       })
-      .gatherCheckboxValidationRequest({
+      .gatherAddedSheetCheckboxValidationRequest({
         sheetId: fixture.sheetGid,
         startRowIndex: rowIndex,
         endRowIndex: rowIndex + 1,

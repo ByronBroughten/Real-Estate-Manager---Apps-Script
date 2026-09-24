@@ -144,7 +144,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       ...requests.fill,
       ...requests.update,
       // After cell updates, so a checkbox's seeded value is written before its rule.
-      ...requests.checkboxValidation,
+      ...requests.addCheckboxValidation,
       // Reads the text as it stands mid-batch, so it must follow what writes it.
       ...requests.findReplace,
       ...this._deleteOperationsDescending(),

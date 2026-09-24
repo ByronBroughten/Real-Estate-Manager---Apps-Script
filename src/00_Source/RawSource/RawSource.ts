@@ -14,6 +14,8 @@ export interface GridRangeProps {
   endColumnIndex?: number;
 }
 
+export type BoundedGridRange = Required<GridRangeProps>;
+
 export interface UsedGridRange {
   sheetId: number;
 }
@@ -132,7 +134,7 @@ export type LocalWriteOperation =
   | UpdateSheetTitleOperation
   | UpdateTableNameOperation
   | UpdateTableColumnPropertiesOperation
-  | SetCheckboxValidationOperation
+  | AddCheckboxValidationOperation
   | OpaqueRawWriteOperation;
 
 // Always at a given GID: Google refuses one another tab already holds (#74).
@@ -262,9 +264,9 @@ export interface TableColumnPropertiesUpdate {
   columnType?: string;
 }
 
-export interface SetCheckboxValidationOperation {
-  kind: "setCheckboxValidation";
-  range: Required<GridRangeProps>;
+export interface AddCheckboxValidationOperation {
+  kind: "addCheckboxValidation";
+  range: BoundedGridRange;
 }
 
 declare const opaqueRawRequest: unique symbol;

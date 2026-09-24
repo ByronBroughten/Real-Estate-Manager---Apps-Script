@@ -462,7 +462,7 @@ function modeledOperationToGoogleRequests(
           },
         },
       ];
-    case "setCheckboxValidation":
+    case "addCheckboxValidation":
       return [
         {
           setDataValidation: {

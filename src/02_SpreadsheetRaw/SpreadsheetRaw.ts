@@ -1,7 +1,7 @@
 import type {
   AddSheetOperation,
   AddTableOperation,
-  GridRangeProps,
+  BoundedGridRange,
   OpaqueRawRequest,
   UpdateCellOperation,
 } from "../00_Source/RawSource/RawSource";
@@ -97,19 +97,15 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       Pick<UpdateCellOperation, "sheetId" | "rowIndex" | "colIndex" | "value">
     >,
   ): this {
-    if (
-      !this.updateRequests.addSheet.some((op) => op.sheetId === props.sheetId)
-    ) {
-      throw new Error(
-        `Added-sheet cell write refused: no addSheet for GID ${props.sheetId} is queued in this flush.`,
-      );
-    }
+    this._validateAddSheetQueued(props.sheetId, "cell write");
     this.updateRequests.update.push({ kind: "updateCell", ...props });
     return this;
   }
-  gatherCheckboxValidationRequest(range: Required<GridRangeProps>): this {
-    this.updateRequests.checkboxValidation.push({
-      kind: "setCheckboxValidation",
+  // A checkbox on a tab this flush adds; an existing tab goes through CellRaw.
+  gatherAddedSheetCheckboxValidationRequest(range: BoundedGridRange): this {
+    this._validateAddSheetQueued(range.sheetId, "checkbox validation");
+    this.updateRequests.addCheckboxValidation.push({
+      kind: "addCheckboxValidation",
       range,
     });
     return this;
@@ -135,5 +131,13 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       state.writeQueue = emptySheetWriteQueue();
     });
     return this;
+  }
+  private _validateAddSheetQueued(sheetId: number, write: string): void {
+    if (this.updateRequests.addSheet.some((op) => op.sheetId === sheetId)) {
+      return;
+    }
+    throw new Error(
+      `Added-sheet ${write} refused: no addSheet for GID ${sheetId} is queued in this flush.`,
+    );
   }
 }

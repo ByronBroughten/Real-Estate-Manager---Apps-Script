@@ -1,10 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import { stubPropertiesService } from "../../testSupport/fakeAppsScriptGlobals";
 import type {
+  AddCheckboxValidationOperation,
   AddSheetOperation,
   AddTableOperation,
   LocalWriteOperation,
-  SetCheckboxValidationOperation,
 } from "../RawSource/RawSource";
 import type { RgbColor } from "../RawSource/RgbColor";
 import {
@@ -39,8 +39,8 @@ const addTableOperation: AddTableOperation = {
     { columnIndex: 2, columnName: "Amount", columnType: "CURRENCY" },
   ],
 };
-const checkboxValidationOperation: SetCheckboxValidationOperation = {
-  kind: "setCheckboxValidation",
+const checkboxValidationOperation: AddCheckboxValidationOperation = {
+  kind: "addCheckboxValidation",
   range: {
     sheetId: 555,
     startRowIndex: 1,

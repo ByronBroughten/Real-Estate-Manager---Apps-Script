@@ -859,6 +859,7 @@ describe("SpreadsheetRaw.batchUpdateGSheets", () => {
     expect(() => cell.updateBackgroundColor(lightGreen)).toThrow(
       staleRowIndexes,
     );
+    expect(() => cell.addCheckboxValidation()).toThrow(staleRowIndexes);
   });
 
   it("throws on active-row and whole-column fills after a flushed row delete", () => {
@@ -1105,6 +1106,14 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     value: "Example",
   };
 
+  const checkboxRange = {
+    sheetId: 555,
+    startRowIndex: 3,
+    endRowIndex: 4,
+    startColumnIndex: 1,
+    endColumnIndex: 2,
+  };
+
   it("refuses a seeded value for a GID with no add-sheet queued, naming the GID, and queues nothing", () => {
     stubSheetsService();
 
@@ -1184,31 +1193,25 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     ]);
   });
 
-  const checkboxRange = {
-    sheetId: 555,
-    startRowIndex: 3,
-    endRowIndex: 4,
-    startColumnIndex: 1,
-    endColumnIndex: 2,
-  };
-
-  it("queues one checkbox-validation operation carrying its range", () => {
+  it("refuses a checkbox validation for a GID with no add-sheet queued, naming the GID, and queues nothing", () => {
     stubSheetsService();
 
     const raw = SpreadsheetRaw.init();
-    raw.gatherCheckboxValidationRequest(checkboxRange);
 
-    expect(raw.updateRequests.checkboxValidation).toEqual([
-      { kind: "setCheckboxValidation", range: checkboxRange },
-    ]);
+    expect(() =>
+      raw.gatherAddedSheetCheckboxValidationRequest(checkboxRange),
+    ).toThrowError(
+      "Added-sheet checkbox validation refused: no addSheet for GID 555 is queued in this flush.",
+    );
+    expect(raw.updateRequests.addCheckboxValidation).toEqual([]);
   });
 
   it("sends a checkbox validation after the add-sheet, the add-Table and the seeded value, whatever the gather order", () => {
     const { batchUpdateCalls } = stubSheetsService();
 
     const raw = SpreadsheetRaw.init();
-    raw.gatherCheckboxValidationRequest(checkboxRange);
     raw.gatherAddSheetRequest(addSheetProps);
+    raw.gatherAddedSheetCheckboxValidationRequest(checkboxRange);
     raw.gatherAddTableRequest(addTableProps);
     raw.gatherAddedSheetCellRequest({ ...seededCell, value: false });
     raw.batchUpdateGSheets();
@@ -1228,7 +1231,7 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
         rule: { condition: { type: "BOOLEAN" } },
       },
     });
-    expect(raw.updateRequests.checkboxValidation).toEqual([]);
+    expect(raw.updateRequests.addCheckboxValidation).toEqual([]);
   });
 
   it("drops a queued seeded value on discardQueuedChanges", () => {
@@ -2627,6 +2630,34 @@ describe("CellRaw.updateBackgroundColor", () => {
 
     expect(cell.isActive).toBe(false);
     expect(() => cell.valueOrEmpty()).toThrowError(/does not have a value set/);
+  });
+});
+
+describe("CellRaw.addCheckboxValidation", () => {
+  it("sends one setDataValidation with a BOOLEAN condition over the cell", () => {
+    const { batchUpdateCalls } = stubSheetsService({
+      sheets: [{ sheetId: 111, title: "Leases", table: { endRowIndex: 11 } }],
+    });
+
+    const raw = SpreadsheetRaw.init();
+    raw.fetchAllSheetProperties();
+    raw.sheet(111).row(5).cell(2).addCheckboxValidation();
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        setDataValidation: {
+          range: {
+            sheetId: 111,
+            startRowIndex: 5,
+            endRowIndex: 6,
+            startColumnIndex: 2,
+            endColumnIndex: 3,
+          },
+          rule: { condition: { type: "BOOLEAN" } },
+        },
+      },
+    ]);
   });
 });
 

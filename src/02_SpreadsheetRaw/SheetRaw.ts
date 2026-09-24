@@ -12,6 +12,7 @@ import {
   type WholeSheetEditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
 import type {
+  BoundedGridRange,
   GridRangeProps,
   SheetSnapshot,
   TableColumnPropertiesUpdate,
@@ -455,6 +456,14 @@ export class SheetRaw extends SheetCommonRaw {
       ...change,
       ...(formula !== undefined ? { formula } : {}),
     });
+  }
+  addCheckboxValidationAt(range: BoundedGridRange): this {
+    this.activeTable.assertRowIndexesNotStale();
+    this.updateRequests.addCheckboxValidation.push({
+      kind: "addCheckboxValidation",
+      range,
+    });
+    return this;
   }
   gatherInsertColumnRequest(startColumnIndex: number): void {
     this.updateRequests.insertColumn.push({

@@ -111,7 +111,7 @@ const requestBody: {
     return columns(
       label.range(range),
       `${rangeCellCount(range)} cell(s)`,
-      setDataValidation?.rule?.condition?.type ?? "(no rule)",
+      setDataValidation?.rule?.condition?.type ?? "",
       "",
     );
   },
