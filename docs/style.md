@@ -117,7 +117,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 - **Imports sorted alphabetically by path, by hand.**
 - **`import type` for a type-only import line; inline the `type` modifier only when a value and its types share one module**; don't split one module's import into two lines just to separate value from type.
-- **No barrel/index files**; `src/index.ts` is the Apps Script entry point, not a barrel.
+- **No barrel/index files** but the framework's two public entries, `src/framework.ts` and `src/frameworkTesting.ts`; `src/index.ts` is the Apps Script entry point, not a barrel.
 - **File naming:**
   - PascalCase mirroring the exported class name.
   - A short PascalCase abbreviation for a file exporting one static-bundle object of related functions. A fat bundle's pieces split into a same-named subfolder and are re-assembled in the parent file.

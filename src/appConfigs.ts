@@ -10,7 +10,7 @@ export const appConfigs = {
   valueConfigs,
 };
 
-declare module "./01_SpreadsheetSchema/configRegister" {
+declare module "@byronbroughten/sheets-framework" {
   interface Register {
     configs: typeof appConfigs;
   }

@@ -15,6 +15,11 @@
     "moduleResolution": "bundler", //nodenext, node
     "lib": ["esnext"], //esnext
     "types": ["google-apps-script"],
+    // The framework's package name, pointed at its entries until the workspace move (#140).
+    "paths": {
+      "@byronbroughten/sheets-framework": ["./src/framework.ts"],
+      "@byronbroughten/sheets-framework/testing": ["./src/frameworkTesting.ts"]
+    },
     "strict": false,
 
     "outDir": "./dist",

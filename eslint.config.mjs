@@ -33,8 +33,11 @@ const layerFolders = [
 // The un-numbered folders built on the tiers; utils/ and testSupport/ are not among them.
 const aboveTierFolders = [
   "appsScriptHost",
+  "appUtils",
   "businessEndpoints",
   "chores",
+  "framework",
+  "frameworkTesting",
   "nodeHost",
 ];
 const layerImportPattern = (layer) => ({
@@ -69,6 +72,68 @@ const layerImportBlocks = layerFolders.flatMap((folder, layer) => {
     },
   ];
 });
+
+// App code reaches the framework only through its package name; in place, relative paths are whitelisted to the app's own files.
+const frameworkPackage = "@byronbroughten/sheets-framework";
+const appRootNames = [
+  "index",
+  "appConfigs",
+  "installAppConfigs",
+  "businessEndpoints",
+  "appUtils",
+  "01_SpreadsheetSchema/generated",
+];
+const appFolders = ["businessEndpoints", "appUtils"];
+const appTestSetupFiles = ["src/installAppConfigs.ts"];
+const appEntryMessage = `App code imports the framework only from "${frameworkPackage}", and "${frameworkPackage}/testing" only from *.test.ts (#140).`;
+const appImportPatterns = (depth, allowTesting) => {
+  const toSrcRoot = depth === 0 ? "\\./" : `(\\.\\./){${depth}}`;
+  return [
+    {
+      regex: `^(\\.\\./){${depth + 1}}`,
+      message: "A relative import stays inside the app (#140).",
+    },
+    {
+      regex: `^${toSrcRoot}(?!\\.\\./|(${appRootNames.join("|")})(/|(\\.js)?$))`,
+      message: appEntryMessage,
+    },
+    {
+      regex: `^${frameworkPackage}/${allowTesting ? "(?!testing$)" : ""}`,
+      message: appEntryMessage,
+    },
+  ];
+};
+const appFileGlobsByDepth = [
+  ["src/index.ts", "src/appConfigs.ts", "src/businessEndpoints.ts"],
+  ...[1, 2, 3].map((depth) =>
+    appFolders.map((folder) => `src/${folder}/${"*/".repeat(depth - 1)}*.ts`),
+  ),
+];
+const appImportBlocks = appFileGlobsByDepth.flatMap((globs, depth) => [
+  {
+    files: globs,
+    ignores: ["**/*.test.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { patterns: appImportPatterns(depth, false) },
+      ],
+    },
+  },
+  {
+    files: [
+      ...(depth === 0
+        ? appTestSetupFiles
+        : globs.map((glob) => [glob, "**/*.test.ts"])),
+    ],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        { patterns: appImportPatterns(depth, true) },
+      ],
+    },
+  },
+]);
 
 export default defineConfig(
   eslint.configs.recommended,
@@ -129,4 +194,5 @@ export default defineConfig(
     },
   },
   ...layerImportBlocks,
+  ...appImportBlocks,
 );

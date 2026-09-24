@@ -1,3 +1,4 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 // Mirrors tsconfig.framework.json: these tests run on the dev configs, the rest of src/ on the app's.
@@ -15,6 +16,23 @@ const frameworkTests = [
 ];
 
 export default defineConfig({
+  // Mirrors tsconfig.json's paths for the framework's package name.
+  resolve: {
+    alias: [
+      {
+        find: /^@byronbroughten\/sheets-framework$/,
+        replacement: fileURLToPath(
+          new URL("src/framework.ts", import.meta.url),
+        ),
+      },
+      {
+        find: /^@byronbroughten\/sheets-framework\/testing$/,
+        replacement: fileURLToPath(
+          new URL("src/frameworkTesting.ts", import.meta.url),
+        ),
+      },
+    ],
+  },
   test: {
     environment: "node",
     restoreMocks: true,

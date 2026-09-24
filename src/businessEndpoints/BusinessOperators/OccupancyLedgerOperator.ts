@@ -1,9 +1,11 @@
-import { SheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SheetBaseNamed";
-import type { SpreadsheetNamedProps } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
-import type { RowNamed } from "../../04_SpreadsheetNamed/RowNamed";
-import type { SheetNamed } from "../../04_SpreadsheetNamed/SheetNamed";
-import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import { SerialDate } from "../../utils/SerialDate";
+import {
+  SerialDate,
+  SheetBaseNamed,
+  SpreadsheetNamed,
+  type RowNamed,
+  type SheetNamed,
+  type SpreadsheetNamedProps,
+} from "@byronbroughten/sheets-framework";
 
 const issuers = {
   propertyManagement: "Property management",
