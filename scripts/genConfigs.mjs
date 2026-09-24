@@ -7,10 +7,6 @@ import { startNodeHost } from "./nodeHost.mjs";
 import { takeTarget } from "./targets.mjs";
 
 const DEFAULT_GENERATED_DIR = "src/01_SpreadsheetSchema/generated";
-const MAKE_CONFIGS_PATH = fileURLToPath(
-  new URL("../src/01_SpreadsheetSchema/makeConfigs", import.meta.url),
-);
-const EMITTED_MAKE_CONFIGS_IMPORT = '"../makeConfigs"';
 
 class ConfigFilesGenerator {
   constructor({ target }) {
@@ -40,10 +36,10 @@ class ConfigFilesGenerator {
 
     // Write nothing until all four are confirmed good; a subset would go stale.
     mkdirSync(dirname(this.path.spreadsheetConfig), { recursive: true });
-    this._write(this.path.spreadsheetConfig, spreadsheetConfig);
-    this._write(this.path.sheetConfigs, sheetConfigs);
-    this._write(this.path.columnConfigs, columnConfigs);
-    this._write(this.path.valueConfigs, valueConfigs);
+    writeFileSync(this.path.spreadsheetConfig, spreadsheetConfig);
+    writeFileSync(this.path.sheetConfigs, sheetConfigs);
+    writeFileSync(this.path.columnConfigs, columnConfigs);
+    writeFileSync(this.path.valueConfigs, valueConfigs);
     console.log(`Wrote ${this.path.spreadsheetConfig}`);
     console.log(`Wrote ${this.path.sheetConfigs}`);
     console.log(`Wrote ${this.path.columnConfigs}`);
@@ -69,20 +65,20 @@ class ConfigFilesGenerator {
     console.log("gen:configs: tsc passed.");
   }
 
-  // The emitters write the import for the default folder; another target's folder needs its own path.
-  _write(path, source) {
-    const specifier = relative(dirname(path), MAKE_CONFIGS_PATH);
-    writeFileSync(
-      path,
-      source.replace(EMITTED_MAKE_CONFIGS_IMPORT, JSON.stringify(specifier)),
-    );
-  }
-
   async _generate() {
     await startNodeHost({ isDryRun: false, target: this.target });
     const { ConfigCoordinator } =
       await import("../src/05_Operators/ConfigCoordinator.ts");
-    return ConfigCoordinator.init().generateConfigFiles();
+    return ConfigCoordinator.init().generateConfigFiles(
+      this._makeConfigsImport(),
+    );
+  }
+
+  _makeConfigsImport() {
+    const makeConfigsPath = fileURLToPath(
+      new URL("../src/01_SpreadsheetSchema/makeConfigs", import.meta.url),
+    );
+    return relative(dirname(this.path.spreadsheetConfig), makeConfigsPath);
   }
 
   _runTsc() {

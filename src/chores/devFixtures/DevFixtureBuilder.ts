@@ -4,20 +4,16 @@ import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
 import {
-  devFixtureId,
+  devColumnId,
   devFixtureSheets,
   type DevFixtureSheet,
 } from "./devFixtureSheets";
 
-/**
- * Builds the dev spreadsheet's fixture tabs for the buildDevFixtures chore:
- * each missing tab with its Table, column types, column IDs and rows, then the
- * Sheet Config and Column Config ticks gen:configs reads. A tab that exists is
- * left alone; the ticks are checked every run. The fixtures themselves are
- * data in devFixtureSheets.ts.
- * docs/architecture/chores.md
- */
+// A tab that exists is left alone; rebuild one by deleting it and rerunning (docs/how-it-runs.md).
 export class DevFixtureBuilder extends SpreadsheetBaseNamed {
+  static init(): DevFixtureBuilder {
+    return new DevFixtureBuilder(DevFixtureBuilder.initSpreadsheetNamedProps());
+  }
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
@@ -92,7 +88,7 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
         sheetId: sheetGid,
         rowIndex: ssConfigGet("columnIdRowIdxBase0"),
         colIndex,
-        value: devFixtureId("c", fixture.idPrefix, column.key),
+        value: devColumnId(fixture.idPrefix, column.key),
       });
       column.values.forEach((value, rowOffset) => {
         if (value === "") return;
@@ -108,7 +104,7 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
       this._addEntryCheckbox(fixture, fixture.entryCheckboxColumnKey);
     }
   }
-  // Data validation isn't modeled yet, so the action-row checkbox goes out raw.
+  // Raw until data validation is modeled: #150.
   private _addEntryCheckbox(fixture: DevFixtureSheet, columnKey: string): void {
     const columnIndex = fixture.columns.findIndex(
       (column) => column.key === columnKey,
@@ -157,7 +153,7 @@ export class DevFixtureBuilder extends SpreadsheetBaseNamed {
     const columnConfig = this.ss.sheet("columnConfig");
     fixture.columns.forEach(({ key, header, emptyValueAllowed }) => {
       if (emptyValueAllowed === undefined) return;
-      const columnId = devFixtureId("c", fixture.idPrefix, key);
+      const columnId = devColumnId(fixture.idPrefix, key);
       const [row] = columnConfig.rowsFiltered({
         sheetGid: fixture.sheetGid,
         columnId,

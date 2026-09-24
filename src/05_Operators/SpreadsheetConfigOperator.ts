@@ -64,7 +64,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
     this.spreadsheetConfigSync.liveConfig = liveConfig;
     return liveConfig;
   }
-  toFileSource(): string {
+  toFileSource(makeConfigsImport: string): string {
     const liveConfig = this.spreadsheetConfigSync.liveConfig;
     if (liveConfig === null) {
       throw new Error(
@@ -72,7 +72,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
       );
     }
     return [
-      `${makeImportLine("makeSpreadsheetConfig")}`,
+      `${makeImportLine("makeSpreadsheetConfig", makeConfigsImport)}`,
       ``,
       `export const spreadsheetConfig = makeSpreadsheetConfig(${spreadsheetConfigFileSource(
         liveConfig,

@@ -11,8 +11,9 @@ export function makeImportLine(
     | "makeColumnConfigs"
     | "makeValueConfigs"
     | "makeSpreadsheetConfig",
+  makeConfigsImport: string,
 ) {
-  return `import { ${configMagerName} } from "../makeConfigs";`;
+  return `import { ${configMagerName} } from ${JSON.stringify(makeConfigsImport)};`;
 }
 
 function makeStructuredConfig<S, const T extends S>(_structure: S, t: T): T {

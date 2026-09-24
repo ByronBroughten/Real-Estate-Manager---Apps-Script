@@ -22,23 +22,27 @@ export interface DevFixtureSheet {
 // Pinned here, not read from spreadsheetTargets.json, so a bad table row can't redirect the chore.
 export const devSpreadsheetId = "19gIs4w8-2Nsin5zTN1TojOR1HiiT9Y-jCctC7doAMqM";
 
-export function devFixtureId(
-  kind: "c" | "r",
-  idPrefix: string,
-  key: string,
-): string {
-  return [kind, idPrefix, key].join(ssConfigGet("idDelimiter"));
+export function devColumnId(idPrefix: string, key: string): string {
+  return ["c", idPrefix, key].join(ssConfigGet("idDelimiter"));
 }
 
-function idColumn(idPrefix: string, rowCount: number): DevFixtureColumn {
-  return {
+function devRowId(idPrefix: string, n: number): string {
+  return ["r", idPrefix, String(n)].join(ssConfigGet("idDelimiter"));
+}
+
+function withIdColumn(sheet: DevFixtureSheet): DevFixtureSheet {
+  const rowCount = Math.max(
+    ...sheet.columns.map((column) => column.values.length),
+  );
+  const idColumn: DevFixtureColumn = {
     key: "id",
     header: ssConfigGet("idHeader"),
     columnType: "TEXT",
     values: Array.from({ length: rowCount }, (_, index) =>
-      devFixtureId("r", idPrefix, String(index + 1)),
+      devRowId(sheet.idPrefix, index + 1),
     ),
   };
+  return { ...sheet, columns: [idColumn, ...sheet.columns] };
 }
 
 function nameColumn(values: string[]): DevFixtureColumn {
@@ -53,13 +57,12 @@ function nameColumn(values: string[]): DevFixtureColumn {
 // A function, not a const: the ID and Name headers come from the installed Spreadsheet Config.
 export function devFixtureSheets(): DevFixtureSheet[] {
   return [
-    {
+    withIdColumn({
       sheetGid: 1100001,
       title: "Item",
       tableName: "item",
       idPrefix: "itm",
       columns: [
-        idColumn("itm", 3),
         nameColumn(["Alpha", "Beta", "Gamma"]),
         {
           key: "optionalNote",
@@ -76,14 +79,13 @@ export function devFixtureSheets(): DevFixtureSheet[] {
           values: [1, 2, 3],
         },
       ],
-    },
-    {
+    }),
+    withIdColumn({
       sheetGid: 1100002,
       title: "Value Types",
       tableName: "valueTypes",
       idPrefix: "vty",
       columns: [
-        idColumn("vty", 2),
         {
           key: "stringValue",
           header: "String value",
@@ -115,7 +117,7 @@ export function devFixtureSheets(): DevFixtureSheet[] {
           values: [true, false],
         },
       ],
-    },
+    }),
     {
       sheetGid: 1100003,
       title: "Log",
@@ -136,14 +138,13 @@ export function devFixtureSheets(): DevFixtureSheet[] {
         },
       ],
     },
-    {
+    withIdColumn({
       sheetGid: 1100004,
       title: "Run Item",
       tableName: "runItem",
       idPrefix: "rit",
       entryCheckboxColumnKey: "result",
       columns: [
-        idColumn("rit", 3),
         nameColumn(["First", "Second", "Third"]),
         {
           key: "selected",
@@ -170,6 +171,6 @@ export function devFixtureSheets(): DevFixtureSheet[] {
           values: ["", "", ""],
         },
       ],
-    },
+    }),
   ];
 }

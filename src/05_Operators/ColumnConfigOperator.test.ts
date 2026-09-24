@@ -205,7 +205,7 @@ describe("ColumnConfigOperator.newColumnConfigs / toFileSource", () => {
     stubGroupedColumnConfigSheets();
 
     const sourceLines = initSyncedColumnConfigOperator()
-      .toFileSource()
+      .toFileSource("../makeConfigs")
       .split("\n");
 
     expect(sourceLines).toContain(

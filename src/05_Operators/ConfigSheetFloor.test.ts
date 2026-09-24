@@ -264,7 +264,7 @@ function addSheetRequests(
   });
 }
 
-// Each added Table with the columns its paired updateTable gives it.
+// The adapter sends a Table's columns on the updateTable after its addTable, not on the addTable.
 function addTableRequests(
   batchUpdateCalls: { requests?: GoogleAppsScript.Sheets.Schema.Request[] }[],
 ) {

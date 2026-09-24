@@ -29,7 +29,7 @@ beforeEach(() => {
   stubLogger();
 });
 
-// newSheetConfigs()/sheetNamesByGid()/toFileSource() all read letApiAccess,
+// newSheetConfigs()/sheetNamesByGid()/toFileSource("../makeConfigs") all read letApiAccess,
 // which prepFetchForSync doesn't prep on its own — production code only
 // preps it via ColumnConfigOperator.prepFetchWithSheetConfig, so a
 // standalone SheetConfigOperator test has to prep it itself.
@@ -370,6 +370,8 @@ describe("SheetConfigOperator.newSheetConfigs / toFileSource", () => {
     const operator = SheetConfigOperator.init();
     syncSheetConfigOperator(operator);
 
-    expect(() => operator.toFileSource()).toThrow(/Property.*Unit.*"prp"/);
+    expect(() => operator.toFileSource("../makeConfigs")).toThrow(
+      /Property.*Unit.*"prp"/,
+    );
   });
 });
