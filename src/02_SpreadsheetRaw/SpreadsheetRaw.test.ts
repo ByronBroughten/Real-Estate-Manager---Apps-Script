@@ -1184,6 +1184,53 @@ describe("SpreadsheetRaw add sheet and add Table", () => {
     ]);
   });
 
+  const checkboxRange = {
+    sheetId: 555,
+    startRowIndex: 3,
+    endRowIndex: 4,
+    startColumnIndex: 1,
+    endColumnIndex: 2,
+  };
+
+  it("queues one checkbox-validation operation carrying its range", () => {
+    stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherCheckboxValidationRequest(checkboxRange);
+
+    expect(raw.updateRequests.checkboxValidation).toEqual([
+      { kind: "setCheckboxValidation", range: checkboxRange },
+    ]);
+  });
+
+  it("sends a checkbox validation after the add-sheet, the add-Table and the seeded value, whatever the gather order", () => {
+    const { batchUpdateCalls } = stubSheetsService();
+
+    const raw = SpreadsheetRaw.init();
+    raw.gatherCheckboxValidationRequest(checkboxRange);
+    raw.gatherAddSheetRequest(addSheetProps);
+    raw.gatherAddTableRequest(addTableProps);
+    raw.gatherAddedSheetCellRequest({ ...seededCell, value: false });
+    raw.batchUpdateGSheets();
+
+    expect(batchUpdateCalls).toHaveLength(1);
+    const requests = batchUpdateCalls[0]?.requests ?? [];
+    expect(requests.map((request) => Object.keys(request))).toEqual([
+      ["addSheet"],
+      ["addTable"],
+      ["updateTable"],
+      ["updateCells"],
+      ["setDataValidation"],
+    ]);
+    expect(requests[4]).toEqual({
+      setDataValidation: {
+        range: checkboxRange,
+        rule: { condition: { type: "BOOLEAN" } },
+      },
+    });
+    expect(raw.updateRequests.checkboxValidation).toEqual([]);
+  });
+
   it("drops a queued seeded value on discardQueuedChanges", () => {
     const { batchUpdateCalls } = stubSheetsService();
 

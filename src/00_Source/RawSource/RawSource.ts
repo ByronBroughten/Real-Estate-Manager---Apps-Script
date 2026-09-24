@@ -132,6 +132,7 @@ export type LocalWriteOperation =
   | UpdateSheetTitleOperation
   | UpdateTableNameOperation
   | UpdateTableColumnPropertiesOperation
+  | SetCheckboxValidationOperation
   | OpaqueRawWriteOperation;
 
 // Always at a given GID: Google refuses one another tab already holds (#74).
@@ -259,6 +260,11 @@ export interface TableColumnPropertiesUpdate {
   columnIndex: number;
   columnName: string;
   columnType?: string;
+}
+
+export interface SetCheckboxValidationOperation {
+  kind: "setCheckboxValidation";
+  range: Required<GridRangeProps>;
 }
 
 declare const opaqueRawRequest: unique symbol;

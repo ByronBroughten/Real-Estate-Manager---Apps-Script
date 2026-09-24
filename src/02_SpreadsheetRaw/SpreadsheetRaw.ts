@@ -1,6 +1,7 @@
 import type {
   AddSheetOperation,
   AddTableOperation,
+  GridRangeProps,
   OpaqueRawRequest,
   UpdateCellOperation,
 } from "../00_Source/RawSource/RawSource";
@@ -104,6 +105,13 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
       );
     }
     this.updateRequests.update.push({ kind: "updateCell", ...props });
+    return this;
+  }
+  gatherCheckboxValidationRequest(range: Required<GridRangeProps>): this {
+    this.updateRequests.checkboxValidation.push({
+      kind: "setCheckboxValidation",
+      range,
+    });
     return this;
   }
   // Matches by content rather than by coordinate, so no local mirror is possible.

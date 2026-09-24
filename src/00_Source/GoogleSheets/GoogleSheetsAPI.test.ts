@@ -4,6 +4,7 @@ import type {
   AddSheetOperation,
   AddTableOperation,
   LocalWriteOperation,
+  SetCheckboxValidationOperation,
 } from "../RawSource/RawSource";
 import type { RgbColor } from "../RawSource/RgbColor";
 import {
@@ -37,6 +38,16 @@ const addTableOperation: AddTableOperation = {
     { columnIndex: 1, columnName: "Name", columnType: "TEXT" },
     { columnIndex: 2, columnName: "Amount", columnType: "CURRENCY" },
   ],
+};
+const checkboxValidationOperation: SetCheckboxValidationOperation = {
+  kind: "setCheckboxValidation",
+  range: {
+    sheetId: 555,
+    startRowIndex: 1,
+    endRowIndex: 2,
+    startColumnIndex: 3,
+    endColumnIndex: 4,
+  },
 };
 
 type BatchUpdateRequest =
@@ -574,6 +585,33 @@ describe("GoogleSheetsAPI write mapping", () => {
       ),
     ).toEqual([["addSheet"], ["addTable"], ["updateTable"]]);
   });
+
+  it("maps a checkbox-validation operation onto one setDataValidation with a BOOLEAN condition over its range", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush([checkboxValidationOperation]);
+
+    expect(batchUpdateCalls[0]?.requests).toEqual([
+      {
+        setDataValidation: {
+          range: checkboxValidationOperation.range,
+          rule: { condition: { type: "BOOLEAN" } },
+        },
+      },
+    ]);
+  });
+
+  it("keeps a checkbox validation after the add-sheet it is handed behind", () => {
+    const { api, batchUpdateCalls } = recordingSheets();
+
+    api.flush([addSheetOperation, checkboxValidationOperation]);
+
+    expect(
+      (batchUpdateCalls[0]?.requests ?? []).map((request) =>
+        Object.keys(request),
+      ),
+    ).toEqual([["addSheet"], ["setDataValidation"]]);
+  });
 });
 
 describe("GoogleSheetsAPI payload mapping", () => {
@@ -888,9 +926,7 @@ describe("GoogleSheetsAPI time zone read", () => {
     });
 
     expect(api.fetchTimeZone()).toBe("Asia/Tokyo");
-    expect(getCalls).toEqual([
-      { spreadsheetId, fields: timeZoneMask },
-    ]);
+    expect(getCalls).toEqual([{ spreadsheetId, fields: timeZoneMask }]);
   });
 
   it("answers null when the lone time zone fetch comes back without it", () => {

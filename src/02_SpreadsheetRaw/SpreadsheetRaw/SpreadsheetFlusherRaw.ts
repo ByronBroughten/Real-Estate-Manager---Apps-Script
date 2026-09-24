@@ -143,6 +143,8 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       // Fills go before updates, so a per-cell write on a filled column wins.
       ...requests.fill,
       ...requests.update,
+      // After cell updates, so a checkbox's seeded value is written before its rule.
+      ...requests.checkboxValidation,
       // Reads the text as it stands mid-batch, so it must follow what writes it.
       ...requests.findReplace,
       ...this._deleteOperationsDescending(),

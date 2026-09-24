@@ -41,6 +41,7 @@ export type ModeledRequestVerb =
   | "updateSheetProperties"
   | "updateTable"
   | "updateCells"
+  | "setDataValidation"
   | "repeatCell"
   | "pasteData";
 
@@ -458,6 +459,15 @@ function modeledOperationToGoogleRequests(
               columnProperties: operation.columnProperties,
             },
             fields: "columnProperties",
+          },
+        },
+      ];
+    case "setCheckboxValidation":
+      return [
+        {
+          setDataValidation: {
+            range: operation.range,
+            rule: { condition: { type: "BOOLEAN" } },
           },
         },
       ];

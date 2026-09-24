@@ -20,6 +20,7 @@ import type {
   InsertColumnOperation,
   OpaqueRawWriteOperation,
   RawSource,
+  SetCheckboxValidationOperation,
   SortOperation,
   TableColumnSnapshot,
   TableColumnType,
@@ -66,6 +67,7 @@ export interface UpdateRequests {
   updateTableName: UpdateTableNameOperation[];
   updateTableColumnType: UpdateTableColumnTypeOperation[];
   updateTableColumnProperties: UpdateTableColumnPropertiesOperation[];
+  checkboxValidation: SetCheckboxValidationOperation[];
   raw: OpaqueRawWriteOperation[];
 }
 
@@ -265,6 +267,7 @@ export function emptyUpdateRequests(): UpdateRequests {
     updateTableName: [],
     updateTableColumnType: [],
     updateTableColumnProperties: [],
+    checkboxValidation: [],
     raw: [],
   };
 }

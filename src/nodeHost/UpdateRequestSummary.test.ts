@@ -63,6 +63,23 @@ describe("UpdateRequestSummary.lines", () => {
     ).toBe("repeatCell occupancy!F5:F9 5 cell(s) false [userEnteredValue]");
   });
 
+  it("names the range, cell count and condition type of a data-validation rule", () => {
+    expect(
+      onlyLine({
+        setDataValidation: {
+          range: {
+            sheetId: occupancyGid,
+            startRowIndex: 4,
+            endRowIndex: 5,
+            startColumnIndex: 5,
+            endColumnIndex: 6,
+          },
+          rule: { condition: { type: "BOOLEAN" } },
+        },
+      }),
+    ).toBe("setDataValidation occupancy!F5:F5 1 cell(s) BOOLEAN");
+  });
+
   it("counts the rows an append adds", () => {
     expect(
       onlyLine({
