@@ -38,18 +38,24 @@ export interface FakeTrigger {
   detail?: number;
 }
 
+export interface FakeToast {
+  message: string;
+  title: string;
+  timeoutSeconds: number;
+}
+
 /**
  * Stubs `ScriptApp` and `SpreadsheetApp` with just enough of a fluent trigger
  * builder to cover AppsScript.trigger's usage. Created triggers are tracked
  * in the returned array so tests can assert on what was scheduled/deleted,
- * and every toast message shown on the active spreadsheet in `toasts`.
+ * and every toast (message, title and timeout) shown on the active spreadsheet in `toasts`.
  */
 export function stubScriptAndSpreadsheetApp(): {
   triggers: FakeTrigger[];
-  toasts: string[];
+  toasts: FakeToast[];
 } {
   const triggers: FakeTrigger[] = [];
-  const toasts: string[] = [];
+  const toasts: FakeToast[] = [];
 
   function record(trigger: FakeTrigger): FakeTrigger {
     triggers.push(trigger);
@@ -93,8 +99,8 @@ export function stubScriptAndSpreadsheetApp(): {
   });
   vi.stubGlobal("SpreadsheetApp", {
     getActive: () => ({
-      toast: (message: string) => {
-        toasts.push(message);
+      toast: (message: string, title: string, timeoutSeconds: number) => {
+        toasts.push({ message, title, timeoutSeconds });
       },
     }),
   });

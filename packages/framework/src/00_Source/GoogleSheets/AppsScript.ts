@@ -1,6 +1,11 @@
 import type { SheetChange } from "../PlatformEvents/sheetChange";
 import type { SheetEdit } from "../PlatformEvents/sheetEdit";
 
+interface ToastOptions {
+  title: string;
+  timeoutSeconds: number;
+}
+
 export class AppsScript {
   static projectProperties(key: string): string | null {
     return PropertiesService.getScriptProperties().getProperty(key);
@@ -21,8 +26,11 @@ export class AppsScript {
       value: e.value,
     };
   }
-  static toast(message: string): void {
-    SpreadsheetApp.getActive().toast(message);
+  static toast(
+    message: string,
+    { title, timeoutSeconds }: ToastOptions,
+  ): void {
+    SpreadsheetApp.getActive().toast(message, title, timeoutSeconds);
   }
   static get trigger() {
     return {

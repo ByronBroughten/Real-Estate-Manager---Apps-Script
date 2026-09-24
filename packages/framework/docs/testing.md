@@ -34,7 +34,7 @@ A fixture's table starts where `spreadsheetConfig` says it must, so a fixture ne
 
 ## `fakeAppsScriptGlobals.ts` and `fakeSheetConfigSheet.ts`
 
-`fakeAppsScriptGlobals.ts` — `stubPropertiesService()` (in-memory script properties, for `AppsScript.projectProperties` and `GoogleSheetsAPI.forAppsScript()`) and `stubScriptAndSpreadsheetApp()` (a fluent trigger builder covering `AppsScript.trigger`'s usage, and an active spreadsheet whose `toast` records each message).
+`fakeAppsScriptGlobals.ts` — `stubPropertiesService()` (in-memory script properties, for `AppsScript.projectProperties` and `GoogleSheetsAPI.forAppsScript()`) and `stubScriptAndSpreadsheetApp()` (a fluent trigger builder covering `AppsScript.trigger`'s usage, and an active spreadsheet whose `toast` records each message with its title and timeout).
 
 `fakeSheetConfigSheet.ts` — a fake "Sheet Config" sheet, for behaviour that reads or writes a whole row rather than one named cell (clearing, the blank test, the wipe, append reuse). Anything working from a sheet's *configured* columns resolves each of them against the live columnId row, so such a test needs a fixture listing every column the config declares — which makes Sheet Config the right subject, as the smallest sheet both config sets share. Its GID and column IDs come from the installed configs, so it serves either test program.
 

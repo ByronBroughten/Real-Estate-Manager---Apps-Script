@@ -103,9 +103,18 @@ describe("AppsScript.trigger", () => {
 });
 
 describe("AppsScript.toast", () => {
-  it("shows the message on the active spreadsheet", () => {
+  it("shows the message, title and timeout on the active spreadsheet", () => {
     const { toasts } = stubScriptAndSpreadsheetApp();
-    AppsScript.toast("Value Config was deleted.");
-    expect(toasts).toEqual(["Value Config was deleted."]);
+    AppsScript.toast("Press Undo now.", {
+      title: "Value Config was deleted",
+      timeoutSeconds: 15,
+    });
+    expect(toasts).toEqual([
+      {
+        message: "Press Undo now.",
+        title: "Value Config was deleted",
+        timeoutSeconds: 15,
+      },
+    ]);
   });
 });
