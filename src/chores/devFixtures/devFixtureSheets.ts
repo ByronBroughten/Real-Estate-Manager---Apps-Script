@@ -1,5 +1,6 @@
 import type { CellValue } from "../../00_Source/CellValues/cellValues";
 import type { TableColumnType } from "../../00_Source/RawSource/RawSource";
+import { dimensionIds } from "../../01_SpreadsheetSchema/dimensionIds";
 import { ssConfigGet } from "../../01_SpreadsheetSchema/spreadsheetConfigTypes";
 
 export interface DevFixtureColumn {
@@ -22,14 +23,6 @@ export interface DevFixtureSheet {
 // Pinned here, not read from spreadsheetTargets.json, so a bad table row can't redirect the chore.
 export const devSpreadsheetId = "19gIs4w8-2Nsin5zTN1TojOR1HiiT9Y-jCctC7doAMqM";
 
-export function devColumnId(idPrefix: string, key: string): string {
-  return ["c", idPrefix, key].join(ssConfigGet("idDelimiter"));
-}
-
-function devRowId(idPrefix: string, n: number): string {
-  return ["r", idPrefix, String(n)].join(ssConfigGet("idDelimiter"));
-}
-
 function withIdColumn(sheet: DevFixtureSheet): DevFixtureSheet {
   const rowCount = Math.max(
     ...sheet.columns.map((column) => column.values.length),
@@ -39,7 +32,7 @@ function withIdColumn(sheet: DevFixtureSheet): DevFixtureSheet {
     header: ssConfigGet("idHeader"),
     columnType: "TEXT",
     values: Array.from({ length: rowCount }, (_, index) =>
-      devRowId(sheet.idPrefix, index + 1),
+      dimensionIds.row(sheet.idPrefix, String(index + 1)),
     ),
   };
   return { ...sheet, columns: [idColumn, ...sheet.columns] };

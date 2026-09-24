@@ -5,6 +5,7 @@ import {
   type FloorSeedColumn,
   type FloorTabName,
 } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
+import { dimensionIds } from "../../01_SpreadsheetSchema/dimensionIds";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   spreadsheetConfigIndexHeaders,
@@ -131,7 +132,7 @@ export class ConfigSheetFloorCreator extends SpreadsheetBaseNamed {
       sheetId: sheetGid,
       rowIndex: ssConfigGet("columnIdRowIdxBase0"),
       colIndex,
-      value: this.ss.schema.makeColIdFromPrefix(idPrefix),
+      value: dimensionIds.col(idPrefix),
     });
     exampleColumn.seededValues.forEach((value, memberIndex) => {
       this.ss.raw.gatherAddedSheetCellRequest({

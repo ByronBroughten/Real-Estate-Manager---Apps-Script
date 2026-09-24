@@ -32,40 +32,6 @@ describe("SpreadsheetSchema", () => {
     });
   });
 
-  describe("makeId / splitId", () => {
-    it("round-trips a prefix and suffix through the id delimiter", () => {
-      const id = schema.makeId("c", "abc123");
-      expect(id).toBe("c:abc123");
-      expect(schema.splitId(id)).toEqual({ prefix: "c", suffix: "abc123" });
-    });
-
-    it("throws on an id missing the delimiter", () => {
-      expect(() => schema.splitId("noDelimiterHere")).toThrow();
-    });
-
-    it("throws on an id with an empty prefix or suffix", () => {
-      expect(() => schema.splitId(":suffix")).toThrow();
-      expect(() => schema.splitId("prefix:")).toThrow();
-    });
-  });
-
-  describe("makeColIdFromPrefix / makeRowIdFromPrefix", () => {
-    it("builds a col id shaped as c:<prefix>:<random>", () => {
-      const colId = schema.makeColIdFromPrefix("hh");
-      expect(colId).toMatch(/^c:hh:[0-9a-zA-Z_-]{7}$/);
-    });
-
-    it("builds a row id shaped as r:<prefix>:<random>", () => {
-      const rowId = schema.makeRowIdFromPrefix("hh");
-      expect(rowId).toMatch(/^r:hh:[0-9a-zA-Z_-]{7}$/);
-    });
-
-    it("throws when the prefix is empty", () => {
-      expect(() => schema.makeColIdFromPrefix("")).toThrow();
-      expect(() => schema.makeRowIdFromPrefix("")).toThrow();
-    });
-  });
-
   describe("uniform row indexes", () => {
     it("recognizes known uniform row indexes", () => {
       expect(schema.isUniformRowIndex(schema.colIdRowIndex)).toBe(true);

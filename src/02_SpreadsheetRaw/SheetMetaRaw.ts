@@ -2,6 +2,7 @@ import {
   type CellValueName,
   type UniformRowName,
 } from "../00_Source/CellValues/cellValues";
+import { dimensionIds } from "../01_SpreadsheetSchema/dimensionIds";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
@@ -43,7 +44,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
   private _columnIdsByIdPrefix(): Map<string, string[]> {
     const columnIdsByPrefix = new Map<string, string[]>();
     this.activeColumnIds.forEach((columnId) => {
-      const idPrefix = this.schema.idPrefixOfColumnIdOrUndefined(columnId);
+      const idPrefix = dimensionIds.colIdPrefixOrUndefined(columnId);
       if (idPrefix === undefined) return;
       const columnIds = columnIdsByPrefix.get(idPrefix) ?? [];
       columnIds.push(columnId);
@@ -98,14 +99,11 @@ export class SheetMetaRaw extends SheetCommonRaw {
     this.fullTableColIndexes.forEach((colIndex) => {
       const colIdValue = this._columnIdInTable(colIndex);
       if (!colIdValue) {
-        this.colIdRow.updateValue(colIndex, this.makeColumnId(idPrefix));
+        this.colIdRow.updateValue(colIndex, dimensionIds.col(idPrefix));
         addedCount++;
       }
     });
     return addedCount;
-  }
-  makeColumnId(idPrefix: string): string {
-    return this.schema.makeColIdFromPrefix(idPrefix);
   }
   insertColumnAtEnd(props: { idPrefix: string; header: string }): number {
     const columnIndex = this.nextEndColumnInsertIndex;

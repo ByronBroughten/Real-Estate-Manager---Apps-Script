@@ -5,6 +5,7 @@ import {
   getSheetColumnNames,
   type ColumnName,
 } from "./columnConfigsTypes";
+import { dimensionIds } from "./dimensionIds";
 import {
   configSheetGids,
   getSheetTraitByGid,
@@ -58,7 +59,7 @@ export class SheetSchema<
     return this.trait("idPrefix");
   }
   makeRowId(): string {
-    return this.makeRowIdFromPrefix(this.idPrefix);
+    return dimensionIds.row(this.idPrefix);
   }
   get columnIds(): MapIterator<string> {
     return getSheetColumnIds(this.sheetGid);
