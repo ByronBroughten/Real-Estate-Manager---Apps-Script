@@ -1,13 +1,15 @@
 // Checks the agent-facing docs' links and size limits; a doc map in, violations out. See docs/agents/prose-files.md.
 import { posix } from "node:path";
 
-const MAX_LEAD_LINES = 5;
-const MAX_LEAD_BYTES = 800;
-const MAX_UNHEADED_DOC_BYTES = 4 * 1024;
-const MAX_SRC_AGENTS_LINES = 15;
-const MAX_FOLDER_AGENTS_LINES = 10;
-const MAX_ROOT_AGENTS_BYTES = 5 * 1024;
-const LINKED_ROOT_FILES = new Set([
+const limits = {
+  leadLines: 5,
+  leadBytes: 800,
+  unheadedDocBytes: 4 * 1024,
+  srcAgentsLines: 15,
+  folderAgentsLines: 10,
+  rootAgentsBytes: 5 * 1024,
+} as const;
+const linkedRootFiles = new Set([
   "AGENTS.md",
   "CLAUDE.md",
   "CONTEXT.md",
@@ -38,17 +40,29 @@ interface ProseLine {
   content: string;
 }
 
+interface Link {
+  line: number;
+  target: string;
+}
+
 // `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.
-export function checkDocs({ docs, paths = [] }: { docs: Docs; paths?: string[] }): Violation[] {
+export function checkDocs({
+  docs,
+  paths = [],
+}: {
+  docs: Docs;
+  paths?: string[];
+}): Violation[] {
   const known = new Set([...Object.keys(docs), ...paths]);
   const slugs = new Map<string, Set<string>>();
-  const slugsOf = (path: string) => {
+  function slugsOf(path: string): Set<string> {
     if (!slugs.has(path)) slugs.set(path, headingSlugs(docs[path] ?? ""));
     return slugs.get(path) ?? new Set<string>();
-  };
+  }
   const violations: Violation[] = [];
   for (const [path, text] of Object.entries(docs)) {
-    const report: Report = (line, message) => violations.push({ path, line, message });
+    const report: Report = (line, message) =>
+      violations.push({ path, line, message });
     if (isLinkChecked(path))
       checkLinks(path, text, { docs, known, slugsOf, report });
     if (isDocsFolderFile(path)) checkLead(text, report);
@@ -83,7 +97,7 @@ function isDocsFolderFile(path: string): boolean {
 function isLinkChecked(path: string): boolean {
   const name = posix.basename(path);
   const local = inRoot(path);
-  if (!local.includes("/")) return LINKED_ROOT_FILES.has(local);
+  if (!local.includes("/")) return linkedRootFiles.has(local);
   return isDocsFolderFile(path) || name === "AGENTS.md" || name === "CLAUDE.md";
 }
 
@@ -94,7 +108,11 @@ function isPublishedFrameworkDoc(path: string): boolean {
   return local.startsWith("docs/") || publishedRootFiles.has(local);
 }
 
-function checkLinks(path: string, text: string, { docs, known, slugsOf, report }: LinkContext): void {
+function checkLinks(
+  path: string,
+  text: string,
+  { docs, known, slugsOf, report }: LinkContext,
+): void {
   const published = isPublishedFrameworkDoc(path);
   for (const { line, target } of linksIn(text)) {
     const hashAt = target.indexOf("#");
@@ -129,8 +147,8 @@ function resolveLink(from: string, file: string): string {
   return posix.normalize(joined).replace(/\/$/, "");
 }
 
-function linksIn(text: string): { line: number; target: string }[] {
-  const links: { line: number; target: string }[] = [];
+function linksIn(text: string): Link[] {
+  const links: Link[] = [];
   for (const { line, content } of proseLines(text)) {
     const bare = content.replace(/`[^`]*`/g, "");
     for (const match of bare.matchAll(
@@ -187,10 +205,10 @@ function checkLead(text: string, report: Report): void {
   const firstSection = lines.findIndex(({ content }) => /^##\s/.test(content));
   if (firstSection === -1) {
     const bytes = byteLength(text);
-    if (bytes > MAX_UNHEADED_DOC_BYTES)
+    if (bytes > limits.unheadedDocBytes)
       report(
         1,
-        `doc is ${bytes} bytes with no ## heading; over ${MAX_UNHEADED_DOC_BYTES} bytes, give it a short lead and ## headings so it can be read by section`,
+        `doc is ${bytes} bytes with no ## heading; over ${limits.unheadedDocBytes} bytes, give it a short lead and ## headings so it can be read by section`,
       );
     return;
   }
@@ -198,18 +216,18 @@ function checkLead(text: string, report: Report): void {
     .slice(0, firstSection)
     .filter(({ content }) => content.trim() !== "" && !/^#\s/.test(content));
   const leadLine = lead[0]?.line ?? 1;
-  if (lead.length > MAX_LEAD_LINES) {
+  if (lead.length > limits.leadLines) {
     report(
       leadLine,
-      `lead is ${lead.length} lines before the first ## heading; keep it to ${MAX_LEAD_LINES} and move the rest under a heading`,
+      `lead is ${lead.length} lines before the first ## heading; keep it to ${limits.leadLines} and move the rest under a heading`,
     );
     return;
   }
   const bytes = byteLength(lead.map(({ content }) => content).join("\n"));
-  if (bytes > MAX_LEAD_BYTES)
+  if (bytes > limits.leadBytes)
     report(
       leadLine,
-      `lead is ${bytes} bytes before the first ## heading; keep it to ${MAX_LEAD_BYTES} and move the rest under a heading`,
+      `lead is ${bytes} bytes before the first ## heading; keep it to ${limits.leadBytes} and move the rest under a heading`,
     );
 }
 
@@ -219,18 +237,18 @@ function byteLength(text: string): number {
 
 function checkRootSize(text: string, report: Report): void {
   const bytes = byteLength(text);
-  if (bytes <= MAX_ROOT_AGENTS_BYTES) return;
+  if (bytes <= limits.rootAgentsBytes) return;
   report(
     1,
-    `root AGENTS.md is ${bytes} bytes; the limit is ${MAX_ROOT_AGENTS_BYTES}`,
+    `root AGENTS.md is ${bytes} bytes; the limit is ${limits.rootAgentsBytes}`,
   );
 }
 
 function checkNestedSize(path: string, text: string, report: Report): void {
   const lines = text.replace(/\n$/, "").split("\n").length;
   const limit = isPackageSrcAgents(path)
-    ? MAX_SRC_AGENTS_LINES
-    : MAX_FOLDER_AGENTS_LINES;
+    ? limits.srcAgentsLines
+    : limits.folderAgentsLines;
   if (lines > limit)
     report(1, `nested AGENTS.md is ${lines} lines; the limit is ${limit}`);
 }
