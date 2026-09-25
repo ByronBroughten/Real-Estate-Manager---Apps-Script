@@ -13,8 +13,11 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci
+      # The root checks only itself; the app's tracked copy needs the framework, which only the workspace has.
+      - run: rm -rf packages
+      # Node 22's bundled npm 10 crashes resolving this tree's peers (reading 'edgesOut'); the workspace runs npm 11.
+      - run: npm install -g npm@11
+      - run: npm install
       - run: npm run tsc
-      - run: npm run test:coverage
+      - run: npm test
       - run: npm run lint

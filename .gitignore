@@ -15,3 +15,10 @@ client_secret*.json
 # Spreadsheet and script IDs stay local; each package commits a .example.json to copy instead.
 sheets.config.json
 .clasp.json
+
+# Each split-out package is its own repo, cloned here; the app stays tracked until it splits out too.
+packages/*
+!packages/real-estate/
+
+# No lockfile: it would name every cloned workspace, private ones included.
+package-lock.json
