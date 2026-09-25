@@ -166,8 +166,9 @@ export const Arr = {
   ): T[] {
     const nextArr = [...arr];
     const idx = arr.findIndex(fn);
-    if (mustFind && idx === -1)
+    if (mustFind && idx === -1) {
       throw new ValueNotFoundError("Value not found to remove.");
+    }
     if (idx !== -1) arr.splice(idx, 1);
     return nextArr;
   },

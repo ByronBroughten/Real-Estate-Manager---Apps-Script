@@ -38,8 +38,9 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
     const identityColIndexes: IdentityColIndexes = new Map();
     floorSheetNames().forEach((sheetName) => {
       const colIndexes = this._floorTab(sheetName).gatherIdentityColumns();
-      if (colIndexes !== undefined)
+      if (colIndexes !== undefined) {
         identityColIndexes.set(sheetName, colIndexes);
+      }
     });
     return identityColIndexes;
   }

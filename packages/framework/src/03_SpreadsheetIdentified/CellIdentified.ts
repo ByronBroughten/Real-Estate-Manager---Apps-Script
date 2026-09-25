@@ -66,8 +66,9 @@ export class CellIdentified<
   // Both halves merge into the one queued change, so the field mask names both.
   update({ value, backgroundColor }: CellChange<VN>): this {
     if (value !== undefined) this.updateValue(value);
-    if (backgroundColor !== undefined)
+    if (backgroundColor !== undefined) {
       this.updateBackgroundColor(backgroundColor);
+    }
     return this;
   }
   updateValue(value: Value<VN>): this {

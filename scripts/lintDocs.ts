@@ -25,14 +25,16 @@ const docs = Object.fromEntries(
 );
 const folders = files.flatMap((file) => {
   const parents: string[] = [];
-  for (let dir = posix.dirname(file); dir !== "."; dir = posix.dirname(dir))
+  for (let dir = posix.dirname(file); dir !== "."; dir = posix.dirname(dir)) {
     parents.push(dir);
+  }
   return parents;
 });
 
 const violations = checkDocs({ docs, paths: [...files, ...new Set(folders)] });
-for (const { path, line, message } of violations)
+for (const { path, line, message } of violations) {
   console.error(`${path}:${line} ${message}`);
+}
 if (violations.length > 0) {
   console.error(
     `lint:docs: ${violations.length} problem(s). The limits and terms: docs/agents/prose-files.md.`,

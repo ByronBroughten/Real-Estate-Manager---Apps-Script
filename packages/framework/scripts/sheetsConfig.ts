@@ -43,8 +43,9 @@ function readSheetsConfig(path: string): SheetsConfig {
   const raw = JSON.parse(readFileSync(path, "utf8"));
   const dir = dirname(path);
   for (const field of ["spreadsheetId", "generatedDir"]) {
-    if (!isFilledString(raw[field]))
+    if (!isFilledString(raw[field])) {
       throw new Error(`${path} has no "${field}" string.`);
+    }
   }
   if (!Array.isArray(raw.choreHomes) || !raw.choreHomes.every(isFilledString)) {
     throw new Error(`${path} has no "choreHomes" array of folder strings.`);
@@ -71,8 +72,9 @@ function siblingConfigPaths(configPath: string): string[] {
         !entry.isDirectory() ||
         entry.name.startsWith(".") ||
         siblingScan.skippedDirs.has(entry.name)
-      )
+      ) {
         continue;
+      }
       visit(join(dir, entry.name), depth + 1);
     }
   }

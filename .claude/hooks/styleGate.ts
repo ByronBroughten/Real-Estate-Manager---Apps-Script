@@ -17,8 +17,9 @@ await runFailOpen(() => {
   if (input.hook_event_name === "PostToolUse") {
     if (input.tool_name !== "Read") return;
     const { offset, limit } = input.tool_input ?? {};
-    if (isStyleRead({ ...where, offset, limit, totalLines: lineCount(join(projectDir, stylePath)) }))
+    if (isStyleRead({ ...where, offset, limit, totalLines: lineCount(join(projectDir, stylePath)) })) {
       writeFileSync(markerPath, "");
+    }
     return;
   }
   if (!["Edit", "Write"].includes(input.tool_name ?? "")) return;

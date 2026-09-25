@@ -64,8 +64,9 @@ export function checkDocs({
     function report(line: number, message: string): void {
       violations.push({ path, line, message });
     }
-    if (isLinkChecked(path))
+    if (isLinkChecked(path)) {
       checkLinks(path, text, { docs, known, slugsOf, report });
+    }
     if (isDocsFolderFile(path)) checkLead(text, report);
     if (posix.basename(path) !== "AGENTS.md") continue;
     if (path === "AGENTS.md") checkRootSize(text, report);
@@ -122,11 +123,12 @@ function checkLinks(
       hashAt === -1 ? null : decodeURIComponent(target.slice(hashAt + 1));
     const resolved =
       file === "" ? path : resolveLink(path, decodeURIComponent(file));
-    if (published && !resolved.startsWith(`${frameworkRoot}/`))
+    if (published && !resolved.startsWith(`${frameworkRoot}/`)) {
       report(
         line,
         `link ${target} leaves the framework; its published docs link only inside ${frameworkRoot}`,
       );
+    }
     if (!known.has(resolved)) {
       report(line, `broken link ${target}: no file ${resolved}`);
       continue;
@@ -206,11 +208,12 @@ function checkLead(text: string, report: Report): void {
   const firstSection = lines.findIndex(({ content }) => /^##\s/.test(content));
   if (firstSection === -1) {
     const bytes = byteLength(text);
-    if (bytes > limits.unheadedDocBytes)
+    if (bytes > limits.unheadedDocBytes) {
       report(
         1,
         `doc is ${bytes} bytes with no ## heading; over ${limits.unheadedDocBytes} bytes, give it a short lead and ## headings so it can be read by section`,
       );
+    }
     return;
   }
   const lead = lines
@@ -225,11 +228,12 @@ function checkLead(text: string, report: Report): void {
     return;
   }
   const bytes = byteLength(lead.map(({ content }) => content).join("\n"));
-  if (bytes > limits.leadBytes)
+  if (bytes > limits.leadBytes) {
     report(
       leadLine,
       `lead is ${bytes} bytes before the first ## heading; keep it to ${limits.leadBytes} and move the rest under a heading`,
     );
+  }
 }
 
 function byteLength(text: string): number {
@@ -250,8 +254,9 @@ function checkNestedSize(path: string, text: string, report: Report): void {
   const limit = isPackageSrcAgents(path)
     ? limits.srcAgentsLines
     : limits.folderAgentsLines;
-  if (lines > limit)
+  if (lines > limit) {
     report(1, `nested AGENTS.md is ${lines} lines; the limit is ${limit}`);
+  }
 }
 
 function isPackageSrcAgents(path: string): boolean {
@@ -269,9 +274,10 @@ function checkClaudePairing(path: string, docs: Docs, report: Report): void {
   const importsIt = (docs[claude] ?? "")
     .split("\n")
     .some((line) => line.trim() === "@AGENTS.md");
-  if (!importsIt)
+  if (!importsIt) {
     report(
       1,
       `no sibling CLAUDE.md importing it; add ${claude} containing @AGENTS.md`,
     );
+  }
 }
