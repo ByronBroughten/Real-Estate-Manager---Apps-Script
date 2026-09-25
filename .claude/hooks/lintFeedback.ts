@@ -19,10 +19,11 @@ await runFailOpen(() => {
   if (!isInLintSet({ ...location, generatedDirs })) return;
   const absolutePath = resolve(location.cwd, filePath);
   const before = readFileSync(absolutePath, "utf8");
+  const configLookup = ["--flag", "v10_config_lookup_from_file"]; // finds each package's own eslint.config.mjs
   // Unused variables are off for this run: an import added one edit before its use isn't an error yet.
   const { stdout } = spawnSync(
     binPath(projectDir, "eslint"),
-    ["--fix", "--rule", "@typescript-eslint/no-unused-vars: off", "--format", "json", absolutePath],
+    [...configLookup, "--fix", "--rule", "@typescript-eslint/no-unused-vars: off", "--format", "json", absolutePath],
     { cwd: projectDir, encoding: "utf8", timeout: 20_000 },
   );
   if (readFileSync(absolutePath, "utf8") !== before) {

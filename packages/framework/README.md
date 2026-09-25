@@ -10,12 +10,13 @@ The package isn't on npm yet. Depend on it from a sibling npm workspace:
 "dependencies": { "@byronbroughten/sheets-framework": "*" }
 ```
 
-It ships TypeScript source, not a build, and your app bundles it. Add the optional peers for what you use: `rollup` and `@rollup/plugin-typescript` to build, `vitest` to test. Pushing to Apps Script also needs [`clasp`](https://github.com/google/clasp).
+It ships TypeScript source, not a build, and your app bundles it. Add the optional peers for what you use: `rollup` and `@rollup/plugin-typescript` to build, `vitest` to test, `eslint` and `@byronbroughten/config` to lint. Pushing to Apps Script also needs [`clasp`](https://github.com/google/clasp).
 
 Your package needs:
 
 - **`tsconfig.json`** extending `@byronbroughten/sheets-framework/tsconfig.base.json`.
 - **`rollup.config.mjs`** built from the preset: `export default rollupPreset({ input: "src/index.ts", rootDir: ".." })`, with `rollupPreset` from `@byronbroughten/sheets-framework/rollup`. `rootDir` must cover the framework's source. With tree-shaking on, only the entry file's functions are callable from Apps Script; `treeshake: false` opts out ([the rollup preset](./docs/how-it-runs.md#the-rollup-preset)).
+- **`eslint.config.mjs`** spreading `@byronbroughten/config`'s `eslintPreset` and then `appEslintPreset({ testSetupFiles: ["src/installAppConfigs.ts"] })` from `@byronbroughten/sheets-framework/eslint`, which adds the platform and public-entry import rules for your `src/`; `testSetupFiles` are the files besides tests that may import `./testing` ([the ESLint preset](./docs/how-it-runs.md#the-eslint-preset)).
 - **`sheets.config.json`** at the package root, naming your spreadsheet ([the bin](#the-bin)).
 - **`.clasp.json`** and `appsscript.json` for an Apps Script project bound to your spreadsheet (created from its Extensions menu), with the Sheets advanced service enabled. The script reads its spreadsheet from that binding; `sheets.config.json` names it for the Node commands.
 

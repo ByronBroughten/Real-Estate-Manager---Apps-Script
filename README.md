@@ -10,7 +10,7 @@ An npm-workspaces monorepo for managing real estate operations — properties, u
 | --- | --- |
 | [`packages/framework`](./packages/framework/README.md) (`@byronbroughten/sheets-framework`) | A project-agnostic framework for typed apps on Google Sheets + Apps Script: the numbered tiers from raw cell I/O up to endpoint dispatch, the Node and Apps Script hosts, and the `sheets-framework` bin. It names nothing from real estate, and it is tested against its own dev spreadsheet, `Sheets Framework Dev`. |
 | [`packages/real-estate`](./packages/real-estate/README.md) (`real-estate-app`, private) | This project: the real-estate endpoints and chores, bundled with the framework's source and pushed to the business spreadsheet's Apps Script project. |
-| [`config`](./config/README.md) (`@byronbroughten/config`) | The general tooling both packages share: an ESLint flat-config preset, the prettier config and a base tsconfig. The framework's tier and Sheets rules stay in the root `eslint.config.mjs`. |
+| [`config`](./config/README.md) (`@byronbroughten/config`) | The general tooling both packages share: an ESLint flat-config preset, the prettier config and a base tsconfig. The framework layers its tier and Sheets rules on it in its own `eslint.config.mjs`, and exports the app's as a preset. |
 
 Before adding a file, ask "would this make sense in a completely different Sheets-backed app?" If yes, it belongs in `packages/framework`, generically named. If no, it belongs in `packages/real-estate`.
 
