@@ -68,6 +68,7 @@
   "devDependencies": {
     "@byronbroughten/config": "^0.1.0",
     "@rollup/plugin-typescript": "^12.1.4",
+    "@types/estree": "^1.0.8",
     "@types/google-apps-script": "^2.0.11",
     "@types/node": "^22.20.4",
     "@vitest/coverage-v8": "^4.1.11",

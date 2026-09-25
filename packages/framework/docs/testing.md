@@ -85,7 +85,7 @@ Each of `02`–`04` has a spreadsheet-level test pinning every Meta/primary navi
 
 ## CI
 
-`.github/workflows/ci.yml` runs `npm install`, `npm run tsc`, `npm run test:coverage`, `npm run lint` and `npm run lint:docs` on every push and pull request. The package carries no lockfile, so the install resolves fresh and dependency drift shows up there. Coverage is reported, not gated — no failure threshold yet.
+The package's own workflow is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). Coverage is reported, not gated — no failure threshold yet.
 
 ## Type verification is `npm run tsc`
 

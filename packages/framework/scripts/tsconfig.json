@@ -8,7 +8,7 @@
     "noEmit": true,
     "allowImportingTsExtensions": true,
     "allowJs": true,
-    "maxNodeModuleJsDepth": 1,
+    "maxNodeModuleJsDepth": 1, // @byronbroughten/config ships JS without .d.ts, so an npm install needs this to type it.
     "checkJs": true,
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
