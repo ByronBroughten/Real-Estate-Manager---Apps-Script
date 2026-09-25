@@ -15,10 +15,10 @@ type UserEnteredValue = NonNullable<
   >[number]["values"]
 >[number]["userEnteredValue"];
 
-type CellDataChange = {
+interface CellDataChange {
   value?: CellValue;
   backgroundColor?: RgbColor;
-};
+}
 
 export const cellDataRequests = {
   fill(operation: FillOperation): ModeledRequest[] {

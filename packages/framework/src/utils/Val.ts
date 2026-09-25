@@ -9,12 +9,12 @@ export function validationError(
   return new ValidationError(`value "${value}" is not a ${notAWhat}`);
 }
 
-type PrimitiveValueNamesToTypes = {
+interface PrimitiveValueNamesToTypes {
   string: string;
   number: number;
   boolean: boolean;
   date: SerialDate;
-};
+}
 export type PrimitiveValueName = keyof PrimitiveValueNamesToTypes;
 export type PureValue<VN extends PrimitiveValueName> =
   PrimitiveValueNamesToTypes[VN];

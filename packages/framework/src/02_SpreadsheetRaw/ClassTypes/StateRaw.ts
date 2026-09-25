@@ -174,28 +174,28 @@ type SheetId = number;
 type RowIndex = number;
 type ColIndex = number;
 
-export type SortParameters = {
+export interface SortParameters {
   colIdxToSortBy: number;
   sortOrder: "ASCENDING" | "DESCENDING";
-};
+}
 
-export type RowChangesToSave = {
+export interface RowChangesToSave {
   append: boolean;
   delete: boolean;
   // Values, not indexes, so a queued write never depends on fetched row state.
   update: Map<ColIndex, RowCellChange>;
-};
+}
 // One entry per cell, merged across writes, so a colour never cancels a value or a formula.
 export interface RowCellChange<VN extends CellValueName = CellValueName> {
   value?: CellValue<VN>;
   formula?: string;
   backgroundColor?: RgbColor;
 }
-export type SheetChangesToSave = {
+export interface SheetChangesToSave {
   sort: null | SortParameters;
   insertColumn: SheetChangePropsObj["insertColumn"][];
   fills: ColumnFill[];
-};
+}
 // One contiguous run of a column's cells: value/colour as repeatCell, formula as pasteData.
 export interface ColumnFill extends RowCellChange {
   colIndex: ColIndex;
@@ -219,14 +219,14 @@ export type AddedSheetCell = Required<
 > &
   ({ value: CellValue } | { formula: string });
 
-export type SheetChangePropsObj = {
+export interface SheetChangePropsObj {
   sort: SheetChangeSortProps;
   insertColumn: {
     action: "insertColumn";
     startColumnIndex: number;
   };
   fill: { action: "fill" } & ColumnFill;
-};
+}
 export type SheetChangeProps = SheetChangePropsObj[keyof SheetChangePropsObj];
 
 export type RowChangeUpdateProps = {

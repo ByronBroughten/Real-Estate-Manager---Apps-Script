@@ -86,7 +86,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 ## Type modeling
 
-- **`interface` for object shapes that get constructed or extended; `type` for everything computed from other types.**
+- **`type` for everything computed from other types.** A plain object shape is an `interface`; lint enforces it.
 - **Generic params get two-letter domain abbreviations with a constraint**; bare `T`/`K`/`V`/`O` are only for domain-free utilities.
 - **Verify a type-level claim with `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts`, never an assignment.** Measure a mapped type over the config unions before adopting it.
 - **Narrow a type until the empty case can't arise, rather than a branded-string fallback.**

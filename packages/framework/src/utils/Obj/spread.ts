@@ -7,21 +7,21 @@ export type Spread<A extends readonly unknown[]> = A extends [
   ? Merge<L, Spread<R>>
   : unknown;
 
-type Sample1 = {
+interface Sample1 {
   a: 1;
   b: 2;
-};
-type Sample2 = {
+}
+interface Sample2 {
   a: 2;
   b: 2;
   c: 3;
-};
+}
 type Test1 = Spread<[Sample1, Sample2]>;
 
-type Sample3 = {
+interface Sample3 {
   a: 3;
   d: 4;
-};
+}
 type Test3 = Spread<[Test1, Sample3]>;
 
 function _spreadTest<T extends Test3>(_t: T): void {}

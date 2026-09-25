@@ -271,7 +271,9 @@ export interface AddCheckboxValidationOperation {
 
 declare const opaqueRawRequest: unique symbol;
 // Only the platform module can build or read one.
-export type OpaqueRawRequest = { readonly [opaqueRawRequest]: true };
+export interface OpaqueRawRequest {
+  readonly [opaqueRawRequest]: true;
+}
 
 export interface OpaqueRawWriteOperation {
   kind: "raw";

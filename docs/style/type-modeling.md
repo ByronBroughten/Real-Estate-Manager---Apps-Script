@@ -4,7 +4,7 @@ Disclosed from [`docs/style.md`](../style.md), "Type modeling". The rules are th
 
 ## `interface` or `type`
 
-Props and state bags that chain through `extends` are `interface`s. Unions, `keyof`, mapped types and utility types are `type`s.
+Unions, `keyof`, mapped types and utility types are `type`s. A plain object shape is an `interface`, which lint enforces, so props and state bags can chain through `extends`.
 
 ## Identity checks, never assignment
 

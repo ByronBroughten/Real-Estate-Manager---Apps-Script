@@ -5,11 +5,11 @@ import {
 } from "../../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 
-export type FloorNotice = {
+export interface FloorNotice {
   title: string;
   message: string;
   untilClosed: boolean;
-};
+}
 
 const unwarnedFloorTab: FloorTabName = "valueConfig";
 

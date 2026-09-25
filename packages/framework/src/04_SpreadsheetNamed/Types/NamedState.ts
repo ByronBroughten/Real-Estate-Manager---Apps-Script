@@ -7,7 +7,7 @@ type SheetColumnNames<SN extends SheetName> = {
   [S in SN]?: ColumnSpecifierNamed<SN>;
 };
 
-export type FetchSpecifierObjNamed<SN extends SheetName = SheetName> = {
+export interface FetchSpecifierObjNamed<SN extends SheetName = SheetName> {
   all: {
     rowSpecifier: RowSpecifier;
     sheetColumnMode: "all";
@@ -22,7 +22,7 @@ export type FetchSpecifierObjNamed<SN extends SheetName = SheetName> = {
     sheetColumnMode: "specific";
     sheetColumnNames: SheetColumnNames<SN>;
   };
-};
+}
 
 type FetchColumnsSpecifierObjNamed<SN extends SheetName = SheetName> = {
   [S in keyof FetchSpecifierObjNamed<SN>]: StrictOmit<
@@ -43,10 +43,10 @@ export type SheetColumnNamesStandard<SN extends SheetName> = {
   [S in SN]?: ColumnName<SN>[];
 };
 
-export type FetchPropsStandardNamed<SN extends SheetName = SheetName> = {
+export interface FetchPropsStandardNamed<SN extends SheetName = SheetName> {
   rowSpecifier: RowSpecifier;
   sheetColumnNames: SheetColumnNamesStandard<SN>;
-};
+}
 
 type RowSpecifier = RowSpecifierName | RowSpecifierName[];
 export type RowSpecifierBySchemaName = Exclude<RowSpecifierName, "activeRows">;
