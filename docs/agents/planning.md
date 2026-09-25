@@ -6,10 +6,12 @@
 
 ## Model fit
 
-- **After `/to-tickets` publishes**, print the tickets as one flat list in completion order, `#n Title: Sonnet|Opus|Grok (reason)`. Chat only: never in a ticket, comment or parent issue.
-- **After `/to-spec` publishes**, say in one chat line whether Sonnet can handle the spec, Opus is recommended, or Grok fits, and why. Say nothing if the developer has explicitly agreed in the conversation that it becomes tickets. The developer switches models with `/model`; never dispatch an implementer.
-- **Sonnet:** fully specified, an existing pattern, one package (a migrate batch needing judgment, a chore, an endpoint on existing machinery, a doc edit). **Opus:** type-level framework work, both packages or the framework's public entry, a new deletion path, an open design fork, or a wide refactor's contract or integrate-and-verify ticket.
-- **Grok (medium effort):** only when `tsc`, tests or lint verify the whole diff and it adds no new name, comment, doc or class shape: a rename or move following an exact stated pattern, a batch of identical edits, a retarget after `gen:configs`. Never a ticket that writes prose or an AGENTS.md/doc edit, mints a member or method name, adds a comment, or restructures a test. A mixed ticket is Sonnet. The reason must name what verifies it.
+- **After `/to-tickets` publishes**, print the tickets as one flat list in completion order, `#n Title: <Model> <effort> (reason)`. Chat only: never in a ticket, comment or parent issue.
+- **After `/to-spec` publishes**, say in one chat line which pair fits the spec, in the same form, and why. Say nothing if the developer has explicitly agreed in the conversation that it becomes tickets. The developer switches with `/model` and `/effort`; never dispatch an implementer.
+- **Pick from seven pairs only:** Sonnet medium, Sonnet high, Opus low, Opus medium, Opus high, Grok medium, Grok high. Criteria for each and their evidence: [`model-fit.md`](./model-fit.md).
+- **Tie-break: the cheapest pair likely to pass review on the first try.** Cost is the Claude Code weekly limit; Grok in Cursor is free at the margin.
+- **A Claude pick adds `· near limit: Grok <effort>`** when the ticket also passes Grok's rule, and nothing when it doesn't.
+- **Grok only when `tsc`, tests or lint check the whole diff**, adding names only as stated word for word, and no prose, comment, doc, class shape or test restructure. A mixed ticket goes to Claude. The reason names what checks the diff and reminds the developer to have Grok read both style docs first.
 
 ## Handoffs
 

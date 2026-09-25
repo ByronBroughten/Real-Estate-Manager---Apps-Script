@@ -7,10 +7,11 @@
   ````
   Wrap up issue-<n>-<slug> (#<n>), in this order, stopping at the first failure and reporting it:
   1. Confirm the working tree is clean and the branch's work is committed.
-  2. Merge the branch into master with a merge commit titled "Merge issue-<n>-<slug> into master (#<n>)", then run `npm run tsc`, `npm test` and `npm run lint`.
-  3. Push master.
-  4. `gh issue close -R <owner/repo> <n> --comment "<what landed, one or two sentences, plus any box left undone>"`.
-  5. Only after steps 3 and 4 succeed, delete the branch locally and on the remote if it exists.
+  2. Model-fit log: ask me which model and effort pair implemented it, and whether it passed first try or what the fix changed. Add the row to the outcome log in `docs/agents/model-fit.md`, trim it to the latest ~20, and commit on this branch.
+  3. Merge the branch into master with a merge commit titled "Merge issue-<n>-<slug> into master (#<n>)", then run `npm run tsc`, `npm test` and `npm run lint`.
+  4. Push master.
+  5. `gh issue close -R <owner/repo> <n> --comment "<what landed, one or two sentences, plus any box left undone>"`.
+  6. Only after steps 4 and 5 succeed, delete the branch locally and on the remote if it exists.
   This message is the developer's yes to merge, push, close and delete for this branch and issue only.
   ````
 
