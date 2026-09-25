@@ -54,4 +54,5 @@ One row per landed issue, added by the landing wrap-up; keep the most recent ~20
 
 | Issue | Pair | Result | What review caught |
 | --- | --- | --- | --- |
+| #6 | Opus high | Pass | — |
 | #168 | Opus low | Pass | — |
