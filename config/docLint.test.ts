@@ -234,6 +234,12 @@ describe("checkDocs", () => {
       );
     });
 
+    it("rejects a published package the repo doesn't track", () => {
+      expect(() => check({}, paths, "packages/framwork")).toThrow(
+        "published package packages/framwork has no tracked files",
+      );
+    });
+
     it("holds no package to the rule when none is configured", () => {
       const docs = {
         "packages/framework/docs/a.md": "[root](../../../docs/style.md)\n",

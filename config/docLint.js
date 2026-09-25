@@ -31,7 +31,9 @@ export function checkDocs({ docs, paths = [], published }) {
   const known = new Set([...Object.keys(docs), ...paths]);
   const trackedPackages = packagesOf(known);
   const publishedRoot =
-    published === undefined ? undefined : normalizeRoot(published);
+    published === undefined
+      ? undefined
+      : normalizeRoot(published, trackedPackages);
   const slugs = new Map();
   /** @param {string} path */
   function slugsOf(path) {
@@ -92,13 +94,19 @@ function isLinkChecked(path) {
   return isDocsFolderFile(path) || name === "AGENTS.md" || name === "CLAUDE.md";
 }
 
-// The repo root is "" and a package is `packages/<name>`, however the caller spells it.
-/** @param {string} root */
-function normalizeRoot(root) {
+// The repo root is "" and a package is `packages/<name>`, however the caller spells it; an untracked package is a typo, not a no-op.
+/**
+ * @param {string} root
+ * @param {Set<string>} trackedPackages
+ */
+function normalizeRoot(root, trackedPackages) {
   const normal = posix.normalize(root).replace(/\/$/, "");
   if (normal === ".") return "";
   if (packageRootOf(normal) !== normal) {
     throw new Error(`published must be "." or packages/<name>, not ${root}`);
+  }
+  if (!trackedPackages.has(normal)) {
+    throw new Error(`published package ${root} has no tracked files`);
   }
   return normal;
 }
