@@ -1,11 +1,12 @@
-// Checks the agent-facing docs' links and size limits; a doc map in, violations out. See docs/agents/prose-files.md.
+// @ts-check
+// Checks a repo's agent-facing docs' links and size limits; a doc map in, violations out. lintDocs.js runs it on the repo it is invoked in.
 import { posix } from "node:path";
 
 const limits = {
   leadLines: 5,
   leadBytes: 800,
   unheadedDocBytes: 4 * 1024,
-} as const;
+};
 const linkedRootFiles = new Set([
   "AGENTS.md",
   "CLAUDE.md",
@@ -13,56 +14,46 @@ const linkedRootFiles = new Set([
   "README.md",
 ]);
 const publishedRootFiles = new Set(["CONTEXT.md", "README.md"]);
-const frameworkRoot = "packages/framework";
 
-export type Docs = Record<string, string>;
+/** @typedef {Record<string, string>} Docs */
+/** @typedef {{ path: string, line: number, message: string }} Violation */
+/** @typedef {(line: number, message: string) => void} Report */
+/** @typedef {{ docs: Docs, known: Set<string>, trackedPackages: Set<string>, published: string | undefined, slugsOf: (path: string) => Set<string>, report: Report }} LinkContext */
+/** @typedef {{ line: number, content: string }} ProseLine */
+/** @typedef {{ line: number, target: string }} Link */
 
-export interface Violation {
-  path: string;
-  line: number;
-  message: string;
-}
-
-type Report = (line: number, message: string) => void;
-
-interface LinkContext {
-  docs: Docs;
-  known: Set<string>;
-  slugsOf: (path: string) => Set<string>;
-  report: Report;
-}
-
-interface ProseLine {
-  line: number;
-  content: string;
-}
-
-interface Link {
-  line: number;
-  target: string;
-}
-
-// `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.
-export function checkDocs({
-  docs,
-  paths = [],
-}: {
-  docs: Docs;
-  paths?: string[];
-}): Violation[] {
+/**
+ * `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.
+ * @param {{ docs: Docs, paths?: string[], published?: string }} args
+ * @returns {Violation[]}
+ */
+export function checkDocs({ docs, paths = [], published }) {
   const known = new Set([...Object.keys(docs), ...paths]);
-  const slugs = new Map<string, Set<string>>();
-  function slugsOf(path: string): Set<string> {
+  const trackedPackages = packagesOf(known);
+  const publishedRoot =
+    published === undefined ? undefined : normalizeRoot(published);
+  const slugs = new Map();
+  /** @param {string} path */
+  function slugsOf(path) {
     if (!slugs.has(path)) slugs.set(path, headingSlugs(docs[path] ?? ""));
-    return slugs.get(path) ?? new Set<string>();
+    return slugs.get(path) ?? new Set();
   }
-  const violations: Violation[] = [];
+  /** @type {Violation[]} */
+  const violations = [];
   for (const [path, text] of Object.entries(docs)) {
-    function report(line: number, message: string): void {
+    /** @type {Report} */
+    function report(line, message) {
       violations.push({ path, line, message });
     }
     if (isLinkChecked(path)) {
-      checkLinks(path, text, { docs, known, slugsOf, report });
+      checkLinks(path, text, {
+        docs,
+        known,
+        trackedPackages,
+        published: publishedRoot,
+        slugsOf,
+        report,
+      });
     }
     if (isDocsFolderFile(path)) checkLead(text, report);
     if (posix.basename(path) === "AGENTS.md" && path !== "AGENTS.md") {
@@ -73,7 +64,8 @@ export function checkDocs({
 }
 
 // The repo root, or the `packages/<name>` folder, that holds the doc.
-function docRoot(path: string): string {
+/** @param {string} path */
+function docRoot(path) {
   const parts = path.split("/");
   return parts[0] === "packages" && parts.length > 2
     ? parts.slice(0, 2).join("/")
@@ -81,35 +73,85 @@ function docRoot(path: string): string {
 }
 
 // `path` relative to its doc root.
-function inRoot(path: string): string {
+/** @param {string} path */
+function inRoot(path) {
   const root = docRoot(path);
   return root === "" ? path : path.slice(root.length + 1);
 }
 
-function isDocsFolderFile(path: string): boolean {
+/** @param {string} path */
+function isDocsFolderFile(path) {
   return inRoot(path).startsWith("docs/");
 }
 
-function isLinkChecked(path: string): boolean {
+/** @param {string} path */
+function isLinkChecked(path) {
   const name = posix.basename(path);
   const local = inRoot(path);
   if (!local.includes("/")) return linkedRootFiles.has(local);
   return isDocsFolderFile(path) || name === "AGENTS.md" || name === "CLAUDE.md";
 }
 
-// The framework ships `docs/`, `CONTEXT.md` and `README.md`, so they must stand alone.
-function isPublishedFrameworkDoc(path: string): boolean {
-  if (docRoot(path) !== frameworkRoot) return false;
+// The repo root is "" and a package is `packages/<name>`, however the caller spells it.
+/** @param {string} root */
+function normalizeRoot(root) {
+  const normal = posix.normalize(root).replace(/\/$/, "");
+  if (normal === ".") return "";
+  if (packageRootOf(normal) !== normal) {
+    throw new Error(`published must be "." or packages/<name>, not ${root}`);
+  }
+  return normal;
+}
+
+// The `packages/<name>` folder a path is in or is.
+/** @param {string} path */
+function packageRootOf(path) {
+  return /^packages\/[^/]+/.exec(path)?.[0];
+}
+
+// The `packages/<name>` folders that hold at least one tracked path.
+/** @param {Set<string>} known */
+function packagesOf(known) {
+  const packages = new Set();
+  for (const path of known) {
+    const root = packageRootOf(path);
+    if (root) packages.add(root);
+  }
+  return packages;
+}
+
+// A package's published docs are its `docs/`, `CONTEXT.md` and `README.md`: they ship without the rest of the repo, so they must stand alone.
+/**
+ * @param {string} path
+ * @param {string | undefined} published
+ */
+function isPublishedDoc(path, published) {
+  if (published === undefined || docRoot(path) !== published) return false;
   const local = inRoot(path);
   return local.startsWith("docs/") || publishedRootFiles.has(local);
 }
 
+/**
+ * @param {string} resolved
+ * @param {string} root
+ */
+function isInside(resolved, root) {
+  if (root === "") return resolved !== ".." && !resolved.startsWith("../");
+  return resolved.startsWith(`${root}/`);
+}
+
+/**
+ * @param {string} path
+ * @param {string} text
+ * @param {LinkContext} context
+ */
 function checkLinks(
-  path: string,
-  text: string,
-  { docs, known, slugsOf, report }: LinkContext,
-): void {
-  const published = isPublishedFrameworkDoc(path);
+  path,
+  text,
+  { docs, known, trackedPackages, published, slugsOf, report },
+) {
+  const publishedIn = isPublishedDoc(path, published) ? published : undefined;
+  const scope = publishedIn === "" ? "the repo" : publishedIn;
   for (const { line, target } of linksIn(text)) {
     const hashAt = target.indexOf("#");
     const file = hashAt === -1 ? target : target.slice(0, hashAt);
@@ -117,12 +159,13 @@ function checkLinks(
       hashAt === -1 ? null : decodeURIComponent(target.slice(hashAt + 1));
     const resolved =
       file === "" ? path : resolveLink(path, decodeURIComponent(file));
-    if (published && !resolved.startsWith(`${frameworkRoot}/`)) {
+    if (publishedIn !== undefined && !isInside(resolved, publishedIn)) {
       report(
         line,
-        `link ${target} leaves the framework; its published docs link only inside ${frameworkRoot}`,
+        `link ${target} leaves ${scope}; its published docs link only inside ${scope}`,
       );
     }
+    if (isUntrackedPackagePath(resolved, trackedPackages)) continue;
     if (!known.has(resolved)) {
       report(line, `broken link ${target}: no file ${resolved}`);
       continue;
@@ -137,15 +180,34 @@ function checkLinks(
   }
 }
 
-function resolveLink(from: string, file: string): string {
+// A checkout that lacks a package (the private root without its clones) can't say whether a path in it exists, so a link into it is external.
+/**
+ * @param {string} resolved
+ * @param {Set<string>} trackedPackages
+ */
+function isUntrackedPackagePath(resolved, trackedPackages) {
+  const root = packageRootOf(resolved);
+  return root !== undefined && !trackedPackages.has(root);
+}
+
+/**
+ * @param {string} from
+ * @param {string} file
+ */
+function resolveLink(from, file) {
   const joined = file.startsWith("/")
     ? file.slice(1)
     : posix.join(posix.dirname(from), file);
   return posix.normalize(joined).replace(/\/$/, "");
 }
 
-function linksIn(text: string): Link[] {
-  const links: Link[] = [];
+/**
+ * @param {string} text
+ * @returns {Link[]}
+ */
+function linksIn(text) {
+  /** @type {Link[]} */
+  const links = [];
   for (const { line, content } of proseLines(text)) {
     const bare = content.replace(/`[^`]*`/g, "");
     for (const match of bare.matchAll(
@@ -160,9 +222,15 @@ function linksIn(text: string): Link[] {
 }
 
 // Lines outside fenced code blocks, numbered from 1.
-function proseLines(text: string): ProseLine[] {
-  const lines: ProseLine[] = [];
-  let fence: string | null = null;
+/**
+ * @param {string} text
+ * @returns {ProseLine[]}
+ */
+function proseLines(text) {
+  /** @type {ProseLine[]} */
+  const lines = [];
+  /** @type {string | null} */
+  let fence = null;
   text.split("\n").forEach((content, index) => {
     const opener = /^\s*(```|~~~)/.exec(content);
     if (opener) {
@@ -176,9 +244,10 @@ function proseLines(text: string): ProseLine[] {
 }
 
 // GitHub's slugger: lowercase, drop everything but letters, marks, numbers, spaces, `-` and `_`, then spaces to `-`.
-function headingSlugs(text: string): Set<string> {
-  const slugs = new Set<string>();
-  const seen = new Map<string, number>();
+/** @param {string} text */
+function headingSlugs(text) {
+  const slugs = new Set();
+  const seen = new Map();
   for (const { content } of proseLines(text)) {
     const heading = /^#{1,6}\s+(.*?)\s*#*\s*$/.exec(content);
     if (!heading) continue;
@@ -197,7 +266,11 @@ function headingSlugs(text: string): Set<string> {
 }
 
 // A read-by-heading doc's lead: the non-blank lines after its title and before its first `##` heading.
-function checkLead(text: string, report: Report): void {
+/**
+ * @param {string} text
+ * @param {Report} report
+ */
+function checkLead(text, report) {
   const lines = proseLines(text);
   const firstSection = lines.findIndex(({ content }) => /^##\s/.test(content));
   if (firstSection === -1) {
@@ -230,11 +303,17 @@ function checkLead(text: string, report: Report): void {
   }
 }
 
-function byteLength(text: string): number {
+/** @param {string} text */
+function byteLength(text) {
   return new TextEncoder().encode(text).length;
 }
 
-function checkClaudePairing(path: string, docs: Docs, report: Report): void {
+/**
+ * @param {string} path
+ * @param {Docs} docs
+ * @param {Report} report
+ */
+function checkClaudePairing(path, docs, report) {
   const claude = posix.join(posix.dirname(path), "CLAUDE.md");
   const importsIt = (docs[claude] ?? "")
     .split("\n")

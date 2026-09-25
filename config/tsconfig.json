@@ -1,0 +1,12 @@
+{
+  // The doc linter is plain JS that Node runs from node_modules, so it is checked through its JSDoc types.
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2023",
+    "module": "nodenext",
+    "types": ["node"],
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["docLint.js", "lintDocs.js", "docLint.test.ts"]
+}
