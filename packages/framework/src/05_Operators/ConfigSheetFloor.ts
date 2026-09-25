@@ -187,12 +187,12 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
           meta
             .uniformRow("colGroupName")
             .updateValue(colIndex, floorColumn.groupHeading);
+          const headingLabel =
+            floorColumn.groupHeading === ""
+              ? "(blank)"
+              : floorColumn.groupHeading;
           groupHeadingLines.push(
-            `${sheet.raw.title} · ${floorColumn.header} (${floorColumn.columnId}) → ${
-              floorColumn.groupHeading === ""
-                ? "(blank)"
-                : floorColumn.groupHeading
-            }`,
+            `${sheet.raw.title} · ${floorColumn.header} (${floorColumn.columnId}) → ${headingLabel}`,
           );
         }
       });

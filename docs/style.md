@@ -106,7 +106,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **A helper returns what it produces; no output parameters.**
 - **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks; lint backs it outside tests.
 - **An option that combines other options is built from them, not from copies of their bodies.**
-- **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects.
+- **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects; a ternary inside `${}` must also fit on one line, or it becomes a named local.
 - **Encode state as a named variable and an explicit `if`, not a wrapper object or a compact operator whose meaning the reader has to reconstruct.** `??=` is for filling in a default, not for "computed yet?" tracking.
 
 ## Tests
