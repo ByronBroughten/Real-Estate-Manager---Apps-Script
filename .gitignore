@@ -16,9 +16,8 @@ client_secret*.json
 sheets.config.json
 .clasp.json
 
-# Each split-out package is its own repo, cloned here; the app stays tracked until it splits out too.
+# Each package is its own repo, cloned here.
 packages/*
-!packages/real-estate/
 
 # No lockfile: it would name every cloned workspace, private ones included.
 package-lock.json

@@ -15,7 +15,7 @@ export default defineConfig(
         {
           patterns: [
             {
-              regex: `(^|/)packages/|^(@byronbroughten/sheets-framework|real-estate-app)(/|$)`,
+              regex: `(^|/)packages/|^(@byronbroughten/sheets-framework|sheets-real-estate)(/|$)`,
               message:
                 "The config package and the hooks import nothing from packages/; write a plain guard instead.",
             },
