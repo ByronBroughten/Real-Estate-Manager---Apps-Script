@@ -13,7 +13,6 @@ const linkedRootFiles = new Set([
   "CONTEXT.md",
   "README.md",
 ]);
-const publishedRootFiles = new Set(["CONTEXT.md", "README.md"]);
 const workspaceFolders = new Set(["config"]);
 
 /** @typedef {Record<string, string>} Docs */
@@ -133,17 +132,6 @@ function rootsOf(known) {
   return roots;
 }
 
-// A package's published docs are its `docs/`, `CONTEXT.md` and `README.md`: they ship without the rest of the repo, so they must stand alone.
-/**
- * @param {string} path
- * @param {Set<string>} published
- */
-function isPublishedDoc(path, published) {
-  if (!published.has(docRoot(path))) return false;
-  const local = inRoot(path);
-  return local.startsWith("docs/") || publishedRootFiles.has(local);
-}
-
 /**
  * @param {string} resolved
  * @param {string} root
@@ -163,9 +151,8 @@ function checkLinks(
   text,
   { docs, known, trackedRoots, published, slugsOf, report },
 ) {
-  const publishedIn = isPublishedDoc(path, published)
-    ? docRoot(path)
-    : undefined;
+  // A published package ships without the rest of the repo, so each checked doc in it must stand alone.
+  const publishedIn = published.has(docRoot(path)) ? docRoot(path) : undefined;
   const scope = publishedIn === "" ? "the repo" : publishedIn;
   for (const { line, target } of linksIn(text)) {
     const hashAt = target.indexOf("#");
