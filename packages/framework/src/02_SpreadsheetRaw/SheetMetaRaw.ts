@@ -3,6 +3,7 @@ import {
   type UniformRowName,
 } from "../00_Source/CellValues/cellValues";
 import { dimensionIds } from "../01_SpreadsheetSchema/dimensionIds";
+import { Val } from "../utils/Val";
 import { SheetCommonRaw } from "./ClassBases/SheetCommonRaw";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { SheetRaw } from "./SheetRaw";
@@ -92,7 +93,7 @@ export class SheetMetaRaw extends SheetCommonRaw {
         `Value ${columnId} not found in row ${this.schema.colIdRowIndex}. Cannot find column index.`,
       );
     }
-    return tableColIndexes[colIndex]!;
+    return Val.assert(tableColIndexes[colIndex], "Table column index");
   }
   addMissingColumnIds(idPrefix: string): number {
     let addedCount = 0;

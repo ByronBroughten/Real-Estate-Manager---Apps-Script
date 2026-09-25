@@ -75,7 +75,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 ## Error handling & validation
 
-- **`Val.assert(value, "label")` over a bare `!` for "this shouldn't be missing" guards.** Bare `!` only right after an explicit `if (...) throw` already proved the value present.
+- **`Val.assert(value, "label")` for "this shouldn't be missing" guards**, never a bare `!`; lint rejects `!`.
 - **Read and validate in one step; reach for a marked read (`valueOrEmpty`, `valueNotEmpty`) only where the call site's requirement differs from its column's** Empty value allowed declaration.
 - **A phrase that names the same thing in several messages or labels comes from one function.**
 - **Default to a plain `throw new Error("specific message")`.** Mint a custom `Error` subclass only when callers need to catch the failure _category_ by type.

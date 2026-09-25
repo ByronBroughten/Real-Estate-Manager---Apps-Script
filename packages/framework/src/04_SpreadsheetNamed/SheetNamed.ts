@@ -22,6 +22,7 @@ import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
+import { Val } from "../utils/Val";
 import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
@@ -220,7 +221,7 @@ export class SheetNamed<
         `Expected 1 row of "${this.sheetName}" to have a "${columnName}" of "${value}", but ${rows.length} did.`,
       );
     }
-    return rows[0]!;
+    return Val.assert(rows[0], "The matching row");
   }
   appendRowWithVals(values: Partial<SheetDataValues<SN>>): RowNamed<SN> {
     const { rowIndex } = this.identified.appendRowDefault();

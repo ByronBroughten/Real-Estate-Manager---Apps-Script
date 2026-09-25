@@ -165,6 +165,7 @@ export default defineConfig(
         "error",
         { allowExpressions: true },
       ],
+      "@typescript-eslint/no-non-null-assertion": "error",
       "prefer-template": "error",
       "no-restricted-syntax": ["error", ...styleSyntax],
       "max-classes-per-file": ["error", 1],

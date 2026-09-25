@@ -1,3 +1,4 @@
+import { Val } from "./Val";
 export type StrictExtract<T, K extends T> = Extract<T, K>;
 
 export interface IndexRange {
@@ -57,18 +58,18 @@ export const Arr = {
   oneOrThrow<V>(arr: readonly V[]): V {
     if (arr.length !== 1) {
       throw new Error("There is more than one item in this array.");
-    } else return arr[0]!;
+    } else return Val.assert(arr[0], "The only item");
   },
   firstOrThrow<V>(arr: readonly V[]): V {
     if (arr.length < 1) {
       throw new Error("This array is empty.");
-    } else return arr[0]!;
+    } else return Val.assert(arr[0], "The first item");
   },
   lastOrThrow<V>(arr: readonly V[]): V {
     const idx = this.lastIdx(arr);
     if (idx < 0) {
       throw new Error("This array has no last value—it has no value.");
-    } else return arr[idx]!;
+    } else return Val.assert(arr[idx], "The last item");
   },
   getOnlyItem<T>(arr: T[], arrayOf?: string): T {
     const strArrayOf = arrayOf ?? "items";
@@ -77,7 +78,7 @@ export const Arr = {
     } else if (arr.length > 1) {
       throw new Error(`The array has too many ${strArrayOf}`);
     } else {
-      return arr[0]!;
+      return Val.assert(arr[0], "The only item");
     }
   },
   insert<V>(arr: readonly V[], value: V, idx: number): V[] {
@@ -91,7 +92,7 @@ export const Arr = {
     }
     const currentIdx = arr.indexOf(currentValue);
     const nextIdx = (currentIdx + 1) % arr.length;
-    return arr[nextIdx]!;
+    return Val.assert(arr[nextIdx], "The next rotating value");
   },
   replaceAtIdx<V>(arr: readonly V[], value: V, idx: number): V[] {
     const nextArr = [...arr];
@@ -183,7 +184,7 @@ export const Arr = {
     while (true) {
       const idx = workingArr.findIndex(fn);
       if (idx < 0) return all;
-      all.push(workingArr[idx]!);
+      all.push(Val.assert(workingArr[idx], "The found item"));
       workingArr.splice(idx, 1);
     }
   },

@@ -4,7 +4,7 @@ Disclosed from [`docs/style.md`](../style.md), "Error handling & validation". Th
 
 ## `Val.assert` over `!`
 
-`!` works only at compile time: it silences the type-checker but checks nothing at runtime, so a real `null`/`undefined` crashes later, further from the actual mistake. `Val.assert(value, "label")` checks at runtime and throws immediately with a clear, labeled message (`` `${label} not found.` ``). A bare `!` is acceptable only right after an explicit `if (...) throw` has _already_ proven the value present a couple of lines earlier. There, `!` just tells the type-checker about something already verified at runtime; it isn't standing in for the check.
+`!` works only at compile time: it silences the type-checker but checks nothing at runtime, so a real `null`/`undefined` crashes later, further from the actual mistake. `Val.assert(value, "label")` checks at runtime and throws immediately with a clear, labeled message (`` `${label} not found.` ``). Lint rejects `!` everywhere, including right after an explicit `if (...) throw` that already proved the value present: `Val.assert` there costs one redundant check and keeps the rule free of exceptions.
 
 ## Marked reads
 

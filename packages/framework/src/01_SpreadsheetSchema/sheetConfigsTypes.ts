@@ -1,5 +1,6 @@
 import { lazy } from "../utils/lazy";
 import { Obj } from "../utils/Obj";
+import { Val } from "../utils/Val";
 import { type Configs, installedConfigs } from "./configRegister";
 import type { SheetConfigsBase, SheetConfigStored } from "./makeConfigs";
 
@@ -36,7 +37,10 @@ export function getSheetTraitByGid<K extends keyof SheetConfig>(
   sheetGid: number,
   key: K,
 ): SheetConfig[K] {
-  return sheetConfigsByGid().get(sheetGid)![key];
+  return Val.assert(
+    sheetConfigsByGid().get(sheetGid),
+    `Sheet with gid ${sheetGid}`,
+  )[key];
 }
 
 // The generated literal read by an arbitrary name, where an entry may be absent.
