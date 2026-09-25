@@ -61,6 +61,12 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | `src/businessEndpoints/` and `src/chores/` `AGENTS.md` | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. The chore gates for `app:chore` live in `src/chores/`. |
 | `README.md` | A short derived view: what the app is, its folders, its `app:*` commands (table below). |
 
+### Config (`config/`)
+
+| File | Holds |
+| --- | --- |
+| `README.md` | What the package exports and how a project consumes each piece. A derived view of its `package.json` and the files it exports. |
+
 ## What README.md mirrors
 
 `grep '^#' README.md` shows a README's shape without reading it.
