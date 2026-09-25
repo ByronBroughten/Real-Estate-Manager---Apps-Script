@@ -12,5 +12,8 @@
   },
   "dependencies": {
     "@byronbroughten/sheets-framework": "*"
+  },
+  "devDependencies": {
+    "@google/clasp": "^3.4.1"
   }
 }

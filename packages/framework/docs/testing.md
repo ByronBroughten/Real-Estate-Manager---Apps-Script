@@ -85,7 +85,7 @@ Each of `02`–`04` has a spreadsheet-level test pinning every Meta/primary navi
 
 ## CI
 
-`.github/workflows/test.yml` runs `npm run tsc` and `npm run test:coverage` on push/PR to `master`. Coverage is reported, not gated — no failure threshold yet.
+The package's own workflow is [`.github/workflows/ci.yml`](../.github/workflows/ci.yml). Coverage is reported, not gated — no failure threshold yet.
 
 ## Type verification is `npm run tsc`
 

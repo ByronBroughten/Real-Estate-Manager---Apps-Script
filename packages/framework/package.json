@@ -25,7 +25,8 @@
   ],
   "scripts": {
     "tsc": "tsc -p . && tsc -p scripts",
-    "lint": "eslint .",
+    "lint": "eslint . && npm run -s lint:docs",
+    "lint:docs": "lint-docs --published .",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
@@ -66,8 +67,15 @@
   },
   "devDependencies": {
     "@byronbroughten/config": "^0.1.0",
+    "@google/clasp": "^3.4.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/estree": "^1.0.8",
+    "@types/google-apps-script": "^2.0.11",
+    "@types/node": "^22.20.4",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.35.0",
+    "rollup": "^4.54.0",
+    "typescript": "^5.9.2",
     "vitest": "^4.1.11"
   }
 }
