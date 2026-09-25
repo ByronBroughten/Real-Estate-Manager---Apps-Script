@@ -1,5 +1,5 @@
 {
-  "name": "dev-science-monorepo",
+  "name": "byrorepo",
   "private": true,
   "type": "module",
   "workspaces": [
