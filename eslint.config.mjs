@@ -43,6 +43,17 @@ const aboveTierFolders = [
   "frameworkTesting",
   "nodeHost",
 ];
+const styleSyntax = [
+  {
+    selector: "TSEnumDeclaration",
+    message:
+      "A fixed set is an `as const` object or a union of string literals, not an enum.",
+  },
+  {
+    selector: "ExportDefaultDeclaration",
+    message: "Exports are named, so every import spells the name it wants.",
+  },
+];
 function layerImportPattern(layer) {
   return {
     regex: `(^|/)(${[...layerFolders.slice(layer + 1), ...aboveTierFolders].join("|")})(/|(\\.js)?$)`,
@@ -150,6 +161,7 @@ export default defineConfig(
       // No setting limits an unbraced body to an exit; multi-line is the nearest, so a one-line non-exiting body also passes.
       curly: ["error", "multi-line"],
       "prefer-template": "error",
+      "no-restricted-syntax": ["error", ...styleSyntax],
       "max-classes-per-file": ["error", 1],
       // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
       "@typescript-eslint/no-unused-vars": [
@@ -173,6 +185,18 @@ export default defineConfig(
       ],
     },
   },
+  // Tool configs are default exports by their tools' contract.
+  {
+    files: ["**/*.config.{mjs,ts}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...styleSyntax.filter(
+          ({ selector }) => selector !== "ExportDefaultDeclaration",
+        ),
+      ],
+    },
+  },
   {
     files: ["packages/*/src/**/*.ts"],
     ignores: [
@@ -192,6 +216,7 @@ export default defineConfig(
       ],
       "no-restricted-syntax": [
         "error",
+        ...styleSyntax,
         {
           selector:
             "TSQualifiedName[left.type='Identifier'][left.name='GoogleAppsScript']",
