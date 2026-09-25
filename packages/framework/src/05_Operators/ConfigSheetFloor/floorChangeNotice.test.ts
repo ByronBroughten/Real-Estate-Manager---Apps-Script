@@ -63,7 +63,7 @@ describe("floorChangeNotice", () => {
   it("says nothing when a business tab is renamed", () => {
     expect(
       floorChangeNotice("other", liveTitles({ [businessSheetGid]: "Gadgets" })),
-    ).toBeNull();
+    ).toBeUndefined();
   });
 
   it.each([
@@ -73,7 +73,7 @@ describe("floorChangeNotice", () => {
   ])("says nothing when warned %s is renamed", (title, sheetGid) => {
     expect(
       floorChangeNotice("other", liveTitles({ [sheetGid]: `Old ${title}` })),
-    ).toBeNull();
+    ).toBeUndefined();
   });
 
   it("says nothing when a business tab is deleted", () => {
@@ -82,11 +82,11 @@ describe("floorChangeNotice", () => {
         "sheetRemoved",
         liveTitles({ [businessSheetGid]: null }),
       ),
-    ).toBeNull();
+    ).toBeUndefined();
   });
 
   it("says nothing for a change that renames or deletes nothing", () => {
-    expect(floorChangeNotice("other", liveTitles())).toBeNull();
-    expect(floorChangeNotice("sheetRemoved", liveTitles())).toBeNull();
+    expect(floorChangeNotice("other", liveTitles())).toBeUndefined();
+    expect(floorChangeNotice("sheetRemoved", liveTitles())).toBeUndefined();
   });
 });

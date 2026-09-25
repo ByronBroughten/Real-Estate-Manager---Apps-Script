@@ -39,8 +39,8 @@ export class ChoreIndex {
     }
     return new ChoreIndex({ generic, own });
   }
-  pathOf(name: string): string | null {
-    return this.generic.get(name) ?? this.own.get(name) ?? null;
+  pathOf(name: string): string | undefined {
+    return this.generic.get(name) ?? this.own.get(name);
   }
   listing(packageDir: string): string {
     function lines(chores: ChorePaths): string[] {

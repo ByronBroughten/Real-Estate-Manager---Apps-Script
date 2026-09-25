@@ -73,7 +73,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     report.push(...this.editWarnings.ensure(identityColIndexes));
     return report.join("; ");
   }
-  changeNotice(change: SheetChange): FloorNotice | null {
+  changeNotice(change: SheetChange): FloorNotice | undefined {
     this.ss.raw.fetchAllSheetProperties();
     const liveTitlesByGid = new Map(
       this.ss.raw.activeSheetGids.flatMap((sheetGid) =>

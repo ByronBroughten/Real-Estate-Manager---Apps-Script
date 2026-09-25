@@ -89,6 +89,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **`type` for everything computed from other types.** A plain object shape is an `interface`; lint enforces it.
 - **Generic params get two-letter domain abbreviations with a constraint**; bare `T`/`K`/`V`/`O` are only for domain-free utilities (`utils/`, `appUtils/`) and tests; lint checks the two letters, not the constraint.
 - **Verify a type-level claim with `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts`, never an assignment.** Measure a mapped type over the config unions before adopting it.
+- **`undefined` is the one "absent" value; `null` appears only where Google's types or JSON carry it.**
 - **Narrow a type until the empty case can't arise, rather than a branded-string fallback.**
 - **`as` casts narrow data that's already runtime-safe; they never substitute for validation.** External values go through `Val.validate.*`/`Val.is.*`. The three accepted cast idioms are in the reasoning file.
 - **A registry keyed by a finite name union takes a plain `: Type` annotation, not `makeStructuredConfig`**, which stays for the generated config files.

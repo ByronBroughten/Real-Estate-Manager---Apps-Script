@@ -127,8 +127,12 @@ describe("Api.handleSheetChange", () => {
   it("does nothing for a change the platform module doesn't name", () => {
     const installSource = vi.fn();
     expect(
-      Api.handleSheetChange({ configs, endpoints: {} }, null, installSource),
-    ).toBeNull();
+      Api.handleSheetChange(
+        { configs, endpoints: {} },
+        undefined,
+        installSource,
+      ),
+    ).toBeUndefined();
     expect(installSource).not.toHaveBeenCalled();
   });
   it("installs the source and returns the floor notice for a renamed Value Config", () => {
@@ -162,7 +166,7 @@ describe("Api.handleSheetChange", () => {
     });
     expect(
       Api.handleSheetChange({ configs, endpoints: {} }, "other", vi.fn()),
-    ).toBeNull();
+    ).toBeUndefined();
   });
 });
 

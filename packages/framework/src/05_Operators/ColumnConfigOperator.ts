@@ -245,7 +245,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
         updatedValues++;
       }
 
-      if (describedColumn.activeDeclaredValueTitle() === null) {
+      if (describedColumn.activeDeclaredValueTitle() === undefined) {
         this._recordUntypedColumn(actualSheetTitle, actualHeader);
       }
     });
