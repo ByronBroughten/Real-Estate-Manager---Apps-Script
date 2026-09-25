@@ -5,7 +5,6 @@ import {
 } from "@byronbroughten/config/eslint";
 import { defineConfig } from "eslint/config";
 
-// The general rules live in config/eslint.js; this file adds the framework and app rules.
 const frameworkSrc = "packages/framework/src";
 const appSrc = "packages/real-estate/src";
 const platformMessage =
