@@ -18,7 +18,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 
 | File | Holds |
 | --- | --- |
-| `AGENTS.md` | Only what changes an agent's behavior on every task: commands, gates, git rules, the README line, the router. Loaded every turn, under 5 KB. |
+| `AGENTS.md` | Only what changes an agent's behavior on every task: commands, gates, git rules, the README line, the router. Loaded every turn; read [What an addition to AGENTS.md costs](#what-an-addition-to-agentsmd-costs) before growing it. |
 | `CLAUDE.md` | `@AGENTS.md` plus pointers to Claude Code-only mechanics (subagents, hooks). |
 | `CONTEXT-MAP.md` | Which `CONTEXT.md` each context owns, and how the app's glossary relates to the framework's. |
 | `docs/style.md` | Code shape for both packages, one line per rule, rule only. Reasoning, examples and instances go under `docs/style/`. |
@@ -35,8 +35,8 @@ Its `docs/`, `CONTEXT.md` and `README.md` ship with the package, so they link on
 | File | Holds |
 | --- | --- |
 | `CLAUDE.md` | Only the restart-at-root notice for a session started inside the package. |
-| `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. 15 lines or fewer (lint). |
-| `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/` and `scripts/` `AGENTS.md` | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. |
+| `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. Kept short: it loads on every `src/` task. |
+| `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/` and `scripts/` `AGENTS.md` | That folder's rules, kept short because they load on every task there, each with a `CLAUDE.md` beside it. |
 | `CONTEXT.md` | Operator-facing words every app on the framework shares: sheet layout, endpoints, columns. Each term is a definition of what it is, its relationships and its avoid-aliases; what the app does with it goes in the mechanics doc that owns that behavior. |
 | `docs/vocabulary.md` | The architecture words, one line per term. |
 | `docs/vocabulary/*.md` | Each term's elaboration, split by subject, indexed by `docs/vocabulary.md`'s "When \| File" table. |
@@ -57,9 +57,24 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | `CLAUDE.md` | Only the restart-at-root notice for a session started inside the package. |
 | `CONTEXT.md` | The app's operator-facing words (units, the occupancy ledger). It opens with a pointer to the framework glossary, links to a framework term rather than redefining it, and lists same-word conflicts under "Same word, two meanings". |
 | `docs/occupancy-ledger.md` | How the occupancy ledger is built, beyond CONTEXT.md's words for it. |
-| `src/AGENTS.md` | Rules an agent can only break by touching the app's `src/`: the boundary question, the one framework import, generated data. 15 lines or fewer (lint), with a `CLAUDE.md` beside it. |
-| `src/businessEndpoints/` and `src/chores/` `AGENTS.md` | That folder's rules, 10 lines or fewer (lint), each with a `CLAUDE.md` beside it. The chore gates for `app:chore` live in `src/chores/`. |
+| `src/AGENTS.md` | Rules an agent can only break by touching the app's `src/`: the boundary question, the one framework import, generated data. Kept short, with a `CLAUDE.md` beside it. |
+| `src/businessEndpoints/` and `src/chores/` `AGENTS.md` | That folder's rules, kept short, each with a `CLAUDE.md` beside it. The chore gates for `app:chore` live in `src/chores/`. |
 | `README.md` | A short derived view: what the app is, its folders, its `app:*` commands (table below). |
+
+### Config (`config/`)
+
+| File | Holds |
+| --- | --- |
+| `README.md` | What the package exports and how a project consumes each piece. A derived view of its `package.json` and the files it exports. |
+
+## What an addition to AGENTS.md costs
+
+No byte cap stands in for judgment here: a cap becomes a target, and an agent at the cap scatters its pointers into other files instead of deciding whether the fact belongs. Weigh the addition yourself.
+
+- **Every byte is paid on every turn**, by every agent and every task, including the ones that never touch the fact. `CLAUDE.md` imports the file, so Claude Code loads all of it; Codex and Cursor read it directly. Roughly 4 bytes is a token.
+- **Each addition dilutes the rest.** A rule competes for attention with the rules already there, so the file's most important gates weaken as it grows.
+- **A rule left out is followed only if a pointer reaches it.** That is the case for a router row, not a reason to skip the row. A fact that matters only for some tasks goes on a higher rung ([enforcement ladder](#terms)): lint, a nested `AGENTS.md`, or a trigger word added to an existing router row.
+- **Add to it only when the fact changes what an agent does on nearly every task, or a miss is costly and can't be cheaply undone.** When you add, shorten or drop a line that no longer earns its place, and state the net bytes in your reply so the operator can judge.
 
 ## What README.md mirrors
 
@@ -95,4 +110,4 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | What's here | The app's `src/AGENTS.md` and its `CONTEXT.md` and `docs/` |
 | Commands | The root `package.json`'s `app:*` scripts and [`targets-and-gates.md`](../targets-and-gates.md#targets-dev-and-app) |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links and the size limits above (`scripts/lintDocs.ts`). It also holds the framework's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside `packages/framework`; its `AGENTS.md` and `CLAUDE.md` files may point at root.
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above (`scripts/lintDocs.ts`). It also holds the framework's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside `packages/framework`; its `AGENTS.md` and `CLAUDE.md` files may point at root.

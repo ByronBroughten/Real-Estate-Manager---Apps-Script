@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "workspaces": [
+    "config",
     "packages/*"
   ],
   "scripts": {
-    "tsc": "tsc -p . && npm run tsc --workspaces",
+    "tsc": "tsc -p . && npm run tsc --workspaces --if-present",
     "lint": "eslint . && npm run -s lint:docs",
     "lint:docs": "node scripts/lintDocs.ts",
     "format": "prettier --write .",
@@ -26,17 +27,16 @@
     "dev:run": "npm run run -w @byronbroughten/sheets-framework --"
   },
   "devDependencies": {
-    "@eslint/js": "^9.35.0",
+    "@byronbroughten/config": "^0.1.0",
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/google-apps-script": "^2.0.11",
     "@types/node": "^22.20.4",
     "@vitest/coverage-v8": "^4.1.11",
     "eslint": "^9.35.0",
-    "eslint-plugin-simple-import-sort": "^14.0.0",
     "prettier": "3.9.6",
     "rollup": "^4.54.0",
     "typescript": "^5.9.2",
-    "typescript-eslint": "^8.43.0",
     "vitest": "^4.1.11"
-  }
+  },
+  "prettier": "@byronbroughten/config/prettier"
 }

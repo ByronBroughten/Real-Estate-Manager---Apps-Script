@@ -1,0 +1,16 @@
+{
+  // The strictness and module settings shared by the programs that extend it; each adds its own target, module and types.
+  "compilerOptions": {
+    "lib": ["esnext"],
+    "noEmit": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitReturns": true
+  }
+}

@@ -1,7 +1,9 @@
-import eslint from "@eslint/js";
+import {
+  eslintPreset,
+  styleSyntax,
+  variableNaming,
+} from "@byronbroughten/config/eslint";
 import { defineConfig } from "eslint/config";
-import simpleImportSort from "eslint-plugin-simple-import-sort";
-import tseslint from "typescript-eslint";
 
 const frameworkSrc = "packages/framework/src";
 const appSrc = "packages/real-estate/src";
@@ -42,29 +44,6 @@ const aboveTierFolders = [
   "framework",
   "frameworkTesting",
   "nodeHost",
-];
-const variableNaming = {
-  selector: "variable",
-  format: ["camelCase", "PascalCase"],
-  leadingUnderscore: "allow",
-  custom: { regex: "^[A-Z][A-Z0-9]+$", match: false },
-};
-// Generic params are two-letter domain abbreviations; the domain-free utilities keep bare T, K and V.
-const typeParameterNaming = {
-  selector: "typeParameter",
-  format: null,
-  custom: { regex: "^[A-Z]{2}$", match: true },
-};
-const styleSyntax = [
-  {
-    selector: "TSEnumDeclaration",
-    message:
-      "A fixed set is an `as const` object or a union of string literals, not an enum.",
-  },
-  {
-    selector: "ExportDefaultDeclaration",
-    message: "Exports are named, so every import spells the name it wants.",
-  },
 ];
 function layerImportPattern(layer) {
   return {
@@ -151,75 +130,13 @@ const appImportBlocks = [0, 1, 2, 3, 4, 5].flatMap((depth) => {
 });
 
 export default defineConfig(
+  ...eslintPreset,
   // Agent worktrees are whole checkouts that git excludes locally, which ESLint doesn't read.
-  { ignores: ["**/dist/**", "**/coverage/**", ".claude/worktrees/**"] },
-  eslint.configs.recommended,
-  tseslint.configs.recommended,
+  { ignores: [".claude/worktrees/**"] },
   // tsc checks these for undefined names, as typescript-eslint leaves it to tsc in .ts files.
   {
     files: ["packages/framework/scripts/**/*.js"],
     rules: { "no-undef": "off" },
-  },
-  {
-    plugins: { "simple-import-sort": simpleImportSort },
-    rules: {
-      "simple-import-sort/imports": "error",
-      "@typescript-eslint/consistent-type-imports": [
-        "error",
-        { fixStyle: "inline-type-imports" },
-      ],
-      // A module's value and type imports share one line.
-      "no-duplicate-imports": ["error", { allowSeparateTypeImports: false }],
-      // No setting limits an unbraced body to an exit; multi-line is the nearest, so a one-line non-exiting body also passes.
-      curly: ["error", "multi-line"],
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/explicit-function-return-type": [
-        "error",
-        { allowExpressions: true },
-      ],
-      "@typescript-eslint/no-non-null-assertion": "error",
-      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
-      "func-style": ["error", "declaration"],
-      "prefer-template": "error",
-      "no-restricted-syntax": ["error", ...styleSyntax],
-      "max-classes-per-file": ["error", 1],
-      // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", ignoreRestSiblings: true },
-      ],
-      // Props bags chain as interfaces, so an empty one can name a tier.
-      "@typescript-eslint/no-empty-object-type": [
-        "error",
-        { allowInterfaces: "with-single-extends" },
-      ],
-      // Constants are camelCase too; methods stay free, so SHOUTING multi-row deletes pass.
-      "@typescript-eslint/naming-convention": [
-        "error",
-        variableNaming,
-        typeParameterNaming,
-      ],
-    },
-  },
-  // Tool configs are default exports by their tools' contract.
-  {
-    files: ["**/*.config.{mjs,ts}"],
-    rules: {
-      "no-restricted-syntax": [
-        "error",
-        ...styleSyntax.filter(
-          ({ selector }) => selector !== "ExportDefaultDeclaration",
-        ),
-      ],
-    },
-  },
-  // Test helpers and plain-JS files are out of the return-type and function-style rules' scope (#153).
-  {
-    files: ["**/*.test.ts", "**/*.{js,mjs}"],
-    rules: {
-      "@typescript-eslint/explicit-function-return-type": "off",
-      "func-style": "off",
-    },
   },
   // Domain-free utilities and test helpers keep bare T, K and V.
   {

@@ -110,7 +110,8 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
   }
   private _pendingEditProtectionContents(): EditProtectionContent[] {
     const fetched = this.sheetState.working.editProtections.protections;
-    const protections: EditProtection[] = fetched === undefined ? [] : [...fetched];
+    const protections: EditProtection[] =
+      fetched === undefined ? [] : [...fetched];
     const deletedIds = new Set(
       this.updateRequests.deleteProtectedRange
         .filter((operation) => operation.sheetId === this.sheetGid)

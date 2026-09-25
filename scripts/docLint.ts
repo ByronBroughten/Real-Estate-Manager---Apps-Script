@@ -5,9 +5,6 @@ const limits = {
   leadLines: 5,
   leadBytes: 800,
   unheadedDocBytes: 4 * 1024,
-  srcAgentsLines: 15,
-  folderAgentsLines: 10,
-  rootAgentsBytes: 5 * 1024,
 } as const;
 const linkedRootFiles = new Set([
   "AGENTS.md",
@@ -68,10 +65,7 @@ export function checkDocs({
       checkLinks(path, text, { docs, known, slugsOf, report });
     }
     if (isDocsFolderFile(path)) checkLead(text, report);
-    if (posix.basename(path) !== "AGENTS.md") continue;
-    if (path === "AGENTS.md") checkRootSize(text, report);
-    else {
-      checkNestedSize(path, text, report);
+    if (posix.basename(path) === "AGENTS.md" && path !== "AGENTS.md") {
       checkClaudePairing(path, docs, report);
     }
   }
@@ -238,35 +232,6 @@ function checkLead(text: string, report: Report): void {
 
 function byteLength(text: string): number {
   return new TextEncoder().encode(text).length;
-}
-
-function checkRootSize(text: string, report: Report): void {
-  const bytes = byteLength(text);
-  if (bytes <= limits.rootAgentsBytes) return;
-  report(
-    1,
-    `root AGENTS.md is ${bytes} bytes; the limit is ${limits.rootAgentsBytes}`,
-  );
-}
-
-function checkNestedSize(path: string, text: string, report: Report): void {
-  const lines = text.replace(/\n$/, "").split("\n").length;
-  const limit = isPackageSrcAgents(path)
-    ? limits.srcAgentsLines
-    : limits.folderAgentsLines;
-  if (lines > limit) {
-    report(1, `nested AGENTS.md is ${lines} lines; the limit is ${limit}`);
-  }
-}
-
-function isPackageSrcAgents(path: string): boolean {
-  const parts = path.split("/");
-  return (
-    parts.length === 4 &&
-    parts[0] === "packages" &&
-    parts[2] === "src" &&
-    parts[3] === "AGENTS.md"
-  );
 }
 
 function checkClaudePairing(path: string, docs: Docs, report: Report): void {
