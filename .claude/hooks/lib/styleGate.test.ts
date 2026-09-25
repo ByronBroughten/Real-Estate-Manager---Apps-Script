@@ -190,7 +190,7 @@ describe("cursor tool input", () => {
 
   it("reads offset and limit only when they are whole numbers", () => {
     expect(cursorReadBounds({ offset: 1, limit: 40 })).toEqual({ offset: 1, limit: 40 });
-    expect(cursorReadBounds({ offset: "1" })).toEqual({});
+    expect(cursorReadBounds({ offset: "1" })).toBeUndefined();
     expect(cursorReadBounds(undefined)).toEqual({});
   });
 });

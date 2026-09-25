@@ -36,17 +36,20 @@ try {
     if (input.tool_name === "Read" && filePath !== undefined) {
       const where = { projectDir, cwd: input.cwd ?? projectDir, filePath };
       const bounds = cursorReadBounds(input.tool_input);
-      function recordStyleRead(docPath: string, markerPath: string): void {
-        const totalLines =
-          bounds.limit == null
-            ? undefined
-            : lineCount(join(projectDir, docPath));
-        if (isFullDocRead({ ...where, ...bounds, totalLines }, docPath)) {
-          writeFileSync(markerPath, "");
+      if (bounds) {
+        const readBounds = bounds;
+        function recordStyleRead(docPath: string, markerPath: string): void {
+          let totalLines: number | undefined;
+          if (readBounds.limit != null) {
+            totalLines = lineCount(join(projectDir, docPath));
+          }
+          if (isFullDocRead({ ...where, ...readBounds, totalLines }, docPath)) {
+            writeFileSync(markerPath, "");
+          }
         }
+        recordStyleRead(stylePath, generalMarker);
+        recordStyleRead(frameworkStylePath, frameworkMarker);
       }
-      recordStyleRead(stylePath, generalMarker);
-      recordStyleRead(frameworkStylePath, frameworkMarker);
     }
     process.exit(0);
   }

@@ -47,7 +47,7 @@ export interface RecordedStyleReads {
 const fullReadClause =
   "Use a full Read with no offset or limit (a partial Read isn't recorded), and skip the docs/style/ reasoning files unless a rule's line doesn't decide your case.";
 
-export function needsFrameworkStyle(relativePath: string): boolean {
+function needsFrameworkStyle(relativePath: string): boolean {
   return frameworkOrAppRoots.some((root) => relativePath.startsWith(root));
 }
 
@@ -84,16 +84,30 @@ export function cursorFilePath(toolInput: { path?: unknown; file_path?: unknown 
   return typeof filePath === "string" ? filePath : undefined;
 }
 
+// Undefined when a bound is present but not a whole number: that Read is not unbounded, and it is not a range we can check.
 export function cursorReadBounds(toolInput: { offset?: unknown; limit?: unknown } | undefined): {
   offset?: number;
   limit?: number;
-} {
+} | undefined {
+  const offset = bound(toolInput, "offset");
+  const limit = bound(toolInput, "limit");
+  if (offset.rejected || limit.rejected) return undefined;
   const bounds: { offset?: number; limit?: number } = {};
-  const offset = wholeNumber(toolInput?.offset);
-  const limit = wholeNumber(toolInput?.limit);
-  if (offset !== undefined) bounds.offset = offset;
-  if (limit !== undefined) bounds.limit = limit;
+  if (offset.value !== undefined) bounds.offset = offset.value;
+  if (limit.value !== undefined) bounds.limit = limit.value;
   return bounds;
+}
+
+interface ParsedBound {
+  rejected: boolean;
+  value?: number;
+}
+
+function bound(toolInput: { offset?: unknown; limit?: unknown } | undefined, key: "offset" | "limit"): ParsedBound {
+  if (toolInput == null || toolInput[key] == null) return { rejected: false };
+  const value = wholeNumber(toolInput[key]);
+  if (value === undefined) return { rejected: true };
+  return { rejected: false, value };
 }
 
 function wholeNumber(value: unknown): number | undefined {
