@@ -102,7 +102,8 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 - **`forEach` only for side effects, `map` only for pure transforms — never mixed.**
 - **`forEach` by default; `for…of` only when the body exits early (`break`, `continue`, `return`) or destructures `Map` entries; `for…in` only in `utils/`.**
-- **`reduce` is fully accepted** for building a new object/record via an accumulator, rather than a manual loop with a declared accumulator.
+- **`reduce` is fully accepted** for building a new object/record, rather than a manual loop with a declared accumulator: seed a fresh `{}`, `new Map()` or `[]`, mutate it and return it.
+- **`flatMap` returning `[]` or `[x]` filters and maps in one pass** when the map needs the narrowed value.
 - **Mutator methods return `this` for chaining.**
 - **A helper returns what it produces; no output parameters.**
 - **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks; lint backs it outside tests.

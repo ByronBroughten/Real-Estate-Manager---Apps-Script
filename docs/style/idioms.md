@@ -4,7 +4,7 @@ Disclosed from [`docs/style.md`](../style.md), "Functional vs. imperative idioms
 
 ## `reduce` builds a new object
 
-`reduce` builds a new object or record through an accumulator, `(acc, item) => ({ ...acc, ... })`, in place of a manual loop with a declared accumulator.
+`reduce` builds a new object or record in place of a manual loop with a declared accumulator. The seed is a fresh `{}`, `new Map()` or `[]`, and each step mutates it and returns it: `(acc, item) => { acc[key] = ...; return acc; }`. Spreading it, `({ ...acc, ... })`, copies the whole accumulator on every item, which makes the build O(n²).
 
 ## Mutators return `this`
 
