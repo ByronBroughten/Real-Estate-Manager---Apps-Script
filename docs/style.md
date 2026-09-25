@@ -103,6 +103,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **`forEach` only for side effects, `map` only for pure transforms — never mixed.**
 - **`reduce` is fully accepted** for building a new object/record via an accumulator, rather than a manual loop with a declared accumulator.
 - **Mutator methods return `this` for chaining.**
+- **A helper returns what it produces; no output parameters.**
 - **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks; lint backs it outside tests.
 - **An option that combines other options is built from them, not from copies of their bodies.**
 - **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects.
