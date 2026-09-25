@@ -94,3 +94,7 @@ Details: [how it runs](./docs/how-it-runs.md).
 - [`docs/how-it-runs.md`](./docs/how-it-runs.md): the hosts and the bin.
 - [`docs/testing.md`](./docs/testing.md): the fakes and seams.
 - [`docs/style.md`](./docs/style.md): the code-shape rules, layered on the general style doc in `@byronbroughten/config`.
+
+## History
+
+The history from before this package had its own repo is in [byronbroughten/byro-repo](https://github.com/byronbroughten/byro-repo).

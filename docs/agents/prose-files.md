@@ -29,7 +29,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 
 ### Framework (`packages/framework/`)
 
-Its `docs/`, `CONTEXT.md` and `README.md` ship with the package, so they link only inside it (lint). Its `AGENTS.md` and `CLAUDE.md` files are for contributors here and may point at root. The linter checks `config/`'s docs and README.md too.
+Its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md` files all ship with the package's repo, so they link only inside it (lint); a rule that lives at root is named in plain text. The linter checks `config/`'s docs and README.md too.
 
 | File | Holds |
 | --- | --- |
@@ -104,6 +104,7 @@ No byte cap stands in for judgment here: a cap becomes a target, and an agent at
 | The public entry | `src/framework.ts` and `src/frameworkTesting.ts` |
 | The bin | The bin's usage text (`scripts/cli.ts`) and [`how-it-runs.md`](../../packages/framework/docs/how-it-runs.md#the-sheets-framework-bin) |
 | Docs | The framework's `docs/` indexes and `CONTEXT.md` |
+| History | Nothing; a fixed link to `byronbroughten/byro-repo` for the history before the split |
 
 ### The app's README.md
 
@@ -113,4 +114,4 @@ No byte cap stands in for judgment here: a cap becomes a target, and an agent at
 | What's here | The app's `src/AGENTS.md` and its `CONTEXT.md` and `docs/` |
 | Commands | The root `package.json`'s `app:*` scripts and [`targets-and-gates.md`](../targets-and-gates.md#targets-dev-and-app) |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published packages/framework --published config`, which holds each package's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside that package; their `AGENTS.md` and `CLAUDE.md` files may point at root.
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published packages/framework --published config`, which holds each package's published docs (its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md`) to links inside that package.

@@ -216,11 +216,24 @@ describe("checkDocs", () => {
       expect(check(docs, paths, published)).toEqual([]);
     });
 
-    it("lets the framework's AGENTS.md and CLAUDE.md files point at root", () => {
+    it("fails a published framework's AGENTS.md and CLAUDE.md linking outside it", () => {
       const docs = {
         "packages/framework/CLAUDE.md": "[root](../../docs/style.md)\n",
         "packages/framework/src/AGENTS.md": "[root](../../../docs/style.md)\n",
         "packages/framework/src/CLAUDE.md": "@AGENTS.md\n",
+      };
+      expect(messages(docs, paths, published)).toEqual([
+        "packages/framework/CLAUDE.md: link ../../docs/style.md leaves packages/framework; its published docs link only inside packages/framework",
+        "packages/framework/src/AGENTS.md: link ../../../docs/style.md leaves packages/framework; its published docs link only inside packages/framework",
+      ]);
+    });
+
+    it("passes a published framework's AGENTS.md and CLAUDE.md linking inside it", () => {
+      const docs = {
+        "packages/framework/CLAUDE.md": "@AGENTS.md\n",
+        "packages/framework/src/AGENTS.md": "[x](./x.ts) [b](../docs/b.md)\n",
+        "packages/framework/src/CLAUDE.md": "@AGENTS.md\n",
+        "packages/framework/docs/b.md": "# B\n",
       };
       expect(check(docs, paths, published)).toEqual([]);
     });
@@ -264,6 +277,7 @@ describe("checkDocs", () => {
       expect(messages(docs, ["docs/x.md"], "config")).toEqual([
         "config/docs/style.md: link ../../docs/x.md leaves config; its published docs link only inside config",
         "config/README.md: link ../AGENTS.md leaves config; its published docs link only inside config",
+        "config/AGENTS.md: link ../docs/x.md leaves config; its published docs link only inside config",
       ]);
     });
 
