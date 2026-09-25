@@ -19,5 +19,5 @@ sheets.config.json
 # Each package is its own repo, cloned here.
 packages/*
 
-# No lockfile: it would name every cloned workspace, private ones included.
+# No lockfile: each cloned workspace is its own repo, so a root lockfile would pin them all.
 package-lock.json
