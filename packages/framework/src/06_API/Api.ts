@@ -54,10 +54,10 @@ export class Api extends SpreadsheetBaseNamed {
   }
   static handleSheetChange(
     { configs }: AppSetup,
-    change: SheetChange | null,
+    change: SheetChange | undefined,
     installSource: () => void,
-  ): FloorNotice | null {
-    if (change === null) return null;
+  ): FloorNotice | undefined {
+    if (change === undefined) return undefined;
     installConfigs(configs);
     installSource();
     return ConfigSheetFloor.init().changeNotice(change);

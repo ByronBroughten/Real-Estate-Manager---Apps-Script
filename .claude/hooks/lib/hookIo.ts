@@ -24,12 +24,12 @@ export interface ToolInput {
 }
 
 // Every guardrail fails open: an unreadable input allows the call.
-export function readHookInput(): HookInput | null {
+export function readHookInput(): HookInput | undefined {
   try {
     const input = JSON.parse(readFileSync(0, "utf8"));
-    return input && typeof input === "object" ? input : null;
+    return input && typeof input === "object" ? input : undefined;
   } catch {
-    return null;
+    return undefined;
   }
 }
 

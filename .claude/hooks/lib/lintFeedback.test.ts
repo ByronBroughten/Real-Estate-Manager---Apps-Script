@@ -12,8 +12,8 @@ function error(line: number, column: number, ruleId: string | null, message: str
 
 describe("lintFeedback", () => {
   it("is silent for a clean file", () => {
-    expect(lintFeedback({ eslintJson: eslintJson([]), filePath })).toBeNull();
-    expect(lintFeedback({ eslintJson: "[]", filePath })).toBeNull();
+    expect(lintFeedback({ eslintJson: eslintJson([]), filePath })).toBeUndefined();
+    expect(lintFeedback({ eslintJson: "[]", filePath })).toBeUndefined();
   });
 
   it("lists each remaining error with its line, column and rule", () => {
@@ -37,7 +37,7 @@ describe("lintFeedback", () => {
 
   it("ignores warnings", () => {
     const warning = { ruleId: null, severity: 1, message: "File ignored.", line: 0, column: 0 };
-    expect(lintFeedback({ eslintJson: eslintJson([warning]), filePath })).toBeNull();
+    expect(lintFeedback({ eslintJson: eslintJson([warning]), filePath })).toBeUndefined();
   });
 
   it("caps a long list and says how many were left out", () => {
@@ -49,9 +49,9 @@ describe("lintFeedback", () => {
   });
 
   it("fails open on output it can't parse", () => {
-    expect(lintFeedback({ eslintJson: "", filePath })).toBeNull();
-    expect(lintFeedback({ eslintJson: "Oops! Something went wrong", filePath })).toBeNull();
-    expect(lintFeedback({ eslintJson: '{"messages":[]}', filePath })).toBeNull();
-    expect(lintFeedback({ eslintJson: "[null, 3]", filePath })).toBeNull();
+    expect(lintFeedback({ eslintJson: "", filePath })).toBeUndefined();
+    expect(lintFeedback({ eslintJson: "Oops! Something went wrong", filePath })).toBeUndefined();
+    expect(lintFeedback({ eslintJson: '{"messages":[]}', filePath })).toBeUndefined();
+    expect(lintFeedback({ eslintJson: "[null, 3]", filePath })).toBeUndefined();
   });
 });

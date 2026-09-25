@@ -40,7 +40,7 @@ interface SelfDescribingRowRule<SN extends FloorSheetName> {
 interface FloorTabRules<SN extends FloorSheetName> {
   excludedDataColumns: readonly ColumnName<SN>[];
   actionRowEditableColumns: readonly ColumnName<SN>[];
-  selfDescribingRow: SelfDescribingRowRule<SN> | null;
+  selfDescribingRow: SelfDescribingRowRule<SN> | undefined;
 }
 
 export class FloorTabEditWarning<
@@ -55,7 +55,7 @@ export class FloorTabEditWarning<
   // Before the floor's fetch, so these ride it: a drifted column ID leaves only the Table header to find them by.
   gatherIdentityColumns(): number[] | undefined {
     const rule = floorTabRules()[this.sheetName].selfDescribingRow;
-    if (rule === null) return undefined;
+    if (rule === undefined) return undefined;
     const sheetGid = getSheetTraitByName(this.sheetName, "sheetGid");
     if (!this.ss.raw.gidIsActive(sheetGid)) return undefined;
     const sheet = this.sheet;
@@ -100,7 +100,7 @@ export class FloorTabEditWarning<
     identityColIndexes: number[] | undefined,
   ): Map<number, number[]> {
     const rule = floorTabRules()[this.sheetName].selfDescribingRow;
-    if (rule === null || identityColIndexes === undefined) return new Map();
+    if (rule === undefined || identityColIndexes === undefined) return new Map();
     const colIndex = this._liveColIndexes().get(rule.declaredColumn);
     if (colIndex === undefined) return new Map();
     const sheet = this.sheet;
@@ -173,7 +173,7 @@ export function selfDescribingRowColumns<SN extends FloorSheetName>(
   sheetName: SN,
 ): readonly ColumnName<SN>[] {
   const rule = floorTabRules()[sheetName].selfDescribingRow;
-  if (rule === null) return [];
+  if (rule === undefined) return [];
   return [...rule.identityColumns, rule.declaredColumn];
 }
 
@@ -185,7 +185,7 @@ function floorTabRules(): { [SN in FloorSheetName]: FloorTabRules<SN> } {
         ...spreadsheetConfigFeedbackColumnNames(),
       ],
       actionRowEditableColumns: spreadsheetConfigTimeLastRanColumnNames(),
-      selfDescribingRow: null,
+      selfDescribingRow: undefined,
     },
     sheetConfig: {
       excludedDataColumns: ["sheetGid", "sheetTitle"],

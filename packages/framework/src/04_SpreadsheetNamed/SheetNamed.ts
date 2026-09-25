@@ -200,14 +200,11 @@ export class SheetNamed<
     return this.column(columnName).anchoredA1();
   }
   rowsFiltered(values: Partial<SheetDataValues<SN>>): RowNamed<SN>[] {
-    return this.rows.filter((row) => {
-      for (const columnName of Obj.keys(values)) {
-        if (row.valueOrEmpty(columnName) !== values[columnName]) {
-          return false;
-        }
-      }
-      return true;
-    });
+    return this.rows.filter((row) =>
+      Obj.keys(values).every(
+        (columnName) => row.valueOrEmpty(columnName) === values[columnName],
+      ),
+    );
   }
   rowByValue<CN extends ColumnName<SN>>(
     columnName: CN,

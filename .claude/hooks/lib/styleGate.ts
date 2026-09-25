@@ -14,7 +14,7 @@ interface EditTarget extends FileLocation {
 }
 
 export interface EditDecision {
-  denyReason: string | null;
+  denyReason: string | undefined;
 }
 
 interface StyleRead extends FileLocation {
@@ -24,7 +24,7 @@ interface StyleRead extends FileLocation {
 }
 
 export function editDecision({ hasReadStyle, ...target }: EditTarget): EditDecision {
-  return { denyReason: isInLintSet(target) && !hasReadStyle ? styleGateReason : null };
+  return { denyReason: isInLintSet(target) && !hasReadStyle ? styleGateReason : undefined };
 }
 
 export function isStyleRead({

@@ -40,7 +40,7 @@ export class SpreadsheetTableValidatorRaw extends SpreadsheetBaseRaw {
       return { kind: "extra" };
     }
     if (
-      state.working.knownTable === null ||
+      state.working.knownTable === undefined ||
       !this.schema.isInSheetGids(sheetGid)
     ) {
       return { kind: "none" };

@@ -21,7 +21,7 @@ export class SheetConditionalFormatsRaw extends SheetCommonRaw {
   }
   conditionalFormatRules(): ConditionalFormatRule[] {
     const rules = this.sheetState.working.conditionalFormats.rules;
-    if (rules === null) {
+    if (rules === undefined) {
       throw new Error(
         `Conditional format rules have not been fetched for sheetGid ${this.sheetGid}.`,
       );
@@ -61,7 +61,7 @@ export class SheetConditionalFormatsRaw extends SheetCommonRaw {
   }
   private _pendingConditionalFormatRules(): ConditionalFormatRule[] {
     const fetched = this.sheetState.working.conditionalFormats.rules;
-    const rules = fetched === null ? [] : [...fetched];
+    const rules = fetched === undefined ? [] : [...fetched];
     const deletes = [...this.updateRequests.deleteConditionalFormat]
       .filter((operation) => operation.sheetId === this.sheetGid)
       .sort((left, right) => right.index - left.index);

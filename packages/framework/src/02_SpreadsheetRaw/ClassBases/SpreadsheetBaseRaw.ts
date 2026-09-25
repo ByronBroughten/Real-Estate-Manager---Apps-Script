@@ -34,7 +34,7 @@ export class SpreadsheetBaseRaw {
     return {
       spreadsheetStateRaw: {
         allSheetPropertiesAreFetched: false,
-        timeZone: null,
+        timeZone: undefined,
         rawSource: installedRawSource(),
         fetchQueue: emptyStateRaw.spreadsheetFetchQueue(),
         writeQueue: emptyStateRaw.spreadsheetWriteQueue(),

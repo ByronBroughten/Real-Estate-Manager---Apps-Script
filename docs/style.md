@@ -89,6 +89,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **`type` for everything computed from other types.** A plain object shape is an `interface`; lint enforces it.
 - **Generic params get two-letter domain abbreviations with a constraint**; bare `T`/`K`/`V`/`O` are only for domain-free utilities (`utils/`, `appUtils/`) and tests; lint checks the two letters, not the constraint.
 - **Verify a type-level claim with `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts`, never an assignment.** Measure a mapped type over the config unions before adopting it.
+- **`undefined` is the one "absent" value; `null` appears only where Google's types or JSON carry it.**
 - **Narrow a type until the empty case can't arise, rather than a branded-string fallback.**
 - **`as` casts narrow data that's already runtime-safe; they never substitute for validation.** External values go through `Val.validate.*`/`Val.is.*`. The three accepted cast idioms are in the reasoning file.
 - **A registry keyed by a finite name union takes a plain `: Type` annotation, not `makeStructuredConfig`**, which stays for the generated config files.
@@ -100,11 +101,14 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 ## Functional vs. imperative idioms
 
 - **`forEach` only for side effects, `map` only for pure transforms — never mixed.**
-- **`reduce` is fully accepted** for building a new object/record via an accumulator, rather than a manual loop with a declared accumulator.
+- **`forEach` by default; `for…of` only when the body exits early (`break`, `continue`, `return`) or destructures `Map` entries; `for…in` only in `utils/`.**
+- **`reduce` is fully accepted** for building a new object/record, rather than a manual loop with a declared accumulator: seed a fresh `{}`, `new Map()` or `[]`, mutate it and return it.
+- **`flatMap` returning `[]` or `[x]` filters and maps in one pass** when the map needs the narrowed value.
 - **Mutator methods return `this` for chaining.**
+- **A helper returns what it produces; no output parameters.**
 - **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks; lint backs it outside tests.
 - **An option that combines other options is built from them, not from copies of their bodies.**
-- **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects.
+- **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects; a ternary inside `${}` must also fit on one line, or it becomes a named local.
 - **Encode state as a named variable and an explicit `if`, not a wrapper object or a compact operator whose meaning the reader has to reconstruct.** `??=` is for filling in a default, not for "computed yet?" tracking.
 
 ## Tests

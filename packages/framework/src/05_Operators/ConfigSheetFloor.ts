@@ -57,23 +57,24 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     return new ConfigSheetFloorCreator(this.spreadsheetNamedProps);
   }
   ensure(): string {
-    const report: string[] = [];
-    this._ensureTitlesAndTables(report);
+    const titleAndTableLines = this._ensureTitlesAndTables();
     let identityColIndexes = this._fetchFloorSheets();
     const createdLines = this.creator.createMissing();
     if (createdLines.length > 0) {
-      report.push(...createdLines);
       this.ss.batchUpdateGSheets();
       this.ss.fetchAllSheetProperties();
       identityColIndexes = this._fetchFloorSheets();
     }
-    this._ensureColumnLabels(report);
-    this._ensureDataValues(report);
-    this._ensureColumnTypes(report);
-    report.push(...this.editWarnings.ensure(identityColIndexes));
-    return report.join("; ");
+    return [
+      ...titleAndTableLines,
+      ...createdLines,
+      ...this._ensureColumnLabels(),
+      ...this._ensureDataValues(),
+      ...this._ensureColumnTypes(),
+      ...this.editWarnings.ensure(identityColIndexes),
+    ].join("; ");
   }
-  changeNotice(change: SheetChange): FloorNotice | null {
+  changeNotice(change: SheetChange): FloorNotice | undefined {
     this.ss.raw.fetchAllSheetProperties();
     const liveTitlesByGid = new Map(
       this.ss.raw.activeSheetGids.flatMap((sheetGid) =>
@@ -84,7 +85,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     );
     return floorChangeNotice(change, liveTitlesByGid);
   }
-  private _ensureTitlesAndTables(report: string[]): void {
+  private _ensureTitlesAndTables(): string[] {
     this.ss.raw.ensureAllSheetPropertiesAreFetched();
     this._assertFloorTitlesAreOwned();
     const presentFloorSheets = floorTabNames().flatMap((sheetName) => {
@@ -115,12 +116,10 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       );
       sheet.updateTableName(seed.tableName);
     });
-    if (titleLines.length > 0) {
-      report.push(`Restored tab titles: ${titleLines.join("; ")}`);
-    }
-    if (tableNameLines.length > 0) {
-      report.push(`Restored Table names: ${tableNameLines.join("; ")}`);
-    }
+    return [
+      ...reportLines("Restored tab titles", titleLines),
+      ...reportLines("Restored Table names", tableNameLines),
+    ];
   }
   private _assertFloorTitlesAreOwned(): void {
     const ownedGidByTitle = new Map<string, number>(
@@ -154,7 +153,7 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
     this.ss.fetchAllPrepped({ includeProgrammaticFacts: true });
     return identityColIndexes;
   }
-  private _ensureColumnLabels(report: string[]): void {
+  private _ensureColumnLabels(): string[] {
     const headerLines: string[] = [];
     const columnIdLines: string[] = [];
     const groupHeadingLines: string[] = [];
@@ -188,40 +187,36 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
           meta
             .uniformRow("colGroupName")
             .updateValue(colIndex, floorColumn.groupHeading);
+          const headingLabel =
+            floorColumn.groupHeading === ""
+              ? "(blank)"
+              : floorColumn.groupHeading;
           groupHeadingLines.push(
-            `${sheet.raw.title} · ${floorColumn.header} (${floorColumn.columnId}) → ${
-              floorColumn.groupHeading === ""
-                ? "(blank)"
-                : floorColumn.groupHeading
-            }`,
+            `${sheet.raw.title} · ${floorColumn.header} (${floorColumn.columnId}) → ${headingLabel}`,
           );
         }
       });
     });
-    if (headerLines.length > 0) {
-      report.push(`Restored headers: ${headerLines.join("; ")}`);
-    }
-    if (columnIdLines.length > 0) {
-      report.push(`Restored column IDs: ${columnIdLines.join("; ")}`);
-    }
-    if (groupHeadingLines.length > 0) {
-      report.push(`Restored group headings: ${groupHeadingLines.join("; ")}`);
-    }
+    return [
+      ...reportLines("Restored headers", headerLines),
+      ...reportLines("Restored column IDs", columnIdLines),
+      ...reportLines("Restored group headings", groupHeadingLines),
+    ];
   }
-  private _ensureDataValues(report: string[]): void {
-    floorSheetNames().forEach((sheetName) => {
-      this._ensureSheetDataValues(sheetName, report);
-    });
+  private _ensureDataValues(): string[] {
+    return floorSheetNames().flatMap((sheetName) =>
+      this._ensureSheetDataValues(sheetName),
+    );
   }
   private _ensureSheetDataValues<SN extends FloorSheetName>(
     sheetName: SN,
-    report: string[],
-  ): void {
+  ): string[] {
     const sheetGid = getSheetTraitByName(sheetName, "sheetGid");
-    if (!this.ss.raw.gidIsActive(sheetGid)) return;
+    if (!this.ss.raw.gidIsActive(sheetGid)) return [];
     const sheet = this.ss.sheet(sheetName);
-    if (sheet.raw.tables.length !== 1) return;
+    if (sheet.raw.tables.length !== 1) return [];
     const row = sheet.raw.row(sheet.schema.topDataRowIdx);
+    const restoredLines: string[] = [];
     floorDataValueColumns(sheetName).forEach((seedColumn) => {
       const colIndex = liveColIndex(
         sheet.raw.meta,
@@ -235,18 +230,17 @@ export class ConfigSheetFloor extends SpreadsheetBaseNamed {
       const { dataValue } = seedColumn;
       if (liveValue === dataValue) return;
       row.updateValue(colIndex, dataValue);
-      report.push(
+      restoredLines.push(
         `Restored ${seedColumn.header}: "${liveValue}" → ${dataValue}`,
       );
     });
+    return restoredLines;
   }
-  private _ensureColumnTypes(report: string[]): void {
+  private _ensureColumnTypes(): string[] {
     const typeChangeLines = floorSheetNames().flatMap((sheetName) =>
       this._ensureSheetColumnTypes(sheetName, floorSeedColumns(sheetName)),
     );
-    if (typeChangeLines.length > 0) {
-      report.push(`Set column types: ${typeChangeLines.join("; ")}`);
-    }
+    return reportLines("Set column types", typeChangeLines);
   }
   private _ensureSheetColumnTypes<SN extends FloorSheetName>(
     sheetName: SN,
@@ -303,6 +297,10 @@ function assertFloorTable(sheet: SheetRaw, tableName: string): void {
       `Floor tab "${sheet.title}" has several Tables and none is named ${tableName}.`,
     );
   }
+}
+
+function reportLines(label: string, lines: string[]): string[] {
+  return lines.length > 0 ? [`${label}: ${lines.join("; ")}`] : [];
 }
 
 function floorColumnIdentity<

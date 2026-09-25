@@ -77,7 +77,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     change.insertColumn.forEach(({ startColumnIndex }) => {
       this.ss.sheet(sheetGid).gatherInsertColumnRequest(startColumnIndex);
     });
-    if (change.sort !== null) {
+    if (change.sort !== undefined) {
       this.ss.sheet(sheetGid).gatherSortRequest(change.sort);
     }
     change.fills.forEach((fill) => {

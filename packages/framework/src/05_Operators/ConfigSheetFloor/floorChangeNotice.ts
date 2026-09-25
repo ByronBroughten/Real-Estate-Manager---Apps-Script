@@ -16,7 +16,7 @@ const unwarnedFloorTab: FloorTabName = "valueConfig";
 export function floorChangeNotice(
   change: SheetChange,
   liveTitlesByGid: ReadonlyMap<number, string>,
-): FloorNotice | null {
+): FloorNotice | undefined {
   const { title } = configSheetFloorSeed[unwarnedFloorTab];
   const liveTitle = liveTitlesByGid.get(
     getSheetTraitByName(unwarnedFloorTab, "sheetGid"),
@@ -36,5 +36,5 @@ export function floorChangeNotice(
       untilClosed: true,
     };
   }
-  return null;
+  return undefined;
 }

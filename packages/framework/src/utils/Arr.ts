@@ -141,11 +141,7 @@ export const Arr = {
     );
   },
   indicesOf(arr: readonly unknown[], value: unknown): number[] {
-    const indices: number[] = [];
-    for (const idx in arr) {
-      if (arr[idx] === value) indices.push(parseInt(idx));
-    }
-    return indices;
+    return arr.flatMap((item, idx) => (item === value ? [idx] : []));
   },
   lastIdx(arr: readonly unknown[]): number {
     return arr.length - 1;

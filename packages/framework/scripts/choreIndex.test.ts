@@ -33,8 +33,8 @@ describe("ChoreIndex", () => {
     expect(index.pathOf("fixUnits")).toBe(
       join(root, "app", "oneOff", "fixUnits.ts"),
     );
-    expect(index.pathOf("Chore")).toBeNull();
-    expect(index.pathOf("x")).toBeNull();
+    expect(index.pathOf("Chore")).toBeUndefined();
+    expect(index.pathOf("x")).toBeUndefined();
   });
 
   it("refuses a package chore with a generic chore's name", () => {

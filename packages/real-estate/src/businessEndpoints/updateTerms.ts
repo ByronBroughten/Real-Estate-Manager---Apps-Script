@@ -36,7 +36,7 @@ export const updateTerms: Endpoint<"occupancy"> = {
     ss.fetchAllPrepped();
     const occupancy = ss.sheet("occupancy");
     const occupancyTerms = ss.sheet("occupancyTerms");
-    for (const rowIndex of selectedRowIndexes) {
+    selectedRowIndexes.forEach((rowIndex) => {
       const occRow = occupancy.row(rowIndex);
       const nextStartDate = occRow.value("nextTermsStartDate");
       const lastActiveTerm = occupancyTerms.rowByValue(
@@ -89,7 +89,7 @@ export const updateTerms: Endpoint<"occupancy"> = {
         petFeeMonthly: occRow.value("nextPetFeeMonthly"),
         notes: occRow.value("nextTermsNotes"),
       });
-    }
+    });
     return "Occupancy terms updated";
   },
 };

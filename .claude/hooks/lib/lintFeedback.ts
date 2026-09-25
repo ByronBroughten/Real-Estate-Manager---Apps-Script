@@ -14,9 +14,9 @@ interface LintMessage {
 
 const maxListed = 20;
 
-export function lintFeedback({ eslintJson, filePath }: LintFeedbackInput): string | null {
+export function lintFeedback({ eslintJson, filePath }: LintFeedbackInput): string | undefined {
   const errors = parseErrors(eslintJson);
-  if (!errors || errors.length === 0) return null;
+  if (!errors || errors.length === 0) return undefined;
   const listed = errors.slice(0, maxListed).map(describeError);
   const omitted = errors.length - listed.length;
   const noun = errors.length === 1 ? "error" : "errors";
@@ -32,15 +32,15 @@ function describeError({ line, column, ruleId, message }: LintMessage): string {
 }
 
 // Anything ESLint's JSON formatter wouldn't print is unparseable, and unparseable means no feedback.
-function parseErrors(eslintJson: string): LintMessage[] | null {
+function parseErrors(eslintJson: string): LintMessage[] | undefined {
   try {
     const results: unknown = JSON.parse(eslintJson);
-    if (!Array.isArray(results)) return null;
+    if (!Array.isArray(results)) return undefined;
     return results
       .flatMap((result) => (Array.isArray(result?.messages) ? result.messages : []))
       .filter(isLintError);
   } catch {
-    return null;
+    return undefined;
   }
 }
 

@@ -59,12 +59,12 @@ export class UpdateRequestSummary {
 
 function line(request: GoogleUpdateRequest): string {
   const verb = requestVerb(request);
-  if (verb === null) return "(empty request)";
+  if (verb === undefined) return "(empty request)";
   return [verb.padEnd(26), body(verb, request)].join(" ");
 }
 
-function requestVerb(request: GoogleUpdateRequest): RequestVerb | null {
-  return Obj.keys(request)[0] ?? null;
+function requestVerb(request: GoogleUpdateRequest): RequestVerb | undefined {
+  return Obj.keys(request)[0];
 }
 
 function body(verb: RequestVerb, request: GoogleUpdateRequest): string {

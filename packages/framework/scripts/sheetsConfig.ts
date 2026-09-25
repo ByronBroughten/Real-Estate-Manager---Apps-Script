@@ -42,11 +42,11 @@ function nearestConfigPath(cwd: string): string {
 function readSheetsConfig(path: string): SheetsConfig {
   const raw = JSON.parse(readFileSync(path, "utf8"));
   const dir = dirname(path);
-  for (const field of ["spreadsheetId", "generatedDir"]) {
+  ["spreadsheetId", "generatedDir"].forEach((field) => {
     if (!isFilledString(raw[field])) {
       throw new Error(`${path} has no "${field}" string.`);
     }
-  }
+  });
   if (!Array.isArray(raw.choreHomes) || !raw.choreHomes.every(isFilledString)) {
     throw new Error(`${path} has no "choreHomes" array of folder strings.`);
   }
@@ -67,16 +67,14 @@ function siblingConfigPaths(configPath: string): string[] {
     const path = join(dir, sheetsConfigFile);
     if (existsSync(path)) found.push(path);
     if (depth === siblingScan.depth) return;
-    for (const entry of readdirSync(dir, { withFileTypes: true })) {
-      if (
-        !entry.isDirectory() ||
-        entry.name.startsWith(".") ||
-        siblingScan.skippedDirs.has(entry.name)
-      ) {
-        continue;
-      }
-      visit(join(dir, entry.name), depth + 1);
-    }
+    readdirSync(dir, { withFileTypes: true })
+      .filter(
+        (entry) =>
+          entry.isDirectory() &&
+          !entry.name.startsWith(".") &&
+          !siblingScan.skippedDirs.has(entry.name),
+      )
+      .forEach((entry) => visit(join(dir, entry.name), depth + 1));
   }
   visit(root, 0);
   return found;
@@ -91,7 +89,7 @@ function repoRootOf(start: string): string {
 
 function assertDistinctIds(paths: string[]): void {
   const byId = new Map<string, string>();
-  for (const path of paths) {
+  paths.forEach((path) => {
     const { spreadsheetId } = JSON.parse(readFileSync(path, "utf8"));
     const other = byId.get(spreadsheetId);
     if (other) {
@@ -100,7 +98,7 @@ function assertDistinctIds(paths: string[]): void {
       );
     }
     byId.set(spreadsheetId, path);
-  }
+  });
 }
 
 function isFilledString(value: unknown): value is string {

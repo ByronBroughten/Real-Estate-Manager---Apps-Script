@@ -27,9 +27,9 @@ describe("AppsScript.sheetChange", () => {
   });
 
   it.each(["INSERT_ROW", "EDIT"] as const)(
-    "ignores %s by returning null",
+    "ignores %s by returning undefined",
     (changeType) => {
-      expect(AppsScript.sheetChange(changeType)).toBeNull();
+      expect(AppsScript.sheetChange(changeType)).toBeUndefined();
     },
   );
 });

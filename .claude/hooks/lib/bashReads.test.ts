@@ -17,7 +17,7 @@ function projectWith(files: Record<string, string>): string {
   return projectDir;
 }
 
-function denyReasonOf(projectDir: string, command: string): string | null {
+function denyReasonOf(projectDir: string, command: string): string | undefined {
   return BashReads.init({ command, cwd: projectDir }).classify().denyReason;
 }
 
@@ -35,10 +35,10 @@ describe("BashReads unguarded folders", () => {
   });
 
   it("exempts .probe, dist and coverage at the root and at any depth", () => {
-    expect(denyReasonOf(projectDir, "cat .probe/last.json")).toBeNull();
-    expect(denyReasonOf(projectDir, "cat dev/.probe/last.json")).toBeNull();
-    expect(denyReasonOf(projectDir, "cat packages/framework/dist/bundle.js")).toBeNull();
-    expect(denyReasonOf(projectDir, "cat packages/app/coverage/index.html")).toBeNull();
+    expect(denyReasonOf(projectDir, "cat .probe/last.json")).toBeUndefined();
+    expect(denyReasonOf(projectDir, "cat dev/.probe/last.json")).toBeUndefined();
+    expect(denyReasonOf(projectDir, "cat packages/framework/dist/bundle.js")).toBeUndefined();
+    expect(denyReasonOf(projectDir, "cat packages/app/coverage/index.html")).toBeUndefined();
   });
 
   it("does not exempt a file merely named like an unguarded folder", () => {
@@ -61,6 +61,6 @@ describe("BashReads columnConfigs", () => {
   });
 
   it("allows one block of it", () => {
-    expect(denyReasonOf(projectDir, "sed -n '1,40p' packages/framework/dev/generated/columnConfigs.ts")).toBeNull();
+    expect(denyReasonOf(projectDir, "sed -n '1,40p' packages/framework/dev/generated/columnConfigs.ts")).toBeUndefined();
   });
 });

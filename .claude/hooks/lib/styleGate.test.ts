@@ -26,7 +26,7 @@ describe("editDecision", () => {
   });
 
   it("allows a gated TypeScript edit after docs/style.md was read", () => {
-    expect(edit(frameworkFile, true)).toEqual({ denyReason: null });
+    expect(edit(frameworkFile, true)).toEqual({ denyReason: undefined });
   });
 
   it("denies an edit to tooling, which ESLint lints too", () => {
@@ -37,21 +37,21 @@ describe("editDecision", () => {
   });
 
   it("allows edits outside the ESLint set", () => {
-    expect(edit("/repo/packages/framework/dist/bundle.js", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/coverage/prettify.js", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/node_modules/x/index.js", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/.claude/worktrees/agent-1/scripts/docLint.ts", false)).toEqual({ denyReason: null });
-    expect(edit("/elsewhere/packages/framework/src/x.ts", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/framework/dist/bundle.js", false)).toEqual({ denyReason: undefined });
+    expect(edit("/repo/coverage/prettify.js", false)).toEqual({ denyReason: undefined });
+    expect(edit("/repo/node_modules/x/index.js", false)).toEqual({ denyReason: undefined });
+    expect(edit("/repo/.claude/worktrees/agent-1/scripts/docLint.ts", false)).toEqual({ denyReason: undefined });
+    expect(edit("/elsewhere/packages/framework/src/x.ts", false)).toEqual({ denyReason: undefined });
   });
 
   it("allows non-code edits", () => {
-    expect(edit("/repo/packages/framework/src/AGENTS.md", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/packages/framework/sheets.config.json", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/framework/src/AGENTS.md", false)).toEqual({ denyReason: undefined });
+    expect(edit("/repo/packages/framework/sheets.config.json", false)).toEqual({ denyReason: undefined });
   });
 
   it("leaves every package's generated files to the generated-data warning", () => {
-    expect(edit("/repo/packages/real-estate/src/generated/sheetConfigs.ts", false)).toEqual({ denyReason: null });
-    expect(edit("/repo/packages/framework/dev/generated/sheetConfigs.ts", false)).toEqual({ denyReason: null });
+    expect(edit("/repo/packages/real-estate/src/generated/sheetConfigs.ts", false)).toEqual({ denyReason: undefined });
+    expect(edit("/repo/packages/framework/dev/generated/sheetConfigs.ts", false)).toEqual({ denyReason: undefined });
   });
 
   it("does not say it only covers packages/", () => {

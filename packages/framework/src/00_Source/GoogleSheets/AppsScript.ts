@@ -17,10 +17,10 @@ export class AppsScript {
   }
   static sheetChange(
     changeType: GoogleAppsScript.Events.SheetsOnChange["changeType"],
-  ): SheetChange | null {
+  ): SheetChange | undefined {
     if (changeType === "REMOVE_GRID") return "sheetRemoved";
     if (changeType === "OTHER") return "other";
-    return null;
+    return undefined;
   }
   // Google's event rows and columns are 1-based.
   static sheetEdit(e: GoogleAppsScript.Events.SheetsOnEdit): SheetEdit {
@@ -43,10 +43,9 @@ export class AppsScript {
   } {
     return {
       deleteAllTriggers(): void {
-        const triggers = ScriptApp.getProjectTriggers();
-        for (const trigger of triggers) {
+        ScriptApp.getProjectTriggers().forEach((trigger) => {
           ScriptApp.deleteTrigger(trigger);
-        }
+        });
       },
       addOnEdit(fnName: string): void {
         ScriptApp.newTrigger(fnName)

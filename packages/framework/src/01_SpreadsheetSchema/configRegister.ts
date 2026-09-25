@@ -28,11 +28,11 @@ export type ConfigsOf<RG> = RG extends {
 
 export type Configs = ConfigsOf<Register>;
 
-let installed: Configs | null = null;
+let installed: Configs | undefined;
 
 // The lazy derivations cache the first set, so a second would be silently ignored.
 export function installConfigs(configs: Configs): void {
-  if (installed !== null && installed !== configs) {
+  if (installed !== undefined && installed !== configs) {
     throw new Error(
       "A different set of configs is already installed. A program installs one set, once.",
     );
@@ -41,7 +41,7 @@ export function installConfigs(configs: Configs): void {
 }
 
 export function installedConfigs(): Configs {
-  if (installed === null) {
+  if (installed === undefined) {
     throw new Error(
       "Configs have not been installed. The entry call must supply the app's configs before anything reads them.",
     );

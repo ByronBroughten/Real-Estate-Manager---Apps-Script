@@ -29,7 +29,7 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
   editProtections(): EditProtection[] {
     this.assertEditProtectionsNotStale();
     const protections = this.sheetState.working.editProtections.protections;
-    if (protections === null) {
+    if (protections === undefined) {
       throw new Error(
         `Edit protections have not been fetched for sheetGid ${this.sheetGid}.`,
       );
@@ -110,7 +110,7 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
   }
   private _pendingEditProtectionContents(): EditProtectionContent[] {
     const fetched = this.sheetState.working.editProtections.protections;
-    const protections: EditProtection[] = fetched === null ? [] : [...fetched];
+    const protections: EditProtection[] = fetched === undefined ? [] : [...fetched];
     const deletedIds = new Set(
       this.updateRequests.deleteProtectedRange
         .filter((operation) => operation.sheetId === this.sheetGid)
@@ -191,7 +191,7 @@ export class SheetEditProtectionsRaw extends SheetCommonRaw {
     range: ProtectionGridRange,
   ): void {
     if (isWholeColumnGridRange(range)) {
-      if (this.sheetState.working.knownTable !== null) {
+      if (this.sheetState.working.knownTable !== undefined) {
         this.activeTable.validateColIndexNotStale(range.startColumnIndex);
       }
       return;

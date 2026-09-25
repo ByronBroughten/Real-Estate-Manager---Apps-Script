@@ -150,12 +150,12 @@ function parsedFilter(filter: string): unknown {
 function valueAt(root: unknown, path: string | undefined): unknown {
   if (!path) return root;
   let value = root;
-  for (const segment of path.split(".")) {
+  path.split(".").forEach((segment) => {
     value = childAt(value, segment);
     if (value === undefined) {
       throw new Error(`Nothing at "${segment}" in path "${path}".`);
     }
-  }
+  });
   return value;
 }
 

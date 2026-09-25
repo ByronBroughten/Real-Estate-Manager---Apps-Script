@@ -21,7 +21,7 @@ export class ChoreIndex {
   }): ChoreIndex {
     const generic = choresIn(genericHome);
     const own: ChorePaths = new Map();
-    for (const home of packageHomes) {
+    packageHomes.forEach((home) => {
       for (const [name, path] of choresIn(home)) {
         if (generic.has(name)) {
           throw new Error(
@@ -36,11 +36,11 @@ export class ChoreIndex {
         }
         own.set(name, path);
       }
-    }
+    });
     return new ChoreIndex({ generic, own });
   }
-  pathOf(name: string): string | null {
-    return this.generic.get(name) ?? this.own.get(name) ?? null;
+  pathOf(name: string): string | undefined {
+    return this.generic.get(name) ?? this.own.get(name);
   }
   listing(packageDir: string): string {
     function lines(chores: ChorePaths): string[] {

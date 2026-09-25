@@ -26,7 +26,7 @@ export class AppsScriptApi {
       AppsScript.sheetChange(e.changeType),
       installGoogleSheets,
     );
-    if (notice !== null) showFloorNotice(notice);
+    if (notice !== undefined) showFloorNotice(notice);
   }
 }
 

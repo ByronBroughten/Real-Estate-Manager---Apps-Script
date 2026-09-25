@@ -34,7 +34,7 @@ class ContextSize {
   }
   run(): void {
     const tokens = this._estimateTokens();
-    if (tokens === null) return;
+    if (tokens === undefined) return;
     const fired = this._fired();
     const threshold = thresholds.find((each) => tokens >= each.tokens);
     if (!threshold || fired.includes(threshold.tokens)) return;
@@ -59,9 +59,9 @@ class ContextSize {
     }
   }
   // Prefer the last main-thread usage figures; fall back to transcript bytes.
-  _estimateTokens(): number | null {
+  _estimateTokens(): number | undefined {
     const path = this.input.transcript_path;
-    if (typeof path !== "string") return null;
+    if (typeof path !== "string") return undefined;
     const { size } = statSync(path);
     const usage = lastUsageIn(readTail(path, size));
     if (usage) return usage;
@@ -81,7 +81,7 @@ function readTail(path: string, size: number): string {
   return buffer.toString("utf8");
 }
 
-function lastUsageIn(text: string): number | null {
+function lastUsageIn(text: string): number | undefined {
   for (const line of text.split("\n").reverse()) {
     if (!line.includes('"usage"')) continue;
     let entry;
@@ -99,7 +99,7 @@ function lastUsageIn(text: string): number | null {
       (usage.output_tokens ?? 0)
     );
   }
-  return null;
+  return undefined;
 }
 
 await runFailOpen(() => {

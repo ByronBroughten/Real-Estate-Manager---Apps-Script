@@ -124,8 +124,7 @@ export class ColumnMetaRaw<
   activeValueTitle(): string {
     return this.activeDeclaredValueTitle() ?? this._actualPrimitiveValueName();
   }
-  // Null means nothing on the sheet says what this column holds.
-  activeDeclaredValueTitle(): string | null {
+  activeDeclaredValueTitle(): string | undefined {
     if (this.activeHeader === this.schema.idHeader) {
       return "id";
     }
@@ -136,36 +135,38 @@ export class ColumnMetaRaw<
       this._compatibleNumberFormatValueName()
     );
   }
-  activeValidationValueTitle(): string | null {
+  activeValidationValueTitle(): string | undefined {
     for (const rawValue of this.valueValidationStrings) {
       const match = rawValue.match(/^=valueConfig\[(.+)\]$/);
       if (!match) continue;
       return Val.assert(match[1], "value title match");
     }
-    return null;
+    return undefined;
   }
-  private _columnTypeValueName(): FrameworkValueName | null {
+  private _columnTypeValueName(): FrameworkValueName | undefined {
     const columnType = this.activeColumnType;
     if (columnType === undefined || !isNamedColumnType(columnType)) {
-      return null;
+      return undefined;
     }
-    return columnTypeValueNames[columnType] ?? null;
+    return columnTypeValueNames[columnType];
   }
-  private _booleanValidationValueName(): "checkbox" | null {
+  private _booleanValidationValueName(): "checkbox" | undefined {
     if (this.validationConditionType === "BOOLEAN") {
       return "checkbox";
     }
     if (this.activeDataValidationConditionType === "BOOLEAN") {
       return "checkbox";
     }
-    return null;
+    return undefined;
   }
-  private _compatibleNumberFormatValueName(): PrimitiveValueName | null {
+  private _compatibleNumberFormatValueName(): PrimitiveValueName | undefined {
     const formatName = this._numberFormatValueName();
-    if (formatName === null) {
-      return null;
+    if (formatName === undefined) {
+      return undefined;
     }
-    return this._actualPrimitiveValueName() === formatName ? formatName : null;
+    return this._actualPrimitiveValueName() === formatName
+      ? formatName
+      : undefined;
   }
   private _actualPrimitiveValueName(): PrimitiveValueName {
     const value = this.activeTopValue;
@@ -180,15 +181,15 @@ export class ColumnMetaRaw<
     }
     return "string";
   }
-  private _numberFormatValueName(): PrimitiveValueName | null {
+  private _numberFormatValueName(): PrimitiveValueName | undefined {
     const formatType = this.activeNumberFormatType;
     if (
       formatType === undefined ||
       formatType === "NUMBER_FORMAT_TYPE_UNSPECIFIED"
     ) {
-      return null;
+      return undefined;
     }
-    return numberFormatValueNames[formatType] ?? null;
+    return numberFormatValueNames[formatType];
   }
 }
 
