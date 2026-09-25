@@ -49,9 +49,9 @@ Its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md` files all sh
 | `docs/testing.md` | The fakes, the seams and the exemplar columns. |
 | `README.md` | The consumer's face: install, the public entry, the bin. A derived view like the root one (table below). |
 
-### App (`packages/real-estate/`)
+### App (`packages/real-estate/`, its own repo)
 
-Private and unpublished, so its docs may link anywhere in the repo.
+The same as the framework's: its docs ship with its repo, so they link only inside it (its own lint), link the framework's docs by github.com URL, and name a rule that lives at root in plain text.
 
 | File | Holds |
 | --- | --- |
@@ -60,7 +60,7 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | `docs/occupancy-ledger.md` | How the occupancy ledger is built, beyond CONTEXT.md's words for it. |
 | `src/AGENTS.md` | Rules an agent can only break by touching the app's `src/`: the boundary question, the one framework import, generated data. Kept short, with a `CLAUDE.md` beside it. |
 | `src/businessEndpoints/` and `src/chores/` `AGENTS.md` | That folder's rules, kept short, each with a `CLAUDE.md` beside it. The chore gates for `app:chore` live in `src/chores/`. |
-| `README.md` | A short derived view: what the app is, its folders, its `app:*` commands (table below). |
+| `README.md` | A short derived view: what the app is, how it builds, its folders, its `app:*` commands (table below). |
 
 ### Config (`config/`)
 
@@ -111,7 +111,9 @@ No byte cap stands in for judgment here: a cap becomes a target, and an agent at
 | README section | Mirrors |
 | --- | --- |
 | Opening paragraph | What the app manages: its `CONTEXT.md` |
+| Building it | Its `package.json` dependencies and the root's workspaces |
 | What's here | The app's `src/AGENTS.md` and its `CONTEXT.md` and `docs/` |
 | Commands | The root `package.json`'s `app:*` scripts and [`targets-and-gates.md`](../targets-and-gates.md#targets-dev-and-app) |
+| History | Nothing; a fixed link to `byronbroughten/byro-repo` for the history before the split |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published config` and the framework's repo with `--published .`, which holds each package's published docs (its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md`) to links inside that package. The root's `npm run lint` runs every clone's `lint:docs` too.
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published config` and each clone's repo with `--published .`, which holds each package's published docs (its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md`) to links inside that package. The root's `npm run lint` runs every clone's `lint:docs` too.

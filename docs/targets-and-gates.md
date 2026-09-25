@@ -6,7 +6,7 @@ Map fragment routed from `AGENTS.md`. Read the heading the task needs.
 
 ## Targets: dev and app
 
-**Every live command names its target through a root alias: `dev:*` for the `Sheets Framework Dev` spreadsheet, `app:*` for the real-estate one.** Each alias runs its package's own script with `-w <pkg> --` (`real-estate-app` for `app:*`, `@byronbroughten/sheets-framework` for `dev:*`), so npm runs the bin from that package and it finds that package's `sheets.config.json`. A bare `npx sheets-framework …` matches no allow rule, so it always asks.
+**Every live command names its target through a root alias: `dev:*` for the `Sheets Framework Dev` spreadsheet, `app:*` for the real-estate one.** Each alias runs its package's own script with `-w <pkg> --` (`sheets-real-estate` for `app:*`, `@byronbroughten/sheets-framework` for `dev:*`), so npm runs the bin from that package and it finds that package's `sheets.config.json`. A bare `npx sheets-framework …` matches no allow rule, so it always asks.
 
 The threat model is accidents, with tampering made visible. Both clasp credentials cover the whole Google account, so OAuth can't isolate the two spreadsheets; the permission rules and hooks do.
 
