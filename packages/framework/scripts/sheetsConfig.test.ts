@@ -49,6 +49,27 @@ describe("loadSheetsConfig", () => {
     expect(() => loadSheetsConfig(root)).toThrow(/No sheets\.config\.json/);
   });
 
+  it("names the example file when a package has only that", () => {
+    const root = repoWith({});
+    writeFileSync(
+      join(root, "sheets.config.example.json"),
+      JSON.stringify(app),
+    );
+    expect(() => loadSheetsConfig(root)).toThrow(
+      /sheets\.config\.example\.json/,
+    );
+    expect(() => loadSheetsConfig(root)).not.toThrow(/No sheets\.config\.json/);
+  });
+
+  it("prefers the real config over an example beside it", () => {
+    const root = repoWith({ ".": app });
+    writeFileSync(
+      join(root, "sheets.config.example.json"),
+      JSON.stringify(dev),
+    );
+    expect(loadSheetsConfig(root).spreadsheetId).toBe("app-id");
+  });
+
   it("refuses two packages that share a spreadsheet ID, from either package", () => {
     const root = repoWith({
       ".": app,

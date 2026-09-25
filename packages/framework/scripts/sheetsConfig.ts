@@ -2,7 +2,10 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 
-const sheetsConfigFile = "sheets.config.json";
+const sheetsConfigFileNames = {
+  config: "sheets.config.json",
+  example: "sheets.config.example.json",
+} as const;
 const siblingScan = {
   depth: 3,
   skippedDirs: new Set(["node_modules", "dist", "coverage"]),
@@ -29,11 +32,17 @@ export function loadSheetsConfig(cwd = process.cwd()): SheetsConfig {
 
 function nearestConfigPath(cwd: string): string {
   for (let dir = cwd; ; dir = dirname(dir)) {
-    const path = join(dir, sheetsConfigFile);
+    const path = join(dir, sheetsConfigFileNames.config);
     if (existsSync(path)) return path;
+    const examplePath = join(dir, sheetsConfigFileNames.example);
+    if (existsSync(examplePath)) {
+      throw new Error(
+        `${examplePath} exists but ${path} does not. Copy the example to ${sheetsConfigFileNames.config} and fill in your spreadsheet ID.`,
+      );
+    }
     if (dirname(dir) === dir) {
       throw new Error(
-        `No ${sheetsConfigFile} in ${cwd} or any folder above it. Run the bin from inside a package.`,
+        `No ${sheetsConfigFileNames.config} in ${cwd} or any folder above it. Run the bin from inside a package.`,
       );
     }
   }
@@ -64,7 +73,7 @@ function siblingConfigPaths(configPath: string): string[] {
   const root = repoRootOf(dirname(configPath));
   const found: string[] = [];
   function visit(dir: string, depth: number): void {
-    const path = join(dir, sheetsConfigFile);
+    const path = join(dir, sheetsConfigFileNames.config);
     if (existsSync(path)) found.push(path);
     if (depth === siblingScan.depth) return;
     readdirSync(dir, { withFileTypes: true })

@@ -40,7 +40,7 @@ The Node host is the second one (the framework's `src/nodeHost/`, launched by it
 
 ## The sheets-framework bin
 
-**The framework's `scripts/sheets-framework.js` is the one tooling entry**, installed as the `sheets-framework` bin: a JS shim that registers `tsx`, then imports `scripts/cli.ts`, which runs `gen-configs`, `chore`, `probe` or `setup-auth`. The first three read the nearest `sheets.config.json` above cwd, the way clasp finds `.clasp.json`, and take the spreadsheet ID from it and nowhere else: no flag, no env override (`scripts/sheetsConfig.ts`). The file is checked in and data-only:
+**The framework's `scripts/sheets-framework.js` is the one tooling entry**, installed as the `sheets-framework` bin: a JS shim that registers `tsx`, then imports `scripts/cli.ts`, which runs `gen-configs`, `chore`, `probe` or `setup-auth`. The first three read the nearest `sheets.config.json` above cwd, the way clasp finds `.clasp.json`, and take the spreadsheet ID from it and nowhere else: no flag, no env override (`scripts/sheetsConfig.ts`). The file is gitignored and data-only; the package commits a `sheets.config.example.json` to copy from, and the bin fails naming it when only the example exists:
 
 - `spreadsheetId`: the package's spreadsheet.
 - `generatedDir`: where `gen-configs` writes the four config files and where the chore runner loads them from.
