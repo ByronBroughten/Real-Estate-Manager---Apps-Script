@@ -11,9 +11,9 @@ import { Str } from "../utils/Str";
 import { spreadsheetConfigFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
 } from "./SpreadsheetBaseOperator";
 
 const fieldColumnNames = [

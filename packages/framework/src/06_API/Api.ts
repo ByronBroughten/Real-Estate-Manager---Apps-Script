@@ -1,22 +1,22 @@
 import type { SheetChange } from "../00_Source/PlatformEvents/sheetChange";
 import type { SheetEdit } from "../00_Source/PlatformEvents/sheetEdit";
-import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import type { ColumnSchema } from "../01_SpreadsheetSchema/ColumnSchema";
 import {
-  installConfigs,
   type Configs,
+  installConfigs,
 } from "../01_SpreadsheetSchema/configRegister";
+import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SpreadsheetIdentified } from "../03_SpreadsheetIdentified/SpreadsheetIdentified";
-import { ConfigSheetFloor } from "../05_Operators/ConfigSheetFloor";
-import type { FloorNotice } from "../05_Operators/ConfigSheetFloor/floorChangeNotice";
 import {
   SpreadsheetBaseNamed,
   type SpreadsheetNamedProps,
 } from "../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
-import { frameworkEndpoints } from "./frameworkEndpoints";
+import { ConfigSheetFloor } from "../05_Operators/ConfigSheetFloor";
+import type { FloorNotice } from "../05_Operators/ConfigSheetFloor/floorChangeNotice";
 import { EndpointRun } from "./EndpointRun";
 import type { Endpoints, EndpointsAll } from "./Endpoints";
+import { frameworkEndpoints } from "./frameworkEndpoints";
 
 interface ApiProps extends SpreadsheetNamedProps {
   endpoints: Endpoints;

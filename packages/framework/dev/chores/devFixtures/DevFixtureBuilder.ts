@@ -4,9 +4,9 @@ import { ssConfigGet } from "../../../src/01_SpreadsheetSchema/spreadsheetConfig
 import { SpreadsheetBaseNamed } from "../../../src/04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../../src/04_SpreadsheetNamed/SpreadsheetNamed";
 import {
-  devFixtureSheets,
   type DevFixtureColumn,
   type DevFixtureSheet,
+  devFixtureSheets,
 } from "./devFixtureSheets";
 
 // A tab that exists is left alone; rebuild one by deleting it and rerunning (docs/how-it-runs.md).

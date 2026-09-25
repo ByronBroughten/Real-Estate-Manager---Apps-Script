@@ -4,7 +4,7 @@ Disclosed from [`docs/style.md`](../style.md), "Imports & file organization". Th
 
 ## Import order and `import type`
 
-Imports are sorted by hand because no import-order lint plugin is configured. A module whose value and types are both imported keeps one line with the inline modifier, `import { vsc, type ValueSchemaBase } from "./valueSchema"`, rather than splitting into a value line and a type line.
+Import order is enforced by `simple-import-sort` (autofixed). A module whose value and types are both imported keeps one line with the inline modifier, `import { vsc, type ValueSchemaBase } from "./valueSchema"`, rather than splitting into a value line and a type line.
 
 ## No barrel files
 

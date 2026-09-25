@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
@@ -9,8 +10,8 @@ import {
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeSheetProperties,
+  stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { ConfigCoordinator } from "./ConfigCoordinator";
 

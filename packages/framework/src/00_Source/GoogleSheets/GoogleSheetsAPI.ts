@@ -1,5 +1,4 @@
 import { Val } from "../../utils/Val";
-import { AppsScript } from "./AppsScript";
 import type {
   GridFetchOptions,
   GridFetchRange,
@@ -10,6 +9,7 @@ import type {
   SheetEditProtectionSnapshot,
   SpreadsheetSnapshot,
 } from "../RawSource/RawSource";
+import { AppsScript } from "./AppsScript";
 import { cellDataRequests } from "./GoogleSheetsAPI/cellData";
 import { googleConditionalFormatRule } from "./GoogleSheetsAPI/conditionalFormats";
 import { googleGrid } from "./GoogleSheetsAPI/gridSnapshots";

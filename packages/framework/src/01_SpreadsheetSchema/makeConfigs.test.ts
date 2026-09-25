@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { makeSheetConfigs, makeSpreadsheetConfig } from "./makeConfigs";
 
 const validLayout = {

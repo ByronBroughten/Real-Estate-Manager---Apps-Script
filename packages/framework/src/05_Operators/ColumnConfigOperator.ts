@@ -4,20 +4,20 @@ import {
   floorSeedColumnById,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import {
-  makeImportLine,
   type ColumnConfigsGeneric,
+  makeImportLine,
 } from "../01_SpreadsheetSchema/makeConfigs";
 import { type ValueName } from "../01_SpreadsheetSchema/valueSchemas";
 import { Str } from "../utils/Str";
 import { columnConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import { SheetConfigOperator } from "./SheetConfigOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
   type UntypedHeadersBySheetTitle,
 } from "./SpreadsheetBaseOperator";
-import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
 interface ColumnIdentity {

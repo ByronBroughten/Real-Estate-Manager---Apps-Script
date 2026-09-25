@@ -8,8 +8,8 @@ import type {
 } from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
-  EditWarningDeclaration,
   EditProtection,
+  EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";

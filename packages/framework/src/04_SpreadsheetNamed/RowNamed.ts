@@ -12,7 +12,6 @@ import { RowIdentified } from "../03_SpreadsheetIdentified/RowIdentified";
 import { Obj } from "../utils/Obj";
 import { CellNamed } from "./CellNamed";
 import { RowBaseNamed } from "./ClassBases/RowBaseNamed";
-
 import { SheetNamed } from "./SheetNamed";
 
 export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import type {
   ColumnConfigStored,

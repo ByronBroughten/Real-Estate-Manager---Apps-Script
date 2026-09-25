@@ -3,9 +3,9 @@ import type {
   NotEmpty,
 } from "../00_Source/CellValues/cellValues";
 import { lazy } from "../utils/lazy";
-import { Obj, type FlattenTwoLevels, type KeyedMap } from "../utils/Obj";
+import { type FlattenTwoLevels, type KeyedMap, Obj } from "../utils/Obj";
 import { Val } from "../utils/Val";
-import { installedConfigs, type Configs } from "./configRegister";
+import { type Configs, installedConfigs } from "./configRegister";
 import type { ColumnConfigsGeneric, ColumnConfigStored } from "./makeConfigs";
 import {
   configSheetNames,

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
+
 import type { ModelableEditProtection } from "../00_Source/RawSource/EditProtection";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import {
   configSheetFloorSeed,
   floorSeedColumns,
@@ -14,9 +15,9 @@ import {
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeCell,
   type FakeSheetProperties,
+  stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { ConfigSheetFloor } from "./ConfigSheetFloor";
 import { floorSheetNames } from "./ConfigSheetFloor/floorSeedLookups";

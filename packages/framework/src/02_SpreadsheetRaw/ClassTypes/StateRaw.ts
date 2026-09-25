@@ -25,8 +25,8 @@ import type {
   TableColumnSnapshot,
   TableColumnType,
   UpdateCellOperation,
-  UpdateTableColumnPropertiesOperation,
   UpdateSheetTitleOperation,
+  UpdateTableColumnPropertiesOperation,
   UpdateTableNameOperation,
 } from "../../00_Source/RawSource/RawSource";
 import type { RgbColor } from "../../00_Source/RawSource/RgbColor";

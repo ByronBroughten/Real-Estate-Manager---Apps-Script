@@ -1,17 +1,17 @@
 import type { ValueSchemaKey } from "../00_Source/CellValues/valueSchema";
 import {
-  getColumnTraitById,
   type ColumnConfig,
   type ColumnConfigAt,
   type ColumnFullName,
   type ColumnName,
   type ColumnValue,
+  getColumnTraitById,
   type MakeColumnFullName,
 } from "./columnConfigsTypes";
 import type { SheetName } from "./sheetConfigsTypes";
-import { getValTrait, type ValueSchema } from "./valueSchemas";
-import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 import { SheetSchema, type SheetSchemaProps } from "./SheetSchema";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
+import { getValTrait, type ValueSchema } from "./valueSchemas";
 
 interface ColumnSchemaProps<
   SN extends SheetName,

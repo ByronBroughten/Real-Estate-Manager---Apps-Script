@@ -1,12 +1,12 @@
 import {
-  GoogleSheetsAPI,
   type GoogleRequest,
+  GoogleSheetsAPI,
   type SheetsHttpTransport,
 } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { installRawSource } from "../00_Source/RawSource/RawSource";
 import {
-  installConfigs,
   type Configs,
+  installConfigs,
 } from "../01_SpreadsheetSchema/configRegister";
 import { UpdateRequestSummary } from "./UpdateRequestSummary";
 

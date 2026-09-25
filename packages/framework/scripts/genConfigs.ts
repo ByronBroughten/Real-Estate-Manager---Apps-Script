@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import type { ConfigRegeneration } from "../src/05_Operators/ConfigCoordinator.ts";
 import {
   type ConfigFile,

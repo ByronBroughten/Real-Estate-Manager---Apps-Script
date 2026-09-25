@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { SerialDate } from "./SerialDate";
 import { Val } from "./Val";

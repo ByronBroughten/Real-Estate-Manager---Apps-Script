@@ -1,5 +1,5 @@
-import type { SheetName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { ColumnName } from "../../01_SpreadsheetSchema/columnConfigsTypes";
+import type { SheetName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { StrictOmit } from "../../utils/Obj";
 import type { SheetNamed } from "../SheetNamed";
 

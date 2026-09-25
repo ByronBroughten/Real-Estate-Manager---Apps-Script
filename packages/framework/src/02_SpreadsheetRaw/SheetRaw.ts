@@ -5,8 +5,8 @@ import type {
 } from "../00_Source/RawSource/ConditionalFormat";
 import {
   type EditLockDeclaration,
-  type EditWarningDeclaration,
   type EditProtection,
+  type EditWarningDeclaration,
   type ProtectionGridRange,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
@@ -28,8 +28,8 @@ import {
   type ColumnFill,
   type FindReplaceTerms,
   type SortParameters,
-  type UpdateTableColumnTypeOperation,
   type TableIdentityRaw,
+  type UpdateTableColumnTypeOperation,
 } from "./ClassTypes/StateRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";

@@ -1,9 +1,10 @@
+// First, out of order: entering the RowCommonRaw <-> SheetRaw cycle here loads UniformRowBaseRaw before its base class, in the bundle.
+import "./SheetRaw";
+
 import type {
   CellValue,
   CellValueName,
 } from "../00_Source/CellValues/cellValues";
-// First, out of order: entering the RowCommonRaw <-> SheetRaw cycle here loads UniformRowBaseRaw before its base class, in the bundle.
-import "./SheetRaw";
 import type { RowRawProps } from "./ClassBases/RowBaseRaw";
 import { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 

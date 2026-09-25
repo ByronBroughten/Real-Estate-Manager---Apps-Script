@@ -2,10 +2,10 @@ import { Obj } from "../utils/Obj";
 import {
   configSheetFloorSeed,
   floorColumnLabel,
-  floorSeedColumnInSheet,
-  floorSeedColumns,
   type FloorColumnType,
   type FloorSeedColumn,
+  floorSeedColumnInSheet,
+  floorSeedColumns,
 } from "./configSheetFloorSeed";
 import type {
   ColumnConfigsGeneric,

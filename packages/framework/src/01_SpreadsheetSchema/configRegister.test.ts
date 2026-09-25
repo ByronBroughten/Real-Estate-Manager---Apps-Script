@@ -1,16 +1,17 @@
 import { describe, expect, it, vi } from "vitest";
+
 import {
   assertNotType,
   assertType,
   type IsExactly,
 } from "../testSupport/typeAssertions";
 import {
-  installConfigs,
-  installedConfigs,
   type Configs,
   type ConfigSetBase,
   type ConfigsNotRegistered,
   type ConfigsOf,
+  installConfigs,
+  installedConfigs,
 } from "./configRegister";
 import type { ColumnConfigsGeneric, makeColumnConfigs } from "./makeConfigs";
 

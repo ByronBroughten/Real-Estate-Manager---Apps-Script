@@ -1,9 +1,9 @@
 import type { CellValue } from "../../00_Source/CellValues/cellValues";
 import type { ProtectionGridRange } from "../../00_Source/RawSource/EditProtection";
 import {
+  type ColumnName,
   getColumnTraitByName,
   getSheetColumnNames,
-  type ColumnName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
@@ -19,8 +19,8 @@ import { Obj } from "../../utils/Obj";
 import { liveColIndex } from "./floorColumnLocation";
 import {
   columnNameByHeader,
-  spreadsheetConfigFeedbackColumnNames,
   type FloorSheetName,
+  spreadsheetConfigFeedbackColumnNames,
 } from "./floorSeedLookups";
 
 export const floorWarningPrefix = "Config-sheet floor";

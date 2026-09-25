@@ -1,5 +1,6 @@
 import eslint from "@eslint/js";
 import { defineConfig } from "eslint/config";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
 
 const frameworkSrc = "packages/framework/src";
@@ -137,7 +138,9 @@ export default defineConfig(
     rules: { "no-undef": "off" },
   },
   {
+    plugins: { "simple-import-sort": simpleImportSort },
     rules: {
+      "simple-import-sort/imports": "error",
       "max-classes-per-file": ["error", 1],
       // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
       "@typescript-eslint/no-unused-vars": [

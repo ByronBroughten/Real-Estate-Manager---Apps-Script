@@ -1,7 +1,7 @@
 import {
+  type ColumnName,
   getColumnTraitByName,
   getSheetColumnNames,
-  type ColumnName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,

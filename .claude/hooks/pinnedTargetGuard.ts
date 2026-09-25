@@ -1,10 +1,11 @@
 // PreToolUse on Bash and gsheets writes: a dev write asks while a pinning file is dirty; a gsheets write is allowed only on the clean dev ID.
 import { spawnSync } from "node:child_process";
+
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
 import {
+  bashDecision,
   type Decision,
   type DirtyPinningFiles,
-  bashDecision,
   gsheetsWriteDecision,
   pinningFiles,
 } from "./lib/pinnedTargets.ts";

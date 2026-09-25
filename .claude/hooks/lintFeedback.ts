@@ -2,6 +2,7 @@
 import { spawnSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
 import { lintFeedback } from "./lib/lintFeedback.ts";
 import { isInLintSet, projectRelative } from "./lib/lintSet.ts";

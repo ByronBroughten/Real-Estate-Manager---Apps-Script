@@ -1,4 +1,3 @@
-import type { FrameworkValueName } from "../00_Source/CellValues/frameworkValueSchemas";
 import type {
   CellValue,
   CellValueName,
@@ -6,12 +5,13 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../00_Source/CellValues/cellValues";
+import type { FrameworkValueName } from "../00_Source/CellValues/frameworkValueSchemas";
 import type {
   GridCellSnapshot,
   TableColumnType,
 } from "../00_Source/RawSource/RawSource";
 import { dimensionIds } from "../01_SpreadsheetSchema/dimensionIds";
-import { Val, type PrimitiveValueName } from "../utils/Val";
+import { type PrimitiveValueName, Val } from "../utils/Val";
 import { CellRaw } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
 import type { ActiveFactsRaw, ColumnStateRaw } from "./ClassTypes/StateRaw";

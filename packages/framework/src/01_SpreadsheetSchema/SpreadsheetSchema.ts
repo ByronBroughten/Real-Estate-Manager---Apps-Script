@@ -3,8 +3,8 @@ import {
   sheetConfigsByGid,
   type SheetName,
 } from "./sheetConfigsTypes";
-import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 import { SheetSchema } from "./SheetSchema";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 
 export class SpreadsheetSchema extends SpreadsheetBaseSchema {
   isInSheetGids(sheetGid: number): boolean {

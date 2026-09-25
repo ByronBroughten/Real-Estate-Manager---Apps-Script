@@ -1,6 +1,6 @@
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes.js";
-import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
+import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIdentified/SheetMetaIdentified";

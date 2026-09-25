@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
+
 import type { CellValue } from "../00_Source/CellValues/cellValues";
 import { googleRawRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import type { AddTableOperation } from "../00_Source/RawSource/RawSource";
+import type { RgbColor } from "../00_Source/RawSource/RgbColor";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeCell,
   type FakeSheetProperties,
+  stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { CellRaw } from "./CellRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
 import type { CellStateRaw, RowCellChange } from "./ClassTypes/StateRaw";
-import type { RgbColor } from "../00_Source/RawSource/RgbColor";
 import { ColumnMetaRaw } from "./ColumnMetaRaw";
 import { ColumnRaw } from "./ColumnRaw";
 import { RowRaw } from "./RowRaw";

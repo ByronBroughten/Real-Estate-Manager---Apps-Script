@@ -1,9 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
+
+import type { SheetsHttpRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw";
 import { NodeHost } from "./NodeHost";
-import type { SheetsHttpRequest } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 
 const spreadsheetId = "spreadsheet-under-test";
 const gadgetsGid = 111;

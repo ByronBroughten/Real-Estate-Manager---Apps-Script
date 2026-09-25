@@ -2,8 +2,8 @@ import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeCell,
+  stubSheetsService,
 } from "./fakeSheetsService";
 
 /**

@@ -1,4 +1,4 @@
-import { installedConfigs, type Configs } from "./configRegister";
+import { type Configs, installedConfigs } from "./configRegister";
 import { uniformRowLayout } from "./uniformRowLayout";
 
 export type SpreadsheetConfig = Configs["spreadsheetConfig"];

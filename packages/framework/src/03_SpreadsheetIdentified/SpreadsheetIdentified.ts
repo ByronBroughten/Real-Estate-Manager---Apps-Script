@@ -4,8 +4,8 @@ import { SpreadsheetBaseIdentified } from "./ClassBases/SpreadsheetBaseIdentifie
 import { type ColumnIdentified } from "./ColumnIdentified";
 import { SheetIdentified } from "./SheetIdentified";
 import {
-  SheetMetaIdentified,
   type GatherDataPrerequisitesProps,
+  SheetMetaIdentified,
 } from "./SheetMetaIdentified";
 
 export class SpreadsheetIdentified extends SpreadsheetBaseIdentified {

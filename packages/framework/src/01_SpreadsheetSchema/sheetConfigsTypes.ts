@@ -1,6 +1,6 @@
 import { lazy } from "../utils/lazy";
 import { Obj } from "../utils/Obj";
-import { installedConfigs, type Configs } from "./configRegister";
+import { type Configs, installedConfigs } from "./configRegister";
 import type { SheetConfigsBase, SheetConfigStored } from "./makeConfigs";
 
 // Post-sheetConfigs

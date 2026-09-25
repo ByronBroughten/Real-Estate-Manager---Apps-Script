@@ -1,12 +1,12 @@
 import type { CellValue } from "../../CellValues/cellValues";
 import {
-  isModelledConditionType,
-  quantizeConditionalFormat,
   type BooleanCondition,
   type ConditionalFormat,
   type ConditionalFormatRule,
+  isModelledConditionType,
   type ModelableConditionalFormatRule,
   type ModelledConditionType,
+  quantizeConditionalFormat,
 } from "../../RawSource/ConditionalFormat";
 import type { GridRangeProps } from "../../RawSource/RawSource";
 import { googleColor } from "./googleColor";

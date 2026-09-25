@@ -1,6 +1,6 @@
 import {
-  sheetConfigsByName,
   type SheetConfigs,
+  sheetConfigsByName,
 } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { type SubType } from "../utils/Obj";
 

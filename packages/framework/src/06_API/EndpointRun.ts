@@ -9,8 +9,8 @@ import {
 import type { SheetNamed } from "../04_SpreadsheetNamed/SheetNamed";
 import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import {
-  CheckboxColumnOperator,
   type CheckboxColumnName,
+  CheckboxColumnOperator,
 } from "../05_Operators/CheckboxColumnOperator";
 import type {
   ActionReturn,

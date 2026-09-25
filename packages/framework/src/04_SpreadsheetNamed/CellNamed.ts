@@ -5,8 +5,8 @@ import type {
 } from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
-  EditWarningDeclaration,
   EditProtection,
+  EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
 import type { RgbColor } from "../00_Source/RawSource/RgbColor";
 import type {

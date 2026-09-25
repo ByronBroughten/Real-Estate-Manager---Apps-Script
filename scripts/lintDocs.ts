@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, posix } from "node:path";
 import { fileURLToPath } from "node:url";
+
 import { checkDocs } from "./docLint.ts";
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)));

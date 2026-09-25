@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { stubScriptAndSpreadsheetApp } from "../../testSupport/fakeAppsScriptGlobals";
 import { AppsScript } from "./AppsScript";
 

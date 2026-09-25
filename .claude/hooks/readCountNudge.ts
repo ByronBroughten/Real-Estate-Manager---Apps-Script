@@ -1,5 +1,6 @@
 // Nudges a write-up at 15 reads per turn, then every 10; UserPromptSubmit resets the count.
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+
 import { BashReads } from "./lib/bashReads.ts";
 import { type HookInput, readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 

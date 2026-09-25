@@ -1,5 +1,5 @@
 import { Obj } from "../utils/Obj";
-import { installedConfigs, type Configs } from "./configRegister";
+import { type Configs, installedConfigs } from "./configRegister";
 
 export type ValueConfigs = Configs["valueConfigs"];
 export type ValueConfigName = keyof ValueConfigs;

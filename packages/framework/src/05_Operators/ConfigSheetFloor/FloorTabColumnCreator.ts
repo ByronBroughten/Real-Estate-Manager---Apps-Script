@@ -1,6 +1,6 @@
 import {
-  getColumnTraitByName,
   type ColumnName,
+  getColumnTraitByName,
 } from "../../01_SpreadsheetSchema/columnConfigsTypes";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { SheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SheetBaseNamed";
@@ -9,10 +9,10 @@ import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
 import { liveColIndex } from "./floorColumnLocation";
 import {
   columnNameByHeader,
-  floorColumnsToRestore,
-  spreadsheetConfigFeedbackColumnNames,
   type FloorColumnRestore,
+  floorColumnsToRestore,
   type FloorSheetName,
+  spreadsheetConfigFeedbackColumnNames,
 } from "./floorSeedLookups";
 
 export class FloorTabColumnCreator<

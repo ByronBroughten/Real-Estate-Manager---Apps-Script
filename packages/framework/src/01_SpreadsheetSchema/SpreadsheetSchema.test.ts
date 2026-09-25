@@ -1,27 +1,28 @@
 import { describe, expect, it } from "vitest";
+
+import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import {
-  getColumnTraitByName,
   type ColumnFullName,
   type ColumnName,
   type ColumnNameFiltered,
   type ColumnNameOf,
   type ColumnValue,
   type ColumnValueName,
+  getColumnTraitByName,
   type MakeColumnFullName,
   type SheetNameOf,
   type ValueNameOf,
   type ValueOf,
 } from "./columnConfigsTypes";
+import { ColumnSchema } from "./ColumnSchema";
 import {
-  sheetConfigsByGid,
   getSheetTraitByName,
+  sheetConfigsByGid,
   type SheetName,
 } from "./sheetConfigsTypes";
-import type { ValueName } from "./valueSchemas";
-import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import { ColumnSchema } from "./ColumnSchema";
 import { SheetSchema } from "./SheetSchema";
 import { SpreadsheetSchema } from "./SpreadsheetSchema";
+import type { ValueName } from "./valueSchemas";
 
 describe("SpreadsheetSchema", () => {
   const schema = new SpreadsheetSchema();

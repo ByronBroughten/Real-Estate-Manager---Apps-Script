@@ -1,9 +1,9 @@
-import { vsc, type ValueSchemaBase } from "../00_Source/CellValues/valueSchema";
+import { type ValueSchemaBase, vsc } from "../00_Source/CellValues/valueSchema";
 import { validationError } from "../utils/Val";
 import {
   getValueConfigValueArr,
-  valueConfigNames,
   type ValueConfigName,
+  valueConfigNames,
   type ValueConfigValue,
 } from "./valueConfigsTypes";
 

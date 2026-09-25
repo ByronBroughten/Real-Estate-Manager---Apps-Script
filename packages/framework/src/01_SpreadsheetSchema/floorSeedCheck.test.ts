@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { columnConfigsByName } from "./columnConfigsTypes";
 import { assertFloorMatchesSeed } from "./floorSeedCheck";
 import type { ColumnConfigsGeneric, ColumnConfigStored } from "./makeConfigs";

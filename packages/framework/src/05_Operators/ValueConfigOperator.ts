@@ -6,9 +6,9 @@ import {
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
 } from "./SpreadsheetBaseOperator";
 
 export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {

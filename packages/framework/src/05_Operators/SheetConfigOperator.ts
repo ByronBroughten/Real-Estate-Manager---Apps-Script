@@ -16,9 +16,9 @@ import { Val } from "../utils/Val";
 import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
 } from "./SpreadsheetBaseOperator";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {

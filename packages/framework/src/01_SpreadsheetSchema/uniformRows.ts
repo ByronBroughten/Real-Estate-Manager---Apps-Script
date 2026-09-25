@@ -1,6 +1,6 @@
 import type { UniformRowName } from "../00_Source/CellValues/cellValues";
-import { ssConfigGet } from "./spreadsheetConfigTypes";
 import { Obj } from "../utils/Obj";
+import { ssConfigGet } from "./spreadsheetConfigTypes";
 
 export const uniformRows = {
   indexes(): Record<UniformRowName, number> {

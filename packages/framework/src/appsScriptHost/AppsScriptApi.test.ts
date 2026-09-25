@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
+
 import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
+import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { ssConfigGet } from "../01_SpreadsheetSchema/spreadsheetConfigTypes";
 import {

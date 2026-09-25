@@ -1,6 +1,7 @@
 // PostToolUse on Read records a full read of docs/style.md; PreToolUse on Edit and Write denies a gated code edit until one is recorded.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 import { editDecision, isStyleRead, stylePath } from "./lib/styleGate.ts";

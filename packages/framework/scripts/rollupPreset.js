@@ -1,7 +1,8 @@
 // @ts-check
 // JS, not TypeScript: a consumer's rollup config imports this from node_modules, where Node won't strip types.
-import typescript from "@rollup/plugin-typescript";
 import { resolve } from "node:path";
+
+import typescript from "@rollup/plugin-typescript";
 import { parseAst } from "rollup/parseAst";
 
 /**

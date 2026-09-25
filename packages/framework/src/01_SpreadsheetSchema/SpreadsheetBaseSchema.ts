@@ -1,16 +1,16 @@
 import {
-  getUniformRowValueName,
-  codebaseNameDelimiter,
   type CodebaseNameDelimiter,
+  codebaseNameDelimiter,
+  getUniformRowValueName,
   type UniformRowName,
   type UniformRowValueName,
 } from "../00_Source/CellValues/cellValues";
-import {
-  ssConfigGet,
-  type LiveSpreadsheetConfig,
-} from "./spreadsheetConfigTypes";
 import { Obj } from "../utils/Obj";
 import { Str } from "../utils/Str";
+import {
+  type LiveSpreadsheetConfig,
+  ssConfigGet,
+} from "./spreadsheetConfigTypes";
 import { uniformRows } from "./uniformRows";
 
 export class SpreadsheetBaseSchema {

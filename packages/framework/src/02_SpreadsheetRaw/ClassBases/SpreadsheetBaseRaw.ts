@@ -1,8 +1,8 @@
 import { installedRawSource } from "../../00_Source/RawSource/RawSource";
+import { SpreadsheetBaseSchema } from "../../01_SpreadsheetSchema/SpreadsheetBaseSchema";
 import type { GridRangeProps } from "../ClassTypes/AccessorsRaw";
 import { emptyStateRaw } from "../ClassTypes/emptyStateRaw";
 import type { SheetsStateRaw, StateRaw } from "../ClassTypes/StateRaw";
-import { SpreadsheetBaseSchema } from "../../01_SpreadsheetSchema/SpreadsheetBaseSchema";
 
 export interface SpreadsheetRawProps {
   spreadsheetStateRaw: StateRaw;

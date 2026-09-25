@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { type Docs, type Violation, checkDocs } from "./docLint.ts";
+
+import { checkDocs, type Docs, type Violation } from "./docLint.ts";
 
 function nested(lines: number): string {
   return (

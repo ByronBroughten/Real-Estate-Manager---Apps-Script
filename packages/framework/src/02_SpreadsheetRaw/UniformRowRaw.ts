@@ -5,8 +5,8 @@ import type {
 } from "../00_Source/CellValues/cellValues";
 import type {
   EditLockDeclaration,
-  EditWarningDeclaration,
   EditProtection,
+  EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
 import { UniformRowBaseRaw } from "./ClassBases/UniformRowBaseRaw";
 

@@ -1,5 +1,6 @@
 // Decides the style gate: an edit to a file ESLint lints waits for a full Read of docs/style.md this session. Pure; styleGate.ts does the I/O.
 import { sep } from "node:path";
+
 import { type FileLocation, isInLintSet, projectRelative } from "./lintSet.ts";
 
 export const styleGateReason =

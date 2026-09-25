@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { type Decision, type GsheetsWrite, bashDecision, devWriteOf, gsheetsWriteDecision } from "./pinnedTargets.ts";
+
+import { bashDecision, type Decision, devWriteOf, type GsheetsWrite, gsheetsWriteDecision } from "./pinnedTargets.ts";
 
 describe("devWriteOf", () => {
   it("names a dev gen:configs, build, push or run", () => {

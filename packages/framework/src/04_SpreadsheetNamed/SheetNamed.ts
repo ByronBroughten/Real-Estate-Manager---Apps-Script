@@ -4,8 +4,8 @@ import type {
 } from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
-  EditWarningDeclaration,
   EditProtection,
+  EditWarningDeclaration,
   WholeSheetEditLockDeclaration,
   WholeSheetEditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
