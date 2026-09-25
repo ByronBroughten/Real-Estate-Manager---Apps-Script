@@ -8,7 +8,8 @@
     ".": "./src/framework.ts",
     "./testing": "./src/frameworkTesting.ts",
     "./tsconfig.base.json": "./tsconfig.base.json",
-    "./rollup": "./scripts/rollupPreset.js"
+    "./rollup": "./scripts/rollupPreset.js",
+    "./eslint": "./scripts/eslintPreset.js"
   },
   "bin": {
     "sheets-framework": "scripts/sheets-framework.js"
@@ -24,6 +25,10 @@
   ],
   "scripts": {
     "tsc": "tsc -p . && tsc -p scripts",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "chore": "node scripts/sheets-framework.js chore",
     "gen:configs": "node scripts/sheets-framework.js gen-configs",
     "probe": "node scripts/sheets-framework.js probe",
@@ -36,12 +41,20 @@
     "tsx": "^4.23.13"
   },
   "peerDependencies": {
+    "@byronbroughten/config": "^0.1.0",
     "@rollup/plugin-typescript": "^12.1.4",
+    "eslint": "^9.35.0",
     "rollup": "^4.54.0",
     "vitest": "^4.1.11"
   },
   "peerDependenciesMeta": {
+    "@byronbroughten/config": {
+      "optional": true
+    },
     "@rollup/plugin-typescript": {
+      "optional": true
+    },
+    "eslint": {
       "optional": true
     },
     "rollup": {
@@ -50,5 +63,11 @@
     "vitest": {
       "optional": true
     }
+  },
+  "devDependencies": {
+    "@byronbroughten/config": "^0.1.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "eslint": "^9.35.0",
+    "vitest": "^4.1.11"
   }
 }

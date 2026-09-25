@@ -6,7 +6,7 @@ Vitest, as plain Node against fakes, so `npm test` is always safe. The test-writ
 
 ## Running the tests
 
-Tests run on [Vitest](https://vitest.dev): `npm test` (single run), `npm run test:watch`, or `npm run test:coverage`. None of it touches the live spreadsheet or Apps Script — it's plain Node against fakes — so it's always safe to run freely, same as `npm run tsc`.
+Tests run on [Vitest](https://vitest.dev): `npm test` (single run), `npm run test:watch`, or `npm run test:coverage`, from the framework's own `vitest.config.ts`. None of it touches the live spreadsheet or Apps Script — it's plain Node against fakes — so it's always safe to run freely, same as `npm run tsc`.
 
 ## Co-located tests and tier imports
 

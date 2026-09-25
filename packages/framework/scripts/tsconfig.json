@@ -1,5 +1,5 @@
 {
-  // The Node program: scripts/ run under tsx, plus the three JS files that run outside it. Self-contained, since scripts/ ships in the package.
+  // The Node program: scripts/ run under tsx, plus the four JS files that run outside it. Self-contained, since scripts/ ships in the package.
   "compilerOptions": {
     "target": "ES2023",
     "module": "preserve",
