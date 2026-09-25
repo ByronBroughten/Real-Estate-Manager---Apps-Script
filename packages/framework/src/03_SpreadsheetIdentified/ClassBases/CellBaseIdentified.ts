@@ -1,6 +1,8 @@
 import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
-import type { ColumnIdentifiedProps } from "./ColumnBaseIdentified";
-import { ColumnBaseIdentified } from "./ColumnBaseIdentified";
+import {
+  ColumnBaseIdentified,
+  type ColumnIdentifiedProps,
+} from "./ColumnBaseIdentified";
 
 export interface CellIdentifiedProps<
   VN extends ValueName = ValueName,

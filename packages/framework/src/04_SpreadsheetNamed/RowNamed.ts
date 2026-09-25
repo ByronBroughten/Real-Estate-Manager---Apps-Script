@@ -10,7 +10,7 @@ import type { Value, ValueName } from "../01_SpreadsheetSchema/valueSchemas";
 import { RowRaw } from "../02_SpreadsheetRaw/RowRaw";
 import { RowIdentified } from "../03_SpreadsheetIdentified/RowIdentified";
 import { Obj } from "../utils/Obj";
-import { CellNamed } from "./CellNamed";
+import type { CellNamed } from "./CellNamed";
 import { RowBaseNamed } from "./ClassBases/RowBaseNamed";
 import { SheetNamed } from "./SheetNamed";
 
