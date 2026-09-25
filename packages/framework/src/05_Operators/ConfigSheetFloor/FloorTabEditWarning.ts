@@ -100,7 +100,9 @@ export class FloorTabEditWarning<
     identityColIndexes: number[] | undefined,
   ): Map<number, number[]> {
     const rule = floorTabRules()[this.sheetName].selfDescribingRow;
-    if (rule === undefined || identityColIndexes === undefined) return new Map();
+    if (rule === undefined || identityColIndexes === undefined) {
+      return new Map();
+    }
     const colIndex = this._liveColIndexes().get(rule.declaredColumn);
     if (colIndex === undefined) return new Map();
     const sheet = this.sheet;
