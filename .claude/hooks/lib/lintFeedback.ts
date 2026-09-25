@@ -17,7 +17,7 @@ const maxListed = 20;
 export function lintFeedback({ eslintJson, filePath }: LintFeedbackInput): string | null {
   const errors = parseErrors(eslintJson);
   if (!errors || errors.length === 0) return null;
-  const listed = errors.slice(0, maxListed).map(describe);
+  const listed = errors.slice(0, maxListed).map(describeError);
   const omitted = errors.length - listed.length;
   const noun = errors.length === 1 ? "error" : "errors";
   return [
@@ -27,7 +27,7 @@ export function lintFeedback({ eslintJson, filePath }: LintFeedbackInput): strin
   ].join("\n");
 }
 
-function describe({ line, column, ruleId, message }: LintMessage): string {
+function describeError({ line, column, ruleId, message }: LintMessage): string {
   return `  ${line}:${column} ${ruleId ?? "parse-error"} ${message}`;
 }
 
@@ -37,9 +37,15 @@ function parseErrors(eslintJson: string): LintMessage[] | null {
     const results: unknown = JSON.parse(eslintJson);
     if (!Array.isArray(results)) return null;
     return results
-      .flatMap((result) => (Array.isArray(result?.messages) ? (result.messages as LintMessage[]) : []))
-      .filter((message) => message.severity === 2);
+      .flatMap((result) => (Array.isArray(result?.messages) ? result.messages : []))
+      .filter(isLintError);
   } catch {
     return null;
   }
+}
+
+function isLintError(message: unknown): message is LintMessage {
+  if (typeof message !== "object" || message === null) return false;
+  const { severity, line, column, message: text } = message as Record<string, unknown>;
+  return severity === 2 && typeof line === "number" && typeof column === "number" && typeof text === "string";
 }

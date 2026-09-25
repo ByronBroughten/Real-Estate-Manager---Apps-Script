@@ -19,11 +19,6 @@ export type Merge<L, R> = IdS<
 export function merge<A extends object, B extends object>(
   a: A,
   b: B,
-): IdS<
-  Pick<A, Exclude<keyof A, keyof B>> &
-    Pick<B, Exclude<keyof B, OptionalPropertyNames<B>>> &
-    Pick<B, Exclude<OptionalPropertyNames<B>, keyof A>> &
-    SpreadProperties<A, B, OptionalPropertyNames<B> & keyof A>
-> {
+): Merge<A, B> {
   return { ...a, ...b } as unknown as Merge<A, B>;
 }
