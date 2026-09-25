@@ -1,9 +1,12 @@
-// Decides the pinned-target guard: dev writes drop to ask while a pinning file is dirty, and gsheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.ts does the I/O.
+// Decides the pinned-target guard: dev writes drop to ask while a pin is off, and gsheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.ts does the I/O.
 import { commandWordsOf } from "./bashReads.ts";
-import { sheetsConfigFiles } from "./sheetsConfigs.ts";
 
+// Pinned in tracked code because sheets.config.json is gitignored, so git can't see an edit to it.
+export const pinnedDevSpreadsheetId = "19gIs4w8-2Nsin5zTN1TojOR1HiiT9Y-jCctC7doAMqM";
+export const devConfigPath = "packages/framework/sheets.config.json";
+
+// The guard and its libs; git status on these is one pin, the dev config's ID the other.
 export const pinningFiles = [
-  ...sheetsConfigFiles.map(({ path }) => path),
   ".claude/hooks/pinnedTargetGuard.ts",
   ".claude/hooks/lib/pinnedTargets.ts",
   ".claude/hooks/lib/sheetsConfigs.ts",
@@ -16,7 +19,7 @@ export const guardedGsheetsWrites = new Set([
 const devWrites = new Set(["dev:gen:configs", "dev:build", "dev:push", "dev:run"]);
 const runVerbs = new Set(["run", "run-script"]);
 
-// undefined means git could not say which pinning files are dirty.
+// Each entry says why a pin is off; undefined means git could not say.
 export type DirtyPinningFiles = string[] | undefined;
 
 export interface Decision {
@@ -41,6 +44,16 @@ export interface GsheetsWrite {
   dirtyPinningFiles: DirtyPinningFiles;
 }
 
+// Turns git's dirty pinning files into pin-off reasons, adding one when the dev config names another spreadsheet.
+export function pinsOff(dirtyFiles: string[] | undefined, configDevSpreadsheetId: string | undefined): DirtyPinningFiles {
+  if (!dirtyFiles) return undefined;
+  const reasons = dirtyFiles.map((path) => `${path} has uncommitted changes`);
+  if (configDevSpreadsheetId !== pinnedDevSpreadsheetId) {
+    reasons.push(`${devConfigPath} does not name the pinned dev spreadsheet`);
+  }
+  return reasons;
+}
+
 export function devWriteOf(command: string): string | undefined {
   let commands;
   try {
@@ -62,7 +75,7 @@ export function bashDecision({ command, dirtyPinningFiles }: BashCommand): Decis
   if (!write || isClean(dirtyPinningFiles)) return undefined;
   return {
     permissionDecision: "ask",
-    reason: `Pinned-target guard: \`${write}\` writes to the dev target, and ${dirtyShown(dirtyPinningFiles)}, so its standing yes is off until that is committed or reverted.`,
+    reason: `Pinned-target guard: \`${write}\` writes to the dev target, and ${dirtyShown(dirtyPinningFiles)}, so its standing yes is off until that is fixed.`,
   };
 }
 
@@ -78,7 +91,7 @@ export function gsheetsWriteDecision({
     return {
       permissionDecision: "ask",
       reason:
-        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the dev spreadsheet in packages/framework/sheets.config.json. " +
+        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the pinned dev spreadsheet. " +
         "It needs a yes that names the exact sheet, range and values.",
     };
   }
@@ -105,5 +118,5 @@ function isClean(dirtyPinningFiles: DirtyPinningFiles): boolean {
 
 function dirtyShown(dirtyPinningFiles: DirtyPinningFiles): string {
   if (!Array.isArray(dirtyPinningFiles)) return "the pinning files' git state could not be read";
-  return `${dirtyPinningFiles.join(", ")} ${dirtyPinningFiles.length === 1 ? "has" : "have"} uncommitted changes`;
+  return dirtyPinningFiles.join("; ");
 }

@@ -1,4 +1,4 @@
-// PreToolUse on Bash and gsheets writes: a dev write asks while a pinning file is dirty; a gsheets write is allowed only on the clean dev ID.
+// PreToolUse on Bash and gsheets writes: a dev write asks while a pin is off; a gsheets write is allowed only on the pinned dev ID.
 import { spawnSync } from "node:child_process";
 
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
@@ -7,7 +7,9 @@ import {
   type Decision,
   type DirtyPinningFiles,
   gsheetsWriteDecision,
+  pinnedDevSpreadsheetId,
   pinningFiles,
+  pinsOff,
 } from "./lib/pinnedTargets.ts";
 import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 
@@ -19,13 +21,13 @@ await runFailOpen(() => {
   if (input.tool_name === "Bash") {
     const command = input.tool_input?.command;
     if (typeof command !== "string") return;
-    decision = bashDecision({ command, dirtyPinningFiles: dirtyPinningFiles(projectDir) });
+    decision = bashDecision({ command, dirtyPinningFiles: pinsOffIn(projectDir) });
   } else {
     decision = gsheetsWriteDecision({
       toolName: input.tool_name,
       spreadsheetId: input.tool_input?.spreadsheet_id,
-      devSpreadsheetId: devSpreadsheetId(projectDir),
-      dirtyPinningFiles: dirtyPinningFiles(projectDir),
+      devSpreadsheetId: pinnedDevSpreadsheetId,
+      dirtyPinningFiles: pinsOffIn(projectDir),
     });
   }
   if (!decision) return;
@@ -38,7 +40,11 @@ await runFailOpen(() => {
   });
 });
 
-function dirtyPinningFiles(projectDir: string): DirtyPinningFiles {
+function pinsOffIn(projectDir: string): DirtyPinningFiles {
+  return pinsOff(dirtyFiles(projectDir), configDevSpreadsheetId(projectDir));
+}
+
+function dirtyFiles(projectDir: string): string[] | undefined {
   const { status, stdout } = spawnSync("git", ["status", "--porcelain", "--", ...pinningFiles], {
     cwd: projectDir,
     encoding: "utf8",
@@ -50,6 +56,6 @@ function dirtyPinningFiles(projectDir: string): DirtyPinningFiles {
     .map((line) => line.slice(3));
 }
 
-function devSpreadsheetId(projectDir: string): string | undefined {
+function configDevSpreadsheetId(projectDir: string): string | undefined {
   return readSheetsConfigs(projectDir).find(({ scriptPrefix }) => scriptPrefix === "dev")?.spreadsheetId;
 }

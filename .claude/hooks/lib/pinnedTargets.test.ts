@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { bashDecision, type Decision, devWriteOf, type GsheetsWrite, gsheetsWriteDecision } from "./pinnedTargets.ts";
+import {
+  bashDecision,
+  type Decision,
+  devWriteOf,
+  type GsheetsWrite,
+  gsheetsWriteDecision,
+  pinnedDevSpreadsheetId,
+  pinsOff,
+} from "./pinnedTargets.ts";
 
 describe("devWriteOf", () => {
   it("names a dev gen:configs, build, push or run", () => {
@@ -49,6 +57,7 @@ describe("bashDecision", () => {
   });
 
   it("asks when the pinning files' state is unknown", () => {
+    expect(pinsOff(undefined, pinnedDevSpreadsheetId)).toBeUndefined();
     expect(bashDecision({ command, dirtyPinningFiles: undefined })?.permissionDecision).toBe("ask");
   });
 
@@ -56,6 +65,21 @@ describe("bashDecision", () => {
     const dirty = ["packages/framework/sheets.config.json"];
     expect(bashDecision({ command: "npm run dev:probe", dirtyPinningFiles: dirty })).toBeUndefined();
     expect(bashDecision({ command: "npm run app:build", dirtyPinningFiles: dirty })).toBeUndefined();
+  });
+});
+
+describe("pinsOff", () => {
+  it("is empty for clean files and the pinned dev ID in config", () => {
+    expect(pinsOff([], pinnedDevSpreadsheetId)).toEqual([]);
+  });
+
+  it("names a dirty file and a config pointing anywhere but the pinned dev ID", () => {
+    const reasons = pinsOff([".claude/hooks/pinnedTargetGuard.ts"], "app-id");
+    expect(reasons).toEqual([
+      ".claude/hooks/pinnedTargetGuard.ts has uncommitted changes",
+      "packages/framework/sheets.config.json does not name the pinned dev spreadsheet",
+    ]);
+    expect(pinsOff([], undefined)).toHaveLength(1);
   });
 });
 
@@ -84,7 +108,7 @@ describe("gsheetsWriteDecision", () => {
   it("asks for any other spreadsheet, with the exact sheet, range and values", () => {
     const decision = decide({ spreadsheetId: "app-id" });
     expect(decision?.permissionDecision).toBe("ask");
-    expect(decision?.reason).toMatch(/not the dev spreadsheet/);
+    expect(decision?.reason).toMatch(/not the pinned dev spreadsheet/);
     expect(decision?.reason).toMatch(/sheet, range and values/);
   });
 
