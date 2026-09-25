@@ -1,6 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { type EditDecision, editDecision, isStyleRead,styleGateReason } from "./styleGate.ts";
+import {
+  cursorEditDecision,
+  cursorFilePath,
+  cursorReadBounds,
+  type EditDecision,
+  editDecision,
+  frameworkStylePath,
+  isFullDocRead,
+  isPostToolUse,
+  isStyleRead,
+  styleGateReason,
+} from "./styleGate.ts";
 
 const projectDir = "/repo";
 const generatedDirs = ["packages/real-estate/src/generated", "packages/framework/dev/generated"];
@@ -116,5 +127,70 @@ describe("the refusal reason", () => {
   it("says a partial Read doesn't count", () => {
     expect(styleGateReason).toMatch(/full Read/);
     expect(styleGateReason).toMatch(/partial/);
+  });
+});
+
+describe("isPostToolUse", () => {
+  it("accepts Claude's spelling and Cursor's", () => {
+    expect(isPostToolUse("PostToolUse")).toBe(true);
+    expect(isPostToolUse("postToolUse")).toBe(true);
+    expect(isPostToolUse("preToolUse")).toBe(false);
+  });
+});
+
+describe("cursorEditDecision", () => {
+  const unread = { hasReadGeneral: false, hasReadFramework: false };
+
+  function decide(filePath: string, reads = unread): EditDecision {
+    return cursorEditDecision({ projectDir, cwd: projectDir, filePath, generatedDirs, reads });
+  }
+
+  it("denies a framework TypeScript edit until both style docs were read in full", () => {
+    const denied = decide(frameworkFile);
+    expect(denied.denyReason).toMatch(/config\/docs\/style\.md/);
+    expect(denied.denyReason).toMatch(/packages\/framework\/docs\/style\.md/);
+    expect(denied.denyReason).toMatch(/retry/);
+    expect(decide(frameworkFile, { hasReadGeneral: true, hasReadFramework: false }).denyReason).toMatch(
+      /packages\/framework\/docs\/style\.md/,
+    );
+    expect(decide(frameworkFile, { hasReadGeneral: true, hasReadFramework: false }).denyReason).not.toMatch(
+      /config\/docs\/style\.md/,
+    );
+  });
+
+  it("denies app code the same way, and root tooling only until the general doc was read", () => {
+    expect(decide("/repo/packages/real-estate/src/index.ts").denyReason).toMatch(/packages\/framework\/docs\/style\.md/);
+    expect(decide("/repo/scripts/docLint.ts").denyReason).toMatch(/config\/docs\/style\.md/);
+    expect(decide("/repo/scripts/docLint.ts").denyReason).not.toMatch(/packages\/framework\/docs\/style\.md/);
+    expect(decide("/repo/scripts/docLint.ts", { hasReadGeneral: true, hasReadFramework: false })).toEqual({
+      denyReason: undefined,
+    });
+  });
+
+  it("allows a framework edit after both docs were read, and still skips generated files", () => {
+    expect(decide(frameworkFile, { hasReadGeneral: true, hasReadFramework: true })).toEqual({ denyReason: undefined });
+    expect(decide("/repo/packages/framework/dev/generated/sheetConfigs.ts")).toEqual({ denyReason: undefined });
+  });
+});
+
+describe("isFullDocRead", () => {
+  it("counts a full Read of the framework style doc and rejects a short one", () => {
+    const where = { projectDir, cwd: projectDir, filePath: "/repo/packages/framework/docs/style.md" };
+    expect(isFullDocRead({ ...where, totalLines: 80 }, frameworkStylePath)).toBe(true);
+    expect(isFullDocRead({ ...where, limit: 5, totalLines: 80 }, frameworkStylePath)).toBe(false);
+  });
+});
+
+describe("cursor tool input", () => {
+  it("reads Cursor's path field, and Claude's file_path", () => {
+    expect(cursorFilePath({ path: "/repo/src/a.ts" })).toBe("/repo/src/a.ts");
+    expect(cursorFilePath({ file_path: "/repo/src/b.ts" })).toBe("/repo/src/b.ts");
+    expect(cursorFilePath(undefined)).toBeUndefined();
+  });
+
+  it("reads offset and limit only when they are whole numbers", () => {
+    expect(cursorReadBounds({ offset: 1, limit: 40 })).toEqual({ offset: 1, limit: 40 });
+    expect(cursorReadBounds({ offset: "1" })).toBeUndefined();
+    expect(cursorReadBounds(undefined)).toEqual({});
   });
 });

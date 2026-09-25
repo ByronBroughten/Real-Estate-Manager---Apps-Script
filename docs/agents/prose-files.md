@@ -24,6 +24,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | `docs/agent-behavior-design.md` | Why the agent tooling (hooks, gates, delegation, this doc scheme) is shaped as it is. It never goes in the framework's `docs/design.md`. |
 | `docs/targets-and-gates.md` | The `dev`/`app` targets, what needs a yes first, and the gsheets MCP write rules. |
 | `docs/claude-code-guardrails.md` | The Claude Code hooks and project agent. |
+| `docs/cursor-guardrails.md` | The Cursor hooks. |
 | `docs/agents/*.md` | Agent workflow: git, planning, delegation, issues. |
 | `README.md` | The workspace overview, a derived view for people on GitHub; it links each public clone by github.com URL, since the clones don't exist there. Nothing routes agents to it. Update it when a fact it mirrors changes (tables below). |
 
