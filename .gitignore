@@ -11,3 +11,7 @@ client_secret*.json
 
 # Full JSON responses from `*:probe`, in each package's .probe/ — live spreadsheet data, never committed.
 .probe/
+
+# Spreadsheet and script IDs stay local; each package commits a .example.json to copy instead.
+sheets.config.json
+.clasp.json

@@ -1,7 +1,6 @@
 {
-  "scriptId": "1mwARqhx3udaTd8xvxnEhmT901shVXjlKPSeA4Yg0kYDE3HntHwM-44vn",
+  "scriptId": "<your Apps Script project's ID>",
   "rootDir": "",
-  "projectId": "real-estate-manager-sheets",
   "scriptExtensions": [".js", ".gs"],
   "htmlExtensions": [".html"],
   "jsonExtensions": [".json"],

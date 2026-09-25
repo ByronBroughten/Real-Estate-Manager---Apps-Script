@@ -1,6 +1,7 @@
 {
-  "scriptId": "1yUDu_CJcIscePPAPSn5korl6b5EW9qLb-9s8xDfZ7S6u3B5wq_-weQXK",
+  "scriptId": "<your Apps Script project's ID>",
   "rootDir": "",
+  "projectId": "<your GCP project's ID>",
   "scriptExtensions": [".js", ".gs"],
   "htmlExtensions": [".html"],
   "jsonExtensions": [".json"],

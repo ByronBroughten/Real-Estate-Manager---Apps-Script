@@ -1,5 +1,5 @@
 {
-  "spreadsheetId": "19gIs4w8-2Nsin5zTN1TojOR1HiiT9Y-jCctC7doAMqM",
+  "spreadsheetId": "<your dev spreadsheet's ID>",
   "generatedDir": "dev/generated",
   "choreHomes": ["dev/chores"]
 }
