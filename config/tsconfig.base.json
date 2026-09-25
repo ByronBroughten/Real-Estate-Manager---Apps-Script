@@ -1,5 +1,5 @@
 {
-  // The strictness and module settings every program shares; each program adds its target, module and types.
+  // The strictness and module settings shared by the programs that extend it; each adds its own target, module and types.
   "compilerOptions": {
     "lib": ["esnext"],
     "noEmit": true,

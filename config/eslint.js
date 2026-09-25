@@ -26,7 +26,6 @@ export const styleSyntax = [
   },
 ];
 
-// The general rules; a consumer spreads them first and layers its project's rules after.
 export const eslintPreset = [
   { ignores: ["**/dist/**", "**/coverage/**"] },
   eslint.configs.recommended,

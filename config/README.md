@@ -1,6 +1,6 @@
 # @byronbroughten/config
 
-General tooling for TypeScript projects: an ESLint flat-config preset, the prettier config and a base tsconfig. Plain JS, no build step.
+General tooling for TypeScript projects: an ESLint flat-config preset, the prettier config and a base tsconfig. Plain JS, no build step; one version of each peer (eslint, prettier, typescript) is needed only for the export that uses it.
 
 | Export | Consume it with |
 | --- | --- |
