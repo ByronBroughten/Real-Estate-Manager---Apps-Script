@@ -104,12 +104,12 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
       };
     });
   }
-  private _withFloorThenLiveConfig<T>(body: (floorReport: string) => T): T {
+  private _withFloorThenLiveConfig<RT>(body: (floorReport: string) => RT): RT {
     const floorReport = this.ensureConfigSheetFloor();
     this.ss.batchUpdateGSheets();
     return this._withLiveSpreadsheetConfig(() => body(floorReport));
   }
-  private _withLiveSpreadsheetConfig<T>(body: () => T): T {
+  private _withLiveSpreadsheetConfig<RT>(body: () => RT): RT {
     const liveConfig = this.spreadsheetConfigOperator.fetchLiveConfig();
     overlaySpreadsheetConfig(liveConfig);
     try {

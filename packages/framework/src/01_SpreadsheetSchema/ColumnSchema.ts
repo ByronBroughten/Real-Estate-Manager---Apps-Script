@@ -56,21 +56,21 @@ export class ColumnSchema<
       sheetName: this.sheetName,
     });
   }
-  trait<K extends keyof ColumnConfig>(
-    key: K,
-  ): ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>] {
+  trait<TK extends keyof ColumnConfig>(
+    key: TK,
+  ): ColumnConfigAt<SN, CN>[TK & keyof ColumnConfigAt<SN, CN>] {
     return getColumnTraitById(
       this.sheetGid,
       this.columnId,
       key,
-    ) as ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>];
+    ) as ColumnConfigAt<SN, CN>[TK & keyof ColumnConfigAt<SN, CN>];
   }
   get valueName(): ColumnConfigAt<SN, CN>["valueName"] {
     return this.trait("valueName");
   }
-  valTrait<K extends ValueSchemaKey>(
-    key: K,
-  ): ValueSchema<ColumnConfigAt<SN, CN>["valueName"]>[K] {
+  valTrait<VK extends ValueSchemaKey>(
+    key: VK,
+  ): ValueSchema<ColumnConfigAt<SN, CN>["valueName"]>[VK] {
     return getValTrait(this.valueName, key);
   }
   get isFormula(): boolean {

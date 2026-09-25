@@ -43,6 +43,18 @@ const aboveTierFolders = [
   "frameworkTesting",
   "nodeHost",
 ];
+const variableNaming = {
+  selector: "variable",
+  format: ["camelCase", "PascalCase"],
+  leadingUnderscore: "allow",
+  custom: { regex: "^[A-Z][A-Z0-9]+$", match: false },
+};
+// Generic params are two-letter domain abbreviations; the domain-free utilities keep bare T, K and V.
+const typeParameterNaming = {
+  selector: "typeParameter",
+  format: null,
+  custom: { regex: "^[A-Z]{2}$", match: true },
+};
 const styleSyntax = [
   {
     selector: "TSEnumDeclaration",
@@ -167,6 +179,7 @@ export default defineConfig(
       ],
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+      "func-style": ["error", "declaration"],
       "prefer-template": "error",
       "no-restricted-syntax": ["error", ...styleSyntax],
       "max-classes-per-file": ["error", 1],
@@ -183,12 +196,8 @@ export default defineConfig(
       // Constants are camelCase too; methods stay free, so SHOUTING multi-row deletes pass.
       "@typescript-eslint/naming-convention": [
         "error",
-        {
-          selector: "variable",
-          format: ["camelCase", "PascalCase"],
-          leadingUnderscore: "allow",
-          custom: { regex: "^[A-Z][A-Z0-9]+$", match: false },
-        },
+        variableNaming,
+        typeParameterNaming,
       ],
     },
   },
@@ -204,10 +213,24 @@ export default defineConfig(
       ],
     },
   },
-  // Test helpers and plain-JS files are out of the return-type rule's scope (#153).
+  // Test helpers and plain-JS files are out of the return-type and function-style rules' scope (#153).
   {
     files: ["**/*.test.ts", "**/*.{js,mjs}"],
-    rules: { "@typescript-eslint/explicit-function-return-type": "off" },
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "func-style": "off",
+    },
+  },
+  // Domain-free utilities and test helpers keep bare T, K and V.
+  {
+    files: [
+      "packages/*/src/{utils,appUtils}/**/*.ts",
+      "packages/*/src/testSupport/typeAssertions.ts",
+      "**/*.test.ts",
+    ],
+    rules: {
+      "@typescript-eslint/naming-convention": ["error", variableNaming],
+    },
   },
   // The structural utilities do the generic typing that needs `any` (docs/style/type-modeling.md).
   {

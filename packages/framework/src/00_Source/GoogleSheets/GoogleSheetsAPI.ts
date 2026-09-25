@@ -228,16 +228,13 @@ function httpSheetsTransport(
   props: GoogleSheetsAPIHttpProps,
 ): SheetsAdvancedTransport {
   // The one place the wire is trusted, as Apps Script's own declaration trusts it.
-  const send = <T>(request: SheetsHttpRequest): T =>
-    props.transport(request) as T;
-  const url = (
-    spreadsheetId: string,
-    suffix: string,
-    fields?: string,
-  ): string => {
+  function send<RS>(request: SheetsHttpRequest): RS {
+    return props.transport(request) as RS;
+  }
+  function url(spreadsheetId: string, suffix: string, fields?: string): string {
     const query = fields ? `?fields=${encodeURIComponent(fields)}` : "";
     return `${sheetsApiBase}/${spreadsheetId}${suffix}${query}`;
-  };
+  }
   return {
     Spreadsheets: {
       get: (spreadsheetId, optionalArgs) =>

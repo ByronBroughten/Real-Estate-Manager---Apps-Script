@@ -21,8 +21,8 @@ export function clearSpreadsheetConfigOverlay(): void {
   liveSpreadsheetConfig = null;
 }
 
-export function ssConfigGet<K extends keyof SpreadsheetConfig>(
-  key: K,
-): LiveSpreadsheetConfig[K] {
+export function ssConfigGet<TK extends keyof SpreadsheetConfig>(
+  key: TK,
+): LiveSpreadsheetConfig[TK] {
   return (liveSpreadsheetConfig ?? installedConfigs().spreadsheetConfig)[key];
 }

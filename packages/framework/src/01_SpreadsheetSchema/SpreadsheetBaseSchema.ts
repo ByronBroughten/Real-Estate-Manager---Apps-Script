@@ -17,10 +17,10 @@ export class SpreadsheetBaseSchema {
   get codebaseNameDelimiter(): CodebaseNameDelimiter {
     return codebaseNameDelimiter;
   }
-  combineNames<S1 extends string, S2 extends string>(
-    name1: S1,
-    name2: S2,
-  ): `${S1}${CodebaseNameDelimiter}${S2}` {
+  combineNames<SA extends string, SB extends string>(
+    name1: SA,
+    name2: SB,
+  ): `${SA}${CodebaseNameDelimiter}${SB}` {
     return `${name1}${this.codebaseNameDelimiter}${name2}`;
   }
   get idHeader(): LiveSpreadsheetConfig["idHeader"] {

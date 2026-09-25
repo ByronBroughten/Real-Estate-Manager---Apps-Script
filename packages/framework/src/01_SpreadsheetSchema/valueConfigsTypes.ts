@@ -10,11 +10,11 @@ export function valueConfigNames(): readonly ValueConfigName[] {
 export type ValueConfigValues = {
   [K in ValueConfigName]: ValueConfigs[K][number];
 };
-export type ValueConfigValue<N extends ValueConfigName = ValueConfigName> =
-  ValueConfigValues[N];
+export type ValueConfigValue<VC extends ValueConfigName = ValueConfigName> =
+  ValueConfigValues[VC];
 
-export function getValueConfigValueArr<K extends ValueConfigName>(
-  key: K,
-): ValueConfigs[K] {
+export function getValueConfigValueArr<VC extends ValueConfigName>(
+  key: VC,
+): ValueConfigs[VC] {
   return installedConfigs().valueConfigs[key];
 }

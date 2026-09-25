@@ -51,7 +51,7 @@ export abstract class RowCommonRaw extends RowBaseRaw {
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
   }
-  returnMissingValues<V extends CellValue>(...values: V[]): V[] {
+  returnMissingValues<CV extends CellValue>(...values: CV[]): CV[] {
     return values.filter((value) => !this.activeValueArr.includes(value));
   }
   remove(): void {

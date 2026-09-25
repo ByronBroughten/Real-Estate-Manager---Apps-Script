@@ -102,9 +102,9 @@ export type ColumnValueDeclared<
 
 export type SheetDataValues<
   SN extends SheetNameSimple,
-  VNS extends ColumnName<SN> = ColumnName<SN>,
+  CS extends ColumnName<SN> = ColumnName<SN>,
 > = {
-  [CN in VNS]: ColumnValue<SN, CN>;
+  [CN in CS]: ColumnValue<SN, CN>;
 };
 
 // Every writable column but the generated id: the bag a complete append must fill.
@@ -123,10 +123,10 @@ export function getSheetColumnNames<SN extends SheetNameSimple>(
 export function getColumnTraitByName<
   TN extends SheetNameSimple,
   CN extends ColumnName<TN>,
-  K extends keyof ColumnConfigAt<TN, CN>,
->(sheetName: TN, columnName: CN, key: K): ColumnConfigAt<TN, CN>[K] {
+  TK extends keyof ColumnConfigAt<TN, CN>,
+>(sheetName: TN, columnName: CN, key: TK): ColumnConfigAt<TN, CN>[TK] {
   if (key === "columnName") {
-    return columnName as ColumnConfigAt<TN, CN>[K];
+    return columnName as ColumnConfigAt<TN, CN>[TK];
   }
   return (columnConfigs()[sheetName][columnName] as ColumnConfigAt<TN, CN>)[
     key
@@ -153,11 +153,11 @@ function makeColumnConfigsByGidAndColId(): ColumnConfigsByGidAndColId {
 
 const columnConfigsByGidAndColId = lazy(makeColumnConfigsByGidAndColId);
 
-export function getColumnTraitById<K extends keyof ColumnConfig>(
+export function getColumnTraitById<TK extends keyof ColumnConfig>(
   sheetGid: number,
   columnId: string,
-  key: K,
-): ColumnConfig[K] {
+  key: TK,
+): ColumnConfig[TK] {
   const colTraits = Val.assert(
     columnConfigsByGidAndColId().get(sheetGid)?.get(columnId),
     `column attributes for sheetGid=${sheetGid}, columnId=${columnId}`,

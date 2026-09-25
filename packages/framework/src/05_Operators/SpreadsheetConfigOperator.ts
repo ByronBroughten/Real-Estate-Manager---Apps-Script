@@ -115,10 +115,10 @@ function validateFixedLayoutValuesUnchanged(
   }
 }
 
-function changedLayoutValueLines<K extends string>(
-  headers: Record<K, string>,
-  liveValues: NoInfer<Record<K, string | number>>,
-  expectedValue: (key: K) => string | number,
+function changedLayoutValueLines<LK extends string>(
+  headers: Record<LK, string>,
+  liveValues: NoInfer<Record<LK, string | number>>,
+  expectedValue: (key: LK) => string | number,
 ): string[] {
   return Obj.keys(headers).flatMap((key) => {
     const live = liveValues[key];

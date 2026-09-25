@@ -14,7 +14,7 @@ export type CellValue<VN extends CellValueName = CellValueName> =
   CellValueNameToValue[VN];
 
 // The blank removed, whether or not this value type ever had one.
-export type NotEmpty<V> = Exclude<V, "">;
+export type NotEmpty<VL> = Exclude<VL, "">;
 
 export const codebaseNameDelimiter = "_";
 export type CodebaseNameDelimiter = typeof codebaseNameDelimiter;

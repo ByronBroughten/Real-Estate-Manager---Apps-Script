@@ -27,7 +27,7 @@ type AllValuesOrEmpty = {
 export type ValueSchemas = {
   [VN in ValueNameSimple]: ValueSchemaBase<AllValuesOrEmpty[VN]>;
 };
-export type ValueName<V extends ValueNameSimple = ValueNameSimple> = V;
+export type ValueName<VN extends ValueNameSimple = ValueNameSimple> = VN;
 export type VnToCvn<VN extends ValueNameSimple> = VN extends CellValueName
   ? VN
   : VN extends "checkbox"
@@ -43,14 +43,14 @@ const valueSchemas = lazy((): ValueSchemas => ({
 
 export type ValueTrait<
   VN extends ValueName,
-  K extends ValueSchemaKey,
-> = ValueSchema<VN>[K];
+  VK extends ValueSchemaKey,
+> = ValueSchema<VN>[VK];
 
 export function getValTrait<
   VN extends ValueNameSimple,
-  K extends ValueSchemaKey,
->(valueName: VN, key: K): ValueSchema<VN>[K] {
-  return valueSchemas()[valueName][key] as ValueSchema<VN>[K];
+  VK extends ValueSchemaKey,
+>(valueName: VN, key: VK): ValueSchema<VN>[VK] {
+  return valueSchemas()[valueName][key] as ValueSchema<VN>[VK];
 }
 
 export type Value<VN extends ValueName = ValueName> = ValueTrait<VN, "type">;

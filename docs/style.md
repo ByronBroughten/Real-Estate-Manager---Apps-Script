@@ -33,7 +33,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
   - **Helpers sharing a subject and passing nothing between them become an object bundle; helpers passing one value around become a helper class** in its own file.
 - **Delete dead scaffolding in a file you touch**, but **ask before deleting commented-out code.** Zero callers is a list of candidates, not a verdict.
 - **A "why" comment carries over verbatim across a restructure.**
-- **One class per file, custom `Error` subclasses included.**
+- **One class per file, custom `Error` subclasses included.** Lint backs it.
 
 ## Naming
 
@@ -49,7 +49,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **A name has to read to someone who has never opened this codebase** — never jargon named after the mechanism that sets it.
 - **Google's API names stay at the wire; framework names follow the glossary.**
 - **A method that deletes more than one row takes a `SHOUTING_SNAKE_CASE` name**, and keeps it once a guard makes the operation safe.
-- **A constant is camelCase; two or more in one file that serve one purpose become one `as const` object named for that purpose.**
+- **A constant is camelCase; two or more in one file that serve one purpose become one `as const` object named for that purpose.** Lint backs the camelCase half.
 - **A collaborator is named `<Subject><Role><Tier>`, the role the agent noun of a verb on the list below.** A job with no verb on the list gets a plain descriptive noun, never "Handler" or "Manager".
 - **Method names draw from one controlled verb vocabulary** — don't invent a new verb for a meaning already on this list:
   - `fetch` — actually hits the live Sheets API
@@ -87,7 +87,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 ## Type modeling
 
 - **`type` for everything computed from other types.** A plain object shape is an `interface`; lint enforces it.
-- **Generic params get two-letter domain abbreviations with a constraint**; bare `T`/`K`/`V`/`O` are only for domain-free utilities.
+- **Generic params get two-letter domain abbreviations with a constraint**; bare `T`/`K`/`V`/`O` are only for domain-free utilities (`utils/`, `appUtils/`); lint checks the two letters, not the constraint.
 - **Verify a type-level claim with `IsExactly` / `assertType` / `assertNotType` from `src/testSupport/typeAssertions.ts`, never an assignment.** Measure a mapped type over the config unions before adopting it.
 - **Narrow a type until the empty case can't arise, rather than a branded-string fallback.**
 - **`as` casts narrow data that's already runtime-safe; they never substitute for validation.** External values go through `Val.validate.*`/`Val.is.*`. The three accepted cast idioms are in the reasoning file.
@@ -102,7 +102,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 - **`forEach` only for side effects, `map` only for pure transforms — never mixed.**
 - **`reduce` is fully accepted** for building a new object/record via an accumulator, rather than a manual loop with a declared accumulator.
 - **Mutator methods return `this` for chaining.**
-- **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks.
+- **Standalone units are `function`/`export function` declarations.** Arrow functions appear only as inline callbacks; lint backs it.
 - **An option that combines other options is built from them, not from copies of their bodies.**
 - **`if`/`else` over a ternary for anything beyond a single trivial value pick** with no side effects.
 - **Encode state as a named variable and an explicit `if`, not a wrapper object or a compact operator whose meaning the reader has to reconstruct.** `??=` is for filling in a default, not for "computed yet?" tracking.

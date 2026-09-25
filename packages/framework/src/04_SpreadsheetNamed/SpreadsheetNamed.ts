@@ -213,12 +213,12 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
   }
 }
 
-function sheetNamesFromReqProps<T extends SheetName>(
-  propsArr: FetchPropsStandardNamed<T>[],
-): Set<T> {
+function sheetNamesFromReqProps<SN extends SheetName>(
+  propsArr: FetchPropsStandardNamed<SN>[],
+): Set<SN> {
   return propsArr.reduce((sheetNames, props) => {
     return sheetNames.add(...Obj.keys(props.sheetColumnNames));
-  }, new Set() as Set<T>);
+  }, new Set() as Set<SN>);
 }
 
 function prepFetchRowSpecifier(

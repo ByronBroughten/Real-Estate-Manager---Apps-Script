@@ -235,10 +235,10 @@ function fakeRowsToGoogleSheetData({
   const blocks: NonNullable<GoogleAppsScript.Sheets.Schema.Sheet["data"]> = [];
   let currentBlockRows: GoogleAppsScript.Sheets.Schema.RowData[] = [];
   let currentBlockStart: number | null = null;
-  const columnMetadata =
-    (): GoogleAppsScript.Sheets.Schema.DimensionProperties[] =>
-      Array.from({ length: columnCount }, () => ({}));
-  const flushCurrentBlock = (): void => {
+  function columnMetadata(): GoogleAppsScript.Sheets.Schema.DimensionProperties[] {
+    return Array.from({ length: columnCount }, () => ({}));
+  }
+  function flushCurrentBlock(): void {
     if (currentBlockStart !== null) {
       blocks.push({
         startColumn: 0,
@@ -249,7 +249,7 @@ function fakeRowsToGoogleSheetData({
     }
     currentBlockRows = [];
     currentBlockStart = null;
-  };
+  }
   rows.forEach((row, rowIndex) => {
     if (noGridBlockRows.has(rowIndex)) {
       flushCurrentBlock();
