@@ -183,7 +183,7 @@ export const Obj = {
     prefix: S,
   ): PickStartsWith<T, S> {
     const result = {} as PickStartsWith<T, S>;
-    // for…in types the key as a string, which startsWith needs; Obj.keys gives keyof T.
+    // for…in types the key as keyof T & string, which startsWith needs; Obj.keys gives keyof T.
     for (const key in obj) {
       if (key.startsWith(prefix)) {
         result[key as unknown as keyof PickStartsWith<T, S>] = obj[
@@ -198,7 +198,7 @@ export const Obj = {
     n: N,
   ): RemoveFirstNFromKeys<T, N> {
     const result = {} as RemoveFirstNFromKeys<T, N>;
-    // for…in types the key as a string, which removeFirstN needs; Obj.keys gives keyof T.
+    // for…in types the key as keyof T & string, which removeFirstN needs; Obj.keys gives keyof T.
     for (const key in obj) {
       const newKey = Str.removeFirstN(
         key,
