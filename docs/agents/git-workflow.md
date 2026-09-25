@@ -2,14 +2,14 @@
 
 - **Commit or push only when asked.** A skill's approval step covers its edits, not a commit. Ask before committing, and ask which branch to use.
 - **Implement a spec on a branch named for it**: `issue-<n>-<short-slug>`. If other work is already in flight, ask which branch to use.
-- **After a spec is implemented**, do not ask whether to land it. End your reply with a wrap-up prompt in one fenced block for the developer to hand to a fresh agent, and do not merge, push, close or delete anything yourself. Fill in the branch, the number and the closing comment:
+- **After a spec is implemented**, do not ask whether to land it. End your reply with a wrap-up prompt in one fenced block for the developer to hand to a fresh agent, and do not merge, push, close or delete anything yourself. Fill in the branch, the number, the issue's repo and the closing comment:
 
   ````
   Wrap up issue-<n>-<slug> (#<n>), in this order, stopping at the first failure and reporting it:
   1. Confirm the working tree is clean and the branch's work is committed.
   2. Merge the branch into master with a merge commit titled "Merge issue-<n>-<slug> into master (#<n>)", then run `npm run tsc`, `npm test` and `npm run lint`.
   3. Push master.
-  4. `gh issue close <n> --comment "<what landed, one or two sentences, plus any box left undone>"`.
+  4. `gh issue close -R <owner/repo> <n> --comment "<what landed, one or two sentences, plus any box left undone>"`.
   5. Only after steps 3 and 4 succeed, delete the branch locally and on the remote if it exists.
   This message is the developer's yes to merge, push, close and delete for this branch and issue only.
   ````
