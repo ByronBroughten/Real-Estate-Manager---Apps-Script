@@ -1,6 +1,6 @@
 ---
 name: to-docs
-description: "Turn a session's friction and the user's style rulings into proposed updates to docs/style.md / packages/framework/docs/vocabulary.md / AGENTS.md: what the docs failed to tell you, and the rules the user set. Runs on this session or on another agent's."
+description: "Turn a session's friction and the user's style rulings into proposed updates to the style docs (config/docs/style.md, packages/framework/docs/style.md) / packages/framework/docs/vocabulary.md / AGENTS.md: what the docs failed to tell you, and the rules the user set. Runs on this session or on another agent's."
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ The spine test, applied to every candidate:
 
 > **Propose only what a doc could have told you before the session started.**
 
-What you _decided_ about what a feature does belongs in a spec, an issue, or a commit message. A ruling about _how code is shaped_, for this feature or any, belongs in `docs/style.md`, even though it was decided this session. What you had to _find out_ belongs in the docs. A retro that restates conclusions has failed even if every line is true.
+What you _decided_ about what a feature does belongs in a spec, an issue, or a commit message. A ruling about _how code is shaped_, for this feature or any, belongs in a style doc, even though it was decided this session. What you had to _find out_ belongs in the docs. A retro that restates conclusions has failed even if every line is true.
 
 Do steps 0-3 silently. The user sees only step 4.
 
@@ -40,7 +40,7 @@ Name every instance of these kinds. Be relentless: the easy two surface on their
 - **Misdirection**: a doc line that was read and acted on and pointed wrong. Usually not false: stale, or written in a tense that implies a live defect where the code already handles it, or precise about a mechanism and silent about whether it currently bites.
 - **Rediscovery**: a fact derived by reading source, probing, or measuring. Measurements are the richest kind, because they cannot be looked up at all.
 - **Stated rule**: a preference or rule the user articulated that no doc holds. Scan the user's own turns for "I prefer", "as a general rule", "always", or a correction of an approach the agent proposed.
-- **Style ruling**: a shape of code the user objected to and had changed, stated as a rule or not. Read the session's diff as well as the conversation: each refactor the user directed is a candidate. The rule is the generalization of the change ("named accessors, never inline lookups"), not the change itself. A ruling counts even if it cost the session nothing, and even if `docs/style.md` already gestures at it. A rule the docs hold but the agent or the codebase broke goes in as a sharpened line, not a new one.
+- **Style ruling**: a shape of code the user objected to and had changed, stated as a rule or not. Read the session's diff as well as the conversation: each refactor the user directed is a candidate. The rule is the generalization of the change ("named accessors, never inline lookups"), not the change itself. A ruling counts even if it cost the session nothing, and even if a style doc already gestures at it. A rule the docs hold but the agent or the codebase broke goes in as a sharpened line, not a new one.
 
 **Include wrong turns, and weight them heavily.** A confident claim that had to be retracted is the strongest possible signal: something about this codebase invites that specific error, and a doc line can disarm it for everyone after. Under-reporting these is the default; resist it.
 
@@ -65,7 +65,7 @@ Done when every wrong turn, rediscovered fact, user-stated rule and style ruling
 ## 3. Route and rank
 
 - **packages/framework/docs/vocabulary.md** and **`packages/framework/src/AGENTS.md`**: the architecture words and the tiers. README.md is a derived view for people, never the home of a fact. Architecture mechanics live as one file per heading under `docs/architecture/`; hosts in `docs/how-it-runs.md`; generated data in `docs/generated-data.md` and the files it indexes; testing in `docs/testing.md`; Claude Code hooks in `docs/claude-code-guardrails.md`. A design principle is one line in packages/framework/docs/design.md plus its reasoning in `docs/design/`.
-- **docs/style.md**: code shape. Its charter is rules distilled from the user's own refactors, so a **stated rule** or **style ruling** almost always lands here, as one line. Its reasoning and worked examples live under `docs/style/`; a rule that needs an example adds the line to docs/style.md and the example to the fragment. For a ruling, the before and after from the session's diff is the example.
+- **config/docs/style.md** and **packages/framework/docs/style.md**: code shape. The charter is rules distilled from the user's own refactors, so a **stated rule** or **style ruling** almost always lands in one of them, as one line: the framework's if it names Sheets, a tier, `Val` or a framework path, otherwise the general one in `config/`. Reasoning and worked examples live under each file's `docs/style/`; a rule that needs an example adds the line to the style doc and the example to the fragment. For a ruling, the before and after from the session's diff is the example.
 - **AGENTS.md**: loaded every turn, so it earns a line only if that line changes turn-one behavior. Everything else goes in the other two, or under `docs/agents/`, with a pointer at most. Full routing: `docs/agents/prose-files.md`.
 
 Rank by time the change would have saved, and say so. A ranked list lets the user take the top three and stop.

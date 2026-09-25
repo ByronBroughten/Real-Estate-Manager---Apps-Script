@@ -4,7 +4,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 
 ## Terms
 
-- **Rules file**: an index file under `docs/` or `packages/*/docs/` of bolded one-line rules (docs/style.md, and the framework's `docs/vocabulary.md` and `docs/design.md`), with one-sentence scope, the fixed sentence on when to open reasoning, and a "When | File" table under `## Reasoning files` into its reasoning folder. A rule line carries only the rule: the bolded rule plus at most a short clause of scope or its one exception. It must be both brief and clear, and no length cap stands in for either. Examples, instances, citations and the why go in its reasoning file.
+- **Rules file**: an index file under `docs/`, `config/docs/` or `packages/*/docs/` of bolded one-line rules (`config/docs/style.md`, and the framework's `docs/style.md`, `docs/vocabulary.md` and `docs/design.md`), with one-sentence scope, the fixed sentence on when to open reasoning, and a "When | File" table under `## Reasoning files` into its reasoning folder. A rule line carries only the rule: the bolded rule plus at most a short clause of scope or its one exception. It must be both brief and clear, and no length cap stands in for either. Examples, instances, citations and the why go in its reasoning file.
 - **Reasoning file**: a file under a rules file's `docs/<name>/` folder holding the why, examples, instances and history. It is never auto-loaded. A rules-file section with anything beyond its rules gets one.
 - **Router**: the Read-by-task table in the root AGENTS.md. It is the only one, with rows into both packages.
 - **Nested AGENTS.md**: a folder's own rules, loaded when an agent works there, paired with a one-line `CLAUDE.md` holding `@AGENTS.md`.
@@ -21,7 +21,6 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | `AGENTS.md` | Only what changes an agent's behavior on every task: commands, gates, git rules, the README line, the router. Loaded every turn; read [What an addition to AGENTS.md costs](#what-an-addition-to-agentsmd-costs) before growing it. |
 | `CLAUDE.md` | `@AGENTS.md` plus pointers to Claude Code-only mechanics (subagents, hooks). |
 | `CONTEXT-MAP.md` | Which `CONTEXT.md` each context owns, and how the app's glossary relates to the framework's. |
-| `docs/style.md` | Code shape for both packages, one line per rule, rule only. Reasoning, examples and instances go under `docs/style/`. |
 | `docs/agent-behavior-design.md` | Why the agent tooling (hooks, gates, delegation, this doc scheme) is shaped as it is. It never goes in the framework's `docs/design.md`. |
 | `docs/targets-and-gates.md` | The `dev`/`app` targets, what needs a yes first, and the gsheets MCP write rules. |
 | `docs/claude-code-guardrails.md` | The Claude Code hooks and project agent. |
@@ -30,7 +29,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 
 ### Framework (`packages/framework/`)
 
-Its `docs/`, `CONTEXT.md` and `README.md` ship with the package, so they link only inside it (lint). Its `AGENTS.md` and `CLAUDE.md` files are for contributors here and may point at root.
+Its `docs/`, `CONTEXT.md` and `README.md` ship with the package, so they link only inside it (lint). Its `AGENTS.md` and `CLAUDE.md` files are for contributors here and may point at root. The linter checks `config/`'s docs and README.md too.
 
 | File | Holds |
 | --- | --- |
@@ -38,6 +37,8 @@ Its `docs/`, `CONTEXT.md` and `README.md` ship with the package, so they link on
 | `src/AGENTS.md` | Rules an agent can only break by touching `src/`: the tiers, downward dependencies, the boundary question, host and platform neutrality, generated data. Kept short: it loads on every `src/` task. |
 | `src/chores/`, `src/00_Source/GoogleSheets/`, `src/01_SpreadsheetSchema/`, `src/02_SpreadsheetRaw/`, `src/06_API/` and `scripts/` `AGENTS.md` | That folder's rules, kept short because they load on every task there, each with a `CLAUDE.md` beside it. |
 | `CONTEXT.md` | Operator-facing words every app on the framework shares: sheet layout, endpoints, columns. Each term is a definition of what it is, its relationships and its avoid-aliases; what the app does with it goes in the mechanics doc that owns that behavior. |
+| `docs/style.md` | Code shape that names Sheets, a tier, `Val` or a framework path, one line per rule, rule only, layered on the config package's general style doc. It names that doc in plain text, since published docs link only inside the package. |
+| `docs/style/*.md` | Each rule's reasoning, examples and instances, indexed by `docs/style.md`'s "When \| File" table. |
 | `docs/vocabulary.md` | The architecture words, one line per term. |
 | `docs/vocabulary/*.md` | Each term's elaboration, split by subject, indexed by `docs/vocabulary.md`'s "When \| File" table. |
 | `docs/design.md` | Why the codebase is shaped as it is, including deliberate absences, one line per principle. Covers the codebase only. |
@@ -66,6 +67,8 @@ Private and unpublished, so its docs may link anywhere in the repo.
 | File | Holds |
 | --- | --- |
 | `README.md` | What the package exports and how a project consumes each piece. A derived view of its `package.json` and the files it exports. |
+| `docs/style.md` | General code shape for any TypeScript project, one line per rule, rule only. It ships with the package, so it names no framework or app path as a link. |
+| `docs/style/*.md` | Each rule's reasoning, examples and instances, indexed by `docs/style.md`'s "When \| File" table. |
 
 ## What an addition to AGENTS.md costs
 
@@ -110,4 +113,4 @@ No byte cap stands in for judgment here: a cap becomes a target, and an agent at
 | What's here | The app's `src/AGENTS.md` and its `CONTEXT.md` and `docs/` |
 | Commands | The root `package.json`'s `app:*` scripts and [`targets-and-gates.md`](../targets-and-gates.md#targets-dev-and-app) |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published packages/framework`, which holds the framework's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside `packages/framework`; its `AGENTS.md` and `CLAUDE.md` files may point at root.
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published packages/framework --published config`, which holds each package's published docs (its `docs/`, `CONTEXT.md` and `README.md`) to links inside that package; their `AGENTS.md` and `CLAUDE.md` files may point at root.

@@ -1,12 +1,12 @@
-// Decides the style gate: an edit to a file ESLint lints waits for a full Read of docs/style.md this session. Pure; styleGate.ts does the I/O.
+// Decides the style gate: an edit to a file ESLint lints waits for a full Read of config/docs/style.md this session. Pure; styleGate.ts does the I/O.
 import { sep } from "node:path";
 
 import { type FileLocation, isInLintSet, projectRelative } from "./lintSet.ts";
 
 export const styleGateReason =
-  "Read docs/style.md before your first code edit this session, then retry. " +
-  "Use a full Read with no offset or limit (a partial Read or a Bash read isn't recorded), and skip docs/style/ unless a rule's line doesn't decide your case.";
-export const stylePath = ["docs", "style.md"].join(sep);
+  "Read config/docs/style.md before your first code edit this session, then retry. " +
+  "Use a full Read with no offset or limit (a partial Read or a Bash read isn't recorded), and skip config/docs/style/ unless a rule's line doesn't decide your case. Framework or app code also follows packages/framework/docs/style.md.";
+export const stylePath = ["config", "docs", "style.md"].join(sep);
 
 interface EditTarget extends FileLocation {
   hasReadStyle: boolean;
