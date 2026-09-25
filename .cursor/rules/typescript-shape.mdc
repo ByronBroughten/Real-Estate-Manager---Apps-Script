@@ -4,4 +4,4 @@ globs: "**/*.ts"
 alwaysApply: false
 ---
 
-Write TypeScript to [`config/docs/style.md`](../../config/docs/style.md) and, for framework or app code, [`packages/framework/docs/style.md`](../../packages/framework/docs/style.md), one line per rule; each table points to its reasoning under `docs/style/`.
+Before the first code edit this session, Read [`config/docs/style.md`](../../config/docs/style.md) in full (no offset or limit). Framework or app code also needs a full Read of [`packages/framework/docs/style.md`](../../packages/framework/docs/style.md). A hook denies the edit until those reads are recorded. Open a reasoning file under `docs/style/` only when you're changing the rule, or the rule's line doesn't decide your case.

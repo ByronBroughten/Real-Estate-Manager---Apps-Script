@@ -4,17 +4,17 @@ import { join } from "node:path";
 
 import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
-import { editDecision, isStyleRead, stylePath } from "./lib/styleGate.ts";
+import { editDecision, isPostToolUse, isStyleRead, stylePath } from "./lib/styleGate.ts";
 
 await runFailOpen(() => {
   const input = readHookInput();
   if (!input) return;
-  const filePath = input.tool_input?.file_path;
+  const filePath = input.tool_input?.file_path ?? input.tool_input?.path;
   if (typeof filePath !== "string") return;
-  const projectDir = process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
+  const projectDir = process.env.CLAUDE_PROJECT_DIR ?? input.workspace_roots?.[0] ?? input.cwd ?? process.cwd();
   const where = { projectDir, cwd: input.cwd ?? projectDir, filePath };
-  const markerPath = sessionStatePath(input.session_id, "style-read");
-  if (input.hook_event_name === "PostToolUse") {
+  const markerPath = sessionStatePath(input.session_id ?? input.conversation_id, "style-read");
+  if (isPostToolUse(input.hook_event_name)) {
     if (input.tool_name !== "Read") return;
     const { offset, limit } = input.tool_input ?? {};
     if (isStyleRead({ ...where, offset, limit, totalLines: lineCount(join(projectDir, stylePath)) })) {

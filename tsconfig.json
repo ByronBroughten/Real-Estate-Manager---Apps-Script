@@ -8,5 +8,5 @@
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true
   },
-  "include": [".claude/hooks/**/*.ts"]
+  "include": [".claude/hooks/**/*.ts", ".cursor/hooks/**/*.ts"]
 }

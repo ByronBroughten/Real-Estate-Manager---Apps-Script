@@ -8,7 +8,11 @@ export default defineConfig(
   { ignores: [".claude/worktrees/**"] },
   // These run or ship apart from packages/, so they carry their own plain guards instead of importing a package's helper.
   {
-    files: ["config/**/*.{js,ts}", ".claude/hooks/**/*.ts"],
+    files: [
+      "config/**/*.{js,ts}",
+      ".claude/hooks/**/*.ts",
+      ".cursor/hooks/**/*.ts",
+    ],
     rules: {
       "no-restricted-imports": [
         "error",
