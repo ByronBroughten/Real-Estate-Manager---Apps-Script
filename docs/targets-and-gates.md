@@ -21,6 +21,8 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 | gsheets `create_spreadsheet`, `share_spreadsheet` | ask | ask |
 | gsheets reads | allow | allow |
 
+**`npm publish` is ask-first, apart from the two targets.** It publishes `@byronbroughten/config` to the public npm registry, where a version can't be replaced and a removal is time-limited, so a yes covers one publish of one version, and the agent shows the `npm pack --dry-run` file list before asking. `npm adduser` is the developer's own step.
+
 - **Bare `npx sheets-framework …`, `node packages/framework/scripts/sheets-framework.js …`, a package-level `npm run chore …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
 - **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.ts` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
 - **`dev:build`, `dev:push` and `dev:run` run the framework package's `build`, `push` and `run` scripts** against the dev project named in its `.clasp.json` ([the dev project](../packages/framework/docs/how-it-runs.md#the-dev-project)).
