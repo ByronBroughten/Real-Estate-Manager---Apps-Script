@@ -1,6 +1,6 @@
 import type {
-  ModeledRequestVerb,
   GoogleRequest,
+  ModeledRequestVerb,
 } from "../00_Source/GoogleSheets/GoogleSheetsAPI";
 import { sheetConfigsByGid } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { Obj } from "../utils/Obj";

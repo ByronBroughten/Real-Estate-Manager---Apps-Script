@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { dimensionIds } from "./dimensionIds";
 
 describe("dimensionIds.col / dimensionIds.row", () => {

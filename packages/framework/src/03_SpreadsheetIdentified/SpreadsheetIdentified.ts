@@ -4,8 +4,8 @@ import { SpreadsheetBaseIdentified } from "./ClassBases/SpreadsheetBaseIdentifie
 import { type ColumnIdentified } from "./ColumnIdentified";
 import { SheetIdentified } from "./SheetIdentified";
 import {
-  SheetMetaIdentified,
   type GatherDataPrerequisitesProps,
+  SheetMetaIdentified,
 } from "./SheetMetaIdentified";
 
 export class SpreadsheetIdentified extends SpreadsheetBaseIdentified {
@@ -41,7 +41,7 @@ export class SpreadsheetIdentified extends SpreadsheetBaseIdentified {
   fetchAllPrepped({
     includeProgrammaticFacts = false,
     ...props
-  }: GatherDataPrerequisitesProps = {}) {
+  }: GatherDataPrerequisitesProps = {}): void {
     const sheetsPreppedForFetch = this.sheetsPreppedForFetch;
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet._gatherDataPrerequisites(props);

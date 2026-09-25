@@ -3,8 +3,8 @@ import type {
   UniformRowValue,
   UniformRowValueName,
 } from "../../00_Source/CellValues/cellValues";
-import type { StrictOmit } from "../../utils/Obj";
 import { uniformRows } from "../../01_SpreadsheetSchema/uniformRows";
+import type { StrictOmit } from "../../utils/Obj";
 import type { RowRawProps } from "./RowBaseRaw";
 import { RowCommonRaw } from "./RowCommonRaw";
 
@@ -36,11 +36,11 @@ export class UniformRowBaseRaw<
       UniformRowValue<UN> | ""
     )[];
   }
-  validateUniformState() {
+  validateUniformState(): void {
     this.validateUniformRowIndex();
     this.ensureStateExists();
   }
-  private validateUniformRowIndex() {
+  private validateUniformRowIndex(): void {
     this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
 }

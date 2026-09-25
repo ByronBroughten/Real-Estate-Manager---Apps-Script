@@ -1,5 +1,5 @@
-import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
 import { ColumnSchema } from "../../01_SpreadsheetSchema/ColumnSchema";
+import type { ValueName } from "../../01_SpreadsheetSchema/valueSchemas";
 import {
   SheetBaseIdentified,
   type SheetIdentifiedProps,

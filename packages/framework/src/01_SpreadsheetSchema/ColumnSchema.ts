@@ -1,17 +1,17 @@
 import type { ValueSchemaKey } from "../00_Source/CellValues/valueSchema";
 import {
-  getColumnTraitById,
   type ColumnConfig,
   type ColumnConfigAt,
   type ColumnFullName,
   type ColumnName,
   type ColumnValue,
+  getColumnTraitById,
   type MakeColumnFullName,
 } from "./columnConfigsTypes";
 import type { SheetName } from "./sheetConfigsTypes";
-import { getValTrait, type ValueSchema } from "./valueSchemas";
-import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 import { SheetSchema, type SheetSchemaProps } from "./SheetSchema";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
+import { getValTrait, type ValueSchema } from "./valueSchemas";
 
 interface ColumnSchemaProps<
   SN extends SheetName,
@@ -56,21 +56,21 @@ export class ColumnSchema<
       sheetName: this.sheetName,
     });
   }
-  trait<K extends keyof ColumnConfig>(
-    key: K,
-  ): ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>] {
+  trait<TK extends keyof ColumnConfig>(
+    key: TK,
+  ): ColumnConfigAt<SN, CN>[TK & keyof ColumnConfigAt<SN, CN>] {
     return getColumnTraitById(
       this.sheetGid,
       this.columnId,
       key,
-    ) as ColumnConfigAt<SN, CN>[K & keyof ColumnConfigAt<SN, CN>];
+    ) as ColumnConfigAt<SN, CN>[TK & keyof ColumnConfigAt<SN, CN>];
   }
   get valueName(): ColumnConfigAt<SN, CN>["valueName"] {
     return this.trait("valueName");
   }
-  valTrait<K extends ValueSchemaKey>(
-    key: K,
-  ): ValueSchema<ColumnConfigAt<SN, CN>["valueName"]>[K] {
+  valTrait<VK extends ValueSchemaKey>(
+    key: VK,
+  ): ValueSchema<ColumnConfigAt<SN, CN>["valueName"]>[VK] {
     return getValTrait(this.valueName, key);
   }
   get isFormula(): boolean {
@@ -95,7 +95,7 @@ export class ColumnSchema<
       return this.valTrait("makeDefault")() as ColumnValue<SN, CN>;
     }
   }
-  validate(value: unknown) {
+  validate(value: unknown): ColumnValue<SN, CN> | "" {
     if (this.emptyValueAllowed && value === "") {
       return value;
     } else {

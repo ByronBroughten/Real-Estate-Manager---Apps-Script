@@ -25,7 +25,7 @@ export class SheetBaseIdentified extends SpreadsheetBaseIdentified {
       sheetGid: this.sheetGid,
     };
   }
-  private _ensureSheetState() {
+  private _ensureSheetState(): void {
     if (!this.sheetsStateIdentified.has(this.sheetGid)) {
       this.sheetsStateIdentified.set(this.sheetGid, {
         fetchQueue: emptySheetFetchQueueIdentified(),

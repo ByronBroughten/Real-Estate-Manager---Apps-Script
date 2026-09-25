@@ -31,13 +31,16 @@ export class AppsScript {
       value: e.value,
     };
   }
-  static toast(
-    message: string,
-    { title, timeoutSeconds }: ToastOptions,
-  ): void {
+  static toast(message: string, { title, timeoutSeconds }: ToastOptions): void {
     SpreadsheetApp.getActive().toast(message, title, timeoutSeconds);
   }
-  static get trigger() {
+  static get trigger(): {
+    deleteAllTriggers(): void;
+    addOnEdit(fnName: string): void;
+    addOnChange(fnName: string): void;
+    addFirstOfMonth: (fnName: string) => void;
+    addEveryMinute: (fnName: string) => void;
+  } {
     return {
       deleteAllTriggers(): void {
         const triggers = ScriptApp.getProjectTriggers();

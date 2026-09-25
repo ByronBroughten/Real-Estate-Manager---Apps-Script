@@ -2,8 +2,8 @@ import type { CellValue } from "../CellValues/cellValues";
 import type { GridRangeProps } from "./RawSource";
 import {
   quantizeRgbChannels,
-  rgbChannelsEqual,
   type RgbChannels,
+  rgbChannelsEqual,
 } from "./RgbColor";
 
 export const modelledConditionTypes = [

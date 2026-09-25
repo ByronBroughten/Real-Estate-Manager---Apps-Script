@@ -1,7 +1,7 @@
 import type { SerialDate } from "../../utils/SerialDate";
 import { Val } from "../../utils/Val";
 import { cellValueNames, type CellValueNameToValue } from "./cellValues";
-import { vsc, type ValueSchemaBase } from "./valueSchema";
+import { type ValueSchemaBase, vsc } from "./valueSchema";
 
 export const frameworkValueNames = [
   "id",

@@ -2,10 +2,10 @@ import type { SheetChange } from "../00_Source/PlatformEvents/sheetChange";
 import type { ColumnName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   configSheetFloorSeed,
-  floorSeedColumns,
-  floorTabSeedByGid,
   type FloorSeedColumn,
+  floorSeedColumns,
   type FloorTabName,
+  floorTabSeedByGid,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { SheetRaw } from "../02_SpreadsheetRaw/SheetRaw";
@@ -28,8 +28,8 @@ import {
   columnNameByHeader,
   floorColumnRestore,
   floorColumnsToRestore,
-  floorSheetNames,
   type FloorSheetName,
+  floorSheetNames,
 } from "./ConfigSheetFloor/floorSeedLookups";
 
 /**

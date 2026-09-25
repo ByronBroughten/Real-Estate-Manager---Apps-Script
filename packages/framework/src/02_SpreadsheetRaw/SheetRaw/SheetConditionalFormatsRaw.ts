@@ -1,10 +1,10 @@
-import type { GridRangeProps } from "../../00_Source/RawSource/RawSource";
 import {
-  conditionalFormatRulesEqual,
-  rangeEqual,
   type ConditionalFormatDeclaration,
   type ConditionalFormatRule,
+  conditionalFormatRulesEqual,
+  rangeEqual,
 } from "../../00_Source/RawSource/ConditionalFormat";
+import type { GridRangeProps } from "../../00_Source/RawSource/RawSource";
 import { SheetCommonRaw } from "../ClassBases/SheetCommonRaw";
 import { SheetRaw } from "../SheetRaw";
 import { SpreadsheetRaw } from "../SpreadsheetRaw";

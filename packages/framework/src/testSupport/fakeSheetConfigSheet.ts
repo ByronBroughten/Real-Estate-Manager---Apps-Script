@@ -2,8 +2,9 @@ import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeCell,
+  type FakeSheetsService,
+  stubSheetsService,
 } from "./fakeSheetsService";
 
 /**
@@ -37,7 +38,7 @@ export const blankSheetConfigRow: FakeCell[] = [null, null, null];
 export function stubSheetConfigSheet(
   dataRows: Record<number, FakeCell[]>,
   rowsWithNoGridData: number[] = [],
-) {
+): FakeSheetsService {
   const rowIndexes = Object.keys(dataRows).map(Number);
   return stubSheetsService({
     sheets: [

@@ -28,11 +28,11 @@ export abstract class RowCommonRaw extends RowBaseRaw {
     }
   }
   // A queued delete outlives a same-run re-fetch; recreating the row would undo it.
-  ensureStateExists() {
+  ensureStateExists(): void {
     if (this.isQueuedForDelete) return;
     super.ensureStateExists();
   }
-  ensureFullActiveDataCells() {
+  ensureFullActiveDataCells(): void {
     this.ensureStateExists();
     this.sheet.fullTableColIndexes.forEach((colIndex) => {
       this.cell(colIndex).ensureActive();
@@ -51,7 +51,7 @@ export abstract class RowCommonRaw extends RowBaseRaw {
   hasValue(value: unknown): boolean {
     return this.activeValueArr.includes(value as CellValue);
   }
-  returnMissingValues<V extends CellValue>(...values: V[]): V[] {
+  returnMissingValues<CV extends CellValue>(...values: CV[]): CV[] {
     return values.filter((value) => !this.activeValueArr.includes(value));
   }
   remove(): void {

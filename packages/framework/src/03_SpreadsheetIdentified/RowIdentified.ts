@@ -30,7 +30,7 @@ export class RowIdentified extends RowCommonIdentified {
     this.cell(columnId).updateValue(value);
     return this;
   }
-  cell(columnId: string) {
+  cell(columnId: string): CellIdentified {
     return new CellIdentified({
       ...this.rowIdentifiedProps,
       columnId,

@@ -1,6 +1,6 @@
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes.js";
-import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
+import type { FindReplaceProps } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
 import { SpreadsheetRaw } from "../02_SpreadsheetRaw/SpreadsheetRaw.js";
 import type { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import type { GatherDataPrerequisitesProps } from "../03_SpreadsheetIdentified/SheetMetaIdentified";
@@ -185,7 +185,7 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
     this.raw.ensureAllSheetPropertiesAreFetched();
     return this;
   }
-  fillMissingRowIds() {
+  fillMissingRowIds(): void {
     // could potentially be reconfigured to not rely on the schema.
     const idSheets = this._sheetsWithRowIds();
     idSheets.forEach((sheet) => {
@@ -213,12 +213,12 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
   }
 }
 
-function sheetNamesFromReqProps<T extends SheetName>(
-  propsArr: FetchPropsStandardNamed<T>[],
-): Set<T> {
+function sheetNamesFromReqProps<SN extends SheetName>(
+  propsArr: FetchPropsStandardNamed<SN>[],
+): Set<SN> {
   return propsArr.reduce((sheetNames, props) => {
     return sheetNames.add(...Obj.keys(props.sheetColumnNames));
-  }, new Set() as Set<T>);
+  }, new Set() as Set<SN>);
 }
 
 function prepFetchRowSpecifier(

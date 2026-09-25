@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { stubScriptAndSpreadsheetApp } from "../../testSupport/fakeAppsScriptGlobals";
 import type {
   AddCheckboxValidationOperation,
@@ -8,9 +9,9 @@ import type {
 } from "../RawSource/RawSource";
 import type { RgbColor } from "../RawSource/RgbColor";
 import {
-  GoogleSheetsAPI,
   googleRawRequest,
   type GoogleRequest,
+  GoogleSheetsAPI,
   type SheetsHttpRequest,
 } from "./GoogleSheetsAPI";
 

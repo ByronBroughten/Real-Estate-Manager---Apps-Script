@@ -2,10 +2,6 @@
 
 Disclosed from [`docs/style.md`](../style.md), "Imports & file organization". The rules are there, one line each; this file holds the examples.
 
-## Import order and `import type`
-
-Imports are sorted by hand because no import-order lint plugin is configured. A module whose value and types are both imported keeps one line with the inline modifier, `import { vsc, type ValueSchemaBase } from "./valueSchema"`, rather than splitting into a value line and a type line.
-
 ## No barrel files
 
 `src/index.ts` is the Apps Script entry point, not a re-export barrel. The framework's two public entries are the only barrels: `src/framework.ts` (`@byronbroughten/sheets-framework`) and `src/frameworkTesting.ts` (`@byronbroughten/sheets-framework/testing`). An export joins them only when app code uses it. Every other file is imported directly by its path.

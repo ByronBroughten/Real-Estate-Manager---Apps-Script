@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
+
 import { getColumnTraitByName } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { Value, VnToCvn } from "../01_SpreadsheetSchema/valueSchemas";
 import {
   blankSheetConfigRow,
   filledSheetConfigRow,
-  sheetConfigGid,
   sheetConfigColumnIdRow,
+  sheetConfigGid,
   stubSheetConfigSheet,
 } from "../testSupport/fakeSheetConfigSheet";
 import {

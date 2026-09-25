@@ -1,6 +1,7 @@
 // PostToolUse on Read records a full read of docs/style.md; PreToolUse on Edit and Write denies a gated code edit until one is recorded.
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 import { editDecision, isStyleRead, stylePath } from "./lib/styleGate.ts";
@@ -16,8 +17,9 @@ await runFailOpen(() => {
   if (input.hook_event_name === "PostToolUse") {
     if (input.tool_name !== "Read") return;
     const { offset, limit } = input.tool_input ?? {};
-    if (isStyleRead({ ...where, offset, limit, totalLines: lineCount(join(projectDir, stylePath)) }))
+    if (isStyleRead({ ...where, offset, limit, totalLines: lineCount(join(projectDir, stylePath)) })) {
       writeFileSync(markerPath, "");
+    }
     return;
   }
   if (!["Edit", "Write"].includes(input.tool_name ?? "")) return;

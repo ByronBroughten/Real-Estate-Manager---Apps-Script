@@ -1,5 +1,5 @@
 import { Obj } from "../utils/Obj";
-import { installedConfigs, type Configs } from "./configRegister";
+import { type Configs, installedConfigs } from "./configRegister";
 
 export type ValueConfigs = Configs["valueConfigs"];
 export type ValueConfigName = keyof ValueConfigs;
@@ -10,11 +10,11 @@ export function valueConfigNames(): readonly ValueConfigName[] {
 export type ValueConfigValues = {
   [K in ValueConfigName]: ValueConfigs[K][number];
 };
-export type ValueConfigValue<N extends ValueConfigName = ValueConfigName> =
-  ValueConfigValues[N];
+export type ValueConfigValue<VC extends ValueConfigName = ValueConfigName> =
+  ValueConfigValues[VC];
 
-export function getValueConfigValueArr<K extends ValueConfigName>(
-  key: K,
-): ValueConfigs[K] {
+export function getValueConfigValueArr<VC extends ValueConfigName>(
+  key: VC,
+): ValueConfigs[VC] {
   return installedConfigs().valueConfigs[key];
 }

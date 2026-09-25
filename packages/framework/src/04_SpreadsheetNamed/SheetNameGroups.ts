@@ -1,6 +1,6 @@
 import {
-  sheetConfigsByName,
   type SheetConfigs,
+  sheetConfigsByName,
 } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { type SubType } from "../utils/Obj";
 
@@ -17,7 +17,9 @@ export type SheetNameWithNameColumn = keyof SubType<
 export type SheetNameWithIdAndNameColumn = SheetNameWithIdColumn &
   SheetNameWithNameColumn;
 
-type SheetNameGroups = { hasIdColumn: SheetNameWithIdColumn[] };
+interface SheetNameGroups {
+  hasIdColumn: SheetNameWithIdColumn[];
+}
 export type TnGroupName = keyof SheetNameGroups;
 
 export type SheetNameByGroup<GN extends TnGroupName> =

@@ -43,7 +43,16 @@ export function stubScriptAndSpreadsheetApp({
     return trigger;
   }
 
-  function newTrigger(handlerFunction: string) {
+  function newTrigger(handlerFunction: string): {
+    forSpreadsheet: (_spreadsheet: unknown) => {
+      onEdit: () => { create: () => FakeTrigger };
+      onChange: () => { create: () => FakeTrigger };
+    };
+    timeBased: () => {
+      onMonthDay: (day: number) => { create: () => FakeTrigger };
+      everyMinutes: (minutes: number) => { create: () => FakeTrigger };
+    };
+  } {
     return {
       forSpreadsheet: (_spreadsheet: unknown) => ({
         onEdit: () => ({

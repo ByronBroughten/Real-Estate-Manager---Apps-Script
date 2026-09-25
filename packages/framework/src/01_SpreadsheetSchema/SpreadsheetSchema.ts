@@ -3,14 +3,14 @@ import {
   sheetConfigsByGid,
   type SheetName,
 } from "./sheetConfigsTypes";
-import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 import { SheetSchema } from "./SheetSchema";
+import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 
 export class SpreadsheetSchema extends SpreadsheetBaseSchema {
   isInSheetGids(sheetGid: number): boolean {
     return sheetConfigsByGid().has(sheetGid);
   }
-  get sheetNames() {
+  get sheetNames(): SheetName[] {
     return configSheetNames();
   }
   sheetByName<SN extends SheetName>(sheetName: SN): SheetSchema<SN> {

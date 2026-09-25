@@ -16,9 +16,9 @@ import { Val } from "../utils/Val";
 import { sheetConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
 } from "./SpreadsheetBaseOperator";
 
 export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
@@ -34,31 +34,31 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
   get sheetConfigSync(): ConfigSyncState["sheetConfigSync"] {
     return this.configSyncState.sheetConfigSync;
   }
-  assertPrepFetchIsComplete() {
+  assertPrepFetchIsComplete(): void {
     if (!this.sheetConfigSync.prepFetchIsComplete) {
       throw new Error(
         "SheetConfigOperator has not yet completed its prepFetch operation.",
       );
     }
   }
-  assertSyncedToSpreadsheet() {
+  assertSyncedToSpreadsheet(): void {
     if (!this.sheetConfigSync.syncedToSpreadsheet) {
       throw new Error(
         "SheetConfigOperator has not yet synced to the spreadsheet.",
       );
     }
   }
-  prepFetchForSync() {
+  prepFetchForSync(): void {
     this.sheet.prepFetchColumnsFull("sheetGid", "sheetTitle", "letApiAccess");
     this.sheetConfigSync.prepFetchIsComplete = true;
   }
-  syncToSpreadsheet() {
+  syncToSpreadsheet(): void {
     this._deleteStaleSheetConfigs();
     this._appendMissingSheetConfigs();
     this._updateProgrammaticValues();
     this.sheetConfigSync.syncedToSpreadsheet = true;
   }
-  private _deleteStaleSheetConfigs() {
+  private _deleteStaleSheetConfigs(): void {
     this.sheet.rows.forEach((row) => {
       const configGid = row.valueOrEmpty("sheetGid");
       if (configGid === "" || !this.ss.raw.gidIsActive(configGid)) {
@@ -66,7 +66,7 @@ export class SheetConfigOperator extends GenericSheetOperator<"sheetConfig"> {
       }
     });
   }
-  private _appendMissingSheetConfigs() {
+  private _appendMissingSheetConfigs(): void {
     const colGid = this.sheet.column("sheetGid");
     this.ss.raw.activeSheetGids.forEach((sheetGid) => {
       if (!colGid.hasValue(sheetGid)) {

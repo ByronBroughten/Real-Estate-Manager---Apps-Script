@@ -1,5 +1,6 @@
 // UserPromptSubmit: warns once when the session's context passes about 400k tokens, and once more past 1M.
 import { closeSync, openSync, readFileSync, readSync, statSync, writeFileSync } from "node:fs";
+
 import { type HookInput, readHookInput, runFailOpen, sessionStatePath, writeHookOutput } from "./lib/hookIo.ts";
 
 const transcriptBytes = { perToken: 4, tail: 4 * 1024 * 1024 } as const;

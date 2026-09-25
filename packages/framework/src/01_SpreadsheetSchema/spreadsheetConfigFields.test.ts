@@ -1,4 +1,5 @@
 import { describe, it } from "vitest";
+
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import type { SentenceToCamelCase } from "../utils/Str";
 import type { ColumnName } from "./columnConfigsTypes";

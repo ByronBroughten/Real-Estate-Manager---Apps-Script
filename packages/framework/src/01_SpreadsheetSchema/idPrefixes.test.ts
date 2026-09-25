@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { idPrefixes } from "./idPrefixes";
 
 describe("idPrefixes.fromTitle", () => {

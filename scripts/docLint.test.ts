@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { type Docs, type Violation, checkDocs } from "./docLint.ts";
+
+import { checkDocs, type Docs, type Violation } from "./docLint.ts";
 
 function nested(lines: number): string {
-  return (
-    Array.from({ length: lines }, (_, i) => `- rule ${i}`).join("\n") + "\n"
-  );
+  const rules = Array.from({ length: lines }, (_, i) => `- rule ${i}`);
+  return `${rules.join("\n")}\n`;
 }
 const baseDocs = {
   "AGENTS.md": "# Root\n",

@@ -4,11 +4,11 @@ import type {
   BoundedGridRange,
   OpaqueRawRequest,
 } from "../00_Source/RawSource/RawSource";
+import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { validateFormulaString } from "./CellRaw";
 import { SpreadsheetBaseRaw } from "./ClassBases/SpreadsheetBaseRaw";
 import { emptyStateRaw } from "./ClassTypes/emptyStateRaw";
 import type { AddedSheetCell, FindReplaceProps } from "./ClassTypes/StateRaw";
-import { SpreadsheetSchema } from "../01_SpreadsheetSchema/SpreadsheetSchema";
 import { SheetMetaRaw } from "./SheetMetaRaw";
 import { SheetRaw } from "./SheetRaw";
 import { SpreadsheetFetcherRaw } from "./SpreadsheetRaw/SpreadsheetFetcherRaw";
@@ -64,10 +64,10 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   sheets(...sheetGids: number[]): SheetRaw[] {
     return sheetGids.map((sheetGid) => this.sheet(sheetGid));
   }
-  ensureAllSheetPropertiesAreFetched() {
+  ensureAllSheetPropertiesAreFetched(): void {
     this.fetcher.ensureAllSheetPropertiesAreFetched();
   }
-  fetchAllSheetProperties() {
+  fetchAllSheetProperties(): { activeSheetGids: number[] } {
     return this.fetcher.fetchAllSheetProperties();
   }
   fetchAllGathered(includeProgrammaticFacts = false): void {
@@ -76,7 +76,7 @@ export class SpreadsheetRaw extends SpreadsheetBaseRaw {
   fetchSheetUsedGrid(sheetGid: number): void {
     this.fetcher.fetchSheetUsedGrid(sheetGid);
   }
-  batchUpdateGSheets() {
+  batchUpdateGSheets(): void {
     this.flusher.flush();
   }
   // Queued on the spreadsheet: a tab that does not exist yet has no sheet state to hold it.

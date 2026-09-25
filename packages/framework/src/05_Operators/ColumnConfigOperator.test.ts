@@ -1,11 +1,12 @@
 import { beforeEach, describe, expect, it } from "vitest";
+
 import { installedConfigs } from "../01_SpreadsheetSchema/configRegister";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeCell,
+  stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import type { StrictOmit } from "../utils/Obj";
 import { ColumnConfigOperator } from "./ColumnConfigOperator";

@@ -12,7 +12,7 @@ export class RowBaseRaw extends SheetBaseRaw {
     super(rest);
     this.rowIndex = rowIndex;
   }
-  ensureStateExists() {
+  ensureStateExists(): void {
     if (!this.rowIsActive()) {
       this.rowStates.set(this.rowIndex, new Map());
     }

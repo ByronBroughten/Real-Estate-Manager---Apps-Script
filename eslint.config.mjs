@@ -1,5 +1,6 @@
 import eslint from "@eslint/js";
 import { defineConfig } from "eslint/config";
+import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
 
 const frameworkSrc = "packages/framework/src";
@@ -41,6 +42,29 @@ const aboveTierFolders = [
   "framework",
   "frameworkTesting",
   "nodeHost",
+];
+const variableNaming = {
+  selector: "variable",
+  format: ["camelCase", "PascalCase"],
+  leadingUnderscore: "allow",
+  custom: { regex: "^[A-Z][A-Z0-9]+$", match: false },
+};
+// Generic params are two-letter domain abbreviations; the domain-free utilities keep bare T, K and V.
+const typeParameterNaming = {
+  selector: "typeParameter",
+  format: null,
+  custom: { regex: "^[A-Z]{2}$", match: true },
+};
+const styleSyntax = [
+  {
+    selector: "TSEnumDeclaration",
+    message:
+      "A fixed set is an `as const` object or a union of string literals, not an enum.",
+  },
+  {
+    selector: "ExportDefaultDeclaration",
+    message: "Exports are named, so every import spells the name it wants.",
+  },
 ];
 function layerImportPattern(layer) {
   return {
@@ -137,7 +161,27 @@ export default defineConfig(
     rules: { "no-undef": "off" },
   },
   {
+    plugins: { "simple-import-sort": simpleImportSort },
     rules: {
+      "simple-import-sort/imports": "error",
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        { fixStyle: "inline-type-imports" },
+      ],
+      // A module's value and type imports share one line.
+      "no-duplicate-imports": ["error", { allowSeparateTypeImports: false }],
+      // No setting limits an unbraced body to an exit; multi-line is the nearest, so a one-line non-exiting body also passes.
+      curly: ["error", "multi-line"],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/explicit-function-return-type": [
+        "error",
+        { allowExpressions: true },
+      ],
+      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+      "func-style": ["error", "declaration"],
+      "prefer-template": "error",
+      "no-restricted-syntax": ["error", ...styleSyntax],
       "max-classes-per-file": ["error", 1],
       // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
       "@typescript-eslint/no-unused-vars": [
@@ -152,14 +196,49 @@ export default defineConfig(
       // Constants are camelCase too; methods stay free, so SHOUTING multi-row deletes pass.
       "@typescript-eslint/naming-convention": [
         "error",
-        {
-          selector: "variable",
-          format: ["camelCase", "PascalCase"],
-          leadingUnderscore: "allow",
-          custom: { regex: "^[A-Z][A-Z0-9]+$", match: false },
-        },
+        variableNaming,
+        typeParameterNaming,
       ],
     },
+  },
+  // Tool configs are default exports by their tools' contract.
+  {
+    files: ["**/*.config.{mjs,ts}"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...styleSyntax.filter(
+          ({ selector }) => selector !== "ExportDefaultDeclaration",
+        ),
+      ],
+    },
+  },
+  // Test helpers and plain-JS files are out of the return-type and function-style rules' scope (#153).
+  {
+    files: ["**/*.test.ts", "**/*.{js,mjs}"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "func-style": "off",
+    },
+  },
+  // Domain-free utilities and test helpers keep bare T, K and V.
+  {
+    files: [
+      "packages/*/src/{utils,appUtils}/**/*.ts",
+      "packages/*/src/testSupport/typeAssertions.ts",
+      "**/*.test.ts",
+    ],
+    rules: {
+      "@typescript-eslint/naming-convention": ["error", variableNaming],
+    },
+  },
+  // The structural utilities do the generic typing that needs `any` (docs/style/type-modeling.md).
+  {
+    files: [
+      "packages/*/src/**/{Obj,Arr}.ts",
+      "packages/*/src/**/{Obj,Arr}/**/*.ts",
+    ],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
   },
   {
     files: ["packages/*/src/**/*.ts"],
@@ -180,6 +259,7 @@ export default defineConfig(
       ],
       "no-restricted-syntax": [
         "error",
+        ...styleSyntax,
         {
           selector:
             "TSQualifiedName[left.type='Identifier'][left.name='GoogleAppsScript']",

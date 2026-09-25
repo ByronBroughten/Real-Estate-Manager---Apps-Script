@@ -1,21 +1,21 @@
-import {
-  frameworkValueSchemas,
-  type FrameworkValueName,
-  type FrameworkValues,
-  type BlankOf,
-} from "../00_Source/CellValues/frameworkValueSchemas";
 import type {
   CellValue,
   CellValueName,
 } from "../00_Source/CellValues/cellValues";
+import {
+  type BlankOf,
+  type FrameworkValueName,
+  type FrameworkValues,
+  frameworkValueSchemas,
+} from "../00_Source/CellValues/frameworkValueSchemas";
 import type {
   ValueSchemaBase,
   ValueSchemaKey,
 } from "../00_Source/CellValues/valueSchema";
 import { lazy } from "../utils/lazy";
 import type { Merge } from "../utils/Obj/merge";
-import type { ValueConfigName, ValueConfigValues } from "./valueConfigsTypes";
 import { makeSchemasFromValueConfig } from "./valueConfigSchemas";
+import type { ValueConfigName, ValueConfigValues } from "./valueConfigsTypes";
 
 type ValueNameSimple = FrameworkValueName | ValueConfigName;
 
@@ -27,7 +27,7 @@ type AllValuesOrEmpty = {
 export type ValueSchemas = {
   [VN in ValueNameSimple]: ValueSchemaBase<AllValuesOrEmpty[VN]>;
 };
-export type ValueName<V extends ValueNameSimple = ValueNameSimple> = V;
+export type ValueName<VN extends ValueNameSimple = ValueNameSimple> = VN;
 export type VnToCvn<VN extends ValueNameSimple> = VN extends CellValueName
   ? VN
   : VN extends "checkbox"
@@ -43,14 +43,14 @@ const valueSchemas = lazy((): ValueSchemas => ({
 
 export type ValueTrait<
   VN extends ValueName,
-  K extends ValueSchemaKey,
-> = ValueSchema<VN>[K];
+  VK extends ValueSchemaKey,
+> = ValueSchema<VN>[VK];
 
 export function getValTrait<
   VN extends ValueNameSimple,
-  K extends ValueSchemaKey,
->(valueName: VN, key: K): ValueSchema<VN>[K] {
-  return valueSchemas()[valueName][key] as ValueSchema<VN>[K];
+  VK extends ValueSchemaKey,
+>(valueName: VN, key: VK): ValueSchema<VN>[VK] {
+  return valueSchemas()[valueName][key] as ValueSchema<VN>[VK];
 }
 
 export type Value<VN extends ValueName = ValueName> = ValueTrait<VN, "type">;

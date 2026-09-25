@@ -1,7 +1,7 @@
 import { merge } from "./Obj/merge";
 import { spread } from "./Obj/spread";
-import { Str, type RemoveFirstN, type TextJoin } from "./Str";
-import { Val, type PrimitiveValueName, type PureValue } from "./Val";
+import { type RemoveFirstN, Str, type TextJoin } from "./Str";
+import { type PrimitiveValueName, type PureValue, Val } from "./Val";
 
 export type StrictOmit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type DistributiveOmit<T, K extends keyof T> = T extends unknown

@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it } from "vitest";
+
 import {
-  getColumnTraitByName,
   type ColumnValueName,
+  getColumnTraitByName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import { getSheetTraitByName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
 import type { ColumnNamedProps } from "../04_SpreadsheetNamed/ClassBases/ColumnBaseNamed";
@@ -9,13 +10,13 @@ import { SpreadsheetNamed } from "../04_SpreadsheetNamed/SpreadsheetNamed";
 import { stubLogger } from "../testSupport/fakeAppsScriptGlobals";
 import {
   buildGridRows,
-  stubSheetsService,
   type FakeCell,
+  stubSheetsService,
 } from "../testSupport/fakeSheetsService";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
 import {
-  CheckboxColumnOperator,
   type CheckboxColumnName,
+  CheckboxColumnOperator,
 } from "./CheckboxColumnOperator";
 
 const runItemGid = getSheetTraitByName("runItem", "sheetGid");

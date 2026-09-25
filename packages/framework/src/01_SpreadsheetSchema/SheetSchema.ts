@@ -1,10 +1,11 @@
 import {
+  type ColumnName,
   getColumnTraitById,
   getColumnTraitByName,
   getSheetColumnIds,
   getSheetColumnNames,
-  type ColumnName,
 } from "./columnConfigsTypes";
+import { ColumnSchema } from "./ColumnSchema";
 import { dimensionIds } from "./dimensionIds";
 import {
   getSheetTraitByGid,
@@ -13,7 +14,6 @@ import {
   sheetConfigsByGid,
   type SheetName,
 } from "./sheetConfigsTypes";
-import { ColumnSchema } from "./ColumnSchema";
 import { SpreadsheetBaseSchema } from "./SpreadsheetBaseSchema";
 
 function sheetNameFromGid(sheetGid: number): SheetName {
@@ -53,7 +53,7 @@ export class SheetSchema<
       sheetName: sheetNameFromGid(sheetGid),
     });
   }
-  trait<K extends keyof SheetConfig>(key: K): SheetConfig[K] {
+  trait<TK extends keyof SheetConfig>(key: TK): SheetConfig[TK] {
     return getSheetTraitByGid(this.sheetGid, key);
   }
   get idPrefix(): string {

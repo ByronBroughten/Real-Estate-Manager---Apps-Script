@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { type EditDecision, styleGateReason, editDecision, isStyleRead } from "./styleGate.ts";
+
+import { type EditDecision, editDecision, isStyleRead,styleGateReason } from "./styleGate.ts";
 
 const projectDir = "/repo";
 const generatedDirs = ["packages/real-estate/src/generated", "packages/framework/dev/generated"];

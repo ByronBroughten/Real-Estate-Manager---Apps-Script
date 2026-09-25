@@ -1,7 +1,8 @@
 import { describe, it } from "vitest";
+
 import type { configSheetFloorSeed } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import { assertType, type IsExactly } from "../testSupport/typeAssertions";
-import { frameworkEndpoints } from "./frameworkEndpoints";
+import type { frameworkEndpoints } from "./frameworkEndpoints";
 
 describe("frameworkEndpoints", () => {
   it("must supply exactly the seeded endpoints", () => {

@@ -4,20 +4,21 @@ import {
   floorSeedColumnById,
 } from "../01_SpreadsheetSchema/configSheetFloorSeed";
 import {
-  makeImportLine,
   type ColumnConfigsGeneric,
+  makeImportLine,
 } from "../01_SpreadsheetSchema/makeConfigs";
 import { type ValueName } from "../01_SpreadsheetSchema/valueSchemas";
+import type { ColumnMetaRaw } from "../02_SpreadsheetRaw/ColumnMetaRaw";
 import { Str } from "../utils/Str";
 import { columnConfigsFileSource } from "./configFileSource";
 import { GenericSheetOperator } from "./GenericSheetOperator";
+import { SheetConfigOperator } from "./SheetConfigOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
   type UntypedHeadersBySheetTitle,
 } from "./SpreadsheetBaseOperator";
-import { SheetConfigOperator } from "./SheetConfigOperator";
 import { ValueConfigOperator } from "./ValueConfigOperator";
 
 interface ColumnIdentity {
@@ -32,7 +33,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       ...props,
     });
   }
-  static init() {
+  static init(): ColumnConfigOperator {
     return new ColumnConfigOperator(
       SpreadsheetBaseOperator.initOperatorProps(),
     );
@@ -59,14 +60,14 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       this._describedColumn(this._columnIdentity(rowIndex)).activeValueTitle(),
     );
   }
-  assertSyncedToSpreadsheet() {
+  assertSyncedToSpreadsheet(): void {
     if (!this.columnConfigSync.syncedToSpreadsheet) {
       throw new Error(
         "ColumnConfigOperator has not yet synced to the spreadsheet.",
       );
     }
   }
-  prepFetchWithSheetConfig() {
+  prepFetchWithSheetConfig(): void {
     this.sheetConfigOperator.assertPrepFetchIsComplete();
     this.sheet.prepFetchColumnsFull(
       "sheetGid",
@@ -88,7 +89,7 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
     this.ss.raw.fetchAllGathered(true);
     return this;
   }
-  syncToSpreadsheet() {
+  syncToSpreadsheet(): this {
     this._addMissingColumnIds();
     this._pruneColumnRows();
     this._appendColumnRows();
@@ -204,10 +205,13 @@ export class ColumnConfigOperator extends GenericSheetOperator<"columnConfig"> {
       columnId: col.columnId.value(rowIndex),
     };
   }
-  private _describedColumn({ sheetGid, columnId }: ColumnIdentity) {
+  private _describedColumn({
+    sheetGid,
+    columnId,
+  }: ColumnIdentity): ColumnMetaRaw {
     return this.ss.raw.sheetMeta(sheetGid).columnByActiveId(columnId);
   }
-  private _updateProgrammaticValues() {
+  private _updateProgrammaticValues(): void {
     const col = this.sheet.columns("sheetTitle", "header", "emptyValueAllowed");
     const reportLines = this.columnConfigSync.declaredCellReportLines;
     reportLines.length = 0;

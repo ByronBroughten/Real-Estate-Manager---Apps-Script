@@ -16,6 +16,9 @@ export type Merge<L, R> = IdS<
     SpreadProperties<L, R, OptionalPropertyNames<R> & keyof L>
 >;
 
-export function merge<A extends object, B extends object>(a: A, b: B) {
+export function merge<A extends object, B extends object>(
+  a: A,
+  b: B,
+): Merge<A, B> {
   return { ...a, ...b } as unknown as Merge<A, B>;
 }

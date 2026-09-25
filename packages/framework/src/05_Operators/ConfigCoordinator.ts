@@ -52,19 +52,19 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  get spreadsheetConfigOperator() {
+  get spreadsheetConfigOperator(): SpreadsheetConfigOperator {
     return new SpreadsheetConfigOperator(this.operatorProps);
   }
-  get columnConfigOperator() {
+  get columnConfigOperator(): ColumnConfigOperator {
     return new ColumnConfigOperator(this.operatorProps);
   }
-  get sheetConfigOperator() {
+  get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.operatorProps);
   }
-  get valueConfigOperator() {
+  get valueConfigOperator(): ValueConfigOperator {
     return new ValueConfigOperator(this.operatorProps);
   }
-  get configSheetFloor() {
+  get configSheetFloor(): ConfigSheetFloor {
     return new ConfigSheetFloor(this.spreadsheetNamedProps);
   }
   ensureConfigSheetFloor(): string {
@@ -104,12 +104,12 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
       };
     });
   }
-  private _withFloorThenLiveConfig<T>(body: (floorReport: string) => T): T {
+  private _withFloorThenLiveConfig<RT>(body: (floorReport: string) => RT): RT {
     const floorReport = this.ensureConfigSheetFloor();
     this.ss.batchUpdateGSheets();
     return this._withLiveSpreadsheetConfig(() => body(floorReport));
   }
-  private _withLiveSpreadsheetConfig<T>(body: () => T): T {
+  private _withLiveSpreadsheetConfig<RT>(body: () => RT): RT {
     const liveConfig = this.spreadsheetConfigOperator.fetchLiveConfig();
     overlaySpreadsheetConfig(liveConfig);
     try {

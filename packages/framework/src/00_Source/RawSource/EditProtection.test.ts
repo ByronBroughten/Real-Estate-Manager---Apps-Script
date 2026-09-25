@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
+
 import {
   assertNotType,
   assertType,
   type IsExactly,
 } from "../../testSupport/typeAssertions";
 import {
-  protectionRangeEqual,
   type EditLockDeclaration,
   type EditWarningDeclaration,
+  protectionRangeEqual,
   type WholeSheetEditLockDeclaration,
   type WholeSheetEditWarningDeclaration,
 } from "./EditProtection";

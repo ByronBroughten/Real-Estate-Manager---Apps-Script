@@ -2,6 +2,7 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+
 import type { HookInput } from "./hookIo.ts";
 import { readSheetsConfigs } from "./sheetsConfigs.ts";
 
@@ -285,7 +286,7 @@ function newSegment(isPiped: boolean): Segment {
 function tokenize(command: string): Token[] {
   const tokens: Token[] = [];
   let word: string | null = null;
-  function endWord() {
+  function endWord(): void {
     if (word !== null) tokens.push({ type: "word", value: word });
     word = null;
   }

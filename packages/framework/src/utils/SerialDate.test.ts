@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { SerialDate } from "./SerialDate";
 
 function ymd(year: number, month: number, day: number): SerialDate {

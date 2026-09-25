@@ -5,9 +5,10 @@ import type {
 } from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
-  EditWarningDeclaration,
   EditProtection,
+  EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
+import type { GridRangeProps } from "../00_Source/RawSource/RawSource";
 import type {
   ColumnIsFormula,
   ColumnName,
@@ -16,7 +17,9 @@ import type {
   ColumnValueName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import type { VnToCvn } from "../01_SpreadsheetSchema/valueSchemas";
 import type { FindReplaceTerms } from "../02_SpreadsheetRaw/ClassTypes/StateRaw";
+import type { ColumnRaw } from "../02_SpreadsheetRaw/ColumnRaw";
 import type { CellChange } from "../03_SpreadsheetIdentified/ClassTypes/StateIdentified";
 import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { CellNamed } from "./CellNamed";
@@ -40,7 +43,7 @@ export class ColumnNamed<
       columnId: this.columnId,
     });
   }
-  get raw() {
+  get raw(): ColumnRaw<VnToCvn<ColumnValueName<SN, CN>>> {
     return this.identified.raw;
   }
   get rowIndexesActive(): number[] {
@@ -116,7 +119,7 @@ export class ColumnNamed<
     this.identified.removeConditionalFormatRule(rule);
     return this;
   }
-  gridRangeFromRow(startRowIndex: number) {
+  gridRangeFromRow(startRowIndex: number): GridRangeProps {
     return this.identified.gridRangeFromRow(startRowIndex);
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {

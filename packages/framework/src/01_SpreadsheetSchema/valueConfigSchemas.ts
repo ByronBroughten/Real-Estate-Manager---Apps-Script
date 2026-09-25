@@ -1,9 +1,9 @@
-import { vsc, type ValueSchemaBase } from "../00_Source/CellValues/valueSchema";
+import { type ValueSchemaBase, vsc } from "../00_Source/CellValues/valueSchema";
 import { validationError } from "../utils/Val";
 import {
   getValueConfigValueArr,
-  valueConfigNames,
   type ValueConfigName,
+  valueConfigNames,
   type ValueConfigValue,
 } from "./valueConfigsTypes";
 
@@ -12,14 +12,14 @@ function makeDefaultValueConfigValue<VN extends ValueConfigName>(
 ): ValueConfigValue<VN> {
   return getValueConfigValueArr(valueName)[0] as ValueConfigValue<VN>;
 }
-function validateValueConfigValue<N extends ValueConfigName>(
+function validateValueConfigValue<VC extends ValueConfigName>(
   value: unknown,
-  valueName: N,
-): ValueConfigValue<N> {
+  valueName: VC,
+): ValueConfigValue<VC> {
   if (
     (getValueConfigValueArr(valueName) as readonly unknown[]).includes(value)
   ) {
-    return value as ValueConfigValue<N>;
+    return value as ValueConfigValue<VC>;
   } else {
     throw validationError(value, `'${valueName}' union value element.`);
   }

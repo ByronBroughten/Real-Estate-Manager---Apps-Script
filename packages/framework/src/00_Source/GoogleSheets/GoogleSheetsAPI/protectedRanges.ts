@@ -1,8 +1,8 @@
 import { Val } from "../../../utils/Val";
 import {
-  isWholeSheetGridRange,
   type EditProtection,
   type EditProtectionContent,
+  isWholeSheetGridRange,
   type ProtectionGridRange,
 } from "../../RawSource/EditProtection";
 import type { GoogleRequest } from "../GoogleSheetsAPI";

@@ -40,6 +40,7 @@ function showFloorNotice({ title, message, untilClosed }: FloorNotice): void {
 }
 
 function installGoogleSheets(): void {
-  if (!hasInstalledRawSource())
+  if (!hasInstalledRawSource()) {
     installRawSource(GoogleSheetsAPI.forAppsScript());
+  }
 }

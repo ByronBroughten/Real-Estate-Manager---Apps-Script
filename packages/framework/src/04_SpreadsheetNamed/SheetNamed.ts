@@ -4,8 +4,8 @@ import type {
 } from "../00_Source/RawSource/ConditionalFormat";
 import type {
   EditLockDeclaration,
-  EditWarningDeclaration,
   EditProtection,
+  EditWarningDeclaration,
   WholeSheetEditLockDeclaration,
   WholeSheetEditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
@@ -22,6 +22,7 @@ import { ColumnIdentified } from "../03_SpreadsheetIdentified/ColumnIdentified";
 import { SheetIdentified } from "../03_SpreadsheetIdentified/SheetIdentified";
 import { Arr } from "../utils/Arr";
 import { Obj } from "../utils/Obj";
+import { Val } from "../utils/Val";
 import { SheetCommonNamed } from "./ClassBases/SheetCommonNamed";
 import { ColumnNamed } from "./ColumnNamed";
 import { RowNamed } from "./RowNamed";
@@ -83,38 +84,38 @@ export class SheetNamed<
     const { columnId } = this.schema.columnByName(columnName);
     return this.identified.column(columnId);
   }
-  columns<CNs extends readonly ColumnName<SN>[]>(
-    ...columnNames: CNs
-  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
-    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+  columns<CS extends readonly ColumnName<SN>[]>(
+    ...columnNames: CS
+  ): { [K in CS[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CS[number]]: ColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
       columns[columnName] = this.column(columnName);
     });
     return columns;
   }
-  prepFetchColumnsFull<CNs extends readonly ColumnName<SN>[]>(
-    ...columnNames: CNs
-  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
-    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+  prepFetchColumnsFull<CS extends readonly ColumnName<SN>[]>(
+    ...columnNames: CS
+  ): { [K in CS[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CS[number]]: ColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
       columns[columnName] = this.column(columnName).prepFetchFull();
     });
     return columns;
   }
-  prepFetchColumnsSpecific<CNs extends readonly ColumnName<SN>[]>(
+  prepFetchColumnsSpecific<CS extends readonly ColumnName<SN>[]>(
     rowIndexes: number[],
-    ...columnNames: CNs
-  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
-    const columns = {} as { [K in CNs[number]]: ColumnNamed<SN, K> };
+    ...columnNames: CS
+  ): { [K in CS[number]]: ColumnNamed<SN, K> } {
+    const columns = {} as { [K in CS[number]]: ColumnNamed<SN, K> };
     columnNames.forEach((columnName) => {
       columns[columnName] =
         this.column(columnName).prepFetchSpecific(rowIndexes);
     });
     return columns;
   }
-  prepFetchColumnsActive<CNs extends readonly ColumnName<SN>[]>(
-    ...columnNames: CNs
-  ): { [K in CNs[number]]: ColumnNamed<SN, K> } {
+  prepFetchColumnsActive<CS extends readonly ColumnName<SN>[]>(
+    ...columnNames: CS
+  ): { [K in CS[number]]: ColumnNamed<SN, K> } {
     return this.prepFetchColumnsSpecific(this.rowIndexesActive, ...columnNames);
   }
   sortRowsbyColumnName(
@@ -220,7 +221,7 @@ export class SheetNamed<
         `Expected 1 row of "${this.sheetName}" to have a "${columnName}" of "${value}", but ${rows.length} did.`,
       );
     }
-    return rows[0]!;
+    return Val.assert(rows[0], "The matching row");
   }
   appendRowWithVals(values: Partial<SheetDataValues<SN>>): RowNamed<SN> {
     const { rowIndex } = this.identified.appendRowDefault();

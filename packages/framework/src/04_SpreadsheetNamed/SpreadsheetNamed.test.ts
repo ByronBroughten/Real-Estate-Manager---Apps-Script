@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
-  getColumnTraitByName,
   type ColumnIsFormula,
+  getColumnTraitByName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import {
   getSheetTraitByName,

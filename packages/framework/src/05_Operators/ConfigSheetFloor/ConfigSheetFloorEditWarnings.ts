@@ -1,16 +1,16 @@
 import {
+  type ModelableEditProtection,
   protectionRangeEqual,
   protectionRangesEqual,
-  type ModelableEditProtection,
 } from "../../00_Source/RawSource/EditProtection";
 import { getSheetTraitByName } from "../../01_SpreadsheetSchema/sheetConfigsTypes";
 import { SpreadsheetBaseNamed } from "../../04_SpreadsheetNamed/ClassBases/SpreadsheetBaseNamed";
 import { SpreadsheetNamed } from "../../04_SpreadsheetNamed/SpreadsheetNamed";
-import { floorSheetNames, type FloorSheetName } from "./floorSeedLookups";
+import { type FloorSheetName, floorSheetNames } from "./floorSeedLookups";
 import {
+  type FloorDeclaration,
   FloorTabEditWarning,
   floorWarningPrefix,
-  type FloorDeclaration,
 } from "./FloorTabEditWarning";
 
 // Sheet indexes of the columns that say whose row it is, gathered with the floor's fetch.
@@ -38,8 +38,9 @@ export class ConfigSheetFloorEditWarnings extends SpreadsheetBaseNamed {
     const identityColIndexes: IdentityColIndexes = new Map();
     floorSheetNames().forEach((sheetName) => {
       const colIndexes = this._floorTab(sheetName).gatherIdentityColumns();
-      if (colIndexes !== undefined)
+      if (colIndexes !== undefined) {
         identityColIndexes.set(sheetName, colIndexes);
+      }
     });
     return identityColIndexes;
   }

@@ -6,9 +6,9 @@ import {
 import { ColumnConfigOperator } from "./ColumnConfigOperator";
 import { GenericSheetOperator } from "./GenericSheetOperator";
 import {
-  SpreadsheetBaseOperator,
   type ConfigSyncState,
   type OperatorProps,
+  SpreadsheetBaseOperator,
 } from "./SpreadsheetBaseOperator";
 
 export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
@@ -30,7 +30,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   get columnConfigOperator(): ColumnConfigOperator {
     return new ColumnConfigOperator(this.operatorProps);
   }
-  fetchAfterColumnConfigSynced() {
+  fetchAfterColumnConfigSynced(): void {
     this.columnConfigOperator.assertSyncedToSpreadsheet();
     this.valueConfigSync.activeHeaders = new Set(
       this.columnConfigOperator

@@ -1,18 +1,18 @@
 import type { NotEmpty } from "./cellValues";
 
-export type ValueSchemaBase<V = unknown> = {
-  type: V;
-  makeDefault: MakeDefaultValueBase<V>;
-  strictValidate: ValidateValueBase<V>;
+export interface ValueSchemaBase<VL = unknown> {
+  type: VL;
+  makeDefault: MakeDefaultValueBase<VL>;
+  strictValidate: ValidateValueBase<VL>;
   // What a blank cell reads as, or null where a blank stays a blank.
-  blankReadsAs: NotEmpty<V> | null;
-};
+  blankReadsAs: NotEmpty<VL> | null;
+}
 
 export type ValueSchemaKey = keyof ValueSchemaBase;
 
-type MakeDefaultValueBase<V> = () => V;
-type ValidateValueBase<V> = (value: unknown) => NotEmpty<V>;
+type MakeDefaultValueBase<VL> = () => VL;
+type ValidateValueBase<VL> = (value: unknown) => NotEmpty<VL>;
 
-export function vsc<V>(props: ValueSchemaBase<V>): ValueSchemaBase<V> {
+export function vsc<VL>(props: ValueSchemaBase<VL>): ValueSchemaBase<VL> {
   return props;
 }
