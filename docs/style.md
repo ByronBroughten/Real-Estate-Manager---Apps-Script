@@ -101,6 +101,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 ## Functional vs. imperative idioms
 
 - **`forEach` only for side effects, `map` only for pure transforms — never mixed.**
+- **`forEach` by default; `for…of` only when the body exits early (`break`, `continue`, `return`) or destructures `Map` entries; `for…in` only in `utils/`.**
 - **`reduce` is fully accepted** for building a new object/record via an accumulator, rather than a manual loop with a declared accumulator.
 - **Mutator methods return `this` for chaining.**
 - **A helper returns what it produces; no output parameters.**

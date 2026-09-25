@@ -43,10 +43,9 @@ export class AppsScript {
   } {
     return {
       deleteAllTriggers(): void {
-        const triggers = ScriptApp.getProjectTriggers();
-        for (const trigger of triggers) {
+        ScriptApp.getProjectTriggers().forEach((trigger) => {
           ScriptApp.deleteTrigger(trigger);
-        }
+        });
       },
       addOnEdit(fnName: string): void {
         ScriptApp.newTrigger(fnName)

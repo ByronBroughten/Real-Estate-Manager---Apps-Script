@@ -82,7 +82,7 @@ function toKeyedMap<
 >(obj: T, idField: F, nameField: N = "name" as N): KeyedMap<T, F, N> {
   const map = new Map() as KeyedMap<T, F, N>;
 
-  for (const outerKey of Object.keys(obj) as (keyof T)[]) {
+  (Object.keys(obj) as (keyof T)[]).forEach((outerKey) => {
     const entry = obj[outerKey] as Record<PropertyKey, unknown>;
     map.set(
       entry[idField as PropertyKey] as T[keyof T][F],
@@ -91,7 +91,7 @@ function toKeyedMap<
         [nameField]: outerKey,
       } as unknown as { [K in keyof T]: T[K] & { [P in N]: K } }[keyof T],
     );
-  }
+  });
 
   return map;
 }
@@ -183,6 +183,7 @@ export const Obj = {
     prefix: S,
   ): PickStartsWith<T, S> {
     const result = {} as PickStartsWith<T, S>;
+    // for…in types the key as a string, which startsWith needs; Obj.keys gives keyof T.
     for (const key in obj) {
       if (key.startsWith(prefix)) {
         result[key as unknown as keyof PickStartsWith<T, S>] = obj[
@@ -197,6 +198,7 @@ export const Obj = {
     n: N,
   ): RemoveFirstNFromKeys<T, N> {
     const result = {} as RemoveFirstNFromKeys<T, N>;
+    // for…in types the key as a string, which removeFirstN needs; Obj.keys gives keyof T.
     for (const key in obj) {
       const newKey = Str.removeFirstN(
         key,
@@ -258,10 +260,9 @@ export const Obj = {
     obj: O,
   ): { [K in O[keyof O]]: keyof O } {
     const objNext = {} as { [K in O[keyof O]]: keyof O };
-    for (const key in obj) {
-      const value = obj[key];
-      objNext[value] = key;
-    }
+    Obj.keys(obj).forEach((key) => {
+      objNext[obj[key]] = key;
+    });
     return objNext;
   },
   merge,

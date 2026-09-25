@@ -112,9 +112,9 @@ export class RowNamed<SN extends SheetName> extends RowBaseNamed<SN> {
     return this;
   }
   updateValues(sectionValues: Partial<SheetDataValues<SN>>): RowNamed<SN> {
-    for (const [columnName, value] of Obj.entries(sectionValues)) {
+    Obj.entries(sectionValues).forEach(([columnName, value]) => {
       this.updateValue(columnName, value as ColumnValue<SN, typeof columnName>);
-    }
+    });
     return this;
   }
   prepFetchFull(): this {
