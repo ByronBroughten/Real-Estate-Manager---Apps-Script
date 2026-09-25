@@ -4,6 +4,9 @@
   "description": "General tooling for TypeScript projects: an ESLint flat-config preset, the prettier config, a base tsconfig and a doc linter.",
   "type": "module",
   "license": "ISC",
+  "publishConfig": {
+    "access": "public"
+  },
   "exports": {
     "./eslint": "./eslint.js",
     "./prettier": "./prettier.json",
