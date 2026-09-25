@@ -95,10 +95,8 @@ class ChoreRunner {
       : "DRY RUN — nothing was written. It would send:";
     console.log(`\n${heading}\n`);
     console.log(this.isJson ? summary.json : summary.lines.join("\n"));
-    console.log(
-      `\n${summary.count} request(s).` +
-        (this.isSend ? "" : " Re-run with `-- --send` to apply."),
-    );
+    const nextStep = this.isSend ? "" : " Re-run with `-- --send` to apply.";
+    console.log(`\n${summary.count} request(s).${nextStep}`);
   }
 }
 

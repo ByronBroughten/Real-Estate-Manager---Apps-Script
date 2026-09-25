@@ -149,6 +149,7 @@ export default defineConfig(
       "no-duplicate-imports": ["error", { allowSeparateTypeImports: false }],
       // No setting limits an unbraced body to an exit; multi-line is the nearest, so a one-line non-exiting body also passes.
       curly: ["error", "multi-line"],
+      "prefer-template": "error",
       "max-classes-per-file": ["error", 1],
       // `_` marks a parameter kept for its signature; a rest sibling is dropped on purpose.
       "@typescript-eslint/no-unused-vars": [
