@@ -15,7 +15,7 @@ await runFailOpen(() => {
   const input = readHookInput();
   if (!input) return;
   const projectDir = process.env.CLAUDE_PROJECT_DIR ?? input.cwd ?? process.cwd();
-  let decision: Decision | null;
+  let decision: Decision | undefined;
   if (input.tool_name === "Bash") {
     const command = input.tool_input?.command;
     if (typeof command !== "string") return;
@@ -43,7 +43,7 @@ function dirtyPinningFiles(projectDir: string): DirtyPinningFiles {
     cwd: projectDir,
     encoding: "utf8",
   });
-  if (status !== 0) return null;
+  if (status !== 0) return undefined;
   return stdout
     .split("\n")
     .filter(Boolean)

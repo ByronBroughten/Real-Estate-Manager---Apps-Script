@@ -23,7 +23,7 @@ export class AppsScriptApi {
   ): void {
     const notice = Api.handleSheetChange(
       app,
-      AppsScript.sheetChange(e.changeType) ?? undefined,
+      AppsScript.sheetChange(e.changeType),
       installGoogleSheets,
     );
     if (notice !== undefined) showFloorNotice(notice);

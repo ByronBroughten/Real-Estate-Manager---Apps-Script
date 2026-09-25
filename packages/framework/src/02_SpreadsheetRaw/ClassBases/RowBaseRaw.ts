@@ -37,7 +37,7 @@ export class RowBaseRaw extends SheetBaseRaw {
   }
   validateIsWritable(): void {
     if (!this.isDataRow || this.rowIsActive()) return;
-    if (this.sheetState.working.knownTable === null) {
+    if (this.sheetState.working.knownTable === undefined) {
       throw new Error(
         `Cannot write to row ${this.rowIndex} of sheetGid ${this.sheetGid} before its sheet properties have been fetched.`,
       );

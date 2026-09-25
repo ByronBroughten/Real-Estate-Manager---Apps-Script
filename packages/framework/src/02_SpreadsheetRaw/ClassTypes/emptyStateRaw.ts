@@ -41,7 +41,7 @@ export const emptyStateRaw = {
     return { updateRequests: emptyStateRaw.updateRequests() };
   },
   sheetChanges(): SheetChangesToSave {
-    return { sort: null, insertColumn: [], fills: [] };
+    return { sort: undefined, insertColumn: [], fills: [] };
   },
   rowChanges(): RowChangesToSave {
     return { append: false, delete: false, update: new Map() };
@@ -76,8 +76,8 @@ function emptySheetFetchQueue(): SheetFetchQueueRaw {
 
 function emptySheetWorkingState(): SheetWorkingStateRaw {
   return {
-    title: null,
-    knownTable: null,
+    title: undefined,
+    knownTable: undefined,
     tables: [],
     hasExtraTables: false,
     cellStateIsStale: false,
@@ -85,7 +85,7 @@ function emptySheetWorkingState(): SheetWorkingStateRaw {
     isPrunedToSelection: false,
     rowStates: new Map(),
     columnStates: new Map(),
-    conditionalFormats: { rules: null, isStale: false },
-    editProtections: { protections: null, isStale: false },
+    conditionalFormats: { rules: undefined, isStale: false },
+    editProtections: { protections: undefined, isStale: false },
   };
 }

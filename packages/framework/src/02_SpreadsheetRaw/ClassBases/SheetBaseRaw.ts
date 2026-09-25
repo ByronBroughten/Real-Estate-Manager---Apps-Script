@@ -52,13 +52,13 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     }));
     if (tables.length > 1) {
       this.sheetState.working.hasExtraTables = true;
-      this.sheetState.working.knownTable = null;
+      this.sheetState.working.knownTable = undefined;
       this._clearColumnPropertyFields();
       return;
     }
     this.sheetState.working.hasExtraTables = false;
     if (tables.length === 0) {
-      this.sheetState.working.knownTable = null;
+      this.sheetState.working.knownTable = undefined;
       return;
     }
     const table = Val.assert(tables[0], "table");
@@ -77,7 +77,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
       ...range,
       columnProperties: table.columnProperties,
       rowIndexesAreStale: previous?.rowIndexesAreStale ?? false,
-      firstStaleColIndex: previous?.firstStaleColIndex ?? null,
+      firstStaleColIndex: previous?.firstStaleColIndex,
     };
     this._parseColumnProperties(table, range.startColumnIndex);
   }
@@ -91,7 +91,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
       this._updateWorkingTableName(tableId, name);
     });
     const knownTable = working.knownTable;
-    if (knownTable === null) return;
+    if (knownTable === undefined) return;
     this.updateRequests.updateTableColumnType.forEach(
       ({ tableId, columnIndex, columnType }) => {
         if (tableId !== knownTable.tableId) return;

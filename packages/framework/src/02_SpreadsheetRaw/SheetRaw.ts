@@ -61,12 +61,12 @@ export class SheetRaw extends SheetCommonRaw {
   }
   get rowIndexesAreStale(): boolean {
     return (
-      this.sheetState.working.knownTable !== null &&
+      this.sheetState.working.knownTable !== undefined &&
       this.activeTable.rowIndexesAreStale
     );
   }
   get hasFetchedProperties(): boolean {
-    return this.sheetState.working.knownTable !== null;
+    return this.sheetState.working.knownTable !== undefined;
   }
   get dataGridRange(): GridRangeProps {
     return {
@@ -88,7 +88,7 @@ export class SheetRaw extends SheetCommonRaw {
     };
   }
   get title(): string {
-    if (this.sheetState.working.title === null) {
+    if (this.sheetState.working.title === undefined) {
       throw new Error(
         `Sheet title is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
       );
@@ -494,7 +494,7 @@ export class SheetRaw extends SheetCommonRaw {
     const tableId = Val.assert(ops[0], "queued column type").tableId;
     const tableLabel = this._tableLabel(tableId);
     if (
-      this.sheetState.working.knownTable === null ||
+      this.sheetState.working.knownTable === undefined ||
       this.activeTable.tableId !== tableId ||
       ops.some((operation) => operation.tableId !== tableId)
     ) {

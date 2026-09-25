@@ -66,7 +66,7 @@ export class SpreadsheetConfigOperator extends GenericSheetOperator<"spreadsheet
   }
   toFileSource(makeConfigsImport: string): string {
     const liveConfig = this.spreadsheetConfigSync.liveConfig;
-    if (liveConfig === null) {
+    if (liveConfig === undefined) {
       throw new Error(
         "SpreadsheetConfigOperator has not yet fetched the live Spreadsheet Config.",
       );

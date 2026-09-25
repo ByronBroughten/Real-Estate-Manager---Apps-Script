@@ -12,15 +12,15 @@ describe("devWriteOf", () => {
 
   it("names a dev chore only when it sends", () => {
     expect(devWriteOf("npm run dev:chore buildFixtures -- --send")).toBe("dev:chore");
-    expect(devWriteOf("npm run dev:chore buildFixtures")).toBeNull();
-    expect(devWriteOf("npm run dev:chore buildFixtures -- --json")).toBeNull();
+    expect(devWriteOf("npm run dev:chore buildFixtures")).toBeUndefined();
+    expect(devWriteOf("npm run dev:chore buildFixtures -- --json")).toBeUndefined();
   });
 
   it("ignores dev reads and app commands", () => {
-    expect(devWriteOf("npm run dev:probe -- --fields sheets")).toBeNull();
-    expect(devWriteOf("npm run -s dev:probe -- --fields sheets")).toBeNull();
-    expect(devWriteOf("npm run app:gen:configs")).toBeNull();
-    expect(devWriteOf("npm test")).toBeNull();
+    expect(devWriteOf("npm run dev:probe -- --fields sheets")).toBeUndefined();
+    expect(devWriteOf("npm run -s dev:probe -- --fields sheets")).toBeUndefined();
+    expect(devWriteOf("npm run app:gen:configs")).toBeUndefined();
+    expect(devWriteOf("npm test")).toBeUndefined();
   });
 
   it("finds the write in any part of a compound command", () => {
@@ -30,7 +30,7 @@ describe("devWriteOf", () => {
 
   it("treats an unparseable command that names a dev script as a write", () => {
     expect(devWriteOf("npm run dev:probe 'unbalanced")).toBe("dev:*");
-    expect(devWriteOf("echo 'unbalanced")).toBeNull();
+    expect(devWriteOf("echo 'unbalanced")).toBeUndefined();
   });
 });
 
@@ -38,7 +38,7 @@ describe("bashDecision", () => {
   const command = "npm run dev:gen:configs";
 
   it("leaves a dev write alone while every pinning file is clean", () => {
-    expect(bashDecision({ command, dirtyPinningFiles: [] })).toBeNull();
+    expect(bashDecision({ command, dirtyPinningFiles: [] })).toBeUndefined();
   });
 
   it("asks for a dev write while a pinning file has uncommitted changes, naming it", () => {
@@ -49,19 +49,19 @@ describe("bashDecision", () => {
   });
 
   it("asks when the pinning files' state is unknown", () => {
-    expect(bashDecision({ command, dirtyPinningFiles: null })?.permissionDecision).toBe("ask");
+    expect(bashDecision({ command, dirtyPinningFiles: undefined })?.permissionDecision).toBe("ask");
   });
 
   it("leaves anything but a dev write alone, however dirty", () => {
     const dirty = ["packages/framework/sheets.config.json"];
-    expect(bashDecision({ command: "npm run dev:probe", dirtyPinningFiles: dirty })).toBeNull();
-    expect(bashDecision({ command: "npm run app:build", dirtyPinningFiles: dirty })).toBeNull();
+    expect(bashDecision({ command: "npm run dev:probe", dirtyPinningFiles: dirty })).toBeUndefined();
+    expect(bashDecision({ command: "npm run app:build", dirtyPinningFiles: dirty })).toBeUndefined();
   });
 });
 
 describe("gsheetsWriteDecision", () => {
   const devSpreadsheetId = "dev-id";
-  function decide(overrides: Partial<GsheetsWrite>): Decision | null {
+  function decide(overrides: Partial<GsheetsWrite>): Decision | undefined {
     return gsheetsWriteDecision({
       toolName: "mcp__gsheets__update_cells",
       spreadsheetId: "dev-id",
@@ -97,12 +97,12 @@ describe("gsheetsWriteDecision", () => {
   it("asks when the dev ID or the pinning files' state is unknown", () => {
     expect(decide({ devSpreadsheetId: undefined })?.permissionDecision).toBe("ask");
     expect(decide({ spreadsheetId: undefined, devSpreadsheetId: undefined })?.permissionDecision).toBe("ask");
-    expect(decide({ dirtyPinningFiles: null })?.permissionDecision).toBe("ask");
+    expect(decide({ dirtyPinningFiles: undefined })?.permissionDecision).toBe("ask");
   });
 
   it("has no opinion on a tool it does not guard", () => {
-    expect(decide({ toolName: "mcp__gsheets__share_spreadsheet" })).toBeNull();
-    expect(decide({ toolName: "mcp__gsheets__create_spreadsheet" })).toBeNull();
-    expect(decide({ toolName: "mcp__gsheets__get_sheet_data" })).toBeNull();
+    expect(decide({ toolName: "mcp__gsheets__share_spreadsheet" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gsheets__create_spreadsheet" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gsheets__get_sheet_data" })).toBeUndefined();
   });
 });

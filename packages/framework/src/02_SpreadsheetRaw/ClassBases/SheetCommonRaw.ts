@@ -15,7 +15,7 @@ export abstract class SheetCommonRaw extends SheetBaseRaw {
   abstract get ss(): SpreadsheetRaw;
   get activeTable(): ActiveTableRaw {
     const knownTable = this.sheetState.working.knownTable;
-    if (knownTable === null) {
+    if (knownTable === undefined) {
       throw new Error(
         `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
       );
@@ -38,7 +38,7 @@ export abstract class SheetCommonRaw extends SheetBaseRaw {
   }
   // The table's own range, not the layout's: no table means no table columns.
   isTableColIndex(colIndex: number): boolean {
-    if (this.sheetState.working.knownTable === null) return false;
+    if (this.sheetState.working.knownTable === undefined) return false;
     const { startColumnIndex, endColumnIndex } = this.activeTable;
     return colIndex >= startColumnIndex && colIndex < endColumnIndex;
   }

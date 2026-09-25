@@ -8,7 +8,7 @@ export type LiveSpreadsheetConfig = {
     : string;
 };
 
-let liveSpreadsheetConfig: LiveSpreadsheetConfig | null = null;
+let liveSpreadsheetConfig: LiveSpreadsheetConfig | undefined;
 
 export function overlaySpreadsheetConfig(
   spreadsheetConfigLive: LiveSpreadsheetConfig,
@@ -18,7 +18,7 @@ export function overlaySpreadsheetConfig(
 }
 
 export function clearSpreadsheetConfigOverlay(): void {
-  liveSpreadsheetConfig = null;
+  liveSpreadsheetConfig = undefined;
 }
 
 export function ssConfigGet<TK extends keyof SpreadsheetConfig>(

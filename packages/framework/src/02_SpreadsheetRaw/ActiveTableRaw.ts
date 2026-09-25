@@ -78,7 +78,7 @@ export class ActiveTableRaw {
   }
   validateColIndexNotStale(colIndex: number): void {
     const { firstStaleColIndex } = this._knownTable();
-    if (firstStaleColIndex !== null && colIndex >= firstStaleColIndex) {
+    if (firstStaleColIndex !== undefined && colIndex >= firstStaleColIndex) {
       throw new Error(
         `Column index ${colIndex} is stale. First stale column index is ${firstStaleColIndex}.`,
       );
@@ -92,7 +92,7 @@ export class ActiveTableRaw {
   }
   private _knownTable(): KnownTableRaw {
     const knownTable = this.sheetState.working.knownTable;
-    if (knownTable === null) {
+    if (knownTable === undefined) {
       throw new Error(
         `Active table is null for sheetGid ${this.sheetGid}. Ensure that the sheet properties have been fetched.`,
       );

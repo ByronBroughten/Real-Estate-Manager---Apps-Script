@@ -28,7 +28,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     }
   }
   ensureTimeZoneIsFetched(): string {
-    if (this.spreadsheetStateRaw.timeZone === null) {
+    if (this.spreadsheetStateRaw.timeZone === undefined) {
       this._fetchTimeZone();
     }
     return Val.assert(this.spreadsheetStateRaw.timeZone, "timeZone");
@@ -94,7 +94,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
       if (toFinalize.rows.size === 0 && toFinalize.columns.size === 0) {
         return;
       }
-      if (state.working.knownTable === null) {
+      if (state.working.knownTable === undefined) {
         absentTables.push({ sheetGid });
         return;
       }

@@ -30,7 +30,7 @@ type BashReadsInit = Omit<BashReadsProps, "projectDir"> & { projectDir?: string 
 
 export interface Classification {
   isRead: boolean;
-  denyReason: string | null;
+  denyReason: string | undefined;
 }
 
 interface Segment {
@@ -89,22 +89,22 @@ export class BashReads {
         if (denyReason) return { isRead, denyReason };
       }
     }
-    return { isRead, denyReason: null };
+    return { isRead, denyReason: undefined };
   }
-  _denyReasonFor(name: string, read: FileRead, path: string): string | null {
-    if (read.kind === "search") return null;
+  _denyReasonFor(name: string, read: FileRead, path: string): string | undefined {
+    if (read.kind === "search") return undefined;
     const shown = relative(this.projectDir, path);
     if (this._columnConfigsPaths().includes(path)) {
-      if (read.kind === "range" && read.span !== undefined && read.span <= largeFileLines) return null;
+      if (read.kind === "range" && read.span !== undefined && read.span <= largeFileLines) return undefined;
       return (
         `Bash-read guard: \`${name}\` would read columnConfigs.ts beyond one block. ` +
         `Grep it for the sheet key (e.g. \`"occupancy":\`) with -A to read that object, ` +
         `or \`sed -n 'a,bp'\` a range of at most ${largeFileLines} lines. (AGENTS.md, "Read the block, not the file".)`
       );
     }
-    if (read.kind !== "whole" || !this._isGuarded(path)) return null;
+    if (read.kind !== "whole" || !this._isGuarded(path)) return undefined;
     const lines = lineCountOf(path);
-    if (lines <= largeFileLines) return null;
+    if (lines <= largeFileLines) return undefined;
     return (
       `Bash-read guard: \`${name}\` would dump all ${lines} lines of ${shown}. ` +
       `Use Read with offset/limit on the block you need, or Grep for the symbol first; ` +
@@ -125,13 +125,13 @@ export class BashReads {
   }
 }
 
-function readOf(name: string, args: string[], segment: Segment): FileRead | null {
+function readOf(name: string, args: string[], segment: Segment): FileRead | undefined {
   if (commandNames.wholeFile.has(name)) return fileRead(nonFlags(args), segment, "whole");
   if (commandNames.headTail.has(name)) return headTailRead(name, args, segment);
   if (name === "sed") return sedRead(args, segment);
   if (name === "awk") return fileRead(nonFlags(args).slice(1), segment, "filter");
   const isSearch = commandNames.search.has(name) || (name === "git" && args[0] === "grep");
-  if (!isSearch || (segment.isPiped && segment.inputFiles.length === 0)) return null;
+  if (!isSearch || (segment.isPiped && segment.inputFiles.length === 0)) return undefined;
   return { kind: "search", files: [] };
 }
 
@@ -148,8 +148,8 @@ function fileRead(
   segment: Segment,
   kind: FileRead["kind"],
   extra: { span?: number } = {},
-): FileRead | null {
-  if (files.length === 0 && segment.inputFiles.length === 0) return null;
+): FileRead | undefined {
+  if (files.length === 0 && segment.inputFiles.length === 0) return undefined;
   return { kind, files, ...extra };
 }
 
@@ -157,7 +157,7 @@ function nonFlags(args: string[]): string[] {
   return args.filter((arg) => !arg.startsWith("-") && !isGlob(arg));
 }
 
-function headTailRead(name: string, args: string[], segment: Segment): FileRead | null {
+function headTailRead(name: string, args: string[], segment: Segment): FileRead | undefined {
   let count = 10;
   let isBounded = true;
   const files: string[] = [];
@@ -184,8 +184,8 @@ function optionValue(arg: string): string | undefined {
   return match ? match[1] : undefined;
 }
 
-function sedRead(args: string[], segment: Segment): FileRead | null {
-  if (args.some((arg) => /^-[a-zA-Z]*i/.test(arg) || arg.startsWith("--in-place"))) return null;
+function sedRead(args: string[], segment: Segment): FileRead | undefined {
+  if (args.some((arg) => /^-[a-zA-Z]*i/.test(arg) || arg.startsWith("--in-place"))) return undefined;
   const isQuiet = args.some((arg) => /^-[a-zA-Z]*n/.test(arg) || arg === "--quiet");
   const scripts: (string | undefined)[] = [];
   const rest: string[] = [];
@@ -199,15 +199,15 @@ function sedRead(args: string[], segment: Segment): FileRead | null {
   const isToEnd = scripts.some((script) => /\d+\s*,\s*\$\s*p/.test(String(script)));
   if (!isQuiet || isToEnd) return fileRead(files, segment, "whole");
   const span = rangeSpanOf(scripts.join(";"));
-  return span === null ? fileRead(files, segment, "filter") : fileRead(files, segment, "range", { span });
+  return span === undefined ? fileRead(files, segment, "filter") : fileRead(files, segment, "range", { span });
 }
 
 // `12,40p` or `12p` pieces only; anything else (a pattern, `$`) is not a numeric range.
-function rangeSpanOf(script: string): number | null {
+function rangeSpanOf(script: string): number | undefined {
   let span = 0;
   for (const piece of String(script).split(/[;\n]/).map((part) => part.trim()).filter(Boolean)) {
     const match = /^(\d+)(?:,(\d+))?p$/.exec(piece);
-    if (!match) return null;
+    if (!match) return undefined;
     const start = Number(match[1]);
     const end = match[2] === undefined ? start : Number(match[2]);
     span += Math.max(0, end - start + 1);
@@ -259,19 +259,19 @@ function stripHeredocBodies(command: string): string {
 function segmentsOf(tokens: Token[]): Segment[] {
   const segments: Segment[] = [];
   let current = newSegment(false);
-  let redirect: string | null = null;
+  let redirect: string | undefined;
   for (const token of tokens) {
     if (token.type === "word") {
       if (redirect === "<") current.inputFiles.push(token.value);
       else if (!redirect) current.words.push(token.value);
-      redirect = null;
+      redirect = undefined;
       continue;
     }
     if (token.type === "redirect") {
       redirect = token.value;
       continue;
     }
-    redirect = null;
+    redirect = undefined;
     segments.push(current);
     current = newSegment(operators.pipes.has(token.value));
   }
@@ -285,10 +285,10 @@ function newSegment(isPiped: boolean): Segment {
 
 function tokenize(command: string): Token[] {
   const tokens: Token[] = [];
-  let word: string | null = null;
+  let word: string | undefined;
   function endWord(): void {
-    if (word !== null) tokens.push({ type: "word", value: word });
-    word = null;
+    if (word !== undefined) tokens.push({ type: "word", value: word });
+    word = undefined;
   }
   for (let i = 0; i < command.length; i++) {
     const char = command.charAt(i);
@@ -302,7 +302,7 @@ function tokenize(command: string): Token[] {
       i++;
     } else if (char === " " || char === "\t") {
       endWord();
-    } else if (char === "#" && word === null) {
+    } else if (char === "#" && word === undefined) {
       while (i + 1 < command.length && command[i + 1] !== "\n") i++;
     } else if (char === "\n") {
       endWord();
@@ -312,7 +312,7 @@ function tokenize(command: string): Token[] {
       tokens.push({ type: "op", value: "$(" });
       i++;
     } else if (char === "<" || char === ">" || (char === "&" && next === ">")) {
-      if (word !== null && /^\d+$/.test(word)) word = null;
+      if (word !== undefined && /^\d+$/.test(word)) word = undefined;
       endWord();
       let value = char;
       while (/[<>&|]/.test(command[i + 1] ?? "") && value.length < 3) value += command.charAt(++i);

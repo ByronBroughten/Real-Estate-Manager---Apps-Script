@@ -34,7 +34,7 @@ import type { GridRangeProps } from "./AccessorsRaw";
 
 export interface StateRaw {
   allSheetPropertiesAreFetched: boolean;
-  timeZone: string | null;
+  timeZone: string | undefined;
   rawSource: RawSource;
   fetchQueue: SpreadsheetFetchQueueRaw;
   writeQueue: SpreadsheetWriteQueueRaw;
@@ -89,8 +89,8 @@ export interface SheetStateRaw {
 }
 
 export interface SheetWorkingStateRaw {
-  title: string | null;
-  knownTable: KnownTableRaw | null;
+  title: string | undefined;
+  knownTable: KnownTableRaw | undefined;
   tables: TableIdentityRaw[];
   hasExtraTables: boolean;
   // A findReplace matches by content, so what it changed is unknowable locally.
@@ -104,12 +104,12 @@ export interface SheetWorkingStateRaw {
 }
 
 export interface ConditionalFormatsStateRaw {
-  rules: ConditionalFormatRule[] | null;
+  rules: ConditionalFormatRule[] | undefined;
   isStale: boolean;
 }
 
 export interface EditProtectionsStateRaw {
-  protections: EditProtection[] | null;
+  protections: EditProtection[] | undefined;
   isStale: boolean;
 }
 
@@ -162,7 +162,7 @@ export interface KnownTableRaw {
   endColumnIndex: number; // lastColumnIndex + 1
   columnProperties: TableColumnSnapshot[];
   rowIndexesAreStale: boolean;
-  firstStaleColIndex: number | null;
+  firstStaleColIndex: number | undefined;
 }
 
 export interface TableIdentityRaw {
@@ -192,7 +192,7 @@ export interface RowCellChange<VN extends CellValueName = CellValueName> {
   backgroundColor?: RgbColor;
 }
 export interface SheetChangesToSave {
-  sort: null | SortParameters;
+  sort: SortParameters | undefined;
   insertColumn: SheetChangePropsObj["insertColumn"][];
   fills: ColumnFill[];
 }

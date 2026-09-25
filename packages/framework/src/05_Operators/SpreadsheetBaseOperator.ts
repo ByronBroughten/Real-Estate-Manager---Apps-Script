@@ -20,7 +20,7 @@ export interface ConfigSyncState {
   };
   valueConfigSync: { activeHeaders: Set<string> };
   spreadsheetConfigSync: {
-    liveConfig: LiveSpreadsheetConfig | null;
+    liveConfig: LiveSpreadsheetConfig | undefined;
   };
 }
 
@@ -53,7 +53,7 @@ export class SpreadsheetBaseOperator extends SpreadsheetBaseNamed {
         declaredCellReportLines: [],
       },
       valueConfigSync: { activeHeaders: new Set() },
-      spreadsheetConfigSync: { liveConfig: null },
+      spreadsheetConfigSync: { liveConfig: undefined },
     };
   }
   static initOperatorProps(): OperatorProps {
