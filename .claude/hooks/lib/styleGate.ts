@@ -29,9 +29,12 @@ export interface EditDecision {
   denyReason: string | undefined;
 }
 
-interface StyleRead extends FileLocation {
+interface ReadBounds {
   offset?: number;
   limit?: number;
+}
+
+interface StyleRead extends FileLocation, ReadBounds {
   totalLines: number | undefined;
 }
 
@@ -85,31 +88,12 @@ export function cursorFilePath(toolInput: { path?: unknown; file_path?: unknown 
 }
 
 // Undefined when a bound is present but not a whole number: that Read is not unbounded, and it is not a range we can check.
-export function cursorReadBounds(toolInput: { offset?: unknown; limit?: unknown } | undefined): {
-  offset?: number;
-  limit?: number;
-} | undefined {
-  const offset = bound(toolInput, "offset");
-  const limit = bound(toolInput, "limit");
-  if (offset.rejected || limit.rejected) return undefined;
-  const bounds: { offset?: number; limit?: number } = {};
-  if (offset.value !== undefined) bounds.offset = offset.value;
-  if (limit.value !== undefined) bounds.limit = limit.value;
-  return bounds;
+export function cursorReadBounds(toolInput: { offset?: unknown; limit?: unknown } | undefined): ReadBounds | undefined {
+  const { offset, limit } = toolInput ?? {};
+  if (!isAbsentOrWholeNumber(offset) || !isAbsentOrWholeNumber(limit)) return undefined;
+  return { offset: offset ?? undefined, limit: limit ?? undefined };
 }
 
-interface ParsedBound {
-  rejected: boolean;
-  value?: number;
-}
-
-function bound(toolInput: { offset?: unknown; limit?: unknown } | undefined, key: "offset" | "limit"): ParsedBound {
-  if (toolInput == null || toolInput[key] == null) return { rejected: false };
-  const value = wholeNumber(toolInput[key]);
-  if (value === undefined) return { rejected: true };
-  return { rejected: false, value };
-}
-
-function wholeNumber(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isInteger(value) ? value : undefined;
+function isAbsentOrWholeNumber(value: unknown): value is number | null | undefined {
+  return value == null || (typeof value === "number" && Number.isInteger(value));
 }
