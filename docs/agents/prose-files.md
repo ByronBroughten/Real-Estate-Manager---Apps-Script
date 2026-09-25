@@ -25,11 +25,11 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | `docs/targets-and-gates.md` | The `dev`/`app` targets, what needs a yes first, and the gsheets MCP write rules. |
 | `docs/claude-code-guardrails.md` | The Claude Code hooks and project agent. |
 | `docs/agents/*.md` | Agent workflow: git, planning, delegation, issues. |
-| `README.md` | The monorepo overview, a derived view for people on GitHub. Nothing routes agents to it. Update it when a fact it mirrors changes (tables below). |
+| `README.md` | The workspace overview, a derived view for people on GitHub; it links each public clone by github.com URL, since the clones don't exist there. Nothing routes agents to it. Update it when a fact it mirrors changes (tables below). |
 
-### Framework (`packages/framework/`)
+### Framework (`packages/framework/`, its own repo)
 
-Its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md` files all ship with the package's repo, so they link only inside it (lint); a rule that lives at root is named in plain text. The linter checks `config/`'s docs and README.md too.
+Its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md` files all ship with the package's repo, so they link only inside it (its own lint); a rule that lives at root is named in plain text. The root's linter checks `config/`'s docs and README.md the same way.
 
 | File | Holds |
 | --- | --- |
@@ -114,4 +114,4 @@ No byte cap stands in for judgment here: a cap becomes a target, and an agent at
 | What's here | The app's `src/AGENTS.md` and its `CONTEXT.md` and `docs/` |
 | Commands | The root `package.json`'s `app:*` scripts and [`targets-and-gates.md`](../targets-and-gates.md#targets-dev-and-app) |
 
-A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published packages/framework --published config`, which holds each package's published docs (its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md`) to links inside that package.
+A fact the environment already states, whether in `package.json`, a config file or `--help`, stays there; a doc restating it is a cache that goes stale. `npm run lint` checks the links, the leads and the headings above with the `lint-docs` bin from `config/`, which the config package's README describes. The root runs it with `--published config` and the framework's repo with `--published .`, which holds each package's published docs (its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md`) to links inside that package. The root's `npm run lint` runs every clone's `lint:docs` too.

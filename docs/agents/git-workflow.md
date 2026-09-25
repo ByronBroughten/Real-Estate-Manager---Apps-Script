@@ -15,6 +15,7 @@
   ````
 
   Add a line above the block if the checks were not all green or a box in the issue is undone, so the developer sees it before handing the prompt on.
-- **A change that spans both packages lands on one `issue-<n>-<slug>` branch.** A breaking change to the framework's public entry lands in the same commit as the app's fix, so every commit stays green. Commit messages get no package prefix.
+- **Each clone under `packages/` is its own repo; its branches and commits go there, not to the root.** Run git for it with `git -C packages/<name>`, and read a branch's `<n>` against the repo that branch lives in.
+- **A change that spans the root and a clone is two commits in two repos**, each on a branch in its own repo. Each branch gets its own wrap-up prompt, run in its repo, and the clone's side lands first, so a fresh workspace never pulls the root's half without the clone's; a breaking change to the framework's public entry and the app's fix land that way too. Commit messages get no package prefix.
 - **A `backup/*` branch is single-session scaffolding.** Take one before a history rewrite, retire it once the rewrite is verified, and say so. If a stale one exists, report it with its ahead/behind counts before starting other git work.
 - Commit messages and `gh` writes from a dispatched agent go back to the main session: [`delegation.md`](./delegation.md). The wrap-up prompt is the exception: it is the developer's own hand-off to a separate session, not a dispatch.

@@ -1,6 +1,6 @@
 # Agent instructions for this repo
 
-An npm-workspaces monorepo: `packages/framework` (`@byronbroughten/sheets-framework`), a TypeScript framework for typed apps on Google Sheets + Apps Script, and `packages/real-estate` (`real-estate-app`), the real-estate endpoints built on it; a live spreadsheet is both database and UI.
+An npm-workspaces root: `packages/framework` (`@byronbroughten/sheets-framework`, a clone of its own repo), a TypeScript framework for typed apps on Google Sheets + Apps Script, and `packages/real-estate` (`real-estate-app`), the real-estate endpoints built on it; a live spreadsheet is both database and UI.
 
 Open only the section or disclosed doc the task needs.
 
@@ -17,6 +17,7 @@ Open only the section or disclosed doc the task needs.
 
 - **README.md is for humans.** Nothing in it is needed for a task here; open it only to keep it accurate ([`docs/agents/prose-files.md`](./docs/agents/prose-files.md)).
 - **Which package: "would this make sense in a different Sheets-backed app?"** Yes: `packages/framework`. No: `packages/real-estate`. A lint, format or tsconfig setting any TypeScript project would want: `config`.
+- **Public repos never depend on private ones; private may depend on public.**
 - **Working in a folder with its own `AGENTS.md`**, read it first; each package's `src/` and several folders under it have one.
 - **Commit or push only when asked. Implement a spec on its `issue-<n>-<slug>` branch**, even when a skill says to commit to the current branch. Branch rules: [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md).
 

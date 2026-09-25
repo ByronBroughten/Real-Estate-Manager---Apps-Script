@@ -2,13 +2,13 @@
 
 > Coding agents working in this repo: start at [`AGENTS.md`](./AGENTS.md). This README is for people.
 
-An npm-workspaces monorepo for managing real estate operations — properties, units, households, leases, subsidies, charges and payments — on a Google Sheets spreadsheet that acts as both the database and the UI, with TypeScript compiled and pushed to Apps Script.
+An npm-workspaces root for managing real estate operations — properties, units, households, leases, subsidies, charges and payments — on a Google Sheets spreadsheet that acts as both the database and the UI, with TypeScript compiled and pushed to Apps Script.
 
 ## The packages
 
 | Package | What it is |
 | --- | --- |
-| [`packages/framework`](./packages/framework/README.md) (`@byronbroughten/sheets-framework`) | A project-agnostic framework for typed apps on Google Sheets + Apps Script: the numbered tiers from raw cell I/O up to endpoint dispatch, the Node and Apps Script hosts, and the `sheets-framework` bin. It names nothing from real estate, and it is tested against its own dev spreadsheet, `Sheets Framework Dev`. |
+| [`sheets-framework`](https://github.com/byronbroughten/sheets-framework) (`@byronbroughten/sheets-framework`), cloned into `packages/framework` | A project-agnostic framework for typed apps on Google Sheets + Apps Script: the numbered tiers from raw cell I/O up to endpoint dispatch, the Node and Apps Script hosts, and the `sheets-framework` bin. It names nothing from real estate, and it is tested against its own dev spreadsheet, `Sheets Framework Dev`. |
 | [`packages/real-estate`](./packages/real-estate/README.md) (`real-estate-app`, private) | This project: the real-estate endpoints and chores, bundled with the framework's source and pushed to the business spreadsheet's Apps Script project. |
 | [`config`](./config/README.md) (`@byronbroughten/config`) | The general tooling both packages share: an ESLint flat-config preset, the prettier config and a base tsconfig. The framework layers its tier and Sheets rules on it in its own `eslint.config.mjs`, and exports the app's as a preset. |
 
@@ -16,7 +16,7 @@ Before adding a file, ask "would this make sense in a completely different Sheet
 
 ## Architecture: the numbered tiers
 
-Each numbered folder under `packages/framework/src/` is a dependency tier, and dependencies only point downward (lint enforces it):
+Each numbered folder under the framework's `src/` is a dependency tier, and dependencies only point downward (lint enforces it):
 
 | Folder | What it does |
 | --- | --- |
@@ -28,7 +28,7 @@ Each numbered folder under `packages/framework/src/` is a dependency tier, and d
 | `05_Operators` | Classes that add methods for one data structure, including regenerating the configs |
 | `06_API` | Routing a sheet edit to the endpoint registered for its column |
 
-The app imports the framework only through its public entry. The precise words for all of this (Raw, Identified, Named, Meta and primary) are defined in [`vocabulary.md`](./packages/framework/docs/vocabulary.md).
+The app imports the framework only through its public entry. The precise words for all of this (Raw, Identified, Named, Meta and primary) are defined in [`vocabulary.md`](https://github.com/byronbroughten/sheets-framework/blob/master/docs/vocabulary.md).
 
 ## Two spreadsheets
 
@@ -40,7 +40,7 @@ Every command that touches a live spreadsheet names its target: `dev:*` for `She
 
 ## Testing
 
-Vitest, across both packages: `npm test`. Co-located `Foo.test.ts`. Fakes, exemplars, and endpoint-run testing: [`testing.md`](./packages/framework/docs/testing.md).
+Vitest, across both packages: `npm test`. Co-located `Foo.test.ts`. Fakes, exemplars, and endpoint-run testing: [`testing.md`](https://github.com/byronbroughten/sheets-framework/blob/master/docs/testing.md).
 
 ## Known rough edges
 

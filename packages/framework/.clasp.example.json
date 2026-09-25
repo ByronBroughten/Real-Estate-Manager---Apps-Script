@@ -1,8 +1,0 @@
-{
-  "scriptId": "<your Apps Script project's ID>",
-  "rootDir": "",
-  "scriptExtensions": [".js", ".gs"],
-  "htmlExtensions": [".html"],
-  "jsonExtensions": [".json"],
-  "filePushOrder": []
-}
