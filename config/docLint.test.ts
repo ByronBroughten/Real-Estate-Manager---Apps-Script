@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { checkDocs, type Docs, type Violation } from "./docLint.ts";
+import { checkDocs, type Docs, type Violation } from "./docLint.js";
 
 function nested(lines: number): string {
   const rules = Array.from({ length: lines }, (_, i) => `- rule ${i}`);
@@ -10,11 +10,17 @@ const baseDocs = {
   "AGENTS.md": "# Root\n",
   "CLAUDE.md": "@AGENTS.md\n",
 };
-function check(docs: Docs, paths: string[] = []): Violation[] {
-  return checkDocs({ docs: { ...baseDocs, ...docs }, paths });
+function check(
+  docs: Docs,
+  paths: string[] = [],
+  published?: string,
+): Violation[] {
+  return checkDocs({ docs: { ...baseDocs, ...docs }, paths, published });
 }
-function messages(docs: Docs, paths?: string[]): string[] {
-  return check(docs, paths).map((each) => `${each.path}: ${each.message}`);
+function messages(docs: Docs, paths?: string[], published?: string): string[] {
+  return check(docs, paths, published).map(
+    (each) => `${each.path}: ${each.message}`,
+  );
 }
 
 describe("checkDocs", () => {
@@ -113,12 +119,48 @@ describe("checkDocs", () => {
     });
   });
 
+  describe("untracked packages", () => {
+    const paths = ["packages/app/src/x.ts"];
+
+    it("treats a link into a packages/<name>/ path the repo doesn't track as external", () => {
+      const docs = {
+        "AGENTS.md":
+          "[fw](./packages/framework/src/x.ts) [dir](./packages/framework/) [doc](./packages/framework/docs/a.md#nope)\n",
+      };
+      expect(check(docs, paths)).toEqual([]);
+    });
+
+    it("still checks a link into a tracked package", () => {
+      const docs = { "AGENTS.md": "[gone](./packages/app/src/gone.ts)\n" };
+      expect(messages(docs, paths)).toEqual([
+        "AGENTS.md: broken link ./packages/app/src/gone.ts: no file packages/app/src/gone.ts",
+      ]);
+    });
+
+    it("counts a package as tracked when only its docs are", () => {
+      const docs = {
+        "AGENTS.md": "[gone](./packages/app/docs/gone.md)\n",
+        "packages/app/docs/a.md": "# A\n",
+      };
+      expect(messages(docs)).toEqual([
+        "AGENTS.md: broken link ./packages/app/docs/gone.md: no file packages/app/docs/gone.md",
+      ]);
+    });
+
+    it("checks a link outside packages/ whatever is tracked", () => {
+      expect(
+        messages({ "AGENTS.md": "[gone](./src/gone.ts)\n" }, paths),
+      ).toEqual(["AGENTS.md: broken link ./src/gone.ts: no file src/gone.ts"]);
+    });
+  });
+
   describe("link direction", () => {
     const paths = [
       "docs/style.md",
       "packages/framework/src/x.ts",
       "packages/real-estate/src/y.ts",
     ];
+    const published = "packages/framework";
 
     it("fails a published framework doc linking outside the framework", () => {
       expect(
@@ -132,13 +174,14 @@ describe("checkDocs", () => {
               "[style](../../../../docs/style.md)\n",
           },
           paths,
+          published,
         ),
       ).toEqual([
-        "packages/framework/docs/a.md: link ../../../docs/style.md leaves the framework; its published docs link only inside packages/framework",
-        "packages/framework/CONTEXT.md: link ../real-estate/src/y.ts leaves the framework; its published docs link only inside packages/framework",
-        "packages/framework/CONTEXT.md: link /docs/style.md leaves the framework; its published docs link only inside packages/framework",
-        "packages/framework/README.md: link ../../AGENTS.md leaves the framework; its published docs link only inside packages/framework",
-        "packages/framework/docs/sub/c.md: link ../../../../docs/style.md leaves the framework; its published docs link only inside packages/framework",
+        "packages/framework/docs/a.md: link ../../../docs/style.md leaves packages/framework; its published docs link only inside packages/framework",
+        "packages/framework/CONTEXT.md: link ../real-estate/src/y.ts leaves packages/framework; its published docs link only inside packages/framework",
+        "packages/framework/CONTEXT.md: link /docs/style.md leaves packages/framework; its published docs link only inside packages/framework",
+        "packages/framework/README.md: link ../../AGENTS.md leaves packages/framework; its published docs link only inside packages/framework",
+        "packages/framework/docs/sub/c.md: link ../../../../docs/style.md leaves packages/framework; its published docs link only inside packages/framework",
       ]);
     });
 
@@ -150,7 +193,7 @@ describe("checkDocs", () => {
         "packages/framework/README.md":
           "[a](./docs/a.md) [abs](/packages/framework/src/x.ts)\n",
       };
-      expect(check(docs, paths)).toEqual([]);
+      expect(check(docs, paths, published)).toEqual([]);
     });
 
     it("lets the framework's AGENTS.md and CLAUDE.md files point at root", () => {
@@ -159,7 +202,7 @@ describe("checkDocs", () => {
         "packages/framework/src/AGENTS.md": "[root](../../../docs/style.md)\n",
         "packages/framework/src/CLAUDE.md": "@AGENTS.md\n",
       };
-      expect(check(docs, paths)).toEqual([]);
+      expect(check(docs, paths, published)).toEqual([]);
     });
 
     it("lets the app's docs link into the framework and root", () => {
@@ -167,7 +210,54 @@ describe("checkDocs", () => {
         "packages/real-estate/docs/a.md":
           "[fw](../../framework/src/x.ts) [root](../../../docs/style.md)\n",
       };
+      expect(check(docs, paths, published)).toEqual([]);
+    });
+
+    it("applies the rule to whichever package is configured", () => {
+      const docs = {
+        "packages/framework/docs/a.md": "[app](../../real-estate/src/y.ts)\n",
+        "packages/real-estate/docs/a.md": "[fw](../../framework/src/x.ts)\n",
+        "packages/real-estate/README.md": "[root](../../docs/style.md)\n",
+      };
+      expect(messages(docs, paths, "packages/real-estate")).toEqual([
+        "packages/real-estate/docs/a.md: link ../../framework/src/x.ts leaves packages/real-estate; its published docs link only inside packages/real-estate",
+        "packages/real-estate/README.md: link ../../docs/style.md leaves packages/real-estate; its published docs link only inside packages/real-estate",
+      ]);
+    });
+
+    it("rejects a published folder that is neither . nor a package", () => {
+      expect(() => check({}, paths, "packages/framwork/docs")).toThrow(
+        'published must be "." or packages/<name>',
+      );
+      expect(() => check({}, paths, "config")).toThrow(
+        'published must be "." or packages/<name>',
+      );
+    });
+
+    it("rejects a published package the repo doesn't track", () => {
+      expect(() => check({}, paths, "packages/framwork")).toThrow(
+        "published package packages/framwork has no tracked files",
+      );
+    });
+
+    it("holds no package to the rule when none is configured", () => {
+      const docs = {
+        "packages/framework/docs/a.md": "[root](../../../docs/style.md)\n",
+      };
       expect(check(docs, paths)).toEqual([]);
+    });
+
+    it("holds the repo's own docs when the repo root is the published package", () => {
+      const docs = {
+        "docs/a.md": "[b](./b.md) [README](../README.md)\n",
+        "docs/b.md": "# B\n",
+        "docs/c.md": "[out](../../elsewhere.md)\n",
+        "README.md": "[a](/docs/a.md)\n",
+      };
+      expect(messages(docs, [], ".")).toEqual([
+        "docs/c.md: link ../../elsewhere.md leaves the repo; its published docs link only inside the repo",
+        "docs/c.md: broken link ../../elsewhere.md: no file ../elsewhere.md",
+      ]);
     });
   });
 

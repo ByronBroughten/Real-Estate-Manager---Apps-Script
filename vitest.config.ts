@@ -27,7 +27,7 @@ export default defineConfig({
         test: {
           name: "tooling",
           include: [
-            "scripts/**/*.test.ts",
+            "config/**/*.test.ts",
             "packages/framework/scripts/**/*.test.ts",
             ".claude/hooks/**/*.test.ts",
           ],

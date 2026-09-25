@@ -119,8 +119,8 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 ## Tooling
 
-- **The hooks, root scripts, the framework's `scripts/` and the tool configs follow this file too**, all but the tier class-shape rules (coordinators, Operators, collaborators, Meta columns) and the Sheets verb list.
-- **The framework's `scripts/` may use `Val`; the hooks and root scripts never import from `packages/`** and write plain guards instead.
+- **The hooks, the framework's `scripts/` and the tool configs follow this file too**, all but the tier class-shape rules (coordinators, Operators, collaborators, Meta columns) and the Sheets verb list.
+- **The framework's `scripts/` may use `Val`; the hooks and the `config` package never import from `packages/`** and write plain guards instead.
 
 ## Imports & file organization
 

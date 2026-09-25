@@ -135,7 +135,10 @@ export default defineConfig(
   { ignores: [".claude/worktrees/**"] },
   // tsc checks these for undefined names, as typescript-eslint leaves it to tsc in .ts files.
   {
-    files: ["packages/framework/scripts/**/*.js"],
+    files: [
+      "packages/framework/scripts/**/*.js",
+      "config/{docLint,lintDocs}.js",
+    ],
     rules: { "no-undef": "off" },
   },
   // Domain-free utilities and test helpers keep bare T, K and V.

@@ -1,7 +1,7 @@
 {
   "name": "@byronbroughten/config",
   "version": "0.1.0",
-  "description": "General tooling for TypeScript projects: an ESLint flat-config preset, the prettier config and a base tsconfig.",
+  "description": "General tooling for TypeScript projects: an ESLint flat-config preset, the prettier config, a base tsconfig and a doc linter.",
   "type": "module",
   "license": "ISC",
   "exports": {
@@ -9,10 +9,15 @@
     "./prettier": "./prettier.json",
     "./tsconfig.base.json": "./tsconfig.base.json"
   },
+  "bin": {
+    "lint-docs": "./lintDocs.js"
+  },
   "files": [
     "eslint.js",
     "prettier.json",
-    "tsconfig.base.json"
+    "tsconfig.base.json",
+    "docLint.js",
+    "lintDocs.js"
   ],
   "dependencies": {
     "@eslint/js": "^9.35.0",
@@ -34,5 +39,8 @@
     "typescript": {
       "optional": true
     }
+  },
+  "scripts": {
+    "tsc": "tsc -p ."
   }
 }
