@@ -1,6 +1,6 @@
 # Coding style
 
-Distilled from the user's own refactors of AI-generated code, plus a survey of a codebase for consistent, repeated patterns. This file covers general TypeScript code _shape_; a project's own rules layer on it, as the framework's do in its `docs/style.md`.
+Distilled from the author's own refactors of AI-generated code, plus a survey of a codebase for consistent, repeated patterns. This file covers general TypeScript code _shape_; a project's own rules layer on it.
 
 One line per rule. The reasoning and worked examples are one file away. Open a reasoning file only when you're changing the rule, or the rule's line doesn't decide your case.
 
@@ -59,7 +59,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 
 - **`type` for everything computed from other types.** A plain object shape is an `interface`; lint enforces it.
 - **Generic params get two-letter domain abbreviations with a constraint**; bare `T`/`K`/`V`/`O` are only for domain-free utilities and tests; lint checks the two letters, not the constraint.
-- **`undefined` is the one "absent" value; `null` appears only where Google's types or JSON carry it.**
+- **`undefined` is the one "absent" value; `null` appears only where an external API's types or JSON carry it.**
 - **Narrow a type until the empty case can't arise, rather than a branded-string fallback.**
 - **A per-kind lookup table is keyed by the finite union its producer returns, never a `switch` with a `default` over a wider type.**
 - **An optional parameter that switches a function to a second job means it should be a second function.** Don't add an overload to loosen a constraint for one caller.
@@ -85,7 +85,6 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 ## Tooling
 
 - **Hooks, scripts and tool configs follow this file too.**
-- **The hooks and the `config` package never import from `packages/`** and write plain guards instead.
 
 ## Imports & file organization
 

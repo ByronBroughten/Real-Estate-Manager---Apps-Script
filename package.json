@@ -9,7 +9,7 @@
   "scripts": {
     "tsc": "tsc -p . && npm run tsc --workspaces --if-present",
     "lint": "eslint . && npm run -s lint:docs",
-    "lint:docs": "lint-docs --published packages/framework",
+    "lint:docs": "lint-docs --published packages/framework --published config",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",

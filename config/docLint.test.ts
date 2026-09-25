@@ -13,11 +13,19 @@ const baseDocs = {
 function check(
   docs: Docs,
   paths: string[] = [],
-  published?: string,
+  published?: string | string[],
 ): Violation[] {
-  return checkDocs({ docs: { ...baseDocs, ...docs }, paths, published });
+  return checkDocs({
+    docs: { ...baseDocs, ...docs },
+    paths,
+    published: typeof published === "string" ? [published] : published,
+  });
 }
-function messages(docs: Docs, paths?: string[], published?: string): string[] {
+function messages(
+  docs: Docs,
+  paths?: string[],
+  published?: string | string[],
+): string[] {
   return check(docs, paths, published).map(
     (each) => `${each.path}: ${each.message}`,
   );
@@ -237,13 +245,44 @@ describe("checkDocs", () => {
       ]);
     });
 
-    it("rejects a published folder that is neither . nor a package", () => {
+    it("rejects a published folder that is neither . nor a workspace folder nor a package", () => {
+      const expected = 'published must be ".", "config", or packages/<name>';
       expect(() => check({}, paths, "packages/framwork/docs")).toThrow(
-        'published must be "." or packages/<name>',
+        expected,
       );
+      expect(() => check({}, paths, "elsewhere")).toThrow(expected);
+    });
+
+    it("holds the config workspace folder's docs when it is published", () => {
+      const docs = {
+        "config/docs/style.md": "[b](./style/b.md) [out](../../docs/x.md)\n",
+        "config/docs/style/b.md": "# B\n",
+        "config/README.md": "[style](./docs/style.md) [root](../AGENTS.md)\n",
+        "config/AGENTS.md": "[root](../docs/x.md)\n",
+        "config/CLAUDE.md": "@AGENTS.md\n",
+      };
+      expect(messages(docs, ["docs/x.md"], "config")).toEqual([
+        "config/docs/style.md: link ../../docs/x.md leaves config; its published docs link only inside config",
+        "config/README.md: link ../AGENTS.md leaves config; its published docs link only inside config",
+      ]);
+    });
+
+    it("rejects a workspace folder the repo doesn't track", () => {
       expect(() => check({}, paths, "config")).toThrow(
-        'published must be "." or packages/<name>',
+        "published package config has no tracked files",
       );
+    });
+
+    it("holds every package named, and no other", () => {
+      const docs = {
+        "packages/framework/docs/a.md": "[app](../../real-estate/src/y.ts)\n",
+        "config/docs/a.md": "[root](../../docs/style.md)\n",
+        "packages/real-estate/docs/a.md": "[fw](../../framework/src/x.ts)\n",
+      };
+      expect(messages(docs, paths, ["packages/framework", "config"])).toEqual([
+        "packages/framework/docs/a.md: link ../../real-estate/src/y.ts leaves packages/framework; its published docs link only inside packages/framework",
+        "config/docs/a.md: link ../../docs/style.md leaves config; its published docs link only inside config",
+      ]);
     });
 
     it("rejects a published package the repo doesn't track", () => {

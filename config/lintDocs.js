@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // @ts-check
-// `lint-docs [--published <dir>]`: runs the doc checker against the tracked and new files of the git repo it is invoked in, exiting non-zero on a violation.
+// `lint-docs [--published <dir>]...`: runs the doc checker against the tracked and new files of the git repo it is invoked in, exiting non-zero on a violation.
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { posix } from "node:path";
@@ -8,7 +8,9 @@ import { parseArgs } from "node:util";
 
 import { checkDocs } from "./docLint.js";
 
-const { values } = parseArgs({ options: { published: { type: "string" } } });
+const { values } = parseArgs({
+  options: { published: { type: "string", multiple: true } },
+});
 
 /** @param {string[]} args */
 function git(args) {

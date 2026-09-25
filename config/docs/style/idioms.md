@@ -12,7 +12,7 @@ A mutator method returns `this` so calls chain: `fetchAndUpdateAll(): this { ...
 
 ## A combined option is built from its parts
 
-`prepFetchRowSpecifier`'s `"all"` case calls itself for `"headers"`, `"actions"`, `"columnIds"` and `"data"` rather than repeating their bodies.
+`prepFetch`'s `"all"` case calls itself for `"headers"`, `"actions"` and `"data"` rather than repeating their bodies.
 
 ## State is a named flag, not a trick
 

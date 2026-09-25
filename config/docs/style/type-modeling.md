@@ -14,13 +14,13 @@ Two letters, not one, even where one would be unambiguous: a lone `F` or `I` rea
 
 ## Specificity over branded fallbacks
 
-A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`. The framework's docs/design.md, "Make disagreement structurally impossible rather than validating against it."
+A branded fallback string also stops working, without any error, in constraint position: the intersection that satisfies the parent's constraint collapses it back to `never`.
 
 ## Lookup tables are keyed by the producer's union
 
-`UpdateRequestSummary` once dispatched on a `switch` over the keys of Google's `Request`, whose every member is optional, ending in a `default` that printed raw JSON. The builders returned that same wide type, so nothing tied the kinds they produced to the cases the switch handled: a new kind compiled and silently rendered as JSON. The fix names the kinds on the producer side (`ModeledRequestVerb` in `GoogleSheetsAPI.ts`), types the builders to return only `ModeledRequest`, and annotates the formatter table with a mapped type over that union, so a missing or mistyped formatter fails `tsc`. The `default` survives only for requests the framework doesn't build. It is the same move as the framework's plain registry annotation (its `docs/style/type-modeling.md`): let the type, not the reader, carry the list of keys. The general hazard: a `default` over an optional-keyed type like Google's `Request` compiles with any case missing.
+A formatter once dispatched on a `switch` over the keys of an external `Request` type, whose every member is optional, ending in a `default` that printed raw JSON. The builders returned that same wide type, so nothing tied the kinds they produced to the cases the switch handled: a new kind compiled and silently rendered as JSON. The fix names the kinds on the producer side (a `RequestVerb` union next to the builders), types the builders to return only the modeled request, and annotates the formatter table with a mapped type over that union, so a missing or mistyped formatter fails `tsc`. The `default` survives only for requests the project doesn't build. Let the type, not the reader, carry the list of keys. The general hazard: a `default` over an optional-keyed type like `Request` compiles with any case missing.
 
 ## Use the named type that already exists
 
-A field, return type or param bag that matches a named type uses it: `TableIdentityRaw`, not `{ tableId: string; name: string }`.
+A field, return type or param bag that matches a named type uses it: `TableIdentity`, not `{ tableId: string; name: string }`.
 

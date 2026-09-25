@@ -15,6 +15,6 @@ General tooling for TypeScript projects: an ESLint flat-config preset, the prett
 `lint-docs` lists the repo's tracked and new files via git and checks its markdown docs, exiting non-zero on a violation:
 
 - **Links and anchors** resolve, in `AGENTS.md`, `CLAUDE.md`, `CONTEXT.md`, `README.md`, and every `docs/` file at the repo root, under `config/` and under `packages/<name>/`. A link into a `packages/<name>/` folder the repo doesn't track is external and not checked, so a root doc can point at clones that exist only locally.
-- **`--published <dir>`** names the package whose `docs/`, `CONTEXT.md` and `README.md` ship on their own, so they link only inside it: `packages/<name>`, or `.` for the repo root, either relative to the repo root wherever the bin runs. Anything else, or a package the repo doesn't track, is an error, and without the flag no package is held to the rule.
+- **`--published <dir>`**, repeatable, names each package whose `docs/`, `CONTEXT.md` and `README.md` ship on their own, so they link only inside it: `packages/<name>`, `config` (this package, in a repo that holds it as a workspace folder), or `.` for the repo root, either relative to the repo root wherever the bin runs. Anything else, or a folder the repo doesn't track, is an error, and without the flag no package is held to the rule.
 - **Leads and headings**: a `docs/` file's lead before its first `##` heading, and a file with no `##` heading at all, stay within the `limits` in `docLint.js`.
 - **Each nested `AGENTS.md`** has a sibling `CLAUDE.md` containing `@AGENTS.md`.

@@ -133,6 +133,24 @@ export default defineConfig(
   ...eslintPreset,
   // Agent worktrees are whole checkouts that git excludes locally, which ESLint doesn't read.
   { ignores: [".claude/worktrees/**"] },
+  // These run or ship apart from packages/, so they carry their own plain guards instead of importing a package's helper.
+  {
+    files: ["config/**/*.{js,ts}", ".claude/hooks/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: `(^|/)packages/|^(${frameworkPackage}|real-estate-app)(/|$)`,
+              message:
+                "The config package and the hooks import nothing from packages/; write a plain guard instead.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // tsc checks these for undefined names, as typescript-eslint leaves it to tsc in .ts files.
   {
     files: [

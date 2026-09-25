@@ -19,22 +19,21 @@ const workspaceFolders = new Set(["config"]);
 /** @typedef {Record<string, string>} Docs */
 /** @typedef {{ path: string, line: number, message: string }} Violation */
 /** @typedef {(line: number, message: string) => void} Report */
-/** @typedef {{ docs: Docs, known: Set<string>, trackedPackages: Set<string>, published: string | undefined, slugsOf: (path: string) => Set<string>, report: Report }} LinkContext */
+/** @typedef {{ docs: Docs, known: Set<string>, trackedRoots: Set<string>, published: Set<string>, slugsOf: (path: string) => Set<string>, report: Report }} LinkContext */
 /** @typedef {{ line: number, content: string }} ProseLine */
 /** @typedef {{ line: number, target: string }} Link */
 
 /**
  * `docs` maps every markdown path to its contents; `paths` lists the other repo files and folders a link may name.
- * @param {{ docs: Docs, paths?: string[], published?: string }} args
+ * @param {{ docs: Docs, paths?: string[], published?: string[] }} args
  * @returns {Violation[]}
  */
-export function checkDocs({ docs, paths = [], published }) {
+export function checkDocs({ docs, paths = [], published = [] }) {
   const known = new Set([...Object.keys(docs), ...paths]);
-  const trackedPackages = packagesOf(known);
-  const publishedRoot =
-    published === undefined
-      ? undefined
-      : normalizeRoot(published, trackedPackages);
+  const trackedRoots = rootsOf(known);
+  const publishedRoots = new Set(
+    published.map((root) => normalizeRoot(root, trackedRoots)),
+  );
   const slugs = new Map();
   /** @param {string} path */
   function slugsOf(path) {
@@ -52,8 +51,8 @@ export function checkDocs({ docs, paths = [], published }) {
       checkLinks(path, text, {
         docs,
         known,
-        trackedPackages,
-        published: publishedRoot,
+        trackedRoots,
+        published: publishedRoots,
         slugsOf,
         report,
       });
@@ -97,18 +96,21 @@ function isLinkChecked(path) {
   return isDocsFolderFile(path) || name === "AGENTS.md" || name === "CLAUDE.md";
 }
 
-// The repo root is "" and a package is `packages/<name>`, however the caller spells it; an untracked package is a typo, not a no-op.
+// The repo root is "", a workspace folder is its name and a package is `packages/<name>`, however the caller spells it; an untracked one is a typo, not a no-op.
 /**
  * @param {string} root
- * @param {Set<string>} trackedPackages
+ * @param {Set<string>} trackedRoots
  */
-function normalizeRoot(root, trackedPackages) {
+function normalizeRoot(root, trackedRoots) {
   const normal = posix.normalize(root).replace(/\/$/, "");
   if (normal === ".") return "";
-  if (packageRootOf(normal) !== normal) {
-    throw new Error(`published must be "." or packages/<name>, not ${root}`);
+  if (packageRootOf(normal) !== normal && !workspaceFolders.has(normal)) {
+    const folders = [...workspaceFolders].map((folder) => `"${folder}", `);
+    throw new Error(
+      `published must be ".", ${folders.join("")}or packages/<name>, not ${root}`,
+    );
   }
-  if (!trackedPackages.has(normal)) {
+  if (!trackedRoots.has(normal)) {
     throw new Error(`published package ${root} has no tracked files`);
   }
   return normal;
@@ -120,24 +122,24 @@ function packageRootOf(path) {
   return /^packages\/[^/]+/.exec(path)?.[0];
 }
 
-// The `packages/<name>` folders that hold at least one tracked path.
+// The workspace and `packages/<name>` folders that hold at least one tracked path.
 /** @param {Set<string>} known */
-function packagesOf(known) {
-  const packages = new Set();
+function rootsOf(known) {
+  const roots = new Set();
   for (const path of known) {
-    const root = packageRootOf(path);
-    if (root) packages.add(root);
+    const root = docRoot(path);
+    if (root) roots.add(root);
   }
-  return packages;
+  return roots;
 }
 
 // A package's published docs are its `docs/`, `CONTEXT.md` and `README.md`: they ship without the rest of the repo, so they must stand alone.
 /**
  * @param {string} path
- * @param {string | undefined} published
+ * @param {Set<string>} published
  */
 function isPublishedDoc(path, published) {
-  if (published === undefined || docRoot(path) !== published) return false;
+  if (!published.has(docRoot(path))) return false;
   const local = inRoot(path);
   return local.startsWith("docs/") || publishedRootFiles.has(local);
 }
@@ -159,9 +161,11 @@ function isInside(resolved, root) {
 function checkLinks(
   path,
   text,
-  { docs, known, trackedPackages, published, slugsOf, report },
+  { docs, known, trackedRoots, published, slugsOf, report },
 ) {
-  const publishedIn = isPublishedDoc(path, published) ? published : undefined;
+  const publishedIn = isPublishedDoc(path, published)
+    ? docRoot(path)
+    : undefined;
   const scope = publishedIn === "" ? "the repo" : publishedIn;
   for (const { line, target } of linksIn(text)) {
     const hashAt = target.indexOf("#");
@@ -176,7 +180,7 @@ function checkLinks(
         `link ${target} leaves ${scope}; its published docs link only inside ${scope}`,
       );
     }
-    if (isUntrackedPackagePath(resolved, trackedPackages)) continue;
+    if (isUntrackedPackagePath(resolved, trackedRoots)) continue;
     if (!known.has(resolved)) {
       report(line, `broken link ${target}: no file ${resolved}`);
       continue;
@@ -194,11 +198,11 @@ function checkLinks(
 // A checkout that lacks a package (the private root without its clones) can't say whether a path in it exists, so a link into it is external.
 /**
  * @param {string} resolved
- * @param {Set<string>} trackedPackages
+ * @param {Set<string>} trackedRoots
  */
-function isUntrackedPackagePath(resolved, trackedPackages) {
+function isUntrackedPackagePath(resolved, trackedRoots) {
   const root = packageRootOf(resolved);
-  return root !== undefined && !trackedPackages.has(root);
+  return root !== undefined && !trackedRoots.has(root);
 }
 
 /**
