@@ -17,13 +17,9 @@ export const platformImportPattern = {
  */
 export function sheetsSrcBlocks(platformIgnores) {
   return [
-    // Domain-free utilities and test helpers keep bare T, K and V.
+    // Tests keep bare T, K and V, like the domain-free utilities each package names itself.
     {
-      files: [
-        "src/{utils,appUtils}/**/*.ts",
-        "src/testSupport/typeAssertions.ts",
-        "**/*.test.ts",
-      ],
+      files: ["**/*.test.ts"],
       rules: {
         "@typescript-eslint/naming-convention": ["error", variableNaming],
       },

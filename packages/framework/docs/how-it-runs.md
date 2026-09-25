@@ -16,6 +16,16 @@ Read the heading the task needs.
 - **An `UNRESOLVED_IMPORT` warning fails the build**, so a missing import can't ship as an external.
 - **Rollup keeps an entry function's own name** when another module declares the same one, and renames the other; the strip throws if it ever sees a renamed entry export.
 
+## The ESLint preset
+
+**An app's `eslint.config.mjs` spreads `@byronbroughten/config`'s `eslintPreset`, then `appEslintPreset({ testSetupFiles })` from `scripts/eslintPreset.js`**, exported as the `./eslint` subpath. It is JavaScript, not TypeScript, because Node won't strip types from a file under `node_modules`. It adds, for the app's `src/`:
+
+- **The platform boundary**: no `GoogleSheets/` import, `GoogleAppsScript` type, or Apps Script global such as `SpreadsheetApp`. The framework's own config applies the same blocks through `sheetsSrcBlocks`, so the boundary can't drift between them.
+- **The public entry**: the framework is imported only as `@byronbroughten/sheets-framework`, and `/testing` only from `*.test.ts` and the `testSetupFiles`, which are the non-test files that install configs for tests. `src/generated/**` is exempt, because `gen:configs` writes a relative import of the framework's `makeConfigs`.
+- **No relative import out of `src/`**. The `../` count differs by depth, so there is one block per depth, covering `src/` down to five folders deep. A file nested deeper gets none of the import rules; add a depth to the preset before nesting that far.
+
+The preset leaves naming for domain-free utility folders to the app: the app's own config gives its utilities folder `variableNaming`, as the real-estate app does for `src/appUtils/`.
+
 ## The Node host
 
 The Node host is the second one (the framework's `src/nodeHost/`, launched by its `scripts/nodeHost.ts`). Spreadsheet I/O is six `RawSource` methods — fetch sheet properties, fetch the time zone, fetch grid ranges, fetch conditional format rules, fetch edit protections, apply the queued write list — none of which names a spreadsheet: the adapter is bound to one when it is constructed. `GoogleSheetsAPI` maps those onto the three Advanced Service verbs and, in Node, an HTTP transport. `NodeHost.ensureGlobals()` installs a `Logger` onto the global scope, installs configs as the Apps Script entry call does, and injects `GoogleSheetsAPI`, bound to the configured spreadsheet ID, as the `RawSource`, before any framework module loads. There is no `PropertiesService` stub. It does **not** install a `Sheets` global, so a chore that reaches for `Sheets` or `SpreadsheetApp` still fails by name. Two commands use it: `sheets-framework chore <name>` and `sheets-framework gen-configs`. A chore gets the four files in its package's `generatedDir`, passed to the same `installConfigs` the entry call uses, so a chore run from the framework package runs on its `dev/generated/`. `gen-configs` installs the package's own configs too, or the framework's dev ones when the package has none yet, since it reads only the config floor, which every package shares.

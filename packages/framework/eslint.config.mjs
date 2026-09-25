@@ -1,4 +1,4 @@
-import { eslintPreset } from "@byronbroughten/config/eslint";
+import { eslintPreset, variableNaming } from "@byronbroughten/config/eslint";
 import { defineConfig } from "eslint/config";
 
 import {
@@ -79,6 +79,13 @@ export default defineConfig(
   ...eslintPreset,
   // tsc checks these for undefined names, as typescript-eslint leaves it to tsc in .ts files.
   { files: ["scripts/**/*.js"], rules: { "no-undef": "off" } },
+  // Domain-free utilities and type assertions keep bare T, K and V.
+  {
+    files: ["src/utils/**/*.ts", "src/testSupport/typeAssertions.ts"],
+    rules: {
+      "@typescript-eslint/naming-convention": ["error", variableNaming],
+    },
+  },
   ...sheetsSrcBlocks([
     "src/00_Source/GoogleSheets/**",
     "src/appsScriptHost/**",
