@@ -37,7 +37,7 @@ Open only the section or disclosed doc the task needs.
 | Tests and fakes | [testing](./packages/framework/docs/testing.md) |
 | Regen `tsc` fails, or hand-written sheet/column keys disagree with generated configs | [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md) |
 | Branches, landing a spec, closing an issue, `backup/*` branches | [`docs/agents/git-workflow.md`](./docs/agents/git-workflow.md) |
-| Design, grilling, specs, an offered ADR, a long session's handoff | [`docs/agents/planning.md`](./docs/agents/planning.md) |
+| Design, grilling, specs, tickets, an offered ADR, a long session's handoff | [`docs/agents/planning.md`](./docs/agents/planning.md) |
 | Editing a prose doc or AGENTS.md: which file a fact belongs in | [`docs/agents/prose-files.md`](./docs/agents/prose-files.md) |
 | Issues and labels | [`docs/agents/issue-tracker.md`](./docs/agents/issue-tracker.md), [`docs/agents/triage-labels.md`](./docs/agents/triage-labels.md) |
 | Domain vs architecture vocabulary | [`docs/agents/domain.md`](./docs/agents/domain.md) |
