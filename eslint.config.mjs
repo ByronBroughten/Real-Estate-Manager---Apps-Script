@@ -160,6 +160,7 @@ export default defineConfig(
       "no-duplicate-imports": ["error", { allowSeparateTypeImports: false }],
       // No setting limits an unbraced body to an exit; multi-line is the nearest, so a one-line non-exiting body also passes.
       curly: ["error", "multi-line"],
+      "@typescript-eslint/no-explicit-any": "error",
       "prefer-template": "error",
       "no-restricted-syntax": ["error", ...styleSyntax],
       "max-classes-per-file": ["error", 1],
@@ -196,6 +197,14 @@ export default defineConfig(
         ),
       ],
     },
+  },
+  // The structural utilities do the generic typing that needs `any` (docs/style/type-modeling.md).
+  {
+    files: [
+      "packages/*/src/**/{Obj,Arr}.ts",
+      "packages/*/src/**/{Obj,Arr}/**/*.ts",
+    ],
+    rules: { "@typescript-eslint/no-explicit-any": "off" },
   },
   {
     files: ["packages/*/src/**/*.ts"],
