@@ -68,7 +68,7 @@ export class SheetMetaIdentified extends SheetCommonIdentified {
       this.raw.primary.gatherFetchEditProtections();
     }
   }
-  gatherFetchDataPrepped() {
+  gatherFetchDataPrepped(): void {
     // This is so that table dimensions and columnIndexes can be guaranteed
     // before their fetch requests are generated.
     this.fetchTargets.forEach((target) => {

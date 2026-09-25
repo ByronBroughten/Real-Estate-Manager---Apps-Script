@@ -22,7 +22,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
   get tableValidator(): SpreadsheetTableValidatorRaw {
     return new SpreadsheetTableValidatorRaw(this.spreadsheetRawProps);
   }
-  ensureAllSheetPropertiesAreFetched() {
+  ensureAllSheetPropertiesAreFetched(): void {
     if (!this.spreadsheetStateRaw.allSheetPropertiesAreFetched) {
       this._fetchAndIntegrateAllSheetProperties();
     }
@@ -33,7 +33,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     }
     return Val.assert(this.spreadsheetStateRaw.timeZone, "timeZone");
   }
-  fetchAllSheetProperties() {
+  fetchAllSheetProperties(): { activeSheetGids: number[] } {
     this._fetchAndIntegrateAllSheetProperties();
     this.tableValidator.validateTablePlacement();
     return { activeSheetGids: this.ss.activeSheetGids };
@@ -67,7 +67,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
     Logger.log(`Fetched the spreadsheet's time zone on its own: ${timeZone}.`);
     this.spreadsheetStateRaw.timeZone = timeZone;
   }
-  private _fetchAndIntegrateAllSheetProperties() {
+  private _fetchAndIntegrateAllSheetProperties(): void {
     const data = this.spreadsheetStateRaw.rawSource.fetchSheetProperties();
     this._addDataToState(data);
     this.spreadsheetStateRaw.allSheetPropertiesAreFetched = true;
@@ -162,7 +162,7 @@ export class SpreadsheetFetcherRaw extends SpreadsheetBaseRaw {
       .filter(([, state]) => state.fetchQueue[flag])
       .map(([sheetGid]) => sheetGid);
   }
-  private _addDataToState(snapshot: SpreadsheetSnapshot) {
+  private _addDataToState(snapshot: SpreadsheetSnapshot): void {
     if (snapshot.timeZone !== null) {
       this.spreadsheetStateRaw.timeZone = snapshot.timeZone;
     }

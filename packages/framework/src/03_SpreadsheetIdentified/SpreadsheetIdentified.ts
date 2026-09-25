@@ -41,7 +41,7 @@ export class SpreadsheetIdentified extends SpreadsheetBaseIdentified {
   fetchAllPrepped({
     includeProgrammaticFacts = false,
     ...props
-  }: GatherDataPrerequisitesProps = {}) {
+  }: GatherDataPrerequisitesProps = {}): void {
     const sheetsPreppedForFetch = this.sheetsPreppedForFetch;
     sheetsPreppedForFetch.forEach((sheet) => {
       sheet._gatherDataPrerequisites(props);

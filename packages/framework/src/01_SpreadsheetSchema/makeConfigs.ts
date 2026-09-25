@@ -12,7 +12,7 @@ export function makeImportLine(
     | "makeValueConfigs"
     | "makeSpreadsheetConfig",
   makeConfigsImport: string,
-) {
+): string {
   return `import { ${configMagerName} } from ${JSON.stringify(makeConfigsImport)};`;
 }
 

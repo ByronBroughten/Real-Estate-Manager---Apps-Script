@@ -1,3 +1,7 @@
+import type {
+  DeleteConditionalFormatRuleOperation,
+  DeleteRowsOperation,
+} from "../../00_Source/RawSource/RawSource";
 import { SpreadsheetBaseRaw } from "../ClassBases/SpreadsheetBaseRaw";
 import { emptyStateRaw } from "../ClassTypes/emptyStateRaw";
 import type {
@@ -16,7 +20,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
   get ss(): SpreadsheetRaw {
     return new SpreadsheetRaw(this.spreadsheetRawProps);
   }
-  flush() {
+  flush(): void {
     this._gatherUpdateRequests();
     const sheetGidsWithRowDeletes = this._sheetGidsWithRowDeletes();
     const sheetGidsWithConditionalFormatMutations =
@@ -43,7 +47,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     );
     if (hasFindReplace) this._invalidateFetchedCellState();
   }
-  private _gatherUpdateRequests() {
+  private _gatherUpdateRequests(): void {
     this.sheetsStateRaw.forEach((state, sheetGid) => {
       this._gatherSheetRequests(sheetGid, state.writeQueue.sheet);
       for (const [rowIndex, change] of state.writeQueue.rows) {
@@ -55,7 +59,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
     // After the sheet queues, so the insert-column refusal sees this flush's inserts.
     this._gatherColumnTypesRequests();
   }
-  private _gatherColumnTypesRequests() {
+  private _gatherColumnTypesRequests(): void {
     const opsBySheet = new Map<number, UpdateTableColumnTypeOperation[]>();
     this.updateRequests.updateTableColumnType.forEach((operation) => {
       const ops = opsBySheet.get(operation.sheetId) ?? [];
@@ -66,7 +70,10 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       this.ss.sheet(sheetGid).gatherColumnTypesRequest(ops),
     );
   }
-  private _gatherSheetRequests(sheetGid: number, change: SheetChangesToSave) {
+  private _gatherSheetRequests(
+    sheetGid: number,
+    change: SheetChangesToSave,
+  ): void {
     change.insertColumn.forEach(({ startColumnIndex }) => {
       this.ss.sheet(sheetGid).gatherInsertColumnRequest(startColumnIndex);
     });
@@ -80,7 +87,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
   private _gatherRowRequests(
     change: RowChangesToSave,
     { sheetGid, rowIndex }: SheetRowRef,
-  ) {
+  ): void {
     if (change.append && change.delete) {
       return;
     } else if (change.delete) {
@@ -127,7 +134,7 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
       ),
     ]);
   }
-  private _sendUpdateRequests() {
+  private _sendUpdateRequests(): void {
     const requests = this.updateRequests;
     const operations = [
       // A Table can only be added to a tab this batch has created, so both go first.
@@ -162,12 +169,12 @@ export class SpreadsheetFlusherRaw extends SpreadsheetBaseRaw {
   // Deletes within one batchUpdate apply sequentially and each shifts the
   // row indices below it, so same-sheet deletes must go highest-index-first
   // or a later request's pre-computed startIndex lands on the wrong row.
-  private _deleteOperationsDescending() {
+  private _deleteOperationsDescending(): DeleteRowsOperation[] {
     return [...this.updateRequests.delete].sort(
       (a, b) => b.startIndex - a.startIndex,
     );
   }
-  private _deleteConditionalFormatOperationsDescending() {
+  private _deleteConditionalFormatOperationsDescending(): DeleteConditionalFormatRuleOperation[] {
     return [...this.updateRequests.deleteConditionalFormat].sort((a, b) => {
       if (a.sheetId !== b.sheetId) return a.sheetId - b.sheetId;
       return b.index - a.index;

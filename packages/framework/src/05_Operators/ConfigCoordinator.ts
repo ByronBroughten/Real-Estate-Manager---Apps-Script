@@ -52,19 +52,19 @@ export class ConfigCoordinator extends SpreadsheetBaseOperator {
   get ss(): SpreadsheetNamed {
     return new SpreadsheetNamed(this.spreadsheetNamedProps);
   }
-  get spreadsheetConfigOperator() {
+  get spreadsheetConfigOperator(): SpreadsheetConfigOperator {
     return new SpreadsheetConfigOperator(this.operatorProps);
   }
-  get columnConfigOperator() {
+  get columnConfigOperator(): ColumnConfigOperator {
     return new ColumnConfigOperator(this.operatorProps);
   }
-  get sheetConfigOperator() {
+  get sheetConfigOperator(): SheetConfigOperator {
     return new SheetConfigOperator(this.operatorProps);
   }
-  get valueConfigOperator() {
+  get valueConfigOperator(): ValueConfigOperator {
     return new ValueConfigOperator(this.operatorProps);
   }
-  get configSheetFloor() {
+  get configSheetFloor(): ConfigSheetFloor {
     return new ConfigSheetFloor(this.spreadsheetNamedProps);
   }
   ensureConfigSheetFloor(): string {

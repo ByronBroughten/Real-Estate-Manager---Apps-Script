@@ -11,7 +11,10 @@ import type {
   EditProtection,
   EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
-import type { GridCellSnapshot } from "../00_Source/RawSource/RawSource";
+import type {
+  BoundedGridRange,
+  GridCellSnapshot,
+} from "../00_Source/RawSource/RawSource";
 import type { RgbColor } from "../00_Source/RawSource/RgbColor";
 import { CellBaseRaw } from "./ClassBases/CellBaseRaw";
 import type { RowCommonRaw } from "./ClassBases/RowCommonRaw";
@@ -27,7 +30,7 @@ export class CellRaw<
   get row(): RowCommonRaw {
     return this.sheet.rowCommon(this.rowIndex);
   }
-  get gridRange() {
+  get gridRange(): BoundedGridRange {
     return {
       sheetId: this.sheetGid,
       startRowIndex: this.rowIndex,
@@ -84,7 +87,7 @@ export class CellRaw<
   get isActive(): boolean {
     return this.row.rowIsActive() && this.rowState.has(this.colIndex);
   }
-  ensureActive() {
+  ensureActive(): void {
     if (!this.row.rowIsActive()) return;
     if (!this.isActive) {
       this.setValueState("");

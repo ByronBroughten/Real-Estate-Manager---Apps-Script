@@ -10,7 +10,7 @@ export class SpreadsheetSchema extends SpreadsheetBaseSchema {
   isInSheetGids(sheetGid: number): boolean {
     return sheetConfigsByGid().has(sheetGid);
   }
-  get sheetNames() {
+  get sheetNames(): SheetName[] {
     return configSheetNames();
   }
   sheetByName<SN extends SheetName>(sheetName: SN): SheetSchema<SN> {

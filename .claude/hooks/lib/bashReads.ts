@@ -286,7 +286,7 @@ function newSegment(isPiped: boolean): Segment {
 function tokenize(command: string): Token[] {
   const tokens: Token[] = [];
   let word: string | null = null;
-  function endWord() {
+  function endWord(): void {
     if (word !== null) tokens.push({ type: "word", value: word });
     word = null;
   }

@@ -27,7 +27,7 @@ export class ColumnMetaRaw<
   get primary(): ColumnRaw<VN> {
     return new ColumnRaw<VN>(this.columnRawProps);
   }
-  get activeHeader() {
+  get activeHeader(): string {
     return this.uniformCell("tableHeader").valueOrEmpty();
   }
   get activeIsFormula(): boolean {

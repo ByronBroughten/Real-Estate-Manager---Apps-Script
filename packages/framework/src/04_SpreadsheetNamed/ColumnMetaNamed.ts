@@ -14,6 +14,7 @@ import type {
   MakeColumnFullName,
 } from "../01_SpreadsheetSchema/columnConfigsTypes";
 import type { SheetName } from "../01_SpreadsheetSchema/sheetConfigsTypes";
+import type { ColumnMetaRaw } from "../02_SpreadsheetRaw/ColumnMetaRaw";
 import type { CellIdentified } from "../03_SpreadsheetIdentified/CellIdentified";
 import { ColumnMetaIdentified } from "../03_SpreadsheetIdentified/ColumnMetaIdentified";
 import { ColumnCommonNamed } from "./ClassBases/ColumnCommonNamed";
@@ -27,7 +28,7 @@ export class ColumnMetaNamed<
   get sheet(): SheetMetaNamed<SN> {
     return new SheetMetaNamed(this.sheetNamedProps);
   }
-  get raw() {
+  get raw(): ColumnMetaRaw {
     return this.sheet.raw.column(this.identified.colIndex);
   }
   get identified(): ColumnMetaIdentified<ColumnValueName<SN, CN>> {
@@ -39,7 +40,7 @@ export class ColumnMetaNamed<
   get primary(): ColumnNamed<SN, CN> {
     return new ColumnNamed(this.columnNamedProps);
   }
-  get colIndex() {
+  get colIndex(): number {
     return this.identified.colIndex;
   }
   get fullName(): MakeColumnFullName<SN, CN> & ColumnFullName {

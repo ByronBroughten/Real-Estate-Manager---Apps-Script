@@ -230,7 +230,11 @@ function httpSheetsTransport(
   // The one place the wire is trusted, as Apps Script's own declaration trusts it.
   const send = <T>(request: SheetsHttpRequest): T =>
     props.transport(request) as T;
-  const url = (spreadsheetId: string, suffix: string, fields?: string) => {
+  const url = (
+    spreadsheetId: string,
+    suffix: string,
+    fields?: string,
+  ): string => {
     const query = fields ? `?fields=${encodeURIComponent(fields)}` : "";
     return `${sheetsApiBase}/${spreadsheetId}${suffix}${query}`;
   };

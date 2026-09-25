@@ -95,7 +95,7 @@ export class ColumnSchema<
       return this.valTrait("makeDefault")() as ColumnValue<SN, CN>;
     }
   }
-  validate(value: unknown) {
+  validate(value: unknown): ColumnValue<SN, CN> | "" {
     if (this.emptyValueAllowed && value === "") {
       return value;
     } else {

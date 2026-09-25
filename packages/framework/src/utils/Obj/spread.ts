@@ -32,6 +32,6 @@ _spreadTest({
   d: 4,
 });
 
-export function spread<A extends object[]>(...a: [...A]) {
+export function spread<A extends object[]>(...a: [...A]): Spread<A> {
   return Object.assign({}, ...a) as Spread<A>;
 }

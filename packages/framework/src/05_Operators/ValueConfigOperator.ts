@@ -30,7 +30,7 @@ export class ValueConfigOperator extends GenericSheetOperator<"valueConfig"> {
   get columnConfigOperator(): ColumnConfigOperator {
     return new ColumnConfigOperator(this.operatorProps);
   }
-  fetchAfterColumnConfigSynced() {
+  fetchAfterColumnConfigSynced(): void {
     this.columnConfigOperator.assertSyncedToSpreadsheet();
     this.valueConfigSync.activeHeaders = new Set(
       this.columnConfigOperator

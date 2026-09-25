@@ -26,7 +26,7 @@ export class SheetBaseRaw extends SpreadsheetBaseRaw {
     this.sheetGid = sheetGid;
     this._ensureSheetState();
   }
-  private _ensureSheetState() {
+  private _ensureSheetState(): void {
     if (!this.spreadsheetStateRaw.sheets.has(this.sheetGid)) {
       this.spreadsheetStateRaw.sheets.set(
         this.sheetGid,

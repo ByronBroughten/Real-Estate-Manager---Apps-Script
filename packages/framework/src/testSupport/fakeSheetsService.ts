@@ -235,8 +235,10 @@ function fakeRowsToGoogleSheetData({
   const blocks: NonNullable<GoogleAppsScript.Sheets.Schema.Sheet["data"]> = [];
   let currentBlockRows: GoogleAppsScript.Sheets.Schema.RowData[] = [];
   let currentBlockStart: number | null = null;
-  const columnMetadata = () => Array.from({ length: columnCount }, () => ({}));
-  const flushCurrentBlock = () => {
+  const columnMetadata =
+    (): GoogleAppsScript.Sheets.Schema.DimensionProperties[] =>
+      Array.from({ length: columnCount }, () => ({}));
+  const flushCurrentBlock = (): void => {
     if (currentBlockStart !== null) {
       blocks.push({
         startColumn: 0,

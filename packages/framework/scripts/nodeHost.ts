@@ -186,7 +186,10 @@ export async function loadPackageConfigs({
   };
 }
 
-async function importConfig(generatedDir: string, base: ConfigFile) {
+async function importConfig<CF extends ConfigFile>(
+  generatedDir: string,
+  base: CF,
+): Promise<Configs[CF]> {
   const url = pathToFileURL(configFilePath(generatedDir, base));
   return (await import(url.href))[base];
 }

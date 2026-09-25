@@ -161,6 +161,10 @@ export default defineConfig(
       // No setting limits an unbraced body to an exit; multi-line is the nearest, so a one-line non-exiting body also passes.
       curly: ["error", "multi-line"],
       "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/explicit-function-return-type": [
+        "error",
+        { allowExpressions: true },
+      ],
       "prefer-template": "error",
       "no-restricted-syntax": ["error", ...styleSyntax],
       "max-classes-per-file": ["error", 1],
@@ -197,6 +201,11 @@ export default defineConfig(
         ),
       ],
     },
+  },
+  // Test helpers and plain-JS files are out of the return-type rule's scope (#153).
+  {
+    files: ["**/*.test.ts", "**/*.{js,mjs}"],
+    rules: { "@typescript-eslint/explicit-function-return-type": "off" },
   },
   // The structural utilities do the generic typing that needs `any` (docs/style/type-modeling.md).
   {

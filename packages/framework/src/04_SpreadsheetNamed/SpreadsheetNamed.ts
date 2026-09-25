@@ -185,7 +185,7 @@ export class SpreadsheetNamed extends SpreadsheetBaseNamed {
     this.raw.ensureAllSheetPropertiesAreFetched();
     return this;
   }
-  fillMissingRowIds() {
+  fillMissingRowIds(): void {
     // could potentially be reconfigured to not rely on the schema.
     const idSheets = this._sheetsWithRowIds();
     idSheets.forEach((sheet) => {

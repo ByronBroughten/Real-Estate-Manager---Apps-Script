@@ -36,11 +36,11 @@ export class UniformRowBaseRaw<
       UniformRowValue<UN> | ""
     )[];
   }
-  validateUniformState() {
+  validateUniformState(): void {
     this.validateUniformRowIndex();
     this.ensureStateExists();
   }
-  private validateUniformRowIndex() {
+  private validateUniformRowIndex(): void {
     this.schema.validateUniformRowIndex(this.rowIndex, this.uniformRowName);
   }
 }

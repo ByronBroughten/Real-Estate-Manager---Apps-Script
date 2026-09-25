@@ -8,6 +8,7 @@ import type {
   EditProtection,
   EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
+import type { GridRangeProps } from "../00_Source/RawSource/RawSource";
 import {
   toWireValue,
   type Value,
@@ -99,12 +100,12 @@ export class ColumnIdentified<
   get cellsActive(): CellIdentified<VN>[] {
     return this.cellIndexesActive.map((rowIndex) => this.cell(rowIndex));
   }
-  activeCellsToDefault() {
+  activeCellsToDefault(): void {
     this.cellsActive.forEach((cell) => {
       cell.updateToDefault();
     });
   }
-  allCellsToDefault() {
+  allCellsToDefault(): void {
     this.cellsFull.forEach((cell) => {
       cell.updateToDefault();
     });
@@ -144,7 +145,7 @@ export class ColumnIdentified<
     this.raw.removeConditionalFormatRule(rule);
     return this;
   }
-  gridRangeFromRow(startRowIndex: number) {
+  gridRangeFromRow(startRowIndex: number): GridRangeProps {
     return this.raw.gridRangeFromRow(startRowIndex);
   }
   addEditWarning(declaration: EditWarningDeclaration = {}): this {

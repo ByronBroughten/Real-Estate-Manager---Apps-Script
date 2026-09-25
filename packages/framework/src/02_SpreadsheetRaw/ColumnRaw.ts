@@ -11,6 +11,10 @@ import type {
   EditProtection,
   EditWarningDeclaration,
 } from "../00_Source/RawSource/EditProtection";
+import type {
+  BoundedGridRange,
+  GridRangeProps,
+} from "../00_Source/RawSource/RawSource";
 import { Arr } from "../utils/Arr";
 import { CellRaw, validateFormulaString } from "./CellRaw";
 import { ColumnBaseRaw } from "./ClassBases/ColumnBaseRaw";
@@ -44,7 +48,7 @@ export class ColumnRaw<
   get topCell(): CellRaw<VN> {
     return this.cell(this.schema.topDataRowIdx);
   }
-  get dataGridRange() {
+  get dataGridRange(): BoundedGridRange {
     return {
       sheetId: this.sheetGid,
       startRowIndex: this.schema.topDataRowIdx,
@@ -53,7 +57,7 @@ export class ColumnRaw<
       endColumnIndex: this.colIndex + 1,
     };
   }
-  gridRangeFromRow(startRowIndex: number) {
+  gridRangeFromRow(startRowIndex: number): GridRangeProps {
     return {
       sheetId: this.sheetGid,
       startRowIndex,
