@@ -152,7 +152,7 @@ export default defineConfig(
       "@typescript-eslint/naming-convention": ["error", variableNaming],
     },
   },
-  // The structural utilities do the generic typing that needs `any` (docs/style/type-modeling.md).
+  // The structural utilities do the generic typing that needs `any` (packages/framework/docs/style/type-modeling.md).
   {
     files: [
       "packages/*/src/**/{Obj,Arr}.ts",

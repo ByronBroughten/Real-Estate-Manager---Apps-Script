@@ -112,6 +112,18 @@ describe("checkDocs", () => {
       ]);
     });
 
+    it("checks the config workspace's docs and README.md", () => {
+      expect(
+        messages({
+          "config/docs/a.md": "[gone](./gone.md)\n",
+          "config/README.md": "[gone](./gone.md)\n",
+        }),
+      ).toEqual([
+        "config/docs/a.md: broken link ./gone.md: no file config/docs/gone.md",
+        "config/README.md: broken link ./gone.md: no file config/gone.md",
+      ]);
+    });
+
     it("leaves unlisted docs such as skills unchecked", () => {
       expect(
         check({ ".claude/skills/x/SKILL.md": "[gone](./gone.md)\n" }),
@@ -306,6 +318,12 @@ describe("checkDocs", () => {
     it("checks a package's docs/ files", () => {
       expect(messages({ "packages/app/docs/a.md": withLead(6) })).toEqual([
         "packages/app/docs/a.md: lead is 6 lines before the first ## heading; keep it to 5 and move the rest under a heading",
+      ]);
+    });
+
+    it("checks the config workspace's docs/ files", () => {
+      expect(messages({ "config/docs/a.md": withLead(6) })).toEqual([
+        "config/docs/a.md: lead is 6 lines before the first ## heading; keep it to 5 and move the rest under a heading",
       ]);
     });
 

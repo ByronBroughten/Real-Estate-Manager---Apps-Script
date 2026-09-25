@@ -17,7 +17,8 @@
     "prettier.json",
     "tsconfig.base.json",
     "docLint.js",
-    "lintDocs.js"
+    "lintDocs.js",
+    "docs"
   ],
   "dependencies": {
     "@eslint/js": "^9.35.0",

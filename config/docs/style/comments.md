@@ -12,13 +12,4 @@ A comment sits trailing or immediately above its line and never restates the lin
 
 ## File-level navigation blocks
 
-A navigation block is 5–10 lines immediately above the exported class, stating the file's job and where neighbouring work lives, so an agent opens the right sibling instead of the whole tier. Six files have one:
-
-- `src/02_SpreadsheetRaw/SpreadsheetRaw.ts`
-- `src/02_SpreadsheetRaw/SheetRaw.ts`
-- `src/04_SpreadsheetNamed/SheetNamed.ts`
-- `src/05_Operators/ConfigCoordinator.ts`
-- `src/05_Operators/ConfigSheetFloor/ConfigSheetFloorEditWarnings.ts`
-- `src/06_API/EndpointRun.ts`
-
-Copy one of them for the shape. The set is small on purpose: a new block is the exception, not the pattern, and every other comment stays one line.
+A navigation block is 5–10 lines immediately above the exported class, stating the file's job and where neighbouring work lives, so an agent opens the right sibling instead of the whole tier. The framework's set is in its `docs/style/comments.md`.

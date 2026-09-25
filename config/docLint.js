@@ -14,6 +14,7 @@ const linkedRootFiles = new Set([
   "README.md",
 ]);
 const publishedRootFiles = new Set(["CONTEXT.md", "README.md"]);
+const workspaceFolders = new Set(["config"]);
 
 /** @typedef {Record<string, string>} Docs */
 /** @typedef {{ path: string, line: number, message: string }} Violation */
@@ -65,13 +66,15 @@ export function checkDocs({ docs, paths = [], published }) {
   return violations;
 }
 
-// The repo root, or the `packages/<name>` folder, that holds the doc.
+// The repo root, a workspace folder such as `config`, or the `packages/<name>` folder, that holds the doc.
 /** @param {string} path */
 function docRoot(path) {
   const parts = path.split("/");
-  return parts[0] === "packages" && parts.length > 2
-    ? parts.slice(0, 2).join("/")
-    : "";
+  const top = parts[0] ?? "";
+  if (top === "packages" && parts.length > 2) {
+    return parts.slice(0, 2).join("/");
+  }
+  return workspaceFolders.has(top) && parts.length > 1 ? top : "";
 }
 
 // `path` relative to its doc root.

@@ -12,14 +12,7 @@ The unmarked accessors carry the column's own **Empty value allowed** declaratio
 
 Don't read through a blank-tolerant form and defer the check to a manual guard closer to where the value is used. Reading and validating in one step means a value can never be used unvalidated in between, and it validates every field in an object literal the same way. `ColumnConfigOperator.newColumnConfigs()` reads `columnId`/`sheetGid`/`header`/`emptyValueAllowed` all via `col.x.value(rowIndex)` for exactly that reason. The drift comparisons a few methods up read `valueOrEmpty`, because a blank config cell is what they exist to catch. Sampled `isFormula` / `valueName` come from the described live column, not from Column Config cells.
 
-## One function for a shared phrase
-
-A phrase that names the same thing in several messages or labels comes from one function, so the wording can't drift between them. `spreadsheetConfigColumnLabel` is the example.
-
 ## `try`/`catch`
 
 `EndpointRun.run` is the only `catch` in the codebase. It exists because an endpoint's failure has to reach the sheet as a run status rather than kill the trigger. Don't generalize from it. If the question comes up elsewhere, note it as open.
 
-## Throw instead of skip-and-log
-
-A defensive skip earns its place only when the condition can genuinely occur in valid, expected state. If upstream code already rules it out (a prior step corrects or prunes exactly this case), skip-and-log just buries a real failure in a log line. Throw instead. Real example: `ColumnConfigOperator.columnEntries()` used to skip rows missing `header`/`valueName`/a resolvable `sheetGid`. But `_updateProgrammaticValues` corrects `header` for every active row, emit samples `valueName` from the live column, and `_pruneColumnRows` guarantees every surviving row's `sheetGid` resolves. So a row still failing one of those checks means the sync didn't actually complete, and now it throws.
