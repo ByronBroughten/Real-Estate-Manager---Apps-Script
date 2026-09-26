@@ -54,6 +54,7 @@ One row per landed issue, added by the landing wrap-up; keep the most recent ~20
 
 | Issue | Pair | Result | What review caught |
 | --- | --- | --- | --- |
+| #9 | Opus medium | Pass | — |
 | #8 | Opus medium | Fix | Further implementation after the first session; ticket too large for one session (suggested pair was Opus high) |
 | #3 | Opus high | Pass | — |
 | #6 | Opus high | Pass | — |
