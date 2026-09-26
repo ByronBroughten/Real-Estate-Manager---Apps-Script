@@ -1,4 +1,4 @@
-// Decides the pinned-target guard: dev writes drop to ask while a pin is off, and gsheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.ts does the I/O.
+// Decides the pinned-target guard: dev writes drop to ask while a pin is off, and gworkspace Sheets writes are allowed only on the dev ID. Pure; pinnedTargetGuard.ts does the I/O.
 import { commandWordsOf } from "./bashReads.ts";
 
 // Pinned in tracked code because sheets.config.json is gitignored, so git can't see an edit to it.
@@ -11,10 +11,18 @@ export const pinningFiles = [
   ".claude/hooks/lib/pinnedTargets.ts",
   ".claude/hooks/lib/sheetsConfigs.ts",
 ];
-export const guardedGsheetsWrites = new Set([
-  "mcp__gsheets__update_cells",
-  "mcp__gsheets__batch_update_cells",
-  "mcp__gsheets__create_sheet",
+// Every Sheets write in workspace-mcp 1.28.0 that takes a spreadsheet_id; settings.json's hook matcher lists the same names.
+export const guardedSheetsWrites = new Set([
+  "mcp__gworkspace__modify_sheet_values",
+  "mcp__gworkspace__format_sheet_range",
+  "mcp__gworkspace__manage_conditional_formatting",
+  "mcp__gworkspace__create_sheet",
+  "mcp__gworkspace__append_table_rows",
+  "mcp__gworkspace__manage_sheet_tab",
+  "mcp__gworkspace__resize_sheet_dimensions",
+  "mcp__gworkspace__move_sheet_rows",
+  "mcp__gworkspace__manage_named_range",
+  "mcp__gworkspace__manage_spreadsheet_comment",
 ]);
 const devWrites = new Set(["dev:gen:configs", "dev:build", "dev:push", "dev:run"]);
 const runVerbs = new Set(["run", "run-script"]);
@@ -37,7 +45,7 @@ export interface BashCommand {
   dirtyPinningFiles: DirtyPinningFiles;
 }
 
-export interface GsheetsWrite {
+export interface SheetsWrite {
   toolName: string | undefined;
   spreadsheetId: string | undefined;
   devSpreadsheetId: string | undefined;
@@ -79,26 +87,26 @@ export function bashDecision({ command, dirtyPinningFiles }: BashCommand): Decis
   };
 }
 
-export function gsheetsWriteDecision({
+export function sheetsWriteDecision({
   toolName,
   spreadsheetId,
   devSpreadsheetId,
   dirtyPinningFiles,
-}: GsheetsWrite): Decision | undefined {
-  if (toolName === undefined || !guardedGsheetsWrites.has(toolName)) return undefined;
+}: SheetsWrite): Decision | undefined {
+  if (toolName === undefined || !guardedSheetsWrites.has(toolName)) return undefined;
   const isDev = devSpreadsheetId !== undefined && devSpreadsheetId !== "" && spreadsheetId === devSpreadsheetId;
   if (!isDev) {
     return {
       permissionDecision: "ask",
       reason:
-        "Pinned-target guard: this gsheets write targets a spreadsheet that is not the pinned dev spreadsheet. " +
+        "Pinned-target guard: this Sheets write targets a spreadsheet that is not the pinned dev spreadsheet. " +
         "It needs a yes that names the exact sheet, range and values.",
     };
   }
   if (!isClean(dirtyPinningFiles)) {
     return {
       permissionDecision: "ask",
-      reason: `Pinned-target guard: this gsheets write targets the dev spreadsheet, but ${dirtyShown(dirtyPinningFiles)}.`,
+      reason: `Pinned-target guard: this Sheets write targets the dev spreadsheet, but ${dirtyShown(dirtyPinningFiles)}.`,
     };
   }
   return { permissionDecision: "allow", reason: "Pinned-target guard: a write to the dev spreadsheet, from a clean pin." };

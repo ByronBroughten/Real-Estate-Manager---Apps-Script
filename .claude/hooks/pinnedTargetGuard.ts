@@ -1,4 +1,4 @@
-// PreToolUse on Bash and gsheets writes: a dev write asks while a pin is off; a gsheets write is allowed only on the pinned dev ID.
+// PreToolUse on Bash and gworkspace Sheets writes: a dev write asks while a pin is off; a Sheets write is allowed only on the pinned dev ID.
 import { spawnSync } from "node:child_process";
 
 import { readHookInput, runFailOpen, writeHookOutput } from "./lib/hookIo.ts";
@@ -6,10 +6,10 @@ import {
   bashDecision,
   type Decision,
   type DirtyPinningFiles,
-  gsheetsWriteDecision,
   pinnedDevSpreadsheetId,
   pinningFiles,
   pinsOff,
+  sheetsWriteDecision,
 } from "./lib/pinnedTargets.ts";
 import { readSheetsConfigs } from "./lib/sheetsConfigs.ts";
 
@@ -23,7 +23,7 @@ await runFailOpen(() => {
     if (typeof command !== "string") return;
     decision = bashDecision({ command, dirtyPinningFiles: pinsOffIn(projectDir) });
   } else {
-    decision = gsheetsWriteDecision({
+    decision = sheetsWriteDecision({
       toolName: input.tool_name,
       spreadsheetId: input.tool_input?.spreadsheet_id,
       devSpreadsheetId: pinnedDevSpreadsheetId,

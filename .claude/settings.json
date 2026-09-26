@@ -28,16 +28,36 @@
       "Bash(npx eslint *)",
       "Bash(gh label list *)",
       "Bash(gh issue edit *)",
-      "mcp__gsheets__get_sheet_data",
-      "mcp__gsheets__list_sheets"
+      "mcp__gworkspace__list_spreadsheets",
+      "mcp__gworkspace__get_spreadsheet_info",
+      "mcp__gworkspace__read_sheet_values",
+      "mcp__gworkspace__list_sheet_tables",
+      "mcp__gworkspace__list_spreadsheet_comments",
+      "mcp__gworkspace__search_docs",
+      "mcp__gworkspace__get_doc_content",
+      "mcp__gworkspace__get_doc_as_markdown",
+      "mcp__gworkspace__list_docs_in_folder",
+      "mcp__gworkspace__inspect_doc_structure",
+      "mcp__gworkspace__debug_table_structure",
+      "mcp__gworkspace__list_document_comments",
+      "mcp__gworkspace__search_drive_files",
+      "mcp__gworkspace__get_drive_file_content",
+      "mcp__gworkspace__list_drive_items",
+      "mcp__gworkspace__get_drive_file_permissions",
+      "mcp__gworkspace__check_drive_file_public_access"
     ],
     "ask": [
       "Bash(npm run app:chore * --send*)",
       "Bash(npm run app:build*)",
       "Bash(clasp deploy*)",
       "Bash(npx clasp deploy*)",
-      "mcp__gsheets__create_spreadsheet",
-      "mcp__gsheets__share_spreadsheet"
+      "mcp__gworkspace__create_spreadsheet",
+      "mcp__gworkspace__create_doc",
+      "mcp__gworkspace__import_to_google_sheets",
+      "mcp__gworkspace__import_to_google_doc",
+      "mcp__gworkspace__copy_drive_file",
+      "mcp__gworkspace__manage_drive_access",
+      "mcp__gworkspace__set_drive_file_permissions"
     ],
     "deny": [
       "Read(./packages/*/src/generated/columnConfigs.ts)",
@@ -57,7 +77,7 @@
         ]
       },
       {
-        "matcher": "Bash|mcp__gsheets__update_cells|mcp__gsheets__batch_update_cells|mcp__gsheets__create_sheet",
+        "matcher": "Bash|mcp__gworkspace__modify_sheet_values|mcp__gworkspace__format_sheet_range|mcp__gworkspace__manage_conditional_formatting|mcp__gworkspace__create_sheet|mcp__gworkspace__append_table_rows|mcp__gworkspace__manage_sheet_tab|mcp__gworkspace__resize_sheet_dimensions|mcp__gworkspace__move_sheet_rows|mcp__gworkspace__manage_named_range|mcp__gworkspace__manage_spreadsheet_comment",
         "hooks": [
           {
             "type": "command",

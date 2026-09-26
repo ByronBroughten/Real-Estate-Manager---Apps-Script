@@ -1,13 +1,16 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
   bashDecision,
   type Decision,
   devWriteOf,
-  type GsheetsWrite,
-  gsheetsWriteDecision,
+  guardedSheetsWrites,
   pinnedDevSpreadsheetId,
   pinsOff,
+  type SheetsWrite,
+  sheetsWriteDecision,
 } from "./pinnedTargets.ts";
 
 describe("devWriteOf", () => {
@@ -83,11 +86,11 @@ describe("pinsOff", () => {
   });
 });
 
-describe("gsheetsWriteDecision", () => {
+describe("sheetsWriteDecision", () => {
   const devSpreadsheetId = "dev-id";
-  function decide(overrides: Partial<GsheetsWrite>): Decision | undefined {
-    return gsheetsWriteDecision({
-      toolName: "mcp__gsheets__update_cells",
+  function decide(overrides: Partial<SheetsWrite>): Decision | undefined {
+    return sheetsWriteDecision({
+      toolName: "mcp__gworkspace__modify_sheet_values",
       spreadsheetId: "dev-id",
       devSpreadsheetId,
       dirtyPinningFiles: [],
@@ -95,14 +98,12 @@ describe("gsheetsWriteDecision", () => {
     });
   }
 
-  it("allows update_cells, batch_update_cells and create_sheet on the dev spreadsheet", () => {
-    for (const toolName of [
-      "mcp__gsheets__update_cells",
-      "mcp__gsheets__batch_update_cells",
-      "mcp__gsheets__create_sheet",
-    ]) {
+  it("allows every guarded gworkspace Sheets write on the dev spreadsheet", () => {
+    expect(guardedSheetsWrites).toContain("mcp__gworkspace__modify_sheet_values");
+    expect(guardedSheetsWrites).toContain("mcp__gworkspace__create_sheet");
+    guardedSheetsWrites.forEach((toolName) => {
       expect(decide({ toolName })).toEqual({ permissionDecision: "allow", reason: expect.any(String) });
-    }
+    });
   });
 
   it("asks for any other spreadsheet, with the exact sheet, range and values", () => {
@@ -125,8 +126,21 @@ describe("gsheetsWriteDecision", () => {
   });
 
   it("has no opinion on a tool it does not guard", () => {
-    expect(decide({ toolName: "mcp__gsheets__share_spreadsheet" })).toBeUndefined();
-    expect(decide({ toolName: "mcp__gsheets__create_spreadsheet" })).toBeUndefined();
-    expect(decide({ toolName: "mcp__gsheets__get_sheet_data" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gworkspace__manage_drive_access" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gworkspace__create_spreadsheet" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gworkspace__read_sheet_values" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gworkspace__modify_doc_text" })).toBeUndefined();
+    expect(decide({ toolName: "mcp__gsheets__update_cells" })).toBeUndefined();
+  });
+});
+
+describe("the pinned-target hook's matcher", () => {
+  it("names Bash and exactly the guarded Sheets writes", () => {
+    const settings = JSON.parse(readFileSync(new URL("../../settings.json", import.meta.url), "utf8"));
+    const matchers: string[] = settings.hooks.PreToolUse.filter(({ hooks }: { hooks: { command: string }[] }) =>
+      hooks.some(({ command }) => command.includes("pinnedTargetGuard.ts")),
+    ).map(({ matcher }: { matcher: string }) => matcher);
+    expect(matchers).toHaveLength(1);
+    expect(new Set(matchers[0]?.split("|"))).toEqual(new Set(["Bash", ...guardedSheetsWrites]));
   });
 });
