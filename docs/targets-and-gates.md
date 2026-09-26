@@ -17,14 +17,14 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 | `gen:configs` | allow | allow, under the four conditions below |
 | `push` / `run <fn>` / `build` | allow | ask |
 | `clasp deploy`, bare `clasp *` | ask | ask |
-| gsheets `update_cells`, `batch_update_cells`, `create_sheet` | allow | ask, with the exact sheet, range and values |
-| gsheets `create_spreadsheet`, `share_spreadsheet` | ask | ask |
-| gsheets reads | allow | allow |
+| gworkspace Sheets writes (`guardedSheetsWrites`) | allow | ask, with the exact sheet, range and values |
+| gworkspace Docs writes, file creation, share tools | ask | ask |
+| gworkspace reads | allow | allow |
 
 **`npm publish` is ask-first, apart from the two targets.** It publishes `@byronbroughten/config` to the public npm registry, where a version can't be replaced and a removal is time-limited, so a yes covers one publish of one version, and the agent shows the `npm pack --dry-run` file list before asking. `npm adduser` is the developer's own step.
 
 - **Bare `npx sheets-framework …`, `node packages/framework/scripts/sheets-framework.js …`, a package-level `npm run chore …` and `npm run … -w …` match no rule, so they ask.** The only `--send` ask rule is `npm run app:chore * --send*`.
-- **A dev write's standing yes holds only while the pinning files are clean**, and a gsheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.ts` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
+- **A dev write's standing yes holds only while the pinning files are clean**, and a gworkspace Sheets write gets it only on the dev ID. The hook: `pinnedTargetGuard.ts` in [`docs/claude-code-guardrails.md`](./claude-code-guardrails.md).
 - **`dev:build`, `dev:push` and `dev:run` run the framework package's `build`, `push` and `run` scripts** against the dev project named in its `.clasp.json` ([the dev project](../packages/framework/docs/how-it-runs.md#the-dev-project)).
 - **Both targets' Node-host credential comes from GCP project `real-estate-manager-sheets`**, whose consent screen is published to production so its refresh tokens don't expire ([why](../packages/framework/docs/how-it-runs.md#when-the-node-host-fails-to-authenticate)).
 - **The dev spreadsheet is not a rehearsal copy of the app one.** Sheet configs key every sheet by its GID, and the dev sheet carries its own fixture sheets, not a copy of the business ones.
@@ -50,12 +50,17 @@ The threat model is accidents, with tampering made visible. Both clasp credentia
 
 The agent verifies a chore's preview before handing it over (the rule: [`src/chores/AGENTS.md`](../packages/framework/src/chores/AGENTS.md)), comparing the rendered requests against what the chore was meant to do and calling out anything wrong or larger than intended. That is a workflow obligation, not a code feature.
 
-## The `gsheets` MCP tools
+## The `gworkspace` MCP tools
 
-The `gsheets` MCP server reads and writes the user's real Google Sheets directly, separately from `clasp`/Apps Script. What it can and can't see: [the framework's notes](../packages/framework/docs/how-it-runs.md#the-gsheets-mcp-tools).
+**The agent account is `byronbroughtenai@gmail.com`, the one Google identity behind agent access to Docs, Drive and Sheets.** To grant access to a file or folder, share it with the agent account, as Editor, from the main account. `clasp` and the Node-host credential stay on the main account.
 
-- **Read-only tools are always fine to use freely**: `list_spreadsheets`, `list_sheets`, `get_sheet_data`.
+The `gworkspace` MCP server signs in as the agent account; what it is and what it can see: [the framework's notes](../packages/framework/docs/how-it-runs.md#the-gworkspace-mcp-tools). It is registered in `~/.claude.json` under this project, never in a repo file. Setting it up, re-authorizing after a dead token, or adding a service is a re-run of `scripts/setup-agent-account-mcp.sh`; `scripts/retire-gsheets-service-account.sh` retired the old service account once that passed.
+
+- **Sheets, Docs and Drive reads are always fine to use freely**; the read tools are on the allow-list.
 - **`app:probe`/`dev:probe` are read-only and on the allow-list, like a chore dry run.** Ask before running any other script that opens the `clasp` credential. The chore runner and `gen:configs` are exempt, because they open it as a routine step and the permissions above cover them.
-- **`update_cells`, `batch_update_cells` and `create_sheet` on the dev spreadsheet have a standing yes**, granted by `pinnedTargetGuard.ts` while the pinning files are clean.
-- **Any other write — those three on any other spreadsheet, and `create_spreadsheet` everywhere — requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values (or the exact new sheet/spreadsheet being created) and wait for a yes.
-- **`share_spreadsheet` needs its own, separate confirmation** — it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.
+- **Sheets writes on the dev spreadsheet have a standing yes**, granted by `pinnedTargetGuard.ts` while the pinning files are clean. The guarded tools are `guardedSheetsWrites` in `.claude/hooks/lib/pinnedTargets.ts`.
+- **Any other Sheets write requires stating a specific plan and getting explicit permission before calling it.** "Can I edit the sheet?" is not enough; state the exact sheet, range, and values and wait for a yes.
+- **Every Docs write asks, and the ask names the doc and the change.** No doc has a standing yes.
+- **Creating a spreadsheet, doc or other Drive file always asks**, naming what is being created.
+- **A share tool (`manage_drive_access`, `set_drive_file_permissions`, and `update_drive_file`, which can change sharing settings) needs its own, separate confirmation**: it grants a third party access, not just data. State exactly who it's being shared with and at what permission level, and get explicit sign-off on that, distinct from any data-write approval.
+- **The server's version is pinned; upgrades are manual.** Read the release notes, bump the pin in the setup wizard, check the tool names in `.claude/settings.json` and `guardedSheetsWrites` against the new version, re-run the wizard's registration stage, and re-test on the dev spreadsheet.

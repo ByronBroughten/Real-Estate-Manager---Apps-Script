@@ -57,7 +57,11 @@
       "mcp__gworkspace__import_to_google_doc",
       "mcp__gworkspace__copy_drive_file",
       "mcp__gworkspace__manage_drive_access",
-      "mcp__gworkspace__set_drive_file_permissions"
+      "mcp__gworkspace__set_drive_file_permissions",
+      "mcp__gworkspace__update_drive_file",
+      "mcp__gworkspace__create_drive_file",
+      "mcp__gworkspace__create_drive_folder",
+      "mcp__gworkspace__export_doc_to_pdf"
     ],
     "deny": [
       "Read(./packages/*/src/generated/columnConfigs.ts)",

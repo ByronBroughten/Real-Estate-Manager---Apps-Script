@@ -11,7 +11,7 @@ Open only the section or disclosed doc the task needs.
 - `npm run app:chore <name>`: a dry run, always safe. `npm run app:chore <name> -- --send` applies it and needs a yes **naming that chore**.
 - `npm run app:probe`: read-only raw Sheets JSON. Stdout gets a summary and the full response goes to that package's `.probe/last.json`; read a line range of it, never print a full body into the chat. Ask before any other script that opens the `clasp` credential.
 - `npm run app:gen:configs` writes to the live config sheets. **Before running it, check the four standing-permission conditions** in [`docs/targets-and-gates.md`](./docs/targets-and-gates.md#before-touching-the-live-spreadsheet-or-deployment).
-- Ask first for `npm run app:build`, `clasp push` / `run` / `deploy`, and any gsheets MCP write to the app spreadsheet (give the exact sheet, range and values). `create_spreadsheet` always asks; `share_spreadsheet` needs its own yes, naming who and at what permission. Reading either sheet needs no yes.
+- Ask first for `npm run app:build`, `clasp push` / `run` / `deploy`, any gworkspace Sheets write to the app spreadsheet (exact sheet, range and values) and any Docs write (the doc and the change). Creating a file asks; a share needs its own yes, naming who and at what permission. Reads need no yes.
 
 ## Every task
 
@@ -33,7 +33,7 @@ Open only the section or disclosed doc the task needs.
 | Architecture mechanics: dispatch, schema classes, class chains, queued writes, round trips, type-check cost | [architecture](./packages/framework/docs/architecture.md) index, then one file |
 | Adding a deletion path | [blank-row](./packages/framework/docs/architecture/blank-row.md) |
 | A one-off job against the live sheet | [chores](./packages/framework/docs/architecture/chores.md) |
-| Hosts, bin, chore dry run, Sheets probe, gsheets MCP | [how-it-runs](./packages/framework/docs/how-it-runs.md); gates: [targets-and-gates](./docs/targets-and-gates.md) |
+| Hosts, bin, chore dry run, Sheets probe, gworkspace MCP | [how-it-runs](./packages/framework/docs/how-it-runs.md); gates: [targets-and-gates](./docs/targets-and-gates.md) |
 | Claude Code hooks and the project agent | [`docs/claude-code-guardrails.md`](./docs/claude-code-guardrails.md) |
 | Tests and fakes | [testing](./packages/framework/docs/testing.md) |
 | Regen `tsc` fails, or hand-written sheet/column keys disagree with generated configs | [retarget-after-gen-configs](./.claude/skills/retarget-after-gen-configs/SKILL.md) |
