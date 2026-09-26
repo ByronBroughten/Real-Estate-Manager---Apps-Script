@@ -28,7 +28,7 @@ _Instances:_ dispatched agents report the command they would run rather than run
 
 A yes is scoped to the specific thing the operator saw. A general go-ahead, or approval of a neighbouring step, is not consent to an action whose effects they didn't see named.
 
-_Instances:_ a `--send` needs a yes that names that chore, and a gsheets write needs an exact sheet, range and values (AGENTS.md, "Commands"). During design or grilling, nothing is written until the operator invokes the skill that files it: approving a design is not approving its publication (`5d5c77c`).
+_Instances:_ a `--send` needs a yes that names that chore, and a Sheets write needs an exact sheet, range and values (AGENTS.md, "Commands"). During design or grilling, nothing is written until the operator invokes the skill that files it: approving a design is not approving its publication (`5d5c77c`).
 
 ### Put each rule where it gets followed, and its reasoning one pointer away
 

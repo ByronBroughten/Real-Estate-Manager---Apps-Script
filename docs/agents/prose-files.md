@@ -22,7 +22,7 @@ Every file has one job, and each fact lives in exactly one of them. Everywhere e
 | `CLAUDE.md` | `@AGENTS.md` plus pointers to Claude Code-only mechanics (subagents, hooks). |
 | `CONTEXT-MAP.md` | Which `CONTEXT.md` each context owns, and how the app's glossary relates to the framework's. |
 | `docs/agent-behavior-design.md` | Why the agent tooling (hooks, gates, delegation, this doc scheme) is shaped as it is. It never goes in the framework's `docs/design.md`. |
-| `docs/targets-and-gates.md` | The `dev`/`app` targets, what needs a yes first, and the gsheets MCP write rules. |
+| `docs/targets-and-gates.md` | The `dev`/`app` targets, what needs a yes first, the agent account, and the gworkspace MCP rules. |
 | `docs/claude-code-guardrails.md` | The Claude Code hooks and project agent. |
 | `docs/cursor-guardrails.md` | The Cursor hooks. |
 | `docs/agents/*.md` | Agent workflow: git, planning, delegation, issues. |
@@ -45,7 +45,7 @@ Its `docs/`, `CONTEXT.md`, `README.md`, `AGENTS.md` and `CLAUDE.md` files all sh
 | `docs/design.md` | Why the codebase is shaped as it is, including deliberate absences, one line per principle. Covers the codebase only. |
 | `docs/design/*.md` | Each principle's argument and instances, one file per principle, plus `candidates.md` for the parked ones. |
 | `docs/architecture/*.md` | Mechanics, one file per heading, indexed by `docs/architecture.md`. |
-| `docs/how-it-runs.md` | The two hosts, the rollup preset, the `sheets-framework` bin, the dev project, the chore dry run, auth failure, the probe, what the gsheets MCP can see. |
+| `docs/how-it-runs.md` | The two hosts, the rollup preset, the `sheets-framework` bin, the dev project, the chore dry run, auth failure, the probe, what the gworkspace MCP can see. |
 | `docs/generated-data.md`, `docs/generated-data/*.md` | The generated configs: the index and regen path, then one file per constant, the config sync and the floor. |
 | `docs/testing.md` | The fakes, the seams and the exemplar columns. |
 | `README.md` | The consumer's face: install, the public entry, the bin. A derived view like the root one (table below). |
