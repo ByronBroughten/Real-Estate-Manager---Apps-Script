@@ -81,6 +81,7 @@ One line per rule. The reasoning and worked examples are one file away. Open a r
 ## Tests
 
 - **A test sits beside what it tests (`Foo.test.ts`).**
+- **Assert the outcome a caller can observe, not the calls made to reach it.** A call count stands only where the count is itself the contract.
 
 ## Tooling
 

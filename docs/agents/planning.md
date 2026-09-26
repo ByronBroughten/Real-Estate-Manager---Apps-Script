@@ -4,6 +4,10 @@
 - **A plan or spec includes the matching prose-file edit** in its own scope ([`prose-files.md`](./prose-files.md)).
 - **When a skill offers an ADR, propose a packages/framework/docs/design.md entry** instead: a new instance (a sentence in that principle's `docs/design/` file), a parked candidate (a line plus a heading in `docs/design/candidates.md`), or, with two citations, a new principle (a line plus a reasoning file). This repo keeps no `docs/adr/` tree ([`domain.md`](./domain.md)).
 
+## Test seams
+
+- **A spec's test seams name the outcome each test asserts**: for a Sheets write, the grid it leaves, not the requests it sends ([framework style](../../packages/framework/docs/style.md#tests)).
+
 ## Model fit
 
 - **After `/to-tickets` publishes**, print the tickets as one flat list in completion order, `#n Title: <Model> <effort> (reason)`. Chat only: never in a ticket, comment or parent issue.

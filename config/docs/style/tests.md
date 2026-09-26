@@ -6,6 +6,10 @@ Disclosed from [`docs/style.md`](../style.md).
 
 All of docs/style.md applies to test code as-is.
 
+## Outcomes over calls
+
+The settled rule in `docs/style.md` asks a test to assert what a caller can observe: a return value, the state a fake is left in, a message shown. A test that asserts which calls were made, how many, or with what arguments is coupled to the route the code takes, so it breaks when an internal refactor keeps the behaviour and passes when the calls are right but the outcome is wrong. A call count is the contract only when the count is what a caller pays for, such as round trips to a rate-limited API, and such a test says so in its name ("costs one read").
+
 ## Draft test rules
 
 - **Understand a class from its implementation.** Open the sibling `Foo.test.ts` when changing tests.
