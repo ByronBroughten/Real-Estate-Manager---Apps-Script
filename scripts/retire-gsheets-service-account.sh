@@ -193,7 +193,7 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 spreadsheet_id_of() {
   sed -nE 's/^[[:space:]]*"spreadsheetId":[[:space:]]*"([^"]+)".*/\1/p' "$REPO_ROOT/packages/$1/sheets.config.json" 2>/dev/null | head -n1
 }
-json_field() {
+service_account_field() {
   sed -nE "s/^[[:space:]]*\"$1\":[[:space:]]*\"([^\"]+)\".*/\1/p" "$SERVICE_ACCOUNT_PATH" 2>/dev/null | head -n1
 }
 
@@ -202,10 +202,10 @@ if [[ -z "$(_existing READ_TEST_PASSED || true)" ]]; then
   exit 1
 fi
 [[ -f "$SERVICE_ACCOUNT_PATH" ]] || note "No key file at $SERVICE_ACCOUNT_PATH; you'll type the account's details."
-SA_EMAIL="$(json_field client_email)"
-SA_PROJECT="$(json_field project_id)"
-SA_UNIQUE_ID="$(json_field client_id)"
-SA_KEY_ID="$(json_field private_key_id)"
+SA_EMAIL="$(service_account_field client_email)"
+SA_PROJECT="$(service_account_field project_id)"
+SA_UNIQUE_ID="$(service_account_field client_id)"
+SA_KEY_ID="$(service_account_field private_key_id)"
 DEV_ID="$(spreadsheet_id_of framework)"
 APP_ID="$(spreadsheet_id_of real-estate)"
 

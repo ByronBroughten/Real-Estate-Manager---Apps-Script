@@ -210,12 +210,37 @@ done_before() {
 }
 mark_done() { write_env "$1" "$(date +%Y-%m-%d)"; }
 
+# api_of SERVICE: the Cloud API a workspace-mcp --tools service needs.
+api_of() {
+  case "$1" in
+    calendar) printf 'calendar-json.googleapis.com' ;;
+    *) printf '%s.googleapis.com' "$1" ;;
+  esac
+}
+
 TOTAL_STAGES=8
 
 banner "Agent account MCP setup (gworkspace, as $AGENT_EMAIL)"
 
+_clear
+say "Which workspace-mcp services should gworkspace load? Adding one later is a re-run with a new list."
+note "Each one needs its API turned on (stage 3), the server re-registered (stage 6) and consent redone (stage 7)."
+previous_services=$(_existing MCP_SERVICES || true)
+ask MCP_SERVICES "Services, space-separated (Enter on a first run: docs drive sheets):"
+MCP_SERVICES="${MCP_SERVICES:-docs drive sheets}"
+if [[ "$MCP_SERVICES" != "$previous_services" ]]; then
+  if [[ -n "$previous_services" ]]; then
+    warn "Services changed: redo stages 3, 6 and 7, and add the new tools' rules to .claude/settings.json."
+  fi
+  write_env MCP_SERVICES "$MCP_SERVICES"
+  pause
+fi
+read -ra SERVICES <<< "$MCP_SERVICES"
+API_IDS=""
+for service in "${SERVICES[@]}"; do API_IDS="${API_IDS:+$API_IDS,}$(api_of "$service")"; done
+
 stage "Share the spreadsheets with the agent account"
-if ! done_before SHARED_DONE; then
+if ! done_before SPREADSHEETS_SHARED; then
   [[ -n "$DEV_ID" && -n "$APP_ID" ]] || { warn "couldn't read spreadsheetId from packages/*/sheets.config.json"; exit 1; }
   say "Signed in as your MAIN account, share each spreadsheet with $AGENT_EMAIL as Editor."
   open_url "https://docs.google.com/spreadsheets/d/$DEV_ID/edit"
@@ -225,7 +250,7 @@ if ! done_before SHARED_DONE; then
   step "Real Estate Manager: Share → add $AGENT_EMAIL → Editor → Share."
   step "Share any Drive folders or Docs you want agents to reach the same way."
   confirm "Both spreadsheets are shared with $AGENT_EMAIL as Editor?" || { warn "Stopping: the final read test would fail."; exit 1; }
-  mark_done SHARED_DONE
+  mark_done SPREADSHEETS_SHARED
 fi
 
 stage "Create the Google Cloud project as the agent account"
@@ -241,12 +266,12 @@ fi
 GCP_PROJECT_ID="${GCP_PROJECT_ID:-$(_existing GCP_PROJECT_ID)}"
 CONSOLE_QS="project=$GCP_PROJECT_ID&authuser=$AGENT_EMAIL"
 
-stage "Turn on the Docs, Drive and Sheets APIs"
-if ! done_before APIS_DONE; then
-  open_url "https://console.cloud.google.com/flows/enableapi?apiid=docs.googleapis.com,drive.googleapis.com,sheets.googleapis.com&$CONSOLE_QS"
+stage "Turn on the APIs for: $MCP_SERVICES"
+if ! done_before APIS_ENABLED; then
+  open_url "https://console.cloud.google.com/flows/enableapi?apiid=$API_IDS&$CONSOLE_QS"
   step "Check the project picker shows $GCP_PROJECT_ID, then Next → Enable."
-  confirm "All three APIs are enabled?" || exit 1
-  mark_done APIS_DONE
+  confirm "Every listed API is enabled?" || exit 1
+  mark_done APIS_ENABLED
 fi
 
 stage "Consent screen: External, published to production"
@@ -286,7 +311,7 @@ if ! done_before MCP_REGISTERED; then
     command -v uvx >/dev/null 2>&1 || { warn "Install uv, then re-run."; exit 1; }
   fi
   say "Adds '$MCP_NAME' to ~/.claude.json under $REPO_ROOT (local scope), pinned to $MCP_PIN:"
-  note "uvx $MCP_PIN --single-user --tools docs drive sheets"
+  note "uvx $MCP_PIN --single-user --tools $MCP_SERVICES"
   confirm "Write the entry (replacing any existing '$MCP_NAME')?" || exit 1
   (
     cd "$REPO_ROOT"
@@ -295,7 +320,7 @@ if ! done_before MCP_REGISTERED; then
       -e "GOOGLE_CLIENT_SECRET_PATH=$CLIENT_SECRET_PATH" \
       -e "WORKSPACE_MCP_CREDENTIALS_DIR=$CREDENTIALS_DIR" \
       -e "USER_GOOGLE_EMAIL=$AGENT_EMAIL" \
-      -- uvx "$MCP_PIN" --single-user --tools docs drive sheets
+      -- uvx "$MCP_PIN" --single-user --tools "${SERVICES[@]}"
   )
   mark_done MCP_REGISTERED
 fi

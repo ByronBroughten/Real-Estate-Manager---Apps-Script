@@ -99,8 +99,6 @@ describe("sheetsWriteDecision", () => {
   }
 
   it("allows every guarded gworkspace Sheets write on the dev spreadsheet", () => {
-    expect(guardedSheetsWrites).toContain("mcp__gworkspace__modify_sheet_values");
-    expect(guardedSheetsWrites).toContain("mcp__gworkspace__create_sheet");
     guardedSheetsWrites.forEach((toolName) => {
       expect(decide({ toolName })).toEqual({ permissionDecision: "allow", reason: expect.any(String) });
     });
@@ -134,8 +132,13 @@ describe("sheetsWriteDecision", () => {
   });
 });
 
-describe("the pinned-target hook's matcher", () => {
-  it("names Bash and exactly the guarded Sheets writes", () => {
+describe("guardedSheetsWrites", () => {
+  it("covers the gworkspace value and tab writes", () => {
+    expect(guardedSheetsWrites).toContain("mcp__gworkspace__modify_sheet_values");
+    expect(guardedSheetsWrites).toContain("mcp__gworkspace__create_sheet");
+  });
+
+  it("is exactly what the pinned-target hook's matcher names, besides Bash", () => {
     const settings = JSON.parse(readFileSync(new URL("../../settings.json", import.meta.url), "utf8"));
     const matchers: string[] = settings.hooks.PreToolUse.filter(({ hooks }: { hooks: { command: string }[] }) =>
       hooks.some(({ command }) => command.includes("pinnedTargetGuard.ts")),
